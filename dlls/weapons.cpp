@@ -38,6 +38,11 @@
 extern bool IsBustingGame();
 extern bool IsPlayerBusting(CBaseEntity* pPlayer);
 
+// Rocket Crowbar 2 (names ours)
+extern cvar_t mp_random;	 // game.cpp: 1 or 3 swaps a map's items for random ones of the same kind, 2 or 4 for anything; 3 and 4 also on every respawn
+bool g_fRC2Randomize = true; // orig .data 0x181430: cleared while an item is replaced or respawned (and by the impulse 101 cheat), so the copy isn't randomized again
+unsigned short g_usExplodeEvent;	// orig .bss 0x1afd18: events/explode.sc
+
 //=========================================================
 // MaxAmmoCarry - pass in a name and this function will tell
 // you the maximum amount of that type of ammunition that a
@@ -71,6 +76,7 @@ Collects multiple small damages into a single damage
 //
 // ClearMultiDamage - resets the global multi damage accumulator
 //
+// orig 0xf8fc0
 void ClearMultiDamage()
 {
 	gMultiDamage.pEntity = NULL;
@@ -137,6 +143,7 @@ int DamageDecal(CBaseEntity* pEntity, int bitsDamageType)
 	return pEntity->DamageDecal(bitsDamageType);
 }
 
+// orig 0xf90c0
 void DecalGunshot(TraceResult* pTrace, int iBulletType)
 {
 	// Is the entity valid
@@ -217,6 +224,7 @@ void ExplodeModel( const Vector &vecOrigin, float speed, int model, int count )
 #endif
 
 // Precaches the weapon and queues the weapon info for sending to clients
+// orig 0xf9270. HLU's exhaustible-weapon ammo registry argument is kept.
 void UTIL_PrecacheOtherWeapon(const char* szClassname)
 {
 	edict_t* pent;
@@ -259,6 +267,7 @@ void UTIL_PrecacheOtherWeapon(const char* szClassname)
 }
 
 // called by worldspawn
+// orig 0xf9360. RC2: also ammo_9mmbox, the health kit, and the explosion events.
 void W_Precache()
 {
 	memset(CBasePlayerItem::ItemInfoArray, 0, sizeof(CBasePlayerItem::ItemInfoArray));
@@ -289,6 +298,7 @@ void W_Precache()
 	UTIL_PrecacheOtherWeapon("weapon_9mmAR");
 	UTIL_PrecacheOther("ammo_9mmAR");
 	UTIL_PrecacheOther("ammo_ARgrenades");
+	UTIL_PrecacheOther("ammo_9mmbox"); // Rocket Crowbar 2
 
 	// python
 	UTIL_PrecacheOtherWeapon("weapon_357");
@@ -329,6 +339,8 @@ void W_Precache()
 		UTIL_PrecacheOther("weaponbox"); // container for dropped deathmatch weapons
 	}
 
+	UTIL_PrecacheOther("item_healthkit"); // Rocket Crowbar 2
+
 	g_sModelIndexFireball = PRECACHE_MODEL("sprites/zerogxplode.spr");	// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL("sprites/WXplo1.spr");		// underwater fireball
 	g_sModelIndexSmoke = PRECACHE_MODEL("sprites/steam1.spr");			// smoke
@@ -338,6 +350,10 @@ void W_Precache()
 
 	g_sModelIndexLaser = PRECACHE_MODEL((char*)g_pModelNameLaser);
 	g_sModelIndexLaserDot = PRECACHE_MODEL("sprites/laserdot.spr");
+
+	// Rocket Crowbar 2
+	g_usExplodeEvent = PRECACHE_EVENT(1, "events/explode.sc");
+	PRECACHE_EVENT(1, "events/expsmoke.sc");
 
 
 	// used by explosions
@@ -370,7 +386,7 @@ TYPEDESCRIPTION CBasePlayerItem::m_SaveData[] =
 		// DEFINE_FIELD( CBasePlayerItem, m_iIdPrimary, FIELD_INTEGER ),
 		// DEFINE_FIELD( CBasePlayerItem, m_iIdSecondary, FIELD_INTEGER ),
 };
-IMPLEMENT_SAVERESTORE(CBasePlayerItem, CBaseAnimating);
+IMPLEMENT_SAVERESTORE(CBasePlayerItem, CBaseAnimating); // orig 0xf95f0, orig 0xf9620
 
 
 TYPEDESCRIPTION CBasePlayerWeapon::m_SaveData[] =
@@ -388,13 +404,15 @@ TYPEDESCRIPTION CBasePlayerWeapon::m_SaveData[] =
 		DEFINE_FIELD(CBasePlayerWeapon, m_iSecondaryAmmoType, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayerWeapon, m_iClip, FIELD_INTEGER),
 		DEFINE_FIELD(CBasePlayerWeapon, m_iDefaultAmmo, FIELD_INTEGER),
+		DEFINE_FIELD(CBasePlayerWeapon, m_iDefaultAmmo2, FIELD_INTEGER), // Rocket Crowbar 2
 		//	DEFINE_FIELD( CBasePlayerWeapon, m_iClientClip, FIELD_INTEGER )	 , reset to zero on load so hud gets updated correctly
 		//  DEFINE_FIELD( CBasePlayerWeapon, m_iClientWeaponState, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
 };
 
-IMPLEMENT_SAVERESTORE(CBasePlayerWeapon, CBasePlayerItem);
+IMPLEMENT_SAVERESTORE(CBasePlayerWeapon, CBasePlayerItem); // orig 0xf9650, orig 0xf9680
 
 
+// orig 0xfa200
 void CBasePlayerItem::SetObjectCollisionBox()
 {
 	pev->absmin = pev->origin + Vector(-24, -24, 0);
@@ -402,9 +420,181 @@ void CBasePlayerItem::SetObjectCollisionBox()
 }
 
 
+// Rocket Crowbar 2: mp_random. RandomItemOfKind swaps a gun for a random gun, an explosive for a
+// random explosive, ammo for random ammo and a battery, health kit or long jump for one of those;
+// RandomAnyItem swaps anything but the suit and the crowbar for anything. Names ours.
+#define SF_ITEM_NORANDOMIZE (1 << 29) // the "norandomize" keyvalue (name ours)
+
+extern int RC2CountEntities(const char* pszClassname); // util's (0xf30f0): how many entities have this classname
+
+// orig 0xf96b0
+static const char* RandomItemOfKind(const char* pszClassname)
+{
+	static const char* const rgszGuns[] = {"weapon_9mmhandgun", "weapon_glock", "weapon_9mmAR", "weapon_mp5", "weapon_357",
+		"weapon_shotgun", "weapon_crossbow", "weapon_rpg", "weapon_egon", "weapon_gauss", "weapon_hornetgun"};
+	static const char* const rgszExplosives[] = {"weapon_handgrenade", "weapon_tripmine", "weapon_satchel", "weapon_snark"};
+	static const char* const rgszAmmo[] = {"ammo_9mmclip", "ammo_glockclip", "ammo_mp5grenades", "ammo_ARgrenades", "ammo_9mmbox",
+		"ammo_rpgclip", "ammo_crossbow", "ammo_357", "ammo_gaussclip", "ammo_rpgclip"};
+	static const char* const rgszItems[] = {"item_battery", "item_healthkit", "item_longjump"};
+
+	for (const char* psz : rgszGuns)
+	{
+		if (!strcmp(pszClassname, psz))
+		{
+			switch (RANDOM_LONG(0, 9))
+			{
+			case 0: return "weapon_9mmhandgun";
+			case 1: return "weapon_9mmAR";
+			case 2: return "weapon_mp5";
+			case 3: return "weapon_shotgun";
+			case 4: return "weapon_crossbow";
+			case 5: return "weapon_rpg";
+			case 6: return "weapon_egon";
+			case 7: return "weapon_gauss";
+			case 8: return "weapon_hornetgun";
+			case 9: return "weapon_357";
+			}
+			return "item_healthkit";
+		}
+	}
+
+	for (const char* psz : rgszExplosives)
+	{
+		if (!strcmp(pszClassname, psz))
+		{
+			switch (RANDOM_LONG(0, 3))
+			{
+			case 0: return "weapon_handgrenade";
+			case 1: return "weapon_tripmine";
+			case 2: return "weapon_satchel";
+			case 3: return "weapon_snark";
+			}
+			return "item_healthkit";
+		}
+	}
+
+	for (const char* psz : rgszAmmo)
+	{
+		if (!strcmp(pszClassname, psz))
+		{
+			// the original's switch has a case 7 (rpg ammo again) the draw never reaches
+			switch (RANDOM_LONG(0, 6))
+			{
+			case 0: return "ammo_9mmclip";
+			case 1: return "ammo_mp5grenades";
+			case 2: return "ammo_9mmbox";
+			case 3:
+			case 7: return "ammo_rpgclip";
+			case 4: return "ammo_crossbow";
+			case 5: return "ammo_357";
+			case 6: return "ammo_gaussclip";
+			}
+			return "item_healthkit";
+		}
+	}
+
+	for (const char* psz : rgszItems)
+	{
+		if (!strcmp(pszClassname, psz))
+		{
+			// the original counts the long jumps in the map here and ignores the count (RandomAnyItem uses it)
+			RC2CountEntities("item_longjump");
+			switch (RANDOM_LONG(0, 2))
+			{
+			case 0: return "item_battery";
+			case 2: return "item_longjump";
+			}
+			return "item_healthkit";
+		}
+	}
+
+	return pszClassname;
+}
+
+// orig 0xf9f00
+static const char* RandomAnyItem(const char* pszClassname)
+{
+	if (!strcmp(pszClassname, "item_suit") || !strcmp(pszClassname, "weapon_crowbar"))
+		return pszClassname;
+
+	// no long jumps once there are more than four
+	int iLast = 24;
+	if (RC2CountEntities("item_longjump") > 4)
+		iLast = 23;
+
+	switch (RANDOM_LONG(0, iLast))
+	{
+	case 0: return "weapon_9mmhandgun";
+	case 1: return "weapon_9mmAR";
+	case 2: return "weapon_mp5";
+	case 3: return "weapon_shotgun";
+	case 4: return "weapon_crossbow";
+	case 5: return "weapon_rpg";
+	case 6: return "weapon_egon";
+	case 7: return "weapon_gauss";
+	case 8: return "weapon_hornetgun";
+	case 9: return "weapon_357";
+	case 10: return "weapon_handgrenade";
+	case 11: return "weapon_tripmine";
+	case 12: return "weapon_satchel";
+	case 13: return "weapon_snark";
+	case 14: return "ammo_9mmclip";
+	case 15: return "ammo_mp5grenades";
+	case 16: return "ammo_9mmbox";
+	case 17:
+	case 21: return "ammo_rpgclip";
+	case 18: return "ammo_crossbow";
+	case 19: return "ammo_357";
+	case 20: return "ammo_gaussclip";
+	case 22: return "item_battery";
+	case 24: return "item_longjump";
+	default: return "item_healthkit";
+	}
+}
+
+// orig 0xfa100: replace an item (weapon, ammo; items.cpp's CItem too) with a random one where it stands
+void RC2RandomizeItem(CBaseEntity* pItem)
+{
+	if (!g_fRC2Randomize || mp_random.value == 0)
+		return;
+
+	if ((pItem->pev->spawnflags & SF_ITEM_NORANDOMIZE) != 0)
+		return;
+
+	const char* pszNew;
+	if (mp_random.value == 1 || mp_random.value == 3)
+		pszNew = RandomItemOfKind(STRING(pItem->pev->classname));
+	else
+		pszNew = RandomAnyItem(STRING(pItem->pev->classname));
+
+	g_fRC2Randomize = false;
+	CBaseEntity* pNew = CBaseEntity::Create((char*)pszNew, pItem->pev->origin, pItem->pev->angles, NULL);
+	pNew->pev->spawnflags = pItem->pev->spawnflags; // the original doesn't check Create's result
+	g_fRC2Randomize = true;
+
+	pItem->SetThink(NULL);
+	pItem->SetTouch(NULL);
+	pItem->pev->effects |= EF_NODRAW;
+	UTIL_Remove(pItem);
+}
+
+// orig 0xfa2b0 (named CBaseDelay::KeyValue in files-rc2.tsv): "norandomize" keeps mp_random off this item
+bool CBasePlayerItem::KeyValue(KeyValueData* pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "norandomize"))
+	{
+		if (atoi(pkvd->szValue) != 0)
+			pev->spawnflags |= SF_ITEM_NORANDOMIZE;
+		return true;
+	}
+
+	return CBaseAnimating::KeyValue(pkvd);
+}
+
 //=========================================================
 // Sets up movetype, size, solidtype for a new weapon.
 //=========================================================
+// orig 0xfa330. RC2: mp_random may swap it for another item.
 void CBasePlayerItem::FallInit()
 {
 	pev->movetype = MOVETYPE_TOSS;
@@ -417,6 +607,9 @@ void CBasePlayerItem::FallInit()
 	SetThink(&CBasePlayerItem::FallThink);
 
 	pev->nextthink = gpGlobals->time + 0.1;
+
+	if (g_pGameRules->IsMultiplayer() && mp_random.value != 0)
+		RC2RandomizeItem(this);
 }
 
 //=========================================================
@@ -426,6 +619,7 @@ void CBasePlayerItem::FallInit()
 // to trigger and set it in a large box that helps the
 // player get it.
 //=========================================================
+// orig 0xfa400 (as SDK 2.3; HLU's extra checks kept)
 void CBasePlayerItem::FallThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -464,27 +658,32 @@ void CBasePlayerItem::FallThink()
 //=========================================================
 // Materialize - make a CBasePlayerItem visible and tangible
 //=========================================================
+// orig 0xfa490. RC2: makes it solid first; with mp_random 3 or 4 a respawned item is swapped.
 void CBasePlayerItem::Materialize()
 {
+	pev->solid = SOLID_TRIGGER;
+
+	UTIL_SetOrigin(pev, pev->origin); // link into world.
+	SetTouch(&CBasePlayerItem::DefaultTouch);
+	SetThink(NULL);
+
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
+
+		if (g_pGameRules->IsMultiplayer() && mp_random.value > 2)
+			RC2RandomizeItem(this);
 	}
-
-	pev->solid = SOLID_TRIGGER;
-
-	UTIL_SetOrigin(pev, pev->origin); // link into world.
-	SetTouch(&CBasePlayerItem::DefaultTouch);
-	SetThink(NULL);
 }
 
 //=========================================================
 // AttemptToMaterialize - the item is trying to rematerialize,
 // should it do so now or wait longer?
 //=========================================================
+// orig 0xfa550
 void CBasePlayerItem::AttemptToMaterialize()
 {
 	float time = g_pGameRules->FlWeaponTryRespawn(this);
@@ -502,6 +701,7 @@ void CBasePlayerItem::AttemptToMaterialize()
 // CheckRespawn - a player is taking this weapon, should
 // it respawn?
 //=========================================================
+// orig 0xfa590
 void CBasePlayerItem::CheckRespawn()
 {
 	switch (g_pGameRules->WeaponShouldRespawn(this))
@@ -519,15 +719,19 @@ void CBasePlayerItem::CheckRespawn()
 // Respawn- this item is already in the world, but it is
 // invisible and intangible. Make it visible and tangible.
 //=========================================================
+// orig 0xfa5c0. RC2: the copy isn't randomized as it spawns, and keeps this one's spawnflags.
 CBaseEntity* CBasePlayerItem::Respawn()
 {
 	// make a copy of this weapon that is invisible and inaccessible to players (no touch function). The weapon spawn/respawn code
 	// will decide when to make the weapon visible and touchable.
+	g_fRC2Randomize = false;
 	CBaseEntity* pNewWeapon = CBaseEntity::Create((char*)STRING(pev->classname), g_pGameRules->VecWeaponRespawnSpot(this), pev->angles, pev->owner);
+	g_fRC2Randomize = true;
 
 	if (pNewWeapon)
 	{
 		pNewWeapon->pev->effects |= EF_NODRAW; // invisible for now
+		pNewWeapon->pev->spawnflags = pev->spawnflags;
 		pNewWeapon->SetTouch(NULL);			   // no touch
 		pNewWeapon->SetThink(&CBasePlayerItem::AttemptToMaterialize);
 
@@ -545,10 +749,11 @@ CBaseEntity* CBasePlayerItem::Respawn()
 	return pNewWeapon;
 }
 
+// orig 0xfa6b0. RC2: only a player in play, and not one with the RC2 member at orig +0x10f8 set.
 void CBasePlayerItem::DefaultTouch(CBaseEntity* pOther)
 {
 	// if it's not a player, ignore
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer() || ((CBasePlayer*)pOther)->m_iTransformType != 0)
 		return;
 
 	if (IsPlayerBusting(pOther))
@@ -591,6 +796,7 @@ void CBasePlayerItem::AddToPlayer(CBasePlayer* pPlayer)
 	m_pPlayer = pPlayer;
 }
 
+// orig 0xfac40
 void CBasePlayerItem::Drop()
 {
 	SetTouch(NULL);
@@ -598,6 +804,7 @@ void CBasePlayerItem::Drop()
 	pev->nextthink = gpGlobals->time + .1;
 }
 
+// orig 0xfac70
 void CBasePlayerItem::Kill()
 {
 	SetTouch(NULL);
@@ -611,6 +818,7 @@ void CBasePlayerItem::Holster()
 	m_pPlayer->pev->weaponmodel = 0;
 }
 
+// orig 0xfacd0 (HLU's SetThink(NULL) kept)
 void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer)
 {
 	pev->movetype = MOVETYPE_FOLLOW;
@@ -626,9 +834,10 @@ void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer)
 }
 
 // CALLED THROUGH the newly-touched weapon's instance. The existing player weapon is pOriginal
+// orig 0xfad50. RC2: secondary default ammo counts too.
 bool CBasePlayerWeapon::AddDuplicate(CBasePlayerItem* pOriginal)
 {
-	if (0 != m_iDefaultAmmo)
+	if (0 != m_iDefaultAmmo || 0 != m_iDefaultAmmo2)
 	{
 		return ExtractAmmo((CBasePlayerWeapon*)pOriginal);
 	}
@@ -719,6 +928,7 @@ bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
 }
 
 
+// orig 0xfaf30 (as SDK 2.3; its slot is named RC2VW2 in names-rc2-slots.tsv)
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 {
 	const bool skiplocal = !m_ForceSendAnimations && UseDecrement() != false;
@@ -736,6 +946,8 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 	MESSAGE_END();
 }
 
+// orig 0xfafc0. VERIFY: RC2's player GiveAmmo takes a fourth argument (always 0 here), see the
+// dossier. HLU's "origin" test for the pickup sound (SDK 2.3 and RC2 ask HasPlayerItem) is kept.
 bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, char* szName, int iMaxClip, int iMaxCarry)
 {
 	int iIdAmmo;
@@ -774,6 +986,7 @@ bool CBasePlayerWeapon::AddPrimaryAmmo(CBasePlayerWeapon* origin, int iCount, ch
 }
 
 
+// orig 0xfb080
 bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount, char* szName, int iMax)
 {
 	int iIdAmmo;
@@ -832,6 +1045,7 @@ bool CBasePlayerWeapon::IsUseable()
 	return CanDeploy();
 }
 
+// orig 0xfb1b0 (as SDK 2.3; HLU's m_flLastFireTime reset kept)
 bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body)
 {
 	if (!CanDeploy())
@@ -863,6 +1077,7 @@ bool CBasePlayerWeapon::PlayEmptySound()
 
 //=========================================================
 //=========================================================
+// orig 0xfb390
 int CBasePlayerWeapon::PrimaryAmmoIndex()
 {
 	return m_iPrimaryAmmoType;
@@ -870,6 +1085,7 @@ int CBasePlayerWeapon::PrimaryAmmoIndex()
 
 //=========================================================
 //=========================================================
+// orig 0xfb3a0. RC2 (as SDK 2.3) returns -1; HLU's fix is kept. VERIFY: see the dossier
 int CBasePlayerWeapon::SecondaryAmmoIndex()
 {
 	return m_iSecondaryAmmoType;
@@ -882,6 +1098,7 @@ void CBasePlayerWeapon::Holster()
 	m_pPlayer->pev->weaponmodel = 0;
 }
 
+// orig 0xfb3e0. RC2: mp_random may swap it.
 void CBasePlayerAmmo::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
@@ -890,8 +1107,12 @@ void CBasePlayerAmmo::Spawn()
 	UTIL_SetOrigin(pev, pev->origin);
 
 	SetTouch(&CBasePlayerAmmo::DefaultTouch);
+
+	if (g_pGameRules->IsMultiplayer() && mp_random.value != 0)
+		RC2RandomizeItem(this);
 }
 
+// orig 0xfb490
 CBaseEntity* CBasePlayerAmmo::Respawn()
 {
 	pev->effects |= EF_NODRAW;
@@ -905,22 +1126,27 @@ CBaseEntity* CBasePlayerAmmo::Respawn()
 	return this;
 }
 
+// orig 0xfb500. RC2: with mp_random 3 or 4 respawned ammo is swapped.
 void CBasePlayerAmmo::Materialize()
 {
+	SetTouch(&CBasePlayerAmmo::DefaultTouch);
+
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
-	}
 
-	SetTouch(&CBasePlayerAmmo::DefaultTouch);
+		if (g_pGameRules->IsMultiplayer() && mp_random.value > 2)
+			RC2RandomizeItem(this);
+	}
 }
 
+// orig 0xfb590. RC2: only a player in play, and not one with the RC2 member at orig +0x10f8 set.
 void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 {
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer() || ((CBasePlayer*)pOther)->m_iTransformType != 0)
 	{
 		return;
 	}
@@ -955,9 +1181,12 @@ void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther)
 // if  this is a weapon dropped by a dying player, has 0 m_iDefaultAmmo, which means only the ammo in
 // the weapon clip comes along.
 //=========================================================
+// orig 0xfb650. RC2: the secondary ammo gets its own default (m_iDefaultAmmo2).
 bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon)
 {
-	bool iReturn = false;
+	// the original leaves this uninitialized: without primary ammo it returns whatever the
+	// register held (pWeapon, so true)
+	bool iReturn = true;
 
 	if (pszAmmo1() != NULL)
 	{
@@ -969,7 +1198,10 @@ bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon)
 
 	if (pszAmmo2() != NULL)
 	{
-		iReturn |= pWeapon->AddSecondaryAmmo(0, (char*)pszAmmo2(), iMaxAmmo2());
+		bool iSecondary = pWeapon->AddSecondaryAmmo(m_iDefaultAmmo2, (char*)pszAmmo2(), iMaxAmmo2());
+		if (!iReturn)
+			iReturn = iSecondary;
+		m_iDefaultAmmo2 = 0;
 	}
 
 	return iReturn;
@@ -978,6 +1210,7 @@ bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon)
 //=========================================================
 // called by the new item's class with the existing item as parameter
 //=========================================================
+// orig 0xfb6f0
 bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon)
 {
 	int iAmmo;
@@ -1062,7 +1295,7 @@ float CBasePlayerWeapon::GetNextAttackDelay(float delay)
 // weaponbox code:
 //*********************************************************
 
-LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox);
+LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox); // orig 0xfb7c0
 
 TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 	{
@@ -1072,11 +1305,12 @@ TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 		DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CWeaponBox, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CWeaponBox, CBaseEntity); // orig 0xfb830, orig 0xfb860
 
 //=========================================================
 //
 //=========================================================
+// orig 0xfb890
 void CWeaponBox::Precache()
 {
 	PRECACHE_MODEL("models/w_weaponbox.mdl");
@@ -1120,6 +1354,7 @@ void CWeaponBox::Spawn()
 // CWeaponBox - Kill - the think function that removes the
 // box from the world.
 //=========================================================
+// orig 0xfb960
 void CWeaponBox::Kill()
 {
 	CBasePlayerItem* pWeapon;
@@ -1146,6 +1381,7 @@ void CWeaponBox::Kill()
 // CWeaponBox - Touch: try to add my contents to the toucher
 // if the toucher is a player.
 //=========================================================
+// orig 0xfb9b0. RC2: only a player in play, and not one with the RC2 member at orig +0x10f8 set.
 void CWeaponBox::Touch(CBaseEntity* pOther)
 {
 	if ((pev->flags & FL_ONGROUND) == 0)
@@ -1153,7 +1389,7 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 		return;
 	}
 
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer() || ((CBasePlayer*)pOther)->m_iTransformType != 0)
 	{
 		// only players may touch a weaponbox.
 		return;
@@ -1268,6 +1504,7 @@ bool CWeaponBox::PackWeapon(CBasePlayerItem* pWeapon)
 //=========================================================
 // CWeaponBox - PackAmmo
 //=========================================================
+// orig 0xfbbb0
 bool CWeaponBox::PackAmmo(int iszName, int iCount)
 {
 	int iMaxCarry;
@@ -1378,6 +1615,7 @@ bool CWeaponBox::IsEmpty()
 
 //=========================================================
 //=========================================================
+// orig 0xfbdc0
 void CWeaponBox::SetObjectCollisionBox()
 {
 	pev->absmin = pev->origin + Vector(-16, -16, 0);
@@ -1401,19 +1639,13 @@ void CBasePlayerWeapon::PrintState()
 }
 
 
-TYPEDESCRIPTION CRpg::m_SaveData[] =
-	{
-		DEFINE_FIELD(CRpg, m_fSpotActive, FIELD_BOOLEAN),
-		DEFINE_FIELD(CRpg, m_cActiveRockets, FIELD_INTEGER),
-};
-IMPLEMENT_SAVERESTORE(CRpg, CBasePlayerWeapon);
+// Rocket Crowbar 2: CRpg has no save table of its own (its vtable has CBasePlayerWeapon's Save and Restore)
 
 TYPEDESCRIPTION CRpgRocket::m_SaveData[] =
 	{
-		DEFINE_FIELD(CRpgRocket, m_flIgniteTime, FIELD_TIME),
-		DEFINE_FIELD(CRpgRocket, m_hLauncher, FIELD_EHANDLE),
+		DEFINE_FIELD(CRpgRocket, m_flIgniteTime, FIELD_TIME), // RC2 saves only this
 };
-IMPLEMENT_SAVERESTORE(CRpgRocket, CGrenade);
+IMPLEMENT_SAVERESTORE(CRpgRocket, CGrenade); // orig 0x460f0, orig 0x46120
 
 TYPEDESCRIPTION CShotgun::m_SaveData[] =
 	{
@@ -1423,17 +1655,9 @@ TYPEDESCRIPTION CShotgun::m_SaveData[] =
 		// DEFINE_FIELD( CShotgun, m_iShell, FIELD_INTEGER ),
 		DEFINE_FIELD(CShotgun, m_flPumpTime, FIELD_TIME),
 };
-IMPLEMENT_SAVERESTORE(CShotgun, CBasePlayerWeapon);
+IMPLEMENT_SAVERESTORE(CShotgun, CBasePlayerWeapon); // orig 0xfbee0, orig 0xfbf10
 
-TYPEDESCRIPTION CGauss::m_SaveData[] =
-	{
-		DEFINE_FIELD(CGauss, m_fInAttack, FIELD_INTEGER),
-		//	DEFINE_FIELD( CGauss, m_flStartCharge, FIELD_TIME ),
-		//	DEFINE_FIELD( CGauss, m_flPlayAftershock, FIELD_TIME ),
-		//	DEFINE_FIELD( CGauss, m_flNextAmmoBurn, FIELD_TIME ),
-		DEFINE_FIELD(CGauss, m_fPrimaryFire, FIELD_BOOLEAN),
-};
-IMPLEMENT_SAVERESTORE(CGauss, CBasePlayerWeapon);
+// Rocket Crowbar 2: CGauss has no save table of its own (its vtable has CBasePlayerWeapon's Save and Restore)
 
 TYPEDESCRIPTION CEgon::m_SaveData[] =
 	{
@@ -1458,4 +1682,29 @@ TYPEDESCRIPTION CSatchel::m_SaveData[] =
 	{
 		DEFINE_FIELD(CSatchel, m_chargeReady, FIELD_INTEGER),
 };
-IMPLEMENT_SAVERESTORE(CSatchel, CBasePlayerWeapon);
+IMPLEMENT_SAVERESTORE(CSatchel, CBasePlayerWeapon); // orig 0xfbf40, orig 0xfbf70
+
+// Rocket Crowbar 2: the readers ReadWeaponState's overrides call (weapons.h). The server's take the
+// two arguments by address and return 0.
+// orig 0xfb780
+bool RC2ReadStateBool(void** ppData, int* piSize) { return false; }
+// orig 0xfb790
+short RC2ReadStateShort(void** ppData, int* piSize) { return 0; }
+// orig 0xfb7a0
+int RC2ReadStateInt(void** ppData, int* piSize) { return 0; }
+// orig 0xfb7b0
+float RC2ReadStateFloat(void** ppData, int* piSize) { return 0.0f; }
+
+// TEMP STUB (p3): real one belongs in util.cpp (0xf30f0): the number of entities in use whose
+// classname is pszClassname (it walks edicts 1 .. maxEntities-1)
+int RC2CountEntities(const char* pszClassname)
+{
+	int iCount = 0;
+	for (int i = 1; i < gpGlobals->maxEntities; i++)
+	{
+		edict_t* pEdict = INDEXENT(i);
+		if (UTIL_IsValidEntity(pEdict) && FClassnameIs(pEdict, pszClassname))
+			iCount++;
+	}
+	return iCount;
+}

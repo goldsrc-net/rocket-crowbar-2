@@ -73,6 +73,7 @@ bool FBoxVisible(entvars_t* pevLooker, entvars_t* pevTarget, Vector& vecTargetOr
 // VecCheckToss - returns the velocity at which an object should be lobbed from vecspot1 to land near vecspot2.
 // returns g_vecZero if toss is not feasible.
 //
+// orig 0x56940: reads as SDK 2.3's; no behavior change found against it
 Vector VecCheckToss(entvars_t* pev, const Vector& vecSpot1, Vector vecSpot2, float flGravityAdj)
 {
 	TraceResult tr;

@@ -347,5 +347,15 @@ bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon) { return false; 
 bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon) { return false; }
 void CBasePlayerWeapon::RetireWeapon() {}
 void CBasePlayerWeapon::DoRetireWeapon() {}
+
+// Rocket Crowbar 2 (p3, weapons): client stubs for what weapons.cpp adds (server only there)
+bool CBasePlayerItem::KeyValue(KeyValueData* pkvd) { return false; }
+void RC2RandomizeItem(CBaseEntity* pItem) {}
+bool g_fRC2Randomize = true;
+unsigned short g_usExplodeEvent;
+bool RC2ReadStateBool(void** ppData, int* piSize) { return false; }
+short RC2ReadStateShort(void** ppData, int* piSize) { return 0; }
+int RC2ReadStateInt(void** ppData, int* piSize) { return 0; }
+float RC2ReadStateFloat(void** ppData, int* piSize) { return 0.0f; }
 void CSoundEnt::InsertSound(int iType, const Vector& vecOrigin, int iVolume, float flDuration) {}
 void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType) {}

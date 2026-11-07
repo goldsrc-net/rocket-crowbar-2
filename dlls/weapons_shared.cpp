@@ -75,6 +75,7 @@ bool CBasePlayerWeapon::CanDeploy()
 	return true;
 }
 
+// orig 0xfb290 (as SDK 2.3)
 bool CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay, int body)
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -96,6 +97,7 @@ bool CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay, in
 	return true;
 }
 
+// orig 0xfb380 (as SDK 2.3; its slot is named RC2VW1 in names-rc2-slots.tsv)
 void CBasePlayerWeapon::ResetEmptySound()
 {
 	m_iPlayEmptySound = true;
@@ -117,8 +119,26 @@ bool CanAttack(float attack_time, float curtime, bool isPredicted)
 	}
 }
 
+// Rocket Crowbar 2 (name ours): set by every ItemPostFrame; weapons play their events only while
+// it is set (orig .data 0x181434, starts set)
+bool g_fRC2PlayWeaponEvents = true;
+
+// orig 0xfa790. RC2: two more attacks, Tertiary on +cancel and Quaternary on +alt1, checked before
+// the secondary and the primary, each with its own timer; WeaponFrame runs first every frame; a
+// frozen player's attack buttons are dropped (WeaponFrame still runs).
 void CBasePlayerWeapon::ItemPostFrame()
 {
+	g_fRC2PlayWeaponEvents = true;
+
+	if (m_pPlayer->RC2Frozen())
+	{
+		m_pPlayer->pev->button &= ~(IN_ATTACK | IN_ATTACK2 | IN_CANCEL | IN_ALT1);
+		WeaponFrame();
+		return;
+	}
+
+	WeaponFrame();
+
 	if ((m_fInReload) && (m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase()))
 	{
 		// complete the reload.
@@ -138,7 +158,19 @@ void CBasePlayerWeapon::ItemPostFrame()
 		m_flLastFireTime = 0.0f;
 	}
 
-	if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && CanAttack(m_flNextSecondaryAttack, gpGlobals->time, UseDecrement()))
+	if ((m_pPlayer->pev->button & IN_ALT1) != 0 && CanAttack(m_flNextQuaternaryAttack, gpGlobals->time, UseDecrement()))
+	{
+		m_pPlayer->TabulateAmmo();
+		QuaternaryAttack();
+		m_pPlayer->pev->button &= ~IN_ALT1;
+	}
+	else if ((m_pPlayer->pev->button & IN_CANCEL) != 0 && CanAttack(m_flNextTertiaryAttack, gpGlobals->time, UseDecrement()))
+	{
+		m_pPlayer->TabulateAmmo();
+		TertiaryAttack();
+		m_pPlayer->pev->button &= ~IN_CANCEL;
+	}
+	else if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && CanAttack(m_flNextSecondaryAttack, gpGlobals->time, UseDecrement()))
 	{
 		if (pszAmmo2() && 0 == m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()])
 		{
@@ -164,7 +196,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
 	}
-	else if ((m_pPlayer->pev->button & (IN_ATTACK | IN_ATTACK2)) == 0)
+	else if ((m_pPlayer->pev->button & (IN_ATTACK | IN_ATTACK2 | IN_CANCEL | IN_ALT1)) == 0)
 	{
 		// no fire buttons down
 

@@ -409,6 +409,11 @@ public:
 	void RemoveTether(int iSlot);											  // ours
 	void ResetTethers();													  // ours
 	void SendPullPoints();													  // ours
+
+	// RC2's CBasePlayer has 28 more bytes between m_szAnimExtention (+0x618, as stock) and
+	// m_flStartCharge: from there on the stock members sit 0x1c further than in SDK 2.3 (the
+	// gauss reads m_flPlayAftershock at +0x65c and m_flNextAmmoBurn at +0x660, stock +0x640 and
+	// +0x644). Found by p3; the player package (p5) places them.
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

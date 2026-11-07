@@ -428,10 +428,21 @@ public:
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
 	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
 
-	// p7 needs: the byte at orig +0x66 (third byte of what m_iRC2Base64 stands for). Read in
-	// about 20 places: CBaseMonster::StartTask skips TASK_SOUND_PAIN while it is set, and RC2's
-	// CBasePlayerWeapon::ItemPostFrame drops the attack buttons. Name ours.
-	bool RC2Byte66() const { return reinterpret_cast<const unsigned char*>(&m_iRC2Base64)[2] != 0; }
+	// p3 needs: the byte at orig +0x66 (third byte of m_iRC2Base64). CFreezeTimer sets it on what
+	// it freezes; CBasePlayerWeapon::ItemPostFrame drops the attack buttons while it is set.
+	bool& RC2Frozen() { return reinterpret_cast<bool*>(&m_iRC2Base64)[2]; } // name ours
+
+	// p3 needs (A weapons):
+	// end p3 (A weapons)
+
+	// p3 needs (B gauss):
+	// end p3 (B gauss)
+
+	// p3 needs (C glock):
+	// end p3 (C glock)
+
+	// p3 needs (D grenades):
+	// end p3 (D grenades)
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

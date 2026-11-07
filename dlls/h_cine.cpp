@@ -42,61 +42,61 @@ public:
 class CCineScientist : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine-scientist.mdl"); }
+	void Spawn() override { CineSpawn("models/cine-scientist.mdl"); } // orig 0x57860
 };
 class CCine2Scientist : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine2-scientist.mdl"); }
+	void Spawn() override { CineSpawn("models/cine2-scientist.mdl"); } // orig 0x57a10
 };
 class CCinePanther : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine-panther.mdl"); }
+	void Spawn() override { CineSpawn("models/cine-panther.mdl"); } // orig 0x578f0
 };
 
 class CCineBarney : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine-barney.mdl"); }
+	void Spawn() override { CineSpawn("models/cine-barney.mdl"); } // orig 0x57980
 };
 
 class CCine2HeavyWeapons : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine2_hvyweapons.mdl"); }
+	void Spawn() override { CineSpawn("models/cine2_hvyweapons.mdl"); } // orig 0x57aa0
 };
 
 class CCine2Slave : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine2_slave.mdl"); }
+	void Spawn() override { CineSpawn("models/cine2_slave.mdl"); } // orig 0x57b30
 };
 
 class CCine3Scientist : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine3-scientist.mdl"); }
+	void Spawn() override { CineSpawn("models/cine3-scientist.mdl"); } // orig 0x57bc0
 };
 
 class CCine3Barney : public CLegacyCineMonster
 {
 public:
-	void Spawn() override { CineSpawn("models/cine3-barney.mdl"); }
+	void Spawn() override { CineSpawn("models/cine3-barney.mdl"); } // orig 0x57c50
 };
 
 //
 // ********** Scientist SPAWN **********
 //
 
-LINK_ENTITY_TO_CLASS(monster_cine_scientist, CCineScientist);
-LINK_ENTITY_TO_CLASS(monster_cine_panther, CCinePanther);
-LINK_ENTITY_TO_CLASS(monster_cine_barney, CCineBarney);
-LINK_ENTITY_TO_CLASS(monster_cine2_scientist, CCine2Scientist);
-LINK_ENTITY_TO_CLASS(monster_cine2_hvyweapons, CCine2HeavyWeapons);
-LINK_ENTITY_TO_CLASS(monster_cine2_slave, CCine2Slave);
-LINK_ENTITY_TO_CLASS(monster_cine3_scientist, CCine3Scientist);
-LINK_ENTITY_TO_CLASS(monster_cine3_barney, CCine3Barney);
+LINK_ENTITY_TO_CLASS(monster_cine_scientist, CCineScientist); // orig 0x577e0
+LINK_ENTITY_TO_CLASS(monster_cine_panther, CCinePanther); // orig 0x57870
+LINK_ENTITY_TO_CLASS(monster_cine_barney, CCineBarney); // orig 0x57900
+LINK_ENTITY_TO_CLASS(monster_cine2_scientist, CCine2Scientist); // orig 0x57990
+LINK_ENTITY_TO_CLASS(monster_cine2_hvyweapons, CCine2HeavyWeapons); // orig 0x57a20
+LINK_ENTITY_TO_CLASS(monster_cine2_slave, CCine2Slave); // orig 0x57ab0
+LINK_ENTITY_TO_CLASS(monster_cine3_scientist, CCine3Scientist); // orig 0x57b40
+LINK_ENTITY_TO_CLASS(monster_cine3_barney, CCine3Barney); // orig 0x57bd0
 
 //
 // ********** Scientist SPAWN **********
@@ -143,6 +143,7 @@ void CLegacyCineMonster::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_
 //
 // ********** Scientist DIE **********
 //
+// orig 0x57d90
 void CLegacyCineMonster::Die()
 {
 	SetThink(&CLegacyCineMonster::SUB_Remove);
@@ -190,9 +191,10 @@ public:
 	void EXPORT BloodGush();
 };
 
-LINK_ENTITY_TO_CLASS(cine_blood, CCineBlood);
+LINK_ENTITY_TO_CLASS(cine_blood, CCineBlood); // orig 0x57e40
 
 
+// orig 0x57eb0: as SDK 2.3
 void CCineBlood::BloodGush()
 {
 	Vector vecSplatDir;
@@ -226,12 +228,14 @@ void CCineBlood::BloodGush()
 	}
 }
 
+// orig 0x581b0: as SDK 2.3
 void CCineBlood::BloodStart(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetThink(&CCineBlood::BloodGush);
 	pev->nextthink = gpGlobals->time; // now!
 }
 
+// orig 0x581d0: as SDK 2.3
 void CCineBlood::Spawn()
 {
 	pev->solid = SOLID_NOT;

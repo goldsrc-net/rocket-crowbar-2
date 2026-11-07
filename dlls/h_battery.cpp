@@ -28,6 +28,8 @@
 #include "skill.h"
 #include "gamerules.h"
 
+#include "p3d_temp.h" // TEMP STUB: RC2PlayerAttribute
+
 class CRecharge : public CBaseToggle
 {
 public:
@@ -37,7 +39,7 @@ public:
 	void EXPORT Recharge();
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() | FCAP_CONTINUOUS_USE) & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() | FCAP_CONTINUOUS_USE) & ~FCAP_ACROSS_TRANSITION; } // orig 0x571f0
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
@@ -59,11 +61,12 @@ TYPEDESCRIPTION CRecharge::m_SaveData[] =
 		DEFINE_FIELD(CRecharge, m_flSoundTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CRecharge, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CRecharge, CBaseEntity); // orig 0x57120 (Save), orig 0x57150 (Restore)
 
-LINK_ENTITY_TO_CLASS(func_recharge, CRecharge);
+LINK_ENTITY_TO_CLASS(func_recharge, CRecharge); // orig 0x57180
 
 
+// orig 0x57200
 bool CRecharge::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "style") ||
@@ -83,6 +86,7 @@ bool CRecharge::KeyValue(KeyValueData* pkvd)
 	return CBaseToggle::KeyValue(pkvd);
 }
 
+// orig 0x57380
 void CRecharge::Spawn()
 {
 	Precache();
@@ -97,6 +101,7 @@ void CRecharge::Spawn()
 	pev->frame = 0;
 }
 
+// orig 0x57410
 void CRecharge::Precache()
 {
 	PRECACHE_SOUND("items/suitcharge1.wav");
@@ -105,10 +110,13 @@ void CRecharge::Precache()
 }
 
 
+// orig 0x57440. RC2: any active player (IsActivePlayer instead of the "player" classname), the
+// player's RC2 member at +0x10f8 (m_iTransformType) must be 0, and armor tops
+// out at the player's attribute 7 instead of 100.
 void CRecharge::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	// if it's not a player, ignore
-	if (!FClassnameIs(pActivator->pev, "player"))
+	if (!pActivator->IsActivePlayer())
 		return;
 
 	auto player = static_cast<CBasePlayer*>(pActivator);
@@ -121,7 +129,7 @@ void CRecharge::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 	}
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if ((m_iJuice <= 0) || !player->HasSuit())
+	if ((m_iJuice <= 0) || !player->HasSuit() || player->m_iTransformType != 0)
 	{
 		if (m_flSoundTime <= gpGlobals->time)
 		{
@@ -140,16 +148,13 @@ void CRecharge::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 		return;
 
 	// Make sure that we have a caller
-	//TODO: useless, it's accessed earlier on.
 	if (!pActivator)
 		return;
 
 	m_hActivator = pActivator;
 
 	//only recharge the player
-
-	//TODO: put this check at the top.
-	if (!m_hActivator->IsPlayer())
+	if (!m_hActivator->IsActivePlayer())
 		return;
 
 	// Play the on sound or the looping charging sound
@@ -165,15 +170,20 @@ void CRecharge::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 		EMIT_SOUND(ENT(pev), CHAN_STATIC, "items/suitcharge1.wav", 0.85, ATTN_NORM);
 	}
 
+	// The original reads attribute 6 and, when it is over 100, reads it again and throws the
+	// value away (a leftover clamp). VERIFY: what attributes 6 and 7 are (player.cpp's table).
+	if (RC2PlayerAttribute(6, ENTINDEX(m_hActivator->edict())) > 100.0f)
+		RC2PlayerAttribute(6, ENTINDEX(m_hActivator->edict()));
+	const float flMaxArmor = (int)RC2PlayerAttribute(7, ENTINDEX(m_hActivator->edict()));
 
 	// charge the player
-	if (m_hActivator->pev->armorvalue < 100)
+	if (m_hActivator->pev->armorvalue < flMaxArmor)
 	{
 		m_iJuice--;
 		m_hActivator->pev->armorvalue += 1;
 
-		if (m_hActivator->pev->armorvalue > 100)
-			m_hActivator->pev->armorvalue = 100;
+		if (m_hActivator->pev->armorvalue > flMaxArmor)
+			m_hActivator->pev->armorvalue = flMaxArmor;
 	}
 
 	// govern the rate of charge
@@ -187,6 +197,7 @@ void CRecharge::Recharge()
 	SetThink(&CRecharge::SUB_DoNothing);
 }
 
+// orig 0x57750
 void CRecharge::Off()
 {
 	// Stop looping sound.
@@ -203,3 +214,4 @@ void CRecharge::Off()
 	else
 		SetThink(&CRecharge::SUB_DoNothing);
 }
+

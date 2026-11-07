@@ -130,6 +130,7 @@ void CDecal::Spawn()
 	}
 }
 
+// orig 0xfc0a0 (as SDK 2.3)
 void CDecal::TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	// this is set up as a USE function for infodecals that have targetnames, so that the
@@ -196,10 +197,10 @@ bool CDecal::KeyValue(KeyValueData* pkvd)
 // Body queue class here.... It's really just CBaseEntity
 class CCorpse : public CBaseEntity
 {
-	int ObjectCaps() override { return FCAP_DONT_SAVE; }
+	int ObjectCaps() override { return FCAP_DONT_SAVE; } // orig 0xfc3e0
 };
 
-LINK_ENTITY_TO_CLASS(bodyque, CCorpse);
+LINK_ENTITY_TO_CLASS(bodyque, CCorpse); // orig 0xfc370
 
 static void InitBodyQue()
 {
@@ -224,6 +225,9 @@ static void InitBodyQue()
 //
 // GLOBALS ASSUMED SET:  g_eoBodyQueueHead
 //
+// orig 0xfc3f0. RC2: the corpse lies flat (no pitch or roll), keeps the player's scale, and
+// takes the dead player's RC2 member at orig +0x10f8 as its pev->playerclass. HLU's modelindex
+// check (a crash fix) is kept.
 void CopyToBodyQue(entvars_t* pev)
 {
 	if ((pev->effects & EF_NODRAW) != 0 || pev->modelindex == 0)
@@ -232,6 +236,8 @@ void CopyToBodyQue(entvars_t* pev)
 	entvars_t* pevHead = VARS(g_pBodyQueueHead);
 
 	pevHead->angles = pev->angles;
+	pevHead->angles.x = 0;
+	pevHead->angles.z = 0;
 	pevHead->model = pev->model;
 	pevHead->modelindex = pev->modelindex;
 	pevHead->frame = pev->frame;
@@ -242,6 +248,7 @@ void CopyToBodyQue(entvars_t* pev)
 	pevHead->deadflag = pev->deadflag;
 	pevHead->renderfx = kRenderFxDeadPlayer;
 	pevHead->renderamt = ENTINDEX(ENT(pev));
+	pevHead->scale = pev->scale;
 
 	pevHead->effects = pev->effects | EF_NOINTERP;
 	//pevHead->goalstarttime = pev->goalstarttime;
@@ -251,17 +258,27 @@ void CopyToBodyQue(entvars_t* pev)
 	pevHead->sequence = pev->sequence;
 	pevHead->animtime = pev->animtime;
 
+	// VERIFY: the original reads the member through whatever private data the edict has; only
+	// players are copied to the body queue
+	CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pev);
+	if (pPlayer && pPlayer->m_iTransformType != 0)
+		pevHead->playerclass = pPlayer->m_iTransformType;
+	else
+		pevHead->playerclass = 0;
+
 	UTIL_SetOrigin(pevHead, pev->origin);
 	UTIL_SetSize(pevHead, pev->mins, pev->maxs);
 	g_pBodyQueueHead = pevHead->owner;
 }
 
 
+// orig 0xfc570
 CGlobalState::CGlobalState()
 {
 	Reset();
 }
 
+// orig 0xfc580
 void CGlobalState::Reset()
 {
 	m_pList = NULL;
@@ -332,6 +349,7 @@ void CGlobalState::EntitySetState(string_t globalname, GLOBALESTATE state)
 }
 
 
+// orig 0xfc710
 const globalentity_t* CGlobalState::EntityFromTable(string_t globalname)
 {
 	globalentity_t* pEnt = Find(globalname);
@@ -466,7 +484,7 @@ void ResetGlobalState()
 // This spawns first when each level begins.
 //=======================
 
-LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
+LINK_ENTITY_TO_CLASS(worldspawn, CWorld); // orig 0xfc960
 
 #define SF_WORLD_DARK 0x0001	  // Fade from black at startup
 #define SF_WORLD_TITLE 0x0002	  // Display game title at startup
@@ -493,12 +511,36 @@ CWorld::~CWorld()
 	World = nullptr;
 }
 
+// Rocket Crowbar 2: world state RC2 keeps (names ours unless said).
+float g_flWeaponCheat; // orig .bss 0x1afd34, SDK 2.3's name (HLU dropped it): sv_cheats at map start
+int g_iRC2ScoreMode;   // orig .bss 0x1afd38: mp_scoremode at map start, 0 or 1
+int g_iRC2GibEvent;	   // orig .bss 0x1afd3c: events/gib.sc (CBaseMonster::GibMonster plays it)
+entvars_t* g_pevRC2WorldDummy; // orig .bss 0x1afd30: a plain entity classnamed "worldspawn" that util's 0xf58a0 hands out
+
+// From other RC2 files (declared here until their packages land). Names ours.
+extern int g_iRC2ClientBits;			   // orig 0x1af2a8: a bit per client index, set on connect (client)
+extern char g_szRC2SpawnCommand[512];	   // orig 0x18be80: an .lcs file's setspawncommand
+extern int g_rgiRC2ForceState[0xc0];	   // orig 0x1915c8: ApplyExternalForce's state (pm_shared .. python)
+extern bool g_fRC2InDamageReflect;		   // orig 0x18f4dc: CBasePlayer::TakeDamage's reflection guard (player)
+extern void RC2ResetPrefs();			   // orig 0xb1150: every rc2.ini value back to its default (rat .. roach)
+extern void RC2LoadPrefs(const char* pszFile); // orig 0xaf030: load rc2.ini; NULL means the rccfgfile cvar (rat .. roach)
+extern void RC2ResetUtil4c50();			   // orig 0xf4c50: clears util's table at 0x1af084 and its count (util)
+extern void RC2ResetPrecachedList();	   // orig 0xf5c60: empties AddToPrecachedList's list (util)
+extern void RC2LoadLCS(int iWhen);		   // orig 0x6d4d0: run maps/lcs/<map>.lcs (items .. leech)
+extern void UTIL_RC2TimedEvent(void (*pfn)(int), int iArg, float flDelay); // orig 0xf5d80: a "timedevent" entity (util)
+
+// orig 0xfc9d0. RC2: also caches sv_cheats (as SDK 2.3 did) and mp_scoremode.
 void CWorld::Spawn()
 {
 	g_fGameOver = false;
 	Precache();
+	g_flWeaponCheat = CVAR_GET_FLOAT("sv_cheats");
+	g_iRC2ScoreMode = (int)CVAR_GET_FLOAT("mp_scoremode");
+	if (g_iRC2ScoreMode < 0 || g_iRC2ScoreMode > 1)
+		g_iRC2ScoreMode = 0;
 }
 
+// orig 0xfca20
 void CWorld::Precache()
 {
 	// Flag this entity for removal if it's not the actual world entity.
@@ -508,7 +550,13 @@ void CWorld::Precache()
 		return;
 	}
 
+	// Rocket Crowbar 2: per-map resets, rc2.ini back to its defaults
+	g_iRC2ClientBits = 0;
+	RC2ResetPrefs();
 	g_pLastSpawn = NULL;
+	RC2ResetUtil4c50();
+	memset(g_rgiRC2ForceState, 0, sizeof(g_rgiRC2ForceState));
+	g_szRC2SpawnCommand[0] = '\0';
 
 #if 1
 	CVAR_SET_STRING("sv_gravity", "800"); // 67ft/sec
@@ -519,11 +567,15 @@ void CWorld::Precache()
 #endif
 
 	CVAR_SET_STRING("room_type", "0"); // clear DSP
+	CVAR_SET_STRING("sv_maxvelocity", "4000"); // Rocket Crowbar 2
 
 	// Set up game rules
 	delete g_pGameRules;
 
 	g_pGameRules = InstallGameRules();
+
+	// Rocket Crowbar 2: load rc2.ini (the rccfgfile cvar)
+	RC2LoadPrefs(NULL);
 
 	//!!!UNDONE why is there so much Spawn code in the Precache function? I'll just keep it here
 
@@ -531,6 +583,8 @@ void CWorld::Precache()
 	//pSoundEnt = CBaseEntity::Create( "soundent", g_vecZero, g_vecZero, edict() );
 	pSoundEnt = GetClassPtr((CSoundEnt*)NULL);
 	pSoundEnt->Spawn();
+
+	RC2ResetPrecachedList(); // Rocket Crowbar 2
 
 	if (!pSoundEnt)
 	{
@@ -556,6 +610,8 @@ void CWorld::Precache()
 
 	ClientPrecache();
 
+	g_fRC2InDamageReflect = false; // Rocket Crowbar 2
+
 	// sounds used from C physics code
 	PRECACHE_SOUND("common/null.wav"); // clears sound channels
 
@@ -565,22 +621,18 @@ void CWorld::Precache()
 	PRECACHE_SOUND("common/bodydrop3.wav"); // dead bodies hitting the ground (animation events)
 	PRECACHE_SOUND("common/bodydrop4.wav");
 
-	g_Language = (int)CVAR_GET_FLOAT("sv_language");
-	if (g_Language == LANGUAGE_GERMAN)
-	{
-		PRECACHE_MODEL("models/germangibs.mdl");
-	}
-	else
-	{
-		PRECACHE_MODEL("models/hgibs.mdl");
-		PRECACHE_MODEL("models/agibs.mdl");
-	}
+	// Rocket Crowbar 2: no sv_language check, always the normal gibs; and the gib event
+	PRECACHE_MODEL("models/hgibs.mdl");
+	PRECACHE_MODEL("models/agibs.mdl");
+	g_iRC2GibEvent = PRECACHE_EVENT(1, "events/gib.sc");
 
 	PRECACHE_SOUND("weapons/ric1.wav");
 	PRECACHE_SOUND("weapons/ric2.wav");
 	PRECACHE_SOUND("weapons/ric3.wav");
 	PRECACHE_SOUND("weapons/ric4.wav");
 	PRECACHE_SOUND("weapons/ric5.wav");
+
+	RC2LoadLCS(0); // Rocket Crowbar 2: the map's .lcs, first pass
 	//
 	// Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
 	//
@@ -689,6 +741,15 @@ void CWorld::Precache()
 	{
 		CVAR_SET_FLOAT("mp_defaultteam", 0);
 	}
+
+	// Rocket Crowbar 2: a plain entity that also answers to "worldspawn", then the .lcs file's
+	// second pass three seconds in
+	CBaseEntity* pDummy = GetClassPtr((CBaseEntity*)NULL);
+	pDummy->Spawn();
+	pDummy->pev->classname = MAKE_STRING("worldspawn");
+	g_pevRC2WorldDummy = pDummy->pev;
+
+	UTIL_RC2TimedEvent(RC2LoadLCS, 1, 3.0);
 }
 
 
@@ -764,3 +825,25 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 
 	return CBaseEntity::KeyValue(pkvd);
 }
+
+
+// TEMP STUB (p3): real one belongs in client.cpp (connect bookkeeping, 0x1a8f0)
+int g_iRC2ClientBits;
+// TEMP STUB (p3): real one belongs in the .lcs loader's file (items .. leech, 0x6d4d0)
+char g_szRC2SpawnCommand[512];
+// TEMP STUB (p3): real one belongs with ApplyExternalForce (pm_shared .. python, 0xa9ba0)
+int g_rgiRC2ForceState[0xc0];
+// TEMP STUB (p3): real one belongs in player.cpp (CBasePlayer::TakeDamage)
+bool g_fRC2InDamageReflect;
+// TEMP STUB (p3): real one belongs in rc2prefs.cpp (0xb1150)
+void RC2ResetPrefs() {}
+// TEMP STUB (p3): real one belongs in rc2prefs.cpp (0xaf030)
+void RC2LoadPrefs(const char* pszFile) {}
+// TEMP STUB (p3): real one belongs in util.cpp (0xf4c50)
+void RC2ResetUtil4c50() {}
+// TEMP STUB (p3): real one belongs in util.cpp (0xf5c60)
+void RC2ResetPrecachedList() {}
+// TEMP STUB (p3): real one belongs in the .lcs loader's file (items .. leech, 0x6d4d0)
+void RC2LoadLCS(int iWhen) {}
+// TEMP STUB (p3): real one belongs in util.cpp (0xf5d80)
+void UTIL_RC2TimedEvent(void (*pfn)(int), int iArg, float flDelay) {}

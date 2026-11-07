@@ -39,12 +39,13 @@ public:
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	int ISoundMask() override;
 };
-LINK_ENTITY_TO_CLASS(monster_generic, CGenericMonster);
+LINK_ENTITY_TO_CLASS(monster_generic, CGenericMonster); // orig 0x50690
 
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x50700 (stock body)
 int CGenericMonster::Classify()
 {
 	return CLASS_PLAYER_ALLY;
@@ -54,6 +55,7 @@ int CGenericMonster::Classify()
 // SetYawSpeed - allows each sequence to have a different
 // turn rate associated with it.
 //=========================================================
+// orig 0x50710 (stock body)
 void CGenericMonster::SetYawSpeed()
 {
 	int ys;
@@ -72,6 +74,7 @@ void CGenericMonster::SetYawSpeed()
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
+// orig 0x50720 (stock body)
 void CGenericMonster::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
@@ -86,6 +89,7 @@ void CGenericMonster::HandleAnimEvent(MonsterEvent_t* pEvent)
 //=========================================================
 // ISoundMask - generic monster can't hear.
 //=========================================================
+// orig 0x50730 (stock body)
 int CGenericMonster::ISoundMask()
 {
 	return bits_SOUND_NONE;

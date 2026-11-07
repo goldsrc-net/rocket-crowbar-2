@@ -30,7 +30,7 @@
 //===================grenade
 
 
-LINK_ENTITY_TO_CLASS(grenade, CGrenade);
+LINK_ENTITY_TO_CLASS(grenade, CGrenade); // orig 0x50910 (files-rc2.tsv puts it in "new: genericmonster .. ggrenade")
 
 // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
 #define SF_DETONATE 0x0001
@@ -47,42 +47,39 @@ void CGrenade::Explode(Vector vecSrc, Vector vecAim)
 }
 
 // UNDONE: temporary scorching for PreAlpha - find a less sleazy permenant solution.
+// orig 0x509f0
+// Rocket Crowbar 2: the explosion is the client's events/explode.sc now (sprites, decal,
+// debris sounds and sparks all went there), so the server only moves the grenade out of the
+// wall, plays the event, does the damage and removes itself (no Smoke think).
 void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 {
-	float flRndSound; // sound randomizer
-
 	pev->model = iStringNull; //invisible
 	pev->solid = SOLID_NOT;	  // intangible
 
 	pev->takedamage = DAMAGE_NO;
 
+	UTIL_KillEntityEffects(ENT(pev));
+
+	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pTrace->vecEndPos + pTrace->vecPlaneNormal * 16, NORMAL_EXPLOSION_VOLUME, 3.0);
+
 	// Pull out of the wall a bit
 	if (pTrace->flFraction != 1.0)
+		UTIL_SetOrigin(pev, pTrace->vecEndPos + pTrace->vecPlaneNormal * 16);
+
+	PlayExplosionEvent(pTrace);
+
+	if (pTrace->flFraction != 1.0)
 	{
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+		// RC2 moves it again, by SDK 2.3's pull-out distance (halflife-updated's fix of that
+		// expression doesn't apply: this is RC2's own line, with a clamp SDK 2.3 didn't have)
+		float flPull = (pev->dmg - 24) * 0.6;
+		if (flPull < 0)
+			flPull = 0;
+		else if (flPull > 256)
+			flPull = 256;
+		UTIL_SetOrigin(pev, pTrace->vecEndPos + pTrace->vecPlaneNormal * flPull);
 	}
 
-	int iContents = UTIL_PointContents(pev->origin);
-
-	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_EXPLOSION);	// This makes a dynamic light and the explosion sprites/sound
-	WRITE_COORD(pev->origin.x); // Send to PAS because of the sound
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
-	if (iContents != CONTENTS_WATER)
-	{
-		WRITE_SHORT(g_sModelIndexFireball);
-	}
-	else
-	{
-		WRITE_SHORT(g_sModelIndexWExplosion);
-	}
-	WRITE_BYTE((pev->dmg - 50) * .60); // scale * 10
-	WRITE_BYTE(15);					   // framerate
-	WRITE_BYTE(TE_EXPLFLAG_NONE);
-	MESSAGE_END();
-
-	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0);
 	entvars_t* pevOwner;
 	if (pev->owner)
 		pevOwner = VARS(pev->owner);
@@ -91,47 +88,62 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	// Counteract the + 1 in RadiusDamage.
-	Vector origin = pev->origin;
-	origin.z -= 1;
+	// SDK 2.3's member RadiusDamage, from pev->origin (halflife-updated's "counteract the + 1"
+	// adjustment was part of the stock body RC2 replaced)
+	RadiusDamage(pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
 
-	RadiusDamage(origin, pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
-
-	if (RANDOM_FLOAT(0, 1) < 0.5)
-	{
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH1);
-	}
-	else
-	{
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH2);
-	}
-
-	flRndSound = RANDOM_FLOAT(0, 1);
-
-	switch (RANDOM_LONG(0, 2))
-	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris1.wav", 0.55, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris2.wav", 0.55, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris3.wav", 0.55, ATTN_NORM);
-		break;
-	}
-
+	SetThink(&CGrenade::SUB_Remove);
+	pev->nextthink = gpGlobals->time + 0.1;
 	pev->effects |= EF_NODRAW;
-	SetThink(&CGrenade::Smoke);
-	pev->velocity = g_vecZero;
-	pev->nextthink = gpGlobals->time + 0.3;
+}
 
-	if (iContents != CONTENTS_WATER)
+// Rocket Crowbar 2: the PLAYBACK_EVENT_FULL both explosions send (inline in each in the original):
+// fparam1 the damage, iparam1 the packed normal facing out of the surface, bparam2 set when the
+// trace hit nothing.
+void CGrenade::PlayExplosionEvent(TraceResult* pTrace) // name ours
+{
+	PLAYBACK_EVENT_FULL(0, edict(), g_usExplodeEvent, 0.0, pev->origin, g_vecZero, pev->dmg, 0.0,
+		UTIL_PackNormal(-pTrace->vecPlaneNormal), 0, 0, pTrace->flFraction == 1.0 ? 1 : 0);
+}
+
+// orig 0x50cc0
+// Rocket Crowbar 2: the explosion of Detonate2 and ExplodeTouch2. Explode's, with RC2's own
+// radius damage (radius 2.5 times the damage, falloff exponent 1, blast) instead of the stock one.
+void CGrenade::RadialExplode(TraceResult* pTrace) // name ours
+{
+	pev->model = iStringNull;
+	pev->solid = SOLID_NOT;
+	pev->takedamage = DAMAGE_NO;
+
+	UTIL_KillEntityEffects(ENT(pev));
+
+	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pTrace->vecEndPos + pTrace->vecPlaneNormal * 16, NORMAL_EXPLOSION_VOLUME, 3.0);
+
+	if (pTrace->flFraction != 1.0)
 	{
-		int sparkCount = RANDOM_LONG(0, 3);
-		for (int i = 0; i < sparkCount; i++)
-			Create("spark_shower", pev->origin, pTrace->vecPlaneNormal, NULL);
+		float flPull = (pev->dmg - 24) * 0.6;
+		if (flPull < 0)
+			flPull = 0;
+		else if (flPull > 256)
+			flPull = 256;
+		UTIL_SetOrigin(pev, pTrace->vecEndPos + pTrace->vecPlaneNormal * flPull);
 	}
+
+	PlayExplosionEvent(pTrace);
+
+	entvars_t* pevOwner;
+	if (pev->owner)
+		pevOwner = VARS(pev->owner);
+	else
+		pevOwner = NULL;
+
+	pev->owner = NULL;
+
+	RC2RadiusDamage(pevOwner, pev, edict(), pev->origin, pev->dmg * 2.5, pev->dmg, 1.0, DMG_BLAST, 1);
+
+	SetThink(&CGrenade::SUB_Remove);
+	pev->nextthink = gpGlobals->time + 0.1;
+	pev->effects |= EF_NODRAW;
 }
 
 
@@ -156,6 +168,7 @@ void CGrenade::Smoke()
 	UTIL_Remove(this);
 }
 
+// orig 0x51070
 void CGrenade::Killed(entvars_t* pevAttacker, int iGib)
 {
 	Detonate();
@@ -163,6 +176,7 @@ void CGrenade::Killed(entvars_t* pevAttacker, int iGib)
 
 
 // Timed grenade, this think is called when time runs out.
+// orig 0x51080
 void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetThink(&CGrenade::Detonate);
@@ -190,6 +204,41 @@ void CGrenade::Detonate()
 }
 
 
+// orig 0x51190
+// Rocket Crowbar 2: Detonate with the radial explosion. Slow (64 or less): a flying grenade
+// explodes where it is with no surface, others trace 64 down from 8 above; fast: traced along
+// its flight like ExplodeTouch2.
+void CGrenade::Detonate2()
+{
+	TraceResult tr;
+
+	if (pev->velocity.Length() <= 64)
+	{
+		if (pev->movetype == MOVETYPE_FLY || pev->movetype == MOVETYPE_BOUNCEMISSILE)
+		{
+			// the original fills only these three fields of an uninitialized TraceResult;
+			// RadialExplode reads no others
+			memset(&tr, 0, sizeof(tr));
+			tr.flFraction = 1.0;
+			tr.vecEndPos = pev->origin;
+			tr.vecPlaneNormal = g_vecZero;
+		}
+		else
+		{
+			Vector vecSpot = pev->origin + Vector(0, 0, 8);
+			UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -64), ignore_monsters, ENT(pev), &tr);
+		}
+	}
+	else
+	{
+		Vector vecSpot = pev->origin - pev->velocity.Normalize() * 32;
+		UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 128, ignore_monsters, ENT(pev), &tr);
+	}
+
+	RadialExplode(&tr);
+}
+
+
 //
 // Contact grenade, explode when it touches something
 //
@@ -204,6 +253,21 @@ void CGrenade::ExplodeTouch(CBaseEntity* pOther)
 	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr);
 
 	Explode(&tr, DMG_BLAST);
+}
+
+
+// orig 0x51710
+// Rocket Crowbar 2: ExplodeTouch with the radial explosion and a 128-unit trace
+void CGrenade::ExplodeTouch2(CBaseEntity* pOther)
+{
+	TraceResult tr;
+
+	pev->enemy = pOther->edict();
+
+	Vector vecSpot = pev->origin - pev->velocity.Normalize() * 32;
+	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 128, ignore_monsters, ENT(pev), &tr);
+
+	RadialExplode(&tr);
 }
 
 
@@ -331,6 +395,7 @@ void CGrenade::BounceSound()
 	}
 }
 
+// orig 0x51ea0
 void CGrenade::TumbleThink()
 {
 	if (!IsInWorld())
@@ -401,6 +466,7 @@ CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector ve
 }
 
 
+// orig 0x521b0
 CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time)
 {
 	CGrenade* pGrenade = GetClassPtr((CGrenade*)NULL);
@@ -425,10 +491,10 @@ CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecV
 		pGrenade->pev->velocity = Vector(0, 0, 0);
 	}
 
-	SET_MODEL(ENT(pGrenade->pev), "models/w_grenade.mdl");
+	// RC2 (as SDK 2.3) sets the model after the sequence; halflife-updated's ResetSequenceInfo
+	// is kept (SDK 2.3 and RC2 don't call it, so the tumble animation's timing starts unset)
 	pGrenade->pev->sequence = RANDOM_LONG(3, 6);
 	pGrenade->pev->framerate = 1.0;
-	pGrenade->ResetSequenceInfo();
 
 	// Tumble through the air
 	// pGrenade->pev->avelocity.x = -400;
@@ -436,6 +502,8 @@ CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecV
 	pGrenade->pev->gravity = 0.5;
 	pGrenade->pev->friction = 0.8;
 
+	SET_MODEL(ENT(pGrenade->pev), "models/w_grenade.mdl");
+	pGrenade->ResetSequenceInfo();
 	pGrenade->pev->dmg = 100;
 
 	return pGrenade;
@@ -504,3 +572,11 @@ void CGrenade::UseSatchelCharges(entvars_t* pevOwner, SATCHELCODE code)
 }
 
 //======================end grenade
+
+// TEMP STUB (p3): real ones belong in util.cpp (UTIL_KillEntityEffects 0xf55b0, UTIL_PackNormal
+// 0xf5920, RC2RadiusDamage 0xf3900). Weak, so
+// whichever file defines them for real wins and other packages' stubs of the same don't collide.
+__attribute__((weak)) void UTIL_KillEntityEffects(edict_t* pEdict) {}
+__attribute__((weak)) int UTIL_PackNormal(Vector vecDir) { return 0; }
+__attribute__((weak)) void RC2RadiusDamage(entvars_t* pevAttacker, entvars_t* pevInflictor, edict_t* pentIgnore, Vector vecSrc, float flRadius,
+	float flDamage, float flExponent, int bitsDamageType, int iFlags) {}

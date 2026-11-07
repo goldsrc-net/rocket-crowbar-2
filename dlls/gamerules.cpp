@@ -144,8 +144,28 @@ edict_t* CGameRules::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 	return pentSpawnSpot;
 }
 
+// Rocket Crowbar 2: the other players this one is linked with get their own try at a weapon the
+// player already carries.
+
+// orig 0x47e50 (missing from files-rc2.tsv: analysis didn't make a function of it; the
+// gamerules vtable's slot 29 points at it)
+bool CGameRules::CanLinkedEntityHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
+{
+	CBaseEntity* pLinked;
+
+	if (pPlayer->m_iRightRider != 0 && (pLinked = UTIL_PlayerByIndex(pPlayer->m_iRightRider)) != NULL && CanHavePlayerItem((CBasePlayer*)pLinked, pWeapon))
+		return true;
+
+	if (pPlayer->m_iLeftRider != 0 && (pLinked = UTIL_PlayerByIndex(pPlayer->m_iLeftRider)) != NULL && CanHavePlayerItem((CBasePlayer*)pLinked, pWeapon))
+		return true;
+
+	return false;
+}
+
 //=========================================================
 //=========================================================
+// orig 0x47ed0. RC2: where SDK 2.3 refuses a weapon the player already has, it asks
+// CanLinkedEntityHavePlayerItem instead.
 bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
 {
 	// only living players can have items
@@ -160,7 +180,7 @@ bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pWeapo
 			// have the gun if we aren't already carrying one of this type
 			if (pPlayer->HasPlayerItem(pWeapon))
 			{
-				return false;
+				return CanLinkedEntityHavePlayerItem(pPlayer, pWeapon);
 			}
 		}
 	}
@@ -169,7 +189,7 @@ bool CGameRules::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pWeapo
 		// weapon doesn't use ammo, don't take another if you already have it.
 		if (pPlayer->HasPlayerItem(pWeapon))
 		{
-			return false;
+			return CanLinkedEntityHavePlayerItem(pPlayer, pWeapon);
 		}
 	}
 
@@ -412,3 +432,4 @@ CGameRules* InstallGameRules()
 		}
 	}
 }
+

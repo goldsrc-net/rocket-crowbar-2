@@ -1236,7 +1236,7 @@ void CBaseMonster::StartTask(Task_t* pTask) // orig 0xbef90
 	case TASK_SOUND_PAIN:
 	{
 		// Rocket Crowbar 2: no pain sound while the byte at +0x66 is set
-		if (!RC2Byte66())
+		if (!RC2Frozen())
 			PainSound();
 		TaskComplete();
 		break;

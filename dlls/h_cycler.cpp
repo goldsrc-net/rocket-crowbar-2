@@ -32,7 +32,7 @@ class CCycler : public CBaseMonster
 {
 public:
 	void GenericCyclerSpawn(const char* szModel, Vector vecMin, Vector vecMax);
-	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
+	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); } // orig 0x582e0
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	void Spawn() override;
 	void Think() override;
@@ -40,7 +40,7 @@ public:
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
 	// Don't treat as a live target
-	bool IsAlive() override { return false; }
+	bool IsAlive() override { return false; } // orig 0x582f0
 	bool IsAllowedToSpeak() { return true; }
 
 	bool Save(CSave& save) override;
@@ -55,7 +55,7 @@ TYPEDESCRIPTION CCycler::m_SaveData[] =
 		DEFINE_FIELD(CCycler, m_animate, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CCycler, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CCycler, CBaseMonster); // orig 0x58200, orig 0x58230
 
 
 //
@@ -66,7 +66,7 @@ class CGenericCycler : public CCycler
 public:
 	void Spawn() override { GenericCyclerSpawn(STRING(pev->model), Vector(-16, -16, 0), Vector(16, 16, 72)); }
 };
-LINK_ENTITY_TO_CLASS(cycler, CGenericCycler);
+LINK_ENTITY_TO_CLASS(cycler, CGenericCycler); // orig 0x58260
 
 
 
@@ -79,7 +79,7 @@ class CCyclerProbe : public CCycler
 public:
 	void Spawn() override;
 };
-LINK_ENTITY_TO_CLASS(cycler_prdroid, CCyclerProbe);
+LINK_ENTITY_TO_CLASS(cycler_prdroid, CCyclerProbe); // orig 0x58380
 void CCyclerProbe::Spawn()
 {
 	pev->origin = pev->origin + Vector(0, 0, 16);
@@ -145,6 +145,7 @@ void CCycler::Spawn()
 //
 // cycler think
 //
+// orig 0x58630
 void CCycler::Think()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -215,7 +216,7 @@ public:
 	void Spawn() override;
 	void Think() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); }
+	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE); } // orig 0x58830
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	void Animate(float frames);
 
@@ -229,7 +230,7 @@ public:
 	float m_maxFrame;
 };
 
-LINK_ENTITY_TO_CLASS(cycler_sprite, CCyclerSprite);
+LINK_ENTITY_TO_CLASS(cycler_sprite, CCyclerSprite); // orig 0x587c0
 
 TYPEDESCRIPTION CCyclerSprite::m_SaveData[] =
 	{
@@ -238,9 +239,10 @@ TYPEDESCRIPTION CCyclerSprite::m_SaveData[] =
 		DEFINE_FIELD(CCyclerSprite, m_maxFrame, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CCyclerSprite, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CCyclerSprite, CBaseEntity); // orig 0x58840, orig 0x58870
 
 
+// orig 0x588a0
 void CCyclerSprite::Spawn()
 {
 	pev->solid = SOLID_SLIDEBOX;
@@ -260,6 +262,7 @@ void CCyclerSprite::Spawn()
 }
 
 
+// orig 0x58970
 void CCyclerSprite::Think()
 {
 	if (ShouldAnimate())
@@ -303,19 +306,24 @@ class CWeaponCycler : public CBasePlayerWeapon
 {
 public:
 	void Spawn() override;
-	int iItemSlot() override { return 1; }
-	bool GetItemInfo(ItemInfo* p) override { return false; }
+	int iItemSlot() override { return 1; }							// orig 0x58b30
+	bool GetItemInfo(ItemInfo* p) override { return false; }		// orig 0x58b40
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
+	// Rocket Crowbar 2: the cycler's own empty attacks and UseDecrement
+	void TertiaryAttack() override {}	// orig 0x58af0
+	void QuaternaryAttack() override {} // orig 0x58b00
+	bool UseDecrement() override { return false; } // orig 0x58b10
 	bool Deploy() override;
 	void Holster() override;
 	int m_iszModel;
 	int m_iModel;
 };
-LINK_ENTITY_TO_CLASS(cycler_weapon, CWeaponCycler);
+LINK_ENTITY_TO_CLASS(cycler_weapon, CWeaponCycler); // orig 0x58a80
 
 
+// orig 0x58b50
 void CWeaponCycler::Spawn()
 {
 	pev->solid = SOLID_SLIDEBOX;
@@ -333,6 +341,7 @@ void CWeaponCycler::Spawn()
 
 
 
+// orig 0x58c30
 bool CWeaponCycler::Deploy()
 {
 	m_pPlayer->pev->viewmodel = m_iszModel;
@@ -349,6 +358,7 @@ void CWeaponCycler::Holster()
 }
 
 
+// orig 0x58ca0
 void CWeaponCycler::PrimaryAttack()
 {
 
@@ -358,6 +368,7 @@ void CWeaponCycler::PrimaryAttack()
 }
 
 
+// orig 0x58cd0
 void CWeaponCycler::SecondaryAttack()
 {
 	float flFrameRate, flGroundSpeed;
@@ -398,11 +409,12 @@ TYPEDESCRIPTION CWreckage::m_SaveData[] =
 	{
 		DEFINE_FIELD(CWreckage, m_flStartTime, FIELD_TIME),
 };
-IMPLEMENT_SAVERESTORE(CWreckage, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CWreckage, CBaseMonster); // orig 0x58d80, orig 0x58db0
 
 
-LINK_ENTITY_TO_CLASS(cycler_wreckage, CWreckage);
+LINK_ENTITY_TO_CLASS(cycler_wreckage, CWreckage); // orig 0x58de0
 
+// orig 0x58e50
 void CWreckage::Spawn()
 {
 	pev->solid = SOLID_NOT;
@@ -420,7 +432,9 @@ void CWreckage::Spawn()
 	}
 	// pev->scale = 5.0;
 
-	m_flStartTime = gpGlobals->time;
+	// SDK 2.3 (and RC2) declare m_flStartTime an int, so the start time is truncated to a whole
+	// second; kept (halflife-updated made it a float and stores the exact time)
+	m_flStartTime = (int)gpGlobals->time;
 }
 
 void CWreckage::Precache()
