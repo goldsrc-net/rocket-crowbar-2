@@ -20,6 +20,11 @@ AngleQuaternion
 
 ====================
 */
+// SDK 2.3's studio_util.cpp also had AngleMatrix, VectorCompare, CrossProduct and
+// VectorTransform, copies of pm_math.cpp's; halflife-updated keeps only pm_math.cpp's, which
+// read the same: orig client 0xbfe00 (AngleMatrix), orig client 0xbff20 (VectorCompare),
+// orig client 0xbff60 (CrossProduct), orig client 0xbffb0 (VectorTransform)
+
 void AngleQuaternion(float* angles, vec4_t quaternion)
 {
 	float angle;

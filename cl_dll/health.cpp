@@ -22,6 +22,9 @@
 #include "stdlib.h"
 
 #include "hud.h"
+
+extern float g_flRaceSpeed; // cl_dll/rc2/pullers_client.cpp (client .bss 0x1020f6c4)
+#include <algorithm>
 #include "cl_util.h"
 #include "parsemsg.h"
 #include <string.h>
@@ -95,11 +98,16 @@ bool CHudHealth::VidInit()
 	return true;
 }
 
+// orig client 0x9f8f0. RC2: a short (as halflife-updated reads it), kept within 0-9999
 bool CHudHealth::MsgFunc_Health(const char* pszName, int iSize, void* pbuf)
 {
 	// TODO: update local health data
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT();
+	if (x < 0)
+		x = 0;
+	else if (x > 9999)
+		x = 9999;
 
 	m_iFlags |= HUD_ACTIVE;
 
@@ -114,6 +122,7 @@ bool CHudHealth::MsgFunc_Health(const char* pszName, int iSize, void* pbuf)
 }
 
 
+// orig client 0x9f970. Not byte-identical to SDK 2.3's, but it reads the same
 bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -139,7 +148,24 @@ bool CHudHealth::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 
 // Returns back a color from the
 // Green <-> Yellow <-> Red ramp
+// orig client 0x9fa40. RC2: red at 25 and below except in a race (playerclass 6); no unused
+// iHealth arithmetic
 void CHudHealth::GetPainColor(int& r, int& g, int& b)
+{
+	if (g_iPlayerClass != 6 && m_iHealth <= 25)
+	{
+		r = 250;
+		g = 0;
+		b = 0;
+	}
+	else
+	{
+		UnpackRGB(r, g, b, RGB_YELLOWISH);
+	}
+}
+
+#if 0 // halflife-updated's (SDK 2.3's)
+void CHudHealth_GetPainColor_Stock(int& r, int& g, int& b)
 {
 	int iHealth = m_iHealth;
 
@@ -164,7 +190,10 @@ void CHudHealth::GetPainColor(int& r, int& g, int& b)
 	}
 #endif
 }
+#endif
 
+// orig client 0x9fac0. RC2: SDK 2.3's layout (DrawHudNumber, no halflife-updated reverse number
+// or text offset), the speed in a race and four digits when transformed
 bool CHudHealth::Draw(float flTime)
 {
 	int r, g, b;
@@ -207,28 +236,40 @@ bool CHudHealth::Draw(float flTime)
 		HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
 		int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
 
-		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-		x = CrossWidth / 2;
+		y = ScreenHeight - gHUD.m_iFontHeight / 2 - gHUD.m_iFontHeight;
 
 		SPR_Set(gHUD.GetSprite(m_HUD_cross), r, g, b);
-		SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_cross));
+		SPR_DrawAdditive(0, CrossWidth / 2, y, &gHUD.GetSpriteRect(m_HUD_cross));
 
 		x = CrossWidth + HealthWidth / 2;
-		y += (int)(gHUD.m_iFontHeight * 0.2f);
 
-		//Reserve space for 3 digits by default, but allow it to expand
-		x += gHUD.GetHudNumberWidth(m_iHealth, 3, DHN_DRAWZERO);
+		// RC2: in a race the number is the speed; transformed, up to four digits of health
+		int iValue; // name ours
+		int iFlags; // name ours
+		if (g_iPlayerClass == 6)
+		{
+			x += HealthWidth / 4;
+			iValue = (int)(g_flRaceSpeed * 16.665f);
+			iValue = std::clamp(iValue, 0, 9999);
+			iFlags = DHN_DRAWZERO | DHN_RC2_4DIGITS;
+		}
+		else if (g_iPlayerClass != 0)
+		{
+			x += HealthWidth / 4;
+			iValue = std::clamp(m_iHealth, 0, 9999);
+			iFlags = DHN_DRAWZERO | DHN_RC2_4DIGITS;
+		}
+		else
+		{
+			iValue = std::clamp(m_iHealth, 0, 999);
+			iFlags = DHN_DRAWZERO | DHN_3DIGITS;
+		}
 
-		gHUD.DrawHudNumberReverse(x, y, m_iHealth, DHN_DRAWZERO, r, g, b);
+		x = gHUD.DrawHudNumber(x, y, iFlags, iValue, r, g, b);
 
-		//x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
-
-		x += HealthWidth / 2;
-
-		int iHeight = gHUD.m_iFontHeight;
-		int iWidth = HealthWidth / 10;
-		UnpackRGB(r, g, b, RGB_YELLOWISH);
-		FillRGBA(x, y, iWidth, iHeight, r, g, b, a);
+		// the divider only when not transformed
+		if (g_iPlayerClass == 0)
+			FillRGBA(x + HealthWidth / 2, y, HealthWidth / 10, gHUD.m_iFontHeight, 255, 160, 0, a);
 	}
 
 	DrawDamage(flTime);

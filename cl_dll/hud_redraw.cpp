@@ -16,6 +16,7 @@
 // hud_redraw.cpp
 //
 #include "hud.h"
+#include "rc2/c4_needs.h"
 #include "cl_util.h"
 
 #include "vgui_TeamFortressViewport.h"
@@ -36,11 +37,10 @@ float HUD_GetFOV();
 extern float IN_GetMouseSensitivity();
 
 // Think
+// orig client 0xa4290. RC2: SDK 2.3's (no screen info refresh, no spectator FOV); in multiplayer
+// default_fov is held at 90
 void CHud::Think()
 {
-	m_scrinfo.iSize = sizeof(m_scrinfo);
-	GetScreenInfo(&m_scrinfo);
-
 	int newfov;
 	HUDLIST* pList = m_pHudList;
 
@@ -50,6 +50,9 @@ void CHud::Think()
 			pList->p->Think();
 		pList = pList->pNext;
 	}
+
+	if (gEngfuncs.GetMaxClients() != 1)
+		default_fov->value = 90;
 
 	newfov = HUD_GetFOV();
 	if (newfov == 0)
@@ -72,7 +75,7 @@ void CHud::Think()
 	else
 	{
 		// set a new sensitivity that is proportional to the change from the FOV default
-		m_flMouseSensitivity = IN_GetMouseSensitivity() * ((float)newfov / (float)V_max(default_fov->value, 90.0f)) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+		m_flMouseSensitivity = IN_GetMouseSensitivity() * ((float)newfov / default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 	}
 
 	// think about default fov
@@ -80,22 +83,19 @@ void CHud::Think()
 	{ // only let players adjust up in fov,  and only if they are not overriden by something else
 		m_iFOV = V_max(default_fov->value, 90);
 	}
-
-	if (0 != gEngfuncs.IsSpectateOnly())
-	{
-		m_iFOV = gHUD.m_Spectator.GetFOV(); // default_fov->value;
-	}
 }
 
 // Redraw
 // step through the local data,  placing the appropriate graphics & text as appropriate
 // returns 1 if they've changed, 0 otherwise
+// orig client 0xa43a0. RC2: SDK 2.3's (no spectator panel update), the screenshot time kept as a
+// whole number (as the original), and RC2's own HUD drawing after the elements
 bool CHud::Redraw(float flTime, bool intermission)
 {
 	m_fOldTime = m_flTime; // save time of previous redraw
 	m_flTime = flTime;
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
-	static float m_flShotTime = 0;
+	static int m_flShotTime = 0; // .bss 0x1020bc20: an int in RC2
 
 	// Clock was reset, reset delta
 	if (m_flTimeDelta < 0)
@@ -110,7 +110,6 @@ bool CHud::Redraw(float flTime, bool intermission)
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
 			gViewPort->HideScoreBoard();
-			gViewPort->UpdateSpectatorPanel();
 		}
 		else if (!m_iIntermission && intermission)
 		{
@@ -118,11 +117,10 @@ bool CHud::Redraw(float flTime, bool intermission)
 			gViewPort->HideCommandMenu();
 			gViewPort->HideVGUIMenu();
 			gViewPort->ShowScoreBoard();
-			gViewPort->UpdateSpectatorPanel();
 
 			// Take a screenshot if the client's got the cvar set
 			if (CVAR_GET_FLOAT("hud_takesshots") != 0)
-				m_flShotTime = flTime + 1.0; // Take a screenshot in a second
+				m_flShotTime = (int)(flTime + 1.0); // Take a screenshot in a second
 		}
 	}
 
@@ -158,6 +156,10 @@ bool CHud::Redraw(float flTime, bool intermission)
 			pList = pList->pNext;
 		}
 	}
+
+	// RC2's own HUD drawing
+	if (!intermission)
+		RC2_HudRedraw(flTime, (float)m_flTimeDelta);
 
 	// are we in demo mode? do we need to draw the logo in the top corner?
 	if (0 != m_iLogo)
@@ -231,6 +233,8 @@ int CHud::DrawHudStringReverse(int xpos, int ypos, int iMinX, const char* szStri
 	return xpos - gEngfuncs.pfnDrawStringReverse(xpos, ypos, szString, r, g, b);
 }
 
+// orig client 0xa47f0. RC2: four digits (a thousands digit, and DHN_RC2_4DIGITS to keep its
+// place); the hundreds digit is (iNumber % 1000) / 100
 int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b)
 {
 	int iWidth = GetSpriteRect(m_HUD_number_0).right - GetSpriteRect(m_HUD_number_0).left;
@@ -238,15 +242,28 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 
 	if (iNumber > 0)
 	{
-		// SPR_Draw 100's
-		if (iNumber >= 100)
+		// SPR_Draw 1000's
+		if (iNumber >= 1000)
 		{
-			k = iNumber / 100;
+			k = iNumber / 1000;
 			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
 			SPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
 			x += iWidth;
 		}
-		else if ((iFlags & DHN_3DIGITS) != 0)
+		else if ((iFlags & DHN_RC2_4DIGITS) != 0)
+		{
+			x += iWidth;
+		}
+
+		// SPR_Draw 100's
+		if (iNumber >= 100)
+		{
+			k = (iNumber % 1000) / 100;
+			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
+			SPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			x += iWidth;
+		}
+		else if ((iFlags & (DHN_RC2_4DIGITS | DHN_3DIGITS)) != 0)
 		{
 			//SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
@@ -260,7 +277,7 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 			SPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
 			x += iWidth;
 		}
-		else if ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) != 0)
+		else if ((iFlags & (DHN_RC2_4DIGITS | DHN_3DIGITS | DHN_2DIGITS)) != 0)
 		{
 			//SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
@@ -276,14 +293,17 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 	{
 		SPR_Set(GetSprite(m_HUD_number_0), r, g, b);
 
+		if ((iFlags & DHN_RC2_4DIGITS) != 0)
+			x += iWidth;
+
 		// SPR_Draw 100's
-		if ((iFlags & DHN_3DIGITS) != 0)
+		if ((iFlags & (DHN_RC2_4DIGITS | DHN_3DIGITS)) != 0)
 		{
 			//SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
 		}
 
-		if ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) != 0)
+		if ((iFlags & (DHN_RC2_4DIGITS | DHN_3DIGITS | DHN_2DIGITS)) != 0)
 		{
 			//SPR_DrawAdditive( 0, x, y, &rc );
 			x += iWidth;
@@ -299,8 +319,12 @@ int CHud::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 }
 
 
+// orig client 0xa4b30. RC2: four digits
 int CHud::GetNumWidth(int iNumber, int iFlags)
 {
+	if ((iFlags & DHN_RC2_4DIGITS) != 0)
+		return 4;
+
 	if ((iFlags & DHN_3DIGITS) != 0)
 		return 3;
 
@@ -321,7 +345,10 @@ int CHud::GetNumWidth(int iNumber, int iFlags)
 	if (iNumber < 100)
 		return 2;
 
-	return 3;
+	if (iNumber < 1000)
+		return 3;
+
+	return 4;
 }
 
 int CHud::GetHudNumberWidth(int number, int width, int flags)

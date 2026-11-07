@@ -14,6 +14,7 @@
 ****/
 // shared event functions
 #include "hud.h"
+#include "pm_rc2.h" // PM_GetRideInfo
 #include "cl_util.h"
 #include "const.h"
 #include "entity_state.h"
@@ -33,6 +34,7 @@ GetEntity
 Return's the requested cl_entity_t
 =================
 */
+// orig client 0x9e9a0
 struct cl_entity_s* GetEntity(int idx)
 {
 	return gEngfuncs.GetEntityByIndex(idx);
@@ -45,6 +47,7 @@ GetViewEntity
 Return's the current weapon/view model
 =================
 */
+// orig client 0x9e9c0
 struct cl_entity_s* GetViewEntity()
 {
 	return gEngfuncs.GetViewModel();
@@ -84,13 +87,11 @@ EV_IsLocal
 Is the entity == the local player
 =================
 */
+// orig client 0x9ea40. RC2: SDK 2.2's, without the first person spectator case (RC2's spectator
+// is SDK 2.2's)
 bool EV_IsLocal(int idx)
 {
-	// check if we are in some way in first person spec mode
-	if (IS_FIRSTPERSON_SPEC)
-		return (g_iUser2 == idx);
-	else
-		return gEngfuncs.pEventAPI->EV_IsLocal(idx - 1) != 0;
+	return gEngfuncs.pEventAPI->EV_IsLocal(idx - 1) != 0;
 }
 
 /*
@@ -100,6 +101,7 @@ EV_GetGunPosition
 Figure out the height of the gun
 =================
 */
+// orig client 0x9ea70. RC2: a player riding on another fires from 8 up; no first person spectator case
 void EV_GetGunPosition(event_args_t* args, float* pos, float* origin)
 {
 	int idx;
@@ -110,11 +112,14 @@ void EV_GetGunPosition(event_args_t* args, float* pos, float* origin)
 
 	if (EV_IsPlayer(idx))
 	{
-		// in spec mode use entity viewheigh, not own
-		if (EV_IsLocal(idx) && !IS_FIRSTPERSON_SPEC)
+		if (EV_IsLocal(idx))
 		{
 			// Grab predicted result for local player
 			gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
+		}
+		else if (0 != *PM_GetRideInfo(idx))
+		{
+			view_ofs = Vector(0, 0, 8); // RC2: a player riding another's shoulders
 		}
 		else if (args->ducking == 1)
 		{

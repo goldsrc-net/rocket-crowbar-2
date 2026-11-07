@@ -24,7 +24,11 @@
 
 #include "vgui_TeamFortressViewport.h"
 
-DECLARE_MESSAGE(m_DeathNotice, DeathMsg);
+DECLARE_MESSAGE(m_DeathNotice, DeathMsg); // orig client 0x9b8d0 (not in files-client.tsv: Ghidra missed it)
+
+// dlls/rc2/killmessages.cpp, compiled into the client too (cl_dll/rc2/killmessages_client.cpp)
+const char* KillMsg_Get(int iMsg, const char* pszVictim, const char* pszKiller, const char* pszWeapon, int iGender, int bSelf);
+const char* KillMsg_His(int iGender);
 
 struct DeathNoticeItem
 {
@@ -52,6 +56,7 @@ float g_ColorGreen[3] = {0.6, 1.0, 0.6};
 float g_ColorYellow[3] = {1.0, 0.7, 0.0};
 float g_ColorGrey[3] = {0.8, 0.8, 0.8};
 
+// orig client 0x9b900. Not byte-identical to SDK 2.3's (g_PlayerExtraInfo differs), but it reads the same
 float* GetClientColor(int clientIndex)
 {
 	switch (g_PlayerExtraInfo[clientIndex].teamnumber)
@@ -99,19 +104,12 @@ bool CHudDeathNotice::VidInit()
 	return true;
 }
 
+// orig client 0x9ba30. RC2: SDK 2.3's layout moved to the top right corner (rows 20 apart from
+// y 20, 20 in from the right) and the victim's name 10 further from the sprite; halflife-updated's
+// row gap from the sprite and font height and its text offset are not RC2's
 bool CHudDeathNotice::Draw(float flTime)
 {
-	int x, y, r, g, b, texty;
-
-	int gap = 20;
-
-	Rect sprite = gHUD.GetSpriteRect(m_HUD_d_skull);
-	gap = sprite.bottom - sprite.top;
-
-	SCREENINFO screenInfo;
-	screenInfo.iSize = sizeof(SCREENINFO);
-	gEngfuncs.pfnGetScreenInfo(&screenInfo);
-	gap = V_max(gap, screenInfo.iCharHeight);
+	int x, y, r, g, b;
 
 	for (int i = 0; i < MAX_DEATHNOTICES; i++)
 	{
@@ -132,12 +130,10 @@ bool CHudDeathNotice::Draw(float flTime)
 		if (gViewPort && gViewPort->AllowedToPrintText())
 		{
 			// Draw the death notice
-			y = DEATHNOTICE_TOP + 2 + (gap * i);
-
-			texty = y + 4;
+			y = 20 + (20 * i);
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left) - 4;
+			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left) - 20;
 
 			if (!rgDeathNoticeList[i].iSuicide)
 			{
@@ -146,7 +142,7 @@ bool CHudDeathNotice::Draw(float flTime)
 				// Draw killers name
 				if (rgDeathNoticeList[i].KillerColor)
 					gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2]);
-				x = 5 + DrawConsoleString(x, texty, rgDeathNoticeList[i].szKiller);
+				x = 5 + DrawConsoleString(x, y, rgDeathNoticeList[i].szKiller);
 			}
 
 			r = 255;
@@ -163,14 +159,14 @@ bool CHudDeathNotice::Draw(float flTime)
 			SPR_Set(gHUD.GetSprite(id), r, g, b);
 			SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(id));
 
-			x += (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+			x += 10 + (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
 
 			// Draw victims name (if it was a player that was killed)
 			if (!rgDeathNoticeList[i].iNonPlayerKill)
 			{
 				if (rgDeathNoticeList[i].VictimColor)
 					gEngfuncs.pfnDrawSetTextColor(rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2]);
-				x = DrawConsoleString(x, texty, rgDeathNoticeList[i].szVictim);
+				x = DrawConsoleString(x, y, rgDeathNoticeList[i].szVictim);
 			}
 		}
 	}
@@ -179,6 +175,9 @@ bool CHudDeathNotice::Draw(float flTime)
 }
 
 // This message handler may be better off elsewhere
+// orig client 0x9bd70. RC2: the message also carries RC2's death message number and the victim's
+// gender (multiplay_gamerules.cpp DeathNotice), and the console gets RC2's line for it
+// (KillMsg_Get) in place of "killed ... with ...", printed with developer on
 bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbuf)
 {
 	m_iFlags |= HUD_ACTIVE;
@@ -187,6 +186,8 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 
 	int killer = READ_BYTE();
 	int victim = READ_BYTE();
+	int iDeathMessage = READ_SHORT(); // name ours
+	int iGender = READ_BYTE();		  // name ours
 
 	char killedwith[32];
 	strcpy(killedwith, "d_");
@@ -273,51 +274,31 @@ bool CHudDeathNotice::MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbu
 		ConsolePrint(" killed a ");
 		ConsolePrint(rgDeathNoticeList[i].szVictim);
 		ConsolePrint("\n");
+		return true;
+	}
+
+	// record the death notice in the console, with developer on while it prints
+	const int iDeveloper = (int)CVAR_GET_FLOAT("developer"); // name ours
+	if (iDeveloper == 0)
+		gEngfuncs.Cvar_SetValue("developer", 1);
+
+	if (rgDeathNoticeList[i].iTeamKill)
+	{
+		ConsolePrint(rgDeathNoticeList[i].szKiller);
+		ConsolePrint(" killed ");
+		ConsolePrint(KillMsg_His(iGender));
+		ConsolePrint(" teammate ");
+		ConsolePrint(rgDeathNoticeList[i].szVictim);
 	}
 	else
 	{
-		// record the death notice in the console
-		if (rgDeathNoticeList[i].iSuicide)
-		{
-			ConsolePrint(rgDeathNoticeList[i].szVictim);
-
-			if (0 == strcmp(killedwith, "d_world"))
-			{
-				ConsolePrint(" died");
-			}
-			else
-			{
-				ConsolePrint(" killed self");
-			}
-		}
-		else if (rgDeathNoticeList[i].iTeamKill)
-		{
-			ConsolePrint(rgDeathNoticeList[i].szKiller);
-			ConsolePrint(" killed his teammate ");
-			ConsolePrint(rgDeathNoticeList[i].szVictim);
-		}
-		else
-		{
-			ConsolePrint(rgDeathNoticeList[i].szKiller);
-			ConsolePrint(" killed ");
-			ConsolePrint(rgDeathNoticeList[i].szVictim);
-		}
-
-		if (killedwith && '\0' != *killedwith && (*killedwith > 13) && 0 != strcmp(killedwith, "d_world") && !rgDeathNoticeList[i].iTeamKill)
-		{
-			ConsolePrint(" with ");
-
-			// replace the code names with the 'real' names
-			if (0 == strcmp(killedwith + 2, "egon"))
-				strcpy(killedwith, "d_gluon gun");
-			if (0 == strcmp(killedwith + 2, "gauss"))
-				strcpy(killedwith, "d_tau cannon");
-
-			ConsolePrint(killedwith + 2); // skip over the "d_" part
-		}
-
-		ConsolePrint("\n");
+		ConsolePrint(KillMsg_Get(iDeathMessage, rgDeathNoticeList[i].szVictim, rgDeathNoticeList[i].szKiller, killedwith + 2, iGender, rgDeathNoticeList[i].iSuicide ? 1 : 0));
 	}
+
+	ConsolePrint("\n");
+
+	if (iDeveloper == 0)
+		gEngfuncs.Cvar_SetValue("developer", 0);
 
 	return true;
 }

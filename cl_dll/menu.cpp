@@ -127,8 +127,13 @@ static inline const char* ParseEscapeToken(const char* token)
 }
 
 
+// orig client 0xae150 (not in files-client.tsv: Ghidra missed it). RC2: no menu without weapons
+// (shrunk or transformed)
 bool CHudMenu::Draw(float flTime)
 {
+	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_RC2_NOWEAPONS) != 0)
+		return true;
+
 	// check for if menu is set to disappear
 	if (m_flShutoffTime > 0)
 	{
@@ -236,6 +241,7 @@ void CHudMenu::SelectMenuItem(int menu_item)
 //		byte : a boolean, true if there is more string yet to be received before displaying the menu, false if it's the last string
 //		string: menu string to display
 // if this message is never received, then scores will simply be the combined totals of the players.
+// orig client 0xae340. Not byte-identical to SDK 2.3's, but it reads the same
 bool CHudMenu::MsgFunc_ShowMenu(const char* pszName, int iSize, void* pbuf)
 {
 	char* temp = NULL;

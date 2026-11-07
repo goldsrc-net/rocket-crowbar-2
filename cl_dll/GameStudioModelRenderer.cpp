@@ -36,6 +36,9 @@
 extern engine_studio_api_t IEngineStudio;
 
 // The renderer object, created on the stack.
+// orig client 0x9f250 (its construction), orig client 0x9f270 (atexit of its destruction) and
+// orig client 0x9f290 (not in files-client.tsv: Ghidra missed it; the destruction itself):
+// compiler-made for this global
 CGameStudioModelRenderer g_StudioRenderer;
 /*
 ====================
@@ -47,6 +50,9 @@ CGameStudioModelRenderer::CGameStudioModelRenderer()
 {
 }
 
+// orig client 0x9f300: CGameStudioModelRenderer's deleting destructor (compiler-made; Ghidra
+// names it CStudioModelRenderer's). It runs ~CStudioModelRenderer (orig client 0xc0870)
+
 ////////////////////////////////////
 // Hooks to class implementation
 ////////////////////////////////////
@@ -57,6 +63,7 @@ R_StudioDrawPlayer
 
 ====================
 */
+// orig client 0x9f330 (not in files-client.tsv: Ghidra missed it). As SDK 2.3's
 int R_StudioDrawPlayer(int flags, entity_state_t* pplayer)
 {
 	return static_cast<int>(g_StudioRenderer.StudioDrawPlayer(flags, pplayer));
@@ -79,6 +86,7 @@ R_StudioInit
 
 ====================
 */
+// orig client 0x9f380. Not byte-identical to SDK 2.3's (the renderer's address), but it reads the same
 void R_StudioInit()
 {
 	g_StudioRenderer.Init();

@@ -45,8 +45,10 @@ static float flScrollTime = 0; // the time at which the lines next scroll up
 static int Y_START = 0;
 static int line_height = 0;
 
-DECLARE_MESSAGE(m_SayText, SayText);
+DECLARE_MESSAGE(m_SayText, SayText); // orig client 0xbeaa0
 
+// orig client 0xbead0. RC2: SDK 2.2's (hud_saytext_time only; halflife-updated's hud_saytext and
+// con_color aren't RC2's)
 bool CHudSayText::Init()
 {
 	gHUD.AddHudElem(this);
@@ -55,25 +57,28 @@ bool CHudSayText::Init()
 
 	InitHUDData();
 
-	m_HUD_saytext = gEngfuncs.pfnRegisterVariable("hud_saytext", "1", 0);
-	m_HUD_saytext_time = gEngfuncs.pfnRegisterVariable("hud_saytext_time", "5", 0);
-	m_con_color = gEngfuncs.pfnGetCvarPointer("con_color");
+	CVAR_CREATE("hud_saytext_time", "5", 0);
 
+	m_iYStart = 0;
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 
 	return true;
 }
 
 
+// orig client 0xbeb50 (not in files-client.tsv: Ghidra missed it)
 void CHudSayText::InitHUDData()
 {
 	memset(g_szLineBuffer, 0, sizeof g_szLineBuffer);
 	memset(g_pflNameColors, 0, sizeof g_pflNameColors);
 	memset(g_iNameLengths, 0, sizeof g_iNameLengths);
+	m_iYStart = 0;
 }
 
+// orig client 0xbeb90 (not in files-client.tsv: Ghidra missed it)
 bool CHudSayText::VidInit()
 {
+	m_iYStart = 0;
 	return true;
 }
 
@@ -95,24 +100,23 @@ int ScrollTextUp()
 	return 1;
 }
 
+// orig client 0xbec40. RC2: SDK 2.2's: the scroll time from SCROLL_SPEED, the name drawn in its
+// colour from the start of the line (its control code too), at most 63 characters of it
 bool CHudSayText::Draw(float flTime)
 {
 	int y = Y_START;
 
-	if ((gViewPort && !gViewPort->AllowedToPrintText()) || 0 == m_HUD_saytext->value)
+	if (gViewPort && !gViewPort->AllowedToPrintText())
 		return true;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = V_min(flScrollTime, flTime + m_HUD_saytext_time->value);
-
-	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = V_min(flScrollTime, flTime + m_HUD_saytext_time->value);
+	flScrollTime = V_min(flScrollTime, flTime + SCROLL_SPEED);
 
 	if (flScrollTime <= flTime)
 	{
 		if ('\0' != *g_szLineBuffer[0])
 		{
-			flScrollTime = flTime + m_HUD_saytext_time->value;
+			flScrollTime = flTime + SCROLL_SPEED;
 			// push the console up
 			ScrollTextUp();
 		}
@@ -122,14 +126,7 @@ bool CHudSayText::Draw(float flTime)
 		}
 	}
 
-	//Set text color to con_color cvar value before drawing to ensure consistent color.
-	//The engine resets this color to that value after drawing a single string.
-	if (int r, g, b; sscanf(m_con_color->string, "%i %i %i", &r, &g, &b) == 3)
-	{
-		gEngfuncs.pfnDrawSetTextColor(r / 255.0f, g / 255.0f, b / 255.0f);
-	}
-
-	char line[MAX_CHARS_PER_LINE]{};
+	static char buf[64]; // .bss 0x10213a64
 
 	for (int i = 0; i < MAX_LINES; i++)
 	{
@@ -138,26 +135,14 @@ bool CHudSayText::Draw(float flTime)
 			if (*g_szLineBuffer[i] == 2 && g_pflNameColors[i])
 			{
 				// it's a saytext string
-
-				//Make a copy we can freely modify
-				strncpy(line, g_szLineBuffer[i], sizeof(line) - 1);
-				line[sizeof(line) - 1] = '\0';
-
 				// draw the first x characters in the player color
-				const std::size_t playerNameEndIndex = V_min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
-
-				//Cut off the actual text so we can print player name
-				line[playerNameEndIndex] = '\0';
-
+				strncpy(buf, g_szLineBuffer[i], V_min(g_iNameLengths[i], 64));
+				buf[V_min(g_iNameLengths[i], 63)] = 0;
 				gEngfuncs.pfnDrawSetTextColor(g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2]);
-				const int x = DrawConsoleString(LINE_START, y, line + 1); // don't draw the control code at the start
-
-				//Reset last character
-				line[playerNameEndIndex] = g_szLineBuffer[i][playerNameEndIndex];
+				int x = DrawConsoleString(LINE_START, y, buf);
 
 				// color is reset after each string draw
-				//Print the text without player name
-				DrawConsoleString(x, y, line + g_iNameLengths[i]);
+				DrawConsoleString(x, y, g_szLineBuffer[i] + g_iNameLengths[i]);
 			}
 			else
 			{
@@ -182,13 +167,15 @@ bool CHudSayText::MsgFunc_SayText(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
+// orig client 0xbee40. RC2: SDK 2.2's: only to the console when the viewport says no, the scroll
+// speed read from hud_saytext_time with the first line, Y_START 45 up below 480 high and six lines
+// up. halflife-updated's copy length (SDK 2.2 copies max(iBufSize - 1, 255) bytes) stays.
 void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex)
 {
-	// Print it straight to the console
-	ConsolePrint(pszBuf);
-
 	if (gViewPort && gViewPort->AllowedToPrintText() == false)
 	{
+		// Print it straight to the console
+		ConsolePrint(pszBuf);
 		return;
 	}
 
@@ -235,13 +222,19 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 	// Set scroll time
 	if (i == 0)
 	{
-		flScrollTime = gHUD.m_flTime + m_HUD_saytext_time->value;
+		SCROLL_SPEED = CVAR_GET_FLOAT("hud_saytext_time");
+		flScrollTime = gHUD.m_flTime + SCROLL_SPEED;
 	}
 
 	m_iFlags |= HUD_ACTIVE;
 	PlaySound("misc/talk.wav", 1);
 
-	Y_START = ScreenHeight - 60 - (line_height * (MAX_LINES + 2));
+	if (ScreenHeight >= 480)
+		Y_START = ScreenHeight - 60;
+	else
+		Y_START = ScreenHeight - 45;
+	Y_START -= line_height * (MAX_LINES + 1);
+	m_iYStart = Y_START;
 }
 
 void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)

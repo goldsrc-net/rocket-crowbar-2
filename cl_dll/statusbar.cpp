@@ -26,8 +26,8 @@
 #include <string.h>
 #include <stdio.h>
 
-DECLARE_MESSAGE(m_StatusBar, StatusText);
-DECLARE_MESSAGE(m_StatusBar, StatusValue);
+DECLARE_MESSAGE(m_StatusBar, StatusText);  // orig client 0xbf6b0
+DECLARE_MESSAGE(m_StatusBar, StatusValue); // orig client 0xbf6e0
 
 #define STATUSBAR_ID_LINE 1
 
@@ -172,6 +172,7 @@ void CHudStatusBar::ParseStatusString(int line_num)
 	}
 }
 
+// orig client 0xbfb30. RC2: the lines start 55 up (45 below 480 high), 5 in from the left
 bool CHudStatusBar::Draw(float fTime)
 {
 	if (m_bReparseString)
@@ -184,7 +185,6 @@ bool CHudStatusBar::Draw(float fTime)
 		m_bReparseString = false;
 	}
 
-	int Y_START = ScreenHeight - 52;
 
 	// Draw the status bar lines
 	for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
@@ -192,8 +192,8 @@ bool CHudStatusBar::Draw(float fTime)
 		int TextHeight, TextWidth;
 		GetConsoleStringSize(m_szStatusBar[i], &TextWidth, &TextHeight);
 
-		int x = 8;
-		int y = Y_START - (4 + TextHeight * i); // draw along bottom of screen
+		int x = 5;
+		int y = (ScreenHeight < 480 ? ScreenHeight - 45 : ScreenHeight - 55) - TextHeight * i; // draw along bottom of screen
 
 		// let user set status ID bar centering
 		if ((i == STATUSBAR_ID_LINE) && 0 != CVAR_GET_FLOAT("hud_centerid"))

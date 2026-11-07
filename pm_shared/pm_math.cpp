@@ -70,6 +70,7 @@ void AngleVectors(const Vector& angles, Vector* forward, Vector* right, Vector* 
 	}
 }
 
+// orig client 0xb0360. Not byte-identical to SDK 2.3's, but it reads the same
 void AngleVectorsTranspose(const Vector& angles, Vector* forward, Vector* right, Vector* up)
 {
 	float angle;
@@ -105,6 +106,7 @@ void AngleVectorsTranspose(const Vector& angles, Vector* forward, Vector* right,
 	}
 }
 
+// orig client 0xb04a0. Not byte-identical to SDK 2.3's, but it reads the same
 void AngleMatrix(const float* angles, float (*matrix)[4])
 {
 	float angle;
@@ -135,6 +137,7 @@ void AngleMatrix(const float* angles, float (*matrix)[4])
 	matrix[2][3] = 0.0;
 }
 
+// orig client 0xb05c0. Not byte-identical to SDK 2.3's, but it reads the same
 void AngleIMatrix(const Vector& angles, float matrix[3][4])
 {
 	float angle;
@@ -191,6 +194,7 @@ FIXME:  Use Quaternions to avoid discontinuities
 Frac is 0.0 to 1.0 ( i.e., should probably be clamped, but doesn't have to be )
 ===================
 */
+// orig client 0xb0730. Not byte-identical to SDK 2.3's, but it reads the same
 void InterpolateAngles(float* start, float* end, float* output, float frac)
 {
 	int i;
@@ -228,6 +232,7 @@ AngleBetweenVectors
 
 ===================
 */
+// orig client 0xb07d0. Not byte-identical to SDK 2.3's, but it reads the same
 float AngleBetweenVectors(const Vector& v1, const Vector& v2)
 {
 	float angle;
@@ -243,6 +248,7 @@ float AngleBetweenVectors(const Vector& v1, const Vector& v2)
 	return angle;
 }
 
+// orig client 0xb0890 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 void VectorTransform(const float* in1, float in2[3][4], float* out)
 {
 	out[0] = DotProduct(*reinterpret_cast<const Vector*>(in1), *reinterpret_cast<const Vector*>(in2[0])) + in2[0][3];
@@ -250,6 +256,7 @@ void VectorTransform(const float* in1, float in2[3][4], float* out)
 	out[2] = DotProduct(*reinterpret_cast<const Vector*>(in1), *reinterpret_cast<const Vector*>(in2[2])) + in2[2][3];
 }
 
+// orig client 0xb0910. Not byte-identical to SDK 2.3's, but it reads the same
 bool VectorCompare(const float* v1, const float* v2)
 {
 	int i;
@@ -261,6 +268,7 @@ bool VectorCompare(const float* v1, const float* v2)
 	return true;
 }
 
+// orig client 0xb0950. Not byte-identical to SDK 2.3's, but it reads the same
 void VectorMA(const float* veca, float scale, const float* vecb, float* vecc)
 {
 	vecc[0] = veca[0] + scale * vecb[0];
@@ -268,6 +276,39 @@ void VectorMA(const float* veca, float scale, const float* vecb, float* vecc)
 	vecc[2] = veca[2] + scale * vecb[2];
 }
 
+// SDK 2.3's function forms of mathlib.h's macros, which halflife-updated dropped. client.dll
+// still has them (nothing calls them); rc2.dll's are SDK 2.3's byte for byte.
+// orig client 0xb09a0 (not in files-client.tsv: Ghidra missed it)
+float _DotProduct(const float* v1, const float* v2)
+{
+	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+}
+
+// orig client 0xb09d0 (not in files-client.tsv: Ghidra missed it)
+void _VectorSubtract(const float* veca, const float* vecb, float* out)
+{
+	out[0] = veca[0] - vecb[0];
+	out[1] = veca[1] - vecb[1];
+	out[2] = veca[2] - vecb[2];
+}
+
+// orig client 0xb0a10 (not in files-client.tsv: Ghidra missed it)
+void _VectorAdd(const float* veca, const float* vecb, float* out)
+{
+	out[0] = veca[0] + vecb[0];
+	out[1] = veca[1] + vecb[1];
+	out[2] = veca[2] + vecb[2];
+}
+
+// orig client 0xb0a50 (not in files-client.tsv: Ghidra missed it)
+void _VectorCopy(const float* in, float* out)
+{
+	out[0] = in[0];
+	out[1] = in[1];
+	out[2] = in[2];
+}
+
+// orig client 0xb0a80. Not byte-identical to SDK 2.3's, but it reads the same
 void CrossProduct(const float* v1, const float* v2, float* cross)
 {
 	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
@@ -275,6 +316,7 @@ void CrossProduct(const float* v1, const float* v2, float* cross)
 	cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
 
+// orig client 0xb0ad0. Not byte-identical to SDK 2.3's, but it reads the same
 float Length(const float* v)
 {
 	int i;
@@ -294,6 +336,7 @@ float Distance(const float* v1, const float* v2)
 	return Length(d);
 }
 
+// orig client 0xb0b60. Not byte-identical to SDK 2.3's, but it reads the same
 float VectorNormalize(float* v)
 {
 	float length, ilength;
@@ -312,6 +355,7 @@ float VectorNormalize(float* v)
 	return length;
 }
 
+// orig client 0xb0bd0 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 void VectorInverse(float* v)
 {
 	v[0] = -v[0];
@@ -319,6 +363,7 @@ void VectorInverse(float* v)
 	v[2] = -v[2];
 }
 
+// orig client 0xb0c00. Not byte-identical to SDK 2.3's, but it reads the same
 void VectorScale(const float* in, float scale, float* out)
 {
 	out[0] = in[0] * scale;
@@ -326,6 +371,7 @@ void VectorScale(const float* in, float scale, float* out)
 	out[2] = in[2] * scale;
 }
 
+// orig client 0xb0c40 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 int Q_log2(int val)
 {
 	int answer = 0;
@@ -334,6 +380,7 @@ int Q_log2(int val)
 	return answer;
 }
 
+// orig client 0xb0c60. Not byte-identical to SDK 2.3's, but it reads the same
 void VectorMatrix(const Vector& forward, Vector& right, Vector& up)
 {
 	Vector tmp;
@@ -358,6 +405,7 @@ void VectorMatrix(const Vector& forward, Vector& right, Vector& up)
 	VectorNormalize(up);
 }
 
+// orig client 0xb0d30. Not byte-identical to SDK 2.3's, but it reads the same
 void VectorAngles(const float* forward, float* angles)
 {
 	double tmp, yaw, pitch;
@@ -391,7 +439,7 @@ void VectorAngles(const float* forward, float* angles)
 // -atan2(right.z, up.z), wrapped to 0-360 as pitch and yaw are. Pitch and yaw as VectorAngles
 // (pitch positive up). Callers: CControlForklift, CXBowTeather. VERIFY: which basis vectors
 // those pass as right and up (only their .z is read)
-void VectorAnglesWithRoll(const float* forward, const float* right, const float* up, float* angles) // orig 0xa0260, name ours
+void VectorAnglesWithRoll(const float* forward, const float* right, const float* up, float* angles) // orig 0xa0260, orig client 0xb0e50, name ours
 {
 	double yaw, pitch, roll;
 

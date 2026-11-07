@@ -29,13 +29,39 @@
 #include "demo.h"
 #include "demo_api.h"
 #include "vgui_ScorePanel.h"
+#include "rc2/hud_servers.h"
+#include "rc2/c4_needs.h"
 
 hud_player_info_t g_PlayerInfoList[MAX_PLAYERS_HUD + 1];	// player info from the engine
 extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS_HUD + 1]; // additional player info sent directly to the client dll
 
+// c4: client.dll's hud.obj also holds compiler-written code from the VGUI headers RC2's hud.cpp
+// pulls in (nothing to write): vgui::Slider2's and vgui::ScrollBar2's implicit copy constructors
+// and assignment operators (orig client 0xa34c0, orig client 0xa37e0, orig client 0xa3b40,
+// orig client 0xa3dc0), and vgui::IntChangeSignal's inline constructor, destructor and empty
+// handler (orig client 0xa3460, orig client 0xa3480, orig client 0xa34a0).
+
+// c4: Rocket Crowbar 2's client globals (hud.h; names ours)
+int g_iThisClient = 1;		   // .data 0x1013d0b8
+int g_iViewMode;			   // .bss 0x1020bb38
+int g_iScoreMode;			   // .bss 0x1020bb3c
+float g_flTransformFOV;		   // .bss 0x1020bb44, VERIFY: set by fork V's transform HUD
+int g_iVGUIDebugCount;		   // .bss 0x10222134
+cvar_t* cl_gibcount = nullptr; // .bss 0x1020b71c
+cvar_t* cl_giblife = nullptr;
+cvar_t* cl_detail = nullptr;
+cvar_t* cl_forkliftlights = nullptr;
+cvar_t* cl_visiblejetpack = nullptr;
+cvar_t* cl_debuggren = nullptr;
+
+// The constructor, destructor and scalar deleting destructor the compiler writes for this class
+// and its global object: orig client 0xa0ac0, orig client 0xa0aa0 (IVoiceStatusHelper's),
+// orig client 0xa0bf0, and the static initializer and atexit hook orig client 0xa0a40,
+// orig client 0xa0a60. RC2's methods are SDK 2.3's.
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
 {
 public:
+	// orig client 0xa0ae0 (not in files-client.tsv: Ghidra missed it)
 	void GetPlayerTextColor(int entindex, int color[3]) override
 	{
 		color[0] = color[1] = color[2] = 255;
@@ -90,34 +116,114 @@ cvar_t* r_decals = nullptr;
 void ShutdownInput();
 
 //DECLARE_MESSAGE(m_Logo, Logo)
+// orig client 0xa0c20 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_Logo(const char* pszName, int iSize, void* pbuf)
 {
 	return static_cast<int>(gHUD.MsgFunc_Logo(pszName, iSize, pbuf));
 }
 
 //DECLARE_MESSAGE(m_Logo, Logo)
+// orig client 0xa0c50
 int __MsgFunc_ResetHUD(const char* pszName, int iSize, void* pbuf)
 {
 	return static_cast<int>(gHUD.MsgFunc_ResetHUD(pszName, iSize, pbuf));
 }
 
+// orig client 0xa0c80 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf)
 {
 	gHUD.MsgFunc_InitHUD(pszName, iSize, pbuf);
 	return 1;
 }
 
+// orig client 0xa10b0. RC2: its own "ViewMode", a byte the client keeps (g_iViewMode); SDK 2.3's
+// CHud::MsgFunc_ViewMode isn't hooked
 int __MsgFunc_ViewMode(const char* pszName, int iSize, void* pbuf)
 {
-	gHUD.MsgFunc_ViewMode(pszName, iSize, pbuf);
+	BEGIN_READ(pbuf, iSize);
+	g_iViewMode = READ_BYTE();
 	return 1;
 }
 
+// orig client 0xa1070: the local player's entity index
+int __MsgFunc_ThisClient(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	BEGIN_READ(pbuf, iSize);
+	g_iThisClient = READ_BYTE();
+	return 1;
+}
+
+// orig client 0xa10f0 (not in files-client.tsv: Ghidra missed it)
+int __MsgFunc_ScoreMode(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	BEGIN_READ(pbuf, iSize);
+	g_iScoreMode = READ_BYTE();
+	return 1;
+}
+
+// orig client 0xa1130 (not in files-client.tsv: Ghidra missed it): shows or hides the VGUI
+// debug panel
+int __MsgFunc_VGUIDebugOn(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	BEGIN_READ(pbuf, iSize);
+	const bool bOn = 0 != READ_BYTE(); // name ours
+
+	if (gViewPort)
+		gViewPort->SetDebugPanelVisible(bOn);
+
+	if (!bOn)
+		g_iVGUIDebugCount = 0;
+
+	return 1;
+}
+
+// orig client 0xa11a0 (not in files-client.tsv: Ghidra missed it)
+int __MsgFunc_DBGCounts(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	if (gViewPort)
+		return static_cast<int>(gViewPort->MsgFunc_DBGCounts(pszName, iSize, pbuf));
+	return 0;
+}
+
+// orig client 0xa11e0 (not in files-client.tsv: Ghidra missed it)
+int __MsgFunc_DBGEntInfo(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	if (gViewPort)
+		return static_cast<int>(gViewPort->MsgFunc_DBGEntInfo(pszName, iSize, pbuf));
+	return 0;
+}
+
+// orig client 0xa1220 (not in files-client.tsv: Ghidra missed it)
+int __MsgFunc_VoteBegin(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	if (gViewPort)
+		return static_cast<int>(gViewPort->MsgFunc_VoteBegin(pszName, iSize, pbuf));
+	return 0;
+}
+
+// orig client 0xa1260 (not in files-client.tsv: Ghidra missed it)
+int __MsgFunc_VoteUpdate(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	if (gViewPort)
+		return static_cast<int>(gViewPort->MsgFunc_VoteUpdate(pszName, iSize, pbuf));
+	return 0;
+}
+
+// orig client 0xa1030
+int __MsgFunc_AttrConf(const char* pszName, int iSize, void* pbuf) // name ours
+{
+	if (gViewPort)
+		return static_cast<int>(gViewPort->MsgFunc_AttrConf(pszName, iSize, pbuf));
+	return 0;
+}
+
+// orig client 0xa0cc0 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_SetFOV(const char* pszName, int iSize, void* pbuf)
 {
 	return static_cast<int>(gHUD.MsgFunc_SetFOV(pszName, iSize, pbuf));
 }
 
+// orig client 0xa0cf0 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf)
 {
 	return static_cast<int>(gHUD.MsgFunc_Concuss(pszName, iSize, pbuf));
@@ -128,12 +234,14 @@ int __MsgFunc_Weapons(const char* pszName, int iSize, void* pbuf)
 	return static_cast<int>(gHUD.MsgFunc_Weapons(pszName, iSize, pbuf));
 }
 
+// orig client 0xa0d20
 int __MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 {
 	return static_cast<int>(gHUD.MsgFunc_GameMode(pszName, iSize, pbuf));
 }
 
 // TFFree Command Menu
+// orig client 0xa0d50
 void __CmdFunc_OpenCommandMenu()
 {
 	if (gViewPort)
@@ -143,6 +251,7 @@ void __CmdFunc_OpenCommandMenu()
 }
 
 // TFC "special" command
+// orig client 0xa0d70. RC2 keeps it but no longer hooks "special"
 void __CmdFunc_InputPlayerSpecial()
 {
 	if (gViewPort)
@@ -151,6 +260,7 @@ void __CmdFunc_InputPlayerSpecial()
 	}
 }
 
+// orig client 0xa0d90 (not in files-client.tsv: Ghidra missed it)
 void __CmdFunc_CloseCommandMenu()
 {
 	if (gViewPort)
@@ -159,6 +269,7 @@ void __CmdFunc_CloseCommandMenu()
 	}
 }
 
+// orig client 0xa0db0 (not in files-client.tsv: Ghidra missed it)
 void __CmdFunc_ForceCloseCommandMenu()
 {
 	if (gViewPort)
@@ -167,14 +278,18 @@ void __CmdFunc_ForceCloseCommandMenu()
 	}
 }
 
-// TFFree Command Menu Message Handlers
-int __MsgFunc_ValClass(const char* pszName, int iSize, void* pbuf)
+// orig client 0xa0dd0 (not in files-client.tsv: Ghidra missed it). SDK 2.3's, which
+// halflife-updated dropped with the server browser
+void __CmdFunc_ToggleServerBrowser()
 {
 	if (gViewPort)
-		return static_cast<int>(gViewPort->MsgFunc_ValClass(pszName, iSize, pbuf));
-	return 0;
+	{
+		gViewPort->ToggleServerBrowser();
+	}
 }
 
+// TFFree Command Menu Message Handlers
+// orig client 0xa0df0 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_TeamNames(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -182,20 +297,7 @@ int __MsgFunc_TeamNames(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
-int __MsgFunc_Feign(const char* pszName, int iSize, void* pbuf)
-{
-	if (gViewPort)
-		return static_cast<int>(gViewPort->MsgFunc_Feign(pszName, iSize, pbuf));
-	return 0;
-}
-
-int __MsgFunc_Detpack(const char* pszName, int iSize, void* pbuf)
-{
-	if (gViewPort)
-		return static_cast<int>(gViewPort->MsgFunc_Detpack(pszName, iSize, pbuf));
-	return 0;
-}
-
+// orig client 0xa0e30 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_VGUIMenu(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -203,6 +305,7 @@ int __MsgFunc_VGUIMenu(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
+// orig client 0xa0e70
 int __MsgFunc_MOTD(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -210,20 +313,7 @@ int __MsgFunc_MOTD(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
-int __MsgFunc_BuildSt(const char* pszName, int iSize, void* pbuf)
-{
-	if (gViewPort)
-		return static_cast<int>(gViewPort->MsgFunc_BuildSt(pszName, iSize, pbuf));
-	return 0;
-}
-
-int __MsgFunc_RandomPC(const char* pszName, int iSize, void* pbuf)
-{
-	if (gViewPort)
-		return static_cast<int>(gViewPort->MsgFunc_RandomPC(pszName, iSize, pbuf));
-	return 0;
-}
-
+// orig client 0xa0eb0
 int __MsgFunc_ServerName(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -231,6 +321,7 @@ int __MsgFunc_ServerName(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
+// orig client 0xa0ef0 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_ScoreInfo(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -238,6 +329,7 @@ int __MsgFunc_ScoreInfo(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
+// orig client 0xa0f30 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_TeamScore(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -245,6 +337,7 @@ int __MsgFunc_TeamScore(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
+// orig client 0xa0f70 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_TeamInfo(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -252,6 +345,7 @@ int __MsgFunc_TeamInfo(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
+// orig client 0xa0fb0
 int __MsgFunc_Spectator(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -273,6 +367,7 @@ int __MsgFunc_ResetFade(const char* pszName, int iSize, void* pbuf)
 	return 0;
 }
 
+// orig client 0xa0ff0 (not in files-client.tsv: Ghidra missed it)
 int __MsgFunc_AllowSpec(const char* pszName, int iSize, void* pbuf)
 {
 	if (gViewPort)
@@ -281,30 +376,27 @@ int __MsgFunc_AllowSpec(const char* pszName, int iSize, void* pbuf)
 }
 
 // This is called every time the DLL is loaded
+// orig client 0xa12a0. RC2: its own messages (and its handlers' homes) and cvars, the energy meter
+// and status icons, "togglebrowser" and ServersInit back from SDK 2.3; no TFC messages, no
+// "special". halflife-updated's Weapons, SpecFade and ResetFade hooks and its cvars stay.
 void CHud::Init()
 {
 	HOOK_MESSAGE(Logo);
 	HOOK_MESSAGE(ResetHUD);
 	HOOK_MESSAGE(GameMode);
 	HOOK_MESSAGE(InitHUD);
-	HOOK_MESSAGE(ViewMode);
 	HOOK_MESSAGE(SetFOV);
 	HOOK_MESSAGE(Concuss);
-	HOOK_MESSAGE(Weapons);
+	HOOK_MESSAGE(Weapons); // halflife-updated's
 
 	// TFFree CommandMenu
 	HOOK_COMMAND("+commandmenu", OpenCommandMenu);
 	HOOK_COMMAND("-commandmenu", CloseCommandMenu);
 	HOOK_COMMAND("ForceCloseCommandMenu", ForceCloseCommandMenu);
-	HOOK_COMMAND("special", InputPlayerSpecial);
+	HOOK_COMMAND("togglebrowser", ToggleServerBrowser);
 
-	HOOK_MESSAGE(ValClass);
 	HOOK_MESSAGE(TeamNames);
-	HOOK_MESSAGE(Feign);
-	HOOK_MESSAGE(Detpack);
 	HOOK_MESSAGE(MOTD);
-	HOOK_MESSAGE(BuildSt);
-	HOOK_MESSAGE(RandomPC);
 	HOOK_MESSAGE(ServerName);
 	HOOK_MESSAGE(ScoreInfo);
 	HOOK_MESSAGE(TeamScore);
@@ -313,29 +405,61 @@ void CHud::Init()
 	HOOK_MESSAGE(Spectator);
 	HOOK_MESSAGE(AllowSpec);
 
-	HOOK_MESSAGE(SpecFade);
-	HOOK_MESSAGE(ResetFade);
+	HOOK_MESSAGE(SpecFade);	 // halflife-updated's
+	HOOK_MESSAGE(ResetFade); // halflife-updated's
+
+	// RC2's messages
+	HOOK_MESSAGE(AttrConf);
+	HOOK_MESSAGE(SetAttr);
+	HOOK_MESSAGE(ThisClient);
+	HOOK_MESSAGE(ViewMode);
+	HOOK_MESSAGE(ScoreMode);
+	HOOK_MESSAGE(VGUIDebugOn);
+	HOOK_MESSAGE(DBGCounts);
+	HOOK_MESSAGE(DBGEntInfo);
+	HOOK_MESSAGE(VoteBegin);
+	HOOK_MESSAGE(VoteUpdate);
+	HOOK_MESSAGE(CLTE);
+	HOOK_MESSAGE(PullerCtrl);
+	HOOK_MESSAGE(WeaponSync);
+	HOOK_MESSAGE(RCCFG);
+	HOOK_MESSAGE(TformStat);
+	HOOK_MESSAGE(PlrStat);
+	HOOK_MESSAGE(RaceStat);
 
 	// VGUI Menus
 	HOOK_MESSAGE(VGUIMenu);
 
-	CVAR_CREATE("hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO); // controls whether or not to suicide immediately on TF class switch
-	CVAR_CREATE("hud_takesshots", "0", FCVAR_ARCHIVE);					   // controls whether or not to automatically take screenshots at the end of a round
-
+	CVAR_CREATE("hud_takesshots", "0", FCVAR_ARCHIVE); // controls whether or not to automatically take screenshots at the end of a round
+	cl_gibcount = CVAR_CREATE("cl_gibcount", "8", FCVAR_ARCHIVE);
+	cl_giblife = CVAR_CREATE("cl_giblife", "15", FCVAR_ARCHIVE);
+	cl_detail = CVAR_CREATE("cl_detail", "0", FCVAR_ARCHIVE);
+	cl_forkliftlights = CVAR_CREATE("cl_forkliftlights", "0", FCVAR_ARCHIVE);
+	cl_visiblejetpack = CVAR_CREATE("cl_visiblejetpack", "1", FCVAR_ARCHIVE);
+	cl_debuggren = CVAR_CREATE("cl_debuggren", "0", FCVAR_ARCHIVE);
 
 	m_iLogo = 0;
 	m_iFOV = 0;
 
+	// RC2 creates these two without FCVAR_ARCHIVE (as SDK 2.3); halflife-updated archives them
 	CVAR_CREATE("zoom_sensitivity_ratio", "1.2", FCVAR_ARCHIVE);
-	CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO);
+	CVAR_CREATE("cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO); // halflife-updated's
 	default_fov = CVAR_CREATE("default_fov", "90", FCVAR_ARCHIVE);
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "1", FCVAR_ARCHIVE);
-	m_pCvarDraw = CVAR_CREATE("hud_draw", "1", FCVAR_ARCHIVE);
+	m_pCvarDraw = CVAR_CREATE("hud_draw", "1", FCVAR_ARCHIVE); // halflife-updated's
 	cl_lw = gEngfuncs.pfnGetCvarPointer("cl_lw");
-	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE);
+	cl_rollangle = CVAR_CREATE("cl_rollangle", "2.0", FCVAR_ARCHIVE); // halflife-updated's
 	cl_rollspeed = CVAR_CREATE("cl_rollspeed", "200", FCVAR_ARCHIVE);
 	cl_bobtilt = CVAR_CREATE("cl_bobtilt", "0", FCVAR_ARCHIVE);
 	r_decals = gEngfuncs.pfnGetCvarPointer("r_decals");
+
+	// RC2: r_drawentities is forced to 1 and made single-player only, so it can't hide models
+	cvar_t* pDrawEntities = gEngfuncs.pfnGetCvarPointer("r_drawentities"); // name ours
+	if (pDrawEntities)
+	{
+		pDrawEntities->value = 1.0f;
+		pDrawEntities->flags |= FCVAR_SPONLY;
+	}
 
 	m_pSpriteList = NULL;
 
@@ -357,11 +481,11 @@ void CHud::Init()
 
 	m_Ammo.Init();
 	m_Health.Init();
-	m_SayText.Init();
-	m_Spectator.Init();
 	m_Geiger.Init();
 	m_Train.Init();
 	m_Battery.Init();
+	m_Energy.Init();
+	m_EIcons.Init();
 	m_Flash.Init();
 	m_Message.Init();
 	m_StatusBar.Init();
@@ -370,8 +494,11 @@ void CHud::Init()
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
-
+	m_Spectator.Init();
+	m_SayText.Init();
 	m_Menu.Init();
+
+	ServersInit();
 
 	MsgFunc_ResetHUD(0, 0, NULL);
 
@@ -383,6 +510,7 @@ void CHud::Init()
 
 // CHud destructor
 // cleans up memory allocated for m_rg* arrays
+// orig client 0xa1890 (SDK 2.3's, with ServersShutdown)
 CHud::~CHud()
 {
 	delete[] m_rghSprites;
@@ -400,12 +528,15 @@ CHud::~CHud()
 		}
 		m_pHudList = NULL;
 	}
+
+	ServersShutdown(); // RC2 (SDK 2.3)
 }
 
 // GetSpriteIndex()
 // searches through the sprite list loaded from hud.txt for a name matching SpriteName
 // returns an index into the gHUD.m_rghSprites[] array
 // returns 0 if sprite not found
+// orig client 0xa19b0. Not byte-identical to SDK 2.3's, but it reads the same
 int CHud::GetSpriteIndex(const char* SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
@@ -418,6 +549,8 @@ int CHud::GetSpriteIndex(const char* SpriteName)
 	return -1; // invalid sprite
 }
 
+// orig client 0xa1a20. RC2: SDK 2.3's resolutions only (640 from 640 wide, else 320: RC2's hud.txt
+// has no 1280/2560 sprites), and the energy meter and status icons
 void CHud::VidInit()
 {
 	m_scrinfo.iSize = sizeof(m_scrinfo);
@@ -431,14 +564,10 @@ void CHud::VidInit()
 	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
-	if (ScreenWidth > 2560 && ScreenHeight > 1600)
-		m_iRes = 2560;
-	else if (ScreenWidth >= 1280 && ScreenHeight > 720)
-		m_iRes = 1280;
-	else if (ScreenWidth >= 640)
-		m_iRes = 640;
-	else
+	if (ScreenWidth < 640)
 		m_iRes = 320;
+	else
+		m_iRes = 640;
 
 	// Only load this once
 	if (!m_pSpriteList)
@@ -510,10 +639,11 @@ void CHud::VidInit()
 
 	m_Ammo.VidInit();
 	m_Health.VidInit();
-	m_Spectator.VidInit();
 	m_Geiger.VidInit();
 	m_Train.VidInit();
 	m_Battery.VidInit();
+	m_Energy.VidInit();
+	m_EIcons.VidInit();
 	m_Flash.VidInit();
 	m_Message.VidInit();
 	m_StatusBar.VidInit();
@@ -524,6 +654,7 @@ void CHud::VidInit()
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
 	GetClientVoiceMgr()->VidInit();
+	m_Spectator.VidInit();
 }
 
 bool CHud::MsgFunc_Logo(const char* pszName, int iSize, void* pbuf)
@@ -608,8 +739,12 @@ HUD_GetFOV
 Returns last FOV
 =====================
 */
+// orig client 0xa1f30. RC2: a transformed player (playerclass set) sees g_flTransformFOV
 float HUD_GetFOV()
 {
+	if (0 != g_iPlayerClass)
+		return g_flTransformFOV;
+
 	if (0 != gEngfuncs.pDemoAPI->IsRecording())
 	{
 		// Write it
@@ -703,6 +838,7 @@ void CHud::AddHudElem(CHudBase* phudelem)
 	ptemp->pNext = pdl;
 }
 
+// orig client 0xa2110
 float CHud::GetSensitivity()
 {
 	return m_flMouseSensitivity;

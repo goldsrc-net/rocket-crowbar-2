@@ -276,3 +276,5 @@ int stub_PrecacheSound(const char* s) { return 0; }
 unsigned short stub_PrecacheEvent(int type, const char* s) { return 0; }
 const char* stub_NameForFunction(uintp function) { return "func"; }
 void stub_SetModel(edict_t* e, const char* m) {}
+// c4: RC2 adds a stub for pfnIndexOfEdict (HUD_InitClientWeapons sets g_engfuncs slot 71 to it)
+int stub_IndexOfEdict(const edict_t* e) { return 0; } // orig client 0x9b8b0, name ours

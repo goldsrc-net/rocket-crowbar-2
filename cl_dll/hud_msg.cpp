@@ -19,6 +19,8 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "vgui_TeamFortressViewport.h"
+#include "rc2/c4_needs.h"
 #include "r_efx.h"
 
 #include "particleman.h"
@@ -63,6 +65,8 @@ void CHud::MsgFunc_ViewMode(const char* pszName, int iSize, void* pbuf)
 	CAM_ToFirstPerson();
 }
 
+// orig client 0xa40e0. RC2: then RC2's own reset, and the viewport's debug panels are hidden.
+// halflife-updated's particle and beam resets stay.
 void CHud::MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf)
 {
 	// prepare all hud data
@@ -82,6 +86,13 @@ void CHud::MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf)
 
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;
+
+	RC2_InitHUD();
+
+	if (gViewPort)
+		gViewPort->HideDebugPanels();
+
+	g_iVGUIDebugCount = 0;
 }
 
 
@@ -130,6 +141,7 @@ bool CHud::MsgFunc_Damage(const char* pszName, int iSize, void* pbuf)
 	return true;
 }
 
+// orig client 0xa4210. Not byte-identical to SDK 2.3's, but it reads the same
 bool CHud::MsgFunc_Concuss(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);

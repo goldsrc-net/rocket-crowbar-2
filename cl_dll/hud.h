@@ -33,6 +33,7 @@
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS 2
 #define DHN_3DIGITS 4
+#define DHN_RC2_4DIGITS 8 // RC2: reserve four digits (client 0xa47f0), name ours
 #define MIN_ALPHA 100
 
 #define HUDELEM_ACTIVE 1
@@ -133,6 +134,10 @@ private:
 	WEAPON* m_pWeapon;
 	int m_HUD_bucket0;
 	int m_HUD_selection;
+
+public:
+	// c4 needs: RC2's energy meter reads m_pWeapon (CHud +0x98, CHudAmmo +0x1c); accessor ours
+	WEAPON* GetActiveWeapon() const { return m_pWeapon; }
 };
 
 //
@@ -311,10 +316,9 @@ public:
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo(int line);
 	friend class CHudSpectator;
 
-private:
-	struct cvar_s* m_HUD_saytext;
-	struct cvar_s* m_HUD_saytext_time;
-	struct cvar_s* m_con_color;
+	// c4: RC2's saytext is SDK 2.2's: the cvar is read when a message arrives, no hud_saytext or
+	// con_color. +0x14 keeps where the lines start (Y_START). Name ours.
+	int m_iYStart;
 };
 
 //
@@ -479,6 +483,47 @@ private:
 
 //
 //-----------------------------------------------------
+// Rocket Crowbar 2's own HUD elements (cl_dll/rc2/hud_energy.cpp). Class and member names ours.
+//
+// RC2's HIDEHUD bit 0x10: no weapons (shrunk or transformed; the server's transform.cpp and
+// shrinktimer.cpp set it). The energy meter only moves up over the ammo rows without it.
+#define HIDEHUD_RC2_NOWEAPONS (1 << 4) // name ours
+
+// The energy meter ("Energy": a byte, 0-100), bottom right next to the ammo. CHud +0x1ec.
+class CHudEnergy : public CHudBase
+{
+public:
+	bool Init() override;
+	bool VidInit() override;
+	bool Draw(float flTime) override;
+	bool MsgFunc_Energy(const char* pszName, int iSize, void* pbuf);
+
+private:
+	float m_flEnergy;		// +0x14: what is drawn; moves toward m_flEnergyTarget
+	float m_flEnergyTarget; // +0x18: the last value the server sent
+	HSPRITE m_hFull;		// +0x1c: "enfull"
+	HSPRITE m_hEmpty;		// +0x20: "enempty"
+	Rect* m_prcFull;		// +0x24
+	Rect* m_prcEmpty;		// +0x28
+};
+
+// The status icons ("EIcons": a byte of flags; bit 0 the gauss beacon). CHud +0x218.
+class CHudEIcons : public CHudBase
+{
+public:
+	bool Init() override;
+	bool VidInit() override;
+	bool Draw(float flTime) override;
+	bool MsgFunc_EIcons(const char* pszName, int iSize, void* pbuf);
+
+private:
+	HSPRITE m_hBecon;		// +0x14: "gauss_becon"
+	Rect* m_prcBecon;		// +0x18
+	unsigned char m_bIcons; // +0x1c
+};
+
+//
+//-----------------------------------------------------
 //
 
 
@@ -562,6 +607,8 @@ public:
 	CHudSpectator m_Spectator;
 	CHudGeiger m_Geiger;
 	CHudBattery m_Battery;
+	CHudEnergy m_Energy; // RC2's, name ours
+	CHudEIcons m_EIcons; // RC2's, name ours
 	CHudTrain m_Train;
 	CHudFlashlight m_Flash;
 	CHudMessage m_Message;
@@ -610,6 +657,19 @@ public:
 };
 
 extern CHud gHUD;
+
+// c4: Rocket Crowbar 2's client globals defined in hud.cpp (names ours; client .data/.bss)
+extern int g_iThisClient;	  // 0x1013d0b8, initially 1: the local player's index ("ThisClient")
+extern int g_iViewMode;		  // 0x1020bb38: "ViewMode" (RC2's message, not halflife-updated's)
+extern int g_iScoreMode;	  // 0x1020bb3c: "ScoreMode"
+extern float g_flTransformFOV; // 0x1020bb44: the FOV HUD_GetFOV returns while transformed
+extern int g_iVGUIDebugCount; // 0x10222134: zeroed when "VGUIDebugOn" turns the debug panel off
+extern struct cvar_s* cl_gibcount;		 // 0x1020b71c ("8"; nothing in client.dll reads it)
+extern struct cvar_s* cl_giblife;		 // 0x1020b718 ("15")
+extern struct cvar_s* cl_detail;		 // 0x1020bb30 ("0")
+extern struct cvar_s* cl_forkliftlights; // 0x1020b724 ("0")
+extern struct cvar_s* cl_visiblejetpack; // 0x1020bb2c ("1")
+extern struct cvar_s* cl_debuggren;		 // 0x1020bb28 ("0")
 
 extern int g_iPlayerClass;
 extern int g_iTeamNumber;

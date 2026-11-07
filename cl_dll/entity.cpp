@@ -1,6 +1,8 @@
 // Client side entity management functions
 
 #include <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "hud.h"
 #include "cl_util.h"
@@ -17,6 +19,8 @@
 #include "particleman.h"
 extern IParticleMan* g_pParticleMan;
 
+#include "rc2/c4_needs.h"
+
 void Game_AddObjects();
 
 extern Vector v_origin;
@@ -29,32 +33,24 @@ HUD_AddEntity
 	Return 0 to filter entity from visible list for rendering
 ========================
 */
+// orig client 0x9d2e0. RC2: the debug panel sees every entity, the highest player and normal
+// entity index is kept (g_iHighestEntIndex), and the overview filter is SDK 2.2's: HLTV
+// spectators only (IsSpectateOnly), by the spectator's own main and inset modes
 int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
 {
 	//	RecClAddEntity(type, ent, modelname);
 
-	switch (type)
-	{
-	case ET_NORMAL:
-		break;
-	case ET_PLAYER:
-	case ET_BEAM:
-	case ET_TEMPENTITY:
-	case ET_FRAGMENTED:
-	default:
-		break;
-	}
-	// each frame every entity passes this function, so the overview hooks it to filter the overview entities
-	// in spectator mode:
-	// each frame every entity passes this function, so the overview hooks
-	// it to filter the overview entities
+	DebugPanel_AddEntity(type, ent, modelname);
 
-	if (0 != g_iUser1)
+	if ((type == ET_NORMAL || type == ET_PLAYER) && ent->index >= g_iHighestEntIndex)
+		g_iHighestEntIndex = ent->index + 1;
+
+	if (0 != gEngfuncs.IsSpectateOnly())
 	{
 		gHUD.m_Spectator.AddOverviewEntity(type, ent, modelname);
 
-		if ((g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) &&
-			ent->index == g_iUser2)
+		if ((gHUD.m_Spectator.m_iMainMode == MAIN_MODE_INEYE || gHUD.m_Spectator.m_iInsetMode == INSET_MODE_INEYE) &&
+			ent->index == gHUD.m_Spectator.m_iTrackedPlayer)
 			return 0; // don't draw the player we are following in eye
 	}
 
@@ -95,6 +91,7 @@ We have received entity_state_t for this player over the network.  We need to co
 playerstate structure
 =========================
 */
+// orig client 0x9d3f0. Not byte-identical to SDK 2.3's, but it reads the same
 void DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
 {
 	//	RecClProcessPlayerState(dst, src);
@@ -164,6 +161,7 @@ Because we can predict an arbitrary number of frames before the server responds 
  update is occupying.
 =========================
 */
+// orig client 0x9d5f0. RC2: fuser4 is carried over too
 void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_state_s* pps, struct clientdata_s* pcd, const struct clientdata_s* ppcd, struct weapon_data_s* wd, const struct weapon_data_s* pwd)
 {
 	//	RecClTxferPredictionData(ps, pps, pcd, ppcd, wd, pwd);
@@ -211,6 +209,7 @@ void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct e
 
 	pcd->fuser2 = ppcd->fuser2;
 	pcd->fuser3 = ppcd->fuser3;
+	pcd->fuser4 = ppcd->fuser4; // RC2
 
 	VectorCopy(ppcd->vuser1, pcd->vuser1);
 	VectorCopy(ppcd->vuser2, pcd->vuser2);
@@ -321,9 +320,13 @@ The entity's studio model description indicated an event was
 fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound )
 =========================
 */
+// orig client 0x9d880. RC2: no events from an entity hidden from this client
 void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_s* entity)
 {
 	//	RecClStudioEvent(event, entity);
+
+	if (entity->index > 0 && 0 != g_bEntityHidden[entity->index])
+		return;
 
 	bool iMuzzleFlash = true;
 
@@ -365,6 +368,7 @@ CL_UpdateTEnts
 Simulation and cleanup of temporary entities
 =================
 */
+// orig client 0x9dc90. RC2: SDK 2.3's, after RC2's two client effect updates
 void DLLEXPORT HUD_TempEntUpdate(
 	double frametime,			  // Simulation time
 	double client_time,			  // Absolute time on client
@@ -380,6 +384,10 @@ void DLLEXPORT HUD_TempEntUpdate(
 	int i;
 	TEMPENTITY *pTemp, *pnext, *pprev;
 	float freq, gravity, gravitySlow, life, fastFreq;
+
+	// RC2: its own client effects update first
+	CLTE_Update(frametime);
+	RC2_TempEntThink(frametime);
 
 	Vector vAngles;
 
@@ -746,6 +754,7 @@ If you specify negative numbers for beam start and end point entities, then
 Indices must start at 1, not zero.
 =================
 */
+// orig client 0x9e980
 cl_entity_t DLLEXPORT* HUD_GetUserEntity(int index)
 {
 	//	RecClGetUserEntity(index);
@@ -764,4 +773,112 @@ cl_entity_t DLLEXPORT* HUD_GetUserEntity(int index)
 #else
 	return NULL;
 #endif
+}
+
+/*
+Rocket Crowbar 2: client gibs. RC2's client effects (CLTE, c2) throw these; the gib leaves up to
+a few blood decals where it lands (red for human gibs, yellow for alien ones). Names ours.
+*/
+
+// orig client 0x9da30: a human gib's touch: a "{blood%i" decal on the world or a pushstep entity
+static void Gib_BloodTouch(TEMPENTITY* pTemp, pmtrace_t* ptr) // name ours
+{
+	if (pTemp->entity.baseline.owner <= 0)
+		return;
+
+	physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(ptr->ent);
+	if (pe && (pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP))
+	{
+		if (0 != CVAR_GET_FLOAT("r_decals"))
+		{
+			char szDecal[64];
+			sprintf(szDecal, "{blood%i", gEngfuncs.pfnRandomLong(1, 6));
+			gEngfuncs.pEfxAPI->R_DecalShoot(gEngfuncs.pEfxAPI->Draw_DecalIndex(gEngfuncs.pEfxAPI->Draw_DecalIndexFromName(szDecal)),
+				gEngfuncs.pEventAPI->EV_IndexFromTrace(ptr), 0, ptr->endpos, 0);
+			pTemp->entity.baseline.owner--;
+			pTemp->frameMax -= 1.0f;
+		}
+	}
+}
+
+// orig client 0x9db60: as Gib_BloodTouch, with "{yblood%i"
+static void Gib_YellowBloodTouch(TEMPENTITY* pTemp, pmtrace_t* ptr) // name ours
+{
+	if (pTemp->entity.baseline.owner <= 0)
+		return;
+
+	physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(ptr->ent);
+	if (pe && (pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP))
+	{
+		if (0 != CVAR_GET_FLOAT("r_decals"))
+		{
+			char szDecal[64];
+			sprintf(szDecal, "{yblood%i", gEngfuncs.pfnRandomLong(1, 6));
+			gEngfuncs.pEfxAPI->R_DecalShoot(gEngfuncs.pEfxAPI->Draw_DecalIndex(gEngfuncs.pEfxAPI->Draw_DecalIndexFromName(szDecal)),
+				gEngfuncs.pEventAPI->EV_IndexFromTrace(ptr), 0, ptr->endpos, 0);
+			pTemp->entity.baseline.owner--;
+			pTemp->frameMax -= 1.0f;
+		}
+	}
+}
+
+// orig client 0x9e770: a gib at vecOrigin flying at vecVelocity: models/hgibs.mdl (bHuman: a random
+// body 1-5, or 0 with bSkull) or models/agibs.mdl (body 0-3). It spins, falls, fades, lasts
+// cl_giblife more seconds and leaves up to 2, 4 or 5 decals by the detail level.
+TEMPENTITY* CL_SpawnGib(Vector vecOrigin, Vector vecVelocity, int bHuman, int bSkull) // name ours
+{
+	static model_s* s_pHumanGibs = NULL; // .bss 0x10206920
+	static model_s* s_pAlienGibs = NULL; // .bss 0x10206924
+	int iIndex;
+
+	if (!s_pHumanGibs)
+	{
+		s_pHumanGibs = gEngfuncs.CL_LoadModel("models/hgibs.mdl", &iIndex);
+		if (!s_pHumanGibs)
+			return NULL;
+	}
+	if (!s_pAlienGibs)
+	{
+		s_pAlienGibs = gEngfuncs.CL_LoadModel("models/agibs.mdl", &iIndex);
+		if (!s_pAlienGibs)
+			return NULL;
+	}
+
+	TEMPENTITY* pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc(vecOrigin, 0 != bHuman ? s_pHumanGibs : s_pAlienGibs);
+	if (!pTemp)
+		return NULL;
+
+	for (int i = 0; i < 3; i++)
+	{
+		pTemp->entity.origin[i] = vecOrigin[i];
+		pTemp->entity.baseline.origin[i] = vecVelocity[i];
+	}
+
+	pTemp->hitcallback = 0 != bHuman ? Gib_BloodTouch : Gib_YellowBloodTouch;
+
+	if (0 == bHuman)
+		pTemp->entity.curstate.body = gEngfuncs.pfnRandomLong(0, 3);
+	else if (0 != bSkull)
+		pTemp->entity.curstate.body = 0;
+	else
+		pTemp->entity.curstate.body = gEngfuncs.pfnRandomLong(1, 5);
+
+	pTemp->flags |= FTENT_GRAVITY | FTENT_ROTATE | FTENT_COLLIDEWORLD | FTENT_FADEOUT;
+	pTemp->entity.baseline.angles[0] = gEngfuncs.pfnRandomFloat(-300, 300);
+	pTemp->entity.baseline.angles[1] = gEngfuncs.pfnRandomFloat(-300, 300);
+	pTemp->entity.baseline.angles[2] = gEngfuncs.pfnRandomFloat(-300, 300);
+	pTemp->entity.baseline.renderamt = 255;
+	pTemp->entity.curstate.rendermode = kRenderNormal;
+	pTemp->fadeSpeed = 1.0f;
+	pTemp->die += atof(cl_giblife->string);
+
+	// the decals it may leave
+	if (g_iDetailLevel > 0)
+		pTemp->entity.baseline.owner = 5;
+	else if (g_iDetailLevel < 0)
+		pTemp->entity.baseline.owner = 2;
+	else
+		pTemp->entity.baseline.owner = 4;
+
+	return pTemp;
 }
