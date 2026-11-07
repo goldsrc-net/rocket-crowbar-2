@@ -152,6 +152,7 @@ bool IsSoundEvent(int eventNumber)
 }
 
 
+// orig 0x9ce0. RC2: precaches the event's own string (SDK 2.3 precached an ALLOC_STRING copy).
 void SequencePrecache(void* pmodel, const char* pSequenceName)
 {
 	int index = LookupSequence(pmodel, pSequenceName);
@@ -184,7 +185,7 @@ void SequencePrecache(void* pmodel, const char* pSequenceName)
 					ALERT(at_error, "Bad sound event %d in sequence %s :: %s (sound is \"%s\")\n", pevent[i].event, pstudiohdr->name, pSequenceName, pevent[i].options);
 				}
 
-				PRECACHE_SOUND((char*)(gpGlobals->pStringBase + ALLOC_STRING(pevent[i].options)));
+				PRECACHE_SOUND(pevent[i].options);
 			}
 		}
 	}
@@ -192,6 +193,8 @@ void SequencePrecache(void* pmodel, const char* pSequenceName)
 
 
 
+// orig 0x9db0. RC2: the ground speed scales with pev->scale. halflife-updated's check of a
+// negative sequence is kept (the original only checks the upper bound).
 void GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* pflGroundSpeed)
 {
 	studiohdr_t* pstudiohdr;
@@ -222,6 +225,9 @@ void GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* p
 		*pflFrameRate = 256.0;
 		*pflGroundSpeed = 0.0;
 	}
+
+	if (pev->scale > 0.0)
+		*pflGroundSpeed = *pflGroundSpeed * pev->scale;
 }
 
 
@@ -498,4 +504,75 @@ int GetBodygroup(void* pmodel, entvars_t* pev, int iGroup)
 	int iCurrent = (pev->body / pbodypart->base) % pbodypart->nummodels;
 
 	return iCurrent;
+}
+
+
+// Rocket Crowbar 2: a sequence remap for models whose sequence list was changed, and the two
+// lookups through it (orig 0xa4a0, 0xa550; nothing in rc2.dll calls them). One entry, for
+// scientist.mdl with 22 bones: its sequences from 23 on moved by one. Names ours.
+struct SequenceRemap_t // name ours
+{
+	const char* pszModel; // matched as a substring of the model's name
+	int iNumBones;		  // and its bone count
+	int iCount;
+	const int (*piPairs)[2]; // {old, new}
+	int iUnknown;			 // VERIFY: unread (106)
+};
+
+static const int g_SciRemap[][2] = // orig 0x137c58
+	{
+		{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7}, {8, 8}, {9, 9}, {10, 10}, {11, 11},
+		{12, 12}, {13, 13}, {14, 14}, {15, 15}, {16, 16}, {17, 17}, {18, 18}, {19, 19}, {20, 20},
+		{21, 21}, {22, 22}, {23, 22}, {24, 24}, {25, 25}, {26, 26}, {27, 27}, {28, 28}, {29, 29},
+		{30, 30}, {31, 31}, {32, 33}, {33, 34}, {34, 35}, {35, 36}, {36, 37}, {37, 38}, {38, 39},
+		{39, 40}, {40, 41}, {42, 43}, {43, 44}, {44, 45}, {45, 46}, {46, 47}, {47, 48}};
+
+static const SequenceRemap_t g_SequenceRemaps[] = // orig 0x137fa8
+	{
+		{"scientist.mdl", 22, 47, g_SciRemap, 0x6a}};
+
+// orig 0xa4a0 (unlisted). The old sequence for a new one; unchanged if no entry fits.
+int RemapSequenceToOld(void* pmodel, int iSequence) // name ours
+{
+	studiohdr_t* pstudiohdr = (studiohdr_t*)pmodel;
+	if (!pstudiohdr)
+		return iSequence;
+	for (unsigned int i = 0; i < ARRAYSIZE(g_SequenceRemaps); i++)
+	{
+		const SequenceRemap_t& remap = g_SequenceRemaps[i];
+		if (!strstr(pstudiohdr->name, remap.pszModel))
+			continue;
+		if (i >= 1 || pstudiohdr->numbones != remap.iNumBones)
+			return iSequence;
+		for (int j = 0; j < remap.iCount; j++)
+		{
+			if (remap.piPairs[j][1] == iSequence)
+				return remap.piPairs[j][0];
+		}
+		return iSequence;
+	}
+	return iSequence;
+}
+
+// orig 0xa550 (unlisted). The new sequence for an old one.
+int RemapSequenceToNew(void* pmodel, int iSequence) // name ours
+{
+	studiohdr_t* pstudiohdr = (studiohdr_t*)pmodel;
+	if (!pstudiohdr)
+		return iSequence;
+	for (unsigned int i = 0; i < ARRAYSIZE(g_SequenceRemaps); i++)
+	{
+		const SequenceRemap_t& remap = g_SequenceRemaps[i];
+		if (!strstr(pstudiohdr->name, remap.pszModel))
+			continue;
+		if (i >= 1 || pstudiohdr->numbones != remap.iNumBones)
+			return iSequence;
+		for (int j = 0; j < remap.iCount; j++)
+		{
+			if (remap.piPairs[j][0] == iSequence)
+				return remap.piPairs[j][1];
+		}
+		return iSequence;
+	}
+	return iSequence;
 }

@@ -29,6 +29,27 @@
 #include "animation.h"
 #include "weapons.h"
 #include "func_break.h"
+#include "player.h"
+#include "rc2prefs.h"
+
+// Rocket Crowbar 2: what combat.cpp uses from other files (reference/dossiers/p1.md)
+// orig 0xc45b0 (the run between scripted and shotgun; p2's name): the damage left after the
+// target's shield takes its share; pvecHit gets the point hit
+extern float RC2ShieldDamage(CBaseEntity* pTarget, float flDamage, float flShieldFraction, Vector vecPos, Vector vecDir, Vector* pvecHit, float* pflOut, int iFlags);
+// orig 0xf4c70, 0xf4d40, 0xf4d90, 0xf4dd0 (util, p9; p4's names): a stack of entity bit sets, so
+// an area effect hits each entity once
+extern void UTIL_PushEntityMask();
+extern void UTIL_PopEntityMask();
+extern void UTIL_MarkEntity(int iEntity);
+extern bool UTIL_IsEntityMarked(int iEntity);
+extern float RC2PlayerAttribute(int iAttribute, int iPlayerIndex); // orig 0x95890 (player, p5; p3's name)
+extern int g_iRC2ScoreMode;										 // orig 0x1afd38 (world.cpp, p3's name): mp_scoremode at map start
+extern int g_iRC2GibEvent;										 // orig 0x1afd3c (world.cpp, p3's name): events/gib.sc
+extern void FreezeTimer_Thaw(edict_t* pent);					 // orig 0x41e80 (p2's name): ends every freeze timer on pent
+extern void StopAntiFriction(edict_t* pent);					 // orig 0xaa40 (p1, dlls/rc2/antifrictimer.cpp)
+
+// orig 0x21770: a second copy of h_ai.cpp's IsFacing (stock) in this file's object; TakeDamage
+// calls it
 
 extern Vector VecBModelOrigin(entvars_t* pevBModel);
 
@@ -38,6 +59,7 @@ extern Vector VecBModelOrigin(entvars_t* pevBModel);
 
 
 // HACKHACK -- The gib velocity equations don't work
+// orig 0x1f3e0 (stock); orig 0x1f900 CGib::ObjectCaps (unlisted; stock)
 void CGib::LimitVelocity()
 {
 	float length = pev->velocity.Length();
@@ -49,6 +71,7 @@ void CGib::LimitVelocity()
 }
 
 
+// orig 0x1f4e0 (unlisted; stock)
 void CGib::SpawnStickyGibs(entvars_t* pevVictim, Vector vecOrigin, int cGibs)
 {
 	int i;
@@ -118,6 +141,7 @@ void CGib::SpawnStickyGibs(entvars_t* pevVictim, Vector vecOrigin, int cGibs)
 	}
 }
 
+// orig 0x1f910 (unlisted; stock)
 void CGib::SpawnHeadGib(entvars_t* pevVictim)
 {
 	CGib* pGib = GetClassPtr((CGib*)NULL);
@@ -176,6 +200,7 @@ void CGib::SpawnHeadGib(entvars_t* pevVictim)
 	pGib->LimitVelocity();
 }
 
+// orig 0x1fd60 (stock; nothing in RC2's own GibMonster calls it any more)
 void CGib::SpawnRandomGibs(entvars_t* pevVictim, int cGibs, bool human)
 {
 	int cSplat;
@@ -296,29 +321,27 @@ void CBaseMonster::FadeMonster()
 // GibMonster - create some gore and get rid of a monster's
 // model.
 //=========================================================
+// orig 0x20270. RC2: the gibs are a client event (events/gib.sc, p3's g_iRC2GibEvent: origin,
+// the attack direction as angles, the health, 1 for human gibs), not CGib entities, and the
+// violence cvars aren't read.
 void CBaseMonster::GibMonster()
 {
 	TraceResult tr;
 	bool gibbed = false;
 
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM, 0, PITCH_NORM);
 
 	// only humans throw skulls !!!UNDONE - eventually monsters will have their own sets of gibs
 	if (HasHumanGibs())
 	{
-		if (CVAR_GET_FLOAT("violence_hgibs") != 0) // Only the player will ever get here
-		{
-			CGib::SpawnHeadGib(pev);
-			CGib::SpawnRandomGibs(pev, 4, true); // throw some human gibs.
-		}
+		pev->angles = g_vecAttackDir;
+		PLAYBACK_EVENT_FULL(0, ENT(pev), g_iRC2GibEvent, 0.0, pev->origin, g_vecAttackDir, pev->health, 0.0, 1, 0, 0, 0);
 		gibbed = true;
 	}
 	else if (HasAlienGibs())
 	{
-		if (CVAR_GET_FLOAT("violence_agibs") != 0) // Should never get here, but someone might call it directly
-		{
-			CGib::SpawnRandomGibs(pev, 4, false); // Throw alien gibs
-		}
+		pev->angles = g_vecAttackDir;
+		PLAYBACK_EVENT_FULL(0, ENT(pev), g_iRC2GibEvent, 0.0, pev->origin, g_vecAttackDir, pev->health, 0.0, 0, 0, 0, 0);
 		gibbed = true;
 	}
 
@@ -537,33 +560,15 @@ bool CBaseMonster::ShouldGibMonster(int iGib)
 }
 
 
+// orig 0x20740. RC2: always gibs (no violence cvars, so no fade), and doesn't remove a
+// monster that ShouldFadeOnDeath.
 void CBaseMonster::CallGibMonster()
 {
-	bool fade = false;
-
-	if (HasHumanGibs())
-	{
-		if (CVAR_GET_FLOAT("violence_hgibs") == 0)
-			fade = true;
-	}
-	else if (HasAlienGibs())
-	{
-		if (CVAR_GET_FLOAT("violence_agibs") == 0)
-			fade = true;
-	}
-
 	pev->takedamage = DAMAGE_NO;
 	pev->solid = SOLID_NOT; // do something with the body. while monster blows up
 
-	if (fade)
-	{
-		FadeMonster();
-	}
-	else
-	{
-		pev->effects = EF_NODRAW; // make the model invisible.
-		GibMonster();
-	}
+	pev->effects = EF_NODRAW; // make the model invisible.
+	GibMonster();
 
 	pev->deadflag = DEAD_DEAD;
 	FCheckAITrigger();
@@ -573,9 +578,6 @@ void CBaseMonster::CallGibMonster()
 	{
 		pev->health = 0;
 	}
-
-	if (ShouldFadeOnDeath() && !fade)
-		UTIL_Remove(this);
 }
 
 
@@ -584,6 +586,7 @@ void CBaseMonster::CallGibMonster()
 Killed
 ============
 */
+// orig 0x207b0. RC2: also thaws the monster and ends its antifriction.
 void CBaseMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
 	unsigned int cCount = 0;
@@ -596,10 +599,14 @@ void CBaseMonster::Killed(entvars_t* pevAttacker, int iGib)
 		return;
 	}
 
+	// RC2: a dying monster is thawed and loses its antifriction first
+	FreezeTimer_Thaw(edict());
+	StopAntiFriction(edict());
+
 	Remember(bits_MEMORY_KILLED);
 
 	// clear the deceased's sound channels.(may have been firing or reloading when killed)
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM, 0, PITCH_NORM);
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
 	// Make sure this condition is fired too (TakeDamage breaks out before this happens on death)
 	SetConditions(bits_COND_LIGHT_DAMAGE);
@@ -638,6 +645,7 @@ void CBaseMonster::Killed(entvars_t* pevAttacker, int iGib)
 //
 // DON'T USE ME FOR GIBS AND STUFF IN MULTIPLAYER!
 // SET A FUTURE THINK AND A RENDERMODE!!
+// orig 0x208e0 (stock)
 void CBaseEntity::SUB_StartFadeOut()
 {
 	if (pev->rendermode == kRenderNormal)
@@ -653,6 +661,7 @@ void CBaseEntity::SUB_StartFadeOut()
 	SetThink(&CBaseEntity::SUB_FadeOut);
 }
 
+// orig 0x20950 (stock)
 void CBaseEntity::SUB_FadeOut()
 {
 	if (pev->renderamt > 7)
@@ -831,20 +840,34 @@ When a monster is poisoned via an arrow etc it takes all the poison damage at on
 GLOBALS ASSUMED SET:  g_iSkillLevel
 ============
 */
+// orig 0x20f60. RC2: forwards to GetEffectedEnt; shrunken monsters take more (damage / scale);
+// no pain sound while frozen; a player attacker's attack attribute scales the damage; only
+// players in play get the client damage bookkeeping; a facing player's hit breaks an admin
+// alliance; mp_scoremode 1 scores the damage for the attacking player; the death and pain
+// test the effected entity's health (a player's below 1); an attacker whose GetRCCaps2 has
+// bit 8 becomes the enemy of a monster without one; and it returns true after a kill.
 bool CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	float flTake;
 	Vector vecDir;
 
+	CBaseEntity* pEffected = GetEffectedEnt();
+	entvars_t* pevEffected = pEffected->pev;
+	if (pevEffected != pev)
+		return pEffected->TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+
 	if (0 == pev->takedamage)
 		return false;
+
+	if (pev->scale > 0.0 && !IsPlayer())
+		flDamage = flDamage / pev->scale;
 
 	if (!IsAlive())
 	{
 		return DeadTakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 	}
 
-	if (pev->deadflag == DEAD_NO)
+	if (pev->deadflag == DEAD_NO && !m_fRC2Frozen)
 	{
 		// no pain sound during death animation.
 		PainSound(); // "Ouch!"
@@ -871,18 +894,26 @@ bool CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 	// add to the damage total for clients, which will be sent as a single
 	// message at the end of the frame
 	// todo: remove after combining shotgun blasts?
-	if (IsPlayer())
+	if (IsActivePlayer())
 	{
 		if (pevInflictor)
 			pev->dmg_inflictor = ENT(pevInflictor);
 
-		pev->dmg_take += flTake;
+		pev->dmg_take += flDamage;
 
 		// check for godmode or invincibility
-		if ((pev->flags & FL_GODMODE) != 0)
+		if ((pevEffected->flags & FL_GODMODE) != 0)
 		{
 			return false;
 		}
+	}
+
+	// a player's attack attribute scales what it does to anything not a player in play
+	if (pevAttacker && !IsActivePlayer())
+	{
+		CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker->pContainingEntity);
+		if (pAttacker->IsActivePlayer())
+			flTake = RC2PlayerAttribute(2, ENTINDEX(pevAttacker->pContainingEntity)) * flDamage;
 	}
 
 	// if this is a player, move him around!
@@ -894,6 +925,24 @@ bool CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 	// do the damage
 	pev->health -= flTake;
 
+	// a player who hits it while facing it ends an admin alliance
+	if (pevAttacker && (pevAttacker->flags & FL_CLIENT) != 0 && IsFacing(pevAttacker, pev->origin))
+		m_fAdminAllied = false;
+
+	// mp_scoremode 1: the attacking player scores the share of the monster's health it took
+	if (g_iRC2ScoreMode == 1 && pev->deadflag == DEAD_NO && pevAttacker && !IsPlayer())
+	{
+		CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker->pContainingEntity);
+		if (pAttacker && pAttacker->IsPlayer())
+		{
+			float flScored = flTake;
+			if (pev->health < 0)
+				flScored = flTake + pev->health;
+			if (pev->max_health != 0)
+				flScored = flScored / pev->max_health;
+			static_cast<CBasePlayer*>(pAttacker)->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_DamageToMonsterMulti).f * flScored;
+		}
+	}
 
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
 	if (m_MonsterState == MONSTERSTATE_SCRIPT)
@@ -902,26 +951,26 @@ bool CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 		return false;
 	}
 
-	if (pev->health <= 0)
+	if (pevEffected->health <= 0 || (pEffected->IsPlayer() && pevEffected->health < 1))
 	{
 		g_pevLastInflictor = pevInflictor;
 
 		if ((bitsDamageType & DMG_ALWAYSGIB) != 0)
 		{
-			Killed(pevAttacker, GIB_ALWAYS);
+			pEffected->Killed(pevAttacker, GIB_ALWAYS);
 		}
 		else if ((bitsDamageType & DMG_NEVERGIB) != 0)
 		{
-			Killed(pevAttacker, GIB_NEVER);
+			pEffected->Killed(pevAttacker, GIB_NEVER);
 		}
 		else
 		{
-			Killed(pevAttacker, GIB_NORMAL);
+			pEffected->Killed(pevAttacker, GIB_NORMAL);
 		}
 
 		g_pevLastInflictor = NULL;
 
-		return false;
+		return true;
 	}
 
 	// react to the damage (get mad)
@@ -941,6 +990,14 @@ bool CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 			else
 			{
 				m_vecEnemyLKP = pev->origin + (g_vecAttackDir * 64);
+			}
+
+			// RC2: an attacker that asks to be (GetRCCaps2 bit 8) becomes the enemy
+			CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker->pContainingEntity);
+			if (pAttacker && (pAttacker->GetRCCaps2(0, this) & 8) != 0 && m_hEnemy == NULL)
+			{
+				SetConditions(bits_COND_NEW_ENEMY);
+				m_hEnemy = pAttacker;
 			}
 
 			MakeIdealYaw(m_vecEnemyLKP);
@@ -967,6 +1024,7 @@ bool CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 // DeadTakeDamage - takedamage function called when a monster's
 // corpse is damaged.
 //=========================================================
+// orig 0x21870 (stock)
 bool CBaseMonster::DeadTakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	Vector vecDir;
@@ -1013,9 +1071,16 @@ bool CBaseMonster::DeadTakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacke
 }
 
 
+// orig 0x21a90. RC2: a shrunken player (0 < scale < 1) counts as 590 units of volume, and a
+// zero or negative volume as 32 * 32 * 72.
 float CBaseMonster::DamageForce(float damage)
 {
-	float force = damage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
+	float flVolume = pev->size.x * pev->size.y * pev->size.z;
+	if (IsPlayer() && pev->scale > 0.0 && pev->scale < 1.0)
+		flVolume = 590.0;
+	if (flVolume <= 0.0)
+		flVolume = 32 * 32 * 72.0;
+	float force = damage * ((32 * 32 * 72.0) / flVolume) * 5;
 
 	if (force > 1000.0)
 	{
@@ -1031,6 +1096,10 @@ float CBaseMonster::DamageForce(float damage)
 // only damage ents that can clearly be seen by the explosion!
 
 
+// orig 0x21b30. RC2: each entity is hit once (through GetEffectedEnt, and marked in the util
+// package's entity mask, so an entity reached twice, or inside a nested blast, isn't hit again),
+// a shield takes its share first (blast and other radius fractions from rc2.ini's [Shield]),
+// and the damage isn't clamped at 0 (nothing is done at 0 or below).
 void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType)
 {
 	CBaseEntity* pEntity = NULL;
@@ -1050,6 +1119,8 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 	if (!pevAttacker)
 		pevAttacker = pevInflictor;
 
+	UTIL_PushEntityMask();
+
 	// iterate on all entities in the vicinity.
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
 	{
@@ -1065,6 +1136,9 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 			if (bInWater && pEntity->pev->waterlevel == 0)
 				continue;
 			if (!bInWater && pEntity->pev->waterlevel == 3)
+				continue;
+
+			if (UTIL_IsEntityMarked(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
 				continue;
 
 			vecSpot = pEntity->BodyTarget(vecSrc);
@@ -1084,25 +1158,30 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 				flAdjustedDamage = (vecSrc - tr.vecEndPos).Length() * falloff;
 				flAdjustedDamage = flDamage - flAdjustedDamage;
 
-				if (flAdjustedDamage < 0)
-				{
-					flAdjustedDamage = 0;
-				}
+				// VERIFY: the shield's direction; read as from the blast to the body target
+				const float flShieldFraction = (bitsDamageType & DMG_BLAST) != 0 ? RC2Pref(RC2P_Shield_BlastDamageFraction).f : RC2Pref(RC2P_Shield_GenericRadiusFraction).f;
+				flAdjustedDamage = RC2ShieldDamage(pEntity, flAdjustedDamage, flShieldFraction, tr.vecEndPos, (vecSpot - vecSrc).Normalize(), NULL, NULL, 8);
+				UTIL_MarkEntity(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
 
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
-				if (tr.flFraction != 1.0)
+				if (flAdjustedDamage > 0)
 				{
-					ClearMultiDamage();
-					pEntity->TraceAttack(pevInflictor, flAdjustedDamage, (tr.vecEndPos - vecSrc).Normalize(), &tr, bitsDamageType);
-					ApplyMultiDamage(pevInflictor, pevAttacker);
-				}
-				else
-				{
-					pEntity->TakeDamage(pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType);
+					if (tr.flFraction != 1.0)
+					{
+						ClearMultiDamage();
+						pEntity->GetEffectedEnt()->TraceAttack(pevInflictor, flAdjustedDamage, (tr.vecEndPos - vecSrc).Normalize(), &tr, bitsDamageType);
+						ApplyMultiDamage(pevInflictor, pevAttacker);
+					}
+					else
+					{
+						pEntity->GetEffectedEnt()->TakeDamage(pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType);
+					}
 				}
 			}
 		}
 	}
+
+	UTIL_PopEntityMask();
 }
 
 
@@ -1126,6 +1205,8 @@ void CBaseMonster::RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_
 //
 // Used for many contact-range melee attacks. Bites, claws, etc.
 //=========================================================
+// orig 0x22070. RC2: the target's shield takes its share (fraction 1.5) and the rest goes to
+// its GetEffectedEnt. The entity is the hit edict's private data, unchecked.
 CBaseEntity* CBaseMonster::CheckTraceHullAttack(float flDist, int iDamage, int iDmgType)
 {
 	TraceResult tr;
@@ -1143,11 +1224,13 @@ CBaseEntity* CBaseMonster::CheckTraceHullAttack(float flDist, int iDamage, int i
 
 	if (tr.pHit)
 	{
-		CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
+		CBaseEntity* pEntity = static_cast<CBaseEntity*>(tr.pHit->pvPrivateData);
 
 		if (iDamage > 0)
 		{
-			pEntity->TakeDamage(pev, pev, iDamage, iDmgType);
+			const float flDamage = RC2ShieldDamage(pEntity, iDamage, 1.5, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 8);
+			if (flDamage > 0)
+				pEntity->GetEffectedEnt()->TakeDamage(pev, pev, flDamage, iDmgType);
 		}
 
 		return pEntity;
@@ -1271,8 +1354,15 @@ bool CBaseEntity::FVisible(const Vector& vecOrigin)
 TraceAttack
 ================
 */
+// orig 0x22550. RC2: forwards to GetEffectedEnt.
 void CBaseEntity::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
+	if (GetEffectedEnt()->pev != pev)
+	{
+		GetEffectedEnt()->TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+		return;
+	}
+
 	Vector vecOrigin = ptr->vecEndPos - vecDir * 4;
 
 	if (0 != pev->takedamage)
@@ -1318,8 +1408,11 @@ void CBaseMonster::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector ve
 //=========================================================
 // TraceAttack
 //=========================================================
+// orig 0x22680. RC2: the hit group scales the damage here, and the blood, bleeding and damage
+// land on GetEffectedEnt.
 void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
+	CBaseEntity* pEffected = GetEffectedEnt();
 	if (0 != pev->takedamage)
 	{
 		m_LastHitGroup = ptr->iHitgroup;
@@ -1349,9 +1442,9 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 			break;
 		}
 
-		SpawnBlood(ptr->vecEndPos, BloodColor(), flDamage); // a little surface blood.
-		TraceBleed(flDamage, vecDir, ptr, bitsDamageType);
-		AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
+		SpawnBlood(ptr->vecEndPos, pEffected->BloodColor(), flDamage); // a little surface blood.
+		pEffected->TraceBleed(flDamage, vecDir, ptr, bitsDamageType);
+		AddMultiDamage(pevAttacker, pEffected, flDamage, bitsDamageType);
 	}
 }
 
@@ -1364,6 +1457,9 @@ Go to the trouble of combining multiple pellets into a single damage call.
 This version is used by Monsters.
 ================
 */
+// orig 0x22770. RC2: every hit goes through the target's shield first (rc2.ini's
+// [Shield] GenericBulletFraction; the shield can move tr.vecEndPos), and halflife-updated's
+// player buckshot case isn't in it (SDK 2.3 had none).
 void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker)
 {
 	static int tracerCount;
@@ -1396,6 +1492,7 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 		vecEnd = vecSrc + vecDir * flDistance;
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev) /*pentIgnore*/, &tr);
 
+		bool tracer = false;
 		if (iTracerFreq != 0 && (tracerCount++ % iTracerFreq) == 0)
 		{
 			Vector vecTracerSrc;
@@ -1408,6 +1505,9 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 			{
 				vecTracerSrc = vecSrc;
 			}
+
+			if (iTracerFreq != 1) // guns that always trace also always decal
+				tracer = true;
 
 			switch (iBulletType)
 			{
@@ -1432,9 +1532,14 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 
+			const float flShieldFraction = RC2Pref(RC2P_Shield_GenericBulletFraction).f;
+			float flDamage;
+
 			if (0 != iDamage)
 			{
-				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
+				flDamage = RC2ShieldDamage(pEntity, iDamage, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+				if (flDamage > 0)
+					pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
 
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 				DecalGunshot(&tr, iBulletType);
@@ -1442,17 +1547,11 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 			else
 				switch (iBulletType)
 				{
-				case BULLET_PLAYER_BUCKSHOT:
-					// make distance based!
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET);
-
-					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-					DecalGunshot(&tr, iBulletType);
-					break;
-
 				default:
 				case BULLET_MONSTER_9MM:
-					pEntity->TraceAttack(pevAttacker, gSkillData.monDmg9MM, vecDir, &tr, DMG_BULLET);
+					flDamage = RC2ShieldDamage(pEntity, gSkillData.monDmg9MM, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					if (flDamage > 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					DecalGunshot(&tr, iBulletType);
@@ -1460,7 +1559,9 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 					break;
 
 				case BULLET_MONSTER_MP5:
-					pEntity->TraceAttack(pevAttacker, gSkillData.monDmgMP5, vecDir, &tr, DMG_BULLET);
+					flDamage = RC2ShieldDamage(pEntity, gSkillData.monDmgMP5, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					if (flDamage > 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					DecalGunshot(&tr, iBulletType);
@@ -1468,13 +1569,21 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 					break;
 
 				case BULLET_MONSTER_12MM:
-					pEntity->TraceAttack(pevAttacker, gSkillData.monDmg12MM, vecDir, &tr, DMG_BULLET);
-					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-					DecalGunshot(&tr, iBulletType);
+					flDamage = RC2ShieldDamage(pEntity, gSkillData.monDmg12MM, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					if (flDamage > 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
+					// SDK 2.3's (halflife-updated decals always): no sound or decal for a tracer
+					if (!tracer)
+					{
+						TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
+						DecalGunshot(&tr, iBulletType);
+					}
 					break;
 
 				case BULLET_NONE: // FIX
-					pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB);
+					flDamage = RC2ShieldDamage(pEntity, 50, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					if (flDamage > 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_CLUB);
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					// only decal glass
 					if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
@@ -1501,6 +1610,8 @@ Go to the trouble of combining multiple pellets into a single damage call.
 This version is used by Players, uses the random seed generator to sync client and server side shots.
 ================
 */
+// orig 0x23180 (unlisted). RC2: every hit goes through the target's shield first (fraction
+// 1.25; the shield can move tr.vecEndPos).
 Vector CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker, int shared_rand)
 {
 	static int tracerCount;
@@ -1536,9 +1647,13 @@ Vector CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 
+			float flDamage;
+
 			if (0 != iDamage)
 			{
-				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
+				flDamage = RC2ShieldDamage(pEntity, iDamage, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+				if (flDamage > 0)
+					pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
 
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 				DecalGunshot(&tr, iBulletType);
@@ -1548,24 +1663,34 @@ Vector CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector
 				{
 				default:
 				case BULLET_PLAYER_9MM:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET);
+					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmg9MM, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					if (flDamage != 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_PLAYER_MP5:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET);
+					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmgMP5, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					if (flDamage != 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_PLAYER_BUCKSHOT:
 					// make distance based!
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET);
+					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmgBuckshot, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					if (flDamage != 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_PLAYER_357:
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET);
+					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmg357, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					if (flDamage != 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_NONE: // FIX
-					pEntity->TraceAttack(pevAttacker, 50, vecDir, &tr, DMG_CLUB);
+					flDamage = RC2ShieldDamage(pEntity, 50, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					if (flDamage != 0)
+						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_CLUB);
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					// only decal glass
 					if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
@@ -1703,3 +1828,14 @@ void CBaseMonster::MakeDamageBloodDecal(int cCount, float flNoise, TraceResult* 
 		}
 	}
 }
+
+// TEMP STUB (p1): real ones belong in the packages named at their declarations (top of this file)
+float RC2ShieldDamage(CBaseEntity* pTarget, float flDamage, float flShieldFraction, Vector vecPos, Vector vecDir, Vector* pvecHit, float* pflOut, int iFlags) { return flDamage; }
+void UTIL_PushEntityMask() {}
+void UTIL_PopEntityMask() {}
+void UTIL_MarkEntity(int iEntity) {}
+bool UTIL_IsEntityMarked(int iEntity) { return false; }
+float RC2PlayerAttribute(int iAttribute, int iPlayerIndex) { return 1.0; }
+int g_iRC2ScoreMode = 0;
+int g_iRC2GibEvent = 0;
+void FreezeTimer_Thaw(edict_t* pent) {}

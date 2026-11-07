@@ -162,6 +162,12 @@ public:
 
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
+
+public:
+	// p1 needs: RC2's gamerules slot 58 (+0xe8), p6's name. Asked before a player's projectile
+	// acts on pTarget (the impailer's grab); false stops it. VERIFY: the default (the
+	// gamerules package reconstructs it)
+	virtual bool PlayerCanAffect(CBaseEntity* pPlayer, CBaseEntity* pTarget) { return true; }
 };
 
 extern CGameRules* InstallGameRules();

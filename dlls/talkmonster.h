@@ -173,6 +173,11 @@ public:
 
 	EHANDLE m_hTalkTarget; // who to look at while talking
 	CUSTOM_SCHEDULES;
+
+	// p1 needs: RC2's CTalkMonster has one more sentence group (its 4 added bytes before
+	// m_useTime, so TLK_CGROUPS is 19 there). Barney sets it to "BA_MINE". Name ours; whoever
+	// owns talkmonster.cpp should make it m_szGrp[18] and say what reads it.
+	const char* m_szGrpMine; // orig CBarney +0x308 (m_szGrp[18])
 };
 
 

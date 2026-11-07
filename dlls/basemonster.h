@@ -360,4 +360,19 @@ public:
 	*	Will return @c nullptr if item dropping is disabled for this NPC.
 	*/
 	CBaseEntity* DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng);
+
+	// p1 needs: RC2's one added CBaseMonster virtual (orig slot 147, right after
+	// StopFollowing) and the first byte of its 4 added members. Names ours.
+	// How far a shrunken monster's sounds are raised: 0 at scale 0 or 1, else
+	// (1 - scale) * 1.25 * 40 clamped to 0..40 (the original reads doubles). Callers add it to
+	// the pitch.
+	virtual int ShrinkPitchShift() // orig 0x74d0
+	{
+		if (pev->scale == 0.0 || pev->scale == 1.0)
+			return 0;
+		return static_cast<int>(std::min(std::max((1.0 - pev->scale) * 1.25 * 40.0, 0.0), 40.0));
+	}
+	bool m_fAdminAllied; // orig +0x2b0 (a byte): 1 after the admin command mkally, 0 after mkhostile
+	// orig slot 74: monsters can be killed by the admin command kill (92 classes inherit this)
+	bool IsCleanupKillable() override { return true; } // orig 0x7550
 };

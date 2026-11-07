@@ -89,6 +89,9 @@ public:
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 	void GibMonster() override;
 
+	// Rocket Crowbar 2 (BASE_VIRTUALS.md slot 75): the controller's capability bits
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0x23d70
+
 	CSprite* m_pBall[2];   // hand balls
 	int m_iBall[2];		   // how bright it should be
 	float m_iBallTime[2];  // when it should be that color
@@ -100,7 +103,7 @@ public:
 	bool m_fInCombat;
 };
 
-LINK_ENTITY_TO_CLASS(monster_alien_controller, CController);
+LINK_ENTITY_TO_CLASS(monster_alien_controller, CController); // orig 0x23cd0
 
 TYPEDESCRIPTION CController::m_SaveData[] =
 	{
@@ -110,7 +113,7 @@ TYPEDESCRIPTION CController::m_SaveData[] =
 		DEFINE_ARRAY(CController, m_iBallCurrent, FIELD_INTEGER, 2),
 		DEFINE_FIELD(CController, m_vecEstVelocity, FIELD_VECTOR),
 };
-IMPLEMENT_SAVERESTORE(CController, CSquadMonster);
+IMPLEMENT_SAVERESTORE(CController, CSquadMonster); // orig 0x23d80 (Save), orig 0x23db0 (Restore), stock
 
 
 const char* CController::pAttackSounds[] =
@@ -154,6 +157,7 @@ const char* CController::pDeathSounds[] =
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x23de0 (stock)
 int CController::Classify()
 {
 	return CLASS_ALIEN_MILITARY;
@@ -163,6 +167,7 @@ int CController::Classify()
 // SetYawSpeed - allows each sequence to have a different
 // turn rate associated with it.
 //=========================================================
+// orig 0x23df0 (stock)
 void CController::SetYawSpeed()
 {
 	int ys;
@@ -178,15 +183,18 @@ void CController::SetYawSpeed()
 	pev->yaw_speed = ys;
 }
 
+// orig 0x23e00
 bool CController::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	// HACK HACK -- until we fix this.
-	if (IsAlive())
+	// orig 0x23e00. RC2: no pain sound while frozen (the freeze grenade)
+	if (IsAlive() && !m_fRC2Frozen)
 		PainSound();
 	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 
+// orig 0x23e40 (stock)
 void CController::Killed(entvars_t* pevAttacker, int iGib)
 {
 	// shut off balls
@@ -213,6 +221,7 @@ void CController::Killed(entvars_t* pevAttacker, int iGib)
 }
 
 
+// orig 0x23e90 (stock)
 void CController::GibMonster()
 {
 	// delete balls
@@ -232,27 +241,32 @@ void CController::GibMonster()
 
 
 
+// orig 0x23ee0 (stock)
 void CController::PainSound()
 {
 	if (RANDOM_LONG(0, 5) < 2)
 		EMIT_SOUND_ARRAY_DYN(CHAN_VOICE, pPainSounds);
 }
 
+// orig 0x23f40 (stock)
 void CController::AlertSound()
 {
 	EMIT_SOUND_ARRAY_DYN(CHAN_VOICE, pAlertSounds);
 }
 
+// orig 0x23f90 (stock)
 void CController::IdleSound()
 {
 	EMIT_SOUND_ARRAY_DYN(CHAN_VOICE, pIdleSounds);
 }
 
+// orig 0x23fe0 (stock)
 void CController::AttackSound()
 {
 	EMIT_SOUND_ARRAY_DYN(CHAN_VOICE, pAttackSounds);
 }
 
+// orig 0x24030 (stock)
 void CController::DeathSound()
 {
 	EMIT_SOUND_ARRAY_DYN(CHAN_VOICE, pDeathSounds);
@@ -262,6 +276,7 @@ void CController::DeathSound()
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
+// orig 0x24080 (stock)
 void CController::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
@@ -355,6 +370,7 @@ void CController::HandleAnimEvent(MonsterEvent_t* pEvent)
 //=========================================================
 // Spawn
 //=========================================================
+// orig 0x24400 (stock)
 void CController::Spawn()
 {
 	Precache();
@@ -377,6 +393,7 @@ void CController::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
+// orig 0x24510 (stock)
 void CController::Precache()
 {
 	PRECACHE_MODEL("models/controller.mdl");
@@ -480,13 +497,14 @@ DEFINE_CUSTOM_SCHEDULES(CController){
 	slControllerFail,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CController, CSquadMonster);
+IMPLEMENT_CUSTOM_SCHEDULES(CController, CSquadMonster); // orig 0x245d0 (ScheduleFromName, stock)
 
 
 
 //=========================================================
 // StartTask
 //=========================================================
+// orig 0x24600 (stock)
 void CController::StartTask(Task_t* pTask)
 {
 	switch (pTask->iTask)
@@ -537,6 +555,7 @@ void CController::StartTask(Task_t* pTask)
 }
 
 
+// orig 0x247a0 (stock)
 Vector Intersect(Vector vecSrc, Vector vecDst, Vector vecMove, float flSpeed)
 {
 	Vector vecTo = vecDst - vecSrc;
@@ -575,6 +594,7 @@ Vector Intersect(Vector vecSrc, Vector vecDst, Vector vecMove, float flSpeed)
 }
 
 
+// orig 0x249c0 (stock)
 int CController::LookupFloat()
 {
 	if (m_velocity.Length() < 32.0)
@@ -614,6 +634,7 @@ int CController::LookupFloat()
 //=========================================================
 // RunTask
 //=========================================================
+// orig 0x24b60 (stock in RC2: halflife-updated's m_hEnemy check removed below)
 void CController::RunTask(Task_t* pTask)
 {
 
@@ -665,11 +686,9 @@ void CController::RunTask(Task_t* pTask)
 	case TASK_WAIT:
 	case TASK_WAIT_FACE_ENEMY:
 	case TASK_WAIT_PVS:
-		if (m_hEnemy != 0)
-		{
-			MakeIdealYaw(m_vecEnemyLKP);
-			ChangeYaw(pev->yaw_speed);
-		}
+		// SDK 2.3 (and RC2): no m_hEnemy check here; halflife-updated's added one is taken out
+		MakeIdealYaw(m_vecEnemyLKP);
+		ChangeYaw(pev->yaw_speed);
 
 		if (m_fSequenceFinished)
 		{
@@ -719,6 +738,7 @@ void CController::RunTask(Task_t* pTask)
 // monster's member function to get a pointer to a schedule
 // of the proper type.
 //=========================================================
+// orig 0x25150 (stock)
 Schedule_t* CController::GetSchedule()
 {
 	switch (m_MonsterState)
@@ -753,6 +773,7 @@ Schedule_t* CController::GetSchedule()
 
 //=========================================================
 //=========================================================
+// orig 0x251e0 (stock)
 Schedule_t* CController::GetScheduleOfType(int Type)
 {
 	// ALERT( at_console, "%d\n", m_iFrustration );
@@ -782,6 +803,7 @@ Schedule_t* CController::GetScheduleOfType(int Type)
 // CheckRangeAttack1  - shoot a bigass energy ball out of their head
 //
 //=========================================================
+// orig 0x25260 (stock)
 bool CController::CheckRangeAttack1(float flDot, float flDist)
 {
 	if (flDot > 0.5 && flDist > 256 && flDist <= 2048)
@@ -792,6 +814,7 @@ bool CController::CheckRangeAttack1(float flDot, float flDist)
 }
 
 
+// orig 0x252a0 (stock)
 bool CController::CheckRangeAttack2(float flDot, float flDist)
 {
 	if (flDot > 0.5 && flDist > 64 && flDist <= 2048)
@@ -802,12 +825,14 @@ bool CController::CheckRangeAttack2(float flDot, float flDist)
 }
 
 
+// orig 0x252e0 (stock)
 bool CController::CheckMeleeAttack1(float flDot, float flDist)
 {
 	return false;
 }
 
 
+// orig 0x252f0 (stock)
 void CController::SetActivity(Activity NewActivity)
 {
 	CBaseMonster::SetActivity(NewActivity);
@@ -828,6 +853,7 @@ void CController::SetActivity(Activity NewActivity)
 //=========================================================
 // RunAI
 //=========================================================
+// orig 0x25320 (stock)
 void CController::RunAI()
 {
 	CBaseMonster::RunAI();
@@ -878,6 +904,7 @@ void CController::RunAI()
 
 extern void DrawRoute(entvars_t* pev, WayPoint_t* m_Route, int m_iRouteIndex, int r, int g, int b);
 
+// orig 0x25560 (stock)
 void CController::Stop()
 {
 	m_IdealActivity = GetStoppedActivity();
@@ -885,6 +912,7 @@ void CController::Stop()
 
 
 #define DIST_TO_CHECK 200
+// orig 0x25580. RC2: the blocker test asks IsActivePlayer
 void CController::Move(float flInterval)
 {
 	float flWaypointDist;
@@ -980,7 +1008,8 @@ void CController::Move(float flInterval)
 			{
 				DispatchBlocked(edict(), pBlocker->edict());
 			}
-			if (pBlocker && m_moveWaitTime > 0 && pBlocker->IsMoving() && !pBlocker->IsPlayer() && (gpGlobals->time - m_flMoveWaitFinished) > 3.0)
+			// RC2: IsActivePlayer where SDK 2.3 asked IsPlayer
+			if (pBlocker && m_moveWaitTime > 0 && pBlocker->IsMoving() && !pBlocker->IsActivePlayer() && (gpGlobals->time - m_flMoveWaitFinished) > 3.0)
 			{
 				// Can we still move toward our target?
 				if (flDist < m_flGroundSpeed)
@@ -1067,6 +1096,7 @@ void CController::Move(float flInterval)
 
 
 
+// orig 0x25ac0 (stock)
 bool CController::ShouldAdvanceRoute(float flWaypointDist)
 {
 	if (flWaypointDist <= 32)
@@ -1078,6 +1108,7 @@ bool CController::ShouldAdvanceRoute(float flWaypointDist)
 }
 
 
+// orig 0x25ae0 (stock)
 int CController::CheckLocalMove(const Vector& vecStart, const Vector& vecEnd, CBaseEntity* pTarget, float* pflDist)
 {
 	TraceResult tr;
@@ -1104,6 +1135,7 @@ int CController::CheckLocalMove(const Vector& vecStart, const Vector& vecEnd, CB
 }
 
 
+// orig 0x25c30 (stock)
 void CController::MoveExecute(CBaseEntity* pTargetEnt, const Vector& vecDir, float flInterval)
 {
 	if (m_IdealActivity != m_movementActivity)
@@ -1139,10 +1171,11 @@ class CControllerHeadBall : public CBaseMonster
 	Vector m_vecIdeal;
 	EHANDLE m_hOwner;
 };
-LINK_ENTITY_TO_CLASS(controller_head_ball, CControllerHeadBall);
+LINK_ENTITY_TO_CLASS(controller_head_ball, CControllerHeadBall); // orig 0x25d90
 
 
 
+// orig 0x25e00 (stock)
 void CControllerHeadBall::Spawn()
 {
 	Precache();
@@ -1173,6 +1206,7 @@ void CControllerHeadBall::Spawn()
 }
 
 
+// orig 0x25f70 (stock)
 void CControllerHeadBall::Precache()
 {
 	PRECACHE_MODEL("sprites/xspark1.spr");
@@ -1181,6 +1215,7 @@ void CControllerHeadBall::Precache()
 }
 
 
+// orig 0x25fa0 (stock)
 void CControllerHeadBall::HuntThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -1256,12 +1291,14 @@ void CControllerHeadBall::HuntThink()
 }
 
 
+// orig 0x263f0 (stock)
 void CControllerHeadBall::DieThink()
 {
 	UTIL_Remove(this);
 }
 
 
+// orig 0x26400 (stock)
 void CControllerHeadBall::MovetoTarget(Vector vecTarget)
 {
 	// accelerate
@@ -1282,6 +1319,7 @@ void CControllerHeadBall::MovetoTarget(Vector vecTarget)
 
 
 
+// orig 0x26690 (stock; unlisted: no function at it in the decompile)
 void CControllerHeadBall::Crawl()
 {
 
@@ -1309,6 +1347,7 @@ void CControllerHeadBall::Crawl()
 }
 
 
+// orig 0x268f0 (stock)
 void CControllerHeadBall::BounceTouch(CBaseEntity* pOther)
 {
 	Vector vecDir = m_vecIdeal.Normalize();
@@ -1334,9 +1373,10 @@ class CControllerZapBall : public CBaseMonster
 
 	EHANDLE m_hOwner;
 };
-LINK_ENTITY_TO_CLASS(controller_energy_ball, CControllerZapBall);
+LINK_ENTITY_TO_CLASS(controller_energy_ball, CControllerZapBall); // orig 0x26b40
 
 
+// orig 0x26bb0 (stock)
 void CControllerZapBall::Spawn()
 {
 	Precache();
@@ -1364,6 +1404,7 @@ void CControllerZapBall::Spawn()
 }
 
 
+// orig 0x26cf0 (stock)
 void CControllerZapBall::Precache()
 {
 	PRECACHE_MODEL("sprites/xspark4.spr");
@@ -1372,6 +1413,7 @@ void CControllerZapBall::Precache()
 }
 
 
+// orig 0x26d00 (stock)
 void CControllerZapBall::AnimateThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -1386,6 +1428,7 @@ void CControllerZapBall::AnimateThink()
 }
 
 
+// orig 0x26da0 (stock)
 void CControllerZapBall::ExplodeTouch(CBaseEntity* pOther)
 {
 	if (0 != pOther->pev->takedamage)

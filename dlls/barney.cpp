@@ -54,7 +54,8 @@ public:
 
 	void RunTask(Task_t* pTask) override;
 	void StartTask(Task_t* pTask) override;
-	int ObjectCaps() override { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; }
+	int ObjectCaps() override { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; } // orig 0xe800 (stock)
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x37ff; }			 // orig 0xe7f0
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	bool CheckRangeAttack1(float flDot, float flDist) override;
 
@@ -88,7 +89,7 @@ public:
 	CUSTOM_SCHEDULES;
 };
 
-LINK_ENTITY_TO_CLASS(monster_barney, CBarney);
+LINK_ENTITY_TO_CLASS(monster_barney, CBarney); // orig 0xe770 (stock)
 
 TYPEDESCRIPTION CBarney::m_SaveData[] =
 	{
@@ -99,7 +100,7 @@ TYPEDESCRIPTION CBarney::m_SaveData[] =
 		DEFINE_FIELD(CBarney, m_flPlayerDamage, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CBarney, CTalkMonster);
+IMPLEMENT_SAVERESTORE(CBarney, CTalkMonster); // orig 0xe810 Save, orig 0xe840 Restore (stock)
 
 //=========================================================
 // AI Schedules Specific to this monster
@@ -204,18 +205,23 @@ DEFINE_CUSTOM_SCHEDULES(CBarney){
 
 
 IMPLEMENT_CUSTOM_SCHEDULES(CBarney, CTalkMonster);
+// orig 0xe870 CBarney::ScheduleFromName, from the macro above (stock). Also emitted into this
+// file's object, all stock: orig 0xf100 IsFacing (h_ai.cpp's), orig 0xf900
+// CTalkMonster::FriendNumber (talkmonster.h's inline).
 
+// orig 0xe8a0 (stock)
 void CBarney::StartTask(Task_t* pTask)
 {
 	CTalkMonster::StartTask(pTask);
 }
 
+// orig 0xe8b0. RC2: an active player (IsActivePlayer) where SDK 2.3 asked IsPlayer.
 void CBarney::RunTask(Task_t* pTask)
 {
 	switch (pTask->iTask)
 	{
 	case TASK_RANGE_ATTACK1:
-		if (m_hEnemy != NULL && (m_hEnemy->IsPlayer()))
+		if (m_hEnemy != NULL && (m_hEnemy->IsActivePlayer()))
 		{
 			pev->framerate = 1.5;
 		}
@@ -234,6 +240,7 @@ void CBarney::RunTask(Task_t* pTask)
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards.
 //=========================================================
+// orig 0xe910 (stock)
 int CBarney::ISoundMask()
 {
 	return bits_SOUND_WORLD |
@@ -249,6 +256,7 @@ int CBarney::ISoundMask()
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0xe920 (stock)
 int CBarney::Classify()
 {
 	return CLASS_PLAYER_ALLY;
@@ -392,6 +400,7 @@ void CBarney::HandleAnimEvent(MonsterEvent_t* pEvent)
 //=========================================================
 // Spawn
 //=========================================================
+// orig 0xed20. RC2: barneys start allied (m_fAdminAllied, as after the admin command mkally).
 void CBarney::Spawn()
 {
 	Precache();
@@ -406,6 +415,8 @@ void CBarney::Spawn()
 	pev->view_ofs = Vector(0, 0, 50);  // position of the eyes relative to monster's origin.
 	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
+
+	m_fAdminAllied = true;
 
 	pev->body = 0; // gun in holster
 	m_fGunDrawn = false;
@@ -441,10 +452,13 @@ void CBarney::Precache()
 }
 
 // Init talk data
+// orig 0xeec0. RC2: and its 19th sentence group, "BA_MINE".
 void CBarney::TalkInit()
 {
 
 	CTalkMonster::TalkInit();
+
+	m_szGrpMine = "BA_MINE";
 
 	// scientists speach group names (group names are in sentences.txt)
 
@@ -476,6 +490,7 @@ void CBarney::TalkInit()
 	m_voicePitch = 100;
 }
 
+// orig 0xef90. RC2: IsActivePlayer where SDK 2.3 asked IsPlayer.
 bool CBarney::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	// make sure friends talk about it if player hurts talkmonsters...
@@ -507,7 +522,7 @@ bool CBarney::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 				Remember(bits_MEMORY_SUSPICIOUS);
 			}
 		}
-		else if (!(m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO)
+		else if (!(m_hEnemy->IsActivePlayer()) && pev->deadflag == DEAD_NO)
 		{
 			PlaySentence("BA_SHOT", 4, VOL_NORM, ATTN_NORM);
 		}
@@ -664,6 +679,8 @@ Schedule_t* CBarney::GetScheduleOfType(int Type)
 // monster's member function to get a pointer to a schedule
 // of the proper type.
 //=========================================================
+// orig 0xf570. RC2: following means following an active player (IsFollowing's IsPlayer is
+// IsActivePlayer here; VERIFY whether RC2 changed talkmonster.h's IsFollowing for everyone).
 Schedule_t* CBarney::GetSchedule()
 {
 	if (HasConditions(bits_COND_HEAR_SOUND))
@@ -712,7 +729,7 @@ Schedule_t* CBarney::GetSchedule()
 			return GetScheduleOfType(SCHED_SMALL_FLINCH);
 		}
 
-		if (m_hEnemy == NULL && IsFollowing())
+		if (m_hEnemy == NULL && m_hTargetEnt != NULL && m_hTargetEnt->IsActivePlayer())
 		{
 			if (!m_hTargetEnt->IsAlive())
 			{
@@ -743,6 +760,7 @@ Schedule_t* CBarney::GetSchedule()
 	return CTalkMonster::GetSchedule();
 }
 
+// orig 0xf720 (stock)
 MONSTERSTATE CBarney::GetIdealState()
 {
 	return CTalkMonster::GetIdealState();
@@ -773,7 +791,7 @@ class CDeadBarney : public CBaseMonster
 {
 public:
 	void Spawn() override;
-	int Classify() override { return CLASS_PLAYER_ALLY; }
+	int Classify() override { return CLASS_PLAYER_ALLY; } // orig 0xf840 (stock)
 
 	bool KeyValue(KeyValueData* pkvd) override;
 
@@ -783,6 +801,7 @@ public:
 
 const char* CDeadBarney::m_szPoses[] = {"lying_on_back", "lying_on_side", "lying_on_stomach"};
 
+// orig 0xf750 (stock)
 bool CDeadBarney::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "pose"))
@@ -794,7 +813,7 @@ bool CDeadBarney::KeyValue(KeyValueData* pkvd)
 	return CBaseMonster::KeyValue(pkvd);
 }
 
-LINK_ENTITY_TO_CLASS(monster_barney_dead, CDeadBarney);
+LINK_ENTITY_TO_CLASS(monster_barney_dead, CDeadBarney); // orig 0xf7d0 (stock)
 
 //=========================================================
 // ********** DeadBarney SPAWN **********

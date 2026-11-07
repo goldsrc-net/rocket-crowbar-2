@@ -356,6 +356,71 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p1 needs: RC2 members the admin commands (dlls/rc2/maintainent.cpp) and
+	// CBaseEntity::IsViewOfPlayer (cbase.cpp) use. Names ours (unsaved members); p5 owns
+	// CBasePlayer and replaces these at merge. VERIFY: the original's offsets fall inside SDK
+	// 2.3's stock members in the RC2-layout reference (m_SbarString0 is at +0x660..+0x6df
+	// there), so RC2's player layout differs from it around here.
+	int m_iAdminLevel;			  // orig +0x674: 0 none, 1 admin, 2 super admin
+	bool m_fGiveBan;			  // orig +0x690 (an int there): set by the admin command giveban
+	bool m_fSuicideBan;			  // orig +0x694 (an int there): set by the admin command suicideban
+	bool m_fForceSpawn;			  // orig +0x698 (an int there): set by the admin command forcespawn
+	// shoulder riding, p6's names (dlls/rc2/playerride.cpp there): what a player owns that one
+	// of these players rides or carries counts as its own view (IsViewOfPlayer)
+	int m_iRidingIndex;			  // orig +0x69c: entity index of the player this one rides, 0 if none
+	int m_iRightRider;			  // orig +0x6a4: entity index of the player on the right shoulder
+	int m_iLeftRider;			  // orig +0x6a8: entity index of the player on the left shoulder
+	void StopRiding(bool bQuiet); // orig 0xb1f50 (p6's): ClientDisconnect lets go of riders and ridden
+	int m_iAdminSelected;		  // orig +0x784: cleared with the admin selection. VERIFY: what it holds
+	edict_t* m_pentAdminSelected; // orig +0x78c: the admin's selected entity (selectent)
+	CBaseEntity* m_pRC2Player798; // orig +0x798: an entity of the player's own, removed on disconnect. VERIFY: what it is
+	CBaseEntity* m_pRC2Player79c; // orig +0x79c: the same (p8: hidden while transforming)
+	CBaseEntity* m_rgpRC2Owned[16]; // orig +0x7a8: entities the player keeps; ClientDisconnect makes each non-solid and kills it. VERIFY: what fills them
+	// client.cpp's commands (ClientCommand, setattr, AddToFullPack, ...); p8's names where p8 has
+	// one, else ours
+	float m_flNextGiveTime;			  // orig +0x684: give, givefor and drop wait until this (0.1 s after each)
+	float m_flDmgScore;				  // orig +0x67c (p5's name): the damage-based score (mp_scoremode 1); CBaseMonster::TakeDamage adds to it
+	int m_iRC2Player688;			  // orig +0x688: 0 while the player is in play (IsActivePlayer); nonzero, AddToFullPack sends it the entity iuser2 names when +0x7a4 is 1 and iuser1 is 2. VERIFY: what it is
+	int m_iRC2Player68c;			  // orig +0x68c (p8's name; p6: m_iShrunk): blocks energy draw, health, shield and transform; such a player is sent with hull 2
+	int m_iMoveLock;				  // orig +0x648 (p6: m_iPhysKeyFlags2): nonzero blocks transforming
+	bool m_fRC2Player650;			  // orig +0x650 (byte; p8's name): the jetpack is on
+	int m_iRC2Player66c;			  // orig +0x66c: ServerDeactivate clears it. VERIFY: what it is
+	float m_flAttrPending[10];		  // orig +0x6ac: the attribute values setattr asked for (jump, speed, attack, defend, health, extra health, armor, extra armor, energy regen, damage reflection)
+	unsigned int m_iAbilitiesPending; // orig +0x6d4: setattr's ability bits
+	unsigned int m_iWeaponsPending;	  // orig +0x6d8: setattr's weapon bits
+	int m_iTransformPending;		  // orig +0x6dc: setattr's transform, -1 for none
+	float m_flAttributes[10];		  // orig +0x6e0: the attribute values in effect
+	unsigned int m_iAbilities;		  // orig +0x708: the ability bits in effect (p2: RC2PlayerButtons reads them)
+	unsigned int m_iAttrWeapons;	  // orig +0x70c: the weapon bits in effect
+	int m_iChosenTransform;			  // orig +0x710 (p8's name): 0-4, or -1
+	bool m_fAttributesSet;			  // orig +0x754 (byte): single player lets attributes change once
+	float m_flEnergy;				  // orig +0x758 (p8's name)
+	float m_flEnergyRegenTime;		  // orig +0x760 (p8's name)
+	float m_flEnergyDrawDone;		  // orig +0x764: the energy draw ends then
+	bool m_fDrawingEnergy;			  // orig +0x768 (byte)
+	float m_flCreateHealthDone;		  // orig +0x76c: making health ends then
+	bool m_fCreatingHealth;			  // orig +0x770 (byte)
+	int m_iRC2Player774;			  // orig +0x774: 0 when making health starts. VERIFY: what it counts
+	bool m_fShieldUp;				  // orig +0x778 (byte; p8's name)
+	int m_iRC2Player788;			  // orig +0x788: nonzero, AddToFullPack sends this player every entity. VERIFY: what sets it
+	int m_iRC2Player7a4;			  // orig +0x7a4: see m_iRC2Player688. VERIFY
+	int m_iTransform;				  // orig +0x10f8 (p8's name; p6: m_iTransformType): 0 human, 1-5 the transforms, 6 the race forklift
+	bool m_fTransforming;			  // orig +0x10fc (byte; p8's name)
+	void StartRiding();				  // orig 0xb16b0 (p6's): the "rideplayer" command
+	void StartTransform();			  // orig 0xe21f0 (p8's)
+	void StartUntransform();		  // orig 0xe2cc0 (p8's)
+	void AddMoveLock(int iBits);	  // orig 0x9a800 (p8's name)
+	void RC2StartObserver();		  // orig 0x9b990 (p5's player.cpp): "spectate"/"observe". Name ours
+	// p1 (antifric_timer) needs, p8's names: set / clear bits of the physics flags at +0x644,
+	// sent as the physics key "phf" (orig 0x9a730, 0x9a780; TEMP STUBs in dlls/rc2/antifrictimer.cpp)
+	void AddPhysFlags(int iBits);
+	void RemovePhysFlags(int iBits);
+	// p1 (crossbow bolts, dlls/rc2/crossbowbolts.cpp) needs, p6's names (dlls/rc2/pullers.cpp
+	// there): a tether pulling this player toward entity iEnt (+ vecOffset); returns the slot, or
+	// < 0 when none is free. orig 0xaab00 / 0xaabb0; TEMP STUBs in crossbowbolts.cpp
+	int AddTether(int iEnt, Vector vecOffset, float flForce, float flLength);
+	void RemoveTether(int iSlot);
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

@@ -367,6 +367,11 @@ public:
 	// hle time creep vars
 	float m_flPrevPrimaryAttack;
 	float m_flLastFireTime;
+
+	// p1 needs: RC2's 8 bytes before m_flTimeWeaponIdle (GetWeaponData sends them); the names
+	// the weapon packages (p2, p4, p6, p8) gave them
+	float m_flNextTertiaryAttack;	// orig +0xb0
+	float m_flNextQuaternaryAttack; // orig +0xb4
 };
 
 

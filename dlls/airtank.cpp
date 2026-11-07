@@ -25,7 +25,7 @@ class CAirtank : public CGrenade
 	void Precache() override;
 	void EXPORT TankThink();
 	void EXPORT TankTouch(CBaseEntity* pOther);
-	int BloodColor() override { return DONT_BLEED; }
+	int BloodColor() override { return DONT_BLEED; } // orig 0x9050 (stock)
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 
 	bool Save(CSave& save) override;
@@ -37,13 +37,13 @@ class CAirtank : public CGrenade
 };
 
 
-LINK_ENTITY_TO_CLASS(item_airtank, CAirtank);
+LINK_ENTITY_TO_CLASS(item_airtank, CAirtank); // orig 0x8fd0 (stock)
 TYPEDESCRIPTION CAirtank::m_SaveData[] =
 	{
 		DEFINE_FIELD(CAirtank, m_state, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CAirtank, CGrenade);
+IMPLEMENT_SAVERESTORE(CAirtank, CGrenade); // orig 0x9060 Save, orig 0x9090 Restore (stock)
 
 
 void CAirtank::Spawn()
@@ -67,6 +67,7 @@ void CAirtank::Spawn()
 	m_state = true;
 }
 
+// orig 0x91b0 (stock)
 void CAirtank::Precache()
 {
 	PRECACHE_MODEL("models/w_oxygen.mdl");
@@ -92,9 +93,10 @@ void CAirtank::TankThink()
 }
 
 
+// orig 0x9250. RC2: an active player (IsActivePlayer) where SDK 2.3 asked IsPlayer.
 void CAirtank::TankTouch(CBaseEntity* pOther)
 {
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer())
 		return;
 
 	if (!m_state)

@@ -58,9 +58,9 @@ TYPEDESCRIPTION CEnvGlobal::m_SaveData[] =
 		DEFINE_FIELD(CEnvGlobal, m_initialstate, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CEnvGlobal, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CEnvGlobal, CBaseEntity); // orig 0x16700 Save, orig 0x16730 Restore (stock)
 
-LINK_ENTITY_TO_CLASS(env_global, CEnvGlobal);
+LINK_ENTITY_TO_CLASS(env_global, CEnvGlobal); // orig 0x16760 (stock)
 
 bool CEnvGlobal::KeyValue(KeyValueData* pkvd)
 {
@@ -144,9 +144,9 @@ TYPEDESCRIPTION CMultiSource::m_SaveData[] =
 		DEFINE_FIELD(CMultiSource, m_globalstate, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CMultiSource, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CMultiSource, CBaseEntity); // orig 0x169c0 Save, orig 0x169f0 Restore (stock)
 
-LINK_ENTITY_TO_CLASS(multisource, CMultiSource);
+LINK_ENTITY_TO_CLASS(multisource, CMultiSource); // orig 0x16a20 (stock). CMultiSource::ObjectCaps (cbase.h) is emitted here: orig 0x18870 (stock)
 //
 // Cache user-entity-field values until spawn is called.
 //
@@ -171,6 +171,7 @@ bool CMultiSource::KeyValue(KeyValueData* pkvd)
 
 #define SF_MULTI_INIT 1
 
+// orig 0x16c50 (stock)
 void CMultiSource::Spawn()
 {
 	// set up think for later registration
@@ -239,6 +240,7 @@ bool CMultiSource::IsTriggered(CBaseEntity*)
 	return false;
 }
 
+// orig 0x16de0 (stock)
 void CMultiSource::Register()
 {
 	edict_t* pentTarget = NULL;
@@ -290,7 +292,7 @@ TYPEDESCRIPTION CBaseButton::m_SaveData[] =
 };
 
 
-IMPLEMENT_SAVERESTORE(CBaseButton, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CBaseButton, CBaseToggle); // orig 0x16f10 Save, orig 0x16f40 Restore (stock)
 
 void CBaseButton::Precache()
 {
@@ -480,9 +482,10 @@ where it can be triggered again.
 2) metallic click
 3) in-out
 */
-LINK_ENTITY_TO_CLASS(func_button, CBaseButton);
+LINK_ENTITY_TO_CLASS(func_button, CBaseButton); // orig 0x17530 (stock)
 
 
+// orig 0x175a0 (stock)
 void CBaseButton::Spawn()
 {
 	const char* pszSound;
@@ -663,6 +666,7 @@ void DoSpark(entvars_t* pev, const Vector& location)
 	}
 }
 
+// orig 0x17af0 (stock)
 void CBaseButton::ButtonSpark()
 {
 	SetThink(&CBaseButton::ButtonSpark);
@@ -723,10 +727,11 @@ CBaseButton::BUTTON_CODE CBaseButton::ButtonResponseToTouch()
 //
 // Touching a button simply "activates" it.
 //
+// orig 0x17c30. RC2: only a player in play (IsActivePlayer; SDK 2.3 tested the classname).
 void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 {
 	// Ignore touches by anything but players
-	if (!FClassnameIs(pOther->pev, "player"))
+	if (!pOther->IsActivePlayer())
 		return;
 
 	m_hActivator = pOther;
@@ -759,6 +764,7 @@ void CBaseButton::ButtonTouch(CBaseEntity* pOther)
 //
 // Starts the button moving "in/up".
 //
+// orig 0x17d10 (stock)
 void CBaseButton::ButtonActivate()
 {
 	EMIT_SOUND(ENT(pev), CHAN_VOICE, (char*)STRING(pev->noise), 1, ATTN_NORM);
@@ -825,6 +831,7 @@ void CBaseButton::TriggerAndWait()
 //
 // Starts the button moving "out/down".
 //
+// orig 0x17ea0 (stock)
 void CBaseButton::ButtonReturn()
 {
 	ASSERT(m_toggle_state == TS_AT_TOP);
@@ -843,6 +850,7 @@ void CBaseButton::ButtonReturn()
 //
 // Button has returned to start state.  Quiesce it.
 //
+// orig 0x17f30 (stock)
 void CBaseButton::ButtonBackHome()
 {
 	ASSERT(m_toggle_state == TS_GOING_DOWN);
@@ -904,8 +912,9 @@ public:
 	void Spawn() override;
 };
 
-LINK_ENTITY_TO_CLASS(func_rot_button, CRotButton);
+LINK_ENTITY_TO_CLASS(func_rot_button, CRotButton); // orig 0x18080 (stock)
 
+// orig 0x180f0 (stock)
 void CRotButton::Spawn()
 {
 	const char* pszSound;
@@ -1016,9 +1025,9 @@ TYPEDESCRIPTION CMomentaryRotButton::m_SaveData[] =
 		DEFINE_FIELD(CMomentaryRotButton, m_sounds, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CMomentaryRotButton, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CMomentaryRotButton, CBaseToggle); // orig 0x18320 Save, orig 0x18350 Restore (stock)
 
-LINK_ENTITY_TO_CLASS(momentary_rot_button, CMomentaryRotButton);
+LINK_ENTITY_TO_CLASS(momentary_rot_button, CMomentaryRotButton); // orig 0x18380 (stock)
 
 void CMomentaryRotButton::Spawn()
 {
@@ -1080,18 +1089,20 @@ void CMomentaryRotButton::PlaySound()
 // BUGBUG: This design causes a latentcy.  When the button is retriggered, the first impulse
 // will send the target in the wrong direction because the parameter is calculated based on the
 // current, not future position.
+// orig 0x18730. RC2: ignores a use by itself, and sends the target its current value (SDK
+// 2.3 predicted the value at the end of the move, so retriggering didn't send it backwards).
 void CMomentaryRotButton::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
+	if (pCaller && pCaller->edict() == edict())
+		return;
+
 	pev->ideal_yaw = CBaseToggle::AxisDelta(pev->spawnflags, pev->angles, m_start) / m_flMoveDistance;
 
 	UpdateAllButtons(pev->ideal_yaw, true);
-
-	// Calculate destination angle and use it to predict value, this prevents sending target in wrong direction on retriggering
-	Vector dest = pev->angles + pev->avelocity * (pev->nextthink - pev->ltime);
-	float value1 = CBaseToggle::AxisDelta(pev->spawnflags, dest, m_start) / m_flMoveDistance;
-	UpdateTarget(value1);
+	UpdateTarget(pev->ideal_yaw);
 }
 
+// orig 0x187b0 (stock)
 void CMomentaryRotButton::UpdateAllButtons(float value, bool start)
 {
 	// Update all rot buttons attached to the same target
@@ -1117,6 +1128,7 @@ void CMomentaryRotButton::UpdateAllButtons(float value, bool start)
 	}
 }
 
+// orig 0x18880 (stock)
 void CMomentaryRotButton::UpdateSelf(float value)
 {
 	bool fplaysound = false;
@@ -1155,6 +1167,7 @@ void CMomentaryRotButton::UpdateSelf(float value)
 	SetThink(&CMomentaryRotButton::Off);
 }
 
+// orig 0x18a00 (stock)
 void CMomentaryRotButton::UpdateTarget(float value)
 {
 	if (!FStringNull(pev->target))
@@ -1174,6 +1187,7 @@ void CMomentaryRotButton::UpdateTarget(float value)
 	}
 }
 
+// orig 0x18a70 (stock)
 void CMomentaryRotButton::Off()
 {
 	pev->avelocity = g_vecZero;
@@ -1198,6 +1212,7 @@ void CMomentaryRotButton::Return()
 }
 
 
+// orig 0x18b50 (stock)
 void CMomentaryRotButton::UpdateSelfReturn(float value)
 {
 	if (value <= 0)
@@ -1243,11 +1258,12 @@ TYPEDESCRIPTION CEnvSpark::m_SaveData[] =
 		DEFINE_FIELD(CEnvSpark, m_flDelay, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CEnvSpark, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CEnvSpark, CBaseEntity); // orig 0x18c30 Save, orig 0x18c60 Restore (stock)
 
-LINK_ENTITY_TO_CLASS(env_spark, CEnvSpark);
-LINK_ENTITY_TO_CLASS(env_debris, CEnvSpark);
+LINK_ENTITY_TO_CLASS(env_spark, CEnvSpark); // orig 0x18c90 (stock)
+LINK_ENTITY_TO_CLASS(env_debris, CEnvSpark); // orig 0x18d00 (stock)
 
+// orig 0x18d70 (stock)
 void CEnvSpark::Spawn()
 {
 	SetThink(NULL);
@@ -1275,6 +1291,7 @@ void CEnvSpark::Spawn()
 }
 
 
+// orig 0x18e00 (stock)
 void CEnvSpark::Precache()
 {
 	PRECACHE_SOUND("buttons/spark1.wav");
@@ -1303,12 +1320,14 @@ bool CEnvSpark::KeyValue(KeyValueData* pkvd)
 	return CBaseEntity::KeyValue(pkvd);
 }
 
+// orig 0x19030 (stock)
 void EXPORT CEnvSpark::SparkThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT(0, m_flDelay);
 	DoSpark(pev, pev->origin);
 }
 
+// orig 0x19070 (stock)
 void EXPORT CEnvSpark::SparkStart(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetUse(&CEnvSpark::SparkStop);
@@ -1334,7 +1353,7 @@ public:
 	int ObjectCaps() override;
 };
 
-LINK_ENTITY_TO_CLASS(button_target, CButtonTarget);
+LINK_ENTITY_TO_CLASS(button_target, CButtonTarget); // orig 0x190d0 (stock)
 
 void CButtonTarget::Spawn()
 {

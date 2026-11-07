@@ -56,6 +56,7 @@ TYPEDESCRIPTION CFlockingFlyerFlock::m_SaveData[] =
 		DEFINE_FIELD(CFlockingFlyerFlock, m_flFlockRadius, FIELD_FLOAT),
 };
 
+// orig 0x5450 Save, orig 0x5480 Restore (stock)
 IMPLEMENT_SAVERESTORE(CFlockingFlyerFlock, CBaseMonster);
 
 //=========================================================
@@ -107,6 +108,7 @@ public:
 	float m_flAlertTime;
 	float m_flFlockNextSoundTime;
 };
+// orig 0x54b0 monster_flyer, orig 0x5520 monster_flyer_flock (stock, plus util.h's AddToPrecachedList)
 LINK_ENTITY_TO_CLASS(monster_flyer, CFlockingFlyer);
 LINK_ENTITY_TO_CLASS(monster_flyer_flock, CFlockingFlyerFlock);
 
@@ -126,6 +128,7 @@ TYPEDESCRIPTION CFlockingFlyer::m_SaveData[] =
 		//	DEFINE_FIELD( CFlockingFlyer, m_flFlockNextSoundTime, FIELD_TIME ),	// don't need to save
 };
 
+// orig 0x5590 Save, orig 0x55c0 Restore (stock)
 IMPLEMENT_SAVERESTORE(CFlockingFlyer, CBaseMonster);
 
 //=========================================================
@@ -158,6 +161,7 @@ void CFlockingFlyerFlock::Spawn()
 
 //=========================================================
 //=========================================================
+// orig 0x56e0 (stock; PrecacheFlockSounds inlined, its tail shared at orig 0x5723)
 void CFlockingFlyerFlock::Precache()
 {
 	//PRECACHE_MODEL("models/aflock.mdl");
@@ -225,6 +229,7 @@ void CFlockingFlyerFlock::SpawnFlock()
 
 //=========================================================
 //=========================================================
+// orig 0x5940 (stock)
 void CFlockingFlyer::Spawn()
 {
 	Precache();
@@ -237,6 +242,7 @@ void CFlockingFlyer::Spawn()
 
 //=========================================================
 //=========================================================
+// orig 0x5980 (stock)
 void CFlockingFlyer::Precache()
 {
 	//PRECACHE_MODEL("models/aflock.mdl");
@@ -278,6 +284,7 @@ void CFlockingFlyer::MakeSound()
 
 //=========================================================
 //=========================================================
+// orig 0x5a80 (stock)
 void CFlockingFlyer::Killed(entvars_t* pevAttacker, int iGib)
 {
 	CFlockingFlyer* pSquad;
@@ -307,6 +314,7 @@ void CFlockingFlyer::Killed(entvars_t* pevAttacker, int iGib)
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
+// orig 0x5b60 (stock)
 void CFlockingFlyer::FallHack()
 {
 	if ((pev->flags & FL_ONGROUND) != 0)
@@ -332,10 +340,10 @@ void CFlockingFlyer::SpawnCommonCode()
 	pev->classname = MAKE_STRING("monster_flyer");
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
-	pev->takedamage = DAMAGE_YES;
-	pev->health = 10;
-
-	m_bloodColor = BLOOD_COLOR_GREEN;
+	// RC2 has SDK 2.3's undamageable flyers (this function matches SDK 2.3 byte for byte);
+	// halflife-updated made them damageable with 10 health and green blood
+	pev->takedamage = DAMAGE_NO;
+	pev->health = 1;
 
 	m_fPathBlocked = false; // obstacles will be detected
 	m_flFieldOfView = 0.2;
@@ -375,6 +383,7 @@ void CFlockingFlyer::BoidAdvanceFrame()
 
 //=========================================================
 //=========================================================
+// orig 0x5da0 (stock)
 void CFlockingFlyer::IdleThink()
 {
 	pev->nextthink = gpGlobals->time + 0.2;
@@ -390,6 +399,7 @@ void CFlockingFlyer::IdleThink()
 //=========================================================
 // Start - player enters the pvs, so get things going.
 //=========================================================
+// orig 0x5e00 (stock)
 void CFlockingFlyer::Start()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -569,6 +579,7 @@ bool CFlockingFlyer::FPathBlocked()
 //=========================================================
 // Leader boids use this think every tenth
 //=========================================================
+// orig 0x6880 (stock)
 void CFlockingFlyer::FlockLeaderThink()
 {
 	TraceResult tr;
@@ -676,6 +687,7 @@ void CFlockingFlyer::FlockLeaderThink()
 //=========================================================
 // follower boids execute this code when flocking
 //=========================================================
+// orig 0x6d50 (stock)
 void CFlockingFlyer::FlockFollowerThink()
 {
 	TraceResult tr;
@@ -808,6 +820,7 @@ void CFlockingFlyer::FlockFollowerThink()
 // SquadUnlink(), Unlink the squad pointers.
 //
 //=========================================================
+// orig 0x7150 (stock)
 void CFlockingFlyer::SquadUnlink()
 {
 	m_pSquadLeader = NULL;

@@ -427,6 +427,14 @@ public:
 	int m_iRC2Base64;	   // orig +0x64. VERIFY: unread so far
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
 	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
+
+	// p1 needs: the byte at orig +0x66 (the third byte of m_iRC2Base64 above, which the merge
+	// has to split); p4's name. Set while the freeze grenade's CFreezeTimer holds the entity:
+	// a frozen player can't give, drop, switch weapons, jetpack or transform.
+	bool m_fRC2Frozen; // orig +0x66
+	// the byte at orig +0x67 (the last of m_iRC2Base64): set while an antifric_timer holds the
+	// entity (dlls/rc2/antifrictimer.cpp). Name ours
+	bool m_fRC2Frictionless; // orig +0x67
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

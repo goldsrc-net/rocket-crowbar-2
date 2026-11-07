@@ -21,6 +21,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "schedule.h"
+#include "gamerules.h"
 
 #define BARNACLE_BODY_HEIGHT 44 // how 'tall' the barnacle's model is.
 #define BARNACLE_PULL_SPEED 8
@@ -53,8 +54,10 @@ public:
 	bool m_fTongueExtended;
 	bool m_fLiftingPrey;
 	float m_flTongueAdj;
+
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 2; } // orig 0xdbf0
 };
-LINK_ENTITY_TO_CLASS(monster_barnacle, CBarnacle);
+LINK_ENTITY_TO_CLASS(monster_barnacle, CBarnacle); // orig 0xdb80 (stock)
 
 TYPEDESCRIPTION CBarnacle::m_SaveData[] =
 	{
@@ -66,13 +69,14 @@ TYPEDESCRIPTION CBarnacle::m_SaveData[] =
 		DEFINE_FIELD(CBarnacle, m_flTongueAdj, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CBarnacle, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CBarnacle, CBaseMonster); // orig 0xdc00 Save, orig 0xdc30 Restore (stock)
 
 
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0xdc60 (stock)
 int CBarnacle::Classify()
 {
 	return CLASS_ALIEN_MONSTER;
@@ -142,6 +146,8 @@ bool CBarnacle::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 
 //=========================================================
 //=========================================================
+// orig 0xde00. RC2: the killing bite always kills a player (50000 damage, not its health),
+// and the barnacle lets go of what it killed.
 void CBarnacle::BarnacleThink()
 {
 	CBaseEntity* pTouchEnt;
@@ -213,12 +219,19 @@ void CBarnacle::BarnacleThink()
 			if (m_flKillVictimTime != -1 && gpGlobals->time > m_flKillVictimTime)
 			{
 				// kill!
-				if (pVictim)
+				if (!pVictim)
+					return;
+
+				if (pVictim->IsPlayer())
 				{
-					pVictim->TakeDamage(pev, pev, pVictim->pev->health, DMG_SLASH | DMG_ALWAYSGIB);
-					m_cGibs = 3;
+					pVictim->TakeDamage(pev, pev, 50000, DMG_SLASH | DMG_ALWAYSGIB);
+					m_hEnemy = NULL;
+					return;
 				}
 
+				pVictim->TakeDamage(pev, pev, pVictim->pev->health, DMG_SLASH | DMG_ALWAYSGIB);
+				m_cGibs = 3;
+				m_hEnemy = NULL;
 				return;
 			}
 
@@ -327,6 +340,7 @@ void CBarnacle::BarnacleThink()
 //=========================================================
 // Killed.
 //=========================================================
+// orig 0xe410 (stock)
 void CBarnacle::Killed(entvars_t* pevAttacker, int iGib)
 {
 	CBaseMonster* pVictim;
@@ -367,6 +381,7 @@ void CBarnacle::Killed(entvars_t* pevAttacker, int iGib)
 
 //=========================================================
 //=========================================================
+// orig 0xe510. RC2: in multiplayer the dead barnacle fades out after 10 seconds.
 void CBarnacle::WaitTillDead()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -378,13 +393,21 @@ void CBarnacle::WaitTillDead()
 	{
 		// death anim finished.
 		StopAnimation();
-		SetThink(NULL);
+		// VERIFY: g_pGameRules' vtable slot 6, IsMultiplayer in SDK 2.3's CGameRules
+		if (g_pGameRules->IsMultiplayer())
+		{
+			SetThink(&CBarnacle::SUB_StartFadeOut);
+			pev->nextthink = gpGlobals->time + 10;
+		}
+		else
+			SetThink(NULL);
 	}
 }
 
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
+// orig 0xe5a0 (stock)
 void CBarnacle::Precache()
 {
 	PRECACHE_MODEL("models/barnacle.mdl");
@@ -404,6 +427,7 @@ void CBarnacle::Precache()
 // of the trace in the int pointer provided.
 //=========================================================
 #define BARNACLE_CHECK_SPACING 8
+// orig 0xe600. RC2: returns the touched entity's GetEffectedEnt.
 CBaseEntity* CBarnacle::TongueTouchEnt(float* pflLength)
 {
 	TraceResult tr;
@@ -432,7 +456,7 @@ CBaseEntity* CBarnacle::TongueTouchEnt(float* pflLength)
 			// only clients and monsters
 			if (pList[i] != this && IRelationship(pList[i]) > R_NO && pList[i]->pev->deadflag == DEAD_NO) // this ent is one of our enemies. Barnacle tries to eat it.
 			{
-				return pList[i];
+				return pList[i]->GetEffectedEnt();
 			}
 		}
 	}

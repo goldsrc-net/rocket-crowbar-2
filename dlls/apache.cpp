@@ -31,12 +31,21 @@ class CApache : public CBaseMonster
 
 	void Spawn() override;
 	void Precache() override;
-	int Classify() override { return CLASS_HUMAN_MILITARY; }
-	int BloodColor() override { return DONT_BLEED; }
+	int Classify() override { return CLASS_HUMAN_MILITARY; } // orig 0xab80 (stock)
+	int BloodColor() override { return DONT_BLEED; }		 // orig 0xab90 (stock)
+
+	// RC2's added base virtuals (cbase.h): fixed effect damage instead of the rc2.ini defaults,
+	// and its capability bits
+	float FartDamageInflict() override { return 0; }		 // orig 0xab40
+	float ZoomedPrimaryDamage() override { return 50; }		 // orig 0xab50
+	float ZoomedSecondaryDamage() override { return 150; }	 // orig 0xab60
+	float BeamViewDamage() override { return 0; }			 // orig 0xab70
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 2; }  // orig 0xab20
+	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 1; } // orig 0xab30
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 	void GibMonster() override;
 
-	void SetObjectCollisionBox() override
+	void SetObjectCollisionBox() override // orig 0xaba0 (stock)
 	{
 		pev->absmin = pev->origin + Vector(-300, -300, -172);
 		pev->absmax = pev->origin + Vector(300, 300, 8);
@@ -84,7 +93,7 @@ class CApache : public CBaseMonster
 	int m_iDoSmokePuff;
 	CBeam* m_pBeam;
 };
-LINK_ENTITY_TO_CLASS(monster_apache, CApache);
+LINK_ENTITY_TO_CLASS(monster_apache, CApache); // orig 0xaa90 (stock)
 
 TYPEDESCRIPTION CApache::m_SaveData[] =
 	{
@@ -107,9 +116,10 @@ TYPEDESCRIPTION CApache::m_SaveData[] =
 		DEFINE_FIELD(CApache, m_flGoalSpeed, FIELD_FLOAT),
 		DEFINE_FIELD(CApache, m_iDoSmokePuff, FIELD_INTEGER),
 };
-IMPLEMENT_SAVERESTORE(CApache, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CApache, CBaseMonster); // orig 0xac60 Save, orig 0xac90 Restore (stock)
 
 
+// orig 0xacc0 (stock)
 void CApache::Spawn()
 {
 	Precache();
@@ -176,6 +186,7 @@ void CApache::Precache()
 
 
 
+// orig 0xaec0 (stock)
 void CApache::NullThink()
 {
 	StudioFrameAdvance();
@@ -184,6 +195,7 @@ void CApache::NullThink()
 }
 
 
+// orig 0xaef0 (stock)
 void CApache::StartupUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetThink(&CApache::HuntThink);
@@ -192,6 +204,7 @@ void CApache::StartupUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 	SetUse(NULL);
 }
 
+// orig 0xaf20 (stock)
 void CApache::Killed(entvars_t* pevAttacker, int iGib)
 {
 	pev->movetype = MOVETYPE_TOSS;
@@ -217,6 +230,7 @@ void CApache::Killed(entvars_t* pevAttacker, int iGib)
 	}
 }
 
+// orig 0xb030 (stock)
 void CApache::DyingThink()
 {
 	StudioFrameAdvance();
@@ -437,12 +451,14 @@ void CApache::CrashTouch(CBaseEntity* pOther)
 
 
 
+// orig 0xb950 (stock)
 void CApache::GibMonster()
 {
 	// EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "common/bodysplat.wav", 0.75, ATTN_NORM, 0, 200);
 }
 
 
+// orig 0xb960 (stock)
 void CApache::HuntThink()
 {
 	StudioFrameAdvance();
@@ -605,6 +621,8 @@ void CApache::HuntThink()
 }
 
 
+// orig 0xc4b0. RC2: the rotor sound starts once and is never re-pitched (SDK 2.3 bent its
+// pitch and volume by the first player's relative speed every frame).
 void CApache::Flight()
 {
 	// tilt model 5 degrees
@@ -727,36 +745,7 @@ void CApache::Flight()
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
 	}
-	else
-	{
-		CBaseEntity* pPlayer = NULL;
 
-		pPlayer = UTIL_FindEntityByClassname(NULL, "player");
-		// UNDONE: this needs to send different sounds to every player for multiplayer.
-		if (pPlayer)
-		{
-
-			float pitch = DotProduct(pev->velocity - pPlayer->pev->velocity, (pPlayer->pev->origin - pev->origin).Normalize());
-
-			pitch = (int)(100 + pitch / 50.0);
-
-			if (pitch > 250)
-				pitch = 250;
-			if (pitch < 50)
-				pitch = 50;
-			if (pitch == 100)
-				pitch = 101;
-
-			float flVol = (m_flForce / 100.0) + .1;
-			if (flVol > 1.0)
-				flVol = 1.0;
-
-			EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "apache/ap_rotor2.wav", 1.0, 0.3, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch);
-		}
-		// EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "apache/ap_whine1.wav", flVol, 0.2, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch);
-
-		// ALERT( at_console, "%.0f %.2f\n", pitch, flVol );
-	}
 }
 
 
@@ -1002,7 +991,8 @@ class CApacheHVR : public CGrenade
 	int m_iTrail;
 	Vector m_vecForward;
 };
-LINK_ENTITY_TO_CLASS(hvr_rocket, CApacheHVR);
+LINK_ENTITY_TO_CLASS(hvr_rocket, CApacheHVR); // orig 0xd700 (stock)
+// orig 0xdb70: CGrenade::BloodColor, weapons.h's inline, emitted here (stock)
 
 TYPEDESCRIPTION CApacheHVR::m_SaveData[] =
 	{
@@ -1010,8 +1000,9 @@ TYPEDESCRIPTION CApacheHVR::m_SaveData[] =
 		DEFINE_FIELD(CApacheHVR, m_vecForward, FIELD_VECTOR),
 };
 
-IMPLEMENT_SAVERESTORE(CApacheHVR, CGrenade);
+IMPLEMENT_SAVERESTORE(CApacheHVR, CGrenade); // orig 0xd780 Save, orig 0xd7b0 Restore (stock)
 
+// orig 0xd7e0 (stock)
 void CApacheHVR::Spawn()
 {
 	Precache();
@@ -1036,6 +1027,7 @@ void CApacheHVR::Spawn()
 }
 
 
+// orig 0xd8e0 (stock)
 void CApacheHVR::Precache()
 {
 	PRECACHE_MODEL("models/HVR.mdl");
@@ -1044,6 +1036,7 @@ void CApacheHVR::Precache()
 }
 
 
+// orig 0xd910 (stock)
 void CApacheHVR::IgniteThink()
 {
 	// pev->movetype = MOVETYPE_TOSS;
@@ -1075,6 +1068,7 @@ void CApacheHVR::IgniteThink()
 }
 
 
+// orig 0xd9f0 (stock)
 void CApacheHVR::AccelerateThink()
 {
 	// check world boundaries

@@ -44,17 +44,18 @@ public:
 	void AttackSnd();
 
 	// No range attacks
-	bool CheckRangeAttack1(float flDot, float flDist) override { return false; }
-	bool CheckRangeAttack2(float flDot, float flDist) override { return false; }
+	bool CheckRangeAttack1(float flDot, float flDist) override { return false; } // orig 0x12510 (stock)
+	bool CheckRangeAttack2(float flDot, float flDist) override { return false; } // orig 0x12520 (stock)
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 };
 
-LINK_ENTITY_TO_CLASS(monster_bloater, CBloater);
+LINK_ENTITY_TO_CLASS(monster_bloater, CBloater); // orig 0x124a0 (stock)
 
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x12530 (stock)
 int CBloater::Classify()
 {
 	return CLASS_ALIEN_MONSTER;
@@ -64,6 +65,7 @@ int CBloater::Classify()
 // SetYawSpeed - allows each sequence to have a different
 // turn rate associated with it.
 //=========================================================
+// orig 0x12540 (stock)
 void CBloater::SetYawSpeed()
 {
 	int ys;
@@ -85,6 +87,7 @@ bool CBloater::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float
 	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
+// orig 0x12580 (stock)
 void CBloater::PainSound()
 {
 #if 0	
@@ -104,6 +107,7 @@ void CBloater::PainSound()
 #endif
 }
 
+// orig 0x12590 (stock)
 void CBloater::AlertSound()
 {
 #if 0
@@ -124,6 +128,7 @@ void CBloater::AlertSound()
 #endif
 }
 
+// orig 0x125a0 (stock)
 void CBloater::IdleSound()
 {
 #if 0
@@ -144,6 +149,7 @@ void CBloater::IdleSound()
 #endif
 }
 
+// orig 0x125b0 (stock)
 void CBloater::AttackSnd()
 {
 #if 0
@@ -208,6 +214,7 @@ void CBloater::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
+// orig 0x126e0 (stock)
 void CBloater::Precache()
 {
 	PRECACHE_MODEL("models/floater.mdl");
