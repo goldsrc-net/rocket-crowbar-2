@@ -16,6 +16,8 @@
 // sound.cpp
 //=========================================================
 
+#include <algorithm>
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -128,6 +130,7 @@ public:
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
+	// orig 0xcc5b0; as SDK 2.3
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 
 	float m_flAttenuation; // attenuation value
@@ -137,6 +140,7 @@ public:
 	bool m_fLooping; // true when the sound played will loop
 };
 
+// orig 0xcc540; RC2's factory also calls RC 1.9's AddToPrecachedList (util, p9)
 LINK_ENTITY_TO_CLASS(ambient_generic, CAmbientGeneric);
 TYPEDESCRIPTION CAmbientGeneric::m_SaveData[] =
 	{
@@ -152,11 +156,13 @@ TYPEDESCRIPTION CAmbientGeneric::m_SaveData[] =
 		DEFINE_ARRAY(CAmbientGeneric, m_dpv, FIELD_CHARACTER, sizeof(dynpitchvol_t)),
 };
 
+// orig 0xcc5c0 (Save), orig 0xcc5f0 (Restore); as SDK 2.3
 IMPLEMENT_SAVERESTORE(CAmbientGeneric, CBaseEntity);
 
 //
 // ambient_generic - general-purpose user-defined static sound
 //
+// orig 0xcc620; as SDK 2.3
 void CAmbientGeneric::Spawn()
 {
 	/*
@@ -221,6 +227,7 @@ void CAmbientGeneric::Spawn()
 }
 
 
+// orig 0xcc730; as SDK 2.3
 void CAmbientGeneric::Precache()
 {
 	char* szSoundFile = (char*)STRING(pev->message);
@@ -539,6 +546,7 @@ void CAmbientGeneric::InitModulationParms()
 // if it's playing, innactive if not.  If the sound is not
 // a looping sound, never mark it as active.
 //
+// orig 0xcce10; as SDK 2.3
 void CAmbientGeneric::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	char* szSoundFile = (char*)STRING(pev->message);
@@ -650,6 +658,7 @@ void CAmbientGeneric::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 // KeyValue - load keyvalue pairs into member data of the
 // ambient generic. NOTE: called BEFORE spawn!
 
+// orig 0xcd060; as SDK 2.3
 bool CAmbientGeneric::KeyValue(KeyValueData* pkvd)
 {
 	// NOTE: changing any of the modifiers in this code
@@ -849,6 +858,7 @@ public:
 	int m_Roomtype;
 };
 
+// orig 0xcd6f0; factory, as ambient_generic
 LINK_ENTITY_TO_CLASS(env_sound, CEnvSound);
 TYPEDESCRIPTION CEnvSound::m_SaveData[] =
 	{
@@ -856,6 +866,7 @@ TYPEDESCRIPTION CEnvSound::m_SaveData[] =
 		DEFINE_FIELD(CEnvSound, m_Roomtype, FIELD_INTEGER),
 };
 
+// orig 0xcd760 (Save), orig 0xcd790 (Restore); as SDK 2.3
 IMPLEMENT_SAVERESTORE(CEnvSound, CBaseEntity);
 
 
@@ -911,6 +922,7 @@ bool FEnvSoundInRange(CEnvSound* pSound, entvars_t* pevTarget, float& flRange)
 
 // CONSIDER: if player in water state, autoset roomtype to 14,15 or 16.
 
+// orig 0xcda20; as SDK 2.3 (the code differs only by RC2's CBasePlayer constructor inlined in GetClassPtr)
 void CEnvSound::Think()
 {
 	const bool shouldThinkFast = [this]()
@@ -1191,8 +1203,9 @@ int SENTENCEG_PlayRndI(edict_t* entity, int isentenceg,
 
 // same as above, but takes sentence group name instead of index
 
+// orig 0xce030. RC2 added the channel (SDK 2.3 always played CHAN_VOICE).
 int SENTENCEG_PlayRndSz(edict_t* entity, const char* szgroupname,
-	float volume, float attenuation, int flags, int pitch)
+	float volume, float attenuation, int flags, int pitch, int channel)
 {
 	char name[64];
 	int ipick;
@@ -1212,7 +1225,7 @@ int SENTENCEG_PlayRndSz(edict_t* entity, const char* szgroupname,
 
 	ipick = USENTENCEG_Pick(isentenceg, name);
 	if (ipick >= 0 && '\0' != name[0])
-		EMIT_SOUND_DYN(entity, CHAN_VOICE, name, volume, attenuation, flags, pitch);
+		EMIT_SOUND_DYN(entity, channel, name, volume, attenuation, flags, pitch);
 
 	return ipick;
 }
@@ -1410,19 +1423,28 @@ int SENTENCEG_Lookup(const char* sample, char* sentencenum)
 	return -1;
 }
 
+// orig 0xce620. RC2 clamps pitch to 0..255 and volume to 0..1 before the engine sees them.
 void EMIT_SOUND_DYN(edict_t* entity, int channel, const char* sample, float volume, float attenuation,
 	int flags, int pitch)
 {
 	if (sample && *sample == '!')
 	{
 		char name[32];
-		if (SENTENCEG_Lookup(sample, name) >= 0)
-			EMIT_SOUND_DYN2(entity, channel, name, volume, attenuation, flags, pitch);
-		else
+		if (SENTENCEG_Lookup(sample, name) < 0)
+		{
 			ALERT(at_aiconsole, "Unable to find %s in sentences.txt\n", sample);
+			return;
+		}
+		pitch = std::clamp(pitch, 0, 255);
+		volume = std::clamp(volume, 0.0f, 1.0f);
+		EMIT_SOUND_DYN2(entity, channel, name, volume, attenuation, flags, pitch);
 	}
 	else
+	{
+		pitch = std::clamp(pitch, 0, 255);
+		volume = std::clamp(volume, 0.0f, 1.0f);
 		EMIT_SOUND_DYN2(entity, channel, sample, volume, attenuation, flags, pitch);
+	}
 }
 
 void EMIT_SOUND_PREDICTED(edict_t* entity, int channel, const char* sample, float volume, float attenuation,
@@ -1456,6 +1478,7 @@ void EMIT_SOUND_SUIT(edict_t* entity, const char* sample)
 
 // play a sentence, randomly selected from the passed in group id, over the HEV suit speaker
 
+// orig 0xce7c0; as SDK 2.3
 void EMIT_GROUPID_SUIT(edict_t* entity, int isentenceg)
 {
 	float fvol;
@@ -1471,6 +1494,7 @@ void EMIT_GROUPID_SUIT(edict_t* entity, int isentenceg)
 
 // play a sentence, randomly selected from the passed in groupname
 
+// orig 0xce830; RC2 passes SENTENCEG_PlayRndSz its channel
 void EMIT_GROUPNAME_SUIT(edict_t* entity, const char* groupname)
 {
 	float fvol;
@@ -1481,7 +1505,7 @@ void EMIT_GROUPNAME_SUIT(edict_t* entity, const char* groupname)
 		pitch = RANDOM_LONG(0, 6) + 98;
 
 	if (fvol > 0.05)
-		SENTENCEG_PlayRndSz(entity, groupname, fvol, ATTN_NORM, 0, pitch);
+		SENTENCEG_PlayRndSz(entity, groupname, fvol, ATTN_NORM, 0, pitch, CHAN_VOICE);
 }
 
 // ===================== MATERIAL TYPE DETECTION, MAIN ROUTINES ========================
@@ -1636,6 +1660,7 @@ char TEXTURETYPE_Find(char* name)
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
 // returns volume of strike instrument (crowbar) to play
 
+// orig 0xceb70; as SDK 2.3 (only the slot of CGameRules::PlayTextureSounds moved)
 float TEXTURETYPE_PlaySound(TraceResult* ptr, Vector vecSrc, Vector vecEnd, int iBulletType)
 {
 	// hit the world, try to play sound based on texture material type
@@ -1839,22 +1864,26 @@ public:
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
+	// orig 0xcf130; as SDK 2.3
 	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 
 	int m_preset; // preset number
 };
 
+// orig 0xcf0c0; factory, as ambient_generic
 LINK_ENTITY_TO_CLASS(speaker, CSpeaker);
 TYPEDESCRIPTION CSpeaker::m_SaveData[] =
 	{
 		DEFINE_FIELD(CSpeaker, m_preset, FIELD_INTEGER),
 };
 
+// orig 0xcf140 (Save), orig 0xcf170 (Restore); as SDK 2.3
 IMPLEMENT_SAVERESTORE(CSpeaker, CBaseEntity);
 
 //
 // ambient_generic - general-purpose user-defined static sound
 //
+// orig 0xcf1a0; as SDK 2.3
 void CSpeaker::Spawn()
 {
 	char* szSoundFile = (char*)STRING(pev->message);
@@ -1889,6 +1918,7 @@ void CSpeaker::Precache()
 		// set first announcement time for random n second
 		pev->nextthink = gpGlobals->time + RANDOM_FLOAT(5.0, 15.0);
 }
+// orig 0xcf2a0; RC2 passes SENTENCEG_PlayRndSz its channel
 void CSpeaker::SpeakerThink()
 {
 	float flvolume = pev->health * 0.1;
@@ -1939,7 +1969,7 @@ void CSpeaker::SpeakerThink()
 	{
 		// make random announcement from sentence group
 
-		if (SENTENCEG_PlayRndSz(ENT(pev), szSoundFile, flvolume, flattenuation, flags, pitch) < 0)
+		if (SENTENCEG_PlayRndSz(ENT(pev), szSoundFile, flvolume, flattenuation, flags, pitch, CHAN_VOICE) < 0)
 			ALERT(at_console, "Level Design Error!\nSPEAKER has bad sentence group name: %s\n", szSoundFile);
 
 		// set next announcement time for random 5 to 10 minute delay
@@ -1956,6 +1986,7 @@ void CSpeaker::SpeakerThink()
 //
 // ToggleUse - if an announcement is pending, cancel it.  If no announcement is pending, start one.
 //
+// orig 0xcf450; as SDK 2.3
 void CSpeaker::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	bool fActive = (pev->nextthink > 0.0);
@@ -2002,6 +2033,7 @@ void CSpeaker::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 // KeyValue - load keyvalue pairs into member data
 // NOTE: called BEFORE spawn!
 
+// orig 0xcf4e0; as SDK 2.3
 bool CSpeaker::KeyValue(KeyValueData* pkvd)
 {
 

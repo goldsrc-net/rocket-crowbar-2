@@ -360,4 +360,9 @@ public:
 	*	Will return @c nullptr if item dropping is disabled for this NPC.
 	*/
 	CBaseEntity* DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng);
+
+	// p7 needs: the byte at orig +0x2b0 (RC2's 4 bytes after m_pCine). The scientists' Spawns
+	// set it to 1; the function at 0x13b0 sets it together with clearing bits_MEMORY_PROVOKED and
+	// 0x1450 clears it while setting that bit. Name ours (the monsters package, p4, owns it).
+	bool m_fRC2NotProvoked;
 };

@@ -367,6 +367,18 @@ public:
 	// hle time creep vars
 	float m_flPrevPrimaryAttack;
 	float m_flLastFireTime;
+
+	// p7 needs: RC2's four added CBasePlayerWeapon virtuals and its 8 added bytes. Names ours;
+	// the weapons package (p3) owns them. RC2's ItemPostFrame (0xfa790) calls slot 114 first
+	// every frame, and fires IN_CANCEL into slot 107 (gated on +0xb0) and IN_ALT1 into 108
+	// (gated on +0xb4), beside SDK 2.3's IN_ATTACK/IN_ATTACK2. rc2.ini's [<weapon>]
+	// <Attack>Refire<Attack> keys name the four attacks Primary..Quaternary.
+	virtual void TertiaryAttack() {}					   // orig slot 107, after SecondaryAttack
+	virtual void QuaternaryAttack() {}					   // orig slot 108
+	virtual void WeaponFrame() {}						   // orig slot 114, after UseDecrement; first thing in ItemPostFrame
+	virtual void ResetWeaponState(int iArg1, int iArg2) {} // orig slot 115; VERIFY: two dwords no p7 override reads
+	float m_flNextTertiaryAttack;						   // orig +0xb0
+	float m_flNextQuaternaryAttack;						   // orig +0xb4
 };
 
 
@@ -716,34 +728,38 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 #endif
 
-
+	// Rocket Crowbar 2 (p7): launches what dlls/rc2/shotgunprojectiles.cpp holds. Primary a
+	// scientist, secondary an HEV suit, tertiary a mini forklift, quaternary a crate it charges.
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 3; }
+	int iItemSlot() override;
 	bool GetItemInfo(ItemInfo* p) override;
+	void AddToPlayer(CBasePlayer* pPlayer) override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
 	bool Deploy() override;
+	bool CanHolster() override;
+	void Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
-	void ItemPostFrame() override;
+	void WeaponFrame() override;
+	void FireCrate(); // name ours
 	int m_fInReload; //TODO: not used, remove
 	float m_flNextReload;
 	int m_iShell;
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
+	bool UseDecrement() override;
 
-private:
-	unsigned short m_usDoubleFire;
-	unsigned short m_usSingleFire;
+	bool m_fCrateCharging;		   // orig +0xe8, name ours
+	float m_flCrateChargeEnd;	   // orig +0xec, name ours
+	unsigned short m_usFireSci;	   // orig +0xf0: events/shotgunsci.sc
+	unsigned short m_usFireSuit;   // orig +0xf2: events/shotgunsuit.sc
+	unsigned short m_usFireFL;	   // orig +0xf4: events/shotgunfl.sc
+	unsigned short m_usFireCrate;  // orig +0xf6: events/firesgcrate.sc
+	unsigned short m_usCrateCharge; // orig +0xf8: events/sgcratecharge.sc
 };
 
 class CLaserSpot : public CBaseEntity
@@ -815,6 +831,23 @@ public:
 
 private:
 	unsigned short m_usRpg;
+
+public:
+	// p7 needs: RC2's CRpg is a mine launcher, one mine per attack (rpg.cpp's RC2 functions,
+	// 0xb9770-0xbad10). Members from the original's offsets, names ours.
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
+	void ResetWeaponState(int iArg1, int iArg2) override;
+	int CountMines(const char* szClassname); // name ours
+	void LaunchMine(const char* szClassname, int iAmmoCost, int iMaxDeployed, const float* pflEnergyCost, const float* pflEnergyRegenDelay,
+		float flLaunchVelocity, const float* pflLaunchZBoost, float flRefirePrimary, float flRefireSecondary, float flRefireTertiary, float flRefireQuaternary); // name ours
+	int m_iSciMines;		   // orig +0xdc: deployed scientist_mine count, sent in WeaponSync
+	int m_iSuckMines;		   // orig +0xe0: suck_mine
+	int m_iSphereMines;		   // orig +0xe4: sphere_mine
+	int m_iRomanCandles;	   // orig +0xe8: rocket_mine (rc2.ini's [RPG] RomanCandle keys)
+	float m_flNextMineCount;   // orig +0xec
+	// (m_usRpg is the original's +0xf0: events/rpg.sc, precached in CRpg::Precache, p3)
 };
 
 class CRpgRocket : public CGrenade
@@ -1116,31 +1149,31 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 #endif
 
+	// Rocket Crowbar 2 (p7): the roach charge launcher. Primary throws a roach or arms the
+	// thrown ones, secondary throws, tertiary throws a conc charge, quaternary a control forklift.
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
+	int iItemSlot() override;
 	bool GetItemInfo(ItemInfo* p) override;
 	void AddToPlayer(CBasePlayer* pPlayer) override;
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
-	bool AddDuplicate(CBasePlayerItem* pOriginal) override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
 	bool CanDeploy() override;
 	bool Deploy() override;
 	bool IsUseable() override;
 
 	void Holster() override;
 	void WeaponIdle() override;
+	void WeaponFrame() override;
+	void ResetWeaponState(int iArg1, int iArg2) override;
 	void Throw();
-	void Detonate();
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
+	bool UseDecrement() override;
+
+	float m_flNextRoachCount; // orig +0xdc, name ours
+	int m_iRoachCount;		  // orig +0xe0, name ours: this player's roach_charge entities
 };
 
 enum tripmine_e
@@ -1203,7 +1236,7 @@ class CSqueak : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
+	int iItemSlot() override { return 5; } // orig 0xd3150
 	bool GetItemInfo(ItemInfo* p) override;
 
 	void PrimaryAttack() override;
@@ -1213,7 +1246,7 @@ public:
 	void WeaponIdle() override;
 	bool m_fJustThrown;
 
-	bool UseDecrement() override
+	bool UseDecrement() override // orig 0xd3160 (RC2's returns true: CLIENT_WEAPONS)
 	{
 #if defined(CLIENT_WEAPONS)
 		return true;
@@ -1223,5 +1256,11 @@ public:
 	}
 
 private:
-	unsigned short m_usSnarkFire;
+	unsigned short m_usSnarkFire; // orig +0xec, "events/snarkfire.sc"
+
+public:
+	// p7 needs: CSqueak's RC2 members p7's functions touch (the attacks at 0xd3440.. are p8's,
+	// which also use +0xdc..+0xe4). Names ours.
+	float m_flDeployTime;			  // orig +0xe8. gpGlobals->time at Spawn and Deploy
+	unsigned short m_usSnarkCamPlace; // orig +0xee, "events/snarkcamplace.sc"
 };

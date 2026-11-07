@@ -21,6 +21,9 @@
 #include "player.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#include "rc2prefs.h"
+#include "rc2/p7_extern.h"
+#include <algorithm>
 
 LINK_ENTITY_TO_CLASS(weapon_rpg, CRpg);
 
@@ -457,72 +460,159 @@ void CRpg::Holster()
 
 
 
-void CRpg::PrimaryAttack()
+// Rocket Crowbar 2: CRpg launches mines, one kind per attack. Each attack costs ammo (clip
+// first, then the reserve), is refused while the player has the kind's MaxDeployed of it out,
+// and the sphere mine and roman candle also cost shield energy. The four functions below are
+// the same code with the [RPG] keys changed; LaunchMine holds it once.
+
+// How many of szClassname this player has out (the mines keep their launcher in
+// pev->dmg_inflictor).
+int CRpg::CountMines(const char* szClassname) // orig 0xb9770
 {
-	if (0 != m_iClip)
+	int iCount = 0;
+#ifndef CLIENT_DLL
+	for (CBaseEntity* pMine = UTIL_FindEntityByClassname(NULL, szClassname); pMine != NULL; pMine = UTIL_FindEntityByClassname(pMine, szClassname))
 	{
-		m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
-		m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
+		if (pMine->pev != NULL && UTIL_IsValidEntity(pMine->pev->pContainingEntity) && pMine->pev->dmg_inflictor == m_pPlayer->pev->pContainingEntity)
+			iCount++;
+	}
+#endif
+	return iCount;
+}
+
+// name ours: the body the original repeats in each of the four attacks
+void CRpg::LaunchMine(const char* szClassname, int iAmmoCost, int iMaxDeployed, const float* pflEnergyCost, const float* pflEnergyRegenDelay,
+	float flLaunchVelocity, const float* pflLaunchZBoost, float flRefirePrimary, float flRefireSecondary, float flRefireTertiary, float flRefireQuaternary)
+{
+	CRpg* pRpg = this;
+	CBasePlayer* pPlayer = m_pPlayer;
+
+	if (pPlayer->m_rgAmmo[pRpg->m_iPrimaryAmmoType] + pRpg->m_iClip >= iAmmoCost && pRpg->CountMines(szClassname) < iMaxDeployed && (pflEnergyCost == NULL || pPlayer->m_flEnergy >= *pflEnergyCost))
+	{
+		pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
+		pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
+		pRpg->m_flNextMineCount = gpGlobals->time; // recount on the next frame
 
 #ifndef CLIENT_DLL
-		// player "shoot" animation
-		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+		pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
-		Vector vecSrc = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -8;
+		UTIL_MakeVectors(pPlayer->pev->v_angle);
+		Vector vecSrc = pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -8;
 
-		CRpgRocket* pRocket = CRpgRocket::CreateRpgRocket(vecSrc, m_pPlayer->pev->v_angle, m_pPlayer, this);
+		CBaseEntity* pMine = CBaseEntity::Create(szClassname, vecSrc, Vector(0, pPlayer->pev->v_angle.y, 0), pPlayer->edict());
+		pMine->pev->dmg_inflictor = pPlayer->edict();
+		pMine->pev->velocity = gpGlobals->v_forward * flLaunchVelocity;
+		if (pflLaunchZBoost != NULL)
+			pMine->pev->velocity.z += *pflLaunchZBoost;
 
-		UTIL_MakeVectors(m_pPlayer->pev->v_angle); // RpgRocket::Create stomps on globals, so remake.
-		pRocket->pev->velocity = pRocket->pev->velocity + gpGlobals->v_forward * DotProduct(m_pPlayer->pev->velocity, gpGlobals->v_forward);
+		if (0 != pPlayer->m_iRC2Player69c)
+		{
+			edict_t* pentOwner = INDEXENT(pPlayer->m_iRC2Player69c);
+			if (UTIL_IsValidEntity(pentOwner))
+				pMine->pev->owner = pentOwner;
+		}
 #endif
 
-		// firing RPG no longer turns on the designator. ALT fire is a toggle switch for the LTD.
-		// Ken signed up for this as a global change (sjb)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, pPlayer->edict(), pRpg->m_usRpg, 0.0, g_vecZero, g_vecZero, 0, 0, 0, 0, false, false);
 
-		int flags;
-#if defined(CLIENT_WEAPONS)
-		flags = FEV_NOTHOST;
-#else
-		flags = 0;
-#endif
+		if (pRpg->m_iClip < iAmmoCost)
+		{
+			pPlayer->m_rgAmmo[pRpg->m_iPrimaryAmmoType] += pRpg->m_iClip - iAmmoCost;
+			pRpg->m_iClip = 0;
+		}
+		else
+			pRpg->m_iClip -= iAmmoCost;
 
-		PLAYBACK_EVENT(flags, m_pPlayer->edict(), m_usRpg);
+		if (pflEnergyCost != NULL)
+		{
+			pPlayer->m_flEnergy -= *pflEnergyCost;
+			UTIL_ExtendTime(pPlayer->m_flEnergyRegenTime, gpGlobals->time, *pflEnergyRegenDelay);
+		}
 
-		m_iClip--;
-
-		m_flNextPrimaryAttack = GetNextAttackDelay(1.5);
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5;
-
-		ResetEmptySound();
+		UTIL_ExtendTime(pRpg->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flRefirePrimary);
+		UTIL_ExtendTime(pRpg->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flRefireSecondary);
+		UTIL_ExtendTime(pRpg->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flRefireTertiary);
+		UTIL_ExtendTime(pRpg->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flRefireQuaternary);
+		pRpg->m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5;
 	}
 	else
 	{
-		PlayEmptySound();
+		pRpg->PlayEmptySound();
+		UTIL_ExtendTime(pRpg->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.25);
+		UTIL_ExtendTime(pRpg->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.25);
+		UTIL_ExtendTime(pRpg->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.25);
+		UTIL_ExtendTime(pRpg->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.25);
 	}
-	UpdateSpot();
 }
 
-
-void CRpg::SecondaryAttack()
+// The scientist mine.
+void CRpg::PrimaryAttack() // orig 0xb97e0
 {
-	m_fSpotActive = !m_fSpotActive;
+	LaunchMine("scientist_mine", RC2Pref(RC2P_RPG_SciMineAmmoCost).s, RC2Pref(RC2P_RPG_SciMineMaxDeployed).s, NULL, NULL,
+		RC2Pref(RC2P_RPG_SciMineLaunchVelocity).f, &RC2Pref(RC2P_RPG_SciMineLaunchZBoost).f,
+		RC2Pref(RC2P_RPG_PrimaryRefirePrimary).f, RC2Pref(RC2P_RPG_PrimaryRefireSecondary).f, RC2Pref(RC2P_RPG_PrimaryRefireTertiary).f, RC2Pref(RC2P_RPG_PrimaryRefireQuaternary).f);
+}
+
+// The suck mine.
+void CRpg::SecondaryAttack() // orig 0xb9cb0
+{
+	LaunchMine("suck_mine", RC2Pref(RC2P_RPG_SuckMineAmmoCost).s, RC2Pref(RC2P_RPG_SuckMineMaxDeployed).s, NULL, NULL,
+		RC2Pref(RC2P_RPG_SuckMineLaunchVelocity).f, &RC2Pref(RC2P_RPG_SuckMineLaunchZBoost).f,
+		RC2Pref(RC2P_RPG_SecondaryRefirePrimary).f, RC2Pref(RC2P_RPG_SecondaryRefireSecondary).f, RC2Pref(RC2P_RPG_SecondaryRefireTertiary).f, RC2Pref(RC2P_RPG_SecondaryRefireQuaternary).f);
+}
+
+// The sphere mine: costs energy, and has no z boost (rc2.ini has no key for one).
+void CRpg::TertiaryAttack() // orig 0xba180
+{
+	LaunchMine("sphere_mine", RC2Pref(RC2P_RPG_SphereMineAmmoCost).s, RC2Pref(RC2P_RPG_SphereMineMaxDeployed).s, &RC2Pref(RC2P_RPG_SphereMineEnergyCost).f, &RC2Pref(RC2P_RPG_SphereMineEnergyRegenDelay).f,
+		RC2Pref(RC2P_RPG_SphereMineLaunchVelocity).f, NULL,
+		RC2Pref(RC2P_RPG_TertiaryRefirePrimary).f, RC2Pref(RC2P_RPG_TertiaryRefireSecondary).f, RC2Pref(RC2P_RPG_TertiaryRefireTertiary).f, RC2Pref(RC2P_RPG_TertiaryRefireQuaternary).f);
+}
+
+// The roman candle (rocket_mine): costs energy.
+void CRpg::QuaternaryAttack() // orig 0xba670
+{
+	LaunchMine("rocket_mine", RC2Pref(RC2P_RPG_RomanCandleAmmoCost).s, RC2Pref(RC2P_RPG_RomanCandleMaxDeployed).s, &RC2Pref(RC2P_RPG_RomanCandleEnergyCost).f, &RC2Pref(RC2P_RPG_RomanCandleEnergyRegenDelay).f,
+		RC2Pref(RC2P_RPG_RomanCandleLaunchVelocity).f, &RC2Pref(RC2P_RPG_RomanCandleLaunchZBoost).f,
+		RC2Pref(RC2P_RPG_QuaternaryRefirePrimary).f, RC2Pref(RC2P_RPG_QuaternaryRefireSecondary).f, RC2Pref(RC2P_RPG_QuaternaryRefireTertiary).f, RC2Pref(RC2P_RPG_QuaternaryRefireQuaternary).f);
+}
+
+// Every frame: four times a second, recount this player's mines and send the counts to the HUD.
+void CRpg::WeaponFrame() // orig 0xbab40
+{
+	if (m_flNextMineCount < gpGlobals->time)
+	{
+		m_flNextMineCount = gpGlobals->time + 0.25;
+		m_iSciMines = CountMines("scientist_mine");
+		m_iSuckMines = CountMines("suck_mine");
+		m_iSphereMines = CountMines("sphere_mine");
+		m_iRomanCandles = CountMines("rocket_mine");
 
 #ifndef CLIENT_DLL
-	if (!m_fSpotActive && m_pSpot)
-	{
-		m_pSpot->Killed(NULL, GIB_NORMAL);
-		m_pSpot = NULL;
-	}
+		MESSAGE_BEGIN(MSG_ONE, gmsgWeaponSync, NULL, m_pPlayer->edict());
+		WRITE_BYTE(WEAPON_RPG);
+		WRITE_BYTE(std::clamp(m_iSciMines, 0, 255));
+		WRITE_BYTE(std::clamp(m_iSuckMines, 0, 255));
+		WRITE_BYTE(std::clamp(m_iSphereMines, 0, 255));
+		WRITE_BYTE(std::clamp(m_iRomanCandles, 0, 255));
+		MESSAGE_END();
 #endif
-
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.2;
+	}
 }
 
-
-void CRpg::WeaponIdle()
+void CRpg::ResetWeaponState(int iArg1, int iArg2) // orig 0xbac90
 {
-	UpdateSpot();
+	// VERIFY: each count is assigned the result of 0xfb780 (weapons.cpp, p3) called with the
+	// addresses of both arguments; that function always returns false.
+	m_iSciMines = 0;
+	m_iSuckMines = 0;
+	m_iSphereMines = 0;
+	m_iRomanCandles = 0;
+}
+
+void CRpg::WeaponIdle() // orig 0xbad10
+{
+	ResetEmptySound();
 
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
@@ -531,26 +621,17 @@ void CRpg::WeaponIdle()
 	{
 		int iAnim;
 		float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
-		if (flRand <= 0.75 || m_fSpotActive)
+		if (flRand <= 0.75)
 		{
-			if (m_iClip == 0)
-				iAnim = RPG_IDLE_UL;
-			else
-				iAnim = RPG_IDLE;
-
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 90.0 / 15.0;
+			iAnim = (m_iClip == 0) ? RPG_IDLE_UL : RPG_IDLE;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 6.0;
 		}
 		else
 		{
-			if (m_iClip == 0)
-				iAnim = RPG_FIDGET_UL;
-			else
-				iAnim = RPG_FIDGET;
-
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 6.1;
+			iAnim = (m_iClip == 0) ? RPG_FIDGET_UL : RPG_FIDGET;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.0;
 		}
 
-		ResetEmptySound();
 		SendWeaponAnim(iAnim);
 	}
 	else
@@ -592,41 +673,25 @@ void CRpg::UpdateSpot()
 
 class CRpgAmmo : public CBasePlayerAmmo
 {
-	void Spawn() override
+	void Spawn() override // orig 0xbae40
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_rpgammo.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
-	void Precache() override
+	void Precache() override // orig 0xbae70
 	{
 		PRECACHE_MODEL("models/w_rpgammo.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
-	bool AddAmmo(CBaseEntity* pOther) override
+	bool AddAmmo(CBaseEntity* pOther) override // orig 0xbae90
 	{
-		int iGive;
-
-#ifdef CLIENT_DLL
-		if (bIsMultiplayer())
-#else
-		if (g_pGameRules->IsMultiplayer())
-#endif
+		if (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_RPGRocketBoxGive).s, "rockets", RC2Pref(RC2P_Ammo_MaxCarryRPG).s) != -1)
 		{
-			// hand out more ammo per rocket in multiplayer.
-			iGive = AMMO_RPGCLIP_GIVE * 2;
-		}
-		else
-		{
-			iGive = AMMO_RPGCLIP_GIVE;
-		}
-
-		if (pOther->GiveAmmo(iGive, "rockets", ROCKET_MAX_CARRY) != -1)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM, 0, PITCH_NORM);
 			return true;
 		}
 		return false;
 	}
 };
-LINK_ENTITY_TO_CLASS(ammo_rpgclip, CRpgAmmo);
+LINK_ENTITY_TO_CLASS(ammo_rpgclip, CRpgAmmo); // orig 0xbadd0

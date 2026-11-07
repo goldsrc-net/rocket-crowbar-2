@@ -109,12 +109,12 @@ TYPEDESCRIPTION CCineMonster::m_SaveData[] =
 };
 
 
-IMPLEMENT_SAVERESTORE(CCineMonster, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CCineMonster, CBaseMonster); // orig 0xc24d0 Save, orig 0xc2500 Restore
 
-LINK_ENTITY_TO_CLASS(scripted_sequence, CCineMonster);
+LINK_ENTITY_TO_CLASS(scripted_sequence, CCineMonster); // orig 0xc2530
 #define CLASSNAME "scripted_sequence"
 
-LINK_ENTITY_TO_CLASS(aiscripted_sequence, CCineAI);
+LINK_ENTITY_TO_CLASS(aiscripted_sequence, CCineAI); // orig 0xc25a0
 
 
 void CCineMonster::Spawn()
@@ -160,7 +160,7 @@ bool CCineMonster::FCanOverrideState()
 // FCanOverrideState - returns true because scripted AI can
 // possess entities regardless of their state.
 //=========================================================
-bool CCineAI::FCanOverrideState()
+bool CCineAI::FCanOverrideState() // orig 0xc26c0
 {
 	return true;
 }
@@ -196,11 +196,11 @@ void CCineMonster::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE u
 
 
 // This doesn't really make sense since only MOVETYPE_PUSH get 'Blocked' events
-void CCineMonster::Blocked(CBaseEntity* pOther)
+void CCineMonster::Blocked(CBaseEntity* pOther) // orig 0xc2730
 {
 }
 
-void CCineMonster::Touch(CBaseEntity* pOther)
+void CCineMonster::Touch(CBaseEntity* pOther) // orig 0xc2740
 {
 	/*
 	ALERT( at_aiconsole, "Cine Touch\n" );
@@ -258,7 +258,7 @@ void CCineMonster::Pain()
 //
 
 // find a viable entity
-bool CCineMonster::FindEntity()
+bool CCineMonster::FindEntity() // orig 0xc2770
 {
 	edict_t* pentTarget;
 
@@ -547,7 +547,7 @@ bool CCineAI::StartSequence(CBaseMonster* pTarget, int iszSeq, bool completeOnEm
 // the CBaseMonster pointer to the monster that the sequence
 // possesses.
 //=========================================================
-void CCineMonster::SequenceDone(CBaseMonster* pMonster)
+void CCineMonster::SequenceDone(CBaseMonster* pMonster) // orig 0xc3000
 {
 	//ALERT( at_aiconsole, "Sequence %s finished\n", STRING( m_pCine->m_iszPlay ) );
 
@@ -690,7 +690,7 @@ void ScriptEntityCancel(edict_t* pentCine)
 
 
 // find all the cinematic entities with my targetname and stop them from playing
-void CCineMonster::CancelScript()
+void CCineMonster::CancelScript() // orig 0xc3260
 {
 	ALERT(at_aiconsole, "Cancelling script: %s\n", STRING(m_iszPlay));
 
@@ -711,7 +711,7 @@ void CCineMonster::CancelScript()
 
 
 // find all the cinematic entities with my targetname and tell them to wait before starting
-void CCineMonster::DelayStart(bool state)
+void CCineMonster::DelayStart(bool state) // orig 0xc3310
 {
 	edict_t* pentCine = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(pev->targetname));
 
@@ -738,7 +738,7 @@ void CCineMonster::DelayStart(bool state)
 
 
 // Find an entity that I'm interested in and precache the sounds he'll need in the sequence.
-void CCineMonster::Activate()
+void CCineMonster::Activate() // orig 0xc3450
 {
 	edict_t* pentTarget;
 	CBaseMonster* pTarget;
@@ -916,7 +916,7 @@ public:
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	void EXPORT FindThink();
 	void EXPORT DelayThink();
-	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
+	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); } // orig 0xc3970
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -959,11 +959,11 @@ TYPEDESCRIPTION CScriptedSentence::m_SaveData[] =
 };
 
 
-IMPLEMENT_SAVERESTORE(CScriptedSentence, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CScriptedSentence, CBaseToggle); // orig 0xc38a0 Save, orig 0xc38d0 Restore
 
-LINK_ENTITY_TO_CLASS(scripted_sentence, CScriptedSentence);
+LINK_ENTITY_TO_CLASS(scripted_sentence, CScriptedSentence); // orig 0xc3900
 
-bool CScriptedSentence::KeyValue(KeyValueData* pkvd)
+bool CScriptedSentence::KeyValue(KeyValueData* pkvd) // orig 0xc3980
 {
 	if (FStrEq(pkvd->szKeyName, "sentence"))
 	{
@@ -1080,7 +1080,7 @@ void CScriptedSentence::FindThink()
 }
 
 
-void CScriptedSentence::DelayThink()
+void CScriptedSentence::DelayThink() // orig 0xc3db0
 {
 	m_active = true;
 	if (FStringNull(pev->targetname))
@@ -1125,7 +1125,7 @@ bool CScriptedSentence::AcceptableSpeaker(CBaseToggle* pTarget)
 }
 
 
-CBaseToggle* CScriptedSentence::FindEntity()
+CBaseToggle* CScriptedSentence::FindEntity() // orig 0xc3eb0
 {
 	edict_t* pentTarget;
 	CBaseToggle* pSpeakingEnt;
@@ -1216,11 +1216,11 @@ public:
 	void Spawn() override;
 	void Die();
 	int Classify() override;
-	int ObjectCaps() override { return (CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
+	int ObjectCaps() override { return (CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); } // orig 0xc41b0
 };
 
 
-LINK_ENTITY_TO_CLASS(monster_furniture, CFurniture);
+LINK_ENTITY_TO_CLASS(monster_furniture, CFurniture); // orig 0xc4140
 
 
 //=========================================================
@@ -1261,7 +1261,7 @@ void CFurniture::Spawn()
 //=========================================================
 // ID's Furniture as neutral (noone will attack it)
 //=========================================================
-int CFurniture::Classify()
+int CFurniture::Classify() // orig 0xc42a0
 {
 	return CLASS_NONE;
 }

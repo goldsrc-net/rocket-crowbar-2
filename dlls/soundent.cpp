@@ -19,6 +19,7 @@
 #include "soundent.h"
 
 
+// orig 0xcf550; RC2's factory also calls RC 1.9's AddToPrecachedList (util, p9)
 LINK_ENTITY_TO_CLASS(soundent, CSoundEnt);
 
 //=========================================================
@@ -49,6 +50,7 @@ void CSound::Reset()
 //=========================================================
 // FIsSound - returns true if the sound is an Audible sound
 //=========================================================
+// orig 0xcf630; as SDK 2.3
 bool CSound::FIsSound()
 {
 	if ((m_iType & (bits_SOUND_COMBAT | bits_SOUND_WORLD | bits_SOUND_PLAYER | bits_SOUND_DANGER)) != 0)
@@ -62,6 +64,7 @@ bool CSound::FIsSound()
 //=========================================================
 // FIsScent - returns true if the sound is actually a scent
 //=========================================================
+// orig 0xcf640; as SDK 2.3
 bool CSound::FIsScent()
 {
 	if ((m_iType & (bits_SOUND_CARCASS | bits_SOUND_MEAT | bits_SOUND_GARBAGE)) != 0)
@@ -126,6 +129,7 @@ void CSoundEnt::Think()
 //=========================================================
 // Precache - dummy function
 //=========================================================
+// orig 0xcf740; as SDK 2.3
 void CSoundEnt::Precache()
 {
 }

@@ -356,6 +356,21 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p7 needs: RC2 player members p7's code reads (names ours; the player package, p5, owns
+	// them). Offsets are the original's.
+	int m_iRC2Player69c;	   // orig +0x69c. An entity index: launched mines take INDEXENT() of it as pev->owner when it is valid; one of IsViewOfPlayer's three
+	float m_flEnergy;		   // orig +0x758. Shield/weapon energy: the sphere mine and roman candle cost RC2Pref(..EnergyCost); the shield drains it
+	float m_flEnergyRegenTime; // orig +0x760. Raised to gpGlobals->time + <..EnergyRegenDelay> whenever energy is spent
+	bool m_fShieldOn;		   // orig +0x778 (byte). The shield deflects only while set; cleared below [Shield] MinRunEnergy
+	int m_iRC2PlayerFlags708; // orig +0x708. Flags; bit 0x200 lets the shotgun fire under water (read through 0x95860 by entity index)
+	int m_iRC2Player10f8;	   // orig +0x10f8. While nonzero the conc charge's blast leaves armor alone
+	void SetPhysicsFlag10(float flDuration); // 0x9a860: sets bit 0x10 of the physics flags at +0x644 (sent as a physinfo key) and +0x64c = time + flDuration
+	int m_iRC2Player68c;	   // orig +0x68c. Set to 1 while a shrink_timer has the player shrunk, 0 after
+	int m_iRC2Player6a4;	   // orig +0x6a4. A player index (a rider); the shrink timer makes that player StopRiding
+	int m_iRC2Player6a8;	   // orig +0x6a8. As +0x6a4
+	bool m_fRC2Player10fc;	   // orig +0x10fc (byte). With +0x10f8 zero, shrinking hides HUD bit 0x10 and holsters
+	void StopRiding(int iArg); // 0xb1f50: "You are no longer riding %s"; the shrink timer calls it with 0. VERIFY: iArg
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)
