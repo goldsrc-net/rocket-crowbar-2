@@ -28,7 +28,6 @@
 #include "skill.h"
 #include "gamerules.h"
 
-#include "p3d_temp.h" // TEMP STUB: RC2PlayerAttribute
 
 class CRecharge : public CBaseToggle
 {
@@ -172,9 +171,9 @@ void CRecharge::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 
 	// The original reads attribute 6 and, when it is over 100, reads it again and throws the
 	// value away (a leftover clamp). VERIFY: what attributes 6 and 7 are (player.cpp's table).
-	if (RC2PlayerAttribute(6, ENTINDEX(m_hActivator->edict())) > 100.0f)
-		RC2PlayerAttribute(6, ENTINDEX(m_hActivator->edict()));
-	const float flMaxArmor = (int)RC2PlayerAttribute(7, ENTINDEX(m_hActivator->edict()));
+	if (PM_GetAttributeScale(6, ENTINDEX(m_hActivator->edict())) > 100.0f)
+		PM_GetAttributeScale(6, ENTINDEX(m_hActivator->edict()));
+	const float flMaxArmor = (int)PM_GetAttributeScale(7, ENTINDEX(m_hActivator->edict()));
 
 	// charge the player
 	if (m_hActivator->pev->armorvalue < flMaxArmor)

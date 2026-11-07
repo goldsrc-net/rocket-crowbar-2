@@ -118,7 +118,7 @@ void CSuckGrenade::StartDetonate()
 	pev->effects |= EF_NODRAW;
 	m_iRC2Flags = 2; // VERIFY: what the flags word at orig +0x68 means to its readers
 
-	m_iPullPoint = RC2AddPullPoint(pev->origin, RC2Pref(RC2P_Grenade_SuckGrenPullRadius).f,
+	m_iPullPoint = AddPullPoint(pev->origin, RC2Pref(RC2P_Grenade_SuckGrenPullRadius).f,
 		RC2Pref(RC2P_Grenade_SuckGrenPullPlayerConstant).f, RC2Pref(RC2P_Grenade_SuckGrenPullMonsterConstant).f);
 	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin, 900, RC2Pref(RC2P_Grenade_SuckGrenDetonateTime).f);
 
@@ -139,7 +139,7 @@ void CSuckGrenade::Detonating()
 // orig 0x59f30
 void CSuckGrenade::EndDetonate()
 {
-	RC2RemovePullPoint(m_iPullPoint);
+	RemovePullPoint(m_iPullPoint);
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 	WRITE_BYTE(254); // end the effect

@@ -14,7 +14,18 @@
 #include "player.h"
 #include "gamerules.h"
 #include "rc2prefs.h"
-#include "p2shared.h"
+#include "shield.h"
+#include "playerride.h"
+#include "UserMessages.h"
+
+// The CLTE types the crowbarang sends (names ours)
+#define RC2_CLTE_ROCKET_TRAIL 1			// short entity
+#define RC2_CLTE_CROWBARANG_GLINT 0x15	// short entity
+#define RC2_CLTE_CROWBARANG_EMBED 0x19	// short entity, short what it is in, 3 coords offset, 3 coords angles
+
+// GetRCCaps / GetRCCaps2 bits it tests (names ours)
+#define RC2_CAP_SHOVE 0x1	// GetRCCaps: may be knocked about
+#define RC2_CAP_NOHOME 0x20 // GetRCCaps2: crowbarangs don't home on it
 
 //=========================================================
 // CCrowbarang: flies out spinning, turns back when it is about to hit a wall, homes on players
@@ -131,7 +142,7 @@ void CCrowbarang::CrowbarangFlyingThink()
 		pev->solid = SOLID_BBOX;
 
 	// steered while the thrower holds the control button
-	if (pev->dmg_inflictor && (RC2PlayerButtons(ENTINDEX(pev->dmg_inflictor)) & RC2_IN_CROWBARANG) != 0)
+	if (pev->dmg_inflictor && (PM_GetAbilityFlags(ENTINDEX(pev->dmg_inflictor)) & RC2_IN_CROWBARANG) != 0)
 	{
 		if (pev->impulse == 2)
 		{
@@ -319,22 +330,22 @@ void CCrowbarang::CrowbarangFlyingTouch(CBaseEntity* pOther)
 		// caught by the thrower (or by what he sees through, for him)
 		if (pOther->IsActivePlayer())
 		{
-			if (pOther->edict() == pev->dmg_inflictor || IsPlayersViewEnt(pOther->edict(), pev->dmg_inflictor))
+			if (pOther->edict() == pev->dmg_inflictor || PlayerHasRider(pOther->edict(), pev->dmg_inflictor))
 			{
 				CBaseEntity* pCatcher = pOther;
-				if (IsPlayersViewEnt(pOther->edict(), pev->dmg_inflictor))
+				if (PlayerHasRider(pOther->edict(), pev->dmg_inflictor))
 					pCatcher = CBaseEntity::Instance(pev->dmg_inflictor);
 
-				g_fItemTimeout = false;
+				g_fRC2Randomize = false;
 				CBaseEntity* pCrowbar = CBaseEntity::Create("weapon_crowbar", g_vecZero, g_vecZero, NULL);
 				pCrowbar->pev->spawnflags |= SF_NORESPAWN;
 				pev->dmg_inflictor = NULL;
 
 				if (g_pGameRules->CanHavePlayerItem((CBasePlayer*)pCatcher, (CBasePlayerItem*)pCrowbar))
 				{
-					g_fGivingItem = true;
+					gEvilImpulse101 = true;
 					pCrowbar->Touch(pCatcher);
-					g_fGivingItem = false;
+					gEvilImpulse101 = false;
 				}
 				else
 					pCrowbar->pev->flags |= FL_KILLME;
@@ -344,7 +355,7 @@ void CCrowbarang::CrowbarangFlyingTouch(CBaseEntity* pOther)
 				pev->nextthink = gpGlobals->time + 0.01;
 				pev->effects |= EF_NODRAW;
 				STOP_SOUND(ENT(pev), CHAN_STATIC, "fans/fan4.wav");
-				g_fItemTimeout = true;
+				g_fRC2Randomize = true;
 				return;
 			}
 		}
@@ -408,7 +419,7 @@ void CCrowbarang::CrowbarangFlyingTouch(CBaseEntity* pOther)
 
 	// bounce: mirror off the touched plane, jiggle a little, same speed
 	float flSpeed = pev->velocity.Length();
-	pev->velocity = UTIL_Reflect(pev->velocity.Normalize(), trTouch.vecPlaneNormal);
+	pev->velocity = UTIL_ReflectVector(pev->velocity.Normalize(), trTouch.vecPlaneNormal);
 	float r1 = RANDOM_FLOAT(-0.1, 0.1);
 	float r2 = RANDOM_FLOAT(-0.1, 0.1);
 	float r3 = RANDOM_FLOAT(-0.1, 0.1);
@@ -511,26 +522,26 @@ void CCrowbarang::CrowbarangPickupTouch(CBaseEntity* pOther)
 
 	pev->dmg = gpGlobals->time + 0.2;
 
-	g_fItemTimeout = false;
+	g_fRC2Randomize = false;
 	CBaseEntity* pCrowbar = CBaseEntity::Create("weapon_crowbar", g_vecZero, g_vecZero, NULL);
 	pCrowbar->pev->spawnflags |= SF_NORESPAWN;
 	pev->dmg_inflictor = NULL;
 
 	if (g_pGameRules->CanHavePlayerItem((CBasePlayer*)pOther, (CBasePlayerItem*)pCrowbar))
 	{
-		g_fGivingItem = true;
+		gEvilImpulse101 = true;
 		pCrowbar->Touch(pOther);
-		g_fGivingItem = false;
+		gEvilImpulse101 = false;
 
 		SetThink(&CCrowbarang::SUB_Remove);
 		pev->nextthink = gpGlobals->time + 0.01;
 		pev->effects |= EF_NODRAW;
-		g_fItemTimeout = true;
+		g_fRC2Randomize = true;
 		return;
 	}
 
 	pCrowbar->pev->flags |= FL_KILLME;
-	g_fItemTimeout = true;
+	g_fRC2Randomize = true;
 }
 
 // orig 0x2f8a0
@@ -613,7 +624,7 @@ void CCrowbarang::Whack(CBaseEntity* pOther)
 	}
 
 	TraceResult tr = UTIL_GetGlobalTrace();
-	float flDamage = RC2ShieldDamage(pOther, pev->dmg, RC2Pref(RC2P_Crowbar_CrowbarangWhackShieldFraction).f, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 12);
+	float flDamage = ShieldDeflect(pOther, pev->dmg, RC2Pref(RC2P_Crowbar_CrowbarangWhackShieldFraction).f, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 12);
 	if (flDamage > 0)
 	{
 		if (pOther->BloodColor() != DONT_BLEED)
@@ -715,7 +726,7 @@ void CCrowbarRocket::DrunkenThink()
 void CCrowbarRocket::DrunkenTouch(CBaseEntity* pOther)
 {
 	STOP_SOUND(ENT(pev), CHAN_VOICE, "weapons/rocket1.wav");
-	UTIL_KillTrail(ENT(pev));
+	UTIL_KillEntityEffects(ENT(pev));
 	pev->owner = pev->dmg_inflictor;
 	ExplodeTouch(pOther);
 }

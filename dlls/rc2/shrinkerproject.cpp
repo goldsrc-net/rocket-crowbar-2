@@ -13,11 +13,8 @@
 #include "player.h"
 #include "gamerules.h"
 #include "rc2prefs.h"
-#include "p2shared.h"
-
-// from other files (TEMP STUBs in dlls/rc2/p2stubs_forkC.cpp)
-extern int UTIL_PackNormal(Vector vecNormal);	 // orig 0xf5920 (util): a unit vector in an int, 10 bits and a sign per axis
-extern entvars_t* UTIL_NamedInflictor(const char* pszName); // orig 0xf58a0 (util): a shared entity whose classname is pszName (the killer weapon's name), or the world
+#include "shield.h"
+#include "UserMessages.h"
 
 // gmsgCLTE types (names ours)
 #define RC2_CLTE_SHRINKER 0x27		 // short entity: the shot's glow
@@ -122,7 +119,7 @@ void CShrinkerProject::ShrinkTouch(CBaseEntity* pOther)
 			goto remove;
 		}
 
-		if (RC2ShieldDamage(pOther, RC2Pref(RC2P_Egon_ShrinkerShieldDamage).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 10) == 0)
+		if (ShieldDeflect(pOther, RC2Pref(RC2P_Egon_ShrinkerShieldDamage).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 10) == 0)
 		{
 			Impact(tr.vecPlaneNormal, 0);
 			goto remove;
@@ -373,7 +370,7 @@ void CImplodeTimer::ImplodeEnt()
 		else
 			pevAttacker = pev->dmg_inflictor ? VARS(pev->dmg_inflictor) : NULL;
 
-		pTarget->TakeDamage(UTIL_NamedInflictor("imploder"), pevAttacker, 50000, DMG_ALWAYSGIB | DMG_ENERGYBEAM);
+		pTarget->TakeDamage(UTIL_RC2DamageInflictor("imploder"), pevAttacker, 50000, DMG_ALWAYSGIB | DMG_ENERGYBEAM);
 		UTIL_Remove(this);
 	}
 }

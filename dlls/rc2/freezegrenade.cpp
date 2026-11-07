@@ -19,7 +19,8 @@
 #include "player.h"
 #include "gamerules.h"
 #include "rc2prefs.h"
-#include "p4_needs.h"
+#include "shield.h"
+#include "UserMessages.h"
 #include "freezegrenade.h"
 
 LINK_ENTITY_TO_CLASS(freeze_grenade, CFreezeGrenade); // orig 0x63860
@@ -90,7 +91,7 @@ void CFreezeGrenade::FlyingThink()
 // thrower kept in dmg_inflictor, when that is still a live entity. Name ours.
 static CBaseEntity* FreezeGrenadeAttacker(entvars_t* pev)
 {
-	if (0 != UTIL_IsValidEdict(pev->dmg_inflictor))
+	if (0 != UTIL_IsValidEntity(pev->dmg_inflictor))
 		return CBaseEntity::Instance(pev->dmg_inflictor);
 	return NULL;
 }
@@ -109,7 +110,7 @@ void CFreezeGrenade::AttachTouch(CBaseEntity* pOther)
 
 	// a player's shield bounces it back, and it becomes the shield owner's grenade
 	Vector vecHit, vecNormal;
-	if (ShieldAbsorbDamage(pOther, 10, 1, tr.vecEndPos, vecDir, &vecHit, &vecNormal, 8) < 10)
+	if (ShieldDeflect(pOther, 10, 1, tr.vecEndPos, vecDir, &vecHit, &vecNormal, 8) < 10)
 	{
 		const float flSpeed = pev->velocity.Length();
 		pev->velocity = UTIL_ReflectVector(vecDir, vecNormal) * flSpeed;
@@ -227,14 +228,14 @@ void CFreezeGrenade::AttachedThink()
 void CFreezeGrenade::Detonate()
 {
 	UTIL_MakeAimVectors(pev->angles);
-	PLAYBACK_EVENT_FULL(0, edict(), m_usFreezeDet, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, UTIL_PackDirection(gpGlobals->v_forward), 0, 0, 0);
+	PLAYBACK_EVENT_FULL(0, edict(), m_usFreezeDet, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, UTIL_PackNormal(gpGlobals->v_forward), 0, 0, 0);
 
 	const float flRadius = RC2Pref(RC2P_HornetGun_GrenadeBlastRadius).f;
 
 	// the damage is the thrower's when it is still around, the grenade's own otherwise
 	entvars_t* pevAttacker = pev;
 	CBaseEntity* pAttacker = NULL;
-	if (0 != UTIL_IsValidEdict(pev->dmg_inflictor))
+	if (0 != UTIL_IsValidEntity(pev->dmg_inflictor))
 	{
 		pAttacker = CBaseEntity::Instance(pev->dmg_inflictor);
 		pevAttacker = VARS(pev->dmg_inflictor);
@@ -243,7 +244,7 @@ void CFreezeGrenade::Detonate()
 	const Vector vecSrc = pev->origin + gpGlobals->v_forward * 24;
 
 	// each entity the blast lands on (GetEffectedEnt) is hit once
-	UTIL_PushEntityMask();
+	UTIL_PushEntityMarks();
 	CBaseEntity* pEntity = NULL;
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
 	{
@@ -285,7 +286,7 @@ void CFreezeGrenade::Detonate()
 		UTIL_MarkEntity(ENTINDEX(pTarget->edict()));
 		FreezeDamage(pTarget, pevAttacker, pev, flDamage, flFreezeDamage, flFreezeTime, &tr, vecDir, true);
 	}
-	UTIL_PopEntityMask();
+	UTIL_PopEntityMarks();
 
 	SetTouch(NULL);
 	SetThink(NULL);
@@ -341,7 +342,7 @@ void FreezeDamage(CBaseEntity* pEntity, entvars_t* pevAttacker, entvars_t* pevIn
 	const float flFull = flDamage;
 	if (bShield)
 	{
-		flDamage = ShieldAbsorbDamage(pEntity, flDamage, RC2Pref(RC2P_HornetGun_SharedShieldFraction).f, ptr ? ptr->vecEndPos : g_vecZero, vecDir, NULL, NULL, 4);
+		flDamage = ShieldDeflect(pEntity, flDamage, RC2Pref(RC2P_HornetGun_SharedShieldFraction).f, ptr ? ptr->vecEndPos : g_vecZero, vecDir, NULL, NULL, 4);
 		if (flDamage <= 0)
 			return;
 	}
@@ -353,7 +354,7 @@ void FreezeDamage(CBaseEntity* pEntity, entvars_t* pevAttacker, entvars_t* pevIn
 
 	if (hEntity == NULL)
 		return;
-	if (0 == UTIL_IsValidEdict(hEntity.Get()))
+	if (0 == UTIL_IsValidEntity(hEntity.Get()))
 		return;
 
 	// what was alive must still be; what wasn't (players aside) is frozen whatever its state

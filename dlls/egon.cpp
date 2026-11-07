@@ -572,16 +572,11 @@ LINK_ENTITY_TO_CLASS(ammo_egonclip, CEgonAmmo);
 //=========================================================
 
 #include "rc2prefs.h"
-#include "p2shared.h"
-
-// from other files (TEMP STUBs in dlls/rc2/p2stubs_forkC.cpp)
-extern int RC2PlayerWaterWeapons(CBasePlayer* pPlayer);		  // orig 0x95860 (player): bit 9 of RC2PlayerButtons, the player may fire under water
-extern int UTIL_PackNormal(Vector vecNormal);					  // orig 0xf5920 (util): a unit vector in an int, 10 bits and a sign per axis
 
 // can't fire: fully under water without the RC2 under-water bit
 static bool EgonUnderwater(CBasePlayer* pPlayer) // name ours
 {
-	return pPlayer->pev->waterlevel == 3 && RC2PlayerWaterWeapons(pPlayer) == 0;
+	return pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(pPlayer);
 }
 
 // the bytes RC2 keeps in CBaseEntity +0x64 (cbase.h's m_ucTractorHeld, m_ucTractorKnocked, m_bFrozen, m_bAntiFriction): +0x64 an egon holds it,
@@ -751,7 +746,7 @@ void CEgon::PrimaryAttack()
 		m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.5;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.1;
 		SendWeaponAnim(EGON_FIRE1 + RANDOM_LONG(0, 3));
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usTractor, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 1);
 		return;
 	}
@@ -861,7 +856,7 @@ void CEgon::SecondaryAttack()
 	m_pPlayer->m_iWeaponFlash = 256;
 	(void)m_pPlayer->GetGunPosition(); // the original calls it here and drops the result
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireShrinker, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
 	if (EGON_AMMO <= 0)
@@ -906,7 +901,7 @@ void CEgon::TertiaryAttack()
 		m_fInAttack = 1;
 		m_flChargeDone = RC2Pref(RC2P_Egon_ImploderChargeTime).f + gpGlobals->time;
 		m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase();
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usImploderCharge, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 		return;
 	}
@@ -979,7 +974,7 @@ void CEgon::QuaternaryAttack()
 	m_pPlayer->m_iWeaponFlash = 512;
 	(void)m_pPlayer->GetGunPosition(); // the original calls it here and drops the result
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usFireNuke, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
 	UTIL_MakeVectors(m_pPlayer->pev->punchangle + m_pPlayer->pev->v_angle);
@@ -1024,7 +1019,7 @@ void CEgon::ImploderFire()
 {
 	CBaseEntity* pBest = NULL;
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 	{
 		m_iChargeType = 0;
 		m_fInAttack = 0;
@@ -1045,7 +1040,7 @@ void CEgon::ImploderFire()
 		m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_Egon_TertiaryRefireQuaternary).f;
 		m_pPlayer->m_iWeaponVolume = 600;
 
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usImploderFire, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -1140,7 +1135,7 @@ void CEgon::ImploderFire()
 // orig 0x3f370: the charge turned on yourself: a shrink timer that never ends
 void CEgon::ShrinkSelf()
 {
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 	{
 		m_iChargeType = 0;
 		m_fInAttack = 0;

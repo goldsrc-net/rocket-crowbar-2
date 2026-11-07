@@ -13,13 +13,12 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
+#include "UserMessages.h"
 #include "monsters.h"
 #include "weapons.h"
 #include "soundent.h"
 #include "rc2prefs.h"
-#include "p6stubs.h"
 
-extern int gmsgCLTE; // RC2's "CLTE" user message (orig .bss 0x18f4b8); TEMP STUB in dlls/rc2/playerride.cpp
 
 #define CLTE_SCIMINE_IDLE 7		  // ours: the client's idle effect on the mine
 #define CLTE_SCIMINE_TRIGGERED 8 // ours: the client's effect once it spins up

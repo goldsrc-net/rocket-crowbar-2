@@ -16,11 +16,10 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
+#include "UserMessages.h"
 #include "soundent.h"
 #include "rc2prefs.h"
-#include "p6stubs.h"
 
-extern int gmsgCLTE; // RC2's "CLTE" user message (orig .bss 0x18f4b8); TEMP STUB in dlls/rc2/playerride.cpp
 
 class CSphereMine : public CGrenade
 {
@@ -339,9 +338,9 @@ void CSphereMine::Killed(entvars_t* pevAttacker, int iGib) // orig 0xb74d0
 	pev->owner = pev->dmg_inflictor;
 	pev->takedamage = DAMAGE_NO;
 	pev->takedamage = DAMAGE_NO;
-	UTIL_RC2KillEntityEffects(edict());
+	UTIL_KillEntityEffects(edict());
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 1024, 3.0);
-	PLAYBACK_EVENT_FULL(0, edict(), g_usRC2ExplodeEvent, 0.0, pev->origin, g_vecZero, pev->dmg, 0.0, 0, 0, false, true);
+	PLAYBACK_EVENT_FULL(0, edict(), g_usExplodeEvent, 0.0, pev->origin, g_vecZero, pev->dmg, 0.0, 0, 0, false, true);
 
 	entvars_t* pevOwner = NULL;
 	if (UTIL_IsValidEntity(pev->dmg_inflictor) && pev->dmg_inflictor)
@@ -475,11 +474,11 @@ void CSMProjectile::ExplodeTouch(CBaseEntity* pOther) // orig 0xb7d40
 	{
 		// hit the world: the impact sits just off the wall, facing out of it
 		vecSpot = tr.vecEndPos + tr.vecPlaneNormal * 4.0;
-		PLAYBACK_EVENT_FULL(0, edict(), m_usEvent, 0.0, vecSpot, g_vecZero, 0.0, 0.0, UTIL_RC2PackNormal(-tr.vecPlaneNormal), 0, true, false);
+		PLAYBACK_EVENT_FULL(0, edict(), m_usEvent, 0.0, vecSpot, g_vecZero, 0.0, 0.0, UTIL_PackNormal(-tr.vecPlaneNormal), 0, true, false);
 	}
 	else
 	{
-		PLAYBACK_EVENT_FULL(0, edict(), m_usEvent, 0.0, vecSpot, g_vecZero, 0.0, 0.0, UTIL_RC2PackNormal(pev->velocity.Normalize()), 0, false, false);
+		PLAYBACK_EVENT_FULL(0, edict(), m_usEvent, 0.0, vecSpot, g_vecZero, 0.0, 0.0, UTIL_PackNormal(pev->velocity.Normalize()), 0, false, false);
 
 		if (pOther->IsAlive())
 		{

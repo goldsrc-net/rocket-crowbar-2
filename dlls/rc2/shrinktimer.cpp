@@ -13,7 +13,8 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
-#include "p7_extern.h"
+#include "UserMessages.h"
+#include "virtualhull.h"
 
 class CShrinkTimer : public CBaseEntity
 {
@@ -223,7 +224,7 @@ bool CShrinkTimer::TrySquash(CBaseEntity* pShrunk, CBaseEntity* pSquasher, Vecto
 		return false;
 
 	pShrunk->pev->armorvalue = 0;
-	pShrunk->TakeDamage(UTIL_NamedInflictor("squash"), pSquasher->pev, 50000, DMG_CRUSH);
+	pShrunk->TakeDamage(UTIL_RC2DamageInflictor("squash"), pSquasher->pev, 50000, DMG_CRUSH);
 	return true;
 }
 
@@ -233,7 +234,7 @@ bool CShrinkTimer::CheckSquash(CBaseEntity* pShrunk, CBaseEntity* pOther, Vector
 {
 	if (pOther->pev->groundentity != pShrunk->edict())
 	{
-		if (!pShrunk->IsPlayer() || !UTIL_PlayerPartIsGround(pShrunk, pOther->edict()))
+		if (!pShrunk->IsPlayer() || !IsOnVirtualHull(static_cast<CBasePlayer*>(pShrunk), pOther->edict()))
 		{
 			const Vector vecFeet(pOther->pev->origin.x, pOther->pev->origin.y, pOther->pev->mins.z + pOther->pev->origin.z);
 			const Vector vecHead(pShrunk->pev->origin.x, pShrunk->pev->origin.y, pShrunk->pev->maxs.z + 1 + pShrunk->pev->origin.z);
@@ -347,7 +348,7 @@ void CShrinkTimer::UnShrinkEnt()
 	if (tr.flFraction < 1.0 || 0 != tr.fStartSolid || 0 != tr.fAllSolid)
 	{
 		// no room to grow: crushed by whatever is there
-		pShrunk->TakeDamage(UTIL_NamedInflictor("squash"), tr.pHit != NULL ? VARS(tr.pHit) : NULL, 50000, DMG_CRUSH);
+		pShrunk->TakeDamage(UTIL_RC2DamageInflictor("squash"), tr.pHit != NULL ? VARS(tr.pHit) : NULL, 50000, DMG_CRUSH);
 		SetThink(NULL);
 		SetTouch(NULL);
 		UTIL_Remove(this);
@@ -404,7 +405,7 @@ void CShrinkTimer::UnShrinkEnt()
 			pevSquasher = tr.pHit != NULL ? VARS(tr.pHit) : NULL;
 		else
 			pevSquasher = pShrunk->pev;
-		pShrunk->TakeDamage(UTIL_NamedInflictor("squash"), pevSquasher, 50000, DMG_CRUSH);
+		pShrunk->TakeDamage(UTIL_RC2DamageInflictor("squash"), pevSquasher, 50000, DMG_CRUSH);
 	}
 
 	SetThink(NULL);

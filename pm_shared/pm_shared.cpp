@@ -5006,25 +5006,4 @@ void PM_GetGlobalPuller(int idx, float* org, float* force, float* dist)
 	*force = 0;
 	*dist = 0;
 }
-#else
-// TEMP STUB (p6): real ones belong in player.cpp (rc2.dll 0x95890-0x95ab0, p5), the transforms'
-// files (0xd9a60, 0xd9b00, 0xdf260-0xdf320, p8), triggers (0xe3400, p8) and util (0xf7150,
-// 0xf7200, p8). Each answers as the original does when there is no such player.
-float PM_GetAttributeScale(int iWhich, int iEnt) { return 1.0f; }
-int PM_GetAbilityFlags(int iEnt) { return 0; }
-void PM_SetPlayerTimer(int iEnt, int iSlot, int iMsec) {}
-int PM_GetPlayerTimer(int iEnt, int iSlot) { return 0; }
-float PM_GetEnergy(int iEnt) { return 100.0f; }
-void PM_UseEnergy(int iEnt, float flAmount, float flRechargeDelay) {}
-void PM_JetboostEffect(int iEnt, int iFlag, float* vecDir, float* vecVelocity) {}
-void PM_HideViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
-void PM_RestoreViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
-int PM_GetPlayerMode(int iEnt) { return 0; }
-void PM_HideOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
-void PM_RestoreOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
-int PM_GetBatPerch(int iEnt, int* piAttachInfo, float* vecOffset) { return 0; }
-void PM_BatUnperch(int iEnt) {}
-void PM_SetHeadcrabLeap(int iEnt, int bLeaping) {}
-int PM_GetHeadcrabLeap(int iEnt) { return 0; }
-int PM_HeadcrabLeapHit(int iEnt, int iHitInfo, float flSpeed) { return 0; }
 #endif

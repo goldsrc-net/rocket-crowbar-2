@@ -105,12 +105,12 @@ void CAFGrenade::Detonate()
 	if ((pev->flags & FL_ONGROUND) != 0)
 		vecSrc.z += RC2Pref(RC2P_Grenade_AFGrenOnGroundZBoost).f;
 
-	RC2EntMarkPush();
+	UTIL_PushEntityMarks();
 	CBaseEntity* pEntity = NULL;
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
 	{
 		CBaseEntity* pTarget = pEntity->GetEffectedEnt();
-		if (RC2EntMarkTest(ENTINDEX(pTarget->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pTarget->edict())))
 			continue;
 		// VERIFY: GetRCCaps' arguments are entity pointers (attacker, this) here; cbase.h types the first int
 		if ((pTarget->GetRCCaps(pAttacker, this) & 0x800) == 0)
@@ -121,8 +121,8 @@ void CAFGrenade::Detonate()
 			continue;
 		if (pTarget->IsPlayer() && static_cast<CBasePlayer*>(pTarget)->m_iRidingIndex != 0)
 			continue;
-		// gamerules orig slot 58 (p3b_temp.h's name), asked (attacker, victim)
-		if (pAttacker && pAttacker->IsPlayer() && !RC2GameRulesAllowGaussTeleport(static_cast<CBasePlayer*>(pAttacker), pTarget))
+		// gamerules orig slot 58 (PlayerCanAffect), asked (attacker, victim)
+		if (pAttacker && pAttacker->IsPlayer() && !g_pGameRules->PlayerCanAffect(pAttacker, pTarget))
 			continue;
 
 		Vector vecSpot = pEntity->Center();
@@ -149,10 +149,10 @@ void CAFGrenade::Detonate()
 		const float flVelocity = RC2Pref(RC2P_Grenade_AFGrenBlastMaxAddVell).f * flFraction + RC2Pref(RC2P_Grenade_AFGrenBlastMinVel).f;
 		const float flDamage = RC2Pref(RC2P_Grenade_AFGrenBlastMaxAddDamage).f * flFraction + RC2Pref(RC2P_Grenade_AFGrenBlastMinDamage).f;
 
-		RC2EntMarkSet(ENTINDEX(pTarget->edict()));
+		UTIL_MarkEntity(ENTINDEX(pTarget->edict()));
 		BlastEntity(pTarget, pevAttacker, pev, flDamage, flTime, flVelocity, vecDir, &tr);
 	}
-	RC2EntMarkPop();
+	UTIL_PopEntityMarks();
 
 	SetThink(NULL);
 	SetTouch(NULL);
@@ -176,7 +176,7 @@ void CAFGrenade::BlastEntity(CBaseEntity* pTarget, entvars_t* pevAttacker, entva
 		bWasAlive = bWasAlive && (static_cast<CBaseMonster*>(CBaseEntity::Instance(hTarget.Get()))->m_afMemory & bits_MEMORY_KILLED) == 0;
 
 	const float flBaseDamage = flDamage;
-	flDamage = RC2ShieldDamage(pTarget, flDamage, RC2Pref(RC2P_Grenade_AFGrenBlastDamageShieldFraction).f, ptr->vecEndPos, vecDir, NULL, NULL, 4);
+	flDamage = ShieldDeflect(pTarget, flDamage, RC2Pref(RC2P_Grenade_AFGrenBlastDamageShieldFraction).f, ptr->vecEndPos, vecDir, NULL, NULL, 4);
 	if (flDamage <= 0)
 		return;
 	if (flBaseDamage != 0)

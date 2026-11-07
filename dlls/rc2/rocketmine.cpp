@@ -18,7 +18,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "rc2prefs.h"
-#include "p6stubs.h"
 
 class CRocketMine : public CGrenade
 {

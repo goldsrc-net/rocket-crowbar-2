@@ -49,6 +49,9 @@
 #include "pm_defs.h"
 #include "UserMessages.h"
 #include "rc2prefs.h"
+#include "rc2/maintainent.h"
+#include "rc2/vote.h"
+#include "rc2/transform.h"
 #include <cmath>
 
 // Rocket Crowbar 2 (RC 1.9's name): set while a client command creates entities, so
@@ -78,31 +81,6 @@ void set_suicide_frame(entvars_t* pev)
 }
 
 
-// Rocket Crowbar 2: what client.cpp uses from other files (see reference/dossiers/p1.md)
-extern void UTIL_KillEntityEffects(edict_t* pEdict);		 // orig 0xf55b0 (util, p9; p3's name): TE_KILLBEAM and a CLTE kill for it
-extern void UTIL_ExtendTime(float* pflTime, float flBase, float flDelay); // orig 0xf5900 (util, p9; p2's name): *pflTime = max(*pflTime, flBase + flDelay)
-extern int RC2PlayerButtons(int iIndex);					 // orig 0x958b0 (player, p5; p2's name): the ability bits (m_iAbilities) of player iIndex
-extern bool g_fRC2Randomize;								 // orig 0x181430 (weapons.cpp; p3/p9's name)
-extern void Admin_Command(edict_t* pEntity);				 // orig 0x2de0 (p1, dlls/rc2/maintainent.cpp)
-extern void RC2Prefs_ClientCommand(edict_t* pEntity);		 // orig 0xb0050 (rc2prefs.cpp, p6's)
-extern void StopVote();										 // orig 0xf7f20 (p9), name ours
-extern void ResetVote();									 // orig 0xf7ed0 (p9), name ours
-extern void VoteThink();									 // orig 0xf8280 (p9), name ours
-extern void Vote_Command(edict_t* pEntity);					 // orig 0xf8520 (p9): "vote <yes|no>", name ours
-extern void VoteMap_Command(edict_t* pEntity);				 // orig 0xf8620 (p9): "votemap", name ours
-extern void VoteKick_Command(edict_t* pEntity);				 // orig 0xf89d0 (p9): "votekick", name ours
-extern void UpdateVirtualHulls();							 // orig 0xf7600 (p9): the virtual_hull entities each frame, name ours
-extern void PrecacheTransforms();							 // orig 0xe3450 (p8): what the five transforms need, name ours
-extern int gmsgCLTE;										 // "CLTE"
-extern bool IsClassnamePrecachedNoInvalid(const char* pszClassname); // orig 0xf5a80 (util, p9; RC 1.9's name)
-extern const char* GetPrecachedClassname(const char* pszClassname);	 // orig 0xf5bf0 (util, p9): the precache list's copy, name ours
-extern int gmsgAttrConf;									 // "AttrConf"
-extern int gmsgSetAttr;										 // "SetAttr"
-
-// Rocket Crowbar 2: which clients are connected, one bit per client index (the util package's
-// UTIL_IsValidEntity tests it for player slots). orig 0x1af2a8, name ours.
-unsigned int g_iConnectedClients = 0;
-
 // SDK 2.3's g_flWeaponCheat, which halflife-updated replaced with g_psv_cheats: RC2 reads
 // sv_cheats into it every frame (StartFrame) and its give, givefor and fov test it. orig 0x1afd34
 extern float g_flWeaponCheat; // world.cpp (SDK 2.3's place)
@@ -118,7 +96,7 @@ called when a player connects to a server
 qboolean ClientConnect(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
 	UTIL_KillEntityEffects(pEntity);
-	g_iConnectedClients |= 1u << ((ENTINDEX(pEntity) - 1) & 31);
+	g_iRC2ClientBits |= 1u << ((ENTINDEX(pEntity) - 1) & 31);
 	return static_cast<qboolean>(g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason));
 
 	// a client connecting during an intermission can cause problems
@@ -141,7 +119,7 @@ GLOBALS ASSUMED SET:  g_fGameOver
 // halflife-updated's tank release isn't in RC2 (SDK 2.3 had none either).
 void ClientDisconnect(edict_t* pEntity)
 {
-	g_iConnectedClients &= ~(1u << ((ENTINDEX(pEntity) - 1) & 31));
+	g_iRC2ClientBits &= ~(1u << ((ENTINDEX(pEntity) - 1) & 31));
 
 	if (g_fGameOver)
 		return;
@@ -887,7 +865,7 @@ void ClientCommand(edict_t* pEntity)
 		pPlayer->m_flNextImpulse = gpGlobals->time + 0.1;
 		g_bUnsafeCreate = true;
 		g_fRC2Randomize = false;
-		CBaseEntity* pItem = CBaseEntity::Create(GetPrecachedClassname(CMD_ARGV(1)), pev->origin, g_vecZero, NULL);
+		CBaseEntity* pItem = CBaseEntity::Create(GetPrecachedName(CMD_ARGV(1)), pev->origin, g_vecZero, NULL);
 		g_fRC2Randomize = true;
 		g_bUnsafeCreate = false;
 		if (!pItem)
@@ -936,7 +914,7 @@ void ClientCommand(edict_t* pEntity)
 		g_fRC2Randomize = false;
 		const float flDist = CMD_ARGC() >= 3 ? atof(CMD_ARGV(2)) : 128.0;
 		const Vector vecAngles(0, pev->v_angle.y, 0);
-		CBaseEntity* pItem = CBaseEntity::Create(GetPrecachedClassname(CMD_ARGV(1)), pev->origin + gpGlobals->v_forward * flDist, vecAngles, NULL);
+		CBaseEntity* pItem = CBaseEntity::Create(GetPrecachedName(CMD_ARGV(1)), pev->origin + gpGlobals->v_forward * flDist, vecAngles, NULL);
 		g_fRC2Randomize = true;
 		g_bUnsafeCreate = false;
 		if (!pItem)
@@ -972,7 +950,7 @@ void ClientCommand(edict_t* pEntity)
 	else if (!strcmp(pcmd, "jetpack"))
 	{
 		// toggles the jetpack (ability bit 8)
-		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x8) == 0 || pPlayer->pev->deadflag != DEAD_NO || pPlayer->m_iTransformType != 0)
+		if ((PM_GetAbilityFlags(ENTINDEX(pPlayer->edict())) & 0x8) == 0 || pPlayer->pev->deadflag != DEAD_NO || pPlayer->m_iTransformType != 0)
 		{
 			CLIENT_PRINTF(pEntity, print_console, "You don't have a jetpack\n");
 			return;
@@ -1008,7 +986,7 @@ void ClientCommand(edict_t* pEntity)
 	else if (!strcmp(pcmd, "energydraw") || !strcmp(pcmd, "drawenergy"))
 	{
 		// standing still to draw energy (ability bit 0x10)
-		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x10) == 0 || pPlayer->pev->deadflag != DEAD_NO)
+		if ((PM_GetAbilityFlags(ENTINDEX(pPlayer->edict())) & 0x10) == 0 || pPlayer->pev->deadflag != DEAD_NO)
 		{
 			CLIENT_PRINTF(pEntity, print_console, "You can't draw energy\n");
 			return;
@@ -1026,7 +1004,7 @@ void ClientCommand(edict_t* pEntity)
 	else if (!strcmp(pcmd, "createhealth") || !strcmp(pcmd, "makehealth") || !strcmp(pcmd, "energy2health"))
 	{
 		// energy into health (ability bit 0x20)
-		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x20) == 0 || pPlayer->pev->deadflag != DEAD_NO)
+		if ((PM_GetAbilityFlags(ENTINDEX(pPlayer->edict())) & 0x20) == 0 || pPlayer->pev->deadflag != DEAD_NO)
 		{
 			CLIENT_PRINTF(pEntity, print_console, "You can't create health\n");
 			return;
@@ -1044,7 +1022,7 @@ void ClientCommand(edict_t* pEntity)
 	else if (!strcmp(pcmd, "shield"))
 	{
 		// toggles the shield (ability bit 0x80)
-		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x80) == 0 || pPlayer->pev->deadflag != DEAD_NO || 0 != pPlayer->m_iShrunk || pPlayer->m_iTransformType != 0 || pPlayer->m_bTransforming || pPlayer->m_iRidingIndex)
+		if ((PM_GetAbilityFlags(ENTINDEX(pPlayer->edict())) & 0x80) == 0 || pPlayer->pev->deadflag != DEAD_NO || 0 != pPlayer->m_iShrunk || pPlayer->m_iTransformType != 0 || pPlayer->m_bTransforming || pPlayer->m_iRidingIndex)
 		{
 			CLIENT_PRINTF(pEntity, print_console, "You don't have a shield\n");
 			return;
@@ -1144,12 +1122,12 @@ void ClientCommand(edict_t* pEntity)
 	{
 		if (pPlayer->m_fSuicideBan)
 			return;
-		pPlayer->RC2StartObserver();
+		pPlayer->GoToSpectatorView();
 	}
 	else if (!strcmp(pcmd, "vote"))
 	{
 		if (CMD_ARGC() >= 2)
-			Vote_Command(pEntity);
+			ClientVote(pEntity);
 		else
 			CLIENT_PRINTF(pEntity, print_console, "Ussage: vote <yes or no>\n");
 	}
@@ -1158,7 +1136,7 @@ void ClientCommand(edict_t* pEntity)
 		if (g_fGameOver)
 			return;
 		if (CMD_ARGC() >= 2)
-			VoteMap_Command(pEntity);
+			ClientVoteMap(pEntity);
 		else
 			CLIENT_PRINTF(pEntity, print_console, "Ussage: votemap\n");
 	}
@@ -1166,7 +1144,7 @@ void ClientCommand(edict_t* pEntity)
 	{
 		if (g_fGameOver)
 			return;
-		VoteKick_Command(pEntity);
+		ClientVoteKick(pEntity);
 	}
 	else if (!strcmp(pcmd, "setattr"))
 	{
@@ -1581,7 +1559,7 @@ void StartFrame()
 	gpGlobals->teamplay = teamplay.value;
 	g_ulFrameCount++;
 
-	UpdateVirtualHulls();
+	RemoveOrphanVirtualHulls();
 	VoteThink();
 
 	const bool allowBunnyHopping = sv_allowbunnyhopping.value != 0;
@@ -1715,7 +1693,7 @@ void ClientPrecache()
 	PRECACHE_MODEL("sprites/lgtning.spr");
 	PRECACHE_SOUND("weapons/mkhealth.wav");
 	PRECACHE_MODEL("sprites/noise1.spr");
-	PrecacheTransforms();
+	Transform_Precache();
 	if (sv_pcstuff.value != 0.0)
 	{
 		UTIL_PrecacheOther("monster_human_grunt");
@@ -2911,22 +2889,3 @@ int AllowLagCompensation()
 // orig 0x1ad20 CBasePlayer::IsAlive, 0x1ad50 ShouldFadeOnDeath, 0x1ad60 IsPlayer, 0x1ad70
 // IsNetClient, 0x1ad80 ObjectCaps: player.h's inline bodies, emitted here, stock (each "orig"
 // listed: orig 0x1ad20, orig 0x1ad50, orig 0x1ad60, orig 0x1ad70, orig 0x1ad80)
-
-// UTIL_KillEntityEffects: the real one is reconstructed elsewhere now
-// UTIL_ExtendTime: the real one is reconstructed elsewhere now
-// RC2PlayerButtons: the real one is reconstructed elsewhere now
-// g_fRC2Randomize: the real one is reconstructed elsewhere now
-// RC2Prefs_ClientCommand: the real one is reconstructed elsewhere now
-// ResetVote: the real one is reconstructed elsewhere now
-// VoteThink: the real one is reconstructed elsewhere now
-void Vote_Command(edict_t* pEntity) {}
-void VoteMap_Command(edict_t* pEntity) {}
-void VoteKick_Command(edict_t* pEntity) {}
-void UpdateVirtualHulls() {}
-void PrecacheTransforms() {}
-// StopRiding: the real one is reconstructed elsewhere now
-// StartRiding: the real one is reconstructed elsewhere now
-// StartTransform: the real one is reconstructed elsewhere now
-// StartUntransform: the real one is reconstructed elsewhere now
-// AddPhysFlag2Source: the real one is reconstructed elsewhere now
-void CBasePlayer::RC2StartObserver() {}

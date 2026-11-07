@@ -68,9 +68,9 @@ void CBasePlayer::UpdateVirtualHulls() // orig 0xf6fb0
 }
 
 // For the player's movement: each of player iPlayer's hulls made non-solid and handed to
-// pfnSetHull out of the way (8192, 8192, 8192), or solid at its own origin. VERIFY: what
-// pfnSetHull is (its caller is at 0xa8af0).
-void VirtualHulls_Hide(int iPlayer, void (*pfnSetHull)(int iEnt, int iSolid, const float* vecOrigin)) // orig 0xf7150
+// pfnSetHull out of the way (8192, 8192, 8192), or solid at its own origin. pfnSetHull is
+// pm_shared's (orig 0xa8d10): it sets the solid and origin of the matching physents.
+void PM_HideOwnedEnts(int iPlayer, PM_SETENTFUNC pfnSetHull) // orig 0xf7150
 {
 	edict_t* pent = INDEXENT(iPlayer);
 	if (!UTIL_IsValidEntity(pent))
@@ -91,7 +91,7 @@ void VirtualHulls_Hide(int iPlayer, void (*pfnSetHull)(int iEnt, int iSolid, con
 	}
 }
 
-void VirtualHulls_Show(int iPlayer, void (*pfnSetHull)(int iEnt, int iSolid, const float* vecOrigin)) // orig 0xf7200
+void PM_RestoreOwnedEnts(int iPlayer, PM_SETENTFUNC pfnSetHull) // orig 0xf7200
 {
 	edict_t* pent = INDEXENT(iPlayer);
 	if (!UTIL_IsValidEntity(pent))

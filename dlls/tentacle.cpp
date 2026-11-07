@@ -25,7 +25,7 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "soundent.h"
-#include "p8_needs.h"
+#include "rc2/shield.h"
 
 
 #define ACT_T_IDLE 1010
@@ -1023,7 +1023,7 @@ void CTentacle::HitTouch(CBaseEntity* pOther)
 
 	// Rocket Crowbar 2: an HEV shield takes its share first, and only a hit that still does
 	// damage starts the half-second wait
-	flDamage = RC2_ShieldFilterDamage(pOther, flDamage, 2.0, tr.vecEndPos, -tr.vecPlaneNormal, NULL, NULL, 12);
+	flDamage = ShieldDeflect(pOther, flDamage, 2.0, tr.vecEndPos, -tr.vecPlaneNormal, NULL, NULL, 12);
 	if (flDamage == 0)
 		return;
 

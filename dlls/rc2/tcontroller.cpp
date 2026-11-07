@@ -16,7 +16,9 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "p8_needs_transform.h"
+#include "shield.h"
+#include "UserMessages.h"
+#include "rc2prefs.h"
 
 //=========================================================
 // The thrown ball (primary)
@@ -78,13 +80,13 @@ static void TController_BallBlast(CBaseEntity* pBall, const Vector& vecCenter, f
 	float flDist;
 	Vector vecClosest;
 
-	UTIL_PushEntFlags();
+	UTIL_PushEntityMarks();
 	CBaseEntity* pEnt = NULL;
-	while ((pEnt = UTIL_FindEntityNearSphere(pEnt, vecCenter, flRadius, &flDist, &vecClosest)) != NULL)
+	while ((pEnt = UTIL_FindEntityNearestInSphere(pEnt, vecCenter, flRadius, &flDist, &vecClosest)) != NULL)
 	{
 		if (pEnt->pev->takedamage == DAMAGE_NO)
 			continue;
-		if (UTIL_TestEntFlag(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
 			continue;
 		if (pEnt->GetEffectedEnt()->edict() == pev->dmg_inflictor)
 			continue;
@@ -104,7 +106,7 @@ static void TController_BallBlast(CBaseEntity* pBall, const Vector& vecCenter, f
 		else if (flDamage > flMaxDamage)
 			flDamage = flMaxDamage;
 
-		flDamage = RC2_ShieldFilterDamage(pEnt, flDamage, flShieldFraction, tr.vecEndPos, vecDir, NULL, NULL, 8);
+		flDamage = ShieldDeflect(pEnt, flDamage, flShieldFraction, tr.vecEndPos, vecDir, NULL, NULL, 8);
 		if (flDamage <= 0)
 			continue;
 
@@ -114,9 +116,9 @@ static void TController_BallBlast(CBaseEntity* pBall, const Vector& vecCenter, f
 
 		entvars_t* pevAttacker = pev->dmg_inflictor ? VARS(pev->dmg_inflictor) : NULL;
 		pEnt->GetEffectedEnt()->TakeDamage(pev, pevAttacker, flDamage, DMG_ENERGYBEAM);
-		UTIL_SetEntFlag(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
+		UTIL_MarkEntity(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
 	}
-	UTIL_PopEntFlags();
+	UTIL_PopEntityMarks();
 }
 
 // orig 0xdac60
@@ -326,11 +328,11 @@ void CTController_ChargeBall::LeechThink()
 	float flTotal = 0;
 	Vector vecTravel = pev->velocity.Normalize();
 
-	UTIL_PushEntFlags();
+	UTIL_PushEntityMarks();
 	CBaseEntity* pEnt = NULL;
 	while ((pEnt = UTIL_FindEntityInSphere(pEnt, pev->origin, flRadius)) != NULL)
 	{
-		if (UTIL_TestEntFlag(ENTINDEX(pEnt->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEnt->edict())))
 			continue;
 		if (pEnt->GetEffectedEnt()->pev->takedamage != DAMAGE_AIM)
 			continue;
@@ -349,16 +351,16 @@ void CTController_ChargeBall::LeechThink()
 		if (tr.flFraction < 1.0 && tr.pHit != pEnt->edict())
 			continue;
 
-		float flAmount = RC2_ShieldFilterDamage(pEnt->GetEffectedEnt(), (float)iLeech, RC2Pref(RC2P_TransformController_ChargeBallLeechShieldFraction).f, tr.vecEndPos, pEnt->Center() - pev->origin, NULL, NULL, 4);
+		float flAmount = ShieldDeflect(pEnt->GetEffectedEnt(), (float)iLeech, RC2Pref(RC2P_TransformController_ChargeBallLeechShieldFraction).f, tr.vecEndPos, pEnt->Center() - pev->origin, NULL, NULL, 4);
 		if (flAmount == 0)
 			continue;
 
 		entvars_t* pevAttacker = pev->owner ? VARS(pev->owner) : NULL; // VERIFY: the leech names pev->owner, the blast pev->dmg_inflictor
 		pEnt->GetEffectedEnt()->TakeDamage(pev, pevAttacker, flAmount, DMG_ENERGYBEAM);
 		flTotal += flAmount;
-		UTIL_SetEntFlag(ENTINDEX(pEnt->edict()));
+		UTIL_MarkEntity(ENTINDEX(pEnt->edict()));
 	}
-	UTIL_PopEntFlags();
+	UTIL_PopEntityMarks();
 
 	if (!pThrower || flTotal == 0)
 		return;
@@ -490,9 +492,9 @@ void CBasePlayer::TController_ThrowStart()
 
 	m_flTransformLastAttack = gpGlobals->time;
 	m_flTransformNextAttack1 = RC2Pref(RC2P_TransformController_ThrowRefireThrow).f + gpGlobals->time;
-	UTIL_SetMaxTime(m_flTransformNextAttack2, gpGlobals->time, RC2Pref(RC2P_TransformController_ThrowRefireOther).f);
-	UTIL_SetMaxTime(m_flTransformNextAttack3, gpGlobals->time, RC2Pref(RC2P_TransformController_ThrowRefireOther).f);
-	UTIL_SetMaxTime(m_flTransformNextAttack4, gpGlobals->time, RC2Pref(RC2P_TransformController_ThrowRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack2, gpGlobals->time, RC2Pref(RC2P_TransformController_ThrowRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack3, gpGlobals->time, RC2Pref(RC2P_TransformController_ThrowRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack4, gpGlobals->time, RC2Pref(RC2P_TransformController_ThrowRefireOther).f);
 	m_flEnergy -= RC2Pref(RC2P_TransformController_ThrowEnergyCost).f;
 
 	pev->sequence = 2;
@@ -522,9 +524,9 @@ void CBasePlayer::TController_ChargeStart()
 
 	m_flTransformLastAttack = gpGlobals->time;
 	m_flTransformNextAttack2 = RC2Pref(RC2P_TransformController_ChargeBallRefireChargeBall).f + gpGlobals->time;
-	UTIL_SetMaxTime(m_flTransformNextAttack1, gpGlobals->time, RC2Pref(RC2P_TransformController_ChargeBallRefireOther).f);
-	UTIL_SetMaxTime(m_flTransformNextAttack3, gpGlobals->time, RC2Pref(RC2P_TransformController_ChargeBallRefireOther).f);
-	UTIL_SetMaxTime(m_flTransformNextAttack4, gpGlobals->time, RC2Pref(RC2P_TransformController_ChargeBallRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack1, gpGlobals->time, RC2Pref(RC2P_TransformController_ChargeBallRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack3, gpGlobals->time, RC2Pref(RC2P_TransformController_ChargeBallRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack4, gpGlobals->time, RC2Pref(RC2P_TransformController_ChargeBallRefireOther).f);
 	m_flEnergy -= RC2Pref(RC2P_TransformController_ChargeBallStartEnergyCost).f;
 
 	pev->sequence = 5;
@@ -571,7 +573,7 @@ void CBasePlayer::TController_ChargeLaunch()
 	m_fSequenceFinished = false;
 	m_iTransformState2 = 0;
 	m_flTransformTimer2 = -1;
-	RemoveMoveLock(4);
+	RemovePhysFlag2Source(4);
 }
 
 // While charging: cycle the charge animations until every attack button is up, then launch.
@@ -622,7 +624,7 @@ void CBasePlayer::TController_ChargeThink()
 	MESSAGE_END();
 	m_iTransformState2 = 0;
 	m_flTransformTimer2 = -1;
-	RemoveMoveLock(4);
+	RemovePhysFlag2Source(4);
 }
 
 // orig 0xda580

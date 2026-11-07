@@ -22,7 +22,6 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 #include "rc2prefs.h"
-#include "rc2/p7_extern.h"
 #include <algorithm>
 #ifndef CLIENT_DLL
 #define RC2_RPG_PICKUP_GIVE RC2Pref(RC2P_Ammo_RPGPickupGive).s

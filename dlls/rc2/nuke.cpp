@@ -13,7 +13,6 @@
 ****/
 
 #include <algorithm>
-#include <vector>
 
 #include "extdll.h"
 #include "util.h"
@@ -23,15 +22,7 @@
 #include "rc2prefs.h"
 #include "UserMessages.h"
 
-// From elsewhere in rc2.dll (see the TEMP STUB block at the bottom)
-extern void UTIL_PushEntityMarks();				   // name ours; util, orig 0xf4c70
-extern bool UTIL_EntityMarked(int iEntIndex);	   // name ours; util, orig 0xf4dd0
-extern void UTIL_MarkEntity(int iEntIndex);		   // name ours; util, orig 0xf4d90
-extern void UTIL_PopEntityMarks();				   // name ours; util, orig 0xf4d40
-extern void UTIL_DelayAttack(float* pflNextAttack, float flBase, float flDelay); // name ours; util, orig 0xf5900
-extern Vector UTIL_Accelerate(const Vector& vecVelocity, const Vector& vecWishDir, float flWishSpeed, float flAccel, float flFrameTime); // name ours; util, orig 0xf50a0
-extern int UTIL_PackDirection(const Vector& vecDir); // name ours; util, orig 0xf5920
-extern float ShieldAbsorbDamage(CBaseEntity* pEntity, float flDamage, float flShieldFract, Vector vecSrc, Vector vecDir, Vector* pvecHit, Vector* pvecHitDir, int iBits); // name ours; orig 0xc45b0
+#include "rc2/shield.h"
 
 class CNuke : public CBaseEntity
 {
@@ -145,7 +136,7 @@ void CNuke::NukeThink()
 	// the controller can't fire anything else while he steers. VERIFY: the original writes
 	// CBaseMonster's m_flNextAttack of whatever entity owns the missile without asking.
 	CBaseMonster* pSteerer = static_cast<CBaseMonster*>(pPlayer);
-	UTIL_DelayAttack(&pSteerer->m_flNextAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Egon_NukeAnythingNextFireTime).f);
+	UTIL_ExtendTime(&pSteerer->m_flNextAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Egon_NukeAnythingNextFireTime).f);
 
 	float flInterval = gpGlobals->time - m_flLastThink;
 	m_flLastThink = gpGlobals->time;
@@ -250,7 +241,7 @@ void CNuke::NukeRadus()
 		if (!pEntity || pEntity->pev->takedamage == DAMAGE_NO)
 			continue;
 
-		if (UTIL_EntityMarked(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
 			continue;
 
 		Vector vecTarget = pEntity->Center();
@@ -278,7 +269,7 @@ void CNuke::NukeRadus()
 		const float flFract = RC2Pref(RC2P_Egon_NukeExplodeDistDamageFract).f;
 		float flDamage = (flFract * flDistFrac + (1.0 - flFract) * flPunchFrac) * flMaxDamage;
 
-		flDamage = ShieldAbsorbDamage(pEntity, flDamage, RC2Pref(RC2P_Egon_NukeExplodeShieldDamageFract).f, g_vecZero, g_vecZero, NULL, NULL, 15);
+		flDamage = ShieldDeflect(pEntity, flDamage, RC2Pref(RC2P_Egon_NukeExplodeShieldDamageFract).f, g_vecZero, g_vecZero, NULL, NULL, 15);
 		if (flDamage > 0)
 			pEntity->TakeDamage(pev, pevAttacker, flDamage, DMG_BLAST | DMG_RADIATION);
 	}
@@ -328,56 +319,9 @@ void CNuke::NukeDetonateTouch(CBaseEntity* pOther)
 	else
 	{
 		UTIL_SetOrigin(pev, tr.vecEndPos + tr.vecPlaneNormal * 16);
-		PLAYBACK_EVENT_FULL(FEV_GLOBAL, edict(), m_usNukeExplode, 0, pev->origin, g_vecZero, 0, 0, UTIL_PackDirection(-tr.vecPlaneNormal), iController, 0, 0);
+		PLAYBACK_EVENT_FULL(FEV_GLOBAL, edict(), m_usNukeExplode, 0, pev->origin, g_vecZero, 0, 0, UTIL_PackNormal(-tr.vecPlaneNormal), iController, 0, 0);
 	}
 
 	NukeRadus();
 	UTIL_Remove(this);
-}
-
-// TEMP STUB (p5): real ones belong in util.cpp (0xf4c70, 0xf4dd0, 0xf4d90, 0xf4d40, 0xf5900,
-// 0xf50a0, 0xf5920). Bodies follow the original's reading so the nuke works until then.
-static std::vector<std::vector<unsigned char>> s_EntityMarks;
-
-// UTIL_PushEntityMarks: the real one is reconstructed elsewhere now
-
-bool UTIL_EntityMarked(int iEntIndex)
-{
-	if (s_EntityMarks.empty() || iEntIndex < 0 || iEntIndex / 8 >= (int)s_EntityMarks.back().size())
-		return false;
-	return (s_EntityMarks.back()[iEntIndex / 8] & (1 << (iEntIndex % 8))) != 0;
-}
-
-// UTIL_MarkEntity: the real one is reconstructed elsewhere now
-
-// UTIL_PopEntityMarks: the real one is reconstructed elsewhere now
-
-void UTIL_DelayAttack(float* pflNextAttack, float flBase, float flDelay)
-{
-	if (*pflNextAttack < flBase + flDelay)
-		*pflNextAttack = flBase + flDelay;
-}
-
-// UTIL_Accelerate: the real one is reconstructed elsewhere now
-
-int UTIL_PackDirection(const Vector& vecDir)
-{
-	Vector v = vecDir.Normalize();
-	int x = (int)(fabs(v.x) * 511.0);
-	int y = (int)(fabs(v.y) * 511.0);
-	int z = (int)(fabs(v.z) * 511.0);
-	if (v.x < 0)
-		x |= 0x200;
-	if (v.y < 0)
-		y |= 0x200;
-	if (v.z < 0)
-		z |= 0x200;
-	return x | (y << 10) | (z << 20);
-}
-
-// TEMP STUB (p5): real one belongs in the shield's file (orig 0xc45b0, p7's range): a player's
-// shield takes its share of the damage and the rest comes back.
-float ShieldAbsorbDamage(CBaseEntity* pEntity, float flDamage, float flShieldFract, Vector vecSrc, Vector vecDir, Vector* pvecHit, Vector* pvecHitDir, int iBits)
-{
-	return flDamage;
 }

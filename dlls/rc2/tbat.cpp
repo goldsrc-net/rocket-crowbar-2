@@ -15,7 +15,9 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "p8_needs_transform.h"
+#include "shield.h"
+#include "UserMessages.h"
+#include "rc2prefs.h"
 
 extern void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& mins, const Vector& maxs, edict_t* pEntity);
 
@@ -229,9 +231,9 @@ void CBasePlayer::TBat_BiteStart()
 
 	m_flTransformLastAttack = gpGlobals->time;
 	m_flTransformNextAttack1 = RC2Pref(RC2P_TransformBat_BiteRefireBite).f + gpGlobals->time;
-	UTIL_SetMaxTime(m_flTransformNextAttack2, gpGlobals->time, RC2Pref(RC2P_TransformBat_BiteRefireOther).f);
-	UTIL_SetMaxTime(m_flTransformNextAttack3, gpGlobals->time, RC2Pref(RC2P_TransformBat_BiteRefireOther).f);
-	UTIL_SetMaxTime(m_flTransformNextAttack4, gpGlobals->time, RC2Pref(RC2P_TransformBat_BiteRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack2, gpGlobals->time, RC2Pref(RC2P_TransformBat_BiteRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack3, gpGlobals->time, RC2Pref(RC2P_TransformBat_BiteRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack4, gpGlobals->time, RC2Pref(RC2P_TransformBat_BiteRefireOther).f);
 	pev->sequence = 3;
 	pev->frame = 0;
 	ResetSequenceInfo();
@@ -272,13 +274,13 @@ void CBasePlayer::TBat_BiteHit()
 		CBaseEntity* pEnt = CBaseEntity::Instance(tr.pHit)->GetEffectedEnt();
 		if (pEnt->pev->takedamage != DAMAGE_NO)
 		{
-			float flDamage = RC2_ShieldFilterDamage(pEnt, RC2Pref(RC2P_TransformBat_BiteDamage).f, RC2Pref(RC2P_TransformBat_BiteShieldFraction).f, vecEnd, gpGlobals->v_forward, NULL, NULL, 6);
+			float flDamage = ShieldDeflect(pEnt, RC2Pref(RC2P_TransformBat_BiteDamage).f, RC2Pref(RC2P_TransformBat_BiteShieldFraction).f, vecEnd, gpGlobals->v_forward, NULL, NULL, 6);
 			if (flDamage <= 0)
 				return;
 
 			ClearMultiDamage();
 			pEnt->TraceAttack(pev, flDamage, gpGlobals->v_forward, &tr, DMG_SLASH);
-			ApplyMultiDamage(UTIL_NamedInflictor("stukabat_bite"), pev);
+			ApplyMultiDamage(UTIL_RC2DamageInflictor("stukabat_bite"), pev);
 			PLAYBACK_EVENT_FULL(0, edict(), g_usTBatBite, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 1, 0);
 			return;
 		}
@@ -424,7 +426,7 @@ void CBasePlayer::TBat_PainSound()
 // For the movement code (by player index): the roost state, and when hanging the entity and
 // the spot.
 // orig 0xd9a60
-int TBat_GetRoost(int iPlayer, int* piEntIndex, Vector* pvecOffset)
+int PM_GetBatPerch(int iPlayer, int* piEntIndex, float* pvecOffset)
 {
 	if (iPlayer <= 0 || iPlayer > gpGlobals->maxClients)
 		return 0;
@@ -438,13 +440,13 @@ int TBat_GetRoost(int iPlayer, int* piEntIndex, Vector* pvecOffset)
 	if (piEntIndex)
 		*piEntIndex = pPlayer->m_iTransformState2;
 	if (pvecOffset)
-		*pvecOffset = pPlayer->m_vecTransformVec;
+		pPlayer->m_vecTransformVec.CopyToArray(pvecOffset);
 	return pPlayer->m_iTransformState1;
 }
 
 // For the movement code: drop out of the roost.
 // orig 0xd9b00
-void TBat_Unroost(int iPlayer)
+void PM_BatUnperch(int iPlayer)
 {
 	if (iPlayer <= 0 || iPlayer > gpGlobals->maxClients)
 		return;

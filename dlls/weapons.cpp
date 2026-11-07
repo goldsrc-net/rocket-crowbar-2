@@ -425,8 +425,6 @@ void CBasePlayerItem::SetObjectCollisionBox()
 // RandomAnyItem swaps anything but the suit and the crowbar for anything. Names ours.
 #define SF_ITEM_NORANDOMIZE (1 << 29) // the "norandomize" keyvalue (name ours)
 
-extern int RC2CountEntities(const char* pszClassname); // util's (0xf30f0): how many entities have this classname
-
 // orig 0xf96b0
 static const char* RandomItemOfKind(const char* pszClassname)
 {
@@ -498,7 +496,7 @@ static const char* RandomItemOfKind(const char* pszClassname)
 		if (!strcmp(pszClassname, psz))
 		{
 			// the original counts the long jumps in the map here and ignores the count (RandomAnyItem uses it)
-			RC2CountEntities("item_longjump");
+			UTIL_CountEntitiesByClass("item_longjump");
 			switch (RANDOM_LONG(0, 2))
 			{
 			case 0: return "item_battery";
@@ -519,7 +517,7 @@ static const char* RandomAnyItem(const char* pszClassname)
 
 	// no long jumps once there are more than four
 	int iLast = 24;
-	if (RC2CountEntities("item_longjump") > 4)
+	if (UTIL_CountEntitiesByClass("item_longjump") > 4)
 		iLast = 23;
 
 	switch (RANDOM_LONG(0, iLast))
@@ -1698,17 +1696,3 @@ short RC2ReadStateShort(void** ppData, int* piSize) { return 0; }
 int RC2ReadStateInt(void** ppData, int* piSize) { return 0; }
 // orig 0xfb7b0
 float RC2ReadStateFloat(void** ppData, int* piSize) { return 0.0f; }
-
-// TEMP STUB (p3): real one belongs in util.cpp (0xf30f0): the number of entities in use whose
-// classname is pszClassname (it walks edicts 1 .. maxEntities-1)
-int RC2CountEntities(const char* pszClassname)
-{
-	int iCount = 0;
-	for (int i = 1; i < gpGlobals->maxEntities; i++)
-	{
-		edict_t* pEdict = INDEXENT(i);
-		if (UTIL_IsValidEntity(pEdict) && FClassnameIs(pEdict, pszClassname))
-			iCount++;
-	}
-	return iCount;
-}

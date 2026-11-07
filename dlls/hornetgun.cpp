@@ -30,7 +30,6 @@
 #include "UserMessages.h"
 #ifndef CLIENT_DLL
 #include "rc2prefs.h"
-#include "p4_needs.h"
 #include "freezegrenade.h"
 #endif
 
@@ -166,7 +165,7 @@ void CHgun::PrimaryAttack()
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, 0, 0);
 
 	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefirePrimary).f);
@@ -183,12 +182,12 @@ void CHgun::PrimaryAttack()
 
 	TraceResult tr;
 	UTIL_TraceLine(vecSrc, vecSrc + gpGlobals->v_forward * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
-	if (tr.flFraction < 1.0 && 0 != UTIL_IsValidEdict(tr.pHit))
+	if (tr.flFraction < 1.0 && 0 != UTIL_IsValidEntity(tr.pHit))
 	{
 		CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
 		if (pHit && g_pGameRules->PlayerCanAffect(m_pPlayer, pHit))
 		{
-			FreezeDamage(pHit, m_pPlayer->pev, UTIL_NamedInflictor("freeze"),
+			FreezeDamage(pHit, m_pPlayer->pev, UTIL_RC2DamageInflictor("freeze"),
 				RC2Pref(RC2P_HornetGun_PrimaryDamage).f, RC2Pref(RC2P_HornetGun_PrimaryFreezeDamage).f, RC2Pref(RC2P_HornetGun_PrimaryFreezeTime).f,
 				&tr, gpGlobals->v_forward, true);
 		}
@@ -215,7 +214,7 @@ void CHgun::SecondaryAttack()
 	m_fInAttack = 1;
 	m_fCharging = true;
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0.01, 0, ENTINDEX(m_pPlayer->edict()), 0, 0, 1);
 #endif
 }
@@ -234,7 +233,7 @@ void CHgun::TertiaryAttack()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= (unsigned short)RC2Pref(RC2P_HornetGun_GrenadeAmmoCost).s;
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, 2, 0);
 
 	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_TertiaryRefirePrimary).f);
@@ -257,7 +256,7 @@ void CHgun::TertiaryAttack()
 	if (0 != m_pPlayer->m_iRidingIndex)
 	{
 		edict_t* pent = INDEXENT(m_pPlayer->m_iRidingIndex);
-		if (0 != UTIL_IsValidEdict(pent))
+		if (0 != UTIL_IsValidEntity(pent))
 			pGrenade->pev->owner = pent;
 	}
 #endif
@@ -295,7 +294,7 @@ void CHgun::ReleaseCharge(bool bBackfire)
 {
 #ifndef CLIENT_DLL
 	// the charged shot, or with bBackfire the overcharge going off on the player
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 	{
 		m_fInAttack = 0;
 		m_fCharging = false;
@@ -310,7 +309,7 @@ void CHgun::ReleaseCharge(bool bBackfire)
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 	{
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0, (float*)&g_vecZero, (float*)&g_vecZero, flCharge + 1.0, 0, 0, 0, bBackfire ? 1 : 0, 0);
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, ENTINDEX(m_pPlayer->edict()), 0, 1, 0);
@@ -336,18 +335,18 @@ void CHgun::ReleaseCharge(bool bBackfire)
 
 		TraceResult tr;
 		UTIL_TraceLine(vecSrc, vecSrc + gpGlobals->v_forward * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
-		if (tr.flFraction < 1.0 && 0 != UTIL_IsValidEdict(tr.pHit))
+		if (tr.flFraction < 1.0 && 0 != UTIL_IsValidEntity(tr.pHit))
 		{
 			CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
 			if (pHit && g_pGameRules->PlayerCanAffect(m_pPlayer, pHit))
-				FreezeDamage(pHit, m_pPlayer->pev, UTIL_NamedInflictor("freeze"), flDamage, flFreezeDamage, flFreezeTime, &tr, gpGlobals->v_forward, true);
+				FreezeDamage(pHit, m_pPlayer->pev, UTIL_RC2DamageInflictor("freeze"), flDamage, flFreezeDamage, flFreezeTime, &tr, gpGlobals->v_forward, true);
 		}
 	}
 	else
 	{
 		// the player takes [HornetGun] SecondaryBackfireScale of it, past any shield
 		const float flScale = RC2Pref(RC2P_HornetGun_SecondaryBackfireScale).f;
-		FreezeDamage(m_pPlayer, m_pPlayer->pev, UTIL_NamedInflictor("freeze"), flScale * flDamage, flScale * flFreezeDamage, flScale * flFreezeTime, NULL, g_vecZero, false);
+		FreezeDamage(m_pPlayer, m_pPlayer->pev, UTIL_RC2DamageInflictor("freeze"), flScale * flDamage, flScale * flFreezeDamage, flScale * flFreezeTime, NULL, g_vecZero, false);
 	}
 #endif
 }
@@ -442,7 +441,7 @@ void CHgun::WeaponFrame()
 	else if (flCharge > 1.0)
 		flCharge = 1.0;
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, (float)flCharge, 0, ENTINDEX(m_pPlayer->edict()), 0, 0, 0);
 #endif
 }

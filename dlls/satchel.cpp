@@ -26,7 +26,8 @@
 #include "gamerules.h"
 #include "soundent.h"
 #include "rc2prefs.h"
-#include "rc2/p7_extern.h"
+#include "rc2/shield.h"
+#include "UserMessages.h"
 #include <algorithm>
 
 #ifndef CLIENT_DLL
@@ -337,7 +338,7 @@ void CConcCharge::AttachTouch(CBaseEntity* pOther) // orig 0xbbfc0
 	{
 		// the shield took it: bounce off and keep flying, now as the shield owner's
 		const float flSpeed = pev->velocity.Length();
-		pev->velocity = UTIL_Reflect(vecDir, vecDeflectDir) * flSpeed;
+		pev->velocity = UTIL_ReflectVector(vecDir, vecDeflectDir) * flSpeed;
 		pev->origin = vecDeflectDir * 2 + vecDeflectPos;
 		UTIL_SetOrigin(pev, pev->origin);
 		pev->owner = pOther->edict();
@@ -547,7 +548,7 @@ void CConcCharge::Detonate() // orig 0xbcb40
 
 	UTIL_PopEntityMarks();
 
-	PLAYBACK_EVENT_FULL(FEV_GLOBAL, edict(), m_usExplode, 0.0, pev->origin, g_vecZero, 0, 0, UTIL_PackDirection(m_vecSurfaceNormal), 0, false, false);
+	PLAYBACK_EVENT_FULL(FEV_GLOBAL, edict(), m_usExplode, 0.0, pev->origin, g_vecZero, 0, 0, UTIL_PackNormal(m_vecSurfaceNormal), 0, false, false);
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 	WRITE_BYTE(CLTE_KILLEFFECT);
@@ -899,13 +900,5 @@ void CSatchel::ReadWeaponState(void* pData, int iSize) // orig 0xbe530
 int CSatchel::iItemSlot() { return 5; } // orig 0xbe560
 
 bool CSatchel::UseDecrement() { return true; } // orig 0xbe570
-
-#ifndef CLIENT_DLL
-// TEMP STUB (p7): RC2 has no DeactivateSatchels; halflife-updated's multiplay_gamerules.cpp
-// still calls it until its package reconstructs PlayerKilled.
-void DeactivateSatchels(CBasePlayer* pOwner)
-{
-}
-#endif
 
 // The client's g_rc2PrefValues (all zero) is defined once, in pm_shared.cpp (p6).

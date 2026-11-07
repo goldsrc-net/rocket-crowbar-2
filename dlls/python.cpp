@@ -296,17 +296,11 @@ LINK_ENTITY_TO_CLASS(ammo_357, CPythonAmmo);
 #include <cstdlib>
 
 #include "rc2prefs.h"
-#include "rc2/p6stubs.h"
+#include "rc2/shield.h"
 #include "rc2/balllightning.h"
 
-extern int gmsgCLTE; // RC2's "CLTE" user message (orig .bss 0x18f4b8); TEMP STUB in dlls/rc2/playerride.cpp
 
 #define CLTE_KILL 0xfe // ours: kills a client effect of the type in the next byte
-
-// TEMP STUB below. The player file's (rc2.dll 0x95860): bit 9 of the player's member +0x708
-// (through 0x958b0 and 0x956c0, by entity index). Every weapon tests it before refusing to
-// fire under water.
-bool PlayerCanFireUnderwater(CBasePlayer* pPlayer); // name ours
 
 // orig 0xac2e0 is util.h's inline VARS(edict_t*), emitted out of line in this file; the SDK's is used
 
@@ -428,22 +422,22 @@ void CPython::QuaternaryAttack() // orig 0xabd10
 		m_pPlayer->pev->fov = m_pPlayer->m_iFOV;
 	}
 
-	UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefirePrimary).f);
-	UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefireSecondary).f);
-	UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefireTertiary).f);
-	UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefireQuaternary).f);
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefirePrimary).f);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefireSecondary).f);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefireTertiary).f);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefireQuaternary).f);
 }
 
 // The lightning bolt: traced now, hurt on the next think (DelayedHurt)
 void CPython::PrimaryAttack() // orig 0xabe10
 {
-	if (m_pPlayer->pev->waterlevel == 3 && !PlayerCanFireUnderwater(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
-		UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		return;
 	}
 
@@ -457,10 +451,10 @@ void CPython::PrimaryAttack() // orig 0xabe10
 		}
 
 		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM, 0, PITCH_NORM);
-		UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		return;
 	}
 
@@ -481,14 +475,14 @@ void CPython::PrimaryAttack() // orig 0xabe10
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 
-	UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefirePrimary).f);
-	UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefireSecondary).f);
-	UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefireTertiary).f);
-	UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefireQuaternary).f);
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefirePrimary).f);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefireSecondary).f);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefireTertiary).f);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_PrimaryRefireQuaternary).f);
 	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 
 	// bparam1: fired under water
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonLightning, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, m_pPlayer->pev->waterlevel == 3 ? 1 : 0, 0);
 
 	TraceResult tr;
@@ -518,13 +512,13 @@ void CPython::PrimaryAttack() // orig 0xabe10
 // Starts charging the chain lightning: it fires from WeaponFrame when the charge is done
 void CPython::SecondaryAttack() // orig 0xac2f0
 {
-	if (m_pPlayer->pev->waterlevel == 3 && !PlayerCanFireUnderwater(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
-		UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		return;
 	}
 
@@ -537,10 +531,10 @@ void CPython::SecondaryAttack() // orig 0xac2f0
 		}
 
 		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM, 0, PITCH_NORM);
-		UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		return;
 	}
 
@@ -550,7 +544,7 @@ void CPython::SecondaryAttack() // orig 0xac2f0
 	// the whole cost up front (the ball's is taken over its charge)
 	m_iClip -= RC2Pref(RC2P_Python_ChainAmmoCost).us;
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonPrefire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -575,13 +569,13 @@ void CPython::SecondaryAttack() // orig 0xac2f0
 // the charge (WeaponFrame), and it fires from WeaponFrame when the charge is done
 void CPython::TertiaryAttack() // orig 0xac5b0
 {
-	if (m_pPlayer->pev->waterlevel == 3 && !PlayerCanFireUnderwater(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
-		UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		return;
 	}
 
@@ -594,10 +588,10 @@ void CPython::TertiaryAttack() // orig 0xac5b0
 		}
 
 		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM, 0, PITCH_NORM);
-		UTIL_RC2ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
-		UTIL_RC2ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		return;
 	}
 
@@ -608,7 +602,7 @@ void CPython::TertiaryAttack() // orig 0xac5b0
 	m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + RC2Pref(RC2P_Python_SharedChargeTime).f / RC2Pref(RC2P_Python_BallAmmoCost).us;
 	m_iClip--;
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonPrefire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 	const float flNext = UTIL_WeaponTimeBase() + 1.0;
@@ -634,8 +628,8 @@ void CPython::DelayedHurt() // orig 0xac860
 	if (m_hTarget->pev->takedamage == DAMAGE_NO)
 		return;
 
-	// VERIFY: the last argument, 6, as RC2ShieldAbsorb reads it (the chain passes 8)
-	const float flDamage = RC2ShieldAbsorb(m_hTarget, RC2Pref(RC2P_Python_PrimaryDamage).f, RC2Pref(RC2P_Python_PrimaryShieldFraction).f,
+	// VERIFY: the last argument, 6, as ShieldDeflect reads it (the chain passes 8)
+	const float flDamage = ShieldDeflect(m_hTarget, RC2Pref(RC2P_Python_PrimaryDamage).f, RC2Pref(RC2P_Python_PrimaryShieldFraction).f,
 		m_trHurt.vecEndPos, m_vecHurtDir, NULL, NULL, 6);
 
 	if (flDamage > 0)
@@ -687,7 +681,7 @@ void CPython::ChainTo(int iDepth, Vector vecFrom, edict_t* pentFrom, unsigned ch
 		if (tr.flFraction < 1.0 && tr.pHit != pEntity->edict())
 			continue;
 
-		const float flDamage = RC2ShieldAbsorb(pEntity, RC2Pref(RC2P_Python_ChainDamage).f, RC2Pref(RC2P_Python_ChainShieldFraction).f,
+		const float flDamage = ShieldDeflect(pEntity, RC2Pref(RC2P_Python_ChainDamage).f, RC2Pref(RC2P_Python_ChainShieldFraction).f,
 			tr.vecEndPos, (pEntity->Center() - vecFrom).Normalize(), NULL, NULL, 8);
 
 		if (flDamage > 0)
@@ -742,7 +736,7 @@ void CPython::FireChain() // orig 0xacea0
 	m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_Python_SecondaryRefireQuaternary).f;
 	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 	{
 		m_iChargeState = 0;
 		m_fInAttack = 0;
@@ -751,7 +745,7 @@ void CPython::FireChain() // orig 0xacea0
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		// bparam1: fired under water
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonChain, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 1, 0);
 
 		UTIL_RC2WaterDischarge(m_pPlayer->Center(), RC2Pref(RC2P_Python_ChainSelfDischargeDamage).f,
@@ -759,7 +753,7 @@ void CPython::FireChain() // orig 0xacea0
 		return;
 	}
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonChain, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 	// VERIFY: which client effect type 0x0e is (the charge's, presumably)
@@ -786,7 +780,7 @@ void CPython::FireChain() // orig 0xacea0
 	if (!pEntity || pEntity->pev->takedamage != DAMAGE_AIM)
 		return;
 
-	const float flDamage = RC2ShieldAbsorb(pEntity, RC2Pref(RC2P_Python_ChainDamage).f, RC2Pref(RC2P_Python_ChainShieldFraction).f,
+	const float flDamage = ShieldDeflect(pEntity, RC2Pref(RC2P_Python_ChainDamage).f, RC2Pref(RC2P_Python_ChainShieldFraction).f,
 		tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 8);
 	if (flDamage <= 0)
 		return;
@@ -833,7 +827,7 @@ void CPython::FireBall() // orig 0xad3c0
 	m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_Python_TertiaryRefireQuaternary).f;
 	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 	{
 		m_iChargeState = 0;
 		m_fInAttack = 0;
@@ -842,7 +836,7 @@ void CPython::FireBall() // orig 0xad3c0
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		// bparam1: fired under water
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonFireball, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 1, 0);
 
 		UTIL_RC2WaterDischarge(m_pPlayer->Center(), RC2Pref(RC2P_Python_BallSelfDischargeDamage).f,
@@ -850,7 +844,7 @@ void CPython::FireBall() // orig 0xad3c0
 		return;
 	}
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonFireball, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 	// VERIFY: which client effect type 0x0e is (the charge's, presumably)
@@ -1001,12 +995,5 @@ class CPythonAmmo : public CBasePlayerAmmo
 // VERIFY: the original's factory also calls RC 1.9's AddToPrecachedList("ammo_357") (0xf5a20); the shared macro doesn't yet
 LINK_ENTITY_TO_CLASS(ammo_357, CPythonAmmo); // orig 0xad980
 
-
-// TEMP STUB (p6): real one belongs in player.cpp (rc2.dll 0x95860, p5's): false is SDK 2.3's
-// behavior, no weapon fires under water
-bool PlayerCanFireUnderwater(CBasePlayer* pPlayer)
-{
-	return false;
-}
 
 #endif // CLIENT_DLL

@@ -18,7 +18,7 @@
 #include "monsters.h"
 #include "customentity.h"
 #include "effects.h"
-#include "p2shared.h"
+#include "rc2/shield.h"
 #include "weapons.h"
 #include "decals.h"
 #include "func_break.h"
@@ -750,7 +750,7 @@ void CLightning::StrikeThink()
 
 
 // orig 0x38620. RC2: the damage goes to what the hit entity stands for (GetEffectedEnt), through
-// its shield (RC2ShieldDamage, which also moves the trace's end to the point it takes), and the
+// its shield (ShieldDeflect, which also moves the trace's end to the point it takes), and the
 // call goes through the instance without SDK 2.3's null check.
 void CBeam::BeamDamage(TraceResult* ptr)
 {
@@ -763,7 +763,7 @@ void CBeam::BeamDamage(TraceResult* ptr)
 			CBaseEntity* pHit = pInstance->GetEffectedEnt();
 			float flDamage = pev->dmg * (gpGlobals->time - pev->dmgtime);
 			if (flDamage > 0)
-				flDamage = RC2ShieldDamage(pHit, flDamage, 0.45, ptr->vecEndPos, (ptr->vecEndPos - pev->origin).Normalize(), &ptr->vecEndPos, NULL, (int)(flDamage * 0.02 + 3));
+				flDamage = ShieldDeflect(pHit, flDamage, 0.45, ptr->vecEndPos, (ptr->vecEndPos - pev->origin).Normalize(), &ptr->vecEndPos, NULL, (int)(flDamage * 0.02 + 3));
 
 			if (flDamage != 0)
 			{

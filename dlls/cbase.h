@@ -575,12 +575,6 @@ public:
 	float m_flLastEventCheck; // last time the event list was checked
 	bool m_fSequenceFinished; // flag set when StudioAdvanceFrame moves across a frame boundry
 	bool m_fSequenceLoops;	  // true if the sequence loops
-
-	// p4 needs:
-	// orig 0x9380 (p1, "new: airtank .. animating"): RC2's StudioFrameAdvance that holds the
-	// frame while m_bFrozen (it only moves animtime on). CBaseMonster::MonsterThink calls it
-	// for a frozen monster. Name ours.
-	float RC2FrameAdvance(float flInterval = 0.0);
 };
 
 

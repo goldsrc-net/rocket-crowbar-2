@@ -25,7 +25,7 @@
 #include "effects.h"
 #include "weapons.h"
 #include "soundent.h"
-#include "p4_needs.h"
+#include "rc2/shield.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -840,7 +840,7 @@ void CISlave::ZapBeam(int side)
 	// its share ([0.7] of the energy cost)
 	if (pEntity != NULL && 0 != pEntity->GetEffectedEnt()->pev->takedamage)
 	{
-		const float flDamage = ShieldAbsorbDamage(pEntity->GetEffectedEnt(), gSkillData.slaveDmgZap, 0.7, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 7);
+		const float flDamage = ShieldDeflect(pEntity->GetEffectedEnt(), gSkillData.slaveDmgZap, 0.7, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 7);
 		if (flDamage > 0)
 			pEntity->GetEffectedEnt()->TraceAttack(pev, flDamage, vecAim, &tr, DMG_SHOCK);
 	}

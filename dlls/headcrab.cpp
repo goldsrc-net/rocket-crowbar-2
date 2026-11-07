@@ -22,7 +22,7 @@
 #include "monsters.h"
 #include "schedule.h"
 #include "game.h"
-#include "p4_needs.h"
+#include "rc2/shield.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -364,7 +364,7 @@ void CHeadCrab::LeapTouch(CBaseEntity* pOther)
 		// Rocket Crowbar 2: a player's shield takes the bite (always 25, whatever
 		// GetDamageAmount says) and bounces the crab off it, still able to bite on the rebound
 		Vector vecNormal;
-		if (ShieldAbsorbDamage(pOther, 25, 1, pev->origin, pev->velocity.Normalize(), NULL, &vecNormal, 8) != 25)
+		if (ShieldDeflect(pOther, 25, 1, pev->origin, pev->velocity.Normalize(), NULL, &vecNormal, 8) != 25)
 		{
 			pev->velocity = UTIL_ReflectVector(pev->velocity.Normalize(), vecNormal) * pev->velocity.Length() * 0.75;
 			return;

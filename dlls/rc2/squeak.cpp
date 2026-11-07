@@ -17,7 +17,10 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "p8_needs.h"
+#include "shield.h"
+#include "UserMessages.h"
+#include "rc2prefs.h"
+#include "snarkcam.h"
 
 // Primary: throw a snark, as SDK 2.3 did, but capped by SnarkMaxDeployed and costing
 // SnarkAmmoCost, and owned by what the player drives when he drives something.
@@ -44,7 +47,7 @@ void CSqueak::PrimaryAttack()
 	// find place to toss monster
 	UTIL_TraceLine(trace_origin + gpGlobals->v_forward * 20, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, NULL, &tr);
 
-	if (0 != g_iPlayWeaponEvents)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usSnarkFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 	if (tr.fAllSolid == 0 && tr.fStartSolid == 0 && tr.flFraction > 0.25)
@@ -76,10 +79,10 @@ void CSqueak::PrimaryAttack()
 
 		m_fJustThrown = true;
 
-		UTIL_SetMaxTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefirePrimary).f);
-		UTIL_SetMaxTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireSecondary).f);
-		UTIL_SetMaxTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireTertiary).f);
-		UTIL_SetMaxTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireQuaternary).f);
+		UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefirePrimary).f);
+		UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireSecondary).f);
+		UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireTertiary).f);
+		UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireQuaternary).f);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
 		m_flNextWeaponSync = gpGlobals->time;
 	}
@@ -104,7 +107,7 @@ void CSqueak::SecondaryAttack()
 
 	UTIL_TraceLine(trace_origin + gpGlobals->v_forward * 20, trace_origin + gpGlobals->v_forward * 64, dont_ignore_monsters, NULL, &tr);
 
-	if (0 != g_iPlayWeaponEvents)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usSnarkFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
 	if (tr.fAllSolid == 0 && tr.fStartSolid == 0 && tr.flFraction > 0.25)
@@ -128,10 +131,10 @@ void CSqueak::SecondaryAttack()
 
 		m_fJustThrown = true;
 
-		UTIL_SetMaxTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefirePrimary).f);
-		UTIL_SetMaxTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefireSecondary).f);
-		UTIL_SetMaxTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefireTertiary).f);
-		UTIL_SetMaxTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefireQuaternary).f);
+		UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefirePrimary).f);
+		UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefireSecondary).f);
+		UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefireTertiary).f);
+		UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_SecondaryRefireQuaternary).f);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
 	}
 }
@@ -150,13 +153,13 @@ void CSqueak::TertiaryAttack()
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	if (0 != g_iPlayWeaponEvents)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usSnarkCamPlace, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
-	UTIL_SetMaxTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefirePrimary).f * 0.5);
-	UTIL_SetMaxTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireSecondary).f * 0.5);
-	UTIL_SetMaxTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireTertiary).f * 0.5);
-	UTIL_SetMaxTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireQuaternary).f * 0.5);
+	UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefirePrimary).f * 0.5);
+	UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireSecondary).f * 0.5);
+	UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireTertiary).f * 0.5);
+	UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireQuaternary).f * 0.5);
 
 	TraceResult tr;
 	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 128, dont_ignore_monsters, m_pPlayer->edict(), &tr);
@@ -165,7 +168,7 @@ void CSqueak::TertiaryAttack()
 
 	CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
 
-	if (RC2_ShieldFilterDamage(pHit, RC2Pref(RC2P_Snark_CamDeployShieldDamage).f, 1.0, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 4) < RC2Pref(RC2P_Snark_CamDeployShieldDamage).f)
+	if (ShieldDeflect(pHit, RC2Pref(RC2P_Snark_CamDeployShieldDamage).f, 1.0, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 4) < RC2Pref(RC2P_Snark_CamDeployShieldDamage).f)
 		return;
 	if (!pHit)
 		return;
@@ -192,10 +195,10 @@ void CSqueak::TertiaryAttack()
 
 	m_fJustThrown = true;
 
-	UTIL_SetMaxTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefirePrimary).f);
-	UTIL_SetMaxTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireSecondary).f);
-	UTIL_SetMaxTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireTertiary).f);
-	UTIL_SetMaxTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireQuaternary).f);
+	UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefirePrimary).f);
+	UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireSecondary).f);
+	UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireTertiary).f);
+	UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_TertiaryRefireQuaternary).f);
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
 	m_flNextWeaponSync = gpGlobals->time;
 }
@@ -210,16 +213,16 @@ void CSqueak::QuaternaryAttack()
 	{
 		if (pCam->pev->dmg_inflictor == m_pPlayer->edict())
 		{
-			SnarkCam_TakeView(pCam);
+			static_cast<CSnarkCam*>(pCam)->TakeControl();
 			return;
 		}
 		pCam = UTIL_FindEntityByClassname(pCam, "snark_cam");
 	}
 
-	UTIL_SetMaxTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefirePrimary).f);
-	UTIL_SetMaxTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefireSecondary).f);
-	UTIL_SetMaxTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefireTertiary).f);
-	UTIL_SetMaxTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefireQuaternary).f);
+	UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefirePrimary).f);
+	UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefireSecondary).f);
+	UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefireTertiary).f);
+	UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_QuaternaryRefireQuaternary).f);
 }
 
 // Each frame: count this player's live snarks and cams, and every half second send both to
@@ -231,7 +234,7 @@ void CSqueak::WeaponFrame()
 	CBaseEntity* pEnt = UTIL_FindEntityByClassname(NULL, "monster_snark");
 	while (pEnt)
 	{
-		CBaseEntity* pOwner = SqueakGrenade_Owner(pEnt); // its m_hOwner (orig +0x2dc)
+		CBaseEntity* pOwner = static_cast<CSqueakGrenade*>(pEnt)->m_hOwner;
 		if (pOwner && pOwner->edict() == m_pPlayer->edict())
 			m_iSnarksDeployed++;
 		pEnt = UTIL_FindEntityByClassname(pEnt, "monster_snark");

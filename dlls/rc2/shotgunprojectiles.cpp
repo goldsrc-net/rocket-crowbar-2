@@ -16,7 +16,7 @@
 #include "soundent.h"
 #include "hltv.h"
 #include "rc2prefs.h"
-#include "p7_extern.h"
+#include "UserMessages.h"
 
 #define CLTE_HEVFLAME 20 // name ours: short entindex; sent to the PVS when the suit spawns
 
@@ -560,7 +560,7 @@ void CShotgunCrate::GoBoom() // orig 0xc6ea0
 	RC2RadiusDamage(pevAttacker, pev, edict(), vecCenter, RC2Pref(RC2P_Shotgun_CrateMaxRadius).f * flScale, RC2Pref(RC2P_Shotgun_CrateMaxDamage).f * flScale,
 		RC2Pref(RC2P_Shotgun_CrateDamageFalloffExponent).f, DMG_BLAST, 1);
 
-	PLAYBACK_EVENT_FULL(0, edict(), m_usCrateHit, 0.0, tr.vecPlaneNormal * 4 + tr.vecEndPos, g_vecZero, flScale, 0, UTIL_PackDirection(-tr.vecPlaneNormal), 0, false, false);
+	PLAYBACK_EVENT_FULL(0, edict(), m_usCrateHit, 0.0, tr.vecPlaneNormal * 4 + tr.vecEndPos, g_vecZero, flScale, 0, UTIL_PackNormal(-tr.vecPlaneNormal), 0, false, false);
 
 	SendBoomDirectorHint(this, 6);
 

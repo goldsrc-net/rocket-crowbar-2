@@ -27,15 +27,9 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "soundent.h"
-#include "p2shared.h"
 
 // Rocket Crowbar 2 (p2): in multiplayer env_explosion and ExplodeAt leave the fireball, decal and
-// sparks to the client's explosion event; reference/dossiers/p2.md.
-extern unsigned short g_usRC2Explode; // orig .data 0x1afd18, name ours: events/explode.sc (W_Precache)
-// orig 0xf5920 (util), name ours: a direction packed into an int, 10 bits a component (9 of
-// magnitude * 511 and a sign bit)
-extern int UTIL_PackDirection(Vector vecDir);
-// orig 0xf3900 (util), name ours: RC2's other radius damage. VERIFY: the arguments' meaning
+// sparks to the client's explosion event (g_usExplodeEvent); reference/dossiers/p2.md.
 
 // orig 0x40960: Vector::operator float*(), the header's inline (vector.h), emitted here
 
@@ -182,7 +176,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	if (g_pGameRules->IsMultiplayer())
 	{
 		UTIL_SetOrigin(pev, tr.vecEndPos);
-		PLAYBACK_EVENT_FULL(0, edict(), g_usRC2Explode, 0, tr.vecEndPos, g_vecZero, (float)m_iMagnitude, 0, UTIL_PackDirection(-tr.vecPlaneNormal), 0, 0, 0);
+		PLAYBACK_EVENT_FULL(0, edict(), g_usExplodeEvent, 0, tr.vecEndPos, g_vecZero, (float)m_iMagnitude, 0, UTIL_PackNormal(-tr.vecPlaneNormal), 0, 0, 0);
 
 		// Pull out of the wall a bit
 		if (tr.flFraction != 1.0)
@@ -336,7 +330,7 @@ void ExplodeAt(Vector vecOrigin, Vector vecDir, float flDamage, const char* pszC
 	}
 
 	UTIL_SetOrigin(pev, vecOrigin);
-	PLAYBACK_EVENT_FULL(0, pExplosion->edict(), g_usRC2Explode, 0, vecOrigin, g_vecZero, flDamage, 0, UTIL_PackDirection(vecDir), 0, 0, 0);
+	PLAYBACK_EVENT_FULL(0, pExplosion->edict(), g_usExplodeEvent, 0, vecOrigin, g_vecZero, flDamage, 0, UTIL_PackNormal(vecDir), 0, 0, 0);
 	pev->flags |= FL_KILLME;
 
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, vecOrigin - vecDir * 16, 1024, 3.0);

@@ -31,22 +31,13 @@
 #include "func_break.h"
 #include "player.h"
 #include "rc2prefs.h"
+#include "rc2/shield.h"
+#include "rc2/freezetimer.h"
+#include "rc2/antifrictimer.h"
 
 // Rocket Crowbar 2: what combat.cpp uses from other files (reference/dossiers/p1.md)
-// orig 0xc45b0 (the run between scripted and shotgun; p2's name): the damage left after the
-// target's shield takes its share; pvecHit gets the point hit
-extern float RC2ShieldDamage(CBaseEntity* pTarget, float flDamage, float flShieldFraction, Vector vecPos, Vector vecDir, Vector* pvecHit, float* pflOut, int iFlags);
-// orig 0xf4c70, 0xf4d40, 0xf4d90, 0xf4dd0 (util, p9; p4's names): a stack of entity bit sets, so
-// an area effect hits each entity once
-extern void UTIL_PushEntityMask();
-extern void UTIL_PopEntityMask();
-extern void UTIL_MarkEntity(int iEntity);
-extern bool UTIL_IsEntityMarked(int iEntity);
-extern float RC2PlayerAttribute(int iAttribute, int iPlayerIndex); // orig 0x95890 (player, p5; p3's name)
-extern int g_iRC2ScoreMode;										 // orig 0x1afd38 (world.cpp, p3's name): mp_scoremode at map start
-extern int g_iRC2GibEvent;										 // orig 0x1afd3c (world.cpp, p3's name): events/gib.sc
-extern void FreezeTimer_Thaw(edict_t* pent);					 // orig 0x41e80 (p2's name): ends every freeze timer on pent
-extern void StopAntiFriction(edict_t* pent);					 // orig 0xaa40 (p1, dlls/rc2/antifrictimer.cpp)
+extern int g_iRC2ScoreMode; // orig 0x1afd38 (world.cpp, p3's name): mp_scoremode at map start
+extern int g_iRC2GibEvent;	// orig 0x1afd3c (world.cpp, p3's name): events/gib.sc
 
 // orig 0x21770: a second copy of h_ai.cpp's IsFacing (stock) in this file's object; TakeDamage
 // calls it
@@ -913,7 +904,7 @@ bool CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 	{
 		CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker->pContainingEntity);
 		if (pAttacker->IsActivePlayer())
-			flTake = RC2PlayerAttribute(2, ENTINDEX(pevAttacker->pContainingEntity)) * flDamage;
+			flTake = PM_GetAttributeScale(2, ENTINDEX(pevAttacker->pContainingEntity)) * flDamage;
 	}
 
 	// if this is a player, move him around!
@@ -1119,7 +1110,7 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 	if (!pevAttacker)
 		pevAttacker = pevInflictor;
 
-	UTIL_PushEntityMask();
+	UTIL_PushEntityMarks();
 
 	// iterate on all entities in the vicinity.
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
@@ -1160,7 +1151,7 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 
 				// VERIFY: the shield's direction; read as from the blast to the body target
 				const float flShieldFraction = (bitsDamageType & DMG_BLAST) != 0 ? RC2Pref(RC2P_Shield_BlastDamageFraction).f : RC2Pref(RC2P_Shield_GenericRadiusFraction).f;
-				flAdjustedDamage = RC2ShieldDamage(pEntity, flAdjustedDamage, flShieldFraction, tr.vecEndPos, (vecSpot - vecSrc).Normalize(), NULL, NULL, 8);
+				flAdjustedDamage = ShieldDeflect(pEntity, flAdjustedDamage, flShieldFraction, tr.vecEndPos, (vecSpot - vecSrc).Normalize(), NULL, NULL, 8);
 				UTIL_MarkEntity(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
 
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
@@ -1181,7 +1172,7 @@ void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker
 		}
 	}
 
-	UTIL_PopEntityMask();
+	UTIL_PopEntityMarks();
 }
 
 
@@ -1228,7 +1219,7 @@ CBaseEntity* CBaseMonster::CheckTraceHullAttack(float flDist, int iDamage, int i
 
 		if (iDamage > 0)
 		{
-			const float flDamage = RC2ShieldDamage(pEntity, iDamage, 1.5, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 8);
+			const float flDamage = ShieldDeflect(pEntity, iDamage, 1.5, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 8);
 			if (flDamage > 0)
 				pEntity->GetEffectedEnt()->TakeDamage(pev, pev, flDamage, iDmgType);
 		}
@@ -1537,7 +1528,7 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 
 			if (0 != iDamage)
 			{
-				flDamage = RC2ShieldDamage(pEntity, iDamage, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+				flDamage = ShieldDeflect(pEntity, iDamage, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
 				if (flDamage > 0)
 					pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
 
@@ -1549,7 +1540,7 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 				{
 				default:
 				case BULLET_MONSTER_9MM:
-					flDamage = RC2ShieldDamage(pEntity, gSkillData.monDmg9MM, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					flDamage = ShieldDeflect(pEntity, gSkillData.monDmg9MM, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
 					if (flDamage > 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 
@@ -1559,7 +1550,7 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 					break;
 
 				case BULLET_MONSTER_MP5:
-					flDamage = RC2ShieldDamage(pEntity, gSkillData.monDmgMP5, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					flDamage = ShieldDeflect(pEntity, gSkillData.monDmgMP5, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
 					if (flDamage > 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 
@@ -1569,7 +1560,7 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 					break;
 
 				case BULLET_MONSTER_12MM:
-					flDamage = RC2ShieldDamage(pEntity, gSkillData.monDmg12MM, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					flDamage = ShieldDeflect(pEntity, gSkillData.monDmg12MM, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
 					if (flDamage > 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					// SDK 2.3's (halflife-updated decals always): no sound or decal for a tracer
@@ -1581,7 +1572,7 @@ void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirS
 					break;
 
 				case BULLET_NONE: // FIX
-					flDamage = RC2ShieldDamage(pEntity, 50, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
+					flDamage = ShieldDeflect(pEntity, 50, flShieldFraction, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 5);
 					if (flDamage > 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_CLUB);
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
@@ -1651,7 +1642,7 @@ Vector CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector
 
 			if (0 != iDamage)
 			{
-				flDamage = RC2ShieldDamage(pEntity, iDamage, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+				flDamage = ShieldDeflect(pEntity, iDamage, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
 				if (flDamage > 0)
 					pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
 
@@ -1663,32 +1654,32 @@ Vector CBaseEntity::FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector
 				{
 				default:
 				case BULLET_PLAYER_9MM:
-					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmg9MM, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					flDamage = ShieldDeflect(pEntity, gSkillData.plrDmg9MM, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
 					if (flDamage != 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_PLAYER_MP5:
-					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmgMP5, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					flDamage = ShieldDeflect(pEntity, gSkillData.plrDmgMP5, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
 					if (flDamage != 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_PLAYER_BUCKSHOT:
 					// make distance based!
-					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmgBuckshot, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					flDamage = ShieldDeflect(pEntity, gSkillData.plrDmgBuckshot, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
 					if (flDamage != 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_PLAYER_357:
-					flDamage = RC2ShieldDamage(pEntity, gSkillData.plrDmg357, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					flDamage = ShieldDeflect(pEntity, gSkillData.plrDmg357, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
 					if (flDamage != 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_BULLET);
 					break;
 
 				case BULLET_NONE: // FIX
-					flDamage = RC2ShieldDamage(pEntity, 50, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
+					flDamage = ShieldDeflect(pEntity, 50, 1.25, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 2);
 					if (flDamage != 0)
 						pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_CLUB);
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
@@ -1829,12 +1820,3 @@ void CBaseMonster::MakeDamageBloodDecal(int cCount, float flNoise, TraceResult* 
 	}
 }
 
-// RC2ShieldDamage: the real one is reconstructed elsewhere now
-void UTIL_PushEntityMask() {}
-void UTIL_PopEntityMask() {}
-// UTIL_MarkEntity: the real one is reconstructed elsewhere now
-// UTIL_IsEntityMarked: the real one is reconstructed elsewhere now
-float RC2PlayerAttribute(int iAttribute, int iPlayerIndex) { return 1.0; }
-// g_iRC2ScoreMode: the real one is reconstructed elsewhere now
-// g_iRC2GibEvent: the real one is reconstructed elsewhere now
-// FreezeTimer_Thaw: the real one is reconstructed elsewhere now

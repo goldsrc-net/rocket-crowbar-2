@@ -264,7 +264,7 @@ void CUltimaGrenade::Blast()
 	const float flMaxPunch = RC2Pref(RC2P_Grenade_UltimaGrenBlastMaxPunch).f;
 	entvars_t* pevAttacker = RC2GrenadeAttacker(pev);
 
-	RC2EntMarkPush();
+	UTIL_PushEntityMarks();
 	for (int i = 1; i < gpGlobals->maxEntities; i++)
 	{
 		edict_t* pent = INDEXENT(i);
@@ -273,7 +273,7 @@ void CUltimaGrenade::Blast()
 		CBaseEntity* pEntity = CBaseEntity::Instance(pent);
 		if (!pEntity || pEntity->pev->takedamage == DAMAGE_NO)
 			continue;
-		if (RC2EntMarkTest(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
 			continue;
 
 		Vector vecSpot = pEntity->Center();
@@ -288,9 +288,9 @@ void CUltimaGrenade::Blast()
 		}
 
 		pEntity->GetEffectedEnt()->TakeDamage(pev, pevAttacker, RC2Pref(RC2P_Grenade_UltimaGrenBlastDamage).f, DMG_BLAST | DMG_ENERGYBEAM);
-		RC2EntMarkSet(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
+		UTIL_MarkEntity(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
 	}
-	RC2EntMarkPop();
+	UTIL_PopEntityMarks();
 }
 
 // orig 0x5bd30

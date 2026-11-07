@@ -15,7 +15,9 @@
 #include "cbase.h"
 #include "player.h"
 #include "gamerules.h"
-#include "rc2/p9_needs.h"
+#include "UserMessages.h"
+#include "maintainent.h"
+#include "vote.h"
 
 #include <cmath>
 

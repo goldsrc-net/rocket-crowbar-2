@@ -43,7 +43,13 @@
 #include "UserMessages.h"
 #include "client.h"
 #include "rc2prefs.h"
-#include "rc2/p5_externs.h"
+#include "rc2/freezetimer.h"
+#include "rc2/antifrictimer.h"
+#include "rc2/maintainent.h"
+#include "rc2/racecontroller.h"
+#include "rc2/transform.h"
+
+extern int g_iRC2ScoreMode; // orig .bss 0x1afd38 (world.cpp): mp_scoremode at map start
 
 // #define DUCKFIX
 
@@ -316,6 +322,10 @@ void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 #define ARMOR_RATIO 0.2 // Armor Takes 80% of the damage
 #define ARMOR_BONUS 0.5 // Each Point of Armor is work 1/x points of health
 
+// Rocket Crowbar 2: set while TakeDamage hands damage back to the attacker (damage reflection), so
+// the reflection isn't reflected again; CWorld::Precache clears it. orig .data 0x18f4dc, name ours
+bool g_fRC2InDamageReflect = false;
+
 // orig 0x949b0. RC2: a shoulder rider takes only the world's own damage; transform 6 takes none
 // and a player who can't drown no drowning; the attacker's and victim's attributes scale the
 // damage, and so does the victim's pev->scale; transformed players' armor stays out of it; the
@@ -344,14 +354,14 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	if (m_iTransformType == 6)
 		return false;
 
-	if ((bitsDamageType & DMG_DROWN) != 0 && (PlayerAttrFlags(ENTINDEX(edict())) & RC2ATTRF_NODROWN) != 0)
+	if ((bitsDamageType & DMG_DROWN) != 0 && (PM_GetAbilityFlags(ENTINDEX(edict())) & RC2ATTRF_NODROWN) != 0)
 		return false;
 
 	CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker);
 
-	flDamage *= PlayerAttr(RC2ATTR_DEFEND, ENTINDEX(edict()));
+	flDamage *= PM_GetAttributeScale(RC2ATTR_DEFEND, ENTINDEX(edict()));
 	if (pAttacker && pAttacker->IsActivePlayer())
-		flDamage *= PlayerAttr(RC2ATTR_ATTACK, ENTINDEX(ENT(pevAttacker)));
+		flDamage *= PM_GetAttributeScale(RC2ATTR_ATTACK, ENTINDEX(ENT(pevAttacker)));
 
 	if ((bitsDamageType & DMG_BLAST) != 0 && g_pGameRules->IsMultiplayer())
 	{
@@ -404,10 +414,9 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType);
 
 	// RC2: damage reflection, for energy
-	static bool s_bReflecting = false; // name ours (orig .data 0x18f4dc)
-	if (!s_bReflecting && pevAttacker && ENT(pevAttacker) != edict())
+	if (!g_fRC2InDamageReflect && pevAttacker && ENT(pevAttacker) != edict())
 	{
-		const float flReflect = PlayerAttr(RC2ATTR_DMGREFLECT, ENTINDEX(edict()));
+		const float flReflect = PM_GetAttributeScale(RC2ATTR_DMGREFLECT, ENTINDEX(edict()));
 		CBaseEntity* pReflectTo = flReflect > 0 ? CBaseEntity::Instance(pevAttacker) : NULL;
 		if (pReflectTo)
 		{
@@ -429,15 +438,15 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 			if ((int)flReflected > 0)
 			{
-				s_bReflecting = true;
-				pReflectTo->TakeDamage(UTIL_DummyInflictor("dmg_reflect"), pev, flReflected, DMG_FALL);
-				s_bReflecting = false;
+				g_fRC2InDamageReflect = true;
+				pReflectTo->TakeDamage(UTIL_RC2DamageInflictor("dmg_reflect"), pev, flReflected, DMG_FALL);
+				g_fRC2InDamageReflect = false;
 			}
 		}
 	}
 
 	// RC2: the damage-based score, by the fraction of the maximum health taken
-	if (g_iScoreMode == 1)
+	if (g_iRC2ScoreMode == 1)
 	{
 		float flFrac = flHealthPrev - (pev->health > 0 ? pev->health : 0);
 		if (pev->max_health != 0)
@@ -464,7 +473,7 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		}
 	}
 
-	TransformTookDamage(this);
+	Transform_PainSound();
 
 	// reset damage time countdown for each type of time based damage player just sustained
 
@@ -966,12 +975,12 @@ static void UseEnergyOf(int iPlayer, float flAmount, float flRegenDelay)
 	if (pPlayer->m_flEnergy < 0)
 		pPlayer->m_flEnergy = 0;
 
-	UTIL_DelayAttack(&pPlayer->m_flEnergyRegenTime, gpGlobals->time, flRegenDelay);
+	UTIL_ExtendTime(&pPlayer->m_flEnergyRegenTime, gpGlobals->time, flRegenDelay);
 }
 
 // orig 0x95810. Mode 0 shows the client effect CLTE 2 on the player to those near him; the
 // vectors go unused
-static void EnergyEffectOf(int iPlayer, int iMode, Vector vecA, Vector vecB)
+static void EnergyEffectOf(int iPlayer, int iMode, float* vecA, float* vecB)
 {
 	CBaseEntity* pPlayer = UTIL_PlayerByIndex(iPlayer);
 	if (!pPlayer || iMode != 0)
@@ -986,18 +995,18 @@ static void EnergyEffectOf(int iPlayer, int iMode, Vector vecA, Vector vecB)
 // orig 0x95860. Attribute flag 0x200 of a player entity
 bool PlayerHasAttrFlag200(CBaseEntity* pPlayer)
 {
-	return ((PlayerAttrFlags(ENTINDEX(pPlayer->edict())) >> 9) & 1) != 0;
+	return ((PM_GetAbilityFlags(ENTINDEX(pPlayer->edict())) >> 9) & 1) != 0;
 }
 
-float PlayerAttr(int iAttr, int iPlayer) { return AttrOf(iAttr, iPlayer); }									 // orig 0x95890
-int PlayerAttrFlags(int iPlayer) { return AttrFlagsOf(iPlayer); }												 // orig 0x958b0
-void SetPlayerAttrInt(int iPlayer, int i, int iValue) { SetAttrIntOf(iPlayer, i, iValue); }						 // orig 0x958c0
-int GetPlayerAttrInt(int iPlayer, int i) { return GetAttrIntOf(iPlayer, i); }									 // orig 0x958e0
+float PM_GetAttributeScale(int iAttr, int iPlayer) { return AttrOf(iAttr, iPlayer); }									 // orig 0x95890
+int PM_GetAbilityFlags(int iPlayer) { return AttrFlagsOf(iPlayer); }												 // orig 0x958b0
+void PM_SetPlayerTimer(int iPlayer, int i, int iValue) { SetAttrIntOf(iPlayer, i, iValue); }						 // orig 0x958c0
+int PM_GetPlayerTimer(int iPlayer, int i) { return GetAttrIntOf(iPlayer, i); }									 // orig 0x958e0
 void SetPlayerAttrFloat(int iPlayer, int i, float flValue) { SetAttrFloatOf(iPlayer, i, flValue); }				 // orig 0x95900 (not in files-rc2.tsv)
 float GetPlayerAttrFloat(int iPlayer, int i) { return GetAttrFloatOf(iPlayer, i); }								 // orig 0x95920 (not in files-rc2.tsv)
-float PlayerEnergy(int iPlayer) { return EnergyOf(iPlayer); }													 // orig 0x95940
-void UsePlayerEnergy(int iPlayer, float flAmount, float flRegenDelay) { UseEnergyOf(iPlayer, flAmount, flRegenDelay); } // orig 0x95950
-void PlayerEnergyEffect(int iPlayer, int iMode, Vector vecA, Vector vecB) { EnergyEffectOf(iPlayer, iMode, vecA, vecB); } // orig 0x95970
+float PM_GetEnergy(int iPlayer) { return EnergyOf(iPlayer); }													 // orig 0x95940
+void PM_UseEnergy(int iPlayer, float flAmount, float flRegenDelay) { UseEnergyOf(iPlayer, flAmount, flRegenDelay); } // orig 0x95950
+void PM_JetboostEffect(int iPlayer, int iMode, float* vecA, float* vecB) { EnergyEffectOf(iPlayer, iMode, vecA, vecB); } // orig 0x95970
 
 // orig 0x955e0. Players riding each other see each other (orig slot 77)
 bool CBasePlayer::IsViewOfPlayer(CBaseEntity* pPlayer)
@@ -1024,7 +1033,7 @@ bool CBasePlayer::IsViewOfPlayer(CBaseEntity* pPlayer)
 // the like, IsViewOfPlayer) goes non-solid and far away for the move; the callback (from
 // pm_shared) takes entity index, solid, origin. Its solid is kept in the entity's
 // m_iRC2Base6c.
-void PlayerHideViewEntities(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin))
+void PM_HideViewers(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin))
 {
 	edict_t* pentPlayer = INDEXENT(iPlayer);
 	if (!UTIL_IsValidEntity(pentPlayer))
@@ -1052,7 +1061,7 @@ void PlayerHideViewEntities(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSoli
 }
 
 // orig 0x95ab0. And back after the move
-void PlayerShowViewEntities(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin))
+void PM_RestoreViewers(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin))
 {
 	edict_t* pentPlayer = INDEXENT(iPlayer);
 	if (!UTIL_IsValidEntity(pentPlayer))
@@ -1169,8 +1178,8 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 			pRidden->m_iShoulderRider[m_iRideShoulder != 0 ? 1 : 0] = 0;
 	}
 
-	RemoveFreezeTimers(edict());
-	RemoveAntiFricTimers(edict());
+	FreezeTimer_Thaw(edict());
+	StopAntiFriction(edict());
 
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveItem && 0 == m_iShrunk && 0 == m_iTransformType && !m_bTransforming)
@@ -1179,9 +1188,9 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 	if (m_bTransforming)
 	{
 		if (m_iTransformType == 0)
-			TransformRevert(this);
+			FinishUntransform();
 		else
-			TransformFinish(this);
+			FinishTransform();
 		m_bTransforming = false;
 	}
 
@@ -1267,7 +1276,7 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 	SetAnimation(PLAYER_DIE);
 
 	if (m_iTransformType != 0)
-		TransformKilled(this);
+		Transform_Killed();
 
 	m_flRespawnTimer = 0.0f;
 
@@ -1334,7 +1343,7 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 	if (m_iTransformType == 0)
 		DeathSound();
 	else
-		TransformDeathSound(this);
+		Transform_DeathSound();
 
 	pev->angles.x = 0;
 	pev->angles.z = 0;
@@ -1368,7 +1377,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 
 	if (m_iTransformType != 0)
 	{
-		TransformSetAnimation(this, playerAnim);
+		Transform_SetAnimation(playerAnim);
 		return;
 	}
 
@@ -1611,7 +1620,7 @@ void CBasePlayer::WaterMove()
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
 
-	const bool bNoDrown = (PlayerAttrFlags(ENTINDEX(edict())) & RC2ATTRF_NODROWN) != 0;
+	const bool bNoDrown = (PM_GetAbilityFlags(ENTINDEX(edict())) & RC2ATTRF_NODROWN) != 0;
 
 	if (!bNoDrown)
 	{
@@ -1656,7 +1665,7 @@ void CBasePlayer::WaterMove()
 
 					const float oldHealth = pev->health;
 
-					TakeDamage(UTIL_DummyInflictor("water"), pev, pev->dmg, DMG_DROWN);
+					TakeDamage(UTIL_RC2DamageInflictor("water"), pev, pev->dmg, DMG_DROWN);
 					pev->pain_finished = gpGlobals->time + 1;
 
 					// Account for god mode, the unkillable flag, potential damage mitigation
@@ -2208,7 +2217,7 @@ int CBasePlayer::Classify()
 		return CLASS_NONE;
 
 	if (m_iTransformType != 0)
-		return TransformClassify(m_iTransformType);
+		return Transform_Classify(m_iTransformType);
 
 	return CLASS_PLAYER;
 }
@@ -2382,7 +2391,7 @@ void CBasePlayer::SendDebugCounts()
 	if (!m_bDebugCounts)
 		return;
 
-	if (!IsListenHost1000(edict()))
+	if (!Admin_IsListenHost(edict()))
 	{
 		if (gpGlobals->time < m_flNextDebugCounts)
 			return;
@@ -2640,12 +2649,12 @@ void CBasePlayer::PreThink()
 			m_iClientPlayerStat = 0xff;
 
 			MESSAGE_BEGIN(MSG_ONE, gmsgScoreMode, NULL, edict());
-			WRITE_BYTE(g_iScoreMode);
+			WRITE_BYTE(g_iRC2ScoreMode);
 			MESSAGE_END();
 
-			SendPrefsReset(edict());
-			SendPrefsChanged(edict());
-			ResetPMTables(this);
+			RC2Prefs_SendResetToClient(edict());
+			RC2Prefs_SendToClient(edict());
+			ResetTethers();
 		}
 		else if (g_pGameRules->IsMultiplayer() && m_iInitStage == 2)
 		{
@@ -2767,9 +2776,9 @@ void CBasePlayer::PreThink()
 	if (m_bTransforming && m_flTransformDoneTime < gpGlobals->time)
 	{
 		if (m_iTransformType != 0)
-			TransformRevert(this);
+			FinishUntransform();
 		else
-			TransformFinish(this);
+			FinishTransform();
 		m_bTransforming = false;
 	}
 
@@ -2800,7 +2809,7 @@ void CBasePlayer::PreThink()
 
 	if (m_iTransformType == 6)
 	{
-		Transform6Think(this);
+		RaceUseFrame(this);
 		return;
 	}
 
@@ -3046,7 +3055,7 @@ void CBasePlayer::PreThink()
 			Duck();
 	}
 	else
-		TransformMovement(this);
+		Transform_Think();
 
 	if (!FBitSet(pev->flags, FL_ONGROUND))
 	{
@@ -3681,7 +3690,7 @@ void CBasePlayer::PostThink()
 	}
 
 	if (m_iTransformType != 0)
-		TransformPostThink(this);
+		Transform_FixAngle();
 
 	// do weapon stuff
 	ItemPostFrame();
@@ -3694,7 +3703,7 @@ void CBasePlayer::PostThink()
 
 		if (m_flEnergy < 100)
 		{
-			float flRegen = PlayerAttr(RC2ATTR_ENERGYREGEN, ENTINDEX(edict())) * m_flFrameInterval * RC2Pref(RC2P_Attributes_EnergyBaseRegenerationRate).f;
+			float flRegen = PM_GetAttributeScale(RC2ATTR_ENERGYREGEN, ENTINDEX(edict())) * m_flFrameInterval * RC2Pref(RC2P_Attributes_EnergyBaseRegenerationRate).f;
 			if (m_fShieldOn)
 				flRegen *= RC2Pref(RC2P_Shield_EnergyRegenerationScale).f;
 			m_flEnergy += flRegen;
@@ -4155,12 +4164,12 @@ void CBasePlayer::Spawn()
 		pItem = NULL;
 
 	pev->classname = MAKE_STRING("player");
-	pev->health = PlayerAttr(RC2ATTR_HEALTH, ENTINDEX(edict()));
-	pev->armorvalue = PlayerAttr(RC2ATTR_ARMOR, ENTINDEX(edict()));
+	pev->health = PM_GetAttributeScale(RC2ATTR_HEALTH, ENTINDEX(edict()));
+	pev->armorvalue = PM_GetAttributeScale(RC2ATTR_ARMOR, ENTINDEX(edict()));
 	pev->takedamage = DAMAGE_AIM;
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_WALK;
-	pev->max_health = PlayerAttr(RC2ATTR_EXTRAHEALTH, ENTINDEX(edict())) + pev->health;
+	pev->max_health = PM_GetAttributeScale(RC2ATTR_EXTRAHEALTH, ENTINDEX(edict())) + pev->health;
 	pev->flags &= FL_PROXY | FL_FAKECLIENT; // keep proxy and fakeclient flags set by engine
 	pev->flags |= FL_CLIENT;
 	pev->air_finished = gpGlobals->time + 12;
@@ -4174,7 +4183,7 @@ void CBasePlayer::Spawn()
 	m_bitsHUDDamage = -1;
 	m_bitsDamageType = 0;
 	m_afPhysicsFlags = 0;
-	m_fLongJump = (PlayerAttrFlags(ENTINDEX(edict())) & RC2ATTRF_LONGJUMP) != 0;
+	m_fLongJump = (PM_GetAbilityFlags(ENTINDEX(edict())) & RC2ATTRF_LONGJUMP) != 0;
 	pev->scale = 1;
 	pev->iuser1 = 0;
 	pev->iuser2 = 0;
@@ -4196,7 +4205,7 @@ void CBasePlayer::Spawn()
 	m_flEnergyDrawDone = gpGlobals->time;
 	m_flHealthCreated = 0;
 	m_flCreateHealthDone = gpGlobals->time;
-	m_fShieldOn = (PlayerAttrFlags(ENTINDEX(edict())) & RC2ATTRF_SHIELD) != 0;
+	m_fShieldOn = (PM_GetAbilityFlags(ENTINDEX(edict())) & RC2ATTRF_SHIELD) != 0;
 	m_bClientShield = false;
 	m_iSpecIndex = -1;
 	m_bSpecChase = false;
@@ -4274,7 +4283,7 @@ void CBasePlayer::Spawn()
 
 	g_pGameRules->PlayerSpawn(this);
 
-	PlayerSpawned50a0(edict());
+	LCS_RunPlayerScript(edict());
 }
 
 // orig 0x9b0b0. The points an attribute value costs (what SetAttr sends), from the rc2.ini
@@ -4342,13 +4351,13 @@ bool CBasePlayer::InitNewClient()
 		return false;
 
 	m_iClientId = iId;
-	m_iAdminLevel = ClientFlags1050(edict());
+	m_iAdminLevel = Admin_GetLevel(edict());
 	m_fGiveBan = false;
 	m_iSpecIndex = -1;
 	m_bSpecChase = false;
 	m_flDmgScore = 0;
 	m_flClientDmgScore = -1;
-	ResetPMTables(this);
+	ResetTethers();
 	m_fAttributesSet = false;
 	m_ucRideInfo = 0;
 	m_iClientPlayerStat = 0xff;
@@ -4515,7 +4524,7 @@ void CBasePlayer::GoToSpectatorView()
 	pev->health = 100;
 	pev->iuser1 = 3;
 	pev->iuser2 = 0;
-	ResetPMTables(this);
+	ResetTethers();
 	m_bNotJoined = true;
 
 	unsigned char *pvs, *pas;
@@ -5205,7 +5214,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		return;
 
 	gEvilImpulse101 = true;
-	g_bRC2EquipFlag = false;
+	g_fRC2Randomize = false;
 	GiveNamedItem("item_suit");
 	GiveNamedItem("item_battery");
 	GiveNamedItem("weapon_crowbar");
@@ -5231,7 +5240,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	GiveNamedItem("weapon_snark");
 	GiveNamedItem("weapon_hornetgun");
 	gEvilImpulse101 = false;
-	g_bRC2EquipFlag = true;
+	g_fRC2Randomize = true;
 }
 
 // orig 0x9cfa0. An item this player can't take goes to a shoulder rider: a random one first,
@@ -5835,7 +5844,7 @@ void CBasePlayer::UpdateClientData()
 		MESSAGE_END();
 	}
 
-	SendWeaponSync(this);
+	SendPullPoints();
 
 	UpdateGaussBeacons();
 	if (m_iGaussBeacons != m_iClientGaussBeacons)
@@ -6224,7 +6233,7 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 		return;
 	}
 
-	if (UTIL_CountEntitiesByClassname("weaponbox") > 20)
+	if (UTIL_CountEntitiesByClass("weaponbox") > 20)
 		return;
 
 	if (0 == strlen(pszItemName))
@@ -6668,47 +6677,3 @@ void CInfoIntermission::Think()
 }
 
 LINK_ENTITY_TO_CLASS(info_intermission, CInfoIntermission); // orig 0x9f2b0
-
-// TEMP STUB (p5): real ones belong in the files named in rc2/p5_externs.h (util.cpp,
-// world.cpp, the transformations' file between tentacle.cpp and triggers.cpp, the riding and
-// prefs files between rat.cpp and roach.cpp, the pm_shared side between pm_shared and python,
-// the freeze and antifriction timers' files, and RC2's code before aflock.cpp). They do the
-// least that keeps the player working: no transformation, no riding, no effects.
-entvars_t* UTIL_DummyInflictor(const char* pszName)
-{
-	return VARS(INDEXENT(0));
-}
-
-// UTIL_KillEntityEffects: the real one is reconstructed elsewhere now
-void RemoveFreezeTimers(edict_t* pOwner) {}
-void RemoveAntiFricTimers(edict_t* pOwner) {}
-void TransformSetAnimation(CBasePlayer* pPlayer, int playerAnim) {}
-void TransformTookDamage(CBasePlayer* pPlayer) {}
-void TransformKilled(CBasePlayer* pPlayer) {}
-void TransformDeathSound(CBasePlayer* pPlayer) {}
-void TransformMovement(CBasePlayer* pPlayer) {}
-void TransformPostThink(CBasePlayer* pPlayer) {}
-void TransformFinish(CBasePlayer* pPlayer) {}
-void TransformRevert(CBasePlayer* pPlayer) {}
-int TransformClassify(int iTransform) { return CLASS_PLAYER; }
-void Transform6Think(CBasePlayer* pPlayer) {}
-void SendPrefsReset(edict_t* pClient) {}
-void SendPrefsChanged(edict_t* pClient) {}
-void ResetPMTables(CBasePlayer* pPlayer) {}
-void SendWeaponSync(CBasePlayer* pPlayer) {}
-int ClientFlags1050(edict_t* pClient) { return 0; }
-void PlayerSpawned50a0(edict_t* pClient) {}
-bool IsListenHost1000(edict_t* pClient) { return false; }
-
-// UTIL_RandomEntityByClassname: the real one is reconstructed elsewhere now
-
-int UTIL_CountEntitiesByClassname(const char* pszClassname)
-{
-	int iCount = 0;
-	CBaseEntity* pEntity = NULL;
-	while ((pEntity = UTIL_FindEntityByClassname(pEntity, pszClassname)) != NULL)
-		iCount++;
-	return iCount;
-}
-
-bool g_bRC2EquipFlag = true;

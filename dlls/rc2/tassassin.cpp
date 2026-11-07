@@ -16,7 +16,10 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "p8_needs_transform.h"
+#include "shield.h"
+#include "UserMessages.h"
+#include "transform.h"
+#include "rc2prefs.h"
 
 // orig 0xd7550
 void CBasePlayer::TAssassin_SetAnimation(PLAYER_ANIM playerAnim)
@@ -221,7 +224,7 @@ void CBasePlayer::TAssassin_GunAttack()
 
 	m_flTransformLastAttack = gpGlobals->time;
 	m_flTransformNextAttack1 = flRefire + gpGlobals->time;
-	UTIL_SetMaxTime(m_flTransformNextAttack2, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_GunRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack2, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_GunRefireOther).f);
 	SetAnimation(PLAYER_ATTACK1);
 	UTIL_MakeVectors(pev->v_angle);
 
@@ -246,13 +249,13 @@ void CBasePlayer::TAssassin_GunAttack()
 		CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
 		if (pHit)
 		{
-			float flDamage = RC2_ShieldFilterDamage(pHit, RC2Pref(RC2P_TransformAssassin_GunDamage).f, RC2Pref(RC2P_TransformAssassin_GunShieldFraction).f, tr.vecEndPos, vecDir, (float*)&tr.vecEndPos, NULL, 9);
+			float flDamage = ShieldDeflect(pHit, RC2Pref(RC2P_TransformAssassin_GunDamage).f, RC2Pref(RC2P_TransformAssassin_GunShieldFraction).f, tr.vecEndPos, vecDir, &tr.vecEndPos, NULL, 9);
 			if (flDamage > 0)
 			{
 				ClearMultiDamage();
 				gMultiDamage.type = DMG_BULLET | DMG_BLAST | DMG_NEVERGIB; // 0x1042
 				pHit->TraceAttack(pev, flDamage, vecDir, &tr, DMG_BULLET | DMG_BLAST | DMG_NEVERGIB);
-				ApplyMultiDamage(UTIL_NamedInflictor("assassin_gun"), pev);
+				ApplyMultiDamage(UTIL_RC2DamageInflictor("assassin_gun"), pev);
 			}
 		}
 	}
@@ -275,7 +278,7 @@ void CBasePlayer::TAssassin_KickStart()
 
 	m_flTransformLastAttack = gpGlobals->time;
 	m_flTransformNextAttack2 = RC2Pref(RC2P_TransformAssassin_KickRefireKick).f + gpGlobals->time;
-	UTIL_SetMaxTime(m_flTransformNextAttack1, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_KickRefireOther).f);
+	UTIL_ExtendTime(m_flTransformNextAttack1, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_KickRefireOther).f);
 	pev->sequence = 7;
 	pev->frame = 0;
 	ResetSequenceInfo();
@@ -318,7 +321,7 @@ void CBasePlayer::TAssassin_KickHit()
 	Vector vecRight = gpGlobals->v_right;
 
 	Vector vecClosest;
-	while ((pEnt = UTIL_FindEntityNearSphere(pEnt, Center(), RC2Pref(RC2P_TransformAssassin_KickCheckDist).f, NULL, &vecClosest)) != NULL)
+	while ((pEnt = UTIL_FindEntityNearestInSphere(pEnt, Center(), RC2Pref(RC2P_TransformAssassin_KickCheckDist).f, NULL, &vecClosest)) != NULL)
 	{
 		if (pEnt->pev->takedamage == DAMAGE_NO)
 			continue;
@@ -360,7 +363,7 @@ void CBasePlayer::TAssassin_KickHit()
 	if (!pBest)
 		return;
 
-	if ((pBest->GetRCCaps(0, this) & 1) != 0 && RC2_GameRulesCanKnock(this, pBest))
+	if ((pBest->GetRCCaps(0, this) & 1) != 0 && g_pGameRules->PlayerCanAffect(this, pBest))
 	{
 		pBest->pev->flags &= ~FL_ONGROUND;
 		pBest->pev->velocity.z += RC2Pref(RC2P_TransformAssassin_KickHitZBoost).f;
@@ -374,7 +377,7 @@ void CBasePlayer::TAssassin_KickHit()
 	}
 
 	float flDamage = (m_iTransformState3 == 1) ? RC2Pref(RC2P_TransformAssassin_KickSwipeDamage).f : RC2Pref(RC2P_TransformAssassin_KickBackKickDamage).f;
-	pBest->TakeDamage(UTIL_NamedInflictor("assassin_kick"), pev, flDamage, DMG_CLUB);
+	pBest->TakeDamage(UTIL_RC2DamageInflictor("assassin_kick"), pev, flDamage, DMG_CLUB);
 }
 
 // orig 0xd8410
@@ -454,7 +457,7 @@ void CBasePlayer::TAssassin_Think()
 			{
 				m_iTransformState2 = 1;
 				m_flEnergy -= RC2Pref(RC2P_TransformAssassin_CloakTurnOnEnergy).f;
-				UTIL_SetMaxTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_CloakTurnOnEnergyRegenDelay).f);
+				UTIL_ExtendTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_CloakTurnOnEnergyRegenDelay).f);
 				pev->rendermode = kRenderTransTexture;
 				pev->renderamt = 255;
 				EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, "debris/beamstart1.wav", 0.2, ATTN_NORM, 0, RANDOM_LONG(95, 105));
@@ -472,7 +475,7 @@ void CBasePlayer::TAssassin_Think()
 	if (0 != m_iTransformState2)
 	{
 		m_flEnergy -= RC2Pref(RC2P_TransformAssassin_CloakEnergyPerSecond).f * m_flFrameInterval;
-		UTIL_SetMaxTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_CloakEnergyRegenDelay).f);
+		UTIL_ExtendTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformAssassin_CloakEnergyRegenDelay).f);
 		if (m_flEnergy <= 0)
 		{
 			m_iTransformState2 = 0;

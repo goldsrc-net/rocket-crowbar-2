@@ -12,7 +12,7 @@
 *	- explode_bolt: sticks in what it hits and explodes after a delay.
 *
 *	The crossbow (p2's crossbow.cpp) creates them by classname, and calls CXBowTeather::DieThink
-*	through XBowTeatherDie.
+*	itself (crossbowbolts.h).
 *
 ****/
 
@@ -22,23 +22,13 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
+#include "UserMessages.h"
 #include "gamerules.h"
 #include "soundent.h"
 #include "rc2prefs.h"
-
-// --- from other packages (reference/dossiers/p1.md, cross-file needs) ---
-// The scripted..shotgun run (orig 0xc45b0), p2's name and signature: the damage left after the
-// target's shield takes its share. VERIFY: the 7th argument is a Vector the shield fills (the
-// explode bolt reads three floats from it, the surface normal it bounces off); p2 declared it
-// float*.
-extern float RC2ShieldDamage(CBaseEntity* pTarget, float flDamage, float flShieldFraction, Vector vecPos, Vector vecDir, Vector* pvecHit, float* pflOut, int iFlags);
-extern Vector UTIL_Reflect(Vector vecDir, Vector vecNormal);								   // orig 0xf5800 (util), p2's name
-extern entvars_t* UTIL_NamedInflictor(const char* pszName);									   // orig 0xf58a0 (util), p2's name: a shared entity classnamed pszName, or the world
-extern void UTIL_KillEntityEffects(edict_t* pEdict);										   // orig 0xf55b0 (util), p3's name
-extern int UTIL_PackDirection(Vector vecDir);												   // orig 0xf5920 (util), p4's name
-extern void VectorsToAngles(const Vector& vecForward, const Vector& vecRight, const Vector& vecUp, Vector& vecAngles); // orig 0xa0260 (pm_math), p2's name
-extern unsigned short g_usExplodeEvent;														   // orig .bss 0x1afd18 (weapons.cpp), p3's name: events/explode.sc
-extern int gmsgCLTE;																		   // RC2's "CLTE" user message
+#include "pm_rc2.h"
+#include "shield.h"
+#include "crossbowbolts.h"
 
 // what a bolt stuck in something keeps (the three classes do the same): its angles and its
 // position in the struck entity's frame, or in the world's
@@ -234,7 +224,7 @@ void CImpailer::AttachTouch(CBaseEntity* pOther)
 		// VERIFY: the original passes the hit position from its trace copy before it fills it
 		// (an uninitialised stack slot); ours is zero
 		TraceResult tr = {};
-		if (RC2ShieldDamage(pOther, RC2Pref(RC2P_Crossbow_ImpailerShieldDeflectDamage).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 8) < 1.0)
+		if (ShieldDeflect(pOther, RC2Pref(RC2P_Crossbow_ImpailerShieldDeflectDamage).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 8) < 1.0)
 		{
 			DieThink();
 			return;
@@ -361,7 +351,7 @@ void CImpailer::PullingThink()
 
 		// bleeding doesn't kick the view
 		const Vector vecPunch = m_hPulled->pev->punchangle;
-		m_hPulled->TakeDamage(UTIL_NamedInflictor("impailer_bleeding"), pevAttacker, RC2Pref(RC2P_Crossbow_ImpailerBleedDamage).f, DMG_NEVERGIB | DMG_SLASH);
+		m_hPulled->TakeDamage(UTIL_RC2DamageInflictor("impailer_bleeding"), pevAttacker, RC2Pref(RC2P_Crossbow_ImpailerBleedDamage).f, DMG_NEVERGIB | DMG_SLASH);
 		if (m_hPulled == NULL || !IsLivingTarget(m_hPulled))
 		{
 			DieThink();
@@ -449,36 +439,8 @@ void CImpailer::ReleasePull(CBaseEntity* pPulled)
 }
 
 //=========================================================
-// CXBowTeather
+// CXBowTeather (crossbowbolts.h)
 //=========================================================
-class CXBowTeather : public CGrenade
-{
-public:
-	void Spawn() override;
-	void Precache() override;
-	void Killed(entvars_t* pevAttacker, int iGib) override;
-	bool GetPullOrg(CBaseEntity* pPulled, Vector& vecOrigin, float& flForce, float& flOther) override;
-	void ReleasePull(CBaseEntity* pPulled) override;
-	int GetRCCaps2(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 2; } // orig 0x285f0
-
-	void EXPORT AttachTouch(CBaseEntity* pOther);
-	void EXPORT PullingThink();
-	void EXPORT DieThink();
-
-	// none saved; names ours. pev->dmg_inflictor is the shooter, pev->owner what it's stuck in.
-	int m_iShooterTether;	 // orig +0x2b8: the shooter's tether, -1 for none
-	int m_iTargetTether;	 // orig +0x2bc: the struck player's tether back to the shooter, -1
-	bool m_fStuckToWorld;	 // orig +0x2c0
-	bool m_fInLiving;		 // orig +0x2c1: stuck in a living thing, not a brush
-	bool m_fAttached;		 // orig +0x2c2
-	Vector m_vecStuckAngles; // orig +0x2c4
-	Vector m_vecStuckPos;	 // orig +0x2d0
-	float m_flPullDist;		 // orig +0x2dc
-	float m_flPullStrength;	 // orig +0x2e0
-	float m_flBackPull;		 // orig +0x2e4: the pull on the struck one
-	float m_flZOffset;		 // orig +0x2e8: VERIFY: nothing in rc2.dll sets it but Spawn (0)
-};
-
 LINK_ENTITY_TO_CLASS(xbow_teather, CXBowTeather); // orig 0x28550
 
 // orig 0x28650
@@ -551,7 +513,7 @@ void CXBowTeather::AttachTouch(CBaseEntity* pOther)
 	Vector vecDir = pev->velocity.Normalize();
 	UTIL_TraceLine(pev->origin - vecDir * 32, pev->origin + vecDir * 128, dont_ignore_monsters, ENT(pev), &tr);
 
-	if (RC2ShieldDamage(pOther, 1.0, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 8) < 1.0)
+	if (ShieldDeflect(pOther, 1.0, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 8) < 1.0)
 	{
 		DieThink();
 		return;
@@ -583,7 +545,7 @@ void CXBowTeather::AttachTouch(CBaseEntity* pOther)
 		}
 		const Vector vecForward = vecB * flSin + vecA * flCos;
 		const Vector vecRight = vecA * flSin - vecB * flCos;
-		VectorsToAngles(vecForward, vecRight, vecNormal, pev->angles);
+		VectorAnglesWithRoll(vecForward, vecRight, vecNormal, pev->angles);
 	}
 
 	if (0 == ENTINDEX(pOther->edict()))
@@ -796,13 +758,6 @@ void CXBowTeather::ReleasePull(CBaseEntity* pPulled)
 		pev->dmg_inflictor = NULL;
 }
 
-// For the crossbow (p2/dlls/rc2/p2shared.h), which calls CXBowTeather::DieThink directly. Name
-// p2's; not a function of its own in rc2.dll.
-void XBowTeatherDie(CBaseEntity* pTeather)
-{
-	static_cast<CXBowTeather*>(pTeather)->DieThink();
-}
-
 //=========================================================
 // CExplodeBolt
 //=========================================================
@@ -876,10 +831,10 @@ void CExplodeBolt::EmbedTouch(CBaseEntity* pOther)
 
 	// a shield turns it away
 	Vector vecHit, vecShieldNormal;
-	if (RC2ShieldDamage(pOther, RC2Pref(RC2P_Crossbow_ExplodeBoltShieldDeflectDmg).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), &vecHit, reinterpret_cast<float*>(&vecShieldNormal), 8) < 10.0)
+	if (ShieldDeflect(pOther, RC2Pref(RC2P_Crossbow_ExplodeBoltShieldDeflectDmg).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), &vecHit, &vecShieldNormal, 8) < 10.0)
 	{
 		const float flSpeed = pev->velocity.Length();
-		pev->velocity = UTIL_Reflect(pev->velocity.Normalize(), vecShieldNormal) * flSpeed;
+		pev->velocity = UTIL_ReflectVector(pev->velocity.Normalize(), vecShieldNormal) * flSpeed;
 		pev->movedir = pev->velocity;
 		pev->origin = vecHit + vecShieldNormal * 8;
 		UTIL_SetOrigin(pev, pev->origin);
@@ -978,7 +933,7 @@ void CExplodeBolt::ArmingThink()
 
 	pev->dmg = RC2Pref(RC2P_Crossbow_ExplodeBoltDetonateDamage).f;
 	UTIL_MakeAimVectors(pev->angles);
-	PLAYBACK_EVENT_FULL(0, edict(), g_usExplodeEvent, 0.0, pev->origin, g_vecZero, pev->dmg, 0.0, UTIL_PackDirection(gpGlobals->v_forward), 0, 0, 0);
+	PLAYBACK_EVENT_FULL(0, edict(), g_usExplodeEvent, 0.0, pev->origin, g_vecZero, pev->dmg, 0.0, UTIL_PackNormal(gpGlobals->v_forward), 0, 0, 0);
 
 	entvars_t* pevAttacker = pev;
 	if (UTIL_IsValidEntity(pev->dmg_inflictor))
@@ -1018,13 +973,6 @@ void CExplodeBolt::FlyThink()
 // Compiler-generated pieces of this run (no source of their own): orig 0x27c90 is Vector's unary
 // minus and orig 0x27cc0 CBaseEntity::entindex(), both inline in the headers (stock).
 
-// UTIL_Reflect: the real one is reconstructed elsewhere now
-// UTIL_NamedInflictor: the real one is reconstructed elsewhere now
-// UTIL_PackDirection: the real one is reconstructed elsewhere now
-void VectorsToAngles(const Vector& vecForward, const Vector& vecRight, const Vector& vecUp, Vector& vecAngles) { vecAngles = UTIL_VecToAngles(vecForward); }
-// g_usExplodeEvent: the real one is reconstructed elsewhere now
-// AddTether: the real one is reconstructed elsewhere now
-// RemoveTether: the real one is reconstructed elsewhere now
 
 // The weapon COMDATs at the end of this run, emitted here for CCrossbow (crossbow.cpp, p2's).
 // Their bodies, as read:

@@ -30,14 +30,12 @@
 #include "trains.h"
 #include "UserMessages.h"
 #include "rc2prefs.h"
+#include "rc2/killmessages.h"
 
 #include <algorithm>
 
 // From elsewhere in rc2.dll
-extern bool g_bRC2EquipFlag; // name ours: weapons given meanwhile bring no ammo of their own. VERIFY; orig .data 0x181430, stubbed in player.cpp
-extern int g_iScoreMode; // name ours: mp_scoremode as CWorld::Spawn read it (0 or 1); world.cpp, orig .bss 0x1afd38
-extern int GetDeathMessageIndex(const char* pszWeapon, bool bNoKiller, int iRandom); // name ours; orig 0x31fe0 (p2)
-extern const char* GetDeathMessageText(int iMessage, const char* pszVictim, const char* pszKiller, const char* pszWeapon, int iGender, bool bSuicide); // name ours; orig 0x32540 (p2)
+extern int g_iRC2ScoreMode; // world.cpp, orig .bss 0x1afd38: mp_scoremode as CWorld::Spawn read it (0 or 1)
 
 // orig 0x7efd0. The player's userinfo "gender": 1 for 1, f or F; 2 for 2, n, N, i, I, u or U;
 // 0 otherwise.
@@ -262,7 +260,7 @@ void CHalfLifeMultiplay::Think()
 			if (!pPlayer)
 				continue;
 
-			const float flScore = g_iScoreMode != 0 ? pPlayer->m_flDmgScore : pPlayer->pev->frags;
+			const float flScore = g_iRC2ScoreMode != 0 ? pPlayer->m_flDmgScore : pPlayer->pev->frags;
 
 			if (flScore >= flFragLimit)
 			{
@@ -282,7 +280,7 @@ void CHalfLifeMultiplay::Think()
 	// Updates when frags change
 	if (frags_remaining != last_frags)
 	{
-		if (g_iScoreMode != 0)
+		if (g_iRC2ScoreMode != 0)
 			g_engfuncs.pfnCvar_DirectSet(&fragsleft, UTIL_VarArgs("%.2f", frags_remaining));
 		else
 			g_engfuncs.pfnCvar_DirectSet(&fragsleft, UTIL_VarArgs("%i", (int)frags_remaining));
@@ -531,7 +529,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 //=========================================================
 // orig 0x7ea40 (not in files-rc2.tsv). RC2: without a game_player_equip the crowbar and the
 // weapons the player chose (CBasePlayer::m_iAttrWeapons), with the extra ammo rc2.ini gives
-// for each; the weapons give no ammo of their own meanwhile (g_bRC2EquipFlag).
+// for each; mp_random leaves what is given alone meanwhile (g_fRC2Randomize cleared).
 // halflife-updated's forced switch to the first weapon stays.
 void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 {
@@ -545,7 +543,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	pPlayer->SetHasSuit(true);
 
 	addDefault = true;
-	g_bRC2EquipFlag = false;
+	g_fRC2Randomize = false;
 
 	while ((pWeaponEntity = UTIL_FindEntityByClassname(pWeaponEntity, "game_player_equip")) != NULL)
 	{
@@ -612,7 +610,7 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 		pPlayer->GiveAmmo(iUranium, "uranium", RC2Pref(RC2P_Ammo_MaxCarryCells).s, NULL);
 	}
 
-	g_bRC2EquipFlag = true;
+	g_fRC2Randomize = true;
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
 }
 
@@ -692,7 +690,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 	if (pVictim->pev == pKiller)
 	{ // killed self
 		pKiller->frags -= 1;
-		if (g_iScoreMode == 1)
+		if (g_iRC2ScoreMode == 1)
 			pVictim->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForSuicide).f;
 	}
 	else if (ktmp && ktmp->IsPlayer())
@@ -704,7 +702,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 
 		FireTargets("game_playerkill", ktmp, ktmp, USE_TOGGLE, 0);
 
-		if (g_iScoreMode == 1)
+		if (g_iRC2ScoreMode == 1)
 		{
 			peKiller->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForPlayerKill).f;
 			pVictim->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForPlayerDeath).f;
@@ -713,7 +711,7 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 	else
 	{ // killed by the world
 		pKiller->frags -= 1;
-		if (g_iScoreMode == 1)
+		if (g_iRC2ScoreMode == 1)
 			pVictim->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForOtherDeath).f;
 	}
 
@@ -800,7 +798,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	else if (strncmp(killer_weapon_name, "func_", 5) == 0)
 		killer_weapon_name += 5;
 
-	const int iDeathMessage = GetDeathMessageIndex(killer_weapon_name_full, (pVictim->pev == pKiller || (pKiller->flags & FL_CLIENT) == 0), RANDOM_LONG(0, 1000));
+	const int iDeathMessage = KillMsg_Pick(killer_weapon_name_full, (pVictim->pev == pKiller || (pKiller->flags & FL_CLIENT) == 0), RANDOM_LONG(0, 1000));
 	const int iGender = PlayerGender(pVictim->edict());
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgDeathMsg);
@@ -819,7 +817,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 
 	if (IS_DEDICATED_SERVER())
 	{
-		g_engfuncs.pfnServerPrint(GetDeathMessageText(iDeathMessage, STRING(pVictim->pev->netname), STRING(pKiller->netname), killer_weapon_name, PlayerGender(pVictim->edict()), pVictim->pev == pKiller));
+		g_engfuncs.pfnServerPrint(KillMsg_Get(iDeathMessage, STRING(pVictim->pev->netname), STRING(pKiller->netname), killer_weapon_name, PlayerGender(pVictim->edict()), pVictim->pev == pKiller));
 		g_engfuncs.pfnServerPrint("\n");
 	}
 
@@ -2069,20 +2067,4 @@ void CMultiplayBusters::SetPlayerModel(CBasePlayer* pPlayer)
 	{
 		g_engfuncs.pfnSetClientKeyValue(pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model", "skeleton");
 	}
-}
-
-// TEMP STUB (p5): real one belongs in world.cpp (CWorld::Spawn, orig 0xfc9d0, sets it from
-// mp_scoremode)
-int g_iScoreMode = 0;
-
-// TEMP STUB (p5): real ones belong in RC2's file between crowbar.cpp and defaultai.cpp (orig
-// 0x31fe0, 0x32540)
-int GetDeathMessageIndex(const char* pszWeapon, bool bNoKiller, int iRandom)
-{
-	return 0;
-}
-
-const char* GetDeathMessageText(int iMessage, const char* pszVictim, const char* pszKiller, const char* pszWeapon, int iGender, bool bSuicide)
-{
-	return "";
 }

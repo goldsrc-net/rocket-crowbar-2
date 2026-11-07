@@ -26,13 +26,12 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 #include "rc2prefs.h"
-#include "rc2/p7_extern.h"
 
 #ifdef CLIENT_DLL
 extern bool g_runfuncs; // cl_dll/com_weapons.cpp
 #define WEAPON_RUNFUNCS g_runfuncs
 #else
-#define WEAPON_RUNFUNCS (0 != g_iWeaponRunFuncs)
+#define WEAPON_RUNFUNCS g_fRC2PlayWeaponEvents
 #endif
 
 LINK_ENTITY_TO_CLASS(weapon_shotgun, CShotgun); // orig 0xc7300

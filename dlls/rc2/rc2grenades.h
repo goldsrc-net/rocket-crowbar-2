@@ -12,8 +12,10 @@
 
 #pragma once
 
-#include "p3b_temp.h"
-#include "p3d_temp.h"
+#include "UserMessages.h"
+#include "weapons.h"
+#include "pullers.h"
+#include "shield.h"
 
 // The thrower as an attacker, as every one of these grenades works it out: the dmg_inflictor
 // entity while it is valid, otherwise the grenade itself. Name ours.
@@ -45,7 +47,7 @@ public:
 	void EXPORT KillTouch(CBaseEntity* pOther);
 	void StartDetonate(); // name ours
 
-	int m_iPullPoint;			 // orig +0x2b8, ours: RC2AddPullPoint's slot, -1 for none
+	int m_iPullPoint;			 // orig +0x2b8, ours: AddPullPoint's slot, -1 for none
 	unsigned short m_usDetonate; // orig +0x2bc, ours: events/gravgrenadedet.sc
 	unsigned short m_usGlow;	 // orig +0x2be, ours: events/gravgrenadeglow.sc
 };
@@ -62,7 +64,7 @@ public:
 	void EXPORT EndDetonate();
 	void StartDetonate(); // name ours
 
-	int m_iPullPoint; // orig +0x2b8, ours: RC2AddPullPoint's slot, -1 for none
+	int m_iPullPoint; // orig +0x2b8, ours: AddPullPoint's slot, -1 for none
 };
 
 class CAFGrenade : public CGrenade

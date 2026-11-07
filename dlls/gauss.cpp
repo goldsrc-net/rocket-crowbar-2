@@ -40,7 +40,6 @@
 #ifndef CLIENT_DLL
 #include "rc2prefs.h"
 #include "gaussbecon.h"
-#include "p3b_temp.h" // TEMP STUBs: RC2's messages and helpers from other files
 #endif
 
 #define RC2_WEAPON_GAUSS 9 // RC2's weapon id for the gauss (SDK 2.3: 7)
@@ -222,10 +221,10 @@ CGaussBecon* CGauss::FindBecon()
 // Every attack's refusal: all four timers at least flDelay from now. (Inline in the original.)
 void CGauss::RaiseAttackTimes(float flDelay)
 {
-	RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flDelay);
-	RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flDelay);
-	RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flDelay);
-	RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flDelay);
 }
 
 // orig 0x4cc80: room for pEnt at vecSpot (RC 1.9's TeleIsValidSpot, here with the gamerules'
@@ -234,7 +233,7 @@ bool CGauss::CanPlaceAt(CBaseEntity* pEnt, Vector vecSpot)
 {
 	TraceResult tr;
 
-	if (!RC2GameRulesAllowGaussTeleport(m_pPlayer, pEnt))
+	if (!g_pGameRules->PlayerCanAffect(m_pPlayer, pEnt))
 		return false;
 
 	if (pEnt->IsPlayer())
@@ -292,18 +291,18 @@ bool CGauss::TeleFragEnt(CBaseEntity* pMover, CBaseEntity* pInBox, CBaseEntity* 
 
 	// the one in the way dies, unless it is a teammate or can't be telefragged
 	if (g_pGameRules->PlayerRelationship(m_pPlayer, pEnt) != GR_TEAMMATE && (GaussCaps2(pEnt, this) & RC2CAP2_NO_TELEFRAG) == 0)
-		return pEnt->TakeDamage(RC2NamedInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
+		return pEnt->TakeDamage(UTIL_RC2DamageInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
 
 	// then the one who moved, under the same two conditions
 	if (g_pGameRules->PlayerRelationship(m_pPlayer, pMover) != GR_TEAMMATE && (GaussCaps2(pMover, this) & RC2CAP2_NO_TELEFRAG) == 0)
 	{
 		if ((GaussCaps2(pEnt, this) & RC2CAP2_NO_TELEFRAG) != 0)
 			return false;
-		return pMover->TakeDamage(RC2NamedInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
+		return pMover->TakeDamage(UTIL_RC2DamageInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
 	}
 
 	// and failing both, the gauss's player
-	m_pPlayer->TakeDamage(RC2NamedInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
+	m_pPlayer->TakeDamage(UTIL_RC2DamageInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
 	return false;
 }
 
@@ -392,7 +391,7 @@ void CGauss::TeleportFlash(CBaseEntity* pEnt, Vector vecOrigin, bool bArrival)
 // orig 0x4d890
 void CGauss::PrimaryAttack()
 {
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2PlayerWaterWeapons(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
 		RaiseAttackTimes(0.15);
@@ -420,10 +419,10 @@ void CGauss::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 		GAUSS_AMMO -= GaussPref(RC2P_Gauss_PrimaryBaseCost);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-		RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefirePrimary));
-		RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefireSecondary));
-		RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefireTertiary));
-		RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefireQuaternary));
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefirePrimary));
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefireSecondary));
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefireTertiary));
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefireQuaternary));
 		m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		if (g_fRC2PlayWeaponEvents)
@@ -462,10 +461,10 @@ void CGauss::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 		GAUSS_AMMO -= GaussPref(RC2P_Gauss_PrimaryNoBeaconBaseCost);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-		RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefirePrimary));
-		RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefireSecondary));
-		RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefireTertiary));
-		RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefireQuaternary));
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefirePrimary));
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefireSecondary));
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefireTertiary));
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconPrimaryRefireQuaternary));
 		m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		if (g_fRC2PlayWeaponEvents)
@@ -552,7 +551,7 @@ void CGauss::PrimaryAttack()
 // orig 0x4e540
 void CGauss::SecondaryAttack()
 {
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2PlayerWaterWeapons(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
 		RaiseAttackTimes(0.15);
@@ -578,10 +577,10 @@ void CGauss::SecondaryAttack()
 		// to the beacon
 		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-		RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefirePrimary));
-		RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireSecondary));
-		RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireTertiary));
-		RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireQuaternary));
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefirePrimary));
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireSecondary));
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireTertiary));
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireQuaternary));
 
 		CGaussBecon* pBecon = FindBecon();
 		if (!pBecon)
@@ -613,18 +612,18 @@ void CGauss::SecondaryAttack()
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 	GAUSS_AMMO -= GaussPref(RC2P_Gauss_SecondaryNoBeaconCost);
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-	RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefirePrimary));
-	RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireSecondary));
-	RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireTertiary));
-	RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireQuaternary));
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefirePrimary));
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireSecondary));
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireTertiary));
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireQuaternary));
 
 	TeleportFlash(m_pPlayer, m_pPlayer->pev->origin, false);
 
-	CBaseEntity* pSpot = UTIL_FindRandomEntityByClassname("info_player_deathmatch");
+	CBaseEntity* pSpot = UTIL_RandomEntityByClassname("info_player_deathmatch");
 	if (!pSpot)
-		pSpot = UTIL_FindRandomEntityByClassname("info_player_coop");
+		pSpot = UTIL_RandomEntityByClassname("info_player_coop");
 	if (!pSpot)
-		pSpot = UTIL_FindRandomEntityByClassname("info_player_start");
+		pSpot = UTIL_RandomEntityByClassname("info_player_start");
 	if (!pSpot)
 		return;
 
@@ -638,7 +637,7 @@ void CGauss::SecondaryAttack()
 // orig 0x4ea50: starts the charge; WeaponFrame burns ammo while it lasts and then fires it
 void CGauss::TertiaryAttack()
 {
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2PlayerWaterWeapons(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
 		RaiseAttackTimes(0.15);
@@ -711,14 +710,14 @@ void CGauss::QuaternaryAttack()
 				m_flNextBeconSync = gpGlobals->time;
 				m_pPlayer->m_iWeaponVolume = 200;
 				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-				RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefirePrimary));
-				RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireSecondary));
-				RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireTertiary));
-				RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireQuaternary));
+				UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefirePrimary));
+				UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireSecondary));
+				UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireTertiary));
+				UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireQuaternary));
 				return;
 			}
 
-			if (m_pPlayer->pev->waterlevel == 3 && !RC2PlayerWaterWeapons(m_pPlayer))
+			if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 			{
 				PlayEmptySound();
 				RaiseAttackTimes(0.15);
@@ -736,10 +735,10 @@ void CGauss::QuaternaryAttack()
 			m_pPlayer->m_iWeaponVolume = 200;
 			GAUSS_AMMO -= GaussPref(RC2P_Gauss_BeaconRetriveCost);
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-			RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefirePrimary));
-			RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireSecondary));
-			RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireTertiary));
-			RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireQuaternary));
+			UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefirePrimary));
+			UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireSecondary));
+			UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireTertiary));
+			UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireQuaternary));
 			PLAYBACK_EVENT_FULL(0, NULL, m_usTeleportFlash, 0, pBecon->pev->origin, g_vecZero, 0, 0, 0, ENTINDEX(pBecon->edict()), 3, 0);
 			UTIL_Remove(pBecon);
 			m_flNextBeconSync = gpGlobals->time;
@@ -747,7 +746,7 @@ void CGauss::QuaternaryAttack()
 		}
 	}
 
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2PlayerWaterWeapons(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
 		RaiseAttackTimes(0.15);
@@ -758,10 +757,10 @@ void CGauss::QuaternaryAttack()
 	m_blHasBecon = true;
 	m_pPlayer->m_iWeaponVolume = 200;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-	RC2RaiseTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefirePrimary));
-	RC2RaiseTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefireSecondary));
-	RC2RaiseTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefireTertiary));
-	RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefireQuaternary));
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefirePrimary));
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefireSecondary));
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefireTertiary));
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconQuaternaryRefireQuaternary));
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussBecon, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
@@ -784,7 +783,7 @@ void CGauss::TertiaryFireNoBecon()
 		m_fInAttack = 0;
 	}
 
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2PlayerWaterWeapons(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussThird, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 2, 0);
 		PlayEmptySound();
@@ -837,7 +836,7 @@ void CGauss::TertiaryFireNoBecon()
 				vecDest = tr.vecEndPos - vecDir * 256;
 			UTIL_SetOrigin(m_pPlayer->pev, vecDest);
 		}
-		m_pPlayer->TakeDamage(RC2NamedInflictor("in_space"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
+		m_pPlayer->TakeDamage(UTIL_RC2DamageInflictor("in_space"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
 		return;
 	}
 
@@ -867,7 +866,7 @@ void CGauss::TertiaryFireBecon()
 		m_fInAttack = 0;
 	}
 
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2PlayerWaterWeapons(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussThird, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 2, 0);
 		PlayEmptySound();
@@ -911,17 +910,17 @@ void CGauss::TertiaryFireBecon()
 	hLast = NULL;
 	Vector vecCenter = tr.vecEndPos + tr.vecPlaneNormal * 8;
 
-	RC2EntMarkPush();
+	UTIL_PushEntityMarks();
 
 	CBaseEntity* pEnt = NULL;
 	Vector vecNear;
-	while ((pEnt = RC2FindEntityNear(pEnt, vecCenter, GaussPrefF(RC2P_Gauss_TertiaryTeleportRadius), NULL, &vecNear)) != NULL)
+	while ((pEnt = UTIL_FindEntityNearestInSphere(pEnt, vecCenter, GaussPrefF(RC2P_Gauss_TertiaryTeleportRadius), NULL, &vecNear)) != NULL)
 	{
 		if ((GaussCaps(pEnt, this) & RC2CAP_GAUSS_TELEPORTABLE) == 0)
 			continue;
 		if (pEnt->GetEffectedEnt()->edict() == m_pPlayer->edict())
 			continue;
-		if (!RC2GameRulesAllowGaussTeleport(m_pPlayer, pEnt))
+		if (!g_pGameRules->PlayerCanAffect(m_pPlayer, pEnt))
 			continue;
 		if (pEnt->IsBSPModel())
 			continue;
@@ -930,7 +929,7 @@ void CGauss::TertiaryFireBecon()
 			if (!pEnt->IsActivePlayer() || !pEnt->IsAlive() || ((CBasePlayer*)pEnt)->m_iRidingIndex != 0)
 				continue;
 		}
-		if (RC2EntMarkTest(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
 			continue;
 		if (iCount != 0 && pEnt->IsPlayer() && !g_pGameRules->FPlayerCanTakeDamage((CBasePlayer*)pEnt, m_pPlayer))
 			continue;
@@ -945,13 +944,13 @@ void CGauss::TertiaryFireBecon()
 			hLast = pEnt->GetEffectedEnt();
 			iCount++;
 		}
-		RC2EntMarkSet(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
+		UTIL_MarkEntity(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
 	}
 
-	RC2EntMarkPop();
+	UTIL_PopEntityMarks();
 
 	if (iCount > 1 && hLast)
-		hLast->TakeDamage(RC2NamedInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
+		hLast->TakeDamage(UTIL_RC2DamageInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
 }
 
 // orig 0x50360: tells the client whether the beacon is out, burns ammo while the tertiary charges
