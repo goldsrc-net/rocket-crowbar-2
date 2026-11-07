@@ -34,13 +34,13 @@ public:
 	void SetYawSpeed() override;
 	int Classify() override;
 };
-LINK_ENTITY_TO_CLASS(monster_rat, CRat);
+LINK_ENTITY_TO_CLASS(monster_rat, CRat); // orig 0xae8d0
 
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
-int CRat::Classify()
+int CRat::Classify() // orig 0xae940: as SDK 2.3 (RC2's layout moved its bytes)
 {
 	return CLASS_INSECT;
 }
@@ -49,7 +49,7 @@ int CRat::Classify()
 // SetYawSpeed - allows each sequence to have a different
 // turn rate associated with it.
 //=========================================================
-void CRat::SetYawSpeed()
+void CRat::SetYawSpeed() // orig 0xae950: as SDK 2.3
 {
 	int ys;
 
@@ -88,7 +88,7 @@ void CRat::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
-void CRat::Precache()
+void CRat::Precache() // orig 0xaea50: as SDK 2.3
 {
 	PRECACHE_MODEL("models/bigrat.mdl");
 }

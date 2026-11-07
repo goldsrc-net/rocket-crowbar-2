@@ -360,4 +360,10 @@ public:
 	*	Will return @c nullptr if item dropping is disabled for this NPC.
 	*/
 	CBaseEntity* DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng);
+
+	// p6 needs (fork B): RC2's slot 147, right after StopFollowing (reference/BASE_VIRTUALS.md).
+	// Name ours: the voice pitch shift for a monster scaled by pev->scale (0 at scale 0 or 1,
+	// else (1 - scale) * 1.25 * 40 clamped to 0..40). Its body (rc2.dll 0x74d0) is the monsters
+	// package's; a TEMP STUB with that reading is in dlls/rc2/scientistmine.cpp.
+	virtual int ScaledPitchShift();
 };

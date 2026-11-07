@@ -387,6 +387,39 @@ void VectorAngles(const float* forward, float* angles)
 	angles[2] = 0;
 }
 
+// Rocket Crowbar 2: VectorAngles with a roll, from the .z of two more basis vectors: roll is
+// -atan2(right.z, up.z), wrapped to 0-360 as pitch and yaw are. Pitch and yaw as VectorAngles
+// (pitch positive up). Callers: CControlForklift, CXBowTeather. VERIFY: which basis vectors
+// those pass as right and up (only their .z is read)
+void VectorAnglesWithRoll(const float* forward, const float* right, const float* up, float* angles) // orig 0xa0260, name ours
+{
+	double yaw, pitch, roll;
+
+	if (forward[1] == 0 && forward[0] == 0)
+	{
+		angles[0] = forward[2] > 0 ? 90 : 270;
+		angles[2] = 0;
+		angles[1] = 0;
+		return;
+	}
+
+	yaw = (atan2(forward[1], forward[0]) * 180 / M_PI);
+	if (yaw < 0)
+		yaw += 360;
+
+	pitch = (atan2(forward[2], sqrt(forward[1] * forward[1] + forward[0] * forward[0])) * 180 / M_PI);
+	if (pitch < 0)
+		pitch += 360;
+
+	roll = -(atan2(right[2], up[2]) * 180 / M_PI);
+	if (roll < 0)
+		roll += 360;
+
+	angles[0] = pitch;
+	angles[2] = roll;
+	angles[1] = yaw;
+}
+
 /*
 ================
 ConcatTransforms

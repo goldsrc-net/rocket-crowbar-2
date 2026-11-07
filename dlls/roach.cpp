@@ -57,14 +57,14 @@ public:
 	int m_iMode;
 	// -----------------------------
 };
-LINK_ENTITY_TO_CLASS(monster_cockroach, CRoach);
+LINK_ENTITY_TO_CLASS(monster_cockroach, CRoach); // orig 0xb2930
 
 //=========================================================
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
-int CRoach::ISoundMask()
+int CRoach::ISoundMask() // orig 0xb29a0: as SDK 2.3 (RC2's layout moved its bytes)
 {
 	return bits_SOUND_CARCASS | bits_SOUND_MEAT;
 }
@@ -73,7 +73,7 @@ int CRoach::ISoundMask()
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
-int CRoach::Classify()
+int CRoach::Classify() // orig 0xb29b0: as SDK 2.3
 {
 	return CLASS_INSECT;
 }
@@ -81,12 +81,18 @@ int CRoach::Classify()
 //=========================================================
 // Touch
 //=========================================================
-void CRoach::Touch(CBaseEntity* pOther)
+// Rocket Crowbar 2: squashed by active players only, and not by players shrunk below half size.
+void CRoach::Touch(CBaseEntity* pOther) // orig 0xb29c0
 {
 	Vector vecSpot;
 	TraceResult tr;
 
-	if (pOther->pev->velocity == g_vecZero || !pOther->IsPlayer())
+	if (pOther->pev->velocity == g_vecZero || !pOther->IsActivePlayer())
+	{
+		return;
+	}
+
+	if (pOther->pev->scale != 0 && pOther->pev->scale < 0.5)
 	{
 		return;
 	}
@@ -104,7 +110,7 @@ void CRoach::Touch(CBaseEntity* pOther)
 // SetYawSpeed - allows each sequence to have a different
 // turn rate associated with it.
 //=========================================================
-void CRoach::SetYawSpeed()
+void CRoach::SetYawSpeed() // orig 0xb2b10: as SDK 2.3
 {
 	int ys;
 
@@ -145,7 +151,7 @@ void CRoach::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
-void CRoach::Precache()
+void CRoach::Precache() // orig 0xb2c50: as SDK 2.3
 {
 	PRECACHE_MODEL("models/roach.mdl");
 
@@ -185,7 +191,7 @@ void CRoach::Killed(entvars_t* pevAttacker, int iGib)
 //=========================================================
 // MonsterThink, overridden for roaches.
 //=========================================================
-void CRoach::MonsterThink()
+void CRoach::MonsterThink() // orig 0xb2d60: as SDK 2.3 (see the food test below)
 {
 	if (FNullEnt(FIND_CLIENT_IN_PVS(edict())))
 		pev->nextthink = gpGlobals->time + RANDOM_FLOAT(1, 1.5);
@@ -262,7 +268,8 @@ void CRoach::MonsterThink()
 				pSound = CSoundEnt::SoundPointerForIndex(m_iAudibleList);
 
 				// roach smells food and is just standing around. Go to food unless food isn't on same z-plane.
-				if (pSound && fabs(pSound->m_vecOrigin.z - pev->origin.z) <= 3)
+				// SDK 2.3's integer abs (halflife-updated has fabs): a difference under 4 passes
+				if (pSound && abs((int)(pSound->m_vecOrigin.z - pev->origin.z)) <= 3)
 				{
 					PickNewDest(ROACH_SMELL_FOOD);
 					SetActivity(ACT_WALK);
@@ -400,7 +407,8 @@ void CRoach::Move(float flInterval)
 // Look - overriden for the roach, which can virtually see
 // 360 degrees.
 //=========================================================
-void CRoach::Look(int iDistance)
+// Rocket Crowbar 2: active players instead of IsPlayer(), and skips what reports RC cap 8.
+void CRoach::Look(int iDistance) // orig 0xb3380
 {
 	CBaseEntity* pSightEnt = NULL; // the current visible entity that we're dealing with
 	CBaseEntity* pPreviousEnt;	   // the last entity added to the link list
@@ -425,9 +433,10 @@ void CRoach::Look(int iDistance)
 	while ((pSightEnt = UTIL_FindEntityInSphere(pSightEnt, pev->origin, iDistance)) != NULL)
 	{
 		// only consider ents that can be damaged. !!!temporarily only considering other monsters and clients
-		if (pSightEnt->IsPlayer() || FBitSet(pSightEnt->pev->flags, FL_MONSTER))
+		if (pSightEnt->IsActivePlayer() || FBitSet(pSightEnt->pev->flags, FL_MONSTER))
 		{
-			if (/*FVisible( pSightEnt ) &&*/ !FBitSet(pSightEnt->pev->flags, FL_NOTARGET) && pSightEnt->pev->health > 0)
+			// VERIFY: GetRCCaps2's arguments (0, this) and what cap 8 means
+			if (/*FVisible( pSightEnt ) &&*/ !FBitSet(pSightEnt->pev->flags, FL_NOTARGET) && pSightEnt->pev->health > 0 && (pSightEnt->GetRCCaps2(0, this) & 8) == 0)
 			{
 				// NULL the Link pointer for each ent added to the link list. If other ents follow, the will overwrite
 				// this value. If this ent happens to be the last, the list will be properly terminated.

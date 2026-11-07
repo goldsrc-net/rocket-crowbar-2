@@ -356,6 +356,56 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p6 needs: RC2's player members the rc2.ini console command and the shoulder riding
+	// (dlls/rc2prefs.cpp, dlls/rc2/playerride.cpp) use. Not saved, so every name is ours.
+	unsigned char m_ucRideInfo; // orig +0x640: 0, or the ridden player's index (|0x80 on the left shoulder); 0 in Spawn
+	int m_iPhysKeyFlags;		// orig +0x644: sent to the engine as physics key "phf" ("%02X")
+	int m_iPhysKeyFlags2;		// orig +0x648: when it clears to 0, bit 2 of m_iPhysKeyFlags goes too
+	bool m_bRC2State650;		// orig +0x650 (a byte). VERIFY: what sets it; riding clears it with phys flag 1 and a CLTE 4
+	int m_iAdminLevel;			// orig +0x674: >0 may setkey/reset, >1 save/savediff/load
+	int m_iShrunk;				// orig +0x68c: nonzero while shrunk (physics key "shr")
+	int m_iRidingIndex;			// orig +0x69c: entity index of the player this one rides, 0 if none
+	int m_iRideShoulder;		// orig +0x6a0: 1 on the left shoulder, 0 on the right
+	int m_iRightRider;			// orig +0x6a4: entity index of the player on the right shoulder
+	int m_iLeftRider;			// orig +0x6a8: entity index of the player on the left shoulder
+	int m_iRC2State4ac;			// orig +0x4ac: bit flags, 0 in Spawn. VERIFY: bit 1 goes with base byte +0x66, bit 0x10 with shrinking
+	float m_flEnergy;			// orig +0x758: 100 in Spawn; riding costs 40, getting off 20
+	bool m_bRC2State778;		// orig +0x778 (a byte). VERIFY: unread here; riding clears it
+	int m_iTransformType;		// orig +0x10f8: what the player is transformed into, 0 if not (6: the race forklift); also pev->playerclass
+	bool m_bTransforming;		// orig +0x10fc (a byte), read with m_iTransformType. VERIFY: name
+	// the race (race_controller's Use, dlls/rc2/racecontroller.cpp): what the race sets up
+	float m_flRaceSavedHealth;		  // orig +0x1104: pev->health when the race began
+	float m_flRaceSavedMaxHealth;	  // orig +0x1108: pev->max_health then; the untransform restores it
+	float m_flRaceTimes[4];			  // orig +0x1118: time + 0.25 at the start. VERIFY: what they time
+	float m_flRace1128;				  // orig +0x1128: -1 at the start. VERIFY
+	float m_flRace112c;				  // orig +0x112c: time - 120 at the start. VERIFY
+	int m_iRace1130;				  // orig +0x1130: 0 at the start. VERIFY
+	float m_flRaceTrackRadius;		  // orig +0x1134: the controller's track_radius (pm_shared reads it)
+	int m_iRace1138[3];				  // orig +0x1138: 0 at the start. VERIFY
+	float m_flRace1144[4];			  // orig +0x1144: -1 at the start. VERIFY
+	int m_iRacePoint;				  // orig +0x1154: index of the race_path point the player heads for
+	int m_iRace1158[3];				  // orig +0x1158: 0 at the start. VERIFY
+	Vector m_vecRace1164;			  // orig +0x1164: zero at the start. VERIFY
+	edict_t* m_pentRaceController;	  // orig +0x1170: the race_controller
+
+	void StartRiding();				   // ours: the "ride" command (dlls/rc2/playerride.cpp)
+	void StopRiding(bool bQuiet);	   // ours
+	void ClearPhysKeyFlags(int iBits);	// ours, player.cpp's package (TEMP STUB in dlls/rc2/playerride.cpp)
+	void ClearPhysKeyFlags2(int iBits); // ours, as above
+
+	// p6 needs (fork B): the player's 64 tethers, what pulls this player towards an entity
+	// (the suck mine; dlls/rc2/pullers.cpp). pm_shared reads them through PM_GetPlayerTether;
+	// the client gets each change in a PullerCtrl message. Not saved, names ours.
+	float m_flTetherForce[64];	   // orig +0x7ec: 0 = slot free
+	float m_flTetherLength[64];	   // orig +0x8ec: slack before it pulls
+	Vector m_vecTetherOffset[64];  // orig +0x9ec: from the entity's origin (absolute when no entity)
+	int m_iTetherEnt[64];		   // orig +0xcec: entity index, -1 (or < 1) for none
+	Vector m_vecSentPullPoint[64]; // orig +0xdf8: g_vecPullPointOrg as last sent to this client
+	int AddTether(int iEnt, Vector vecOffset, float flForce, float flLength); // ours (dlls/rc2/pullers.cpp)
+	void RemoveTether(int iSlot);											  // ours
+	void ResetTethers();													  // ours
+	void SendPullPoints();													  // ours
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

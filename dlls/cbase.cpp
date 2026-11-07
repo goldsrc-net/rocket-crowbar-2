@@ -844,11 +844,135 @@ void CBaseEntity::GravGrenAnnihilate(CBaseEntity* pInflictor, CBaseEntity* pAtta
 		TakeDamage(pInflictor->pev, pAttacker->pev, RC2Pref(RC2P_Grenade_GravGrenAnnihilateDamage).f, DMG_ALWAYSGIB | DMG_ENERGYBEAM | DMG_BLAST);
 }
 
-// TEMP STUB for 0xa9ba0 (3107 bytes, the run between pm_shared and python in files-rc2.tsv):
-// its package reconstructs it.
-bool CBaseEntity::ApplyExternalForce(float flInterval)
+#include "rc2/pullers.h" // p6: ApplyExternalForce's pull sources
+
+// Integrates what pulls this entity into pev->velocity over flInterval (0: since the last
+// call, kept in m_iRC2Base54 as a float): every GetPullOrg (RC2_GetPullForce), the egon
+// tractor point, and when GetRCCaps has 0x400 the global pull points. Walking monsters on
+// the ground only lift off for a strong enough pull. True when it lifted the entity, tractored
+// it, or a pull point had it in range. Called from think functions.
+bool CBaseEntity::ApplyExternalForce(float flInterval) // orig 0xa9ba0
 {
-	return false;
+	Vector vecForce = RC2_GetPullForce(this);
+	bool bPulled = false;
+	float& flLastTime = reinterpret_cast<float&>(m_iRC2Base54); // VERIFY: m_iRC2Base54 is a float, the last call's time
+
+	if (flInterval == 0)
+	{
+		if (flLastTime == 0)
+		{
+			flLastTime = gpGlobals->time;
+			return false;
+		}
+		flInterval = gpGlobals->time - flLastTime;
+	}
+	flLastTime = gpGlobals->time;
+
+	if (vecForce != g_vecZero)
+	{
+		bool bDrag = true;
+		if (pev->movetype == MOVETYPE_STEP)
+		{
+			if ((pev->flags & FL_ONGROUND) != 0)
+			{
+				bDrag = false;
+				float flForce = sqrt(vecForce.x * vecForce.x + vecForce.y * vecForce.y + vecForce.z * vecForce.z);
+				if (GetForceScale() * 150 < flForce || GetForceScale() * 10 < vecForce.z)
+				{
+					pev->velocity = vecForce * flInterval + pev->velocity;
+					pev->flags &= ~FL_ONGROUND;
+					UTIL_SetOrigin(pev, Vector(pev->origin.x, pev->origin.y, pev->origin.z + 1.0));
+					bPulled = true;
+				}
+			}
+			else
+			{
+				pev->velocity = vecForce * flInterval + pev->velocity;
+			}
+		}
+		else if (pev->movetype == MOVETYPE_TOSS)
+		{
+			Vector vecAdd(vecForce.x * flInterval, vecForce.y * flInterval, vecForce.z * flInterval);
+			pev->velocity = Vector(pev->velocity.x + vecAdd.x, pev->velocity.y + vecAdd.y, pev->velocity.z + vecAdd.z);
+			if ((pev->flags & FL_ONGROUND) != 0)
+			{
+				pev->flags &= ~FL_ONGROUND;
+				UTIL_SetOrigin(pev, Vector(pev->origin.x, pev->origin.y, pev->origin.z + 1.0));
+			}
+		}
+		else
+		{
+			Vector vecAdd(vecForce.x * flInterval, vecForce.y * flInterval, vecForce.z * flInterval);
+			pev->velocity = Vector(pev->velocity.x + vecAdd.x, pev->velocity.y + vecAdd.y, pev->velocity.z + vecAdd.z);
+		}
+
+		// air drag while pulled: a third of the speed per second
+		if (bDrag && (pev->flags & FL_ONGROUND) == 0)
+		{
+			float flSpeed = sqrt(pev->velocity.x * pev->velocity.x + pev->velocity.y * pev->velocity.y + pev->velocity.z * pev->velocity.z);
+			Vector vecDrag = pev->velocity.Normalize() * flSpeed * 0.33f * flInterval;
+			pev->velocity = pev->velocity - vecDrag;
+		}
+	}
+
+	// the egon's tractor beam: straight at its point, harder further out, dropped past
+	// [Egon] TractorDropDist
+	Vector vecTractor;
+	if (PM_GetPlayerPullVec(ENTINDEX(edict()), vecTractor) && !(vecTractor == g_vecZero) && flInterval > 0)
+	{
+		Vector vecTo = vecTractor - Center();
+		float flDist = sqrt(vecTo.x * vecTo.x + vecTo.y * vecTo.y + vecTo.z * vecTo.z);
+		if (flDist > RC2Pref(RC2P_Egon_TractorDropDist).f)
+		{
+			PM_ClearPlayerPull(ENTINDEX(edict()));
+		}
+		else
+		{
+			if (flDist < 0)
+				flDist = 0;
+			float flFrac = flDist / RC2Pref(RC2P_Egon_TractorDropDist).f * 0.95 + 0.05;
+			pev->velocity = vecTo.Normalize() * flFrac * RC2Pref(RC2P_Egon_TractorMaxAccel).f * flInterval;
+			bPulled = true;
+			pev->flags &= ~FL_ONGROUND;
+
+			float flSpeed = sqrt(pev->velocity.x * pev->velocity.x + pev->velocity.y * pev->velocity.y + pev->velocity.z * pev->velocity.z);
+			Vector vecDrag = pev->velocity.Normalize() * flSpeed * 0.5f * flInterval;
+			pev->velocity = pev->velocity - vecDrag;
+		}
+	}
+
+	// the gravity and suck grenades' pull points: inverse square, snapping in inside 32
+	if ((GetRCCaps(0, NULL) & 0x400) != 0)
+	{
+		for (int i = 0; i < 64; i++)
+		{
+			if (g_vecPullPointOrg[i] == g_vecZero)
+				continue;
+
+			Vector vecTo = g_vecPullPointOrg[i] - Center();
+			float flDist = sqrt(vecTo.x * vecTo.x + vecTo.y * vecTo.y + vecTo.z * vecTo.z);
+			if (!(flDist < g_flPullPointRadius[i]))
+				continue;
+
+			bPulled = true;
+			if (flDist < 32)
+			{
+				if (flInterval != 0)
+					pev->velocity = Vector(vecTo.x / flInterval, vecTo.y / flInterval, vecTo.z / flInterval);
+				if (pev->velocity.z > 0 && ((pev->flags & FL_ONGROUND) != 0 || pev->movetype == MOVETYPE_TOSS))
+					UTIL_SetOrigin(pev, pev->origin + Vector(0, 0, 1));
+			}
+			else
+			{
+				pev->velocity = pev->velocity + vecTo / (flDist * flDist) * g_flPullPointMonsterForce[i] * flInterval;
+				if ((pev->flags & FL_ONGROUND) != 0 || pev->movetype == MOVETYPE_TOSS)
+					UTIL_SetOrigin(pev, pev->origin + Vector(0, 0, 1));
+			}
+			pev->flags &= ~FL_ONGROUND;
+		}
+	}
+
+	return bPulled;
 }
 
 // TEMP STUB for 0x1a7e0: true when pPlayer is a player and this entity's owner is one of three
