@@ -90,11 +90,30 @@ One slot, RC2 slot 147, right after `StopFollowing`; 8 calls (CAGrunt::Preschedu
 CScientistMine::SciMineThink, four small functions at 0x7b60-0x7c50). The default (0x74d0)
 compares `pev` floats at +0x144.
 
-## CBasePlayerItem
+## CBasePlayerWeapon
 
-Four slots after `AttachToPlayer` (RC2 slots 93-96), in 17 weapon classes. Their offsets collide
-with `CBaseMonster`'s own virtuals (slot 93 is `CheckLocalMove` there), so their call sites have to
-be read from the weapon code.
+Four slots: two after `PlayEmptySound`, two after `RetireWeapon` (the slot pairing against the
+RC2-layout reference build places them; they are not on `CBasePlayerItem`). In the vtables
+before the RC2-layout correction they were listed as slots 93-96. Defaults in 17 of 18
+weapons: one returns the member at +0xbc, one returns -1, one is a real function comparing
+the player's members at +0x4d4 and +0x5ec, one returns `this`. The weapons package names and
+declares them. Their offsets collide with `CBaseMonster`'s own virtuals, so their call sites
+have to be read from the weapon code.
+
+## Members
+
+From the class sizes (each factory's allocation) and the save tables' offsets against SDK 2.3:
+
+```
+CBaseEntity         +28 bytes after m_fireState (dlls/cbase.h, neutral names until read)
+CBaseMonster        +4 after m_pCine
+CTalkMonster        +4 before m_useTime
+CBasePlayerWeapon   +8 before m_flTimeWeaponIdle
+CBasePlayer         +2576 after its last stock member
+```
+
+New saved fields: `m_iDefaultAmmo2` (weapons), `CFuncTank::m_pControllerEdict` and
+`m_flIgniteTime`, `CIchthyosaur::m_flDeadTime`.
 
 ## RC 1.9's, for comparison
 
