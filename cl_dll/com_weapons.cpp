@@ -278,3 +278,4 @@ const char* stub_NameForFunction(uintp function) { return "func"; }
 void stub_SetModel(edict_t* e, const char* m) {}
 // c4: RC2 adds a stub for pfnIndexOfEdict (HUD_InitClientWeapons sets g_engfuncs slot 71 to it)
 int stub_IndexOfEdict(const edict_t* e) { return 0; } // orig client 0x9b8b0, name ours
+edict_t* stub_PEntityOfEntIndex(int iEntIndex) { return nullptr; } // ours: the client has no edicts

@@ -29,6 +29,7 @@ unsigned short stub_PrecacheEvent(int type, const char* s);
 const char* stub_NameForFunction(uintp function);
 void stub_SetModel(struct edict_s* e, const char* m);
 int stub_IndexOfEdict(const struct edict_s* e); // c4: RC2's, name ours
+struct edict_s* stub_PEntityOfEntIndex(int iEntIndex); // ours
 
 
 extern cvar_t* cl_lw;

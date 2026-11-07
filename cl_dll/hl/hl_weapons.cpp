@@ -452,6 +452,12 @@ void HUD_InitClientWeapons()
 	g_engfuncs.pfnNameForFunction = stub_NameForFunction;
 	g_engfuncs.pfnSetModel = stub_SetModel;
 	g_engfuncs.pfnSetClientMaxspeed = HUD_SetMaxSpeed;
+	// RC2's (orig client 0x9b8b0): its weapons call ENTINDEX on the client (the crowbar's and
+	// hornetgun's charge events, the gauss); without it the crowbar's Deploy called through a null
+	// pointer and crashed the client (found in play, 2026-11-07)
+	g_engfuncs.pfnIndexOfEdict = stub_IndexOfEdict;
+	// and INDEXENT (the gauss's pull loop): no entities on the client
+	g_engfuncs.pfnPEntityOfEntIndex = stub_PEntityOfEntIndex;
 
 	// Handled locally
 	g_engfuncs.pfnPlaybackEvent = HUD_PlaybackEvent;
