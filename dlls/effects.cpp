@@ -18,6 +18,7 @@
 #include "monsters.h"
 #include "customentity.h"
 #include "effects.h"
+#include "p2shared.h"
 #include "weapons.h"
 #include "decals.h"
 #include "func_break.h"
@@ -29,7 +30,7 @@
 
 
 // Lightning target, just alias landmark
-LINK_ENTITY_TO_CLASS(info_target, CPointEntity);
+LINK_ENTITY_TO_CLASS(info_target, CPointEntity); // orig 0x36cb0
 
 
 class CBubbling : public CBaseEntity
@@ -44,7 +45,7 @@ public:
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
-	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x36d90 (CBubbling: 0)
 	static TYPEDESCRIPTION m_SaveData[];
 
 	int m_density;
@@ -53,7 +54,7 @@ public:
 	bool m_state;
 };
 
-LINK_ENTITY_TO_CLASS(env_bubbles, CBubbling);
+LINK_ENTITY_TO_CLASS(env_bubbles, CBubbling); // orig 0x36d20
 
 TYPEDESCRIPTION CBubbling::m_SaveData[] =
 	{
@@ -64,11 +65,12 @@ TYPEDESCRIPTION CBubbling::m_SaveData[] =
 		//	DEFINE_FIELD( CBubbling, m_bubbleModel, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE(CBubbling, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CBubbling, CBaseEntity); // orig 0x36da0, orig 0x36dd0
 
 
 #define SF_BUBBLES_STARTOFF 0x0001
 
+// orig 0x36e00 (SDK 2.3's, at RC2's offsets)
 void CBubbling::Spawn()
 {
 	Precache();
@@ -95,12 +97,14 @@ void CBubbling::Spawn()
 		m_state = false;
 }
 
+// orig 0x36f10 (SDK 2.3's, at RC2's offsets)
 void CBubbling::Precache()
 {
 	m_bubbleModel = PRECACHE_MODEL("sprites/bubble.spr"); // Precache bubble sprite
 }
 
 
+// orig 0x36f30 (SDK 2.3's, at RC2's offsets)
 void CBubbling::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (ShouldToggle(useType, m_state))
@@ -141,6 +145,7 @@ bool CBubbling::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0x370b0 (SDK 2.3's, at RC2's offsets)
 void CBubbling::FizzThink()
 {
 	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, VecBModelOrigin(pev));
@@ -162,7 +167,7 @@ void CBubbling::FizzThink()
 //
 // --------------------------------------------------
 
-LINK_ENTITY_TO_CLASS(beam, CBeam);
+LINK_ENTITY_TO_CLASS(beam, CBeam); // orig 0x37160
 
 void CBeam::Spawn()
 {
@@ -218,6 +223,7 @@ const Vector& CBeam::GetEndPos()
 }
 
 
+// orig 0x37400 (SDK 2.3's, at RC2's offsets)
 CBeam* CBeam::BeamCreate(const char* pSpriteName, int width)
 {
 	// Create a new entity with CBeam private data
@@ -336,6 +342,7 @@ void CBeam::TriggerTouch(CBaseEntity* pOther)
 }
 
 
+// orig 0x37930 (SDK 2.3's, at RC2's offsets)
 CBaseEntity* CBeam::RandomTargetname(const char* szName)
 {
 	int total = 0;
@@ -413,8 +420,8 @@ public:
 	float m_radius;
 };
 
-LINK_ENTITY_TO_CLASS(env_lightning, CLightning);
-LINK_ENTITY_TO_CLASS(env_beam, CLightning);
+LINK_ENTITY_TO_CLASS(env_lightning, CLightning); // orig 0x379d0
+LINK_ENTITY_TO_CLASS(env_beam, CLightning); // orig 0x37a40
 
 // UNDONE: Jay -- This is only a test
 #if _DEBUG
@@ -452,9 +459,10 @@ TYPEDESCRIPTION CLightning::m_SaveData[] =
 		DEFINE_FIELD(CLightning, m_radius, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CLightning, CBeam);
+IMPLEMENT_SAVERESTORE(CLightning, CBeam); // orig 0x37ab0, orig 0x37ae0
 
 
+// orig 0x37b10 (SDK 2.3's, at RC2's offsets)
 void CLightning::Spawn()
 {
 	if (FStringNull(m_iszSpriteName))
@@ -604,6 +612,7 @@ void CLightning::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 }
 
 
+// orig 0x38100 (SDK 2.3's, at RC2's offsets)
 void CLightning::StrikeUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (!ShouldToggle(useType, m_active))
@@ -740,21 +749,32 @@ void CLightning::StrikeThink()
 }
 
 
+// orig 0x38620. RC2: the damage goes to what the hit entity stands for (GetEffectedEnt), through
+// its shield (RC2ShieldDamage, which also moves the trace's end to the point it takes), and the
+// call goes through the instance without SDK 2.3's null check.
 void CBeam::BeamDamage(TraceResult* ptr)
 {
 	RelinkBeam();
 	if (ptr->flFraction != 1.0 && ptr->pHit != NULL)
 	{
-		CBaseEntity* pHit = CBaseEntity::Instance(ptr->pHit);
-		if (pHit)
+		CBaseEntity* pInstance = CBaseEntity::Instance(ptr->pHit);
+		if (pInstance)
 		{
-			ClearMultiDamage();
-			pHit->TraceAttack(pev, pev->dmg * (gpGlobals->time - pev->dmgtime), (ptr->vecEndPos - pev->origin).Normalize(), ptr, DMG_ENERGYBEAM);
-			ApplyMultiDamage(pev, pev);
-			if ((pev->spawnflags & SF_BEAM_DECALS) != 0)
+			CBaseEntity* pHit = pInstance->GetEffectedEnt();
+			float flDamage = pev->dmg * (gpGlobals->time - pev->dmgtime);
+			if (flDamage > 0)
+				flDamage = RC2ShieldDamage(pHit, flDamage, 0.45, ptr->vecEndPos, (ptr->vecEndPos - pev->origin).Normalize(), &ptr->vecEndPos, NULL, (int)(flDamage * 0.02 + 3));
+
+			if (flDamage != 0)
 			{
-				if (pHit->IsBSPModel())
-					UTIL_DecalTrace(ptr, DECAL_BIGSHOT1 + RANDOM_LONG(0, 4));
+				ClearMultiDamage();
+				pHit->TraceAttack(pev, flDamage, (ptr->vecEndPos - pev->origin).Normalize(), ptr, DMG_ENERGYBEAM);
+				ApplyMultiDamage(pev, pev);
+				if ((pev->spawnflags & SF_BEAM_DECALS) != 0)
+				{
+					if (pHit->IsBSPModel())
+						UTIL_DecalTrace(ptr, DECAL_BIGSHOT1 + RANDOM_LONG(0, 4));
+				}
 			}
 		}
 	}
@@ -762,6 +782,7 @@ void CBeam::BeamDamage(TraceResult* ptr)
 }
 
 
+// orig 0x387c0 (SDK 2.3's, at RC2's offsets)
 void CLightning::DamageThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -813,6 +834,7 @@ void CLightning::Zap(const Vector& vecSrc, const Vector& vecDest)
 	DoSparks(vecSrc, vecDest);
 }
 
+// orig 0x38950 (SDK 2.3's, at RC2's offsets)
 void CLightning::RandomArea()
 {
 	int iLoops = 0;
@@ -856,6 +878,7 @@ void CLightning::RandomArea()
 }
 
 
+// orig 0x38da0 (SDK 2.3's, at RC2's offsets)
 void CLightning::RandomPoint(Vector& vecSrc)
 {
 	int iLoops = 0;
@@ -880,6 +903,7 @@ void CLightning::RandomPoint(Vector& vecSrc)
 
 
 
+// orig 0x38f90 (SDK 2.3's, at RC2's offsets)
 void CLightning::BeamUpdateVars()
 {
 	int beamType;
@@ -945,7 +969,7 @@ void CLightning::BeamUpdateVars()
 }
 
 
-LINK_ENTITY_TO_CLASS(env_laser, CLaser);
+LINK_ENTITY_TO_CLASS(env_laser, CLaser); // orig 0x391b0
 
 TYPEDESCRIPTION CLaser::m_SaveData[] =
 	{
@@ -954,7 +978,7 @@ TYPEDESCRIPTION CLaser::m_SaveData[] =
 		DEFINE_FIELD(CLaser, m_firePosition, FIELD_POSITION_VECTOR),
 };
 
-IMPLEMENT_SAVERESTORE(CLaser, CBeam);
+IMPLEMENT_SAVERESTORE(CLaser, CBeam); // orig 0x39220, orig 0x39250
 
 void CLaser::Spawn()
 {
@@ -1067,6 +1091,7 @@ void CLaser::TurnOn()
 }
 
 
+// orig 0x397c0 (SDK 2.3's, at RC2's offsets)
 void CLaser::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	bool active = IsOn();
@@ -1094,6 +1119,7 @@ void CLaser::FireAtPoint(TraceResult& tr)
 	DoSparks(GetStartPos(), tr.vecEndPos);
 }
 
+// orig 0x39860 (SDK 2.3's, at RC2's offsets)
 void CLaser::StrikeThink()
 {
 	CBaseEntity* pEnd = RandomTargetname(STRING(pev->message));
@@ -1124,7 +1150,7 @@ public:
 	float m_maxFrame;
 };
 
-LINK_ENTITY_TO_CLASS(env_glow, CGlow);
+LINK_ENTITY_TO_CLASS(env_glow, CGlow); // orig 0x398f0
 
 TYPEDESCRIPTION CGlow::m_SaveData[] =
 	{
@@ -1132,8 +1158,9 @@ TYPEDESCRIPTION CGlow::m_SaveData[] =
 		DEFINE_FIELD(CGlow, m_maxFrame, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CGlow, CPointEntity);
+IMPLEMENT_SAVERESTORE(CGlow, CPointEntity); // orig 0x39960, orig 0x39990
 
+// orig 0x399c0 (SDK 2.3's, at RC2's offsets)
 void CGlow::Spawn()
 {
 	pev->solid = SOLID_NOT;
@@ -1152,6 +1179,7 @@ void CGlow::Spawn()
 }
 
 
+// orig 0x39ac0 (SDK 2.3's, at RC2's offsets)
 void CGlow::Think()
 {
 	Animate(pev->framerate * (gpGlobals->time - m_lastTime));
@@ -1168,7 +1196,7 @@ void CGlow::Animate(float frames)
 }
 
 
-LINK_ENTITY_TO_CLASS(env_sprite, CSprite);
+LINK_ENTITY_TO_CLASS(env_sprite, CSprite); // orig 0x39b40
 
 TYPEDESCRIPTION CSprite::m_SaveData[] =
 	{
@@ -1176,7 +1204,7 @@ TYPEDESCRIPTION CSprite::m_SaveData[] =
 		DEFINE_FIELD(CSprite, m_maxFrame, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CSprite, CPointEntity);
+IMPLEMENT_SAVERESTORE(CSprite, CPointEntity); // orig 0x39bd0, orig 0x39c00
 
 void CSprite::Spawn()
 {
@@ -1240,6 +1268,7 @@ CSprite* CSprite::SpriteCreate(const char* pSpriteName, const Vector& origin, bo
 }
 
 
+// orig 0x39e80 (SDK 2.3's, at RC2's offsets)
 void CSprite::AnimateThink()
 {
 	Animate(pev->framerate * (gpGlobals->time - m_lastTime));
@@ -1270,6 +1299,7 @@ void CSprite::Expand(float scaleSpeed, float fadeSpeed)
 }
 
 
+// orig 0x39f50 (SDK 2.3's, at RC2's offsets)
 void CSprite::ExpandThink()
 {
 	float frametime = gpGlobals->time - m_lastTime;
@@ -1378,8 +1408,8 @@ TYPEDESCRIPTION CGibShooter::m_SaveData[] =
 		DEFINE_FIELD(CGibShooter, m_flGibLife, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CGibShooter, CBaseDelay);
-LINK_ENTITY_TO_CLASS(gibshooter, CGibShooter);
+IMPLEMENT_SAVERESTORE(CGibShooter, CBaseDelay); // orig 0x3a130, orig 0x3a160
+LINK_ENTITY_TO_CLASS(gibshooter, CGibShooter); // orig 0x3a190
 
 
 void CGibShooter::Precache()
@@ -1395,6 +1425,7 @@ void CGibShooter::Precache()
 }
 
 
+// orig 0x3a240 (SDK 2.3's, at RC2's offsets)
 bool CGibShooter::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "m_iGibs"))
@@ -1421,6 +1452,7 @@ bool CGibShooter::KeyValue(KeyValueData* pkvd)
 	return CBaseDelay::KeyValue(pkvd);
 }
 
+// orig 0x3a3b0 (SDK 2.3's, at RC2's offsets)
 void CGibShooter::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetThink(&CGibShooter::ShootThink);
@@ -1527,7 +1559,7 @@ class CEnvShooter : public CGibShooter
 	CGib* CreateGib() override;
 };
 
-LINK_ENTITY_TO_CLASS(env_shooter, CEnvShooter);
+LINK_ENTITY_TO_CLASS(env_shooter, CEnvShooter); // orig 0x3a8f0
 
 bool CEnvShooter::KeyValue(KeyValueData* pkvd)
 {
@@ -1623,18 +1655,21 @@ public:
 };
 
 
-LINK_ENTITY_TO_CLASS(test_effect, CTestEffect);
+LINK_ENTITY_TO_CLASS(test_effect, CTestEffect); // orig 0x3ac20
 
+// orig 0x3ac90 (SDK 2.3's, at RC2's offsets)
 void CTestEffect::Spawn()
 {
 	Precache();
 }
 
+// orig 0x3aca0 (SDK 2.3's, at RC2's offsets)
 void CTestEffect::Precache()
 {
 	PRECACHE_MODEL("sprites/lgtning.spr");
 }
 
+// orig 0x3acb0 (SDK 2.3's, at RC2's offsets)
 void CTestEffect::TestThink()
 {
 	int i;
@@ -1702,6 +1737,7 @@ void CTestEffect::TestThink()
 }
 
 
+// orig 0x3af70 (SDK 2.3's, at RC2's offsets)
 void CTestEffect::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetThink(&CTestEffect::TestThink);
@@ -1731,7 +1767,7 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(env_blood, CBlood);
+LINK_ENTITY_TO_CLASS(env_blood, CBlood); // orig 0x3afa0
 
 
 
@@ -1848,7 +1884,7 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(env_shake, CShake);
+LINK_ENTITY_TO_CLASS(env_shake, CShake); // orig 0x3b450
 
 // pev->scale is amplitude
 // pev->dmg_save is frequency
@@ -1923,7 +1959,7 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(env_fade, CFade);
+LINK_ENTITY_TO_CLASS(env_fade, CFade); // orig 0x3b6c0
 
 // pev->dmg_take is duration
 // pev->dmg_save is hold duration
@@ -1993,7 +2029,7 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(env_message, CMessage);
+LINK_ENTITY_TO_CLASS(env_message, CMessage); // orig 0x3b900
 
 
 void CMessage::Spawn()
@@ -2100,12 +2136,13 @@ public:
 	int m_iSprite; // Don't save, precache
 };
 
+// orig 0x3bc60 (SDK 2.3's, at RC2's offsets)
 void CEnvFunnel::Precache()
 {
 	m_iSprite = PRECACHE_MODEL("sprites/flare6.spr");
 }
 
-LINK_ENTITY_TO_CLASS(env_funnel, CEnvFunnel);
+LINK_ENTITY_TO_CLASS(env_funnel, CEnvFunnel); // orig 0x3bc80
 
 void CEnvFunnel::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
@@ -2152,13 +2189,14 @@ public:
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 };
 
+// orig 0x3bdb0 (SDK 2.3's, at RC2's offsets)
 void CEnvBeverage::Precache()
 {
 	PRECACHE_MODEL("models/can.mdl");
 	PRECACHE_SOUND("weapons/g_bounce3.wav");
 }
 
-LINK_ENTITY_TO_CLASS(env_beverage, CEnvBeverage);
+LINK_ENTITY_TO_CLASS(env_beverage, CEnvBeverage); // orig 0x3bde0
 
 void CEnvBeverage::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
@@ -2212,11 +2250,12 @@ public:
 	void EXPORT CanTouch(CBaseEntity* pOther);
 };
 
+// orig 0x3bf50 (SDK 2.3's, at RC2's offsets)
 void CItemSoda::Precache()
 {
 }
 
-LINK_ENTITY_TO_CLASS(item_sodacan, CItemSoda);
+LINK_ENTITY_TO_CLASS(item_sodacan, CItemSoda); // orig 0x3bf70
 
 void CItemSoda::Spawn()
 {

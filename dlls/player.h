@@ -520,6 +520,9 @@ public:
 	void AddPhysFlags(int bits);
 	void RemovePhysFlags(int bits);
 #endif
+
+	// p2: the egon's nuke can't fire again before this. Name ours.
+	float m_flRC2NextSuperWeapon; // orig +0x780
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

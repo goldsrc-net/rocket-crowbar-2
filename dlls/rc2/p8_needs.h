@@ -30,7 +30,6 @@ void UTIL_SetMaxTime(float& flTime, float flBase, float flAdd);
 
 // at 0xfb780 (weapons): the server's stand-in for the client's byte reader that
 // ReadWeaponState uses; returns 0. Name ours. VERIFY: argument types.
-unsigned char WeaponSync_ReadByte(void** ppbuf, int* piSize);
 
 // User messages (player.cpp's LinkUserMessages)
 extern int gmsgWeaponSync; // "WeaponSync", at 0x18f4c0

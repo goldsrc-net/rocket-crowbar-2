@@ -418,7 +418,7 @@ extern unsigned short g_usExplodeEvent;
 
 // Rocket Crowbar 2: the readers ReadWeaponState's overrides call, as the server has them: each
 // takes the two arguments by address and returns 0 (names ours). weapons.cpp
-bool RC2ReadStateBool(void** ppData, int* piSize);
+unsigned char RC2ReadStateByte(void** ppData, int* piSize);
 short RC2ReadStateShort(void** ppData, int* piSize);
 int RC2ReadStateInt(void** ppData, int* piSize);
 float RC2ReadStateFloat(void** ppData, int* piSize);
@@ -598,6 +598,44 @@ enum crowbar_e
 class CCrowbar : public CBasePlayerWeapon
 {
 public:
+#ifndef CLIENT_DLL
+	// Rocket Crowbar 2's crowbar (p2, dlls/crowbar.cpp): a charged swing that shoves, a rocket,
+	// the crowbarang throw, and the charge itself (fourth attack, held).
+	void Spawn() override;
+	void Precache() override;
+	int iItemSlot() override { return 1; } // orig 0x30480
+	bool GetItemInfo(ItemInfo* p) override;
+	bool CanAddToPlayer(CBasePlayer* pPlayer) override;
+	void AddToPlayer(CBasePlayer* pPlayer) override;
+	bool Deploy() override;
+	void Holster() override;
+
+	void PrimaryAttack() override;
+	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	bool UseDecrement() override { return true; } // orig 0x30490
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+
+	void EXPORT SwingAgain();
+	void EXPORT Smack();
+	bool Swing(bool fFirst);
+	void ChargeStop(bool bSilent); // name ours
+
+	int m_iSwing;				   // orig +0xdc
+	TraceResult m_trHit;		   // orig +0xe0
+	bool m_bCharging;			   // orig +0x118, name ours: the charge button is held
+	float m_flCharge;			   // orig +0x11c, name ours: 0..[Crowbar] MaxCharge
+	float m_flLastFrame;		   // orig +0x120, name ours
+	float m_flDischargeStart;	   // orig +0x124, name ours: when a released charge starts draining
+	float m_flNextChargeEvent;	   // orig +0x128, name ours
+	float m_flNextSync;			   // orig +0x12c, name ours
+	unsigned short m_usCrowbar;	   // orig +0x130, events/crowbar.sc
+	unsigned short m_usCrowbarSwing; // orig +0x132, events/crowbarswing.sc
+	unsigned short m_usCbarCharge; // orig +0x134, events/cbarcharge.sc
+#else
+	// halflife-updated's client prediction, until RC2's client.dll is reconstructed
 	void Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 1; }
@@ -623,6 +661,7 @@ public:
 
 private:
 	unsigned short m_usCrowbar;
+#endif
 };
 
 enum python_e
@@ -755,6 +794,55 @@ enum crossbow_e
 class CCrossbow : public CBasePlayerWeapon
 {
 public:
+#ifndef CLIENT_DLL
+	// Rocket Crowbar 2's crossbow (p2, dlls/crossbow.cpp): four attacks, zoomed or not, firing
+	// impailers, tethers and exploding bolts, or delayed hitscan hurts when zoomed.
+	void Spawn() override;
+	void Precache() override;
+	int iItemSlot() override { return 3; } // rc2.dll 0x2adf0, in p1's run
+	bool GetItemInfo(ItemInfo* p) override;
+	void AddToPlayer(CBasePlayer* pPlayer) override;
+	bool Deploy() override;
+	bool CanHolster() override;
+	void Holster() override;
+
+	void PrimaryAttack() override;
+	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void Reload() override;
+	void WeaponIdle() override;
+	bool UseDecrement() override { return true; } // rc2.dll 0x2ae00, in p1's run
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+
+	void EXPORT DelayedHurt();
+
+	void ZoomedSecondaryFire(); // name ours
+	void ZoomedTertiaryFire();	// name ours
+	void SecondaryFire();		// name ours
+	CBaseEntity* FindMyTeather(); // name ours
+
+	int m_fInZoom;			// orig +0xdc
+	bool m_fTeatherOut;		// orig +0xe0, name ours: one of this player's tethers exists
+	int m_iChargeType;		// orig +0xe4, name ours: 0 none, 1 zoomed secondary, 2 zoomed tertiary, 3 secondary
+	float m_flChargeDone;	// orig +0xe8, name ours
+	float m_flNextSync;		// orig +0xec, name ours: next gmsgWeaponSync
+	TraceResult m_trHurt;	// orig +0xf0, name ours: what DelayedHurt hurts
+	int m_iHurtSerial;		// orig +0x128, name ours: m_trHurt.pHit's serial number when traced
+	int m_iHurtType;		// orig +0x12c, name ours: 0 zoomed primary, 1 zoomed secondary, 2 zoomed tertiary, -1 done
+	Vector m_vecHurtDir;	// orig +0x130, name ours
+
+	unsigned short m_usZoom1;		 // orig +0x13c, events/xbowzoom1.sc
+	unsigned short m_usImpailer;	 // orig +0x13e, events/xbowimpailer.sc
+	unsigned short m_usTeather;		 // orig +0x140, events/xbowteather.sc
+	unsigned short m_usCharge;		 // orig +0x142, events/xbowcharge.sc
+	unsigned short m_usCharge2;		 // orig +0x144, events/xbowcharge2.sc
+	unsigned short m_usSuperZoomed;	 // orig +0x146, events/xbowsuperzoomed.sc
+	unsigned short m_usExploZoomed;	 // orig +0x148, events/xbowexplozoomed.sc
+	unsigned short m_usExplodeBolt;	 // orig +0x14a, events/xbowimpailer.sc again
+#else
+	// halflife-updated's client prediction, until RC2's client.dll is reconstructed
 	void Spawn() override;
 	void Precache() override;
 	int iItemSlot() override { return 3; }
@@ -781,6 +869,7 @@ public:
 private:
 	unsigned short m_usCrossbow;
 	unsigned short m_usCrossbow2;
+#endif
 };
 
 enum shotgun_e
@@ -1054,6 +1143,52 @@ class CEgon : public CBasePlayerWeapon
 {
 public:
 #ifndef CLIENT_DLL
+	// Rocket Crowbar 2's egon (p2, dlls/egon.cpp): a tractor beam (primary; secondary and
+	// tertiary push and pull what it holds, quaternary throws it), the shrinker (secondary),
+	// the imploder (tertiary, charged; secondary while charging shrinks yourself) and the nuke
+	// (quaternary).
+	void Spawn() override;
+	void Precache() override;
+	int iItemSlot() override { return 4; } // orig 0x3d300
+	bool GetItemInfo(ItemInfo* p) override;
+	void AddToPlayer(CBasePlayer* pPlayer) override;
+	bool Deploy() override;
+	bool CanHolster() override;
+	void Holster() override;
+
+	void PrimaryAttack() override;
+	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponIdle() override;
+	bool UseDecrement() override { return true; } // orig 0x3d310
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+
+	void TractorStop();	 // name ours
+	void ImploderFire(); // name ours
+	void ShrinkSelf();	 // name ours
+
+	EHANDLE m_hTractor;			  // orig +0xdc, name ours: what the beam holds
+	bool m_bHolding;			  // orig +0xe4, name ours
+	bool m_bTargetAlive;		  // orig +0xe5, name ours: it was alive when grabbed (let go if it dies)
+	bool m_bTractorOn;			  // orig +0xe6, name ours
+	bool m_bAdjusting;			  // orig +0xe7, name ours: the hold distance changed this frame
+	float m_flHoldDist;			  // orig +0xe8, name ours: 32..8192
+	int m_iChargeType;			  // orig +0xec, name ours: 1 while the imploder charges
+	float m_flChargeDone;		  // orig +0xf0, name ours
+	float m_flLastFrame;		  // orig +0xf4, name ours
+	float m_flFrameTime;		  // orig +0xf8, name ours
+	float m_flNextSync;			  // orig +0xfc, name ours: next gmsgWeaponSync
+	unsigned short m_usFireShrinker;  // orig +0x100, events/egonfireshrinker.sc
+	unsigned short m_usImploderCharge; // orig +0x102, events/egonimplodercharge.sc
+	unsigned short m_usImploderFire;  // orig +0x104, events/egonimploderfire.sc
+	unsigned short m_usFireNuke;	  // orig +0x106, events/egonfirenuke.sc
+	unsigned short m_usTractor;		  // orig +0x108, events/egontractor.sc
+	unsigned short m_usShrinkerImpact; // orig +0x10a, events/egonshrinkerimpact.sc
+#else
+	// halflife-updated's client prediction, until RC2's client.dll is reconstructed
+#ifndef CLIENT_DLL
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
@@ -1112,6 +1247,7 @@ private:
 	bool m_deployed;
 
 	unsigned short m_usEgonFire;
+#endif
 };
 
 enum hgun_e

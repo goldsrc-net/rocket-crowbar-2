@@ -171,7 +171,7 @@ bool PM_GetPlayerPullVec(int iEnt, float* pvecPoint) // orig 0xa9840, name ours
 	CBaseEntity* pEnt = CBaseEntity::Instance(pent);
 	if (!pEnt)
 		return false;
-	if (pEnt->m_ucRC2Base64[0] == 0)
+	if (pEnt->m_ucTractorHeld == 0)
 		return false;
 	pvecPoint[0] = pEnt->m_vecRC2Base58.x;
 	pvecPoint[1] = pEnt->m_vecRC2Base58.y;
@@ -187,8 +187,8 @@ void PM_ClearPlayerPull(int iEnt) // orig 0xa98b0, name ours
 	CBaseEntity* pEnt = CBaseEntity::Instance(pent);
 	if (!pEnt)
 		return;
-	pEnt->m_ucRC2Base64[0] = 0;
-	pEnt->m_ucRC2Base64[1] = 0; // VERIFY: what the second byte is
+	pEnt->m_ucTractorHeld = 0;
+	pEnt->m_ucTractorKnocked = 0;
 }
 
 void PM_GetGlobalPuller(int iPoint, float* pvecOrigin, float* pflRadius, float* pflPlayerForce) // orig 0xa98f0, name ours

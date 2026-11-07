@@ -1659,6 +1659,8 @@ IMPLEMENT_SAVERESTORE(CShotgun, CBasePlayerWeapon); // orig 0xfbee0, orig 0xfbf1
 
 // Rocket Crowbar 2: CGauss has no save table of its own (its vtable has CBasePlayerWeapon's Save and Restore)
 
+// p2: RC2's CEgon has no save table (dlls/egon.cpp); halflife-updated's is disabled.
+#if 0
 TYPEDESCRIPTION CEgon::m_SaveData[] =
 	{
 		//	DEFINE_FIELD( CEgon, m_pBeam, FIELD_CLASSPTR ),
@@ -1671,6 +1673,8 @@ TYPEDESCRIPTION CEgon::m_SaveData[] =
 		DEFINE_FIELD(CEgon, m_flAmmoUseTime, FIELD_TIME),
 };
 IMPLEMENT_SAVERESTORE(CEgon, CBasePlayerWeapon);
+#endif
+
 
 TYPEDESCRIPTION CHgun::m_SaveData[] =
 	{
@@ -1687,7 +1691,7 @@ IMPLEMENT_SAVERESTORE(CSatchel, CBasePlayerWeapon); // orig 0xfbf40, orig 0xfbf7
 // Rocket Crowbar 2: the readers ReadWeaponState's overrides call (weapons.h). The server's take the
 // two arguments by address and return 0.
 // orig 0xfb780
-bool RC2ReadStateBool(void** ppData, int* piSize) { return false; }
+unsigned char RC2ReadStateByte(void** ppData, int* piSize) { return 0; }
 // orig 0xfb790
 short RC2ReadStateShort(void** ppData, int* piSize) { return 0; }
 // orig 0xfb7a0

@@ -424,7 +424,8 @@ public:
 	// their code does with each, and they get real names at merge.
 	int m_iRC2Base54;	   // orig +0x54. VERIFY: unread so far
 	Vector m_vecRC2Base58; // orig +0x58. Reset to g_vecZero in CBasePlayer::Spawn
-	unsigned char m_ucRC2Base64[2]; // orig +0x64, +0x65. VERIFY: unread so far
+	unsigned char m_ucTractorHeld;	  // orig +0x64, name ours: an egon's tractor beam holds this entity (p2; the pullers clear it, p6)
+	unsigned char m_ucTractorKnocked; // orig +0x65, name ours: another egon knocked it out of this one's beam (p2)
 	bool m_bFrozen;		  // orig +0x66, name ours: set by the freeze grenade's CFreezeTimer, cleared when it thaws (p3, p8)
 	bool m_bAntiFriction; // orig +0x67, name ours: set by the antifriction grenade's CAntiFricTimer (p8)
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom

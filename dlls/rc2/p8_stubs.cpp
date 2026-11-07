@@ -22,11 +22,7 @@ void UTIL_SetMaxTime(float& flTime, float flBase, float flAdd)
 		flTime = flBase + flAdd;
 }
 
-// TEMP STUB (p8): real one belongs in weapons.cpp
-unsigned char WeaponSync_ReadByte(void** ppbuf, int* piSize)
-{
-	return 0;
-}
+// RC2ReadStateByte: the real one is reconstructed elsewhere now
 
 // gmsgWeaponSync: the real one is reconstructed elsewhere now
 

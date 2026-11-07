@@ -154,8 +154,8 @@ void CTripmine::WeaponFrame() // orig 0xedfc0
 // reads the counts back (only the client's readers read anything)
 void CTripmine::ReadWeaponState(void* pData, int iSize) // orig 0xee0a0
 {
-	m_iMinesOut[0] = RC2ReadStateBool(&pData, &iSize);
-	m_iMinesOut[1] = RC2ReadStateBool(&pData, &iSize);
-	m_iMinesOut[2] = RC2ReadStateBool(&pData, &iSize);
-	m_iMinesOut[3] = RC2ReadStateBool(&pData, &iSize);
+	m_iMinesOut[0] = RC2ReadStateByte(&pData, &iSize);
+	m_iMinesOut[1] = RC2ReadStateByte(&pData, &iSize);
+	m_iMinesOut[2] = RC2ReadStateByte(&pData, &iSize);
+	m_iMinesOut[3] = RC2ReadStateByte(&pData, &iSize);
 }

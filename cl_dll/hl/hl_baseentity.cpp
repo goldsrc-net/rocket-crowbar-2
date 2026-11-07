@@ -353,7 +353,7 @@ bool CBasePlayerItem::KeyValue(KeyValueData* pkvd) { return false; }
 void RC2RandomizeItem(CBaseEntity* pItem) {}
 bool g_fRC2Randomize = true;
 unsigned short g_usExplodeEvent;
-bool RC2ReadStateBool(void** ppData, int* piSize) { return false; }
+unsigned char RC2ReadStateByte(void** ppData, int* piSize) { return false; }
 short RC2ReadStateShort(void** ppData, int* piSize) { return 0; }
 int RC2ReadStateInt(void** ppData, int* piSize) { return 0; }
 float RC2ReadStateFloat(void** ppData, int* piSize) { return 0.0f; }

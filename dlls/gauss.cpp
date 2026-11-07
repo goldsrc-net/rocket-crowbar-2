@@ -204,7 +204,7 @@ void CGauss::ReadWeaponState(void* pData, int iSize) {}
 // orig 0x50330
 void CGauss::ReadWeaponState(void* pData, int iSize)
 {
-	m_blHasBecon = RC2ReadStateBool(&pData, &iSize);
+	m_blHasBecon = RC2ReadStateByte(&pData, &iSize);
 }
 
 // orig 0x4d460: the beacon this player threw (pev->dmg_inflictor names the thrower), or NULL

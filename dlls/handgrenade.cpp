@@ -230,8 +230,8 @@ int CHandGrenade::CountThrown(const char* pszClassname)
 void CHandGrenade::ReadWeaponState(void* pData, int iSize)
 {
 #ifndef CLIENT_DLL
-	m_iGravDeployed = RC2ReadStateBool(&pData, &iSize);
-	m_iSuckDeployed = RC2ReadStateBool(&pData, &iSize);
+	m_iGravDeployed = RC2ReadStateByte(&pData, &iSize);
+	m_iSuckDeployed = RC2ReadStateByte(&pData, &iSize);
 #endif
 }
 

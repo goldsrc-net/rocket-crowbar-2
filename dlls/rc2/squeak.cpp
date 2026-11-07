@@ -262,6 +262,6 @@ void CSqueak::WeaponFrame()
 // orig 0xd44b0
 void CSqueak::ReadWeaponState(void* pData, int iSize)
 {
-	m_iSnarksDeployed = WeaponSync_ReadByte(&pData, &iSize);
-	m_iCamsDeployed = WeaponSync_ReadByte(&pData, &iSize);
+	m_iSnarksDeployed = RC2ReadStateByte(&pData, &iSize);
+	m_iCamsDeployed = RC2ReadStateByte(&pData, &iSize);
 }

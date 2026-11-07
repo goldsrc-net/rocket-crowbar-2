@@ -968,6 +968,7 @@ Schedule_t* CBaseMonster::ScheduleInList(const char* pName, Schedule_t** pList, 
 // GetScheduleOfType - returns a pointer to one of the
 // monster's available schedules of the indicated type.
 //=========================================================
+// orig 0x32630. RC2's is SDK 2.3's: it differs from the VC6 build only by m_pCine's offset.
 Schedule_t* CBaseMonster::GetScheduleOfType(int Type)
 {
 	//	ALERT ( at_console, "Sched Type:%d\n", Type );
