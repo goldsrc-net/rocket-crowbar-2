@@ -46,6 +46,11 @@ if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
   exit 1
 fi
 
+# One build at a time on this machine, across every worktree of this repo (the work packages
+# each build in their own); others wait here.
+exec 9>"/tmp/mod-rc2-build.lock"
+flock 9
+
 TARGET_FLAGS=""; for t in $BUILD_TARGETS; do TARGET_FLAGS="$TARGET_FLAGS --target $t"; done
 
 echo ">>> mod-rc2 ($ARCH) [$BUILD_TARGETS] via $IMAGE"
