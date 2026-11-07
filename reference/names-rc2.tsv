@@ -39,7 +39,6 @@ rva	size	name	demangled	ref_object
 0x9cc0	27	?IsSoundEvent@@YAHH@Z	int __cdecl IsSoundEvent(int)	__animation.obj
 0x9e90	53	?GetSequenceFlags@@YAHPAXPAUentvars_s@@@Z	int __cdecl GetSequenceFlags(void *, struct entvars_s *)	__animation.obj
 0x9ed0	329	?GetAnimationEvent@@YAHPAXPAUentvars_s@@PAUMonsterEvent_t@@MMH@Z	int __cdecl GetAnimationEvent(void *, struct entvars_s *, struct MonsterEvent_t *, float, float, int)	__animation.obj
-0xa190	319	?SetBlending@@YAMPAXPAUentvars_s@@HM@Z	float __cdecl SetBlending(void *, struct entvars_s *, int, float)	__animation.obj
 0xa2d0	261	?FindTransition@@YAHPAXHHPAH@Z	int __cdecl FindTransition(void *, int, int, int *)	__animation.obj
 0xa3e0	93	?SetBodygroup@@YAXPAXPAUentvars_s@@HH@Z	void __cdecl SetBodygroup(void *, struct entvars_s *, int, int)	__animation.obj
 0xa440	81	?GetBodygroup@@YAHPAXPAUentvars_s@@H@Z	int __cdecl GetBodygroup(void *, struct entvars_s *, int)	__animation.obj
@@ -67,11 +66,9 @@ rva	size	name	demangled	ref_object
 0x12b70	121	?Spawn@CFuncConveyor@@UAEXXZ	public: virtual void __thiscall CFuncConveyor::Spawn(void)	__bmodels.obj
 0x12bf0	116	?UpdateSpeed@CFuncConveyor@@QAEXM@Z	public: void __thiscall CFuncConveyor::UpdateSpeed(float)	__bmodels.obj
 0x12c70	35	?Use@CFuncConveyor@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncConveyor::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__bmodels.obj
-0x12d20	122	?KeyValue@CFuncIllusionary@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncIllusionary::KeyValue(struct KeyValueData_s *)	__bmodels.obj
 0x12da0	91	?Spawn@CFuncIllusionary@@UAEXXZ	public: virtual void __thiscall CFuncIllusionary::Spawn(void)	__bmodels.obj
 0x12e80	63	?Spawn@CFuncMonsterClip@@UAEXXZ	public: virtual void __thiscall CFuncMonsterClip::Spawn(void)	__bmodels.obj
 0x13b80	22	?Rotate@CFuncRotating@@QAEXXZ	public: void __thiscall CFuncRotating::Rotate(void)	__bmodels.obj
-0x151f0	240	?IdleSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::IdleSound(void)	__bullsquid.obj
 0x152e0	204	?PainSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::PainSound(void)	__bullsquid.obj
 0x153b0	125	?AlertSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::AlertSound(void)	__bullsquid.obj
 0x15f00	298	?Precache@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::Precache(void)	__bullsquid.obj
@@ -79,12 +76,11 @@ rva	size	name	demangled	ref_object
 0x161e0	38	?ScheduleFromName@CBullsquid@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CBullsquid::ScheduleFromName(char const *)	__bullsquid.obj
 0x163c0	173	?GetScheduleOfType@CBullsquid@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CBullsquid::GetScheduleOfType(int)	__bullsquid.obj
 0x16c50	68	?Spawn@CMultiSource@@UAEXXZ	public: virtual void __thiscall CMultiSource::Spawn(void)	__buttons.obj
+0x17820	240	?ButtonSound@@YAPADH@Z	char * __cdecl ButtonSound(int)	__buttons.obj
 0x17910	476	?DoSpark@@YAXPAUentvars_s@@ABVVector@@@Z	void __cdecl DoSpark(struct entvars_s *, class Vector const &)	__buttons.obj
 0x17af0	66	?ButtonSpark@CBaseButton@@QAEXXZ	public: void __thiscall CBaseButton::ButtonSpark(void)	__buttons.obj
 0x183f0	21	?ObjectCaps@CMomentaryRotButton@@UAEHXZ	public: virtual int __thiscall CMomentaryRotButton::ObjectCaps(void)	__buttons.obj
 0x186f0	58	?PlaySound@CMomentaryRotButton@@QAEXXZ	public: void __thiscall CMomentaryRotButton::PlaySound(void)	__buttons.obj
-0x187b0	187	?UpdateAllButtons@CMomentaryRotButton@@QAEXMH@Z	public: void __thiscall CMomentaryRotButton::UpdateAllButtons(float, int)	__buttons.obj
-0x18a00	111	?UpdateTarget@CMomentaryRotButton@@QAEXM@Z	public: void __thiscall CMomentaryRotButton::UpdateTarget(float)	__buttons.obj
 0x19010	31	?ObjectCaps@CBaseButton@@UAEHXZ	public: virtual int __thiscall CBaseButton::ObjectCaps(void)	__buttons.obj
 0x190b0	17	?SparkStop@CEnvSpark@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CEnvSpark::SparkStop(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__buttons.obj
 0x19140	101	?Spawn@CButtonTarget@@UAEXXZ	public: virtual void __thiscall CButtonTarget::Spawn(void)	__buttons.obj
@@ -97,7 +93,6 @@ rva	size	name	demangled	ref_object
 0x194b0	62	?DispatchKeyValue@@YAXPAUedict_s@@PAUKeyValueData_s@@@Z	void __cdecl DispatchKeyValue(struct edict_s *, struct KeyValueData_s *)	__cbase.obj
 0x19670	76	?DispatchThink@@YAXPAUedict_s@@@Z	void __cdecl DispatchThink(struct edict_s *)	__cbase.obj
 0x19710	201	?DispatchSave@@YAXPAUedict_s@@PAUsaverestore_s@@@Z	void __cdecl DispatchSave(struct edict_s *, struct saverestore_s *)	__cbase.obj
-0x197e0	172	?FindGlobalEntity@@YAPAVCBaseEntity@@HH@Z	class CBaseEntity * __cdecl FindGlobalEntity(int, int)	__cbase.obj
 0x19890	833	?DispatchRestore@@YAHPAUedict_s@@PAUsaverestore_s@@H@Z	int __cdecl DispatchRestore(struct edict_s *, struct saverestore_s *, int)	__cbase.obj
 0x19be0	33	?DispatchObjectCollsionBox@@YAXPAUedict_s@@@Z	void __cdecl DispatchObjectCollsionBox(struct edict_s *)	__cbase.obj
 0x19c10	52	?SaveWriteFields@@YAXPAUsaverestore_s@@PBDPAXPAUTYPEDESCRIPTION@@H@Z	void __cdecl SaveWriteFields(struct saverestore_s *, char const *, void *, struct TYPEDESCRIPTION *, int)	__cbase.obj
@@ -107,19 +102,18 @@ rva	size	name	demangled	ref_object
 0x19d00	48	??4EHANDLE@@QAEPAVCBaseEntity@@PAV1@@Z	public: class CBaseEntity * __thiscall EHANDLE::operator=(class CBaseEntity *)	__cbase.obj
 0x19d50	109	?TakeHealth@CBaseEntity@@UAEHMH@Z	public: virtual int __thiscall CBaseEntity::TakeHealth(float, int)	__cbase.obj
 0x1a1a0	36	?Killed@CBaseEntity@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CBaseEntity::Killed(struct entvars_s *, int)	__cbase.obj
-0x1a1d0	78	?GetNextTarget@CBaseEntity@@UAEPAV1@XZ	public: virtual class CBaseEntity * __thiscall CBaseEntity::GetNextTarget(void)	__cbase.obj
-0x1a220	60	?Save@CBaseEntity@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseEntity::Save(class CSave &)	__cbase.obj
+0x1a260	238	?Restore@CBaseEntity@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseEntity::Restore(class CRestore &)	__cbase.obj
+0x1a350	456	?SetObjectCollisionBox@@YAXPAUentvars_s@@@Z	void __cdecl SetObjectCollisionBox(struct entvars_s *)	__cbase.obj
 0x1a530	137	?Intersects@CBaseEntity@@QAEHPAV1@@Z	public: int __thiscall CBaseEntity::Intersects(class CBaseEntity *)	__cbase.obj
 0x1a5c0	90	?MakeDormant@CBaseEntity@@QAEXXZ	public: void __thiscall CBaseEntity::MakeDormant(void)	__cbase.obj
 0x1a6b0	44	?ShouldToggle@CBaseEntity@@QAEHW4USE_TYPE@@H@Z	public: int __thiscall CBaseEntity::ShouldToggle(enum USE_TYPE, int)	__cbase.obj
 0x1a6e0	48	?DamageDecal@CBaseEntity@@UAEHH@Z	public: virtual int __thiscall CBaseEntity::DamageDecal(int)	__cbase.obj
 0x1a870	118	?set_suicide_frame@@YAXPAUentvars_s@@@Z	void __cdecl set_suicide_frame(struct entvars_s *)	__client.obj
 0x1d7a0	35	?ParmsChangeLevel@@YAXXZ	void __cdecl ParmsChangeLevel(void)	__client.obj
+0x1dd00	104	?PlayerCustomization@@YAXPAUedict_s@@PAUcustomization_s@@@Z	void __cdecl PlayerCustomization(struct edict_s *, struct customization_s *)	__client.obj
 0x1ddd0	255	?SetupVisibility@@YAXPAUedict_s@@0PAPAE1@Z	void __cdecl SetupVisibility(struct edict_s *, struct edict_s *, unsigned char **, unsigned char **)	__client.obj
 0x1e8f0	112	?Entity_FieldInit@@YAXPAUdelta_s@@@Z	void __cdecl Entity_FieldInit(struct delta_s *)	__client.obj
-0x1e960	347	?Entity_Encode@@YAXPAUdelta_s@@PBE1@Z	void __cdecl Entity_Encode(struct delta_s *, unsigned char const *, unsigned char const *)	__client.obj
 0x1eac0	61	?Player_FieldInit@@YAXPAUdelta_s@@@Z	void __cdecl Player_FieldInit(struct delta_s *)	__client.obj
-0x1eb00	224	?Player_Encode@@YAXPAUdelta_s@@PBE1@Z	void __cdecl Player_Encode(struct delta_s *, unsigned char const *, unsigned char const *)	__client.obj
 0x1ebe0	166	?Custom_Entity_FieldInit@@YAXPAUdelta_s@@@Z	void __cdecl Custom_Entity_FieldInit(struct delta_s *)	__client.obj
 0x1ec90	226	?Custom_Encode@@YAXPAUdelta_s@@PBE1@Z	void __cdecl Custom_Encode(struct delta_s *, unsigned char const *, unsigned char const *)	__client.obj
 0x1ed80	52	?RegisterEncoders@@YAXXZ	void __cdecl RegisterEncoders(void)	__client.obj
@@ -143,7 +137,6 @@ rva	size	name	demangled	ref_object
 0x23f90	70	?IdleSound@CController@@UAEXXZ	public: virtual void __thiscall CController::IdleSound(void)	__controller.obj
 0x24030	70	?DeathSound@CController@@UAEXXZ	public: virtual void __thiscall CController::DeathSound(void)	__controller.obj
 0x24510	191	?Precache@CController@@UAEXXZ	public: virtual void __thiscall CController::Precache(void)	__controller.obj
-0x247a0	541	?Intersect@@YA?AVVector@@V1@00M@Z	class Vector __cdecl Intersect(class Vector, class Vector, class Vector, float)	__controller.obj
 0x251e0	126	?GetScheduleOfType@CController@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CController::GetScheduleOfType(int)	__controller.obj
 0x25ae0	330	?CheckLocalMove@CController@@UAEHABVVector@@0PAVCBaseEntity@@PAM@Z	public: virtual int __thiscall CController::CheckLocalMove(class Vector const &, class Vector const &, class CBaseEntity *, float *)	__controller.obj
 0x26690	595	?Crawl@CControllerHeadBall@@AAEXXZ	private: void __thiscall CControllerHeadBall::Crawl(void)	__controller.obj
@@ -169,6 +162,7 @@ rva	size	name	demangled	ref_object
 0x37730	410	?RelinkBeam@CBeam@@QAEXXZ	public: void __thiscall CBeam::RelinkBeam(void)	__effects.obj
 0x378d0	92	?TriggerTouch@CBeam@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CBeam::TriggerTouch(class CBaseEntity *)	__effects.obj
 0x37990	62	?DoSparks@CBeam@@QAEXABVVector@@0@Z	public: void __thiscall CBeam::DoSparks(class Vector const &, class Vector const &)	__effects.obj
+0x38160	224	?IsPointEntity@@YAHPAVCBaseEntity@@@Z	int __cdecl IsPointEntity(class CBaseEntity *)	__effects.obj
 0x387c0	78	?DamageThink@CLightning@@QAEXXZ	public: void __thiscall CLightning::DamageThink(void)	__effects.obj
 0x39720	17	?IsOn@CLaser@@QAEHXZ	public: int __thiscall CLaser::IsOn(void)	__effects.obj
 0x39d10	130	?Precache@CSprite@@UAEXXZ	public: virtual void __thiscall CSprite::Precache(void)	__effects.obj
@@ -205,7 +199,6 @@ rva	size	name	demangled	ref_object
 0x40ed0	33	?FTriangulate@CFlyingMonster@@UAEHABVVector@@0MPAVCBaseEntity@@PAV2@@Z	public: virtual int __thiscall CFlyingMonster::FTriangulate(class Vector const &, class Vector const &, float, class CBaseEntity *, class Vector *)	__flyingmonster.obj
 0x40f00	22	?GetStoppedActivity@CFlyingMonster@@UAE?AW4Activity@@XZ	public: virtual enum Activity __thiscall CFlyingMonster::GetStoppedActivity(void)	__flyingmonster.obj
 0x41030	63	?Killed@CFlyingMonster@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CFlyingMonster::Killed(struct entvars_s *, int)	__flyingmonster.obj
-0x41550	143	?CeilingZ@CFlyingMonster@@QAEMABVVector@@@Z	public: float __thiscall CFlyingMonster::CeilingZ(class Vector const &)	__flyingmonster.obj
 0x415e0	584	?ProbeZ@CFlyingMonster@@QAEHABVVector@@0PAM@Z	public: int __thiscall CFlyingMonster::ProbeZ(class Vector const &, class Vector const &, float *)	__flyingmonster.obj
 0x41830	93	?FloorZ@CFlyingMonster@@QAEMABVVector@@@Z	public: float __thiscall CFlyingMonster::FloorZ(class Vector const &)	__flyingmonster.obj
 0x423c0	148	?MaterialSoundList@CBreakable@@SAPAPBDW4Materials@@AAH@Z	public: static char const ** __cdecl CBreakable::MaterialSoundList(enum Materials, int &)	__func_break.obj
@@ -215,7 +208,9 @@ rva	size	name	demangled	ref_object
 0x435a0	559	?KeyValue@CPushable@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CPushable::KeyValue(struct KeyValueData_s *)	__func_break.obj
 0x43860	100	?Touch@CPushable@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CPushable::Touch(class CBaseEntity *)	__func_break.obj
 0x43b10	48	?TakeDamage@CPushable@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CPushable::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__func_break.obj
+0x43bb0	151	_$E25	_$E25	__func_tank.obj
 0x44bf0	99	?Think@CFuncTank@@UAEXXZ	public: virtual void __thiscall CFuncTank::Think(void)	__func_tank.obj
+0x457b0	537	?TankTrace@CFuncTank@@QAEXABVVector@@00AAUTraceResult@@@Z	public: void __thiscall CFuncTank::TankTrace(class Vector const &, class Vector const &, class Vector const &, struct TraceResult &)	__func_tank.obj
 0x459d0	91	?StartRotSound@CFuncTank@@QAEXXZ	public: void __thiscall CFuncTank::StartRotSound(void)	__func_tank.obj
 0x45a30	85	?StopRotSound@CFuncTank@@QAEXXZ	public: void __thiscall CFuncTank::StopRotSound(void)	__func_tank.obj
 0x46b40	25	?Precache@CFuncTankRocket@@UAEXXZ	public: virtual void __thiscall CFuncTankRocket::Precache(void)	__func_tank.obj
@@ -242,12 +237,14 @@ rva	size	name	demangled	ref_object
 0x51950	293	?DangerSoundThink@CGrenade@@QAEXXZ	public: void __thiscall CGrenade::DangerSoundThink(void)	__ggrenade.obj
 0x51e00	150	?BounceSound@CGrenade@@UAEXXZ	public: virtual void __thiscall CGrenade::BounceSound(void)	__ggrenade.obj
 0x51ea0	334	?TumbleThink@CGrenade@@QAEXXZ	public: void __thiscall CGrenade::TumbleThink(void)	__ggrenade.obj
+0x52620	31	_$E13	_$E13	__globals.obj
 0x56730	49	?TraceAttack@CGMan@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CGMan::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	__gman.obj
 0x567c0	371	?FBoxVisible@@YAHPAUentvars_s@@0AAVVector@@M@Z	int __cdecl FBoxVisible(struct entvars_s *, struct entvars_s *, class Vector &, float)	__h_ai.obj
 0x56940	1361	?VecCheckToss@@YA?AVVector@@PAUentvars_s@@ABV1@V1@M@Z	class Vector __cdecl VecCheckToss(struct entvars_s *, class Vector const &, class Vector, float)	__h_ai.obj
 0x56ea0	628	?VecCheckThrow@@YA?AVVector@@PAUentvars_s@@ABV1@V1@MM@Z	class Vector __cdecl VecCheckThrow(struct entvars_s *, class Vector const &, class Vector, float, float)	__h_ai.obj
 0x57d60	40	?Use@CLegacyCineMonster@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CLegacyCineMonster::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__h_cine.obj
 0x57da0	40	?Pain@CLegacyCineMonster@@QAEXXZ	public: void __thiscall CLegacyCineMonster::Pain(void)	__h_cine.obj
+0x57eb0	767	?BloodGush@CCineBlood@@QAEXXZ	public: void __thiscall CCineBlood::BloodGush(void)	__h_cine.obj
 0x581d0	34	?Spawn@CCineBlood@@UAEXXZ	public: virtual void __thiscall CCineBlood::Spawn(void)	__h_cine.obj
 0x58300	118	?Spawn@CGenericCycler@@UAEXXZ	public: virtual void __thiscall CGenericCycler::Spawn(void)	__h_cycler.obj
 0x58400	171	?Spawn@CCyclerProbe@@UAEXXZ	public: virtual void __thiscall CCyclerProbe::Spawn(void)	__h_cycler.obj
@@ -274,7 +271,6 @@ rva	size	name	demangled	ref_object
 0x62bd0	44	?IRelationship@CHornet@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CHornet::IRelationship(class CBaseEntity *)	__hornet.obj
 0x62c00	35	?Classify@CHornet@@UAEHXZ	public: virtual int __thiscall CHornet::Classify(void)	__hornet.obj
 0x62c30	46	?StartTrack@CHornet@@QAEXXZ	public: void __thiscall CHornet::StartTrack(void)	__hornet.obj
-0x62c60	46	?StartDart@CHornet@@QAEXXZ	public: void __thiscall CHornet::StartDart(void)	__hornet.obj
 0x63750	271	?DieTouch@CHornet@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CHornet::DieTouch(class CBaseEntity *)	__hornet.obj
 0x66580	47	?CheckRangeAttack1@CHoundeye@@UAEHMM@Z	public: virtual int __thiscall CHoundeye::CheckRangeAttack1(float, float)	__houndeye.obj
 0x66ae0	106	?WarmUpSound@CHoundeye@@QAEXXZ	public: void __thiscall CHoundeye::WarmUpSound(void)	__houndeye.obj
@@ -285,7 +281,6 @@ rva	size	name	demangled	ref_object
 0x68030	48	?BecomeDead@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::BecomeDead(void)	__ichthyosaur.obj
 0x68800	156	?GetScheduleOfType@CIchthyosaur@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CIchthyosaur::GetScheduleOfType(int)	__ichthyosaur.obj
 0x69260	111	?VectorToPitch@CIchthyosaur@@QAEMABVVector@@@Z	public: float __thiscall CIchthyosaur::VectorToPitch(class Vector const &)	__ichthyosaur.obj
-0x692e0	123	?FlPitchDiff@CIchthyosaur@@QAEMXZ	public: float __thiscall CIchthyosaur::FlPitchDiff(void)	__ichthyosaur.obj
 0x694a0	22	?GetStoppedActivity@CIchthyosaur@@UAE?AW4Activity@@XZ	public: virtual enum Activity __thiscall CIchthyosaur::GetStoppedActivity(void)	__ichthyosaur.obj
 0x6ac00	29	?Killed@CISlave@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CISlave::Killed(struct entvars_s *, int)	__islave.obj
 0x6b210	24	?StartTask@CISlave@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CISlave::StartTask(struct Task_t *)	__islave.obj
@@ -298,13 +293,11 @@ rva	size	name	demangled	ref_object
 0x6eba0	73	?Precache@CLeech@@UAEXXZ	public: virtual void __thiscall CLeech::Precache(void)	__leech.obj
 0x6ebf0	297	?TakeDamage@CLeech@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CLeech::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__leech.obj
 0x6ef10	54	?MakeVectors@CLeech@@QAEXXZ	public: void __thiscall CLeech::MakeVectors(void)	__leech.obj
-0x702e0	444	?KeyValue@CEnvLight@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvLight::KeyValue(struct KeyValueData_s *)	__lights.obj
 0x704a0	169	?Spawn@CEnvLight@@UAEXXZ	public: virtual void __thiscall CEnvLight::Spawn(void)	__lights.obj
 0x705b0	34	?Spawn@CRuleEntity@@UAEXXZ	public: virtual void __thiscall CRuleEntity::Spawn(void)	__maprules.obj
 0x70680	30	?Spawn@CRulePointEntity@@UAEXXZ	public: virtual void __thiscall CRulePointEntity::Spawn(void)	__maprules.obj
 0x706a0	54	?Spawn@CRuleBrushEntity@@UAEXXZ	public: virtual void __thiscall CRuleBrushEntity::Spawn(void)	__maprules.obj
 0x70760	125	?KeyValue@CGameScore@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGameScore::KeyValue(struct KeyValueData_s *)	__maprules.obj
-0x707e0	99	?Use@CGameScore@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameScore::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
 0x71110	75	?Use@CGameTeamSet@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameTeamSet::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
 0x71580	141	?Use@CGamePlayerHurt@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGamePlayerHurt::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
 0x71680	44	?Spawn@CGameCounter@@UAEXXZ	public: virtual void __thiscall CGameCounter::Spawn(void)	__maprules.obj
@@ -316,7 +309,6 @@ rva	size	name	demangled	ref_object
 0x749b0	60	?FLSoundVolume@CBaseMonster@@QAEMPAVCSound@@@Z	public: float __thiscall CBaseMonster::FLSoundVolume(class CSound *)	__monsters.obj
 0x75280	25	?ShouldSimplify@@YAHH@Z	int __cdecl ShouldSimplify(int)	__monsters.obj
 0x76090	472	?CheckLocalMove@CBaseMonster@@UAEHABVVector@@0PAVCBaseEntity@@PAM@Z	public: virtual int __thiscall CBaseMonster::CheckLocalMove(class Vector const &, class Vector const &, class CBaseEntity *, float *)	__monsters.obj
-0x76270	312	?OpenDoorAndWait@CBaseMonster@@QAEMPAUentvars_s@@@Z	public: float __thiscall CBaseMonster::OpenDoorAndWait(struct entvars_s *)	__monsters.obj
 0x76500	71	?RouteClassify@CBaseMonster@@QAEHH@Z	public: int __thiscall CBaseMonster::RouteClassify(int)	__monsters.obj
 0x78380	82	?FlYawDiff@CBaseMonster@@QAEMXZ	public: float __thiscall CBaseMonster::FlYawDiff(void)	__monsters.obj
 0x78550	74	?VecToYaw@CBaseMonster@@QAEMVVector@@@Z	public: float __thiscall CBaseMonster::VecToYaw(class Vector)	__monsters.obj
@@ -329,6 +321,7 @@ rva	size	name	demangled	ref_object
 0x7a890	54	?Spawn@CMortar@@UAEXXZ	public: virtual void __thiscall CMortar::Spawn(void)	__mortar.obj
 0x7df80	235	??0CHalfLifeMultiplay@@QAE@XZ	public: __thiscall CHalfLifeMultiplay::CHalfLifeMultiplay(void)	__multiplay_gamerules.obj
 0x7e070	29	?ClientCommand@CHalfLifeMultiplay@@UAEHPAVCBasePlayer@@PBD@Z	public: virtual int __thiscall CHalfLifeMultiplay::ClientCommand(class CBasePlayer *, char const *)	__multiplay_gamerules.obj
+0x7e090	156	?RefreshSkillData@CHalfLifeMultiplay@@UAEXXZ	public: virtual void __thiscall CHalfLifeMultiplay::RefreshSkillData(void)	__multiplay_gamerules.obj
 0x7e600	23	?ClientConnected@CHalfLifeMultiplay@@UAEHPAUedict_s@@PBD1QAD@Z	public: virtual int __thiscall CHalfLifeMultiplay::ClientConnected(struct edict_s *, char const *, char const *, char *const)	__multiplay_gamerules.obj
 0x7e620	50	?UpdateGameMode@CHalfLifeMultiplay@@UAEXPAVCBasePlayer@@@Z	public: virtual void __thiscall CHalfLifeMultiplay::UpdateGameMode(class CBasePlayer *)	__multiplay_gamerules.obj
 0x7e8f0	233	?ClientDisconnected@CHalfLifeMultiplay@@UAEXPAUedict_s@@@Z	public: virtual void __thiscall CHalfLifeMultiplay::ClientDisconnected(struct edict_s *)	__multiplay_gamerules.obj
@@ -340,8 +333,8 @@ rva	size	name	demangled	ref_object
 0x7fab0	64	?DestroyMapCycle@@YAXPAUmapcycle_s@@@Z	void __cdecl DestroyMapCycle(struct mapcycle_s *)	__multiplay_gamerules.obj
 0x7faf0	240	?COM_Parse@@YAPADPAD@Z	char * __cdecl COM_Parse(char *)	__multiplay_gamerules.obj
 0x7fbe0	67	?COM_TokenWaiting@@YAHPAD@Z	int __cdecl COM_TokenWaiting(char *)	__multiplay_gamerules.obj
+0x7fc30	712	?ReloadMapCycleFile@@YAHPADPAUmapcycle_s@@@Z	int __cdecl ReloadMapCycleFile(char *, struct mapcycle_s *)	__multiplay_gamerules.obj
 0x7ff00	58	?CountPlayers@@YAHXZ	int __cdecl CountPlayers(void)	__multiplay_gamerules.obj
-0x7ff40	293	?ExtractCommandString@@YAXPAD0@Z	void __cdecl ExtractCommandString(char *, char *)	__multiplay_gamerules.obj
 0x80370	317	?SendMOTDToClient@CHalfLifeMultiplay@@IAEXPAUedict_s@@@Z	protected: void __thiscall CHalfLifeMultiplay::SendMOTDToClient(struct edict_s *)	__multiplay_gamerules.obj
 0x80d50	55	?DeathSound@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::DeathSound(void)	__nihilanth.obj
 0x80dc0	39	?StartupUse@CNihilanth@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CNihilanth::StartupUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__nihilanth.obj
@@ -353,7 +346,6 @@ rva	size	name	demangled	ref_object
 0x855e0	46	?RemoveTouch@CNihilanthHVR@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanthHVR::RemoveTouch(class CBaseEntity *)	__nihilanth.obj
 0x85960	139	?InitGraph@CGraph@@QAEXXZ	public: void __thiscall CGraph::InitGraph(void)	__nodes.obj
 0x859f0	55	?AllocNodes@CGraph@@QAEHXZ	public: int __thiscall CGraph::AllocNodes(void)	__nodes.obj
-0x85a30	517	?LinkEntForLink@CGraph@@QAEPAUentvars_s@@PAVCLink@@PAVCNode@@@Z	public: struct entvars_s * __thiscall CGraph::LinkEntForLink(class CLink *, class CNode *)	__nodes.obj
 0x85c40	502	?HandleLinkEnt@CGraph@@QAEHHPAUentvars_s@@HW4NODEQUERY@1@@Z	public: int __thiscall CGraph::HandleLinkEnt(int, struct entvars_s *, int, enum CGraph::NODEQUERY)	__nodes.obj
 0x85e40	168	?HullIndex@CGraph@@QAEHPBVCBaseEntity@@@Z	public: int __thiscall CGraph::HullIndex(class CBaseEntity const *)	__nodes.obj
 0x85ef0	43	?NodeType@CGraph@@QAEHPBVCBaseEntity@@@Z	public: int __thiscall CGraph::NodeType(class CBaseEntity const *)	__nodes.obj
@@ -381,9 +373,6 @@ rva	size	name	demangled	ref_object
 0x88f30	47	?Remove@CQueuePriority@@QAEHAAM@Z	public: int __thiscall CQueuePriority::Remove(float &)	__nodes.obj
 0x88f60	119	?Heap_SiftDown@CQueuePriority@@AAEXH@Z	private: void __thiscall CQueuePriority::Heap_SiftDown(int)	__nodes.obj
 0x88fe0	75	?Heap_SiftUp@CQueuePriority@@AAEXXZ	private: void __thiscall CQueuePriority::Heap_SiftUp(void)	__nodes.obj
-0x89030	1046	?FLoadGraph@CGraph@@QAEHPAD@Z	public: int __thiscall CGraph::FLoadGraph(char *)	__nodes.obj
-0x89450	579	?FSaveGraph@CGraph@@QAEHPAD@Z	public: int __thiscall CGraph::FSaveGraph(char *)	__nodes.obj
-0x896a0	218	?FSetGraphPointers@CGraph@@QAEHXZ	public: int __thiscall CGraph::FSetGraphPointers(void)	__nodes.obj
 0x89780	364	?CheckNODFile@CGraph@@QAEHPAD@Z	public: int __thiscall CGraph::CheckNODFile(char *)	__nodes.obj
 0x898f0	171	?HashInsert@CGraph@@QAEXHHH@Z	public: void __thiscall CGraph::HashInsert(int, int, int)	__nodes.obj
 0x899a0	243	?HashSearch@CGraph@@QAEXHHAAH@Z	public: void __thiscall CGraph::HashSearch(int, int, int &)	__nodes.obj
@@ -404,17 +393,16 @@ rva	size	name	demangled	ref_object
 0x90670	199	?RotMove@CFuncPlatRot@@QAEXAAVVector@@M@Z	public: void __thiscall CFuncPlatRot::RotMove(class Vector &, float)	__plats.obj
 0x91110	175	?OverrideReset@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::OverrideReset(void)	__plats.obj
 0x914b0	53	?NextThink@CFuncTrackTrain@@QAEXMH@Z	public: void __thiscall CFuncTrackTrain::NextThink(float, int)	__plats.obj
+0x920b0	44	?FixupAngles@@YAXAAVVector@@@Z	void __cdecl FixupAngles(class Vector &)	__plats.obj
+0x920e0	69	?Fix@@YAMM@Z	float __cdecl Fix(float)	__plats.obj
 0x92840	38	?OverrideReset@CFuncTrackTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrackTrain::OverrideReset(void)	__plats.obj
-0x92c40	230	?Find@CFuncTrainControls@@QAEXXZ	public: void __thiscall CFuncTrainControls::Find(void)	__plats.obj
 0x92d30	122	?Spawn@CFuncTrainControls@@UAEXXZ	public: virtual void __thiscall CFuncTrainControls::Spawn(void)	__plats.obj
 0x930e0	29	?OverrideReset@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::OverrideReset(void)	__plats.obj
 0x93d30	29	?BodyTarget@CGunTarget@@UAE?AVVector@@ABV2@@Z	public: virtual class Vector __thiscall CGunTarget::BodyTarget(class Vector const &)	__plats.obj
 0x940d0	53	?Stop@CGunTarget@@UAEXXZ	public: virtual void __thiscall CGunTarget::Stop(void)	__plats.obj
 0x946b0	329	?VecVelocityForDamage@@YA?AVVector@@M@Z	class Vector __cdecl VecVelocityForDamage(float)	__player.obj
 0x94800	87	?TrainSpeed@@YAHHH@Z	int __cdecl TrainSpeed(int, int)	__player.obj
-0x96bf0	197	?TabulateAmmo@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::TabulateAmmo(void)	__player.obj
 0x97270	18	?IsOnLadder@CBasePlayer@@QAEHXZ	public: int __thiscall CBasePlayer::IsOnLadder(void)	__player.obj
-0x97720	387	?StartDeathCam@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::StartDeathCam(void)	__player.obj
 0x97e80	77	?FixPlayerCrouchStuck@@YAXPAUedict_s@@@Z	void __cdecl FixPlayerCrouchStuck(struct edict_s *)	__player.obj
 0x9be20	48	?Save@CBasePlayer@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBasePlayer::Save(class CSave &)	__player.obj
 0x9c390	200	?Spawn@CSprayCan@@QAEXPAUentvars_s@@@Z	public: void __thiscall CSprayCan::Spawn(struct entvars_s *)	__player.obj
@@ -422,12 +410,14 @@ rva	size	name	demangled	ref_object
 0x9c5b0	156	?Spawn@CBloodSplat@@QAEXPAUentvars_s@@@Z	public: void __thiscall CBloodSplat::Spawn(struct entvars_s *)	__player.obj
 0x9c650	200	?Spray@CBloodSplat@@QAEXXZ	public: void __thiscall CBloodSplat::Spray(void)	__player.obj
 0x9c720	147	?GiveNamedItem@CBasePlayer@@QAEXPBD@Z	public: void __thiscall CBasePlayer::GiveNamedItem(char const *)	__player.obj
+0x9c7c0	307	?FindEntityForward@@YAPAVCBaseEntity@@PAV1@@Z	class CBaseEntity * __cdecl FindEntityForward(class CBaseEntity *)	__player.obj
 0x9d6b0	66	?GetAmmoIndex@CBasePlayer@@SAHPBD@Z	public: static int __cdecl CBasePlayer::GetAmmoIndex(char const *)	__player.obj
 0x9e0a0	38	?BarnacleVictimBitten@CBasePlayer@@UAEXPAUentvars_s@@@Z	public: virtual void __thiscall CBasePlayer::BarnacleVictimBitten(struct entvars_s *)	__player.obj
 0x9e110	41	?EnableControl@CBasePlayer@@QAEXH@Z	public: void __thiscall CBasePlayer::EnableControl(int)	__player.obj
 0x9ed80	95	?Use@CStripWeapons@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CStripWeapons::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__player.obj
 0x9f0e0	34	?LoadThink@CRevertSaved@@QAEXXZ	public: void __thiscall CRevertSaved::LoadThink(void)	__player.obj
-0x9f180	290	?Think@CInfoIntermission@@EAEXXZ	private: virtual void __thiscall CInfoIntermission::Think(void)	__player.obj
+0x9f110	100	?Spawn@CInfoIntermission@@EAEXXZ	private: virtual void __thiscall CInfoIntermission::Spawn(void)	__player.obj
+0x9f350	199	_PM_ParticleLine	_PM_ParticleLine	___pm_shared_pm_debug.obj
 0x9f420	84	_PM_DrawRectangle	_PM_DrawRectangle	___pm_shared_pm_debug.obj
 0x9f480	701	_PM_DrawPhysEntBBox	_PM_DrawPhysEntBBox	___pm_shared_pm_debug.obj
 0x9f740	209	_PM_DrawBBox	_PM_DrawBBox	___pm_shared_pm_debug.obj
@@ -437,7 +427,7 @@ rva	size	name	demangled	ref_object
 0x9fa00	241	_AngleVectorsTranspose	_AngleVectorsTranspose	___pm_shared_pm_math.obj
 0x9fb00	222	_AngleMatrix	_AngleMatrix	___pm_shared_pm_math.obj
 0x9fbe0	222	_AngleIMatrix	_AngleIMatrix	___pm_shared_pm_math.obj
-0x9fd00	121	_InterpolateAngles	_InterpolateAngles	___pm_shared_pm_math.obj
+0x9fcc0	64	_NormalizeAngles	_NormalizeAngles	___pm_shared_pm_math.obj
 0x9fd80	129	_AngleBetweenVectors	_AngleBetweenVectors	___pm_shared_pm_math.obj
 0x9fe10	92	_VectorTransform	_VectorTransform	___pm_shared_pm_math.obj
 0x9fe70	45	_VectorCompare	_VectorCompare	___pm_shared_pm_math.obj
@@ -454,10 +444,7 @@ rva	size	name	demangled	ref_object
 0xa00d0	16	_Q_log2	_Q_log2	___pm_shared_pm_math.obj
 0xa00e0	159	_VectorMatrix	_VectorMatrix	___pm_shared_pm_math.obj
 0xa0180	209	_VectorAngles	_VectorAngles	___pm_shared_pm_math.obj
-0xa0370	179	_PM_SwapTextures	_PM_SwapTextures	___pm_shared_pm_shared.obj
 0xa0430	101	_PM_SortTextures	_PM_SortTextures	___pm_shared_pm_shared.obj
-0xa04a0	660	_PM_InitTextureTypes	_PM_InitTextureTypes	___pm_shared_pm_shared.obj
-0xa0740	94	_PM_FindTextureType	_PM_FindTextureType	___pm_shared_pm_shared.obj
 0xa0f30	115	_PM_MapTextureTypeStepType	_PM_MapTextureTypeStepType	___pm_shared_pm_shared.obj
 0xa1080	250	_PM_CatagorizeTextureType	_PM_CatagorizeTextureType	___pm_shared_pm_shared.obj
 0xa1570	160	_PM_AddToTouched	_PM_AddToTouched	___pm_shared_pm_shared.obj
@@ -466,6 +453,7 @@ rva	size	name	demangled	ref_object
 0xa24a0	157	_PM_Accelerate	_PM_Accelerate	___pm_shared_pm_shared.obj
 0xa47f0	19	_PM_InWater	_PM_InWater	___pm_shared_pm_shared.obj
 0xa4810	445	_PM_CheckWater	_PM_CheckWater	___pm_shared_pm_shared.obj
+0xa49d0	294	_PM_CatagorizePosition	_PM_CatagorizePosition	___pm_shared_pm_shared.obj
 0xa4b00	77	_PM_GetRandomStuckOffsets	_PM_GetRandomStuckOffsets	___pm_shared_pm_shared.obj
 0xa4b50	23	_PM_ResetStuckOffsets	_PM_ResetStuckOffsets	___pm_shared_pm_shared.obj
 0xa4b70	887	_PM_CheckStuck	_PM_CheckStuck	___pm_shared_pm_shared.obj
@@ -475,10 +463,11 @@ rva	size	name	demangled	ref_object
 0xa5e20	95	_PM_AddGravity	_PM_AddGravity	___pm_shared_pm_shared.obj
 0xa5e80	203	_PM_PushEntity	_PM_PushEntity	___pm_shared_pm_shared.obj
 0xa5f50	779	_PM_Physics_Toss	_PM_Physics_Toss	___pm_shared_pm_shared.obj
+0xa6260	174	_PM_NoClip	_PM_NoClip	___pm_shared_pm_shared.obj
 0xa6310	97	_PM_PreventMegaBunnyJumping	_PM_PreventMegaBunnyJumping	___pm_shared_pm_shared.obj
-0xa6cc0	610	_PM_CheckWaterJump	_PM_CheckWaterJump	___pm_shared_pm_shared.obj
 0xa75d0	240	_PM_PlayWaterSounds	_PM_PlayWaterSounds	___pm_shared_pm_shared.obj
 0xa76c0	151	_PM_CalcRoll	_PM_CalcRoll	___pm_shared_pm_shared.obj
+0xa8af0	539	_PM_CreateStuckTable	_PM_CreateStuckTable	___pm_shared_pm_shared.obj
 0xa9120	46	_PM_GetVisEntInfo	_PM_GetVisEntInfo	___pm_shared_pm_shared.obj
 0xa9150	30	_PM_Init	_PM_Init	___pm_shared_pm_shared.obj
 0xb2c80	216	?Killed@CRoach@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CRoach::Killed(struct entvars_s *, int)	__roach.obj
@@ -506,7 +495,7 @@ rva	size	name	demangled	ref_object
 0xce250	775	?SENTENCEG_Init@@YAXXZ	void __cdecl SENTENCEG_Init(void)	__sound.obj
 0xce560	179	?SENTENCEG_Lookup@@YAHPBDPAD@Z	int __cdecl SENTENCEG_Lookup(char const *, char *)	__sound.obj
 0xce750	110	?EMIT_SOUND_SUIT@@YAXPAUedict_s@@PBD@Z	void __cdecl EMIT_SOUND_SUIT(struct edict_s *, char const *)	__sound.obj
-0xce7c0	108	?EMIT_GROUPID_SUIT@@YAXPAUedict_s@@H@Z	void __cdecl EMIT_GROUPID_SUIT(struct edict_s *, int)	__sound.obj
+0xce8a0	145	?memfgets@@YAPADPAEHAAHPADH@Z	char * __cdecl memfgets(unsigned char *, int, int &, char *, int)	__sound.obj
 0xce940	471	?TEXTURETYPE_Init@@YAXXZ	void __cdecl TEXTURETYPE_Init(void)	__sound.obj
 0xceb20	68	?TEXTURETYPE_Find@@YADPAD@Z	char __cdecl TEXTURETYPE_Find(char *)	__sound.obj
 0xcf260	53	?Precache@CSpeaker@@UAEXXZ	public: virtual void __thiscall CSpeaker::Precache(void)	__sound.obj
@@ -515,7 +504,6 @@ rva	size	name	demangled	ref_object
 0xcf600	44	?Reset@CSound@@QAEXXZ	public: void __thiscall CSound::Reset(void)	__soundent.obj
 0xcf650	46	?Spawn@CSoundEnt@@UAEXXZ	public: virtual void __thiscall CSoundEnt::Spawn(void)	__soundent.obj
 0xcfa20	16	?ClientSoundIndex@CSoundEnt@@SAHPAUedict_s@@@Z	public: static int __cdecl CSoundEnt::ClientSoundIndex(struct edict_s *)	__soundent.obj
-0xcfa80	226	?SpectatorImpulseCommand@CBaseSpectator@@AAEXXZ	private: void __thiscall CBaseSpectator::SpectatorImpulseCommand(void)	__spectator.obj
 0xcfb70	67	?SpectatorThink@CBaseSpectator@@QAEXXZ	public: void __thiscall CBaseSpectator::SpectatorThink(void)	__spectator.obj
 0xd09b0	26	?GetScheduleOfType@CSquadMonster@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CSquadMonster::GetScheduleOfType(int)	__squadmonster.obj
 0xd0ed0	43	?GibMonster@CSqueakGrenade@@EAEXXZ	private: virtual void __thiscall CSqueakGrenade::GibMonster(void)	__squeakgrenade.obj
@@ -524,7 +512,6 @@ rva	size	name	demangled	ref_object
 0xd47f0	26	?IsTriggered@CBaseDMStart@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CBaseDMStart::IsTriggered(class CBaseEntity *)	__subs.obj
 0xd4890	77	?SUB_Remove@CBaseEntity@@QAEXXZ	public: void __thiscall CBaseEntity::SUB_Remove(void)	__subs.obj
 0xd4a10	55	?SUB_UseTargets@CBaseEntity@@QAEXPAV1@W4USE_TYPE@@M@Z	public: void __thiscall CBaseEntity::SUB_UseTargets(class CBaseEntity *, enum USE_TYPE, float)	__subs.obj
-0xd4a50	164	?FireTargets@@YAXPBDPAVCBaseEntity@@1W4USE_TYPE@@M@Z	void __cdecl FireTargets(char const *, class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__subs.obj
 0xd4d70	258	?SetMovedir@@YAXPAUentvars_s@@@Z	void __cdecl SetMovedir(struct entvars_s *)	__subs.obj
 0xd4e80	84	?DelayThink@CBaseDelay@@QAEXXZ	public: void __thiscall CBaseDelay::DelayThink(void)	__subs.obj
 0xd53b0	35	?AxisValue@CBaseToggle@@SAMHABVVector@@@Z	public: static float __cdecl CBaseToggle::AxisValue(int, class Vector const &)	__subs.obj
@@ -549,7 +536,6 @@ rva	size	name	demangled	ref_object
 0xdeba0	62	?TakeDamage@CTentacle@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CTentacle::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__tentacle.obj
 0xdec60	185	?Spawn@CTentacleMaw@@UAEXXZ	public: virtual void __thiscall CTentacleMaw::Spawn(void)	__tentacle.obj
 0xe38d0	76	?Spawn@CFrictionModifier@@UAEXXZ	public: virtual void __thiscall CFrictionModifier::Spawn(void)	__triggers.obj
-0xe4320	211	?Use@CRenderFxManager@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CRenderFxManager::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__triggers.obj
 0xe4480	170	?InitTrigger@CBaseTrigger@@QAEXXZ	public: void __thiscall CBaseTrigger::InitTrigger(void)	__triggers.obj
 0xe47a0	41	?Think@CTriggerMonsterJump@@UAEXXZ	public: virtual void __thiscall CTriggerMonsterJump::Think(void)	__triggers.obj
 0xe4930	117	?PlayCDTrack@@YAXH@Z	void __cdecl PlayCDTrack(int)	__triggers.obj
@@ -564,12 +550,9 @@ rva	size	name	demangled	ref_object
 0xe5880	27	?Spawn@CFireAndDie@@UAEXXZ	public: virtual void __thiscall CFireAndDie::Spawn(void)	__triggers.obj
 0xe58c0	24	?Think@CFireAndDie@@UAEXXZ	public: virtual void __thiscall CFireAndDie::Think(void)	__triggers.obj
 0xe5c70	59	?ExecuteChangeLevel@CChangeLevel@@QAEXXZ	public: void __thiscall CChangeLevel::ExecuteChangeLevel(void)	__triggers.obj
-0xe5cb0	158	?FindLandmark@CChangeLevel@@SAPAUedict_s@@PBD@Z	public: static struct edict_s * __cdecl CChangeLevel::FindLandmark(char const *)	__triggers.obj
 0xe6070	259	?AddTransitionToList@CChangeLevel@@SAHPAULEVELLIST@@HPBD1PAUedict_s@@@Z	public: static int __cdecl CChangeLevel::AddTransitionToList(struct LEVELLIST *, int, char const *, char const *, struct edict_s *)	__triggers.obj
-0xe61a0	250	?InTransitionVolume@CChangeLevel@@SAHPAVCBaseEntity@@PAD@Z	public: static int __cdecl CChangeLevel::InTransitionVolume(class CBaseEntity *, char *)	__triggers.obj
 0xe6700	101	?Precache@CLadder@@UAEXXZ	public: virtual void __thiscall CLadder::Precache(void)	__triggers.obj
 0xe6770	65	?Spawn@CLadder@@UAEXXZ	public: virtual void __thiscall CLadder::Spawn(void)	__triggers.obj
-0xe6840	147	?Spawn@CTriggerPush@@UAEXXZ	public: virtual void __thiscall CTriggerPush::Spawn(void)	__triggers.obj
 0xe6db0	55	?Spawn@CTriggerSave@@UAEXXZ	public: virtual void __thiscall CTriggerSave::Spawn(void)	__triggers.obj
 0xe6eb0	80	?EndSectionUse@CTriggerEndSection@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CTriggerEndSection::EndSectionUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__triggers.obj
 0xe6f00	74	?Spawn@CTriggerEndSection@@UAEXXZ	public: virtual void __thiscall CTriggerEndSection::Spawn(void)	__triggers.obj
@@ -577,6 +560,7 @@ rva	size	name	demangled	ref_object
 0xee6d0	125	?Precache@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::Precache(void)	__turret.obj
 0xee910	31	?Precache@CTurret@@UAEXXZ	public: virtual void __thiscall CTurret::Precache(void)	__turret.obj
 0xeea40	53	?Precache@CMiniTurret@@UAEXXZ	public: virtual void __thiscall CMiniTurret::Precache(void)	__turret.obj
+0xef2a0	147	?Shoot@CTurret@@UAEXAAVVector@@0@Z	public: virtual void __thiscall CTurret::Shoot(class Vector &, class Vector &)	__turret.obj
 0xef340	237	?Shoot@CMiniTurret@@UAEXAAVVector@@0@Z	public: virtual void __thiscall CMiniTurret::Shoot(class Vector &, class Vector &)	__turret.obj
 0xef8d0	121	?SetTurretAnim@CBaseTurret@@QAEXW4TURRET_ANIM@@@Z	public: void __thiscall CBaseTurret::SetTurretAnim(enum TURRET_ANIM)	__turret.obj
 0xf0460	18	?Precache@CSentry@@UAEXXZ	public: virtual void __thiscall CSentry::Precache(void)	__turret.obj
@@ -592,7 +576,6 @@ rva	size	name	demangled	ref_object
 0xf0db0	28	??1UTIL_GroupTrace@@QAE@XZ	public: __thiscall UTIL_GroupTrace::~UTIL_GroupTrace(void)	__util.obj
 0xf0dd0	22	?UTIL_GetNextBestWeapon@@YAHPAVCBasePlayer@@PAVCBasePlayerItem@@@Z	int __cdecl UTIL_GetNextBestWeapon(class CBasePlayer *, class CBasePlayerItem *)	__util.obj
 0xf0df0	120	?UTIL_AngleMod@@YAMM@Z	float __cdecl UTIL_AngleMod(float)	__util.obj
-0xf0e70	63	?UTIL_AngleDiff@@YAMMM@Z	float __cdecl UTIL_AngleDiff(float, float)	__util.obj
 0xf0eb0	47	?UTIL_VecToAngles@@YA?AVVector@@ABV1@@Z	class Vector __cdecl UTIL_VecToAngles(class Vector const &)	__util.obj
 0xf0ee0	57	?UTIL_MoveToOrigin@@YAXPAUedict_s@@ABVVector@@MH@Z	void __cdecl UTIL_MoveToOrigin(struct edict_s *, class Vector const &, float, int)	__util.obj
 0xf0f20	257	?UTIL_EntitiesInBox@@YAHPAPAVCBaseEntity@@HABVVector@@1H@Z	int __cdecl UTIL_EntitiesInBox(class CBaseEntity **, int, class Vector const &, class Vector const &, int)	__util.obj
@@ -601,11 +584,15 @@ rva	size	name	demangled	ref_object
 0xf1330	44	?UTIL_MakeAimVectors@@YAXABVVector@@@Z	void __cdecl UTIL_MakeAimVectors(class Vector const &)	__util.obj
 0xf1360	141	?UTIL_MakeInvVectors@@YAXABVVector@@PAUglobalvars_t@@@Z	void __cdecl UTIL_MakeInvVectors(class Vector const &, struct globalvars_t *)	__util.obj
 0xf13f0	150	?UTIL_EmitAmbientSound@@YAXPAUedict_s@@ABVVector@@PBDMMHH@Z	void __cdecl UTIL_EmitAmbientSound(struct edict_s *, class Vector const &, char const *, float, float, int, int)	__util.obj
+0xf1490	356	?UTIL_ScreenShake@@YAXABVVector@@MMMM@Z	void __cdecl UTIL_ScreenShake(class Vector const &, float, float, float, float)	__util.obj
+0xf1600	33	?FixedUnsigned16@@YAGMM@Z	unsigned short __cdecl FixedUnsigned16(float, float)	__util.obj
 0xf1630	31	?UTIL_ScreenShakeAll@@YAXABVVector@@MMM@Z	void __cdecl UTIL_ScreenShakeAll(class Vector const &, float, float, float)	__util.obj
 0xf1650	101	?UTIL_ScreenFadeBuild@@YAXAAUScreenFade@@ABVVector@@MMHH@Z	void __cdecl UTIL_ScreenFadeBuild(struct ScreenFade &, class Vector const &, float, float, int, int)	__util.obj
 0xf16c0	152	?UTIL_ScreenFadeWrite@@YAXABUScreenFade@@PAVCBaseEntity@@@Z	void __cdecl UTIL_ScreenFadeWrite(struct ScreenFade const &, class CBaseEntity *)	__util.obj
 0xf1760	100	?UTIL_ScreenFadeAll@@YAXABVVector@@MMHH@Z	void __cdecl UTIL_ScreenFadeAll(class Vector const &, float, float, int, int)	__util.obj
 0xf17d0	57	?UTIL_ScreenFade@@YAXPAVCBaseEntity@@ABVVector@@MMHH@Z	void __cdecl UTIL_ScreenFade(class CBaseEntity *, class Vector const &, float, float, int, int)	__util.obj
+0xf1810	471	?UTIL_HudMessage@@YAXPAVCBaseEntity@@ABUhudtextparms_s@@PBD@Z	void __cdecl UTIL_HudMessage(class CBaseEntity *, struct hudtextparms_s const &, char const *)	__util.obj
+0xf19f0	39	?FixedSigned16@@YAFMM@Z	short __cdecl FixedSigned16(float, float)	__util.obj
 0xf1a20	72	?UTIL_HudMessageAll@@YAXABUhudtextparms_s@@PBD@Z	void __cdecl UTIL_HudMessageAll(struct hudtextparms_s const &, char const *)	__util.obj
 0xf1a70	121	?UTIL_ClientPrintAll@@YAXHPBD0000@Z	void __cdecl UTIL_ClientPrintAll(int, char const *, char const *, char const *, char const *, char const *)	__util.obj
 0xf1af0	131	?ClientPrint@@YAXPAUentvars_s@@HPBD1111@Z	void __cdecl ClientPrint(struct entvars_s *, int, char const *, char const *, char const *, char const *, char const *)	__util.obj
@@ -618,10 +605,8 @@ rva	size	name	demangled	ref_object
 0xf21f0	26	?UTIL_SetOrigin@@YAXPAUentvars_s@@ABVVector@@@Z	void __cdecl UTIL_SetOrigin(struct entvars_s *, class Vector const &)	__util.obj
 0xf2210	65	?UTIL_ParticleEffect@@YAXABVVector@@0KK@Z	void __cdecl UTIL_ParticleEffect(class Vector const &, class Vector const &, unsigned long, unsigned long)	__util.obj
 0xf2260	61	?UTIL_Approach@@YAMMMM@Z	float __cdecl UTIL_Approach(float, float, float)	__util.obj
-0xf2340	48	?UTIL_AngleDistance@@YAMMM@Z	float __cdecl UTIL_AngleDistance(float, float)	__util.obj
 0xf2390	29	?UTIL_VarArgs@@YAPADPADZZ	char * __cdecl UTIL_VarArgs(char *, ...)	__util.obj
 0xf23b0	52	?UTIL_GetAimVector@@YA?AVVector@@PAUedict_s@@M@Z	class Vector __cdecl UTIL_GetAimVector(struct edict_s *, float)	__util.obj
-0xf23f0	114	?UTIL_IsMasterTriggered@@YAHHPAVCBaseEntity@@@Z	int __cdecl UTIL_IsMasterTriggered(int, class CBaseEntity *)	__util.obj
 0xf2490	174	?UTIL_BloodStream@@YAXABVVector@@0HH@Z	void __cdecl UTIL_BloodStream(class Vector const &, class Vector const &, int, int)	__util.obj
 0xf2630	80	?UTIL_RandomBloodVector@@YA?AVVector@@XZ	class Vector __cdecl UTIL_RandomBloodVector(void)	__util.obj
 0xf2680	80	?UTIL_BloodDecalTrace@@YAXPAUTraceResult@@H@Z	void __cdecl UTIL_BloodDecalTrace(struct TraceResult *, int)	__util.obj
@@ -666,7 +651,6 @@ rva	size	name	demangled	ref_object
 0xf6830	37	?BufferField@CSave@@AAEXPBDH0@Z	private: void __thiscall CSave::BufferField(char const *, int, char const *)	__util.obj
 0xf6860	76	?BufferHeader@CSave@@AAEXPBDH@Z	private: void __thiscall CSave::BufferHeader(char const *, int)	__util.obj
 0xf68b0	100	?BufferData@CSave@@AAEXPBDH@Z	private: void __thiscall CSave::BufferData(char const *, int)	__util.obj
-0xf6920	848	?ReadField@CRestore@@QAEHPAXPAUTYPEDESCRIPTION@@HHHPAD0@Z	public: int __thiscall CRestore::ReadField(void *, struct TYPEDESCRIPTION *, int, int, int, char *, void *)	__util.obj
 0xf6c90	299	?ReadFields@CRestore@@QAEHPBDPAXPAUTYPEDESCRIPTION@@H@Z	public: int __thiscall CRestore::ReadFields(char const *, void *, struct TYPEDESCRIPTION *, int)	__util.obj
 0xf6dc0	55	?BufferReadHeader@CRestore@@AAEXPAUHEADER@@@Z	private: void __thiscall CRestore::BufferReadHeader(struct HEADER *)	__util.obj
 0xf6e00	28	?ReadShort@CRestore@@QAEFXZ	public: short __thiscall CRestore::ReadShort(void)	__util.obj
@@ -675,17 +659,19 @@ rva	size	name	demangled	ref_object
 0xf6e60	23	?ReadNamedString@CRestore@@QAEPADPBD@Z	public: char * __thiscall CRestore::ReadNamedString(char const *)	__util.obj
 0xf6e90	115	?BufferReadBytes@CRestore@@AAEXPADH@Z	private: void __thiscall CRestore::BufferReadBytes(char *, int)	__util.obj
 0xf6f20	58	?BufferSkipZString@CRestore@@AAEHXZ	private: int __thiscall CRestore::BufferSkipZString(void)	__util.obj
+0xf6f60	70	?BufferCheckZString@CRestore@@AAEHPBD@Z	private: int __thiscall CRestore::BufferCheckZString(char const *)	__util.obj
 0xf7890	20	??0CVoiceGameMgr@@QAE@XZ	public: __thiscall CVoiceGameMgr::CVoiceGameMgr(void)	___game_shared_voice_gamemgr.obj
 0xf78b0	30	??_GCVoiceGameMgr@@UAEPAXI@Z	public: virtual void * __thiscall CVoiceGameMgr::`scalar deleting dtor'(unsigned int)	___game_shared_voice_gamemgr.obj
 0xf78e0	140	?Init@CVoiceGameMgr@@QAE_NPAVIVoiceGameMgrHelper@@H@Z	public: bool __thiscall CVoiceGameMgr::Init(class IVoiceGameMgrHelper *, int)	___game_shared_voice_gamemgr.obj
 0xf7980	31	?Update@CVoiceGameMgr@@QAEXN@Z	public: void __thiscall CVoiceGameMgr::Update(double)	___game_shared_voice_gamemgr.obj
+0xf79a0	144	?ClientConnected@CVoiceGameMgr@@QAEXPAUedict_s@@@Z	public: void __thiscall CVoiceGameMgr::ClientConnected(struct edict_s *)	___game_shared_voice_gamemgr.obj
+0xf7c00	88	?VoiceServerDebug@@YAXPBDZZ	void __cdecl VoiceServerDebug(char const *, ...)	___game_shared_voice_gamemgr.obj
 0xf7ea0	44	??8?$CBitVec@$0CA@@@QAE_NABV0@@Z	public: bool __thiscall CBitVec<32>::operator==(class CBitVec<32> const &)	___game_shared_voice_gamemgr.obj
 0xf8ec0	251	?MaxAmmoCarry@@YAHH@Z	int __cdecl MaxAmmoCarry(int)	__weapons.obj
 0xf8fe0	40	?ApplyMultiDamage@@YAXPAUentvars_s@@0@Z	void __cdecl ApplyMultiDamage(struct entvars_s *, struct entvars_s *)	__weapons.obj
 0xf9010	92	?AddMultiDamage@@YAXPAUentvars_s@@PAVCBaseEntity@@MH@Z	void __cdecl AddMultiDamage(struct entvars_s *, class CBaseEntity *, float, int)	__weapons.obj
 0xf9070	34	?SpawnBlood@@YAXVVector@@HM@Z	void __cdecl SpawnBlood(class Vector, int, float)	__weapons.obj
 0xf90a0	32	?DamageDecal@@YAHPAVCBaseEntity@@H@Z	int __cdecl DamageDecal(class CBaseEntity *, int)	__weapons.obj
-0xf90c0	182	?DecalGunshot@@YAXPAUTraceResult@@H@Z	void __cdecl DecalGunshot(struct TraceResult *, int)	__weapons.obj
 0xf9180	140	?EjectBrass@@YAXABVVector@@0MHH@Z	void __cdecl EjectBrass(class Vector const &, class Vector const &, float, int, int)	__weapons.obj
 0xf9210	82	?AddAmmoNameToAmmoRegistry@@YAXPBD@Z	void __cdecl AddAmmoNameToAmmoRegistry(char const *)	__weapons.obj
 0xfa400	143	?FallThink@CBasePlayerItem@@QAEXXZ	public: void __thiscall CBasePlayerItem::FallThink(void)	__weapons.obj
@@ -693,8 +679,8 @@ rva	size	name	demangled	ref_object
 0xfacd0	127	?AttachToPlayer@CBasePlayerItem@@UAEXPAVCBasePlayer@@@Z	public: virtual void __thiscall CBasePlayerItem::AttachToPlayer(class CBasePlayer *)	__weapons.obj
 0xfb910	79	?Spawn@CWeaponBox@@EAEXXZ	private: virtual void __thiscall CWeaponBox::Spawn(void)	__weapons.obj
 0xfc030	107	?Spawn@CDecal@@UAEXXZ	public: virtual void __thiscall CDecal::Spawn(void)	__world.obj
-0xfc0a0	330	?TriggerDecal@CDecal@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CDecal::TriggerDecal(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__world.obj
 0xfc1f0	237	?StaticDecal@CDecal@@QAEXXZ	public: void __thiscall CDecal::StaticDecal(void)	__world.obj
+0xfc2e0	143	?KeyValue@CDecal@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CDecal::KeyValue(struct KeyValueData_s *)	__world.obj
 0xfc590	104	?Find@CGlobalState@@AAEPAUglobalentity_s@@H@Z	private: struct globalentity_s * __thiscall CGlobalState::Find(int)	__world.obj
 0xfc600	66	?DumpGlobals@CGlobalState@@QAEXXZ	public: void __thiscall CGlobalState::DumpGlobals(void)	__world.obj
 0xfc650	145	?EntityAdd@CGlobalState@@QAEXHHW4GLOBALESTATE@@@Z	public: void __thiscall CGlobalState::EntityAdd(int, int, enum GLOBALESTATE)	__world.obj
@@ -707,16 +693,18 @@ rva	size	name	demangled	ref_object
 0xfc8d0	38	?SaveGlobalState@@YAXPAUsaverestore_s@@@Z	void __cdecl SaveGlobalState(struct saverestore_s *)	__world.obj
 0xfc900	61	?RestoreGlobalState@@YAXPAUsaverestore_s@@@Z	void __cdecl RestoreGlobalState(struct saverestore_s *)	__world.obj
 0xfc940	21	?ResetGlobalState@@YAXXZ	void __cdecl ResetGlobalState(void)	__world.obj
+0xfcee0	104	?InitBodyQue@@YAXXZ	void __cdecl InitBodyQue(void)	__world.obj
 0xfcf50	967	?KeyValue@CWorld@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CWorld::KeyValue(struct KeyValueData_s *)	__world.obj
+0xfd870	250	?Spawn@CXenHair@@UAEXXZ	public: virtual void __thiscall CXenHair::Spawn(void)	__xen.obj
 0xfdac0	71	?Touch@CXenTreeTrigger@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CXenTreeTrigger::Touch(class CBaseEntity *)	__xen.obj
 0xfddd0	84	?Precache@CXenTree@@UAEXXZ	public: virtual void __thiscall CXenTree::Precache(void)	__xen.obj
 0xfe430	99	?Spawn@CXenSporeSmall@@EAEXXZ	private: virtual void __thiscall CXenSporeSmall::Spawn(void)	__xen.obj
+0xfe4a0	99	?Spawn@CXenSporeMed@@EAEXXZ	private: virtual void __thiscall CXenSporeMed::Spawn(void)	__xen.obj
 0xfe5c0	438	?Spawn@CXenSporeLarge@@EAEXXZ	private: virtual void __thiscall CXenSporeLarge::Spawn(void)	__xen.obj
 0xfe780	178	?Spawn@CXenSpore@@UAEXXZ	public: virtual void __thiscall CXenSpore::Spawn(void)	__xen.obj
 0xfe840	25	?Precache@CXenSpore@@UAEXXZ	public: virtual void __thiscall CXenSpore::Precache(void)	__xen.obj
 0xfeb30	94	?PainSound@CZombie@@UAEXXZ	public: virtual void __thiscall CZombie::PainSound(void)	__zombie.obj
 0xfeb90	75	?AlertSound@CZombie@@UAEXXZ	public: virtual void __thiscall CZombie::AlertSound(void)	__zombie.obj
-0xfebe0	85	?IdleSound@CZombie@@UAEXXZ	public: virtual void __thiscall CZombie::IdleSound(void)	__zombie.obj
 0xfec40	73	?AttackSound@CZombie@@QAEXXZ	public: void __thiscall CZombie::AttackSound(void)	__zombie.obj
 0xfec90	1023	?HandleAnimEvent@CZombie@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CZombie::HandleAnimEvent(struct MonsterEvent_t *)	__zombie.obj
 0xff2c8	49	_fclose	_fclose	LIBCMT:fclose.obj
@@ -725,7 +713,6 @@ rva	size	name	demangled	ref_object
 0xff3db	139	_atol	_atol	LIBCMT:atox.obj
 0xff471	186	__atoi64	__atoi64	LIBCMT:atox.obj
 0xff52b	164	_strtok	_strtok	LIBCMT:strtok.obj
-0xff5d7	111	_tolower	_tolower	LIBCMT:tolower.obj
 0xff646	203	__tolower_lk	__tolower_lk	LIBCMT:tolower.obj
 0xff711	23	__fpmath	__fpmath	LIBCMT:fpinit.obj
 0xff729	56	__cfltcvt_init	__cfltcvt_init	LIBCMT:fpinit.obj
@@ -748,7 +735,7 @@ rva	size	name	demangled	ref_object
 0xffbfc	61	___iscsymf	___iscsymf	LIBCMT:_ctype.obj
 0xffc39	61	___iscsym	___iscsym	LIBCMT:_ctype.obj
 0xffdb0	208	_stricmp	_stricmp	LIBCMT:stricmp.obj
-0xffe8a	40	__CIfmod	__CIfmod	LIBCMT:87fmod.obj
+0xffe94	30	fFMOD	fFMOD	LIBCMT:87fmod.obj
 0xffec0	56	_strncmp	_strncmp	LIBCMT:strncmp.obj
 0xfff10	25	__CIpow	__CIpow	LIBCMT:pow.obj
 0x10012d	49	__fsopen	__fsopen	LIBCMT:fopen.obj
@@ -766,13 +753,12 @@ rva	size	name	demangled	ref_object
 0x1004ec	47	_fwrite	_fwrite	LIBCMT:fwrite.obj
 0x10051b	266	__fwrite_lk	__fwrite_lk	LIBCMT:fwrite.obj
 0x100630	20	__CIacos	__CIacos	LIBCMT:acos.obj
-0x100703	111	_toupper	_toupper	LIBCMT:toupper.obj
 0x100772	204	__toupper_lk	__toupper_lk	LIBCMT:toupper.obj
 0x10083e	117	__isctype	__isctype	LIBCMT:isctype.obj
 0x100982	47	_fflush	_fflush	LIBCMT:fflush.obj
 0x1009b1	46	__fflush_lk	__fflush_lk	LIBCMT:fflush.obj
 0x1009df	92	__flush	__flush	LIBCMT:fflush.obj
-0x100a3b	173	__flushall	__flushall	LIBCMT:fflush.obj
+0x100a44	164	_flsall	_flsall	LIBCMT:fflush.obj
 0x100bc0	47	__chkstk	__chkstk	LIBCMT:chkstk.obj
 0x100cf3	80	__vsnprintf	__vsnprintf	LIBCMT:vsnprint.obj
 0x100d43	217	__CRT_INIT@12	__CRT_INIT@12	LIBCMT:dllcrt0.obj
@@ -783,6 +769,10 @@ rva	size	name	demangled	ref_object
 0x10104c	93	__close	__close	LIBCMT:close.obj
 0x1010a9	131	__close_lk	__close_lk	LIBCMT:close.obj
 0x10112c	43	__freebuf	__freebuf	LIBCMT:_freebuf.obj
+0x101157	2597	__input	__input	LIBCMT:input.obj
+0x101b7c	55	__hextodec	__hextodec	LIBCMT:input.obj
+0x101bb3	26	__inc	__inc	LIBCMT:input.obj
+0x101bcd	23	__un_inc	__un_inc	LIBCMT:input.obj
 0x101c10	123	_strlen	_strlen	LIBCMT:strlen.obj
 0x101c8b	220	__filbuf	__filbuf	LIBCMT:_filbuf.obj
 0x101d70	52	__allmul	__allmul	LIBCMT:llmul.obj
@@ -795,24 +785,37 @@ rva	size	name	demangled	ref_object
 0x101f65	108	__mtdeletelocks	__mtdeletelocks	LIBCMT:mlock.obj
 0x101fd1	97	__lock	__lock	LIBCMT:mlock.obj
 0x102032	21	__unlock	__unlock	LIBCMT:mlock.obj
+0x102047	24	__lockerr_exit	__lockerr_exit	LIBCMT:mlock.obj
+0x10205f	582	_setlocale	_setlocale	LIBCMT:setlocal.obj
+0x1022a5	283	__setlocale_set_cat	__setlocale_set_cat	LIBCMT:setlocal.obj
+0x1023c0	185	__setlocale_get_all	__setlocale_get_all	LIBCMT:setlocal.obj
 0x102479	280	__expandlocale	__expandlocale	LIBCMT:setlocal.obj
 0x102594	37	__strcats	__strcats	LIBCMT:setlocal.obj
 0x1025b9	204	___lc_strtolc	___lc_strtolc	LIBCMT:setlocal.obj
 0x102685	83	___lc_lctostr	___lc_lctostr	LIBCMT:setlocal.obj
-0x1026d8	591	___crtLCMapStringA	___crtLCMapStringA	LIBCMT:a_map.obj
+0x1026d8	548	___crtLCMapStringA	___crtLCMapStringA	LIBCMT:a_map.obj
 0x102927	18	__setdefaultprecision	__setdefaultprecision	LIBCMT:fp8.obj
+0x102939	62	__ms_p5_test_fdiv	__ms_p5_test_fdiv	LIBCMT:testfdiv.obj
 0x102977	41	__ms_p5_mp_test_fdiv	__ms_p5_mp_test_fdiv	LIBCMT:testfdiv.obj
 0x1029a0	90	__forcdecpt	__forcdecpt	LIBCMT:cvt.obj
 0x1029fa	78	__cropzeros	__cropzeros	LIBCMT:cvt.obj
 0x102a48	24	__positive	__positive	LIBCMT:cvt.obj
 0x102a60	62	__fassign	__fassign	LIBCMT:cvt.obj
-0x102a9e	291	__cftoe	__cftoe	LIBCMT:cvt.obj
-0x102bc1	252	__cftof	__cftof	LIBCMT:cvt.obj
+0x102a9e	97	__cftoe	__cftoe	LIBCMT:cvt.obj
+0x102aff	194	__cftoe2	__cftoe2	LIBCMT:cvt.obj
+0x102bc1	85	__cftof	__cftof	LIBCMT:cvt.obj
+0x102c16	167	__cftof2	__cftof2	LIBCMT:cvt.obj
 0x102cbd	147	__cftog	__cftog	LIBCMT:cvt.obj
-0x102d50	118	__cfltcvt	__cfltcvt	LIBCMT:cvt.obj
+0x102d50	81	__cfltcvt	__cfltcvt	LIBCMT:cvt.obj
+0x102da1	37	__shift	__shift	LIBCMT:cvt.obj
 0x102dc6	127	__fltin2	__fltin2	LIBCMT:cfin.obj
 0x102e66	182	___from_strstr_to_strchr	___from_strstr_to_strchr	LIBCMT:strchr.obj
 0x102f1c	280	__flsbuf	__flsbuf	LIBCMT:_flsbuf.obj
+0x103034	1857	__output	__output	LIBCMT:output.obj
+0x103775	53	_write_char	_write_char	LIBCMT:output.obj
+0x1037aa	49	_write_multi_char	_write_multi_char	LIBCMT:output.obj
+0x1037db	56	_write_string	_write_string	LIBCMT:output.obj
+0x103820	16	_get_int64_arg	_get_int64_arg	LIBCMT:output.obj
 0x103840	62	__cintrindisp2	__cintrindisp2	LIBCMT:87cdisp.obj
 0x10387e	61	__cintrindisp1	__cintrindisp1	LIBCMT:87cdisp.obj
 0x1038bb	384	__ctrandisp2	__ctrandisp2	LIBCMT:87cdisp.obj
@@ -822,8 +825,46 @@ rva	size	name	demangled	ref_object
 0x103b17	140	__trandisp2	__trandisp2	LIBCMT:87disp.obj
 0x103bc2	43	__tosnan1	__tosnan1	LIBCMT:87disp.obj
 0x103c17	63	__nan2	__nan2	LIBCMT:87disp.obj
-0x103c58	17	__rtindfnpop	__rtindfnpop	LIBCMT:87disp.obj
-0x103d97	1183	__adj_fdiv_r	__adj_fdiv_r	LIBCMT:adj_fdiv.obj
+0x103dd2	28	label8	label8	LIBCMT:adj_fdiv.obj
+0x103df3	22	label10	label10	LIBCMT:adj_fdiv.obj
+0x103e0e	28	label12	label12	LIBCMT:adj_fdiv.obj
+0x103e3a	20	label14	label14	LIBCMT:adj_fdiv.obj
+0x103e5e	32	label16	label16	LIBCMT:adj_fdiv.obj
+0x103e83	26	label18	label18	LIBCMT:adj_fdiv.obj
+0x103ea2	32	label20	label20	LIBCMT:adj_fdiv.obj
+0x103ec2	20	label21	label21	LIBCMT:adj_fdiv.obj
+0x103ed6	24	label22	label22	LIBCMT:adj_fdiv.obj
+0x103eee	20	label23	label23	LIBCMT:adj_fdiv.obj
+0x103f02	32	label24	label24	LIBCMT:adj_fdiv.obj
+0x103f27	26	label26	label26	LIBCMT:adj_fdiv.obj
+0x103f46	32	label28	label28	LIBCMT:adj_fdiv.obj
+0x103f66	20	label29	label29	LIBCMT:adj_fdiv.obj
+0x103f7a	24	label30	label30	LIBCMT:adj_fdiv.obj
+0x103f92	20	label31	label31	LIBCMT:adj_fdiv.obj
+0x103fa6	32	label32	label32	LIBCMT:adj_fdiv.obj
+0x103fcb	26	label34	label34	LIBCMT:adj_fdiv.obj
+0x103fea	32	label36	label36	LIBCMT:adj_fdiv.obj
+0x10400a	20	label37	label37	LIBCMT:adj_fdiv.obj
+0x10401e	24	label38	label38	LIBCMT:adj_fdiv.obj
+0x104036	20	label39	label39	LIBCMT:adj_fdiv.obj
+0x10404a	32	label40	label40	LIBCMT:adj_fdiv.obj
+0x10406f	26	label42	label42	LIBCMT:adj_fdiv.obj
+0x10408e	32	label44	label44	LIBCMT:adj_fdiv.obj
+0x1040ae	20	label45	label45	LIBCMT:adj_fdiv.obj
+0x1040c2	24	label46	label46	LIBCMT:adj_fdiv.obj
+0x1040da	20	label47	label47	LIBCMT:adj_fdiv.obj
+0x1040ee	32	label48	label48	LIBCMT:adj_fdiv.obj
+0x104113	26	label50	label50	LIBCMT:adj_fdiv.obj
+0x104132	32	label52	label52	LIBCMT:adj_fdiv.obj
+0x104152	20	label53	label53	LIBCMT:adj_fdiv.obj
+0x104166	24	label54	label54	LIBCMT:adj_fdiv.obj
+0x10417e	20	label55	label55	LIBCMT:adj_fdiv.obj
+0x104192	32	label56	label56	LIBCMT:adj_fdiv.obj
+0x1041b7	26	label58	label58	LIBCMT:adj_fdiv.obj
+0x1041d6	32	label60	label60	LIBCMT:adj_fdiv.obj
+0x1041f6	20	label61	label61	LIBCMT:adj_fdiv.obj
+0x10420a	24	label62	label62	LIBCMT:adj_fdiv.obj
+0x104222	20	label63	label63	LIBCMT:adj_fdiv.obj
 0x104236	19	__fdivp_sti_st	__fdivp_sti_st	LIBCMT:adj_fdiv.obj
 0x104249	19	__fdivrp_sti_st	__fdivrp_sti_st	LIBCMT:adj_fdiv.obj
 0x10425c	76	__adj_fdiv_m32	__adj_fdiv_m32	LIBCMT:adj_fdiv.obj
@@ -838,7 +879,7 @@ rva	size	name	demangled	ref_object
 0x104944	181	__adj_fprem1	__adj_fprem1	LIBCMT:adj_fdiv.obj
 0x104a8a	16	__rtinfnpopse	__rtinfnpopse	LIBCMT:87tran.obj
 0x104a9a	181	__fFLN	__fFLN	LIBCMT:87tran.obj
-0x104b51	29	__rtinfnpop	__rtinfnpop	LIBCMT:87tran.obj
+0x104b51	16	__rtinfnpop	__rtinfnpop	LIBCMT:87tran.obj
 0x104b6e	169	__ffexpm1	__ffexpm1	LIBCMT:87tran.obj
 0x104c20	23	__startTwoArgErrorHandling	__startTwoArgErrorHandling	LIBCMT:genexcep.obj
 0x104c37	60	__startOneArgErrorHandling	__startOneArgErrorHandling	LIBCMT:genexcep.obj
@@ -859,21 +900,18 @@ rva	size	name	demangled	ref_object
 0x105290	60	__heap_init	__heap_init	LIBCMT:heapinit.obj
 0x1052cc	117	__heap_term	__heap_term	LIBCMT:heapinit.obj
 0x105347	23	__set_sbh_threshold	__set_sbh_threshold	LIBCMT:sbheap.obj
-0x10535e	62	___sbh_heap_init	___sbh_heap_init	LIBCMT:sbheap.obj
 0x10539c	43	___sbh_find_block	___sbh_find_block	LIBCMT:sbheap.obj
-0x1056f2	777	___sbh_alloc_block	___sbh_alloc_block	LIBCMT:sbheap.obj
 0x1059fb	177	___sbh_alloc_new_region	___sbh_alloc_new_region	LIBCMT:sbheap.obj
 0x105aac	251	___sbh_alloc_new_group	___sbh_alloc_new_group	LIBCMT:sbheap.obj
 0x105ba7	758	___sbh_resize_block	___sbh_resize_block	LIBCMT:sbheap.obj
-0x105e9d	209	___sbh_heapmin	___sbh_heapmin	LIBCMT:sbheap.obj
 0x105f6e	815	___sbh_heap_check	___sbh_heap_check	LIBCMT:sbheap.obj
 0x10629d	36	?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z	int (__cdecl * __cdecl _set_new_handler(int (__cdecl *)(unsigned int)))(unsigned int)	LIBCMT:handler.obj
 0x1062c7	27	__callnewh	__callnewh	LIBCMT:handler.obj
 0x106344	45	__cinit	__cinit	LIBCMT:crt0dat.obj
 0x106371	17	_exit	_exit	LIBCMT:crt0dat.obj
 0x106382	17	__exit	__exit	LIBCMT:crt0dat.obj
-0x1063a2	180	__c_exit	__c_exit	LIBCMT:crt0dat.obj
-0x10645f	35	__unlockexit	__unlockexit	LIBCMT:crt0dat.obj
+0x1063b1	165	_doexit	_doexit	LIBCMT:crt0dat.obj
+0x106468	26	__initterm	__initterm	LIBCMT:crt0dat.obj
 0x1065ba	69	__msize	__msize	LIBCMT:msize.obj
 0x106600	88	_memset	_memset	LIBCMT:memset.obj
 0x106658	101	__lseek	__lseek	LIBCMT:lseek.obj
@@ -886,7 +924,8 @@ rva	size	name	demangled	ref_object
 0x106ebf	691	__raise_exc	__raise_exc	LIBCMT:fpexcept.obj
 0x107172	535	__handle_exc	__handle_exc	LIBCMT:fpexcept.obj
 0x107389	136	__umatherr	__umatherr	LIBCMT:fpexcept.obj
-0x107411	77	__set_errno	__set_errno	LIBCMT:fpexcept.obj
+0x107411	40	__set_errno	__set_errno	LIBCMT:fpexcept.obj
+0x107439	37	__get_fname	__get_fname	LIBCMT:fpexcept.obj
 0x10745e	45	__errcode	__errcode	LIBCMT:fpexcept.obj
 0x10748b	18	__frnd	__frnd	LIBCMT:frnd.obj
 0x10749d	41	__set_exp	__set_exp	LIBCMT:util.obj
@@ -902,6 +941,8 @@ rva	size	name	demangled	ref_object
 0x1077d8	444	__ioinit	__ioinit	LIBCMT:ioinit.obj
 0x107994	84	__ioterm	__ioterm	LIBCMT:ioinit.obj
 0x1079e8	185	__setenvp	__setenvp	LIBCMT:stdenvp.obj
+0x107aa1	153	__setargv	__setargv	LIBCMT:stdargv.obj
+0x107b3a	436	_parse_cmdline	_parse_cmdline	LIBCMT:stdargv.obj
 0x107cee	306	___crtGetEnvironmentStringsA	___crtGetEnvironmentStringsA	LIBCMT:a_env.obj
 0x107e20	57	__FF_MSGBANNER	__FF_MSGBANNER	LIBCMT:crt0msg.obj
 0x107e59	339	__NMSG_WRITE	__NMSG_WRITE	LIBCMT:crt0msg.obj
@@ -915,22 +956,41 @@ rva	size	name	demangled	ref_object
 0x108343	167	__open_osfhandle	__open_osfhandle	LIBCMT:osfinfo.obj
 0x1083ea	95	__lock_fhandle	__lock_fhandle	LIBCMT:osfinfo.obj
 0x108449	34	__unlock_fhandle	__unlock_fhandle	LIBCMT:osfinfo.obj
-0x10846b	93	_mbtowc	_mbtowc	LIBCMT:mbtowc.obj
 0x1084c8	201	__mbtowc_lk	__mbtowc_lk	LIBCMT:mbtowc.obj
 0x1085a0	31	__allshl	__allshl	LIBCMT:llshl.obj
 0x1085bf	41	_ungetc	_ungetc	LIBCMT:ungetc.obj
 0x1085e8	110	__ungetc_lk	__ungetc_lk	LIBCMT:ungetc.obj
-0x1086bb	473	__read_lk	__read_lk	LIBCMT:read.obj
 0x108894	68	__getbuf	__getbuf	LIBCMT:_getbuf.obj
-0x1088d8	376	__XcptFilter	__XcptFilter	LIBCMT:winxfltr.obj
-0x108a50	1391	___init_time	___init_time	LIBCMT:inittime.obj
-0x108fbf	524	___init_numeric	___init_numeric	LIBCMT:initnum.obj
+0x1088d8	318	__XcptFilter	__XcptFilter	LIBCMT:winxfltr.obj
+0x108a16	58	_xcptlookup	_xcptlookup	LIBCMT:winxfltr.obj
+0x108a50	145	___init_time	___init_time	LIBCMT:inittime.obj
+0x108ae1	846	__get_lc_time	__get_lc_time	LIBCMT:inittime.obj
+0x108e2f	400	__free_lc_time	__free_lc_time	LIBCMT:inittime.obj
+0x1091cb	203	___init_monetary	___init_monetary	LIBCMT:initmon.obj
+0x1093ef	78	__free_lc_lconv	__free_lc_lconv	LIBCMT:initmon.obj
+0x10943d	581	___init_ctype	___init_ctype	LIBCMT:initctyp.obj
 0x109690	132	_strcmp	_strcmp	LIBCMT:strcmp.obj
 0x109720	62	_strcspn	_strcspn	LIBCMT:strcspn.obj
 0x109760	16	_strcpy	_strcpy	LIBCMT:strcat.obj
 0x109770	224	_strcat	_strcat	LIBCMT:strcat.obj
-0x109850	2215	___get_qualified_locale	___get_qualified_locale	LIBCMT:getqloc.obj
-0x10a0f8	66	__global_unwind2	__global_unwind2	LIBCMT:exsup.obj
+0x109850	381	___get_qualified_locale	___get_qualified_locale	LIBCMT:getqloc.obj
+0x1099cd	88	_TranslateName	_TranslateName	LIBCMT:getqloc.obj
+0x109a25	135	_GetLcidFromLangCountry	_GetLcidFromLangCountry	LIBCMT:getqloc.obj
+0x109aac	516	_LangCountryEnumProc@4	_LangCountryEnumProc@4	LIBCMT:getqloc.obj
+0x109cb0	86	_GetLcidFromLanguage	_GetLcidFromLanguage	LIBCMT:getqloc.obj
+0x109d06	189	_LanguageEnumProc@4	_LanguageEnumProc@4	LIBCMT:getqloc.obj
+0x109dc3	55	_GetLcidFromCountry	_GetLcidFromCountry	LIBCMT:getqloc.obj
+0x109dfa	134	_CountryEnumProc@4	_CountryEnumProc@4	LIBCMT:getqloc.obj
+0x109e80	26	_GetLcidFromDefault	_GetLcidFromDefault	LIBCMT:getqloc.obj
+0x109e9a	102	_ProcessCodePage	_ProcessCodePage	LIBCMT:getqloc.obj
+0x109f00	31	_TestDefaultCountry	_TestDefaultCountry	LIBCMT:getqloc.obj
+0x109f1f	98	_TestDefaultLanguage	_TestDefaultLanguage	LIBCMT:getqloc.obj
+0x109f81	54	_IsThisWindowsNT	_IsThisWindowsNT	LIBCMT:getqloc.obj
+0x109fb7	230	_crtGetLocaleInfoA@16	_crtGetLocaleInfoA@16	LIBCMT:getqloc.obj
+0x10a09d	57	_LcidFromHexString	_LcidFromHexString	LIBCMT:getqloc.obj
+0x10a0d6	33	_GetPrimaryLen	_GetPrimaryLen	LIBCMT:getqloc.obj
+0x10a0f8	24	__global_unwind2	__global_unwind2	LIBCMT:exsup.obj
+0x10a118	34	__unwind_handler	__unwind_handler	LIBCMT:exsup.obj
 0x10a13a	88	__local_unwind2	__local_unwind2	LIBCMT:exsup.obj
 0x10a192	16	__NLG_Return2	__NLG_Return2	LIBCMT:exsup.obj
 0x10a1a2	35	__abnormal_termination	__abnormal_termination	LIBCMT:exsup.obj
@@ -941,7 +1001,10 @@ rva	size	name	demangled	ref_object
 0x10a2db	20	__clearfp	__clearfp	LIBCMT:ieee87.obj
 0x10a2ef	53	__control87	__control87	LIBCMT:ieee87.obj
 0x10a324	22	__controlfp	__controlfp	LIBCMT:ieee87.obj
-0x10a33a	379	__fpreset	__fpreset	LIBCMT:ieee87.obj
+0x10a33a	43	__fpreset	__fpreset	LIBCMT:ieee87.obj
+0x10a365	146	__abstract_cw	__abstract_cw	LIBCMT:ieee87.obj
+0x10a3f7	137	__hw_cw	__hw_cw	LIBCMT:ieee87.obj
+0x10a480	53	__abstract_sw	__abstract_sw	LIBCMT:ieee87.obj
 0x10a4b5	73	__ZeroTail	__ZeroTail	LIBCMT:intrncvt.obj
 0x10a4fe	86	__IncMan	__IncMan	LIBCMT:intrncvt.obj
 0x10a554	140	__RoundMan	__RoundMan	LIBCMT:intrncvt.obj
@@ -958,7 +1021,6 @@ rva	size	name	demangled	ref_object
 0x10b2ef	60	___STRINGTOLD	___STRINGTOLD	LIBCMT:strgtold.obj
 0x10b390	115	__lseek_lk	__lseek_lk	LIBCMT:lseek.obj
 0x10b403	41	__isatty	__isatty	LIBCMT:isatty.obj
-0x10b42c	89	_wctomb	_wctomb	LIBCMT:wctomb.obj
 0x10b485	105	__wctomb_lk	__wctomb_lk	LIBCMT:wctomb.obj
 0x10b4f0	117	__aullrem	__aullrem	LIBCMT:ullrem.obj
 0x10b565	208	__87except	__87except	LIBCMT:87except.obj
@@ -973,23 +1035,35 @@ rva	size	name	demangled	ref_object
 0x10bae1	23	__open	__open	LIBCMT:open.obj
 0x10baf8	719	__sopen	__sopen	LIBCMT:open.obj
 0x10bdc7	453	___crtGetStringTypeW	___crtGetStringTypeW	LIBCMT:w_str.obj
-0x10bf8f	984	__setmbcp	__setmbcp	LIBCMT:mbctype.obj
+0x10bf8f	429	__setmbcp	__setmbcp	LIBCMT:mbctype.obj
+0x10c13c	74	_getSystemCP	_getSystemCP	LIBCMT:mbctype.obj
+0x10c186	51	_CPtoLCID	_CPtoLCID	LIBCMT:mbctype.obj
+0x10c1b9	41	_setSBCS	_setSBCS	LIBCMT:mbctype.obj
+0x10c1e2	389	_setSBUpLow	_setSBUpLow	LIBCMT:mbctype.obj
 0x10c367	16	__getmbcp	__getmbcp	LIBCMT:mbctype.obj
 0x10c377	28	___initmbctable	___initmbctable	LIBCMT:mbctype.obj
 0x10c393	137	___crtMessageBoxA	___crtMessageBoxA	LIBCMT:crtmbox.obj
 0x10c41c	143	__Getdays	__Getdays	LIBCMT:strftime.obj
 0x10c4ab	149	__Getmonths	__Getmonths	LIBCMT:strftime.obj
 0x10c772	27	_strftime	_strftime	LIBCMT:strftime.obj
-0x10c78d	2199	__Strftime	__Strftime	LIBCMT:strftime.obj
+0x10c887	1007	__expandtime	__expandtime	LIBCMT:strftime.obj
+0x10cc76	39	__store_str	__store_str	LIBCMT:strftime.obj
+0x10cc9d	111	__store_num	__store_num	LIBCMT:strftime.obj
+0x10cd0c	73	__store_number	__store_number	LIBCMT:strftime.obj
+0x10cd55	719	__store_winword	__store_winword	LIBCMT:strftime.obj
 0x10d024	312	___getlocaleinfo	___getlocaleinfo	LIBCMT:inithelp.obj
-0x10d162	137	__itoa	__itoa	LIBCMT:xtoa.obj
+0x10d162	45	__itoa	__itoa	LIBCMT:xtoa.obj
+0x10d18f	92	_xtoa	_xtoa	LIBCMT:xtoa.obj
 0x10d1eb	42	__ltoa	__ltoa	LIBCMT:xtoa.obj
 0x10d215	27	__ultoa	__ultoa	LIBCMT:xtoa.obj
-0x10d230	183	__i64toa	__i64toa	LIBCMT:xtoa.obj
+0x10d230	49	__i64toa	__i64toa	LIBCMT:xtoa.obj
+0x10d261	134	_x64toa@20	_x64toa@20	LIBCMT:xtoa.obj
 0x10d2e7	27	__ui64toa	__ui64toa	LIBCMT:xtoa.obj
 0x10d310	257	_strnicmp	_strnicmp	LIBCMT:strnicmp.obj
-0x10d411	484	_signal	_signal	LIBCMT:winsig.obj
-0x10d5f5	447	_raise	_raise	LIBCMT:winsig.obj
+0x10d411	386	_signal	_signal	LIBCMT:winsig.obj
+0x10d593	98	_ctrlevent_capture@4	_ctrlevent_capture@4	LIBCMT:winsig.obj
+0x10d5f5	386	_raise	_raise	LIBCMT:winsig.obj
+0x10d777	61	_siglookup	_siglookup	LIBCMT:winsig.obj
 0x10d7c6	33	___addl	___addl	LIBCMT:mantold.obj
 0x10d7e7	94	___add_12	___add_12	LIBCMT:mantold.obj
 0x10d845	46	___shl_12	___shl_12	LIBCMT:mantold.obj
@@ -1001,6 +1075,11 @@ rva	size	name	demangled	ref_object
 0x10de96	486	_ldexp	_ldexp	LIBCMT:ldexp.obj
 0x10e0d5	293	__chsize_lk	__chsize_lk	LIBCMT:chsize.obj
 0x10e1fa	46	___tzset	___tzset	LIBCMT:tzset.obj
+0x10e228	22	__tzset	__tzset	LIBCMT:tzset.obj
+0x10e23e	647	__tzset_lk	__tzset_lk	LIBCMT:tzset.obj
+0x10e4c5	33	__isindst	__isindst	LIBCMT:tzset.obj
+0x10e4e6	428	__isindst_lk	__isindst_lk	LIBCMT:tzset.obj
+0x10e692	320	_cvtdate	_cvtdate	LIBCMT:tzset.obj
 0x10e7d2	275	___crtGetLocaleInfoW	___crtGetLocaleInfoW	LIBCMT:w_loc.obj
 0x10e8e5	286	___crtGetLocaleInfoA	___crtGetLocaleInfoA	LIBCMT:a_loc.obj
 0x10ea5c	97	__setmode_lk	__setmode_lk	LIBCMT:setmode.obj
@@ -1008,7 +1087,9 @@ rva	size	name	demangled	ref_object
 0x10eade	125	__getenv_lk	__getenv_lk	LIBCMT:getenv.obj
 0x10eb5b	63	__mbsnbicoll	__mbsnbicoll	LIBCMT:mbsnbico.obj
 0x10eb9a	110	___wtomb_environ	___wtomb_environ	LIBCMT:wtombenv.obj
-0x10ec08	680	___crtCompareStringA	___crtCompareStringA	LIBCMT:a_cmp.obj
-0x10eeb0	582	___crtsetenv	___crtsetenv	LIBCMT:setenv.obj
+0x10ec08	637	___crtCompareStringA	___crtCompareStringA	LIBCMT:a_cmp.obj
+0x10eeb0	391	___crtsetenv	___crtsetenv	LIBCMT:setenv.obj
+0x10f037	88	_findenv	_findenv	LIBCMT:setenv.obj
+0x10f08f	103	_copy_environ	_copy_environ	LIBCMT:setenv.obj
 0x10f0f6	151	__mbschr	__mbschr	LIBCMT:mbschr.obj
 0x10f18d	43	__strdup	__strdup	LIBCMT:strdup.obj
