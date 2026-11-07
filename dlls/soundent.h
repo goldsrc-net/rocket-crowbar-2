@@ -84,6 +84,7 @@ public:
 	bool IsEmpty() { return m_iActiveSound == SOUNDLIST_EMPTY; }
 	int ISoundsInList(int iListType);
 	int IAllocSound();
+	// orig 0xcfa30; as SDK 2.3
 	int ObjectCaps() override { return FCAP_DONT_SAVE; }
 
 	int m_iFreeSound;		 // index of the first sound in the free sound list

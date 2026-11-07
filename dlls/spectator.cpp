@@ -58,6 +58,7 @@ SpectatorImpulseCommand
 Called by SpectatorThink if the spectator entered an impulse
 ================
 */
+// orig 0xcfa80; as SDK 2.3
 void CBaseSpectator::SpectatorImpulseCommand()
 {
 	static edict_t* pGoal = NULL;
@@ -139,6 +140,7 @@ Spawn
   UNDONE:  Is this actually being called because spectators are not allocated in normal fashion?
 ============
 */
+// orig 0xcfa40; as SDK 2.3
 void CBaseSpectator::Spawn()
 {
 	pev->flags = FL_SPECTATOR;

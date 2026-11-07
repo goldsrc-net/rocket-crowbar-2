@@ -156,7 +156,7 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	}
 
 	pPlayer->m_iRC2State4ac |= 0x10;
-	pPlayer->m_bRC2State778 = false;
+	pPlayer->m_fShieldOn = false;
 
 	if (pPlayer->m_bRC2State650)
 	{

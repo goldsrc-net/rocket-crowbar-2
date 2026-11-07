@@ -177,7 +177,7 @@ void CBasePlayer::StartRiding() // orig 0xb16b0
 
 	pev->view_ofs = Vector(0, 0, 11);
 	pev->solid = SOLID_NOT;
-	m_bRC2State778 = false;
+	m_fShieldOn = false;
 
 	if (m_bRC2State650)
 	{

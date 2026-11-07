@@ -366,4 +366,9 @@ public:
 	// else (1 - scale) * 1.25 * 40 clamped to 0..40). Its body (rc2.dll 0x74d0) is the monsters
 	// package's; a TEMP STUB with that reading is in dlls/rc2/scientistmine.cpp.
 	virtual int ScaledPitchShift();
+
+	// p7 needs: the byte at orig +0x2b0 (RC2's 4 bytes after m_pCine). The scientists' Spawns
+	// set it to 1; the function at 0x13b0 sets it together with clearing bits_MEMORY_PROVOKED and
+	// 0x1450 clears it while setting that bit. Name ours (the monsters package, p4, owns it).
+	bool m_fRC2NotProvoked;
 };

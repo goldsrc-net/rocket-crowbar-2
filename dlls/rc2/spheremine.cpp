@@ -484,7 +484,7 @@ void CSMProjectile::ExplodeTouch(CBaseEntity* pOther) // orig 0xb7d40
 		if (pOther->IsAlive())
 		{
 			// VERIFY: CBasePlayer +0x778 (RC2's) suppresses the blood on players
-			if (!pOther->IsActivePlayer() || !static_cast<CBasePlayer*>(pOther)->m_bRC2State778)
+			if (!pOther->IsActivePlayer() || !static_cast<CBasePlayer*>(pOther)->m_fShieldOn)
 				UTIL_BloodDrips(tr.vecEndPos, tr.vecPlaneNormal, pOther->GetEffectedEnt()->BloodColor(), 60);
 		}
 	}

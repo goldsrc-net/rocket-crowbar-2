@@ -41,6 +41,7 @@ TYPEDESCRIPTION CSquadMonster::m_SaveData[] =
 
 };
 
+// orig 0xcfbf0 (Save), orig 0xcfc20 (Restore); as SDK 2.3
 IMPLEMENT_SAVERESTORE(CSquadMonster, CBaseMonster);
 
 
@@ -113,6 +114,7 @@ void CSquadMonster::VacateSlot()
 //=========================================================
 // ScheduleChange
 //=========================================================
+// orig 0xcfd40; as SDK 2.3
 void CSquadMonster::ScheduleChange()
 {
 	VacateSlot();

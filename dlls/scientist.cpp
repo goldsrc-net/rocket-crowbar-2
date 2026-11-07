@@ -26,6 +26,7 @@
 #include "scripted.h"
 #include "animation.h"
 #include "soundent.h"
+#include "gamerules.h"
 
 
 #define NUM_SCIENTIST_HEADS 4 // four heads available for scientist model
@@ -80,7 +81,7 @@ public:
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	void RunTask(Task_t* pTask) override;
 	void StartTask(Task_t* pTask) override;
-	int ObjectCaps() override { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; }
+	int ObjectCaps() override { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; } // orig 0xc0590
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	int FriendNumber(int arrayNumber) override;
 	void SetActivity(Activity newActivity) override;
@@ -88,7 +89,8 @@ public:
 	int ISoundMask() override;
 	void DeclineFollowing() override;
 
-	float CoverRadius() override { return 1200; } // Need more room for cover because scientists want to get far away!
+	float CoverRadius() override { return 1200; } // Need more room for cover because scientists want to get far away! // orig 0xc05a0
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0xc0580. VERIFY: meaning of the bits (BASE_VIRTUALS slot 75)
 	bool DisregardEnemy(CBaseEntity* pEnemy) { return !pEnemy->IsAlive() || (gpGlobals->time - m_fearTime) > 15; }
 
 	bool CanHeal();
@@ -121,7 +123,7 @@ private:
 	float m_fearTime;
 };
 
-LINK_ENTITY_TO_CLASS(monster_scientist, CScientist);
+LINK_ENTITY_TO_CLASS(monster_scientist, CScientist); // orig 0xc0500
 
 TYPEDESCRIPTION CScientist::m_SaveData[] =
 	{
@@ -130,7 +132,7 @@ TYPEDESCRIPTION CScientist::m_SaveData[] =
 		DEFINE_FIELD(CScientist, m_fearTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CScientist, CTalkMonster);
+IMPLEMENT_SAVERESTORE(CScientist, CTalkMonster); // orig 0xc05b0 Save, orig 0xc05e0 Restore
 
 char* CScientist::GetScientistModel() const
 {
@@ -447,7 +449,7 @@ Activity CScientist::GetStoppedActivity()
 }
 
 
-void CScientist::StartTask(Task_t* pTask)
+void CScientist::StartTask(Task_t* pTask) // orig 0xc0720
 {
 	switch (pTask->iTask)
 	{
@@ -472,13 +474,13 @@ void CScientist::StartTask(Task_t* pTask)
 		break;
 
 	case TASK_SAY_FEAR:
-		// Marphy Fact FIles Fix - This speech check always fails during combat, so removing
-		//if ( FOkToSpeak() )
-		if (m_hEnemy)
+		// Rocket Crowbar 2 keeps SDK 2.3's FOkToSpeak() (halflife-updated drops it), and asks
+		// whether there is an enemy before asking whether it is a player
+		if (FOkToSpeak())
 		{
 			Talk(2);
 			m_hTalkTarget = m_hEnemy;
-			if (m_hEnemy->IsPlayer())
+			if (m_hEnemy != NULL && m_hEnemy->IsPlayer())
 				PlaySentence("SC_PLFEAR", 5, VOL_NORM, ATTN_NORM);
 			else
 				PlaySentence("SC_FEAR", 5, VOL_NORM, ATTN_NORM);
@@ -588,7 +590,7 @@ void CScientist::RunTask(Task_t* pTask)
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
-int CScientist::Classify()
+int CScientist::Classify() // orig 0xc0c90
 {
 	return CLASS_HUMAN_PASSIVE;
 }
@@ -656,13 +658,10 @@ void CScientist::HandleAnimEvent(MonsterEvent_t* pEvent)
 //=========================================================
 // Spawn
 //=========================================================
-void CScientist::Spawn()
+void CScientist::Spawn() // orig 0xc0d90
 {
-	if (pev->body == -1)
-	{														 // -1 chooses a random head
-		pev->body = RANDOM_LONG(0, NUM_SCIENTIST_HEADS - 1); // pick a head, any head
-	}
-
+	// Rocket Crowbar 2 picks the head after Precache, as SDK 2.3 does (halflife-updated moved it
+	// first), so TalkInit's voice pitch reads the head the level gave
 	Precache();
 
 	SET_MODEL(ENT(pev), GetScientistModel());
@@ -675,6 +674,7 @@ void CScientist::Spawn()
 	pev->view_ofs = Vector(0, 0, 50);  // position of the eyes relative to monster's origin.
 	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so scientists will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
+	m_fRC2NotProvoked = true;
 
 	//	m_flDistTooFar		= 256.0;
 
@@ -682,6 +682,12 @@ void CScientist::Spawn()
 
 	// White hands
 	pev->skin = 0;
+
+	// Rocket Crowbar 2: in multiplayer the head is always random
+	if (pev->body == -1 || g_pGameRules->IsMultiplayer())
+	{														 // -1 chooses a random head
+		pev->body = RANDOM_LONG(0, NUM_SCIENTIST_HEADS - 1); // pick a head, any head
+	}
 
 	// Luther is black, make his hands black
 	if (pev->body == HEAD_LUTHER)
@@ -711,7 +717,7 @@ void CScientist::Precache()
 }
 
 // Init talk data
-void CScientist::TalkInit()
+void CScientist::TalkInit() // orig 0xc0f50
 {
 
 	CTalkMonster::TalkInit();
@@ -746,8 +752,8 @@ void CScientist::TalkInit()
 	m_szGrp[TLK_WOUND] = "SC_WOUND";
 	m_szGrp[TLK_MORTAL] = "SC_MORTAL";
 
-	// get voice for head
-	switch (pev->body % NUM_SCIENTIST_HEADS)
+	// get voice for head. Rocket Crowbar 2 has SDK 2.3's % 3 (halflife-updated: % NUM_SCIENTIST_HEADS)
+	switch (pev->body % 3)
 	{
 	default:
 	case HEAD_GLASSES:
@@ -784,14 +790,11 @@ bool CScientist::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
-// Marphy Fact Files Fix - Restore scientist's sense of smell
-int CScientist::ISoundMask()
+// Rocket Crowbar 2 has SDK 2.3's mask, without the scents halflife-updated restored
+int CScientist::ISoundMask() // orig 0xc10c0
 {
 	return bits_SOUND_WORLD |
 		   bits_SOUND_COMBAT |
-		   bits_SOUND_CARCASS |
-		   bits_SOUND_MEAT |
-		   bits_SOUND_GARBAGE |
 		   bits_SOUND_DANGER |
 		   bits_SOUND_PLAYER;
 }
@@ -829,7 +832,7 @@ void CScientist::PainSound()
 //=========================================================
 // DeathSound
 //=========================================================
-void CScientist::DeathSound()
+void CScientist::DeathSound() // orig 0xc1230
 {
 	PainSound();
 }
@@ -910,7 +913,10 @@ Schedule_t* CScientist::GetScheduleOfType(int Type)
 	return CTalkMonster::GetScheduleOfType(Type);
 }
 
-Schedule_t* CScientist::GetSchedule()
+// Rocket Crowbar 2 has SDK 2.3's GetSchedule and GetIdealState, without halflife-updated's
+// "Marphy Fact Files" disregard-enemy fixes. IsFollowing() is RC2's: it asks IsActivePlayer()
+// (slot 73), not IsPlayer(); that inline is talkmonster.h's (p8).
+Schedule_t* CScientist::GetSchedule() // orig 0xc13a0
 {
 	// so we don't keep calling through the EHANDLE stuff
 	CBaseEntity* pEnemy = m_hEnemy;
@@ -937,9 +943,6 @@ Schedule_t* CScientist::GetSchedule()
 			{
 				m_hEnemy = NULL;
 				pEnemy = NULL;
-
-				// Marphy Fact Files Fix - Fix scientists not disregarding enemy after hiding
-				m_fearTime = gpGlobals->time;
 			}
 		}
 
@@ -1017,35 +1020,10 @@ Schedule_t* CScientist::GetSchedule()
 			return slFear; // Point and scream!
 
 		if (HasConditions(bits_COND_SEE_ENEMY))
-		{
-			// Marphy Fact Files Fix - Fix scientists not disregarding enemy after hiding
-			m_fearTime = gpGlobals->time;
 			return slScientistCover; // Take Cover
-		}
 
 		if (HasConditions(bits_COND_HEAR_SOUND))
 			return slTakeCoverFromBestSound; // Cower and panic from the scary sound!
-
-		// Marphy Fact Files Fix - Fix scientists not disregarding enemy after hiding
-		if (pEnemy)
-		{
-			if (HasConditions(bits_COND_SEE_ENEMY))
-				m_fearTime = gpGlobals->time;
-			else if (DisregardEnemy(pEnemy)) // After 15 seconds of being hidden, return to alert
-			{
-				m_hEnemy = NULL;
-				pEnemy = NULL;
-
-				m_fearTime = gpGlobals->time;
-
-				if (IsFollowing())
-				{
-					return slScientistStartle;
-				}
-
-				return slScientistHide; // Hide after disregard
-			}
-		}
 
 		return slScientistCover; // Run & Cower
 		break;
@@ -1054,7 +1032,7 @@ Schedule_t* CScientist::GetSchedule()
 	return CTalkMonster::GetSchedule();
 }
 
-MONSTERSTATE CScientist::GetIdealState()
+MONSTERSTATE CScientist::GetIdealState() // orig 0xc1610
 {
 	switch (m_MonsterState)
 	{
@@ -1092,9 +1070,6 @@ MONSTERSTATE CScientist::GetIdealState()
 				// Strip enemy when going to alert
 				m_IdealMonsterState = MONSTERSTATE_ALERT;
 				m_hEnemy = NULL;
-
-				// Marphy Fact Files Fix - Fix scientists not disregarding enemy after hiding
-				m_fearTime = gpGlobals->time;
 				return m_IdealMonsterState;
 			}
 			// Follow if only scared a little
@@ -1141,7 +1116,7 @@ void CScientist::Heal()
 	m_healTime = gpGlobals->time + 60;
 }
 
-int CScientist::FriendNumber(int arrayNumber)
+int CScientist::FriendNumber(int arrayNumber) // orig 0xc1880
 {
 	static int array[3] = {1, 2, 0};
 	if (arrayNumber < 3)
@@ -1157,7 +1132,7 @@ class CDeadScientist : public CBaseMonster
 {
 public:
 	void Spawn() override;
-	int Classify() override { return CLASS_HUMAN_PASSIVE; }
+	int Classify() override { return CLASS_HUMAN_PASSIVE; } // orig 0xc1990
 
 	// passed into Precache which is non-const
 	char* GetScientistModel() const;
@@ -1179,7 +1154,7 @@ char* CDeadScientist::GetScientistModel() const
 	return (char *)"models/scientist.mdl";
 }
 
-bool CDeadScientist::KeyValue(KeyValueData* pkvd)
+bool CDeadScientist::KeyValue(KeyValueData* pkvd) // orig 0xc18a0
 {
 	if (FStrEq(pkvd->szKeyName, "pose"))
 	{
@@ -1189,7 +1164,7 @@ bool CDeadScientist::KeyValue(KeyValueData* pkvd)
 
 	return CBaseMonster::KeyValue(pkvd);
 }
-LINK_ENTITY_TO_CLASS(monster_scientist_dead, CDeadScientist);
+LINK_ENTITY_TO_CLASS(monster_scientist_dead, CDeadScientist); // orig 0xc1920
 
 //
 // ********** DeadScientist SPAWN **********
@@ -1245,6 +1220,7 @@ public:
 
 	void SetAnswerQuestion(CTalkMonster* pSpeaker) override;
 	int FriendNumber(int arrayNumber) override;
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0xc1b10. Same as CScientist's; the original has its own copy
 
 	bool FIdleSpeak();
 	int m_baseSequence;
@@ -1252,7 +1228,7 @@ public:
 	float m_flResponseDelay;
 };
 
-LINK_ENTITY_TO_CLASS(monster_sitting_scientist, CSittingScientist);
+LINK_ENTITY_TO_CLASS(monster_sitting_scientist, CSittingScientist); // orig 0xc1a90
 TYPEDESCRIPTION CSittingScientist::m_SaveData[] =
 	{
 		// Don't need to save/restore m_baseSequence (recalced)
@@ -1260,7 +1236,7 @@ TYPEDESCRIPTION CSittingScientist::m_SaveData[] =
 		DEFINE_FIELD(CSittingScientist, m_flResponseDelay, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CSittingScientist, CScientist);
+IMPLEMENT_SAVERESTORE(CSittingScientist, CScientist); // orig 0xc1b20 Save, orig 0xc1b50 Restore
 
 // animation sequence aliases
 typedef enum
@@ -1276,7 +1252,7 @@ typedef enum
 //
 // ********** Scientist SPAWN **********
 //
-void CSittingScientist::Spawn()
+void CSittingScientist::Spawn() // orig 0xc1b80
 {
 	PRECACHE_MODEL(GetScientistModel());
 	SET_MODEL(ENT(pev), GetScientistModel());
@@ -1289,6 +1265,7 @@ void CSittingScientist::Spawn()
 	pev->movetype = MOVETYPE_STEP;
 	pev->effects = 0;
 	pev->health = 50;
+	m_fRC2NotProvoked = true;
 
 	m_bloodColor = BLOOD_COLOR_RED;
 	m_flFieldOfView = VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
@@ -1324,13 +1301,13 @@ void CSittingScientist::Precache()
 //=========================================================
 // ID as a passive human
 //=========================================================
-int CSittingScientist::Classify()
+int CSittingScientist::Classify() // orig 0xc1d30
 {
 	return CLASS_HUMAN_PASSIVE;
 }
 
 
-int CSittingScientist::FriendNumber(int arrayNumber)
+int CSittingScientist::FriendNumber(int arrayNumber) // orig 0xc1d40
 {
 	static int array[3] = {2, 1, 0};
 	if (arrayNumber < 3)
@@ -1343,7 +1320,7 @@ int CSittingScientist::FriendNumber(int arrayNumber)
 //=========================================================
 // sit, do stuff
 //=========================================================
-void CSittingScientist::SittingThink()
+void CSittingScientist::SittingThink() // orig 0xc1d60
 {
 	CBaseEntity* pent;
 
@@ -1456,7 +1433,7 @@ void CSittingScientist::SetAnswerQuestion(CTalkMonster* pSpeaker)
 // FIdleSpeak
 // ask question of nearby friend, or make statement
 //=========================================================
-bool CSittingScientist::FIdleSpeak()
+bool CSittingScientist::FIdleSpeak() // orig 0xc20a0
 {
 	// try to start a conversation, or make statement
 	int pitch;

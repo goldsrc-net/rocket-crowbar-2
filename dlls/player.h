@@ -370,8 +370,10 @@ public:
 	int m_iRightRider;			// orig +0x6a4: entity index of the player on the right shoulder
 	int m_iLeftRider;			// orig +0x6a8: entity index of the player on the left shoulder
 	int m_iRC2State4ac;			// orig +0x4ac: bit flags, 0 in Spawn. VERIFY: bit 1 goes with base byte +0x66, bit 0x10 with shrinking
-	float m_flEnergy;			// orig +0x758: 100 in Spawn; riding costs 40, getting off 20
-	bool m_bRC2State778;		// orig +0x778 (a byte). VERIFY: unread here; riding clears it
+	float m_flEnergy;			// orig +0x758: shield and weapon energy, 100 in Spawn; riding costs 40, getting off 20, the sphere mine and roman candle their EnergyCost
+	float m_flEnergyRegenTime;	// orig +0x760: gpGlobals->time + the EnergyRegenDelay whenever energy is spent (p7)
+	int m_iRC2PlayerFlags708;	// orig +0x708: flags; bit 0x200 lets the shotgun fire under water (p7)
+	bool m_fShieldOn;			// orig +0x778 (a byte): the shield deflects only while set (p7), cleared below [Shield] MinRunEnergy; riding clears it
 	int m_iTransformType;		// orig +0x10f8: what the player is transformed into, 0 if not (6: the race forklift); also pev->playerclass
 	bool m_bTransforming;		// orig +0x10fc (a byte), read with m_iTransformType. VERIFY: name
 	// the race (race_controller's Use, dlls/rc2/racecontroller.cpp): what the race sets up
@@ -390,7 +392,8 @@ public:
 	edict_t* m_pentRaceController;	  // orig +0x1170: the race_controller
 
 	void StartRiding();				   // ours: the "ride" command (dlls/rc2/playerride.cpp)
-	void StopRiding(bool bQuiet);	   // ours
+	void StopRiding(bool bQuiet);	   // ours (orig 0xb1f50)
+	void SetPhysicsFlag10(float flDuration); // ours: 0x9a860, bit 0x10 of m_iPhysKeyFlags, and +0x64c = time + flDuration (p7; player.cpp's package)
 	void ClearPhysKeyFlags(int iBits);	// ours, player.cpp's package (TEMP STUB in dlls/rc2/playerride.cpp)
 	void ClearPhysKeyFlags2(int iBits); // ours, as above
 

@@ -268,7 +268,7 @@ void CSuckMine::ActiveThink() // orig 0xb4da0
 			if (pEnt->IsActivePlayer())
 			{
 				CBasePlayer* pPlayer = (CBasePlayer*)pEnt;
-				if (pPlayer->m_bRC2State778 || pPlayer->m_iRidingIndex != 0)
+				if (pPlayer->m_fShieldOn || pPlayer->m_iRidingIndex != 0)
 					continue;
 			}
 			if (pOwner && pOwner->IsPlayer() && !g_pGameRules->PlayerCanAffect(pOwner, pEnt))

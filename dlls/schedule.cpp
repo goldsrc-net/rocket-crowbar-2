@@ -25,6 +25,7 @@
 #include "nodes.h"
 #include "defaultai.h"
 #include "soundent.h"
+#include "gamerules.h"
 
 //=========================================================
 // FHaveSchedule - Returns true if monster's m_pSchedule
@@ -299,7 +300,7 @@ void CBaseMonster::MaintainSchedule()
 //=========================================================
 // RunTask
 //=========================================================
-void CBaseMonster::RunTask(Task_t* pTask)
+void CBaseMonster::RunTask(Task_t* pTask) // orig 0xbe8a0
 {
 	switch (pTask->iTask)
 	{
@@ -469,6 +470,12 @@ void CBaseMonster::RunTask(Task_t* pTask)
 				// this monster was created by a monstermaker... fade the corpse out.
 				SUB_StartFadeOut();
 			}
+			else if (g_pGameRules->IsMultiplayer()) // VERIFY: CGameRules slot 6 taken as IsMultiplayer, as in SDK 2.3
+			{
+				// Rocket Crowbar 2: in multiplayer every corpse fades out after 5 to 7 seconds
+				SetThink(&CBaseMonster::SUB_StartFadeOut);
+				pev->nextthink = gpGlobals->time + RANDOM_FLOAT(5, 7);
+			}
 			else
 			{
 				// body is gonna be around for a while, so have it stink for a bit.
@@ -565,7 +572,7 @@ void CBaseMonster::SetTurnActivity()
 // any necessary calculations to start the next task on the
 // schedule.
 //=========================================================
-void CBaseMonster::StartTask(Task_t* pTask)
+void CBaseMonster::StartTask(Task_t* pTask) // orig 0xbef90
 {
 	switch (pTask->iTask)
 	{
@@ -1228,7 +1235,9 @@ void CBaseMonster::StartTask(Task_t* pTask)
 	}
 	case TASK_SOUND_PAIN:
 	{
-		PainSound();
+		// Rocket Crowbar 2: no pain sound while the byte at +0x66 is set
+		if (!RC2Byte66())
+			PainSound();
 		TaskComplete();
 		break;
 	}

@@ -10,11 +10,7 @@
 #include "cbase.h"
 #include "p6stubs.h"
 
-// TEMP STUB (p6): real one belongs in util.cpp
-void RC2RadiusDamage(entvars_t* pevAttacker, entvars_t* pevInflictor, edict_t* pentSelf, Vector vecSrc, float flRadius,
-	float flDamage, float flFalloffExponent, int bitsDamageType, int iLast)
-{
-}
+// RC2RadiusDamage: TEMP STUB in dlls/rc2/p7_stubs.cpp (p7's, which falls back to RadiusDamage)
 
 // TEMP STUB (p6): real one belongs in util.cpp
 void UTIL_RC2KillEntityEffects(edict_t* pent)
