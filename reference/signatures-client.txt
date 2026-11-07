@@ -1,0 +1,1410 @@
+??0?$Dar@D@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<char>::Dar<char>(int)
+
+??0?$Dar@D@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<char>::Dar<char>(void)
+
+??0?$Dar@H@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<int>::Dar<int>(int)
+
+??0?$Dar@H@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<int>::Dar<int>(void)
+
+??0?$Dar@PAD@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<char *>::Dar<char *>(int)
+
+??0?$Dar@PAD@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<char *>::Dar<char *>(void)
+
+??0?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::Dar<char> *>::Dar<class vgui::Dar<char> *>(int)
+
+??0?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::Dar<char> *>::Dar<class vgui::Dar<char> *>(void)
+
+??0?$Dar@PAVActionSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::ActionSignal *>::Dar<class vgui::ActionSignal *>(int)
+
+??0?$Dar@PAVActionSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::ActionSignal *>::Dar<class vgui::ActionSignal *>(void)
+
+??0?$Dar@PAVButton@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::Button *>::Dar<class vgui::Button *>(int)
+
+??0?$Dar@PAVButton@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::Button *>::Dar<class vgui::Button *>(void)
+
+??0?$Dar@PAVChangeSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::ChangeSignal *>::Dar<class vgui::ChangeSignal *>(int)
+
+??0?$Dar@PAVChangeSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::ChangeSignal *>::Dar<class vgui::ChangeSignal *>(void)
+
+??0?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::DesktopIcon *>::Dar<class vgui::DesktopIcon *>(int)
+
+??0?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::DesktopIcon *>::Dar<class vgui::DesktopIcon *>(void)
+
+??0?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::Dar<class vgui::FocusChangeSignal *>(int)
+
+??0?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::Dar<class vgui::FocusChangeSignal *>(void)
+
+??0?$Dar@PAVFrame@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::Frame *>::Dar<class vgui::Frame *>(int)
+
+??0?$Dar@PAVFrame@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::Frame *>::Dar<class vgui::Frame *>(void)
+
+??0?$Dar@PAVFrameSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::FrameSignal *>::Dar<class vgui::FrameSignal *>(int)
+
+??0?$Dar@PAVFrameSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::FrameSignal *>::Dar<class vgui::FrameSignal *>(void)
+
+??0?$Dar@PAVInputSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::InputSignal *>::Dar<class vgui::InputSignal *>(int)
+
+??0?$Dar@PAVInputSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::InputSignal *>::Dar<class vgui::InputSignal *>(void)
+
+??0?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::IntChangeSignal *>::Dar<class vgui::IntChangeSignal *>(int)
+
+??0?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::IntChangeSignal *>::Dar<class vgui::IntChangeSignal *>(void)
+
+??0?$Dar@PAVLabel@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::Label *>::Dar<class vgui::Label *>(int)
+
+??0?$Dar@PAVLabel@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::Label *>::Dar<class vgui::Label *>(void)
+
+??0?$Dar@PAVPanel@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::Panel *>::Dar<class vgui::Panel *>(int)
+
+??0?$Dar@PAVPanel@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::Panel *>::Dar<class vgui::Panel *>(void)
+
+??0?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::RepaintSignal *>::Dar<class vgui::RepaintSignal *>(int)
+
+??0?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::RepaintSignal *>::Dar<class vgui::RepaintSignal *>(void)
+
+??0?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::SurfaceBase *>::Dar<class vgui::SurfaceBase *>(int)
+
+??0?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::SurfaceBase *>::Dar<class vgui::SurfaceBase *>(void)
+
+??0?$Dar@PAVTickSignal@vgui@@@vgui@@QAE@H@Z
+public: __thiscall vgui::Dar<class vgui::TickSignal *>::Dar<class vgui::TickSignal *>(int)
+
+??0?$Dar@PAVTickSignal@vgui@@@vgui@@QAE@XZ
+public: __thiscall vgui::Dar<class vgui::TickSignal *>::Dar<class vgui::TickSignal *>(void)
+
+??0ActionSignal@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::ActionSignal::ActionSignal(class vgui::ActionSignal const &)
+
+??0ActionSignal@vgui@@QAE@XZ
+public: __thiscall vgui::ActionSignal::ActionSignal(void)
+
+??0App@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::App::App(class vgui::App const &)
+
+??0Bitmap@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Bitmap::Bitmap(class vgui::Bitmap const &)
+
+??0BitmapTGA@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::BitmapTGA::BitmapTGA(class vgui::BitmapTGA const &)
+
+??0Border@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Border::Border(class vgui::Border const &)
+
+??0BorderLayout@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::BorderLayout::BorderLayout(class vgui::BorderLayout const &)
+
+??0BuildGroup@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::BuildGroup::BuildGroup(class vgui::BuildGroup const &)
+
+??0Button@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Button::Button(class vgui::Button const &)
+
+??0Color@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Color::Color(class vgui::Color const &)
+
+??0Cursor@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Cursor::Cursor(class vgui::Cursor const &)
+
+??0DataInputStream@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::DataInputStream::DataInputStream(class vgui::DataInputStream const &)
+
+??0DesktopIcon@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::DesktopIcon::DesktopIcon(class vgui::DesktopIcon const &)
+
+??0EtchedBorder@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::EtchedBorder::EtchedBorder(class vgui::EtchedBorder const &)
+
+??0FileInputStream@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::FileInputStream::FileInputStream(class vgui::FileInputStream const &)
+
+??0Font@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Font::Font(class vgui::Font const &)
+
+??0Frame@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Frame::Frame(class vgui::Frame const &)
+
+??0HeaderPanel@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::HeaderPanel::HeaderPanel(class vgui::HeaderPanel const &)
+
+??0Image@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Image::Image(class vgui::Image const &)
+
+??0ImagePanel@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::ImagePanel::ImagePanel(class vgui::ImagePanel const &)
+
+??0ImagePanel@vgui@@QAE@XZ
+public: __thiscall vgui::ImagePanel::ImagePanel(void)
+
+??0InputSignal@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::InputSignal::InputSignal(class vgui::InputSignal const &)
+
+??0InputSignal@vgui@@QAE@XZ
+public: __thiscall vgui::InputSignal::InputSignal(void)
+
+??0InputStream@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::InputStream::InputStream(class vgui::InputStream const &)
+
+??0InputStream@vgui@@QAE@XZ
+public: __thiscall vgui::InputStream::InputStream(void)
+
+??0IntChangeSignal@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::IntChangeSignal::IntChangeSignal(class vgui::IntChangeSignal const &)
+
+??0IntChangeSignal@vgui@@QAE@XZ
+public: __thiscall vgui::IntChangeSignal::IntChangeSignal(void)
+
+??0Label@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Label::Label(class vgui::Label const &)
+
+??0Label@vgui@@QAE@XZ
+public: __thiscall vgui::Label::Label(void)
+
+??0Layout@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Layout::Layout(class vgui::Layout const &)
+
+??0LineBorder@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::LineBorder::LineBorder(class vgui::LineBorder const &)
+
+??0LoweredBorder@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::LoweredBorder::LoweredBorder(class vgui::LoweredBorder const &)
+
+??0MenuSeparator@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::MenuSeparator::MenuSeparator(class vgui::MenuSeparator const &)
+
+??0MiniApp@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::MiniApp::MiniApp(class vgui::MiniApp const &)
+
+??0Panel@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Panel::Panel(class vgui::Panel const &)
+
+??0Scheme@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Scheme::Scheme(class vgui::Scheme const &)
+
+??0ScrollBar2@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::ScrollBar2::ScrollBar2(class vgui::ScrollBar2 const &)
+
+??0ScrollBar2@vgui@@QAE@HHHH_N@Z
+public: __thiscall vgui::ScrollBar2::ScrollBar2(int, int, int, int, bool)
+
+??0ScrollBar@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::ScrollBar::ScrollBar(class vgui::ScrollBar const &)
+
+??0ScrollPanel@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::ScrollPanel::ScrollPanel(class vgui::ScrollPanel const &)
+
+??0Slider2@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Slider2::Slider2(class vgui::Slider2 const &)
+
+??0Slider2@vgui@@QAE@HHHH_N@Z
+public: __thiscall vgui::Slider2::Slider2(int, int, int, int, bool)
+
+??0Slider@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Slider::Slider(class vgui::Slider const &)
+
+??0StackLayout@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::StackLayout::StackLayout(class vgui::StackLayout const &)
+
+??0Surface@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::Surface::Surface(class vgui::Surface const &)
+
+??0SurfaceBase@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::SurfaceBase::SurfaceBase(class vgui::SurfaceBase const &)
+
+??0TablePanel@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::TablePanel::TablePanel(class vgui::TablePanel const &)
+
+??0TextEntry@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::TextEntry::TextEntry(class vgui::TextEntry const &)
+
+??0TextGrid@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::TextGrid::TextGrid(class vgui::TextGrid const &)
+
+??0TextImage@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::TextImage::TextImage(class vgui::TextImage const &)
+
+??0TextPanel@vgui@@QAE@ABV01@@Z
+public: __thiscall vgui::TextPanel::TextPanel(class vgui::TextPanel const &)
+
+??1Surface@vgui@@QAE@XZ
+public: __thiscall vgui::Surface::~Surface(void)
+
+??4?$Dar@D@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<char> & __thiscall vgui::Dar<char>::operator=(class vgui::Dar<char> const &)
+
+??4?$Dar@H@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<int> & __thiscall vgui::Dar<int>::operator=(class vgui::Dar<int> const &)
+
+??4?$Dar@PAD@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<char *> & __thiscall vgui::Dar<char *>::operator=(class vgui::Dar<char *> const &)
+
+??4?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::Dar<char> *> & __thiscall vgui::Dar<class vgui::Dar<char> *>::operator=(class vgui::Dar<class vgui::Dar<char> *> const &)
+
+??4?$Dar@PAVActionSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::ActionSignal *> & __thiscall vgui::Dar<class vgui::ActionSignal *>::operator=(class vgui::Dar<class vgui::ActionSignal *> const &)
+
+??4?$Dar@PAVButton@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::Button *> & __thiscall vgui::Dar<class vgui::Button *>::operator=(class vgui::Dar<class vgui::Button *> const &)
+
+??4?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::ChangeSignal *> & __thiscall vgui::Dar<class vgui::ChangeSignal *>::operator=(class vgui::Dar<class vgui::ChangeSignal *> const &)
+
+??4?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::DesktopIcon *> & __thiscall vgui::Dar<class vgui::DesktopIcon *>::operator=(class vgui::Dar<class vgui::DesktopIcon *> const &)
+
+??4?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::FocusChangeSignal *> & __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::operator=(class vgui::Dar<class vgui::FocusChangeSignal *> const &)
+
+??4?$Dar@PAVFrame@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::Frame *> & __thiscall vgui::Dar<class vgui::Frame *>::operator=(class vgui::Dar<class vgui::Frame *> const &)
+
+??4?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::FrameSignal *> & __thiscall vgui::Dar<class vgui::FrameSignal *>::operator=(class vgui::Dar<class vgui::FrameSignal *> const &)
+
+??4?$Dar@PAVInputSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::InputSignal *> & __thiscall vgui::Dar<class vgui::InputSignal *>::operator=(class vgui::Dar<class vgui::InputSignal *> const &)
+
+??4?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::IntChangeSignal *> & __thiscall vgui::Dar<class vgui::IntChangeSignal *>::operator=(class vgui::Dar<class vgui::IntChangeSignal *> const &)
+
+??4?$Dar@PAVLabel@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::Label *> & __thiscall vgui::Dar<class vgui::Label *>::operator=(class vgui::Dar<class vgui::Label *> const &)
+
+??4?$Dar@PAVPanel@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::Panel *> & __thiscall vgui::Dar<class vgui::Panel *>::operator=(class vgui::Dar<class vgui::Panel *> const &)
+
+??4?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::RepaintSignal *> & __thiscall vgui::Dar<class vgui::RepaintSignal *>::operator=(class vgui::Dar<class vgui::RepaintSignal *> const &)
+
+??4?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::SurfaceBase *> & __thiscall vgui::Dar<class vgui::SurfaceBase *>::operator=(class vgui::Dar<class vgui::SurfaceBase *> const &)
+
+??4?$Dar@PAVTickSignal@vgui@@@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Dar<class vgui::TickSignal *> & __thiscall vgui::Dar<class vgui::TickSignal *>::operator=(class vgui::Dar<class vgui::TickSignal *> const &)
+
+??4ActionSignal@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::ActionSignal & __thiscall vgui::ActionSignal::operator=(class vgui::ActionSignal const &)
+
+??4App@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::App & __thiscall vgui::App::operator=(class vgui::App const &)
+
+??4Bitmap@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Bitmap & __thiscall vgui::Bitmap::operator=(class vgui::Bitmap const &)
+
+??4BitmapTGA@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::BitmapTGA & __thiscall vgui::BitmapTGA::operator=(class vgui::BitmapTGA const &)
+
+??4Border@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Border & __thiscall vgui::Border::operator=(class vgui::Border const &)
+
+??4BorderLayout@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::BorderLayout & __thiscall vgui::BorderLayout::operator=(class vgui::BorderLayout const &)
+
+??4BuildGroup@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::BuildGroup & __thiscall vgui::BuildGroup::operator=(class vgui::BuildGroup const &)
+
+??4Button@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Button & __thiscall vgui::Button::operator=(class vgui::Button const &)
+
+??4Color@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Color & __thiscall vgui::Color::operator=(class vgui::Color const &)
+
+??4Cursor@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Cursor & __thiscall vgui::Cursor::operator=(class vgui::Cursor const &)
+
+??4DataInputStream@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::DataInputStream & __thiscall vgui::DataInputStream::operator=(class vgui::DataInputStream const &)
+
+??4DesktopIcon@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::DesktopIcon & __thiscall vgui::DesktopIcon::operator=(class vgui::DesktopIcon const &)
+
+??4EtchedBorder@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::EtchedBorder & __thiscall vgui::EtchedBorder::operator=(class vgui::EtchedBorder const &)
+
+??4FileInputStream@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::FileInputStream & __thiscall vgui::FileInputStream::operator=(class vgui::FileInputStream const &)
+
+??4Font@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Font & __thiscall vgui::Font::operator=(class vgui::Font const &)
+
+??4Frame@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Frame & __thiscall vgui::Frame::operator=(class vgui::Frame const &)
+
+??4HeaderPanel@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::HeaderPanel & __thiscall vgui::HeaderPanel::operator=(class vgui::HeaderPanel const &)
+
+??4Image@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Image & __thiscall vgui::Image::operator=(class vgui::Image const &)
+
+??4ImagePanel@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::ImagePanel & __thiscall vgui::ImagePanel::operator=(class vgui::ImagePanel const &)
+
+??4InputSignal@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::InputSignal & __thiscall vgui::InputSignal::operator=(class vgui::InputSignal const &)
+
+??4InputStream@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::InputStream & __thiscall vgui::InputStream::operator=(class vgui::InputStream const &)
+
+??4IntChangeSignal@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::IntChangeSignal & __thiscall vgui::IntChangeSignal::operator=(class vgui::IntChangeSignal const &)
+
+??4Label@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Label & __thiscall vgui::Label::operator=(class vgui::Label const &)
+
+??4Layout@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Layout & __thiscall vgui::Layout::operator=(class vgui::Layout const &)
+
+??4LineBorder@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::LineBorder & __thiscall vgui::LineBorder::operator=(class vgui::LineBorder const &)
+
+??4LoweredBorder@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::LoweredBorder & __thiscall vgui::LoweredBorder::operator=(class vgui::LoweredBorder const &)
+
+??4MenuSeparator@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::MenuSeparator & __thiscall vgui::MenuSeparator::operator=(class vgui::MenuSeparator const &)
+
+??4MiniApp@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::MiniApp & __thiscall vgui::MiniApp::operator=(class vgui::MiniApp const &)
+
+??4Panel@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Panel & __thiscall vgui::Panel::operator=(class vgui::Panel const &)
+
+??4Scheme@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Scheme & __thiscall vgui::Scheme::operator=(class vgui::Scheme const &)
+
+??4ScrollBar2@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::ScrollBar2 & __thiscall vgui::ScrollBar2::operator=(class vgui::ScrollBar2 const &)
+
+??4ScrollBar@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::ScrollBar & __thiscall vgui::ScrollBar::operator=(class vgui::ScrollBar const &)
+
+??4ScrollPanel@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::ScrollPanel & __thiscall vgui::ScrollPanel::operator=(class vgui::ScrollPanel const &)
+
+??4Slider2@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Slider2 & __thiscall vgui::Slider2::operator=(class vgui::Slider2 const &)
+
+??4Slider@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Slider & __thiscall vgui::Slider::operator=(class vgui::Slider const &)
+
+??4StackLayout@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::StackLayout & __thiscall vgui::StackLayout::operator=(class vgui::StackLayout const &)
+
+??4String@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::String & __thiscall vgui::String::operator=(class vgui::String const &)
+
+??4Surface@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::Surface & __thiscall vgui::Surface::operator=(class vgui::Surface const &)
+
+??4SurfaceBase@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::SurfaceBase & __thiscall vgui::SurfaceBase::operator=(class vgui::SurfaceBase const &)
+
+??4TablePanel@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::TablePanel & __thiscall vgui::TablePanel::operator=(class vgui::TablePanel const &)
+
+??4TextEntry@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::TextEntry & __thiscall vgui::TextEntry::operator=(class vgui::TextEntry const &)
+
+??4TextGrid@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::TextGrid & __thiscall vgui::TextGrid::operator=(class vgui::TextGrid const &)
+
+??4TextImage@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::TextImage & __thiscall vgui::TextImage::operator=(class vgui::TextImage const &)
+
+??4TextPanel@vgui@@QAEAAV01@ABV01@@Z
+public: class vgui::TextPanel & __thiscall vgui::TextPanel::operator=(class vgui::TextPanel const &)
+
+??A?$Dar@D@vgui@@QAEDH@Z
+public: char __thiscall vgui::Dar<char>::operator[](int)
+
+??A?$Dar@H@vgui@@QAEHH@Z
+public: int __thiscall vgui::Dar<int>::operator[](int)
+
+??A?$Dar@PAD@vgui@@QAEPADH@Z
+public: char * __thiscall vgui::Dar<char *>::operator[](int)
+
+??A?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEPAV?$Dar@D@1@H@Z
+public: class vgui::Dar<char> * __thiscall vgui::Dar<class vgui::Dar<char> *>::operator[](int)
+
+??A?$Dar@PAVActionSignal@vgui@@@vgui@@QAEPAVActionSignal@1@H@Z
+public: class vgui::ActionSignal * __thiscall vgui::Dar<class vgui::ActionSignal *>::operator[](int)
+
+??A?$Dar@PAVButton@vgui@@@vgui@@QAEPAVButton@1@H@Z
+public: class vgui::Button * __thiscall vgui::Dar<class vgui::Button *>::operator[](int)
+
+??A?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEPAVChangeSignal@1@H@Z
+public: class vgui::ChangeSignal * __thiscall vgui::Dar<class vgui::ChangeSignal *>::operator[](int)
+
+??A?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEPAVDesktopIcon@1@H@Z
+public: class vgui::DesktopIcon * __thiscall vgui::Dar<class vgui::DesktopIcon *>::operator[](int)
+
+??A?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEPAVFocusChangeSignal@1@H@Z
+public: class vgui::FocusChangeSignal * __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::operator[](int)
+
+??A?$Dar@PAVFrame@vgui@@@vgui@@QAEPAVFrame@1@H@Z
+public: class vgui::Frame * __thiscall vgui::Dar<class vgui::Frame *>::operator[](int)
+
+??A?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEPAVFrameSignal@1@H@Z
+public: class vgui::FrameSignal * __thiscall vgui::Dar<class vgui::FrameSignal *>::operator[](int)
+
+??A?$Dar@PAVInputSignal@vgui@@@vgui@@QAEPAVInputSignal@1@H@Z
+public: class vgui::InputSignal * __thiscall vgui::Dar<class vgui::InputSignal *>::operator[](int)
+
+??A?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEPAVIntChangeSignal@1@H@Z
+public: class vgui::IntChangeSignal * __thiscall vgui::Dar<class vgui::IntChangeSignal *>::operator[](int)
+
+??A?$Dar@PAVLabel@vgui@@@vgui@@QAEPAVLabel@1@H@Z
+public: class vgui::Label * __thiscall vgui::Dar<class vgui::Label *>::operator[](int)
+
+??A?$Dar@PAVPanel@vgui@@@vgui@@QAEPAVPanel@1@H@Z
+public: class vgui::Panel * __thiscall vgui::Dar<class vgui::Panel *>::operator[](int)
+
+??A?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEPAVRepaintSignal@1@H@Z
+public: class vgui::RepaintSignal * __thiscall vgui::Dar<class vgui::RepaintSignal *>::operator[](int)
+
+??A?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEPAVSurfaceBase@1@H@Z
+public: class vgui::SurfaceBase * __thiscall vgui::Dar<class vgui::SurfaceBase *>::operator[](int)
+
+??A?$Dar@PAVTickSignal@vgui@@@vgui@@QAEPAVTickSignal@1@H@Z
+public: class vgui::TickSignal * __thiscall vgui::Dar<class vgui::TickSignal *>::operator[](int)
+
+??_7ActionSignal@vgui@@6B@
+const vgui::ActionSignal::`vftable'
+
+??_7App@vgui@@6B@
+const vgui::App::`vftable'
+
+??_7Bitmap@vgui@@6B@
+const vgui::Bitmap::`vftable'
+
+??_7BitmapTGA@vgui@@6B@
+const vgui::BitmapTGA::`vftable'
+
+??_7Border@vgui@@6B@
+const vgui::Border::`vftable'
+
+??_7BorderLayout@vgui@@6B@
+const vgui::BorderLayout::`vftable'
+
+??_7BuildGroup@vgui@@6B@
+const vgui::BuildGroup::`vftable'
+
+??_7Button@vgui@@6B@
+const vgui::Button::`vftable'
+
+??_7Color@vgui@@6B@
+const vgui::Color::`vftable'
+
+??_7Cursor@vgui@@6B@
+const vgui::Cursor::`vftable'
+
+??_7DataInputStream@vgui@@6B01@@
+const vgui::DataInputStream::`vftable'{for `vgui::DataInputStream'}
+
+??_7DataInputStream@vgui@@6BInputStream@1@@
+const vgui::DataInputStream::`vftable'{for `vgui::InputStream'}
+
+??_7DesktopIcon@vgui@@6B@
+const vgui::DesktopIcon::`vftable'
+
+??_7EtchedBorder@vgui@@6B@
+const vgui::EtchedBorder::`vftable'
+
+??_7FileInputStream@vgui@@6B@
+const vgui::FileInputStream::`vftable'
+
+??_7Font@vgui@@6B@
+const vgui::Font::`vftable'
+
+??_7Frame@vgui@@6B@
+const vgui::Frame::`vftable'
+
+??_7HeaderPanel@vgui@@6B@
+const vgui::HeaderPanel::`vftable'
+
+??_7Image@vgui@@6B@
+const vgui::Image::`vftable'
+
+??_7ImagePanel@vgui@@6B@
+const vgui::ImagePanel::`vftable'
+
+??_7InputSignal@vgui@@6B@
+const vgui::InputSignal::`vftable'
+
+??_7InputStream@vgui@@6B@
+const vgui::InputStream::`vftable'
+
+??_7IntChangeSignal@vgui@@6B@
+const vgui::IntChangeSignal::`vftable'
+
+??_7Label@vgui@@6B@
+const vgui::Label::`vftable'
+
+??_7Layout@vgui@@6B@
+const vgui::Layout::`vftable'
+
+??_7LineBorder@vgui@@6B@
+const vgui::LineBorder::`vftable'
+
+??_7LoweredBorder@vgui@@6B@
+const vgui::LoweredBorder::`vftable'
+
+??_7MenuSeparator@vgui@@6B@
+const vgui::MenuSeparator::`vftable'
+
+??_7MiniApp@vgui@@6B@
+const vgui::MiniApp::`vftable'
+
+??_7Panel@vgui@@6B@
+const vgui::Panel::`vftable'
+
+??_7Scheme@vgui@@6B@
+const vgui::Scheme::`vftable'
+
+??_7ScrollBar2@vgui@@6B@
+const vgui::ScrollBar2::`vftable'
+
+??_7ScrollBar@vgui@@6B@
+const vgui::ScrollBar::`vftable'
+
+??_7ScrollPanel@vgui@@6B@
+const vgui::ScrollPanel::`vftable'
+
+??_7Slider2@vgui@@6B@
+const vgui::Slider2::`vftable'
+
+??_7Slider@vgui@@6B@
+const vgui::Slider::`vftable'
+
+??_7StackLayout@vgui@@6B@
+const vgui::StackLayout::`vftable'
+
+??_7Surface@vgui@@6B@
+const vgui::Surface::`vftable'
+
+??_7SurfaceBase@vgui@@6B@
+const vgui::SurfaceBase::`vftable'
+
+??_7TablePanel@vgui@@6B@
+const vgui::TablePanel::`vftable'
+
+??_7TextEntry@vgui@@6BInputSignal@1@@
+const vgui::TextEntry::`vftable'{for `vgui::InputSignal'}
+
+??_7TextEntry@vgui@@6BPanel@1@@
+const vgui::TextEntry::`vftable'{for `vgui::Panel'}
+
+??_7TextGrid@vgui@@6B@
+const vgui::TextGrid::`vftable'
+
+??_7TextImage@vgui@@6B@
+const vgui::TextImage::`vftable'
+
+??_7TextPanel@vgui@@6B@
+const vgui::TextPanel::`vftable'
+
+??_8DataInputStream@vgui@@7B@
+const vgui::DataInputStream::`vbtable'
+
+??_C@_00A@?$AA@
+""
+
+?AttemptToMaterialize@CBasePlayerItem@@QAEXXZ
+public: void __thiscall CBasePlayerItem::AttemptToMaterialize(void)
+
+?CallMonsterThink@CBaseMonster@@QAEXXZ
+public: void __thiscall CBaseMonster::CallMonsterThink(void)
+
+?CorpseFallThink@CBaseMonster@@QAEXXZ
+public: void __thiscall CBaseMonster::CorpseFallThink(void)
+
+?DefaultTouch@CBasePlayerAmmo@@QAEXPAVCBaseEntity@@@Z
+public: void __thiscall CBasePlayerAmmo::DefaultTouch(class CBaseEntity *)
+
+?DefaultTouch@CBasePlayerItem@@QAEXPAVCBaseEntity@@@Z
+public: void __thiscall CBasePlayerItem::DefaultTouch(class CBaseEntity *)
+
+?DelayedHurt@CCrossbow@@QAEXXZ
+public: void __thiscall CCrossbow::DelayedHurt(void)
+
+?DelayedHurt@CPython@@QAEXXZ
+public: void __thiscall CPython::DelayedHurt(void)
+
+?DestroyItem@CBasePlayerItem@@QAEXXZ
+public: void __thiscall CBasePlayerItem::DestroyItem(void)
+
+?DetonateUse@CGrenade@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z
+public: void __thiscall CGrenade::DetonateUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)
+
+?FallThink@CBasePlayerItem@@QAEXXZ
+public: void __thiscall CBasePlayerItem::FallThink(void)
+
+?Materialize@CBasePlayerAmmo@@QAEXXZ
+public: void __thiscall CBasePlayerAmmo::Materialize(void)
+
+?Materialize@CBasePlayerItem@@QAEXXZ
+public: void __thiscall CBasePlayerItem::Materialize(void)
+
+?MonsterInitThink@CBaseMonster@@QAEXXZ
+public: void __thiscall CBaseMonster::MonsterInitThink(void)
+
+?MonsterUse@CBaseMonster@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z
+public: void __thiscall CBaseMonster::MonsterUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)
+
+?PlayerDeathThink@CBasePlayer@@QAEXXZ
+public: void __thiscall CBasePlayer::PlayerDeathThink(void)
+
+?SUB_CallUseToggle@CBaseEntity@@QAEXXZ
+public: void __thiscall CBaseEntity::SUB_CallUseToggle(void)
+
+?SUB_Remove@CBaseEntity@@QAEXXZ
+public: void __thiscall CBaseEntity::SUB_Remove(void)
+
+?Smack@CCrowbar@@QAEXXZ
+public: void __thiscall CCrowbar::Smack(void)
+
+?SwingAgain@CCrowbar@@QAEXXZ
+public: void __thiscall CCrowbar::SwingAgain(void)
+
+?addElement@?$Dar@D@vgui@@QAEXD@Z
+public: void __thiscall vgui::Dar<char>::addElement(char)
+
+?addElement@?$Dar@H@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<int>::addElement(int)
+
+?addElement@?$Dar@PAD@vgui@@QAEXPAD@Z
+public: void __thiscall vgui::Dar<char *>::addElement(char *)
+
+?addElement@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXPAV?$Dar@D@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::addElement(class vgui::Dar<char> *)
+
+?addElement@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXPAVActionSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::addElement(class vgui::ActionSignal *)
+
+?addElement@?$Dar@PAVButton@vgui@@@vgui@@QAEXPAVButton@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::addElement(class vgui::Button *)
+
+?addElement@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXPAVChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::addElement(class vgui::ChangeSignal *)
+
+?addElement@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXPAVDesktopIcon@2@@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::addElement(class vgui::DesktopIcon *)
+
+?addElement@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXPAVFocusChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::addElement(class vgui::FocusChangeSignal *)
+
+?addElement@?$Dar@PAVFrame@vgui@@@vgui@@QAEXPAVFrame@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::addElement(class vgui::Frame *)
+
+?addElement@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXPAVFrameSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::addElement(class vgui::FrameSignal *)
+
+?addElement@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXPAVInputSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::addElement(class vgui::InputSignal *)
+
+?addElement@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXPAVIntChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::addElement(class vgui::IntChangeSignal *)
+
+?addElement@?$Dar@PAVLabel@vgui@@@vgui@@QAEXPAVLabel@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::addElement(class vgui::Label *)
+
+?addElement@?$Dar@PAVPanel@vgui@@@vgui@@QAEXPAVPanel@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::addElement(class vgui::Panel *)
+
+?addElement@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXPAVRepaintSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::addElement(class vgui::RepaintSignal *)
+
+?addElement@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXPAVSurfaceBase@2@@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::addElement(class vgui::SurfaceBase *)
+
+?addElement@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXPAVTickSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::addElement(class vgui::TickSignal *)
+
+?addIntChangeSignal@ScrollBar2@vgui@@UAEXPAVIntChangeSignal@2@@Z
+public: virtual void __thiscall vgui::ScrollBar2::addIntChangeSignal(class vgui::IntChangeSignal *)
+
+?addIntChangeSignal@Slider2@vgui@@UAEXPAVIntChangeSignal@2@@Z
+public: virtual void __thiscall vgui::Slider2::addIntChangeSignal(class vgui::IntChangeSignal *)
+
+?doButtonPressed@ScrollBar2@vgui@@UAEXH@Z
+public: virtual void __thiscall vgui::ScrollBar2::doButtonPressed(int)
+
+?ensureCapacity@?$Dar@D@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<char>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@H@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<int>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAD@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<char *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVButton@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVFrame@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVLabel@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVPanel@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::ensureCapacity(int)
+
+?ensureCapacity@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::ensureCapacity(int)
+
+?fireIntChangeSignal@ScrollBar2@vgui@@UAEXXZ
+public: virtual void __thiscall vgui::ScrollBar2::fireIntChangeSignal(void)
+
+?fireIntChangeSignal@Slider2@vgui@@MAEXXZ
+protected: virtual void __thiscall vgui::Slider2::fireIntChangeSignal(void)
+
+?getButton@ScrollBar2@vgui@@UAEPAVButton@2@H@Z
+public: virtual class vgui::Button * __thiscall vgui::ScrollBar2::getButton(int)
+
+?getCount@?$Dar@D@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<char>::getCount(void)
+
+?getCount@?$Dar@H@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<int>::getCount(void)
+
+?getCount@?$Dar@PAD@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<char *>::getCount(void)
+
+?getCount@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::Dar<char> *>::getCount(void)
+
+?getCount@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::ActionSignal *>::getCount(void)
+
+?getCount@?$Dar@PAVButton@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::Button *>::getCount(void)
+
+?getCount@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::ChangeSignal *>::getCount(void)
+
+?getCount@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::DesktopIcon *>::getCount(void)
+
+?getCount@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::getCount(void)
+
+?getCount@?$Dar@PAVFrame@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::Frame *>::getCount(void)
+
+?getCount@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::FrameSignal *>::getCount(void)
+
+?getCount@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::InputSignal *>::getCount(void)
+
+?getCount@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::IntChangeSignal *>::getCount(void)
+
+?getCount@?$Dar@PAVLabel@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::Label *>::getCount(void)
+
+?getCount@?$Dar@PAVPanel@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::Panel *>::getCount(void)
+
+?getCount@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::RepaintSignal *>::getCount(void)
+
+?getCount@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::SurfaceBase *>::getCount(void)
+
+?getCount@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEHXZ
+public: int __thiscall vgui::Dar<class vgui::TickSignal *>::getCount(void)
+
+?getNobPos@Slider2@vgui@@UAEXAAH0@Z
+public: virtual void __thiscall vgui::Slider2::getNobPos(int &, int &)
+
+?getRange@Slider2@vgui@@UAEXAAH0@Z
+public: virtual void __thiscall vgui::Slider2::getRange(int &, int &)
+
+?getSlider@ScrollBar2@vgui@@UAEPAVSlider2@2@XZ
+public: virtual class vgui::Slider2 * __thiscall vgui::ScrollBar2::getSlider(void)
+
+?getValue@ScrollBar2@vgui@@UAEHXZ
+public: virtual int __thiscall vgui::ScrollBar2::getValue(void)
+
+?getValue@Slider2@vgui@@UAEHXZ
+public: virtual int __thiscall vgui::Slider2::getValue(void)
+
+?hasElement@?$Dar@D@vgui@@QAE_ND@Z
+public: bool __thiscall vgui::Dar<char>::hasElement(char)
+
+?hasElement@?$Dar@H@vgui@@QAE_NH@Z
+public: bool __thiscall vgui::Dar<int>::hasElement(int)
+
+?hasElement@?$Dar@PAD@vgui@@QAE_NPAD@Z
+public: bool __thiscall vgui::Dar<char *>::hasElement(char *)
+
+?hasElement@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAE_NPAV?$Dar@D@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::Dar<char> *>::hasElement(class vgui::Dar<char> *)
+
+?hasElement@?$Dar@PAVActionSignal@vgui@@@vgui@@QAE_NPAVActionSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::ActionSignal *>::hasElement(class vgui::ActionSignal *)
+
+?hasElement@?$Dar@PAVButton@vgui@@@vgui@@QAE_NPAVButton@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::Button *>::hasElement(class vgui::Button *)
+
+?hasElement@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAE_NPAVChangeSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::ChangeSignal *>::hasElement(class vgui::ChangeSignal *)
+
+?hasElement@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAE_NPAVDesktopIcon@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::DesktopIcon *>::hasElement(class vgui::DesktopIcon *)
+
+?hasElement@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAE_NPAVFocusChangeSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::hasElement(class vgui::FocusChangeSignal *)
+
+?hasElement@?$Dar@PAVFrame@vgui@@@vgui@@QAE_NPAVFrame@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::Frame *>::hasElement(class vgui::Frame *)
+
+?hasElement@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAE_NPAVFrameSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::FrameSignal *>::hasElement(class vgui::FrameSignal *)
+
+?hasElement@?$Dar@PAVInputSignal@vgui@@@vgui@@QAE_NPAVInputSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::InputSignal *>::hasElement(class vgui::InputSignal *)
+
+?hasElement@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAE_NPAVIntChangeSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::IntChangeSignal *>::hasElement(class vgui::IntChangeSignal *)
+
+?hasElement@?$Dar@PAVLabel@vgui@@@vgui@@QAE_NPAVLabel@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::Label *>::hasElement(class vgui::Label *)
+
+?hasElement@?$Dar@PAVPanel@vgui@@@vgui@@QAE_NPAVPanel@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::Panel *>::hasElement(class vgui::Panel *)
+
+?hasElement@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAE_NPAVRepaintSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::RepaintSignal *>::hasElement(class vgui::RepaintSignal *)
+
+?hasElement@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAE_NPAVSurfaceBase@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::SurfaceBase *>::hasElement(class vgui::SurfaceBase *)
+
+?hasElement@?$Dar@PAVTickSignal@vgui@@@vgui@@QAE_NPAVTickSignal@2@@Z
+public: bool __thiscall vgui::Dar<class vgui::TickSignal *>::hasElement(class vgui::TickSignal *)
+
+?hasFullRange@ScrollBar2@vgui@@UAE_NXZ
+public: virtual bool __thiscall vgui::ScrollBar2::hasFullRange(void)
+
+?hasFullRange@Slider2@vgui@@UAE_NXZ
+public: virtual bool __thiscall vgui::Slider2::hasFullRange(void)
+
+?insertElementAt@?$Dar@D@vgui@@QAEXDH@Z
+public: void __thiscall vgui::Dar<char>::insertElementAt(char, int)
+
+?insertElementAt@?$Dar@H@vgui@@QAEXHH@Z
+public: void __thiscall vgui::Dar<int>::insertElementAt(int, int)
+
+?insertElementAt@?$Dar@PAD@vgui@@QAEXPADH@Z
+public: void __thiscall vgui::Dar<char *>::insertElementAt(char *, int)
+
+?insertElementAt@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXPAV?$Dar@D@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::insertElementAt(class vgui::Dar<char> *, int)
+
+?insertElementAt@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXPAVActionSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::insertElementAt(class vgui::ActionSignal *, int)
+
+?insertElementAt@?$Dar@PAVButton@vgui@@@vgui@@QAEXPAVButton@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::insertElementAt(class vgui::Button *, int)
+
+?insertElementAt@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXPAVChangeSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::insertElementAt(class vgui::ChangeSignal *, int)
+
+?insertElementAt@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXPAVDesktopIcon@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::insertElementAt(class vgui::DesktopIcon *, int)
+
+?insertElementAt@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXPAVFocusChangeSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::insertElementAt(class vgui::FocusChangeSignal *, int)
+
+?insertElementAt@?$Dar@PAVFrame@vgui@@@vgui@@QAEXPAVFrame@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::insertElementAt(class vgui::Frame *, int)
+
+?insertElementAt@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXPAVFrameSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::insertElementAt(class vgui::FrameSignal *, int)
+
+?insertElementAt@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXPAVInputSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::insertElementAt(class vgui::InputSignal *, int)
+
+?insertElementAt@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXPAVIntChangeSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::insertElementAt(class vgui::IntChangeSignal *, int)
+
+?insertElementAt@?$Dar@PAVLabel@vgui@@@vgui@@QAEXPAVLabel@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::insertElementAt(class vgui::Label *, int)
+
+?insertElementAt@?$Dar@PAVPanel@vgui@@@vgui@@QAEXPAVPanel@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::insertElementAt(class vgui::Panel *, int)
+
+?insertElementAt@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXPAVRepaintSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::insertElementAt(class vgui::RepaintSignal *, int)
+
+?insertElementAt@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXPAVSurfaceBase@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::insertElementAt(class vgui::SurfaceBase *, int)
+
+?insertElementAt@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXPAVTickSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::insertElementAt(class vgui::TickSignal *, int)
+
+?isVertical@ScrollBar2@vgui@@UAE_NXZ
+public: virtual bool __thiscall vgui::ScrollBar2::isVertical(void)
+
+?isVertical@Slider2@vgui@@UAE_NXZ
+public: virtual bool __thiscall vgui::Slider2::isVertical(void)
+
+?paintBackground@Slider2@vgui@@MAEXXZ
+protected: virtual void __thiscall vgui::Slider2::paintBackground(void)
+
+?performLayout@ScrollBar2@vgui@@MAEXXZ
+protected: virtual void __thiscall vgui::ScrollBar2::performLayout(void)
+
+?privateCursorMoved@Slider2@vgui@@UAEXHHPAVPanel@2@@Z
+public: virtual void __thiscall vgui::Slider2::privateCursorMoved(int, int, class vgui::Panel *)
+
+?privateMousePressed@Slider2@vgui@@UAEXW4MouseCode@2@PAVPanel@2@@Z
+public: virtual void __thiscall vgui::Slider2::privateMousePressed(enum vgui::MouseCode, class vgui::Panel *)
+
+?privateMouseReleased@Slider2@vgui@@UAEXW4MouseCode@2@PAVPanel@2@@Z
+public: virtual void __thiscall vgui::Slider2::privateMouseReleased(enum vgui::MouseCode, class vgui::Panel *)
+
+?putElement@?$Dar@D@vgui@@QAEXD@Z
+public: void __thiscall vgui::Dar<char>::putElement(char)
+
+?putElement@?$Dar@H@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<int>::putElement(int)
+
+?putElement@?$Dar@PAD@vgui@@QAEXPAD@Z
+public: void __thiscall vgui::Dar<char *>::putElement(char *)
+
+?putElement@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXPAV?$Dar@D@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::putElement(class vgui::Dar<char> *)
+
+?putElement@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXPAVActionSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::putElement(class vgui::ActionSignal *)
+
+?putElement@?$Dar@PAVButton@vgui@@@vgui@@QAEXPAVButton@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::putElement(class vgui::Button *)
+
+?putElement@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXPAVChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::putElement(class vgui::ChangeSignal *)
+
+?putElement@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXPAVDesktopIcon@2@@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::putElement(class vgui::DesktopIcon *)
+
+?putElement@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXPAVFocusChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::putElement(class vgui::FocusChangeSignal *)
+
+?putElement@?$Dar@PAVFrame@vgui@@@vgui@@QAEXPAVFrame@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::putElement(class vgui::Frame *)
+
+?putElement@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXPAVFrameSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::putElement(class vgui::FrameSignal *)
+
+?putElement@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXPAVInputSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::putElement(class vgui::InputSignal *)
+
+?putElement@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXPAVIntChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::putElement(class vgui::IntChangeSignal *)
+
+?putElement@?$Dar@PAVLabel@vgui@@@vgui@@QAEXPAVLabel@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::putElement(class vgui::Label *)
+
+?putElement@?$Dar@PAVPanel@vgui@@@vgui@@QAEXPAVPanel@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::putElement(class vgui::Panel *)
+
+?putElement@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXPAVRepaintSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::putElement(class vgui::RepaintSignal *)
+
+?putElement@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXPAVSurfaceBase@2@@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::putElement(class vgui::SurfaceBase *)
+
+?putElement@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXPAVTickSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::putElement(class vgui::TickSignal *)
+
+?recomputeNobPosFromValue@Slider2@vgui@@EAEXXZ
+private: virtual void __thiscall vgui::Slider2::recomputeNobPosFromValue(void)
+
+?recomputeValueFromNobPos@Slider2@vgui@@EAEXXZ
+private: virtual void __thiscall vgui::Slider2::recomputeValueFromNobPos(void)
+
+?removeAll@?$Dar@D@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<char>::removeAll(void)
+
+?removeAll@?$Dar@H@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<int>::removeAll(void)
+
+?removeAll@?$Dar@PAD@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<char *>::removeAll(void)
+
+?removeAll@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::removeAll(void)
+
+?removeAll@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::removeAll(void)
+
+?removeAll@?$Dar@PAVButton@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::Button *>::removeAll(void)
+
+?removeAll@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::removeAll(void)
+
+?removeAll@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::removeAll(void)
+
+?removeAll@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::removeAll(void)
+
+?removeAll@?$Dar@PAVFrame@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::Frame *>::removeAll(void)
+
+?removeAll@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::removeAll(void)
+
+?removeAll@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::removeAll(void)
+
+?removeAll@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::removeAll(void)
+
+?removeAll@?$Dar@PAVLabel@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::Label *>::removeAll(void)
+
+?removeAll@?$Dar@PAVPanel@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::Panel *>::removeAll(void)
+
+?removeAll@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::removeAll(void)
+
+?removeAll@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::removeAll(void)
+
+?removeAll@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXXZ
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::removeAll(void)
+
+?removeElement@?$Dar@D@vgui@@QAEXD@Z
+public: void __thiscall vgui::Dar<char>::removeElement(char)
+
+?removeElement@?$Dar@H@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<int>::removeElement(int)
+
+?removeElement@?$Dar@PAD@vgui@@QAEXPAD@Z
+public: void __thiscall vgui::Dar<char *>::removeElement(char *)
+
+?removeElement@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXPAV?$Dar@D@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::removeElement(class vgui::Dar<char> *)
+
+?removeElement@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXPAVActionSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::removeElement(class vgui::ActionSignal *)
+
+?removeElement@?$Dar@PAVButton@vgui@@@vgui@@QAEXPAVButton@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::removeElement(class vgui::Button *)
+
+?removeElement@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXPAVChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::removeElement(class vgui::ChangeSignal *)
+
+?removeElement@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXPAVDesktopIcon@2@@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::removeElement(class vgui::DesktopIcon *)
+
+?removeElement@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXPAVFocusChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::removeElement(class vgui::FocusChangeSignal *)
+
+?removeElement@?$Dar@PAVFrame@vgui@@@vgui@@QAEXPAVFrame@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::removeElement(class vgui::Frame *)
+
+?removeElement@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXPAVFrameSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::removeElement(class vgui::FrameSignal *)
+
+?removeElement@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXPAVInputSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::removeElement(class vgui::InputSignal *)
+
+?removeElement@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXPAVIntChangeSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::removeElement(class vgui::IntChangeSignal *)
+
+?removeElement@?$Dar@PAVLabel@vgui@@@vgui@@QAEXPAVLabel@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::removeElement(class vgui::Label *)
+
+?removeElement@?$Dar@PAVPanel@vgui@@@vgui@@QAEXPAVPanel@2@@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::removeElement(class vgui::Panel *)
+
+?removeElement@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXPAVRepaintSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::removeElement(class vgui::RepaintSignal *)
+
+?removeElement@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXPAVSurfaceBase@2@@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::removeElement(class vgui::SurfaceBase *)
+
+?removeElement@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXPAVTickSignal@2@@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::removeElement(class vgui::TickSignal *)
+
+?removeElementAt@?$Dar@D@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<char>::removeElementAt(int)
+
+?removeElementAt@?$Dar@H@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<int>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAD@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<char *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVButton@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVFrame@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVLabel@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVPanel@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::removeElementAt(int)
+
+?removeElementAt@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::removeElementAt(int)
+
+?setButton@ScrollBar2@vgui@@UAEXPAVButton@2@H@Z
+public: virtual void __thiscall vgui::ScrollBar2::setButton(class vgui::Button *, int)
+
+?setButtonOffset@Slider2@vgui@@UAEXH@Z
+public: virtual void __thiscall vgui::Slider2::setButtonOffset(int)
+
+?setButtonPressedScrollValue@ScrollBar2@vgui@@UAEXH@Z
+public: virtual void __thiscall vgui::ScrollBar2::setButtonPressedScrollValue(int)
+
+?setCount@?$Dar@D@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<char>::setCount(int)
+
+?setCount@?$Dar@H@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<int>::setCount(int)
+
+?setCount@?$Dar@PAD@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<char *>::setCount(int)
+
+?setCount@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::setCount(int)
+
+?setCount@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::setCount(int)
+
+?setCount@?$Dar@PAVButton@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::setCount(int)
+
+?setCount@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::setCount(int)
+
+?setCount@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::setCount(int)
+
+?setCount@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::setCount(int)
+
+?setCount@?$Dar@PAVFrame@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::setCount(int)
+
+?setCount@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::setCount(int)
+
+?setCount@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::setCount(int)
+
+?setCount@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::setCount(int)
+
+?setCount@?$Dar@PAVLabel@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::setCount(int)
+
+?setCount@?$Dar@PAVPanel@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::setCount(int)
+
+?setCount@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::setCount(int)
+
+?setCount@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::setCount(int)
+
+?setCount@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXH@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::setCount(int)
+
+?setElementAt@?$Dar@D@vgui@@QAEXDH@Z
+public: void __thiscall vgui::Dar<char>::setElementAt(char, int)
+
+?setElementAt@?$Dar@H@vgui@@QAEXHH@Z
+public: void __thiscall vgui::Dar<int>::setElementAt(int, int)
+
+?setElementAt@?$Dar@PAD@vgui@@QAEXPADH@Z
+public: void __thiscall vgui::Dar<char *>::setElementAt(char *, int)
+
+?setElementAt@?$Dar@PAV?$Dar@D@vgui@@@vgui@@QAEXPAV?$Dar@D@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Dar<char> *>::setElementAt(class vgui::Dar<char> *, int)
+
+?setElementAt@?$Dar@PAVActionSignal@vgui@@@vgui@@QAEXPAVActionSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::ActionSignal *>::setElementAt(class vgui::ActionSignal *, int)
+
+?setElementAt@?$Dar@PAVButton@vgui@@@vgui@@QAEXPAVButton@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Button *>::setElementAt(class vgui::Button *, int)
+
+?setElementAt@?$Dar@PAVChangeSignal@vgui@@@vgui@@QAEXPAVChangeSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::ChangeSignal *>::setElementAt(class vgui::ChangeSignal *, int)
+
+?setElementAt@?$Dar@PAVDesktopIcon@vgui@@@vgui@@QAEXPAVDesktopIcon@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::DesktopIcon *>::setElementAt(class vgui::DesktopIcon *, int)
+
+?setElementAt@?$Dar@PAVFocusChangeSignal@vgui@@@vgui@@QAEXPAVFocusChangeSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::FocusChangeSignal *>::setElementAt(class vgui::FocusChangeSignal *, int)
+
+?setElementAt@?$Dar@PAVFrame@vgui@@@vgui@@QAEXPAVFrame@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Frame *>::setElementAt(class vgui::Frame *, int)
+
+?setElementAt@?$Dar@PAVFrameSignal@vgui@@@vgui@@QAEXPAVFrameSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::FrameSignal *>::setElementAt(class vgui::FrameSignal *, int)
+
+?setElementAt@?$Dar@PAVInputSignal@vgui@@@vgui@@QAEXPAVInputSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::InputSignal *>::setElementAt(class vgui::InputSignal *, int)
+
+?setElementAt@?$Dar@PAVIntChangeSignal@vgui@@@vgui@@QAEXPAVIntChangeSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::IntChangeSignal *>::setElementAt(class vgui::IntChangeSignal *, int)
+
+?setElementAt@?$Dar@PAVLabel@vgui@@@vgui@@QAEXPAVLabel@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Label *>::setElementAt(class vgui::Label *, int)
+
+?setElementAt@?$Dar@PAVPanel@vgui@@@vgui@@QAEXPAVPanel@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::Panel *>::setElementAt(class vgui::Panel *, int)
+
+?setElementAt@?$Dar@PAVRepaintSignal@vgui@@@vgui@@QAEXPAVRepaintSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::RepaintSignal *>::setElementAt(class vgui::RepaintSignal *, int)
+
+?setElementAt@?$Dar@PAVSurfaceBase@vgui@@@vgui@@QAEXPAVSurfaceBase@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::SurfaceBase *>::setElementAt(class vgui::SurfaceBase *, int)
+
+?setElementAt@?$Dar@PAVTickSignal@vgui@@@vgui@@QAEXPAVTickSignal@2@H@Z
+public: void __thiscall vgui::Dar<class vgui::TickSignal *>::setElementAt(class vgui::TickSignal *, int)
+
+?setLineColor@LineBorder@vgui@@QAEXHHHH@Z
+public: void __thiscall vgui::LineBorder::setLineColor(int, int, int, int)
+
+?setRange@ScrollBar2@vgui@@UAEXHH@Z
+public: virtual void __thiscall vgui::ScrollBar2::setRange(int, int)
+
+?setRange@Slider2@vgui@@UAEXHH@Z
+public: virtual void __thiscall vgui::Slider2::setRange(int, int)
+
+?setRangeWindow@ScrollBar2@vgui@@UAEXH@Z
+public: virtual void __thiscall vgui::ScrollBar2::setRangeWindow(int)
+
+?setRangeWindow@Slider2@vgui@@UAEXH@Z
+public: virtual void __thiscall vgui::Slider2::setRangeWindow(int)
+
+?setRangeWindowEnabled@ScrollBar2@vgui@@UAEX_N@Z
+public: virtual void __thiscall vgui::ScrollBar2::setRangeWindowEnabled(bool)
+
+?setRangeWindowEnabled@Slider2@vgui@@UAEX_N@Z
+public: virtual void __thiscall vgui::Slider2::setRangeWindowEnabled(bool)
+
+?setSize@ScrollBar2@vgui@@UAEXHH@Z
+public: virtual void __thiscall vgui::ScrollBar2::setSize(int, int)
+
+?setSize@Slider2@vgui@@UAEXHH@Z
+public: virtual void __thiscall vgui::Slider2::setSize(int, int)
+
+?setSlider@ScrollBar2@vgui@@UAEXPAVSlider2@2@@Z
+public: virtual void __thiscall vgui::ScrollBar2::setSlider(class vgui::Slider2 *)
+
+?setValue@ScrollBar2@vgui@@UAEXH@Z
+public: virtual void __thiscall vgui::ScrollBar2::setValue(int)
+
+?setValue@Slider2@vgui@@UAEXH@Z
+public: virtual void __thiscall vgui::Slider2::setValue(int)
+
+?validate@ScrollBar2@vgui@@UAEXXZ
+public: virtual void __thiscall vgui::ScrollBar2::validate(void)
+
