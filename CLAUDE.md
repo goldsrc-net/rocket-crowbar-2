@@ -48,8 +48,11 @@ RC2 added virtuals to the SDK bases, which come first, as in mod-rockcrowbar: on
 of `CBaseMonster`, four after `CBasePlayerItem::AttachToPlayer`. Each factory also calls
 RC 1.9's `AddToPrecachedList`, so code is shared with RC 1.9 beyond `CCrowbarRocket`.
 
-Next: client.dll's vtables (its weapons are static objects), the rest by call graph and the
-decompile, then the work list.
+The work list is `reference/RECONSTRUCTION-rc2.md` (`scripts/inventory.py`): 881 functions
+(296 KB) of RC2's own code between SDK files and 920 (278 KB) changed inside them; the
+decompile is `recovered/decomp/rc2/` (`scripts/ghidra/re.sh export rc2`, about a minute).
+Next: name the added base virtuals (`reference/BASE_VIRTUALS.md` has what is known of each),
+then client.dll's vtables (its weapons are static objects).
 
 - The amd64 client doesn't link yet (no 64-bit VGUI; mod-ts links openvgui statically). The
   Half-Life client players run is 32-bit, so it waits.
