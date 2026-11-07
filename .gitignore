@@ -5,3 +5,17 @@
 
 # CMake build folder
 build
+
+# per-arch build dirs
+build-*/
+build_*/
+
+# WIP decompiler output (not committed until it becomes real source)
+recovered/
+
+# session working files (decompiles, RE notes)
+scratchpad/
+
+# python bytecode
+__pycache__/
+*.pyc

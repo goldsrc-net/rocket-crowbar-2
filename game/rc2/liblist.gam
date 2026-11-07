@@ -1,0 +1,15 @@
+//-- mod-rc2 : Rocket Crowbar 2 rebuilt on halflife-updated @ 64bit-demo
+//
+// Mounts as `rc2/` and falls back to valve/ for everything it does not
+// override. Unlike RC 1.9, RC2 has its own client library (cldll 1).
+game "Rocket Crowbar 2"
+gamedir "rc2"
+fallback_dir "valve"
+version "1"
+startmap "c0a0"
+trainmap "t0a0"
+mpentity "info_player_deathmatch"
+gamedll "dlls\hl.dll"
+gamedll_linux "dlls/hl.so"
+svonly "0"
+cldll "1"
