@@ -369,3 +369,304 @@ afterwards (2026-11-07, same verdicts in both projects):
   was design; changed to fix and restored there.
 - `CBasePlayer::UpdatePlayerSound`: the vectors stay as they are (mod-rockcrowbar keeps the original's
   call, decided by Steven).
+
+## mod-ozdm
+
+Oz Deathmatch 3.02 (`~/Projects/goldsrc.net/mod-ozdm`), built on SDK 2.3 as RC2 is, so a change
+Valve made by SDK 2.3 is the original's and not a call. These are the calls the seven package
+dossiers made (`reference/dossiers/*.md`, halflife-updated tables), gathered 2026-11-07. rva is the
+`hl_i386.so` file address (`reference/funcfile.tsv`, the code's `// orig` tags); "-" where the dossier
+names no single function. "as mod-rc2" or "as mod-rockcrowbar" marks a call that follows that
+project's verdict for the same function. The bots package has none (all OZ's own files), and the egon
+is OZ's own body, which replaces halflife-updated's whole. The seven calls the packages left unclear
+follow Steven's rule of 2026-11-07 (unclear goes to halflife-updated's version, design reverts
+already made stay) and are marked so.
+
+```
+rva       file                    function                           what halflife-updated changed                                   verdict  reason
+0x9daa0   combat.cpp              CBaseEntity::FireBullets           no tracer flag, decals on every shot (b0e5d2d, #163)            design   as mod-rockcrowbar: SDK 2.3's restored
+0x9daa0   combat.cpp              CBaseEntity::FireBullets           BULLET_PLAYER_BUCKSHOT case (c73c240)                           design   as mod-rockcrowbar ("no player bullet cases"); OZ's
+                                                                                                                                              FireBulletsPlayer has the player types
+0x7b370   airtank.cpp             CAirtank::Save, m_SaveData         m_state int to bool, FIELD_BOOLEAN (998469a)                    fix      a type refactor, as mod-rc2 and mod-rockcrowbar keep
+                                                                                                                                              it; the original saves FIELD_INTEGER
+0x13e0c0  items.cpp               CItemSuit::MyTouch and HasSuit     the suit bit in the 64-bit m_WeaponBits (c633af8)               fix      the same test; pev->weapons is mirrored
+0xf15e0   player.cpp              CBasePlayer::PackDeadPlayerItems   reloads the active weapon before packing (9d4ce15, HL25)        design   as mod-rockcrowbar
+0xf15e0   player.cpp              CBasePlayer::PackDeadPlayerItems   packs nothing for an empty active satchel (e0ba8ce, HL25)       fix      as mod-rockcrowbar
+0xf1940   player.cpp              CBasePlayer::RemoveAllItems        lets go of a func_tank (seed)                                   fix      as mod-rockcrowbar
+0xf1940   player.cpp              CBasePlayer::RemoveAllItems        empty CurWeapon moved to UpdateClientData (83c18d3)             design   as mod-rockcrowbar; the original's message is back
+0xf1af0   player.cpp              CBasePlayer::Killed                non-solid corpse in multiplayer (df5605d, HL25)                 design   HL25's corpses
+0xf1af0   player.cpp              CBasePlayer::Killed                zeroes the death-frame count (ac6b664)                          fix      as mod-rockcrowbar (row 139, changed to fix)
+0xf2920   player.cpp              CBasePlayer::PlayerDeathThink      body copied when the death animation ends (ac6b664, HL25)       design   as mod-rockcrowbar
+0xf2920   player.cpp              CBasePlayer::PlayerDeathThink      a time to respawn, not think frames (ac6b664)                   fix      as mod-rockcrowbar
+0xf2920   player.cpp              CBasePlayer::PlayerDeathThink      spectator return through iuser1                                 design   OZ's observer is SDK 2.2's
+0xf3120   player.cpp              CBasePlayer::StartObserver,        halflife-updated's spectator mode                               design   a feature; OZ's own observer reconstructed
+                                  Observer_*
+0xf4190   player.cpp              CBasePlayer::PreThink              m_bResetViewEntity (5fd0acb, halflife#3031)                     fix      as mod-rockcrowbar
+0xf4190   player.cpp              CBasePlayer::PreThink              func_vehicle controls (HL25)                                    fix      (Steven 2026-11-07: unclear goes to
+                                                                                                                                              halflife-updated); mod-rc2 and mod-rockcrowbar keep
+                                                                                                                                              func_vehicle too (their DEVIATIONS.md)
+0xf4190   player.cpp              CBasePlayer::PreThink              node graph pointers set here, not in Precache (seed)            design   the original sets them in Precache
+0xf4f00   player.cpp              CBasePlayer::PostThink             m_afButtonLast set on every path (seed)                         fix      as mod-rockcrowbar
+0xf23f0   player.cpp              CBasePlayer::WaterMove             drown damage counts health lost (3718cf2); swim sounds only     fix      as mod-rockcrowbar
+                                                                     with the head under (c2902f8)
+0xf4600   player.cpp              CBasePlayer::CheckTimeBasedDamage  fabs (e19fe47)                                                  fix      as mod-rc2
+0xf59d0   player.cpp              EntSelectSpawnPoint                random walk by the spot count (b61c0be, HL25)                   design   RANDOM_LONG(1, 5) back; a balance change
+0xf77d0   player.cpp              CBasePlayer::ImpulseCommands       impulse 204 dropped                                             design   as mod-rockcrowbar
+0xf7a90   player.cpp              CBasePlayer::CheatImpulseCommands  texture type in impulse 107                                     design   the original prints the plain "Texture:" line
+0xf7a90   player.cpp, client.cpp, CBasePlayer::CheatImpulseCommands, sv_cheats read on demand (04f8b91, halflife#2511)               fix      the cached value missed a later change (no FIXES
+          world.cpp               ClientCommand (give, fov),                                                                                  row; the player dossier says as mod-rc2)
+                                  CWorld::Spawn
+0xf84a0   player.cpp              CBasePlayer::AddPlayerItem         insert before ExtractAmmo (6951bf1)                             fix      as mod-rc2
+0xf84a0   player.cpp              CBasePlayer::AddPlayerItem         WeapPickup for every non-exhaustible weapon                     design   as mod-rc2
+0xf8780   player.cpp              CBasePlayer::GiveAmmo              gives the exhaustible weapon with its ammo (6951bf1)            fix      as mod-rc2
+0xf88f0   player.cpp              CBasePlayer::ItemPostFrame         returns when PlayerUse just started a tank (4fe7e6e)            fix      as mod-rockcrowbar
+0xf9550   player.cpp              CBasePlayer::GetAutoaimVector      ResetAutoaim when sv_aim is 0 (beb9f35)                         fix      as mod-rockcrowbar
+0xf9550   player.cpp              CBasePlayer::GetAutoaimVector,     sv_allow_autoaim (c567ed8)                                      design   as mod-rockcrowbar
+                                  AutoaimDeflection (0xf9970)
+0xfa0e0   player.cpp              CBasePlayer::DropPlayerItem        refuses when no next weapon (seed)                              design   as mod-rockcrowbar
+0xf6d00   player.cpp              CBasePlayer::SelectItem,           m_ForceSendAnimations (42f45bd, #154)                           fix      as mod-rc2
+                                  SwitchWeapon (0xfa540)
+0xf8ae0   player.cpp              CBasePlayer::UpdateClientData      status bar, Weapons message, empty CurWeapon                    design   the original sends none of them
+0xf8ae0   player.cpp              CBasePlayer::UpdateClientData      0-1 health sent as 1, resend after a restore                    fix      as mod-rockcrowbar for the health
+0xf8ae0   player.cpp              CBasePlayer::UpdateClientData      Health as a short (5a0c6c1, #2149)                              fix      as mod-rockcrowbar
+0xf8ae0   player.cpp              CBasePlayer::UpdateClientData,     room type sent from here, reset at spawn (bc3add9)              fix      goes with CEnvSound::Think below
+                                  Spawn
+0xf7770   player.cpp              CBasePlayer::ForceClientDllUpdate  extra resends                                                   fix      (Steven 2026-11-07: unclear goes to
+                                                                                                                                              halflife-updated)
+0xf5e70   player.cpp              CBasePlayer::Spawn                 m_flStartCharge reset                                           fix
+0xf5e70   player.cpp              CBasePlayer::Spawn                 "bj" physinfo (sv_allowbunnyhopping), chat time                 fix      (Steven 2026-11-07: unclear goes to
+                                                                                                                                              halflife-updated); at their defaults they do what
+                                                                                                                                              the original does
+0x950d0   client.cpp              ClientDisconnect                   lets go of a func_tank (de2751c, halflife#2594)                 fix      as mod-rockcrowbar
+0x950d0   client.cpp              ClientDisconnect,                  null name guards (seed)                                         fix
+                                  CHalfLifeMultiplay::InitHUD
+                                  (0xdafc0)
+0x95490   client.cpp              Host_Say                           Q_UnicodeValidate for the isprint loop (seed)                   fix
+0x959e0   client.cpp              ClientCommand                      fullupdate, closemenus, the % filter on "Unknown command"       fix      as mod-rockcrowbar (per the rules dossier; no FIXES
+                                                                     (seed)                                                                   row)
+0x991a0   client.cpp              AddToFullPack                      MAX_EDICTS test; the FL_FLY/m_EFlags slerp rule                 fix      the slerp rule as decided for mod-rc2 (FIXES,
+                                                                                                                                              decided list)
+0x97480   client.cpp              ServerActivate                     loop bounds                                                     fix
+0x9a370   client.cpp              UpdateClientData                   fov from m_iFOV (6f8aac9, halflife #3044)                      fix      one FOV; OZ's zooms set m_iFOV (Steven 2026-11-07:
+                                                                                                                                              unclear goes to halflife-updated)
+                                                                                                                                              m_iFOV, so m_iFOV wins
+0x9a370   client.cpp              UpdateClientData                   m_WeaponBits sync                                               fix
+0xda7a0   multiplay_gamerules.cpp CHalfLifeMultiplay ctor            no servercfgfile exec                                           fix      left to the engine (Steven 2026-11-07)
+0xf0350   UserMessages.cpp        LinkUserMessages                   Health 2 bytes (5a0c6c1, halflife#2149)                         fix      as mod-rockcrowbar
+0x12d3a0  world.cpp               CWorld::Spawn                      duplicate worldspawn guard                                      fix
+0x12cc40  world.cpp               CopyToBodyQue                      modelindex 0 test (ac6b664)                                     fix      mod-rockcrowbar dropped it (see below)
+0x131800  voice_gamemgr.cpp       CVoiceGameMgr::ClientCommand       vban sscanf check (3e9a8f0)                                     fix
+0x134df0  pm_shared.cpp           PM_FlyMove                         reflects off the first plane only (854187a, HL25)               fix      mod-rc2 p6 restored the original (see below)
+0x136690  pm_shared.cpp           PM_CheckStuck, PM_PlayerMove       nudge loop on a server, duck to get unstuck (854187a, 1d0831a)  fix      mod-rc2 p6 dropped the duck (see below)
+                                  (0x138e80)
+0x138ae0  pm_shared.cpp           PM_CheckParamters                  +use on the ground cuts maxspeed to a third (4f0d502, HL25)     fix      mod-rc2 p6 dropped it (see below)
+0x139780  pm_shared.cpp           PM_Move                            friction reset in multiplayer too (1d5610c, halflife#1542)      fix      a func_friction's value stayed on the player
+0x138010  pm_shared.cpp           PM_Jump                            no jump sound while frozen (f3810c7)                            fix      mod-rockcrowbar's server plays it (see below)
+0x1398e0  pm_shared.cpp           PM_Init, PM_GetHullBounds (not in  hull bounds filled at init (c3c5576, halflife#3229)             fix
+                                  the original)
+0x137380  pm_shared.cpp           PM_LadderMove                      model trace from a cleared trace (f2f5ecc, halflife#3283)       fix      as mod-rc2 (its PM_TraceModel)
+0x137f80  pm_shared.cpp           PM_PreventMegaBunnyJumping         sv_allowbunnyhopping (a1cf2d3)                                  fix      (Steven 2026-11-07: unclear goes to
+                                                                                                                                              halflife-updated); at its default 0 it caps, as the
+                                                                                                                                              original
+0xda900   multiplay_gamerules.cpp CHalfLifeMultiplay::               357 damage 50 (ebaf86d, HL25)                                   design   as mod-rc2
+                                  RefreshSkillData
+0xbf930   gamerules.cpp           CGameRules::RefreshSkillData       sk_plr_hornet_dmg (460802c)                                     design   OZ's fixed 7
+0xdad10   multiplay_gamerules.cpp CHalfLifeMultiplay::               cl_autowepswitch and prefs (e7bb9d7)                            design   as mod-rockcrowbar (features)
+                                  FShouldSwitchWeapon,
+                                  ClientUserInfoChanged
+0x95490   client.cpp              Host_Say                           chat flood timer, "(SPEC)" chat, voice mute                     design   as mod-rockcrowbar
+0x959e0   client.cpp              ClientCommand                      spectate, specmode, follownext                                  design   as mod-rockcrowbar
+0x95440   client.cpp              ClientPutInServer                  iuser1/iuser2 reset                                             design   as mod-rockcrowbar
+0x9a370   client.cpp              UpdateClientData                   OBS_IN_EYE data                                                 design   spectator feature
+0x991a0   client.cpp              AddToFullPack                      EFLAG_FLESH_SOUND                                               design
+0xc0160   gamerules.cpp           InstallGameRules                   game.cfg exec                                                   design
+0xc0160   gamerules.cpp           InstallGameRules                   teamplay.value > 0 for mp_teamplay == 1                         design
+0xdbf90   multiplay_gamerules.cpp CHalfLifeMultiplay::PlayerKilled   func_vehicle kill credit                                        design   as mod-rockcrowbar
+0xda9c0   multiplay_gamerules.cpp CHalfLifeMultiplay::Think,         mp_chattime 1-120                                               design   as mod-rockcrowbar; OZ clamps to 10-45
+                                  GoToIntermission (0xdd000)
+0x9a940   client.cpp              AllowLagCompensation               lag compensation on                                             design   OZ returns 0
+0x137380  pm_shared.cpp           PM_LadderMove                      maxspeed cap, ducked climb speed (seed)                         design   as mod-rc2 (p6)
+0xe0b60   nodes.cpp               CTestHull::DropDelay               "Node Graph out of Date" center print commented out (seed)      design   as mod-rc2
+0x11bc70  triggers.cpp            CLadder::KeyValue,                 pass-through overrides dropped (seed)                           design   restored; no behavior
+                                  CTriggerPush::KeyValue (0x11bda0)
+0xd6740   monsters.cpp            CBaseMonster::KeyValue, DropItem   allow_item_dropping (b624a61)                                   design   as mod-rockcrowbar
+0xd4fa0   monsters.cpp            CBaseMonster::IRelationship        HUMANPASSIVE fears AMIL and APRED as R_HT/R_DL (75bf517)        fix      as mod-rockcrowbar (Steven)
+0xd31f0   monsters.cpp            CBaseMonster::SetActivity          m_Activity set before SetYawSpeed (ec1f016)                     fix      as mod-rc2 (Steven's oldActivity = m_Activity)
+0xd5870   monsters.cpp            CBaseMonster::ChangeYaw            turn step from the time since the last turn (343bbb2)           fix      as mod-rc2
+0xb5980   flyingmonster.cpp       CFlyingMonster::ChangeYaw          roll step from the time since the last call (343bbb2, 95fdebe)  fix      as mod-rc2 (343bbb2's 220 * delta)
+0xd1ed0   monsters.cpp            CBaseMonster::MonsterUse           no MONSTERSTATE_ALERT (08975b8)                                 fix      as mod-rockcrowbar
+0xd6320   monsters.cpp            CBaseMonster::ReportAIState        "PlayDead" in the names (3dc5750)                               fix      as mod-rockcrowbar
+0xd70d0   monsters.cpp,           CBaseMonster::PlaySentence,        IsAllowedToSpeak, no speaking while dying (85467c5)             fix      as mod-rockcrowbar
+          talkmonster.cpp         CTalkMonster::PlaySentence
+                                  (0x113420)
+0xd70d0   monsters.cpp,           CBaseMonster::PlaySentence,        sentences moved to CBaseToggle (3d8b933, HL25)                  fix      kept; mod-rockcrowbar calls it design (see below)
+          talkmonster.cpp,        PlayScriptedSentence,
+          subs.cpp                SentenceStop,
+                                  CTalkMonster::PlaySentence
+0x119910  triggers.cpp            PlayCDTrack, CTargetCDAudio::Think UTIL_GetLocalPlayer (f2c8e23)                                   design   as mod-rockcrowbar; INDEXENT(1) back
+                                  (0x119c80)
+0xb01e0   effects.cpp,            CBlood::BloodPosition,             UTIL_GetLocalPlayer (f2c8e23)                                   fix      as mod-rockcrowbar: a free slot 1's stale edict, or
+          triggers.cpp,           CMessage::Use (0xb1630),                                                                                    a NULL Instance
+          talkmonster.cpp         CChangeLevel::ChangeLevelNow
+                                  (0x11b150), CTriggerCamera::Use
+                                  (0x11cf10), CTalkMonster tasks
+0x119910  triggers.cpp            PlayCDTrack                        track -1 sends "cd stop" (seed)                                 design   as mod-rc2 (Steven: "cd pause")
+0x11aed0  triggers.cpp            CChangeLevel::Spawn                error for a changelevel to the current map (b9adea9)            design   as mod-rc2
+0x11a1e0  triggers.cpp            CBaseTrigger::HurtTouch            no healing a dead player in multiplayer (6ae5366)               fix      as mod-rockcrowbar
+0x11d280  triggers.cpp            CTriggerCamera::FollowTarget       avelocity (91944d1; 66b1f30 reverted by 95741e9)                fix      as mod-rc2
+0xb8850   func_break.cpp          CPushable::Move                    HL25 pushable rework (4f0d502)                                  design   as mod-rockcrowbar
+0xb6390   func_break.cpp          CBreakable::KeyValue               "explosion" "1" is directed (50e1811)                           fix      as mod-rc2
+0xb7710   func_break.cpp          CBreakable::Die                    no second break (473e9ea), fabs (e19fe47)                       fix      as mod-rc2
+0xb7710   func_break.cpp          CBreakable::Die                    gibs along -g_vecAttackDir (50e1811)                            design   as mod-rc2 (Steven: the original's direction)
+0xed040   plats.cpp               CFuncTrackTrain::UpdateSound       fabs (e19fe47)                                                  fix      as mod-rc2
+-         func_break.cpp          CPushable::DamageDecal             no glass decal unless breakable (484911d)                       fix      a wrong decal
+0x10a250  sound.cpp               CEnvSound::KeyValue, m_SaveData    room type an int (fdc159c)                                      fix      as mod-rc2 and mod-rockcrowbar (Steven 2026-11-07)
+0x10a6b0  sound.cpp               CEnvSound::Think                   room type sent from UpdateClientData, saved, reset on a level   fix      a client kept a stale room type (halflife#1144,
+                                                                     change (bc3add9)                                                         #2936)
+0x10af10  sound.cpp               SENTENCEG_Init                     off by one (51a1fc2)                                            fix
+0x10c1e0  sound.cpp               CSpeaker::SpeakerThink             invalid preset (a8824ba)                                        fix
+0xe2e50   nodes.cpp               CGraph::FLoadGraph, FSaveGraph     node graphs through the engine filesystem, GAMECONFIG only,     fix      a port; the same paths
+                                  (0xe32f0)                          out-of-date check (1f2f27a, 88df0a2, 609eafd, 04c63d0)
+0xe2e50   nodes.cpp               CGraph::FLoadGraph, FSaveGraph     .nod64 on 64-bit builds (870fe1c)                               fix      64-bit only: the graph layout differs
+0x908e0   buttons.cpp             CBaseButton::ButtonSpark,          sparks (ecd7ef9, d7dd2a8, 0d101ca, 2ca64e1)                     fix      as mod-rc2
+                                  ButtonBackHome (0x90eb0)
+0x919b0   buttons.cpp             CMomentaryRotButton::Use           sends the predicted destination's value (SDK 2.2+)              fix      as mod-rockcrowbar
+0xbac20   func_tank.cpp           CFuncTank::StartControl,           view model cleared (seed), EquipWeapon (3c1e84a)                fix      as mod-rockcrowbar
+                                  StopControl (0xbad20)
+0xbbc80   func_tank.cpp           CFuncTank::AdjustAnglesForBarrel   acos domain clamp (90500cf)                                     fix
+0xbafd0   func_tank.cpp           CFuncTank::Use                     usable again (1315fd4)                                          fix      its own regression
+0x115a70  tentacle.cpp            CTentacle::Spawn                   EFLAG_SLERP (a02eb83)                                           fix      as mod-rc2 (Steven)
+0x113580  talkmonster.cpp         CTalkMonster::TakeDamage           skips a dying friend (e306d7a)                                  fix      as mod-rc2
+0x113da0  talkmonster.cpp         CTalkMonster::CanFollow            ideal state SCRIPT too (3f68a77)                                fix      as mod-rockcrowbar
+-         talkmonster.cpp         CTalkMonster (m_pCine)             null m_pCine (3c7d4ed)                                          fix
+0x112aa0  talkmonster.cpp         CTalkMonster::Touch                push only when the schedule allows it (d667a24)                 fix      as mod-rockcrowbar
+0x111e70  talkmonster.cpp         CTalkMonster::RunTask              player looked up once (55a1e89)                                 fix      as mod-rockcrowbar
+0xa0dc0   controller.cpp          CController::RunTask               faces only with an enemy (271d503)                              fix      as mod-rockcrowbar
+0x920f0   effects.cpp             CEnvSpark                          no level transition (70f3b23)                                   fix
+-         effects.cpp             CBeam                              attachments restored (497b213)                                  fix      save/restore
+-         effects.cpp             trip beam touch                    touch reference (5831d2e)                                       fix      the same function either way
+0xcffa0   maprules.cpp            CGamePlayerEquip::EquipPlayer,     null activator, KeyValue, save table (6b649da, 4122fcd,         fix
+                                  KeyValue (0xcfce0), save table     c20feca)
+0xcdfe0   maprules.cpp            CGameScore::Use                    null deref (fcb7096)                                            fix
+-         maprules.cpp            CGamePlayerZone                    no level transition (61e18e3)                                   fix
+0xc7310   h_cycler.cpp            CWreckage                          time as a float (cb51706)                                       fix      as mod-rockcrowbar
+0xc6ca0   h_cycler.cpp            CCyclerSprite                      saved (d02b687)                                                 fix
+0xea970   plats.cpp               CPlatTrigger::Touch                no trigger after the plat is removed (ffb0716)                  fix
+-         (all)                   BOOL members                       bool, FIELD_BOOLEAN (c5b1932)                                   fix      the field type follows the member
+0xa5750   crowbar.cpp             CCrowbar::Swing                    swing event only on fFirst (6528126)                            fix      SwingAgain replayed the event
+0xa5750   crowbar.cpp             CCrowbar::Swing                    next attack set before the dead-target return (511c6ef)         fix      a corpse took swings with no delay
+0xa5750   crowbar.cpp             CCrowbar::Swing                    Smack think on gpGlobals->time (c90351f)                        fix      UTIL_WeaponTimeBase() + 0.2 decalled at once
+0xa5750   crowbar.cpp             CCrowbar::Swing                    <= for a full swing (a542e4a)                                   fix      inert in multiplayer
+0xfd3a0   python.cpp              CPython::PrimaryAttack             dry fire (75bc5af)                                              fix      a repeated dry-fire sound
+0xfd2a0   python.cpp,             CPython::SecondaryAttack,          pev->fov replaced by m_iFOV (6f8aac9); m_fInZoom kept           fix      the zoom moved onto m_iFOV (Steven 2026-11-07);
+          crossbow.cpp            CCrossbow::SecondaryAttack                                                                                  m_fInZoom (d4b0e77) stays, OZ's zoom state
+                                  (0xa4b20)
+0xa47c0   crossbow.cpp            CCrossbow::FireBolt,               event ammo int 0                                                design   the original's reserve count
+                                  FireSniperBolt (0xa4500)
+0x106420  shotgun.cpp             CShotgun::PrimaryAttack,           pump from ItemPostFrame and on the last shell (a65846e)         fix      as mod-rockcrowbar
+                                  WeaponIdle (0x1076f0)
+0x129920  weapons.cpp             CBasePlayerItem::                  absolute time (f14827a)                                         fix      as mod-rockcrowbar
+                                  AttemptToMaterialize
+0x12a200  weapons.cpp             CBasePlayerItem::AttachToPlayer    SetThink(NULL) (ad50584)                                        fix      as mod-rockcrowbar
+0x1297b0  weapons.cpp             CBasePlayerItem::FallThink         stops once a player holds it (e0ba8ce)                          fix      as mod-rockcrowbar (its busters branch inert)
+0x12a630  weapons.cpp             CBasePlayerWeapon::AddPrimaryAmmo  sound test (3d13792)                                            fix      goes with 6951bf1
+0x12a7b0  weapons.cpp             CBasePlayerWeapon::IsUseable       secondary ammo, WEAPON_NOCLIP, CanDeploy                        fix      as mod-rc2
+0x12ab20  weapons.cpp             CBasePlayerWeapon::PlayEmptySound  EMIT_SOUND_PREDICTED (063b8a5)                                  fix      as mod-rc2 (mod-rockcrowbar: unclear, see below)
+0x12b020  weapons.cpp             CBasePlayerWeapon::RetireWeapon    deferred to DoRetireWeapon (c4a67d4)                            fix      as mod-rc2
+0x12a530  weapons.cpp             CBasePlayerWeapon::SendWeaponAnim  m_ForceSendAnimations (42f45bd)                                 fix      as mod-rc2
+0x12a300  weapons.cpp             CBasePlayerWeapon::AddToPlayer     no extract (6951bf1)                                            fix      as mod-rc2
+0x12aa40  weapons_shared.cpp      CBasePlayerWeapon::DefaultReload   forwards body (a3783be)                                         fix      inert: weapons-a's callers pass 0
+-         weapons.cpp             GetNextAttackDelay (crowbar,       the 2013 SDK's fire-rate compensation (seed)                    fix      (Steven 2026-11-07: unclear goes to
+                                  glock, mp5, shotgun, crossbow)                                                                              halflife-updated); weapons-b's design revert stays
+0xfdf00   rpg.cpp                 CRpgRocket::RocketTouch,           launcher decrement in the destructor, EHANDLE launcher          fix      a rocket that blew up in flight locked the reload
+                                  ~CRpgRocket                        (40d3849, 8092ab5)
+0xfe1a0   rpg.cpp                 CRpgRocket::FollowThink            launcher release at 8192 units or 6 s, sky detonate (9b9d6c3,   design
+                                                                     HL25)
+0xfefa0   rpg.cpp                 CRpg::PrimaryAttack, WeaponIdle    ResetEmptySound placement (c31c918, 9b9d6c3)                    design   client prediction; the server gets the original
+                                  (0xff320)
+0xff320   rpg.cpp                 CRpg::WeaponIdle                   fidget idle 6.1 s, not 3 (33385ad)                              fix      as mod-rockcrowbar
+0xff450   rpg.cpp                 CRpg::UpdateSpot                   no laser while reloading (9784339)                              fix
+0xfea50   rpg.cpp                 CRpg::Reload                       reads only this reload's result (c82c3fa)                       fix
+0xfed20   rpg.cpp                 CRpg::GetItemInfo                  ITEM_FLAG_NOAUTOSWITCHTO (2353ca4, HL25)                        design   as mod-rockcrowbar
+-         rpg, gauss, egon,       weapons-b's attacks                GetNextAttackDelay for UTIL_WeaponTimeBase() + x (seed)         design   as mod-rc2 and mod-rockcrowbar (made before the
+          hornetgun, ...                                                                                                                      rule; stays)
+0xfedf0   rpg, gauss, egon,       ::AddToPlayer (0xc0750, 0xb2d20,   WeapPickup moved to AddPlayerItem                               design   as mod-rc2
+          hornetgun               0xca390)
+0xc1220   gauss.cpp               CGauss::StartFire                  V_min(m_flStartCharge, time) (8c5d4ab, HL25)                    fix
+0xc14c0   gauss.cpp               CGauss::Fire                       hitgroup cleared on a self-hit (8c5d4ab)                        fix      (Steven 2026-11-07: unclear goes to
+                                                                                                                                              halflife-updated)
+0xc0b40   gauss.cpp               CGauss::SecondaryAttack            SendStopEvent in water and on overcharge (fd35528)              fix
+0xc1c80   gauss.cpp               CGauss stop event                  FEV_GLOBAL (52b6a8a)                                            fix
+0xc0b40   gauss.cpp               CGauss::SecondaryAttack            no ammo burn at 0 (0e8d3ad)                                     fix      uranium went to -1
+0xca640   hornetgun.cpp           CHgun::PrimaryAttack, Reload       0.3 s multiplayer recharge, empty delays (37ed1d9, HL25)        design
+                                  (0xcaf90)
+0xca980   hornetgun.cpp           CHgun::SecondaryAttack             iparam1 FIREMODE_FAST to 0, ammo_hornets test (f347954)         design   as mod-rockcrowbar: prediction mirrors
+0xcaf90   hornetgun.cpp           CHgun::Reload                      TabulateAmmo after the recharge (f347954, halflife#556)         fix      mod-rockcrowbar calls it design (see below)
+0xca0a0   hornet.cpp              CHornet::DieTouch                  owner guard (e7fb734)                                           fix
+0xc7b60   handgrenade.cpp         CHandGrenade::Holster              clears m_flStartThrow (70dd419, halflife#3251)                  fix      as mod-rockcrowbar; mod-rc2 left it out (see below)
+0xc7da0   handgrenade.cpp         CHandGrenade::WeaponIdle           m_flReleaseThrow kept after the throw (4bb1f3c)                 fix
+0xc7da0   handgrenade.cpp         CHandGrenade::WeaponIdle           6.5 multiplier, 1000 cap (ae352a6, HL25)                        design   balance
+0xc2d20   ggrenade.cpp            CGrenade::BounceTouch              ResetSequenceInfo, frame 0 (2ee36b4, b31de2b)                   fix      as mod-rc2
+0xc34b0   ggrenade.cpp            CGrenade::ShootTimed               ResetSequenceInfo (2ee36b4)                                     fix      as mod-rc2
+0xc2270   ggrenade.cpp            CGrenade::Explode(TraceResult*)    source 1 unit lower (d6accf1)                                   fix      as mod-rockcrowbar
+0xc2270   ggrenade.cpp            CGrenade::Explode(TraceResult*)    pull-out 0.6, was (dmg - 24) * 0.6 (078e787)                    fix      (Steven 2026-11-07: unclear goes to
+                                                                                                                                              halflife-updated)
+0x1000d0  satchel.cpp             CSatchel::PrimaryAttack            MODERN_SATCHEL_CONTROLS (1c202f5, HL25)                         design   as mod-rockcrowbar
+0xffbd0   satchel.cpp             CSatchel::AddDuplicate             live charge limit (fd97136, HL25)                               design   as mod-rockcrowbar
+0xfff10   satchel.cpp             CSatchel::Deploy                   first idle at 2 s (33385ad)                                     fix      as mod-rockcrowbar
+0x11e4f0  tripmine.cpp            CTripmineGrenade::PowerupThink,    SF_BEAM_TEMPORARY, PointsInit (7d84906, 819a9ac)                fix
+                                  MakeBeam (0x11ea20)
+0x11ed50  tripmine.cpp            CTripmineGrenade::BeamBreakThink   owner retrace (6f0ae55, 79f9e95)                                fix
+0x11f470  tripmine.cpp            CTripmine::Deploy, WeaponIdle      pev->body = 0 (68dc517, c10b998)                                fix
+                                  (0x11fbe0)
+0x10fa00  squeakgrenade.cpp       CSqueak::PrimaryAttack,            aim-down throw, FL_WORLDBRUSH bite test (e9986c0, HL25)         design   as mod-rockcrowbar
+                                  CSqueakGrenade::SuperBounceTouch
+                                  (0x10f260)
+0x10e630  squeakgrenade.cpp       CSqueakGrenade::Spawn              movetype assignment (d6629ed)                                   fix
+0x10f850  squeakgrenade.cpp       CSqueak::Deploy                    first idle at 1.7 s (33385ad)                                   fix      as mod-rockcrowbar
+```
+
+Counts (rows above): fix 126 (7 of them unclear until Steven's rule), design 52.
+
+### Where an OZ verdict differed from mod-rc2 or mod-rockcrowbar
+
+- `PM_FlyMove`'s first-plane reflect, the duck to get unstuck (`PM_CheckStuck`/`PM_PlayerMove`) and
+  `PM_CheckParamters`' +use slowdown (854187a, 4f0d502): fix in OZ and mod-rockcrowbar; mod-rc2's p6
+  restored the original for all three. Resolved: halflife-updated's in all three.
+- `CopyToBodyQue`'s modelindex 0 test (ac6b664): fix in OZ; mod-rockcrowbar dropped it with
+  `PlayerDeathThink`'s HL25 body copy (wave 2 row 0x1ec5b0). Resolved: halflife-updated's in all
+  three.
+- The HL25 sentence rework (3d8b933, sentences on `CBaseToggle`): OZ's world package kept it;
+  mod-rockcrowbar calls the restructure design and keeps the sentence code in `CBaseMonster`. Both
+  keep 85467c5's IsAllowedToSpeak. Resolved: halflife-updated's in all three.
+- `CHgun::Reload`'s TabulateAmmo after the recharge (f347954): fix in OZ (weapons-b); design in
+  mod-rockcrowbar wave 2 ("prediction mirrors"). Resolved: halflife-updated's in all three.
+- `CBasePlayerWeapon::PlayEmptySound` (063b8a5): fix in OZ and mod-rc2; unclear in mod-rockcrowbar
+  wave 2. Resolved: halflife-updated's in all three.
+- `CHandGrenade::Holster` clearing m_flStartThrow (70dd419): fix in OZ and mod-rockcrowbar; mod-rc2
+  keeps RC2's, which doesn't clear it (`dlls/handgrenade.cpp`). Resolved: halflife-updated's in all
+  three.
+- `PM_Jump`'s silent jump while frozen (f3810c7): fix in OZ; mod-rockcrowbar's server build plays the
+  sound as the original does (`pm_shared.cpp`; its client build has halflife-updated's). Resolved:
+  halflife-updated's in all three.
+- `CEnvSound`'s room type as an int (fdc159c): OZ's world package had put back the original's float.
+  Resolved: halflife-updated's int in all three (Steven 2026-11-07).
+- client.cpp `UpdateClientData`'s fov (6f8aac9): OZ's rules and weapons-a packages differed.
+  Resolved: halflife-updated's m_iFOV; OZ's zooms (glock, python, mp5, crossbow, DefaultDeploy)
+  set m_iFOV alone. mod-rockcrowbar still sends pev->fov (its DEVIATIONS.md): to be brought to
+  m_iFOV the same way.
+
+### The unclear calls in mod-ozdm, applied
+
+Each was unclear in its dossier, or kept there without a call; all now have halflife-updated's
+version (rows above), in `reference/DEVIATIONS.md` where it differs from the original:
+- weapons-a's `GetNextAttackDelay`: the crowbar, glock, mp5, shotgun and crossbow set the next primary
+  attack through it where halflife-updated's do (the python has none upstream). weapons-b's design
+  revert of the same stays.
+- `CGauss::Fire` clears the hitgroup on a self-hit (8c5d4ab).
+- `CGrenade::Explode` pulls out of the wall by 0.6 units (078e787).
+- `CBasePlayer::ForceClientDllUpdate`'s extra resends: kept.
+- The multiplay constructor's servercfgfile exec: left to the engine, as before; the VERIFY is gone.
+- `CBasePlayer::PreThink`'s func_vehicle controls, `CBasePlayer::Spawn`'s "bj" physinfo and chat
+  time, `PM_PreventMegaBunnyJumping`'s sv_allowbunnyhopping: kept, as they were.
+- The user-message set: this tree's registrations, as before (not a FIXES row; the rules dossier).
