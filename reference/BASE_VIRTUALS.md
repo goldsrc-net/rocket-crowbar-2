@@ -36,26 +36,33 @@ slot calls default             overridden by                 reading            
                                                              interval (walk/toss only),
                                                              lifting off the ground; from
                                                              think functions
- 61     1  float global        -                             -                             open
- 62     0  float global        CBaseMonster CGargantua       -                             open
-                               CTentacle CTripmineGrenade
- 63     1  float global        CApache CGargantua COsprey    damage fractions: the big     tentative: RC 1.9's
-                               CTentacle                     monsters return fixed floats;  ExtreemeDamageFract /
- 64     3  float global        + CNihilanth                  64-65 read in                  VeryHeavyDamageFract
- 65     1  float global        + CNihilanth                  CCrossbow::DelayedHurt         and a third
- 66     4  float global        CBasePlayer CHoundeye         read together in one          open
- 67     1  float global        CBasePlayer CHoundeye         function keeping per-player
- 68     2  float global        + CApache CBigMomma CGargantua arrays
+ 61     1  [Glock] TransphasicImpactDamage (50000)  -          the damage each effect deals  ours, from the key:
+ 62     0  [Tripmine] GlobalBeamDamage (5000)  CBaseMonster  to this entity: the rc2.ini   TransphasicImpactDamage,
+                               CGargantua CTentacle          value by default, a fixed     GlobalBeamDamage,
+                               CTripmineGrenade              amount in the overrides (the  FartDamageInflict,
+ 63     1  [MP5] FartDamageInflict (5000)  CApache           big monsters take less).      ZoomedPrimaryDamage,
+                               CGargantua COsprey CTentacle  64-65 read in                 ZoomedSecondaryDamage,
+ 64     3  [Crossbow] ZoomedPrimaryDamage (350)  + CNihilanth CCrossbow::DelayedHurt;      BeamCoreDamage,
+ 65     1  [Crossbow] ZoomedSecondaryDamage (50000)          66-68 together in the         BeamRadialMaxDamage,
+                               + CNihilanth                  houndeye transform's beam     BeamViewDamage
+ 66     4  [TransformHoundeye] BeamCoreDamage (50000)
+                               CBasePlayer CHoundeye
+ 67     1  [TransformHoundeye] BeamRadialMaxDamage (250)
+                               CBasePlayer CHoundeye
+ 68     2  [TransformHoundeye] BeamViewDamage (5)
+                               + CApache CBigMomma CGargantua
  69     1  void, 1 arg         CBaseMonster CImpailer        release, with 58              tentative
                                CSuckMine
  70     1  return 1            CRocketMine CSphereMine       gauss: hull to trace          GetGuassHull (RC 1.9)
                                CSuckMine
  71     2  return 56.0f        same three                    gauss: distance out (RC 1.9:   GetGuassDistOut (RC 1.9)
                                                              int 56)
- 72     2  if takedamage:      -                             the gravity grenade's kill    ours: GravGrenadeKill
-           TakeDamage(a, b,                                  hit                            (inflictor, attacker)
-           global, ALWAYSGIB|
-           ENERGYBEAM|BLAST)
+ 72     2  if takedamage:      -                             the gravity grenade's kill    ours, from the key:
+           TakeDamage(a, b,                                  hit, [Grenade]                 GravGrenAnnihilate
+           [Grenade] GravGren-                               GravGrenAnnihilateDamage       (inflictor, attacker)
+           AnnihilateDamage,
+           ALWAYSGIB|ENERGY-
+           BEAM|BLAST)
  73    81  return 0            CBasePlayer: member at        "a player in play": replaces  ours: IsActivePlayer
                                +0x688 == 0                   SDK 2.3's IsPlayer()/"player"
                                                              classname checks in touches
@@ -73,10 +80,9 @@ slot calls default             overridden by                 reading            
  78     3  return 0, 1 arg     CUltimaGrenade (returns 1)    -                             open
 ```
 
-The "float global" defaults read addresses 0x192158-0x193d40, which are not `gSkillData`
-(`RefreshSkillData` fills 0x193e90-0x193fe0), are never stored to by address, and have no table
-pointing at them, so they are written in bulk. The changelog's "Menuconfig load/save" is a
-candidate (a settings block read from a file); not checked yet.
+The rc2.ini values come from `reference/prefs-rc2.tsv` (`scripts/prefs.py`): a static table of
+1,113 key records (type, heading, key, default) with a parallel array of 8-byte value slots at
+0x191bc8, which is what these defaults read.
 
 ## CBaseMonster
 
