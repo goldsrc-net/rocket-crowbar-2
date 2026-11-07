@@ -3304,7 +3304,11 @@ void AddToPrecachedList(const char* pszClassname) // orig 0xf5a20
 			return;
 	}
 
-	strcpy(g_pPrecachedStuff[g_iCntPrecached++], pszClassname);
+	// The original strcpy's unbounded into the 128-byte row: a longer name (an LCS spawner's
+	// classname, up to 255) runs on into the rows after it, as here. Original bug (crash),
+	// guarded: in the last row it ran past the list; ours stops at the list's end.
+	const int iRow = g_iCntPrecached++;
+	snprintf(g_pPrecachedStuff[0] + iRow * 128, sizeof(g_pPrecachedStuff) - iRow * 128, "%s", pszClassname);
 }
 
 bool IsClassnamePrecachedNoInvalid(const char* pszClassname) // orig 0xf5a80
@@ -3386,7 +3390,7 @@ void CUTIL_TimedEvent::TimeThink() // orig 0xf5d50
 void UTIL_RC2TimedEvent(void (*pfnEvent)(int), int iArg, float flDelay) // orig 0xf5d80
 {
 	CUTIL_TimedEvent* pEvent = (CUTIL_TimedEvent*)CBaseEntity::Create("timedevent", g_vecZero, g_vecZero, NULL);
-	// Original bug kept: no NULL check
+	// no NULL check, as the original; Create of a registered class never returns NULL
 	pEvent->pev->nextthink = flDelay + gpGlobals->time;
 	pEvent->m_pfnEvent = pfnEvent;
 	pEvent->m_iEventArg = iArg;

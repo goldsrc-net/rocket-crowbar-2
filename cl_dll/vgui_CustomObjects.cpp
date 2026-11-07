@@ -144,7 +144,9 @@ void CommandButton::RecalculateText()
 		szBuf[MAX_BUTTON_SIZE - 1] = 0;
 	}
 
-	Button::setText(szBuf);
+	// Original bug (crash), guarded: the original (as SDK 2.3) passes the text as setText's
+	// printf format; button texts carry team and player names (team menu, spectator panel)
+	Button::setText("%s", szBuf);
 }
 
 // orig client 0xd40a0

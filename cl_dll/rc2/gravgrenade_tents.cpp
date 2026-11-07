@@ -133,7 +133,8 @@ CGravGrenadeTent::CGravGrenadeTent() // orig client 0x80cb0
 
 	// VERIFY: m_pBeam, m_pGlow, m_pFlare, m_pDlight and m_pElight are left unset when there is no
 	// entity (harmless: nothing reads them then) and m_pBeam, m_pGlow, m_pFlare also when their
-	// sprite doesn't load, which KillEntity and Update then dereference (an original bug, kept)
+	// sprite doesn't load, which KillEntity and Update then dereference (an original bug, kept:
+	// nothing sends CLTE 0x32, neither the server nor the client's loopback)
 	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{

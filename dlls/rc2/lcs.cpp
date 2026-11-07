@@ -114,9 +114,11 @@ static bool LCS_GetToken(const char* pszLine, char* pszOut, int iToken)
 			char d = *++p;
 			while (d != '\0' && d != cClose)
 				d = *++p;
-			// past the closing character; an unterminated token steps past the end of the
-			// string too (kept: the caller's buffers have room)
-			p++;
+			// past the closing character. Original bug (crash), guarded: the original steps
+			// past an unterminated token's end too and reads on through stale bytes, out of
+			// the line's buffer at its end; ours stops at the terminator
+			if (d != '\0')
+				p++;
 		}
 		else
 		{
@@ -141,11 +143,15 @@ static bool LCS_GetToken(const char* pszLine, char* pszOut, int iToken)
 		return false;
 	}
 
+	// Original bug (crash), guarded: the original copies the token unbounded; every caller's
+	// buffer is 256 bytes and a .lcs line 512, so a long token overran the stack. Ours stops at 255.
+	const char* pszOutEnd = pszOut + 255;
+
 	if (c == '"' || c == '\'' || c == '{')
 	{
 		const char cClose = (c == '{') ? '}' : c;
 		char d = *++p;
-		while (d != '\0' && d != cClose)
+		while (d != '\0' && d != cClose && pszOut < pszOutEnd)
 		{
 			*pszOut++ = d;
 			d = *++p;
@@ -154,7 +160,7 @@ static bool LCS_GetToken(const char* pszLine, char* pszOut, int iToken)
 		return true;
 	}
 
-	while (c != ' ' && c != '\t' && c != '\n' && c != '\r')
+	while (c != ' ' && c != '\t' && c != '\n' && c != '\r' && pszOut < pszOutEnd)
 	{
 		*pszOut++ = c;
 		c = *++p;

@@ -211,8 +211,9 @@ bool CForkliftLightsTent::KillEntity(int iEntIndex) // orig client 0x8d8d0
 	for (int i = 0; i < 2; i++)
 	{
 		// Original bug, kept: the dlight is tested but the elight is the one killed and
-		// cleared, so the dlights live on to their die time, and a dlight without an elight
-		// writes through a null pointer.
+		// cleared, so the dlights live on to their die time. A dlight without an elight would
+		// write through a null pointer, but both are made together and the engine's
+		// CL_AllocDlight/CL_AllocElight never return NULL.
 		if (m_pDlight[i])
 		{
 			m_pElight[i]->die = gEngfuncs.GetClientTime() + 0.01;

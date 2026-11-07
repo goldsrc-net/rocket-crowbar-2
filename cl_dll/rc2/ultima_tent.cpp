@@ -228,6 +228,10 @@ CUltimaTent::CUltimaTent() // orig client 0x83dd0
 	m_vecOrigin = Vector(0, 0, 0);
 	m_flPulse = gEngfuncs.pfnRandomFloat(0, 6.2831855);
 	m_flTime = 0;
+	// Original bug (crash), guarded: the original leaves the down beams unset when
+	// laserbeam.spr doesn't load (Think's guard below then holds)
+	m_pDownBeam[0] = nullptr;
+	m_pDownBeam[1] = nullptr;
 	m_pGroundBeam = nullptr;
 	m_pSkyBeam = nullptr;
 	m_pFlare = nullptr;
@@ -444,8 +448,6 @@ CUltimaTent::CUltimaTent() // orig client 0x83dd0
 		if (m_pSkyBeam)
 			m_pSkyBeam->flags |= FBEAM_SHADEOUT;
 	}
-	// VERIFY: m_pDownBeam is left unset when laserbeam.spr doesn't load (and the think then
-	// dereferences it)
 
 	if (gEngfuncs.CL_LoadModel("sprites/xbeam1.spr", &iModelIndex))
 	{
@@ -680,13 +682,21 @@ bool CUltimaTent::Update(float flFrametime) // orig client 0x85a20
 		if (m_pGroundRingGlow[i])
 			m_pGroundRingGlow[i]->entity.origin = m_vecGroundRingPos[i];
 	}
-	// VERIFY: no null check on the down beams in the original
-	m_pDownBeam[1]->target = m_vecOrigin;
-	m_pDownBeam[0]->target = m_pDownBeam[1]->target;
-	m_pDownBeam[0]->source = vecGround + vecForward * m_vecGroundRing[0].x + vecRight * m_vecGroundRing[0].y + vecUp * m_vecGroundRing[0].z;
-	m_pDownBeam[1]->source = vecGround + vecForward * m_vecGroundRing[4].x + vecRight * m_vecGroundRing[4].y + vecUp * m_vecGroundRing[4].z;
-	m_pDownBeam[0]->delta = m_pDownBeam[0]->target - m_pDownBeam[0]->source;
-	m_pDownBeam[1]->delta = m_pDownBeam[1]->target - m_pDownBeam[1]->source;
+	// Original bug (crash), guarded: no null check on the down beams in the original; one is
+	// NULL when the engine's beam list was full (R_BeamPoints) or laserbeam.spr didn't load.
+	// Both targets are the grenade's origin, as the original's copy of [1]'s into [0]'s.
+	if (m_pDownBeam[1])
+	{
+		m_pDownBeam[1]->target = m_vecOrigin;
+		m_pDownBeam[1]->source = vecGround + vecForward * m_vecGroundRing[4].x + vecRight * m_vecGroundRing[4].y + vecUp * m_vecGroundRing[4].z;
+		m_pDownBeam[1]->delta = m_pDownBeam[1]->target - m_pDownBeam[1]->source;
+	}
+	if (m_pDownBeam[0])
+	{
+		m_pDownBeam[0]->target = m_vecOrigin;
+		m_pDownBeam[0]->source = vecGround + vecForward * m_vecGroundRing[0].x + vecRight * m_vecGroundRing[0].y + vecUp * m_vecGroundRing[0].z;
+		m_pDownBeam[0]->delta = m_pDownBeam[0]->target - m_pDownBeam[0]->source;
+	}
 
 	// the spokes
 	m_vecSpokeRingAngles = m_vecSpokeRingAngles + m_vecSpokeRingSpin * flFrametime * flSpinScale;

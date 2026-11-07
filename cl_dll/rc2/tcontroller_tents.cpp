@@ -1113,10 +1113,11 @@ bool CControllerChargeBallTent::Update(float flFrametime) // orig client 0x95e50
 		iBeam++;
 	}
 
-	// the beams nobody holds go dark
-	// (original bug: no null check; a beam missing because zbeam2.spr didn't load crashes here)
+	// the beams nobody holds go dark. Original bug (crash), guarded: no null check in the
+	// original; a beam is NULL when zbeam2.spr didn't load or the engine's beam list was full
 	for (; iBeam < 8; iBeam++)
-		m_pBeams[iBeam]->brightness = 0;
+		if (m_pBeams[iBeam])
+			m_pBeams[iBeam]->brightness = 0;
 
 streams:
 	m_flStreamTime -= flFrametime;

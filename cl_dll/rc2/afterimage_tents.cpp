@@ -146,7 +146,8 @@ bool CAfterimageTent::Update(float flFrametime) // orig client 0x92e70
 
 	// Original bugs, kept: the copies are dereferenced without a null check, and walking them
 	// front to back makes each take the one ahead's place as just updated, so the three behind the
-	// first all sit where the first was a frame ago instead of strung out behind it.
+	// first all sit where the first was a frame ago instead of strung out behind it. (A copy is
+	// NULL when no tempent was free, but nothing sends CLTE 0x44, so this never runs.)
 	for (int i = 1; i < AFTERIMAGES; i++)
 	{
 		m_pImage[i]->entity.origin = m_pImage[i - 1]->entity.origin;

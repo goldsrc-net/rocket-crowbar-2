@@ -85,8 +85,8 @@ bool Admin_IsTempAdmin(edict_t* pEntity) // name ours
 {
 	int wonid = g_engfuncs.pfnGetPlayerWONId(pEntity);
 	char szList[128];
-	// the original strcpy's the whole cvar into its 128-byte buffer (a stack overrun when the
-	// cvar is longer); ours truncates (dossier: original bugs)
+	// Original bug (crash), guarded: the original strcpy's the whole cvar into its 128-byte
+	// buffer (a stack overrun when the cvar is longer); ours truncates
 	strncpy(szList, CVAR_GET_STRING("sv_tempadmins"), sizeof(szList) - 1);
 	szList[127] = '\0';
 
@@ -210,6 +210,14 @@ static char g_szLCSStrings[512][64];	 // orig 0x183e70: strings LCS sets as targ
 static int g_iLCSStringCount = 0;		 // orig 0x18be70
 static int g_iLCSStringNext = 0;		 // orig 0x18be74
 
+// The original strcpy's unbounded into a 64-byte slot: a longer string runs on into the slots
+// after it, as here. Original bug (crash), guarded: in the last slots it ran past the pool into
+// the globals after it (orig 0x18be70, the counts); ours stops at the pool's end.
+static void LCS_CopyToSlot(int iSlot, const char* psz) // name ours
+{
+	snprintf(g_szLCSStrings[0] + iSlot * 64, sizeof(g_szLCSStrings) - iSlot * 64, "%s", psz);
+}
+
 // orig 0x1580. A persistent copy of the string for MAKE_STRING: an existing one if the pool
 // already holds it, else the next of 512 64-byte slots.
 static char* LCS_AllocString(const char* psz) // name ours
@@ -224,15 +232,14 @@ static char* LCS_AllocString(const char* psz) // name ours
 	{
 		if (g_iLCSStringCount < 512)
 			g_iLCSStringCount++;
-		// the original strcpy's unbounded into 64 bytes (dossier: original bugs)
-		strcpy(g_szLCSStrings[g_iLCSStringNext], psz);
+		LCS_CopyToSlot(g_iLCSStringNext, psz);
 		return g_szLCSStrings[g_iLCSStringNext++];
 	}
 
 	// full: the original goes back to slot 0 but doesn't advance past it, so the next string
 	// overwrites slot 0 again (dossier: original bugs)
 	g_iLCSStringNext = 0;
-	strcpy(g_szLCSStrings[0], psz);
+	LCS_CopyToSlot(0, psz);
 	return g_szLCSStrings[0];
 }
 

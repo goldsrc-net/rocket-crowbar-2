@@ -47,7 +47,10 @@ CAntiFrictionTent::CAntiFrictionTent()
 
 	if (gEngfuncs.pEventAPI->EV_IsLocal(m_iEntIndex - 1))
 		g_iRC2LocalAntiFriction = 1;
-	g_abRC2AntiFriction[m_iEntIndex] = 1;
+	// Original bug (crash), guarded: the original writes the 1024-byte table at the message's
+	// index unchecked
+	if (m_iEntIndex >= 0 && m_iEntIndex < (int)sizeof(g_abRC2AntiFriction))
+		g_abRC2AntiFriction[m_iEntIndex] = 1;
 }
 
 // Lives until its entity's kill.
@@ -63,7 +66,9 @@ bool CAntiFrictionTent::KillEntity(int iEntIndex) // orig client 0x83720
 
 	if (gEngfuncs.pEventAPI->EV_IsLocal(m_iEntIndex - 1))
 		g_iRC2LocalAntiFriction = 0;
-	g_abRC2AntiFriction[m_iEntIndex] = 0;
+	// Original bug (crash), guarded: as the constructor's write
+	if (m_iEntIndex >= 0 && m_iEntIndex < (int)sizeof(g_abRC2AntiFriction))
+		g_abRC2AntiFriction[m_iEntIndex] = 0;
 	m_iEntIndex = 0;
 	return true;
 }

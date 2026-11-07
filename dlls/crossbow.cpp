@@ -308,7 +308,7 @@ void CCrossbow::PrimaryAttack()
 		{
 			if (tr.pHit && UTIL_IsValidEntity(tr.pHit))
 			{
-				// Original bug, kept: a null instance here is called through anyway (dossier)
+				// no null test, as the original; UTIL_IsValidEntity has ruled a NULL instance out
 				CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
 				if (!pHit->IsBSPModel())
 					return;

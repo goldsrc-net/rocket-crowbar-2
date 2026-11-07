@@ -66,12 +66,16 @@ CClientTent* RC2_NewNukeTent(const CClientTent* pCopy) // orig client 0x75a80
 	return pTent;
 }
 
-// short entity, byte the player who fired it (0: none), byte 0. The original never sets the
-// lights below cl_detail 0, nor m_flBubbles at all: they keep whatever the heap held (kept).
+// short entity, byte the player who fired it (0: none), byte 0. The original never sets
+// m_flBubbles: it keeps whatever the heap held (kept).
 CNukeTent::CNukeTent() // orig client 0x76c40
 {
 	m_iEntIndex = READ_SHORT();
 	m_iOwner = READ_BYTE();
+	// Original bug (crash), guarded: the original never sets the lights below cl_detail 0, and
+	// Think and EntityGone write through them past their NULL tests
+	m_pLight = nullptr;
+	m_pLight2 = nullptr;
 	m_vecUp = Vector(0, 0, 0);
 	m_pTrails[2] = nullptr;
 	m_pTrails[1] = nullptr;

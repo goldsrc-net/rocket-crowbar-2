@@ -285,19 +285,23 @@ bool CDebugPanel::MsgFunc_DBGEntInfo(const char* pszName, int iSize, void* pbuf)
 		return true;
 	}
 
+	// Original bug (crash), guarded: the original strcpy's the server's strings into these
+	// buffers and sprintf's them into szLine unbounded (a map's target or targetname can be longer
+	// than 127), and passes the lines, names in them, as setText's printf format. Ours bounds
+	// each copy and line and prints them with "%s".
 	int iAddress = READ_LONG();
 	int iEntity = READ_SHORT();
-	strcpy(szClassname, READ_STRING());
+	snprintf(szClassname, sizeof(szClassname), "%s", READ_STRING());
 	g_iDebugEntity = iEntity;
-	sprintf(szLine, "0x%08X  %d  \"%s\"", iAddress, iEntity, szClassname);
-	m_pEntityLabel->setText(szLine);
+	snprintf(szLine, sizeof(szLine), "0x%08X  %d  \"%s\"", iAddress, iEntity, szClassname);
+	m_pEntityLabel->setText("%s", szLine);
 
-	strcpy(szClassname, READ_STRING()); // netname
-	strcpy(szTarget, READ_STRING());
-	strcpy(szTargetname, READ_STRING());
-	strcpy(szNetname, READ_STRING()); // model
-	sprintf(szLine, "Netname: \"%s\"   Model: \"%s\"\nTarget: \"%s\"    Targetname: \"%s\"", szClassname, szNetname, szTarget, szTargetname);
-	m_pNameLabel->setText(szLine);
+	snprintf(szClassname, sizeof(szClassname), "%s", READ_STRING()); // netname
+	snprintf(szTarget, sizeof(szTarget), "%s", READ_STRING());
+	snprintf(szTargetname, sizeof(szTargetname), "%s", READ_STRING());
+	snprintf(szNetname, sizeof(szNetname), "%s", READ_STRING()); // model
+	snprintf(szLine, sizeof(szLine), "Netname: \"%s\"   Model: \"%s\"\nTarget: \"%s\"    Targetname: \"%s\"", szClassname, szNetname, szTarget, szTargetname);
+	m_pNameLabel->setText("%s", szLine);
 
 	int iHealth = READ_SHORT();
 	int iArmor = READ_SHORT();
@@ -307,7 +311,7 @@ bool CDebugPanel::MsgFunc_DBGEntInfo(const char* pszName, int iSize, void* pbuf)
 	m_pHealthLabel->setText(szLine);
 
 	int iThink = READ_SHORT();
-	strcpy(szClassname, READ_STRING());
+	snprintf(szClassname, sizeof(szClassname), "%s", READ_STRING()); // guarded, as above
 	float flThink = iThink * 0.001f;
 	sprintf(szLine, "Think % 7.3f: %s", flThink, szClassname);
 	m_pThinkLabel->setText(szLine);
@@ -318,7 +322,7 @@ bool CDebugPanel::MsgFunc_DBGEntInfo(const char* pszName, int iSize, void* pbuf)
 	else
 		m_pThinkLabel->setFgColor(255, 160, 0, 0);
 
-	strcpy(szModel, READ_STRING());
+	snprintf(szModel, sizeof(szModel), "%s", READ_STRING()); // guarded, as above
 	sprintf(szLine, "Touch: %s", szModel);
 	m_pTouchLabel->setText(szLine);
 

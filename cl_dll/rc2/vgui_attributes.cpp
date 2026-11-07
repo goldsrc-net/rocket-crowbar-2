@@ -810,7 +810,9 @@ static void AttrMenu_LoadSlots()
 		char* psz = s_szAttrSlots[i];
 		psz[0] = '\0';
 		fgets(psz, 255, pFile);
-		psz[254] = '\0'; // VERIFY: the original writes psz[255], the next slot's first byte, which the next fgets overwrites
+		// Original bug (crash), guarded: the original writes psz[255], the next slot's first byte
+		// (which the next fgets overwrites), and for the last slot one byte past the array
+		psz[254] = '\0';
 		if ('\0' != psz[0])
 		{
 			for (int j = (int)strlen(psz) - 1; j >= 0; j--)

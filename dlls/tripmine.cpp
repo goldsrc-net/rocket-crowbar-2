@@ -409,7 +409,9 @@ void CTripmineGrenade::BeamUpdate()
 				}
 			}
 		}
-		if (!bFound)
+		// Original bug (crash), guarded: a crossing 9999 or more away sets bFound but no
+		// target, and the original reads pTarget through NULL below; ours counts it as none
+		if (!bFound || !pTarget)
 			return;
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
@@ -820,7 +822,7 @@ void CBouncyTripmine::BeamUpdate()
 				if (vecOut != g_vecZero)
 				{
 					m_pvecPoints[iLast] = vecOut;
-					m_ppBeams[iLast]->pev->angles = vecOut; // original bug: no null checks here
+					m_ppBeams[iLast]->pev->angles = vecOut; // no null checks, as the original; Spawn fills every slot and BeamUpdate stops with KillBeam
 				}
 			}
 			else
@@ -990,7 +992,9 @@ void CPunchTripmine::BeamUpdate()
 				}
 			}
 		}
-		if (!bFound)
+		// Original bug (crash), guarded: as the plain mine's, a crossing 9999 or more away
+		// leaves pTarget NULL for the found branch below
+		if (!bFound || !pTarget)
 			return;
 		pev->nextthink = gpGlobals->time + 0.1;
 	}

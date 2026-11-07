@@ -578,7 +578,9 @@ void CXBowTeather::AttachTouch(CBaseEntity* pOther)
 			DieThink();
 			return;
 		}
-		m_iShooterTether = pShooter->AddTether(entindex(), g_vecZero, m_flPullStrength, m_flPullDist);
+		// Original bug (crash), guarded: a teather from an LCS spawner has the spawner as its
+		// shooter, and AddTether writes player members past its end; ours fails the tether
+		m_iShooterTether = pShooter->IsPlayer() ? pShooter->AddTether(entindex(), g_vecZero, m_flPullStrength, m_flPullDist) : -1;
 		if (m_iShooterTether < 0)
 		{
 			m_iShooterTether = -1;
@@ -621,7 +623,8 @@ void CXBowTeather::AttachTouch(CBaseEntity* pOther)
 		pev->rendermode = kRenderTransTexture;
 
 		const float flZOffset = UTIL_GetGlobalTrace().vecEndPos.z - pOther->pev->origin.z;
-		m_iShooterTether = pShooter->AddTether(ENTINDEX(pOther->edict()), Vector(0, 0, flZOffset), m_flPullStrength, m_flPullDist);
+		// Original bug (crash), guarded: as above, a shooter that isn't a player
+		m_iShooterTether = pShooter->IsPlayer() ? pShooter->AddTether(ENTINDEX(pOther->edict()), Vector(0, 0, flZOffset), m_flPullStrength, m_flPullDist) : -1;
 		if (m_iShooterTether < 0)
 		{
 			m_iShooterTether = -1;

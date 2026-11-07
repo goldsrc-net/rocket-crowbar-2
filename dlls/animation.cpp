@@ -193,8 +193,9 @@ void SequencePrecache(void* pmodel, const char* pSequenceName)
 
 
 
-// orig 0x9db0. RC2: the ground speed scales with pev->scale. halflife-updated's check of a
-// negative sequence is kept (the original only checks the upper bound).
+// orig 0x9db0. RC2: the ground speed scales with pev->scale. Original bug (crash), guarded:
+// the original only checks the upper bound, so a negative sequence (an LCS "seq" token can set
+// one) reads before the sequence table; halflife-updated's check is kept.
 void GetSequenceInfo(void* pmodel, entvars_t* pev, float* pflFrameRate, float* pflGroundSpeed)
 {
 	studiohdr_t* pstudiohdr;
