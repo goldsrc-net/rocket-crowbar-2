@@ -8,7 +8,7 @@ originals. Nothing built here ships.
 
 Reads the .dsp's "Win32 Release" ADD CPP and ADD LINK32 lines and its SOURCE= list (skipping
 files excluded from that config), compiles each .c/.cpp with cl.exe and links with link.exe,
-keeping the .map (always) and asking for a .pdb. /YX, /FD and /Fr (precompiled headers,
+keeping the .map (always) and asking for a .pdb, not incrementally (the Release default). /YX, /FD and /Fr (precompiled headers,
 dependency and browse files) are dropped: they don't change code.
 
 Usage:
@@ -99,7 +99,10 @@ def main():
           (winpath(os.path.join(proj_dir, f)) if f.endswith(".lib") and "/" in f else f) for f in lf]
     name = os.path.splitext(dsp)[0]
     dll = os.path.join(out, name + ".dll")
-    code, log = wine(["LINK.EXE", "/nologo"] + lf + ["/map:" + winpath(os.path.join(out, name + ".map")),
+    # /INCREMENTAL:NO is VC6's Release default (the IDE adds it; the .dsp line doesn't say it).
+    # Without it /debug links incrementally: every call and vtable slot goes through a jump thunk
+    # and functions get int3 padding, which the originals don't have.
+    code, log = wine(["LINK.EXE", "/nologo", "/incremental:no"] + lf + ["/map:" + winpath(os.path.join(out, name + ".map")),
                      "/pdb:" + winpath(os.path.join(out, name + ".pdb")), "/out:" + winpath(dll)] +
                      [winpath(o) for o in objs], proj_dir)
     print(log[-3000:])
