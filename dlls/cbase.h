@@ -427,6 +427,19 @@ public:
 	int m_iRC2Base64;	   // orig +0x64. VERIFY: unread so far
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
 	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
+
+	// p5 needs: the byte at orig +0x66 (inside m_iRC2Base64 above), set by CFreezeTimer and
+	// read by the nuke, the forklift and the snark cam: the entity is frozen. An accessor until
+	// the member gets its own name.
+	bool RC2Frozen() const { return reinterpret_cast<const unsigned char*>(&m_iRC2Base64)[2] != 0; }
+	// p5 needs: the byte at orig +0x67, set by CAntiFricTimer: the entity slides (antifriction)
+	bool RC2AntiFriction() const { return reinterpret_cast<const unsigned char*>(&m_iRC2Base64)[3] != 0; }
+	// p5 needs: the byte at orig +0x64 (inside m_iRC2Base64): m_vecRC2Base58 holds a pull the
+	// client is told about (PullerCtrl in CBasePlayer::UpdateClientData) while it is set
+	unsigned char& RC2PullActive() { return reinterpret_cast<unsigned char*>(&m_iRC2Base64)[0]; }
+	// p5 needs: RC2's GiveAmmo (orig slot 24) has a fourth argument, where it stores how much it
+	// took; the three-argument one above stays for halflife-updated's callers
+	virtual int GiveAmmo(int iAmount, const char* szName, int iMax, int* piGiven) { return -1; }
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

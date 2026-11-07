@@ -162,6 +162,11 @@ public:
 
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
+
+public:
+	// p5 needs: RC2's CGameRules slot 57 (orig 0x804b0 overrides it in CHalfLifeMultiplay): may
+	// pPlayer be ridden. VERIFY: the base default, read from the single-player rules' vtable
+	virtual bool AllowRiding(CBasePlayer* pPlayer, CBaseEntity* pOther) { return false; }
 };
 
 extern CGameRules* InstallGameRules();
@@ -361,6 +366,11 @@ protected:
 	float m_flIntermissionEndTime = 0;
 	bool m_iEndIntermissionButtonHit;
 	void SendMOTDToClient(edict_t* client);
+
+	// p5 needs: CBasePlayer::PreThink sends a new client the MOTD itself (orig 0x98a20)
+	friend class CBasePlayer;
+	// p5 needs: orig 0x804b0, RC2's slot 57
+	bool AllowRiding(CBasePlayer* pPlayer, CBaseEntity* pOther) override;
 };
 
 //=========================================================

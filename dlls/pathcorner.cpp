@@ -27,7 +27,7 @@ class CPathCorner : public CPointEntity
 public:
 	void Spawn() override;
 	bool KeyValue(KeyValueData* pkvd) override;
-	float GetDelay() override { return m_flWait; }
+	float GetDelay() override { return m_flWait; } // orig 0x8e8e0
 	//	void Touch( CBaseEntity *pOther ) override;
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -38,7 +38,7 @@ private:
 	float m_flWait;
 };
 
-LINK_ENTITY_TO_CLASS(path_corner, CPathCorner);
+LINK_ENTITY_TO_CLASS(path_corner, CPathCorner); // orig 0x8e870
 
 // Global Savedata for Delay
 TYPEDESCRIPTION CPathCorner::m_SaveData[] =
@@ -46,7 +46,7 @@ TYPEDESCRIPTION CPathCorner::m_SaveData[] =
 		DEFINE_FIELD(CPathCorner, m_flWait, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CPathCorner, CPointEntity);
+IMPLEMENT_SAVERESTORE(CPathCorner, CPointEntity); // orig 0x8e8f0 Save, orig 0x8e920 Restore
 
 //
 // Cache user-entity-field values until spawn is called.
@@ -63,6 +63,7 @@ bool CPathCorner::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0x8e9c0
 void CPathCorner::Spawn()
 {
 	ASSERTSZ(!FStringNull(pev->targetname), "path_corner without a targetname");
@@ -127,8 +128,8 @@ TYPEDESCRIPTION CPathTrack::m_SaveData[] =
 		DEFINE_FIELD(CPathTrack, m_altName, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CPathTrack, CBaseEntity);
-LINK_ENTITY_TO_CLASS(path_track, CPathTrack);
+IMPLEMENT_SAVERESTORE(CPathTrack, CBaseEntity); // orig 0x8e9d0 Save, orig 0x8ea00 Restore
+LINK_ENTITY_TO_CLASS(path_track, CPathTrack); // orig 0x8ea30
 
 //
 // Cache user-entity-field values until spawn is called.
@@ -175,6 +176,7 @@ void CPathTrack::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 }
 
 
+// orig 0x8ebb0
 void CPathTrack::Link()
 {
 	edict_t* pentTarget;
@@ -405,6 +407,7 @@ CPathTrack* CPathTrack::Nearest(Vector origin)
 }
 
 
+// orig 0x8f430
 CPathTrack* CPathTrack::Instance(edict_t* pent)
 {
 	if (FClassnameIs(pent, "path_track"))

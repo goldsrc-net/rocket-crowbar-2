@@ -42,12 +42,20 @@ public:
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
-	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x8c6e0
 
 	void Spawn() override;
 	void Precache() override;
-	int Classify() override { return CLASS_MACHINE; }
-	int BloodColor() override { return DONT_BLEED; }
+	int Classify() override { return CLASS_MACHINE; } // orig 0x8c6f0
+	int BloodColor() override { return DONT_BLEED; } // orig 0x8c700
+
+	// Rocket Crowbar 2's base virtuals (reference/BASE_VIRTUALS.md): fixed damage from the fart
+	// and the crossbow's zoomed shots instead of rc2.ini's, and its capability bits
+	float FartDamageInflict() override { return 0; }								// orig 0x8c6b0
+	float ZoomedPrimaryDamage() override { return 50; }							// orig 0x8c6c0
+	float ZoomedSecondaryDamage() override { return 150; }						// orig 0x8c6d0
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 2; }		// orig 0x8c690
+	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 1; }	// orig 0x8c6a0
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 
 	void UpdateGoal();
@@ -105,7 +113,7 @@ public:
 	int m_iDoRightSmokePuff;
 };
 
-LINK_ENTITY_TO_CLASS(monster_osprey, COsprey);
+LINK_ENTITY_TO_CLASS(monster_osprey, COsprey); // orig 0x8c600
 
 TYPEDESCRIPTION COsprey::m_SaveData[] =
 	{
@@ -139,7 +147,7 @@ TYPEDESCRIPTION COsprey::m_SaveData[] =
 		DEFINE_FIELD(COsprey, m_iDoLeftSmokePuff, FIELD_INTEGER),
 		DEFINE_FIELD(COsprey, m_iDoRightSmokePuff, FIELD_INTEGER),
 };
-IMPLEMENT_SAVERESTORE(COsprey, CBaseMonster);
+IMPLEMENT_SAVERESTORE(COsprey, CBaseMonster); // orig 0x8c710 Save, orig 0x8c740 Restore
 
 
 void COsprey::Spawn()
@@ -201,11 +209,13 @@ void COsprey::Precache()
 	m_iEngineGibs = PRECACHE_MODEL("models/osprey_enginegibs.mdl");
 }
 
+// orig 0x8c9a0
 void COsprey::CommandUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
+// orig 0x8c9c0
 void COsprey::FindAllThink()
 {
 	CBaseEntity* pEntity = NULL;
@@ -233,6 +243,7 @@ void COsprey::FindAllThink()
 }
 
 
+// orig 0x8ca90
 void COsprey::DeployThink()
 {
 	UTIL_MakeAimVectors(pev->angles);
@@ -282,6 +293,7 @@ bool COsprey::HasDead()
 }
 
 
+// orig 0x8d0b0
 CBaseMonster* COsprey::MakeGrunt(Vector vecSrc)
 {
 	CBaseEntity* pEntity;
@@ -324,6 +336,7 @@ CBaseMonster* COsprey::MakeGrunt(Vector vecSrc)
 }
 
 
+// orig 0x8d320
 void COsprey::HoverThink()
 {
 	int i;
@@ -383,6 +396,7 @@ void COsprey::UpdateGoal()
 }
 
 
+// orig 0x8d610
 void COsprey::FlyThink()
 {
 	StudioFrameAdvance();
@@ -415,6 +429,7 @@ void COsprey::FlyThink()
 }
 
 
+// orig 0x8d760. RC2: no rotor pitch shift
 void COsprey::Flight()
 {
 	float t = (gpGlobals->time - m_startTime);
@@ -464,6 +479,7 @@ void COsprey::Flight()
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
 	}
+#if 0 // RC2 took out the rotor's pitch shift against the first player
 	else
 	{
 		CBaseEntity* pPlayer = NULL;
@@ -493,9 +509,11 @@ void COsprey::Flight()
 		}
 		// EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "apache/ap_whine1.wav", flVol, 0.2, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch);
 	}
+#endif
 }
 
 
+// orig 0x8dbe0
 void COsprey::HitTouch(CBaseEntity* pOther)
 {
 	pev->nextthink = gpGlobals->time + 2.0;
@@ -520,6 +538,7 @@ int COsprey::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 
 
 
+// orig 0x8dc00
 void COsprey::Killed(entvars_t* pevAttacker, int iGib)
 {
 	pev->movetype = MOVETYPE_TOSS;
@@ -552,6 +571,7 @@ void COsprey::CrashTouch(CBaseEntity* pOther)
 }
 
 
+// orig 0x8ddb0
 void COsprey::DyingThink()
 {
 	StudioFrameAdvance();

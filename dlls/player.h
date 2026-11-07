@@ -356,7 +356,147 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// Rocket Crowbar 2. RC2's CBasePlayer is 0x1174 bytes: from orig +0x638 on, after
+	// m_szAnimExtention, it has none of SDK 2.3's status bar members and moves the gauss
+	// charge floats to +0x654..+0x660 (halflife-updated's members above stay). None of these is
+	// saved; every name is ours (reference/dossiers/p5.md has what each is read from).
+	int m_iGaussBeacons;		// orig +0x638: bit 0 while one of this player's gauss beacons is out (EIcons)
+	int m_iClientGaussBeacons;	// orig +0x63c: what the client last got
+	byte m_iPlayerStat;			// orig +0x640: what PlrStat sends about this player; 0 on spawn and death
+	byte m_iClientPlayerStat;	// orig +0x641: what it last sent (0xff forces a resend)
+	int m_iPhysFlags;			// orig +0x644: mirrored into the physinfo key "phf" (%02X)
+	int m_iPhysFlag2Sources;	// orig +0x648: reasons holding phys flag 2 set
+	float m_flPhysFlag10Time;	// orig +0x64c: when phys flag 0x10 goes off (-1: never)
+	bool m_bJetpack;			// orig +0x650: the jetpack is on (CLTE 4)
+	float m_flLastPreThink;		// orig +0x664
+	float m_flFrameTime;		// orig +0x668: since the last PreThink, 0.0001 to 10
+	int m_iClientId;			// orig +0x66c: WON id (or entity index for a bot) of the client that last spawned here
+	int m_iInitStage;			// orig +0x670: the first frames of a new client: 3 resets the HUD, 2 the MOTD, 1 AttrConf
+	int m_iRC2_674;				// orig +0x674: set from the function at orig 0x1050 when a new client spawns. VERIFY: meaning
+	float m_flJoinAllowedTime;	// orig +0x678: before it a new client can't join from the spectator view
+	float m_flDmgScore;			// orig +0x67c: the damage-based score (mp_scoremode 1)
+	float m_flClientDmgScore;	// orig +0x680: what ScoreInfo last sent of it
+	float m_flNextImpulse;		// orig +0x684: impulses are taken at most every 0.1 s (204 always)
+	bool m_bNotJoined;			// orig +0x688: still in the spectator view before joining; IsActivePlayer is its opposite
+	int m_iCarrying;			// orig +0x68c: VERIFY: holds the player's weapons and use (no weapon switch, holster or reload); gets a virtual hull
+	bool m_bIsProxy;			// orig +0x690: an HLTV proxy (FL_PROXY when it connected)
+	bool m_bForceSpawn;			// orig +0x698: the forcespawn command: respawn or join now
+	int m_iRidingPlayer;		// orig +0x69c: entity index of the player whose shoulders this one rides (p1 needs it)
+	int m_iRidingShoulder;		// orig +0x6a0: which of his shoulders, 0 or 1
+	int m_iShoulderRider[2];	// orig +0x6a4, +0x6a8: entity indices of the players riding this one's shoulders (p1 needs them)
+	float m_rgflNextAttr[10];	// orig +0x6ac: the attributes chosen for the next spawn (rc2.ini [Attributes])
+	int m_iNextAttrFlags;		// orig +0x6d4
+	int m_iNextSpawnWeapons;	// orig +0x6d8 (1, the glock, by default)
+	int m_iNextTransformKind;	// orig +0x6dc
+	float m_rgflAttr[10];		// orig +0x6e0: the attributes in effect (RC2ATTR_*), applied by Spawn
+	int m_iAttrFlags;			// orig +0x708: RC2ATTRF_* bits
+	int m_iSpawnWeapons;		// orig +0x70c: the weapons a multiplayer spawn gives (bits: glock, 357, mp5, shotgun, crossbow, rpg, egon, gauss, hornetgun)
+	int m_iTransformKind;		// orig +0x710: what this player transforms into (6: none, and no +use)
+	int m_rgiAttrInt[8];		// orig +0x714: per-player ints the rest of rc2.dll keeps through Get/SetPlayerAttrInt
+	float m_rgflAttrValue[8];	// orig +0x734: per-player floats, through Get/SetPlayerAttrFloat
+	bool m_bRC2_754;			// orig +0x754: cleared for a new client. VERIFY: meaning
+	float m_flEnergy;			// orig +0x758: 0-100
+	int m_iClientEnergy;		// orig +0x75c
+	float m_flEnergyRegenTime;	// orig +0x760: energy regenerates after it (-1: never)
+	float m_flEnergyDrawTime;	// orig +0x764: the energy draw ends (or can be used again) then
+	bool m_bEnergyDraw;			// orig +0x768: drawing energy (CLTE 6)
+	float m_flCreateHealthTime; // orig +0x76c
+	bool m_bCreatingHealth;		// orig +0x770
+	float m_flHealthCreated;	// orig +0x774: health given so far by this creation
+	bool m_bShield;				// orig +0x778: the shield is up
+	bool m_bClientShield;		// orig +0x779: its effect was sent (CLTE 0x25)
+	float m_flHealthRegen;		// orig +0x77c: fractional health regenerated (or decayed over max)
+	float m_flJoinTime;			// orig +0x780
+	bool m_bDebugCounts;		// orig +0x784: send DBGCounts / DBGEntInfo
+	edict_t* m_pentDebug;		// orig +0x78c: the entity DBGEntInfo watches
+	int m_iDebugSerial;			// orig +0x790: its serial number when picked
+	float m_flNextDebugCounts;	// orig +0x794
+	CBaseEntity* m_pCam;		// orig +0x798: RC2's dying camera (an invisible copy of the player model)
+	CBaseEntity* m_pCam2;		// orig +0x79c: a second, hidden helper entity. VERIFY: role
+	int m_iSpecIndex;			// orig +0x7a0: the spawn point or player the pre-join view is on (-1: none)
+	bool m_bSpecChase;			// orig +0x7a4: the pre-join view follows a player (else spawn points)
+	CBaseEntity* m_rgpHulls[16]; // orig +0x7a8: the player's virtual hulls (UpdateVirtualHulls, util)
+	float m_flNextHullUpdate;	// orig +0x7e8
+	// orig +0x7ec..+0xdeb and +0xdf8..+0x10f7: per-player tables the pm_shared side of rc2.dll
+	// keeps (ResetPMTables, orig 0xaaa60); names left to that package
+	int m_rgiPM7ec[64];
+	int m_rgiPM8ec[64];
+	Vector m_rgvecPM9ec[64];
+	int m_rgiPMcec[64];
+	Vector m_vecClientPull;		// orig +0xdec: what PullerCtrl last sent of m_vecRC2Base58
+	Vector m_rgvecPMdf8[64];
+	int m_iTransform;			// orig +0x10f8: 0 human, 1-5 transformed (TformStat), 6 a special state with no damage, use or think
+	bool m_bTransforming;		// orig +0x10fc
+	float m_flTransformTime;	// orig +0x1100
+
+	bool IsActivePlayer() override { return !m_bNotJoined; } // orig 0x9bd00
+	bool IsViewOfPlayer(CBaseEntity* pPlayer) override;
+
+	// RC2's own player functions (names ours)
+	void StartDyingCam(bool bGibbed);		   // RC 1.9's name
+	void SendDebugCounts();
+	CBaseEntity* FindNextNamed(bool bReverse, const char* pszClassname);
+	bool InitNewClient();
+	void GoToSpectatorView();
+	void ResetPhysFlags();
+	void SetPhysFlags(int iBits);
+	void ClearPhysFlags(int iBits);
+	void AddPhysFlag2Source(int iBits);
+	void RemovePhysFlag2Source(int iBits);
+	void ClearPhysFlag2Sources();
+	void SetPhysFlag10For(float flTime);
+	bool RidersAddPlayerItem(CBasePlayerItem* pItem);
+	bool RidersHavePlayerItem(CBasePlayerItem* pItem);
+	int RidersGiveAmmo(int iAmount, const char* szName, int iMax);
+	void UpdateGaussBeacons();
+	int GiveAmmo(int iAmount, const char* szName, int iMax, int* piGiven) override;
 };
+
+// Rocket Crowbar 2's attributes (m_rgflAttr), in its order; names ours, from the rc2.ini cost
+// keys AttrPoints reads
+enum
+{
+	RC2ATTR_JUMP = 0,
+	RC2ATTR_SPEED,
+	RC2ATTR_ATTACK, // scales the damage the player does
+	RC2ATTR_DEFEND, // scales the damage the player takes
+	RC2ATTR_HEALTH,
+	RC2ATTR_EXTRAHEALTH,
+	RC2ATTR_ARMOR,
+	RC2ATTR_EXTRAARMOR,
+	RC2ATTR_ENERGYREGEN,
+	RC2ATTR_DMGREFLECT,
+};
+
+#define RC2ATTRF_NODROWN 0x002	// can't drown
+#define RC2ATTRF_SHIELD 0x080	// starts with the shield up
+#define RC2ATTRF_LONGJUMP 0x100 // has the long jump
+
+// Rocket Crowbar 2's per-player attribute access by entity index, as the rest of rc2.dll uses
+// it (orig 0x95690-0x95970: each is a wrapper around an inner function). Names ours.
+float PlayerAttr(int iAttr, int iPlayer);
+int PlayerAttrFlags(int iPlayer);
+void SetPlayerAttrInt(int iPlayer, int i, int iValue);
+int GetPlayerAttrInt(int iPlayer, int i);
+void SetPlayerAttrFloat(int iPlayer, int i, float flValue);
+float GetPlayerAttrFloat(int iPlayer, int i);
+float PlayerEnergy(int iPlayer);
+void UsePlayerEnergy(int iPlayer, float flAmount, float flRegenDelay);
+void PlayerEnergyEffect(int iPlayer, int iMode, Vector vecA, Vector vecB);
+bool PlayerHasAttrFlag200(CBaseEntity* pPlayer);
+int AttrPoints(int iAttr, float flValue);
+float AttrDefault(int iAttr);
+void PlayerHideViewEntities(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin));
+void PlayerShowViewEntities(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin));
+
+// RC2's transformation events (CBasePlayer::Precache); names ours
+inline unsigned short g_usTAssassinGun;
+inline unsigned short g_usTAssassinKick;
+inline unsigned short g_usTHoundeyeBeam;
+inline unsigned short g_usTHoundeyeSonic;
+inline unsigned short g_usTControllerThrow;
+inline unsigned short g_usTBatBite;
 
 inline void CBasePlayer::SetWeaponBit(int id)
 {
