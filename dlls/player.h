@@ -356,6 +356,18 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p2 needs: RC2 player members (names ours)
+	int m_iRC2ControlledEnt; // orig +0x69c: entity index the player acts through; the crossbow's bolts are owned by it when set
+	int m_iRC2State648;		 // orig +0x648. VERIFY: meaning; a tank can't be taken while it's set
+	int m_iRC2State68c;		 // orig +0x68c. VERIFY: as +0x648
+	bool m_bRC2State10fc;	 // orig +0x10fc (byte). VERIFY: as +0x648
+	float m_flRC2Energy;			  // orig +0x758: the energy the crowbar's charge and rocket spend
+	float m_flRC2EnergyRecharge;	  // orig +0x760: energy recharges after this time
+	int m_iRC2ViewPlayer1;			  // orig +0x6a4: a player index tied to this one (IsViewOfPlayer; the freeze timer freezes it along)
+	int m_iRC2ViewPlayer2;			  // orig +0x6a8: as +0x6a4
+	bool m_bRC2Shield;				  // orig +0x778 (byte): the shield is up (RC2ShieldDamage reads it; the freeze timer drops it)
+	float m_flRC2NextSuperWeapon;	  // orig +0x780: the egon's nuke can't fire again before this
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

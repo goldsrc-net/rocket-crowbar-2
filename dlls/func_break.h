@@ -53,13 +53,15 @@ public:
 	// To spark when hit
 	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 
-	bool IsBreakable();
+	bool IsBreakable(); // orig 0x43300 (SDK 2.3's inline, emitted)
 	bool SparkWhenHit();
 
 	int DamageDecal(int bitsDamageType) override;
 
 	void EXPORT Die();
-	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
+	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); } // orig 0x42270 (0)
+	// RC2 (orig slot 76, orig 0x42260): breakables answer bit 0x10. VERIFY: what the bit means to its askers
+	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 0x10; }
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 

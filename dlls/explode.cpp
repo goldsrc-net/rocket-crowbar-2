@@ -25,6 +25,20 @@
 #include "decals.h"
 #include "explode.h"
 #include "weapons.h"
+#include "gamerules.h"
+#include "soundent.h"
+#include "p2shared.h"
+
+// Rocket Crowbar 2 (p2): in multiplayer env_explosion and ExplodeAt leave the fireball, decal and
+// sparks to the client's explosion event; reference/dossiers/p2.md.
+extern unsigned short g_usRC2Explode; // orig .data 0x1afd18, name ours: events/explode.sc (W_Precache)
+// orig 0xf5920 (util), name ours: a direction packed into an int, 10 bits a component (9 of
+// magnitude * 511 and a sign bit)
+extern int UTIL_PackDirection(Vector vecDir);
+// orig 0xf3900 (util), name ours: RC2's other radius damage. VERIFY: the arguments' meaning
+extern void RC2RadiusDamage(entvars_t* pevAttacker, entvars_t* pevInflictor, entvars_t* pevIgnore, Vector vecSrc, float flRadius, float flDamage, float flScale, int bitsDamageType, int iFlag);
+
+// orig 0x40960: Vector::operator float*(), the header's inline (vector.h), emitted here
 
 // Spark Shower
 class CShower : public CBaseEntity
@@ -32,11 +46,12 @@ class CShower : public CBaseEntity
 	void Spawn() override;
 	void Think() override;
 	void Touch(CBaseEntity* pOther) override;
-	int ObjectCaps() override { return FCAP_DONT_SAVE; }
+	int ObjectCaps() override { return FCAP_DONT_SAVE; } // orig 0x40010
 };
 
-LINK_ENTITY_TO_CLASS(spark_shower, CShower);
+LINK_ENTITY_TO_CLASS(spark_shower, CShower); // orig 0x3ffa0
 
+// orig 0x40020. RC2's is SDK 2.3's (it differs from the VC6 build only by the base's offsets).
 void CShower::Spawn()
 {
 	pev->velocity = RANDOM_FLOAT(200, 300) * pev->angles;
@@ -59,6 +74,7 @@ void CShower::Spawn()
 }
 
 
+// orig 0x401a0, SDK 2.3's
 void CShower::Think()
 {
 	UTIL_Sparks(pev->origin);
@@ -104,8 +120,8 @@ TYPEDESCRIPTION CEnvExplosion::m_SaveData[] =
 		DEFINE_FIELD(CEnvExplosion, m_spriteScale, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CEnvExplosion, CBaseMonster);
-LINK_ENTITY_TO_CLASS(env_explosion, CEnvExplosion);
+IMPLEMENT_SAVERESTORE(CEnvExplosion, CBaseMonster); // orig 0x40310 (Save), orig 0x40340 (Restore)
+LINK_ENTITY_TO_CLASS(env_explosion, CEnvExplosion);  // orig 0x40370
 
 bool CEnvExplosion::KeyValue(KeyValueData* pkvd)
 {
@@ -148,6 +164,9 @@ void CEnvExplosion::Spawn()
 	m_spriteScale = (int)flSpriteScale;
 }
 
+// orig 0x404c0. RC2's is SDK 2.3's in single player; in multiplayer the client's explosion event
+// draws it, the activator is the attacker, and it goes at once (unless repeatable) without the
+// smoke think.
 void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	TraceResult tr;
@@ -160,6 +179,23 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	vecSpot = pev->origin + Vector(0, 0, 8);
 
 	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
+
+	if (g_pGameRules->IsMultiplayer())
+	{
+		UTIL_SetOrigin(pev, tr.vecEndPos);
+		PLAYBACK_EVENT_FULL(0, edict(), g_usRC2Explode, 0, tr.vecEndPos, g_vecZero, (float)m_iMagnitude, 0, UTIL_PackDirection(-tr.vecPlaneNormal), 0, 0, 0);
+
+		// Pull out of the wall a bit
+		if (tr.flFraction != 1.0)
+			pev->origin = tr.vecEndPos + (tr.vecPlaneNormal * (m_iMagnitude - 24) * 0.6);
+
+		if ((pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE) == 0)
+			::RadiusDamage(pev->origin, pev, pActivator ? pActivator->pev : pev, (float)m_iMagnitude, (float)m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
+
+		if ((pev->spawnflags & SF_ENVEXPLOSION_REPEATABLE) == 0)
+			UTIL_Remove(this);
+		return;
+	}
 
 	// Pull out of the wall a bit
 	if (tr.flFraction != 1.0)
@@ -271,4 +307,38 @@ void ExplosionCreate(const Vector& center, const Vector& angles, edict_t* pOwner
 
 	pExplosion->Spawn();
 	pExplosion->Use(NULL, NULL, USE_TOGGLE, 0);
+}
+
+
+// orig 0x40ab0, name ours: an invisible explosion of class pszClassname (its kills read as that)
+// at vecOrigin, against a surface facing back along vecDir; the client's explosion event draws
+// it. bOtherDamage uses RC2's other radius damage (0xf3900).
+void ExplodeAt(Vector vecOrigin, Vector vecDir, float flDamage, const char* pszClassname, entvars_t* pevOwner, bool bOtherDamage)
+{
+	CBaseEntity* pExplosion = GetClassPtr((CBaseEntity*)NULL);
+	pExplosion->Spawn();
+	pExplosion->pev->effects |= EF_NODRAW;
+	pExplosion->pev->classname = MAKE_STRING(pszClassname);
+
+	entvars_t* pev = pExplosion->pev;
+	if (!bOtherDamage)
+	{
+		if (pevOwner)
+			::RadiusDamage(vecOrigin - vecDir * 8, pev, pevOwner, flDamage, flDamage * 2.5, CLASS_NONE, DMG_BLAST);
+		else
+			::RadiusDamage(vecOrigin - vecDir * 8, pev, pev, flDamage, flDamage * 2.5, CLASS_NONE, DMG_BLAST);
+	}
+	else
+	{
+		if (pevOwner)
+			RC2RadiusDamage(pevOwner, pev, NULL, vecOrigin - vecDir * 8, flDamage * 2.5, flDamage, 1.0, DMG_BLAST, 1);
+		else
+			RC2RadiusDamage(pev, pev, NULL, vecOrigin - vecDir * 8, flDamage * 2.5, flDamage, 1.0, DMG_BLAST, 1);
+	}
+
+	UTIL_SetOrigin(pev, vecOrigin);
+	PLAYBACK_EVENT_FULL(0, pExplosion->edict(), g_usRC2Explode, 0, vecOrigin, g_vecZero, flDamage, 0, UTIL_PackDirection(vecDir), 0, 0, 0);
+	pev->flags |= FL_KILLME;
+
+	CSoundEnt::InsertSound(bits_SOUND_COMBAT, vecOrigin - vecDir * 16, 1024, 3.0);
 }

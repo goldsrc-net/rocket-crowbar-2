@@ -17,6 +17,7 @@
 #include "cbase.h"
 #include "effects.h"
 #include "weapons.h"
+#include "p2shared.h"
 #include "explode.h"
 
 #include "player.h"
@@ -63,7 +64,7 @@ public:
 	void StopRotSound();
 
 	// Bmodels don't go across transitions
-	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x45b40
 
 	inline bool IsActive() { return (pev->spawnflags & SF_TANK_ACTIVE) != 0; }
 	inline void TankActivate()
@@ -107,6 +108,7 @@ public:
 
 protected:
 	CBasePlayer* m_pController;
+	edict_t* m_pControllerEdict; // orig +0x74, RC2's (saved): the controller's edict, checked before m_pController is used
 	float m_flNextAttack;
 	Vector m_vecControllerUsePos;
 
@@ -165,13 +167,14 @@ TYPEDESCRIPTION CFuncTank::m_SaveData[] =
 		DEFINE_FIELD(CFuncTank, m_sightOrigin, FIELD_VECTOR),
 		DEFINE_FIELD(CFuncTank, m_spread, FIELD_INTEGER),
 		DEFINE_FIELD(CFuncTank, m_pController, FIELD_CLASSPTR),
+		DEFINE_FIELD(CFuncTank, m_pControllerEdict, FIELD_EDICT), // RC2's
 		DEFINE_FIELD(CFuncTank, m_vecControllerUsePos, FIELD_VECTOR),
 		DEFINE_FIELD(CFuncTank, m_flNextAttack, FIELD_TIME),
 		DEFINE_FIELD(CFuncTank, m_iBulletDamage, FIELD_INTEGER),
 		DEFINE_FIELD(CFuncTank, m_iszMaster, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncTank, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CFuncTank, CBaseEntity); // orig 0x43b40, orig 0x43b70
 
 static Vector gTankSpread[] =
 	{
@@ -184,6 +187,7 @@ static Vector gTankSpread[] =
 #define MAX_FIRING_SPREADS ARRAYSIZE(gTankSpread)
 
 
+// orig 0x43c50 (SDK 2.3's at RC2's offsets)
 void CFuncTank::Spawn()
 {
 	Precache();
@@ -209,6 +213,7 @@ void CFuncTank::Spawn()
 }
 
 
+// orig 0x43ed0 (SDK 2.3's)
 void CFuncTank::Precache()
 {
 	if (!FStringNull(m_iszSpriteSmoke))
@@ -221,6 +226,7 @@ void CFuncTank::Precache()
 }
 
 
+// orig 0x43f40 (SDK 2.3's)
 bool CFuncTank::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "yawrate"))
@@ -336,6 +342,7 @@ bool CFuncTank::KeyValue(KeyValueData* pkvd)
 
 //==================================================================================
 // TANK CONTROLLING
+// orig 0x44650 (SDK 2.3's)
 bool CFuncTank::OnControls(entvars_t* pevTest)
 {
 	if ((pev->spawnflags & SF_TANK_CANCONTROL) == 0)
@@ -349,6 +356,8 @@ bool CFuncTank::OnControls(entvars_t* pevTest)
 	return false;
 }
 
+// orig 0x446b0. RC2: not while the active weapon can't be holstered, keeps the controller's
+// edict, and has no console message.
 bool CFuncTank::StartControl(CBasePlayer* pController)
 {
 	if (m_pController != NULL)
@@ -361,9 +370,11 @@ bool CFuncTank::StartControl(CBasePlayer* pController)
 			return false;
 	}
 
-	ALERT(at_console, "using TANK!\n");
+	if (pController->m_pActiveItem && !pController->m_pActiveItem->CanHolster())
+		return false;
 
 	m_pController = pController;
+	m_pControllerEdict = pController->edict();
 	if (m_pController->m_pActiveItem)
 	{
 		m_pController->m_pActiveItem->Holster();
@@ -379,26 +390,31 @@ bool CFuncTank::StartControl(CBasePlayer* pController)
 	return true;
 }
 
+// orig 0x44790. RC2: only while the controller's edict is still valid, which it forgets too,
+// and no console message. RC2 calls m_pActiveItem->Deploy(); halflife-updated's EquipWeapon
+// (which deploys it, or picks another weapon if that fails) is kept.
 void CFuncTank::StopControl()
 {
 	// TODO: bring back the controllers current weapon
 	if (!m_pController)
 		return;
+	if (!UTIL_IsValidEntity(m_pControllerEdict))
+		return;
 
 	m_pController->EquipWeapon();
-
-	ALERT(at_console, "stopped using TANK\n");
 
 	m_pController->m_iHideHUD &= ~HIDEHUD_WEAPONS;
 
 	pev->nextthink = 0;
 	m_pController = NULL;
+	m_pControllerEdict = NULL;
 
 	if (IsActive())
 		pev->nextthink = pev->ltime + 1.0;
 }
 
 // Called each frame by the player's ItemPostFrame
+// orig 0x44810 (SDK 2.3's)
 void CFuncTank::ControllerPostFrame()
 {
 	ASSERT(m_pController != NULL);
@@ -425,12 +441,18 @@ void CFuncTank::ControllerPostFrame()
 ////////////// END NEW STUFF //////////////
 
 
+// orig 0x44a60. RC2 lets only an active player who isn't busy with any of RC2's own states
+// (CBasePlayer members, reference/dossiers/p2.md) take the controls, where SDK 2.3 asked for
+// CLASS_PLAYER.
 void CFuncTank::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if ((pev->spawnflags & SF_TANK_CANCONTROL) != 0)
 	{ // player controlled turret
 
-		if (pActivator->Classify() != CLASS_PLAYER)
+		if (!pActivator->IsActivePlayer())
+			return;
+		CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
+		if (pPlayer->m_iRC2State68c != 0 || pPlayer->m_iRC2ControlledEnt != 0 || pPlayer->m_bRC2State10fc || pPlayer->m_iRC2State648 != 0)
 			return;
 
 		if (value == 2 && useType == USE_SET)
@@ -460,6 +482,7 @@ void CFuncTank::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 }
 
 
+// orig 0x44b90 (SDK 2.3's)
 edict_t* CFuncTank::FindTarget(edict_t* pPlayer)
 {
 	return pPlayer;
@@ -467,6 +490,7 @@ edict_t* CFuncTank::FindTarget(edict_t* pPlayer)
 
 
 
+// orig 0x44ba0 (SDK 2.3's)
 bool CFuncTank::InRange(float range)
 {
 	if (range < m_minRange)
@@ -489,6 +513,7 @@ void CFuncTank::Think()
 		StopRotSound();
 }
 
+// orig 0x44c60 (SDK 2.3's but for the controller check)
 void CFuncTank::TrackTarget()
 {
 	TraceResult tr;
@@ -498,6 +523,10 @@ void CFuncTank::TrackTarget()
 	edict_t* pTarget;
 
 	// Get a position to aim for
+	// RC2: a controller whose edict has gone is dropped
+	if (m_pController && !UTIL_IsValidEntity(m_pControllerEdict))
+		m_pController = NULL;
+
 	if (m_pController)
 	{
 		// Tanks attempt to mirror the player's angles
@@ -633,6 +662,7 @@ void CFuncTank::TrackTarget()
 
 
 // If barrel is offset, add in additional rotation
+// orig 0x454c0 (SDK 2.3's)
 void CFuncTank::AdjustAnglesForBarrel(Vector& angles, float distance)
 {
 	if (m_barrelPos.y != 0 || m_barrelPos.z != 0)
@@ -662,6 +692,7 @@ void CFuncTank::AdjustAnglesForBarrel(Vector& angles, float distance)
 
 
 // Fire targets and spawn sprites
+// orig 0x45570 (SDK 2.3's)
 void CFuncTank::Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker)
 {
 	if (m_fireLast != 0)
@@ -731,8 +762,9 @@ class CFuncTankGun : public CFuncTank
 public:
 	void Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker) override;
 };
-LINK_ENTITY_TO_CLASS(func_tank, CFuncTankGun);
+LINK_ENTITY_TO_CLASS(func_tank, CFuncTankGun); // orig 0x45a90
 
+// orig 0x45b50 (SDK 2.3's)
 void CFuncTankGun::Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker)
 {
 	int i;
@@ -792,7 +824,7 @@ private:
 	CLaser* m_pLaser;
 	float m_laserTime;
 };
-LINK_ENTITY_TO_CLASS(func_tanklaser, CFuncTankLaser);
+LINK_ENTITY_TO_CLASS(func_tanklaser, CFuncTankLaser); // orig 0x45c80
 
 TYPEDESCRIPTION CFuncTankLaser::m_SaveData[] =
 	{
@@ -800,8 +832,9 @@ TYPEDESCRIPTION CFuncTankLaser::m_SaveData[] =
 		DEFINE_FIELD(CFuncTankLaser, m_laserTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncTankLaser, CFuncTank);
+IMPLEMENT_SAVERESTORE(CFuncTankLaser, CFuncTank); // orig 0x45cf0, orig 0x45d20
 
+// orig 0x45d50 (SDK 2.3's)
 void CFuncTankLaser::Activate()
 {
 	if (!GetLaser())
@@ -816,6 +849,7 @@ void CFuncTankLaser::Activate()
 }
 
 
+// orig 0x45d90 (SDK 2.3's)
 bool CFuncTankLaser::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "laserentity"))
@@ -828,6 +862,7 @@ bool CFuncTankLaser::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0x45e10 (SDK 2.3's)
 CLaser* CFuncTankLaser::GetLaser()
 {
 	if (m_pLaser)
@@ -852,6 +887,7 @@ CLaser* CFuncTankLaser::GetLaser()
 }
 
 
+// orig 0x45f00 (SDK 2.3's)
 void CFuncTankLaser::Think()
 {
 	if (m_pLaser && (gpGlobals->time > m_laserTime))
@@ -861,6 +897,7 @@ void CFuncTankLaser::Think()
 }
 
 
+// orig 0x45f30 (SDK 2.3's)
 void CFuncTankLaser::Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker)
 {
 	int i;
@@ -900,7 +937,7 @@ public:
 	void Precache() override;
 	void Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker) override;
 };
-LINK_ENTITY_TO_CLASS(func_tankrocket, CFuncTankRocket);
+LINK_ENTITY_TO_CLASS(func_tankrocket, CFuncTankRocket); // its factory (0x46ad0) is in p3's run
 
 void CFuncTankRocket::Precache()
 {
@@ -910,6 +947,7 @@ void CFuncTankRocket::Precache()
 
 
 
+// orig 0x46b60. RC2: each rocket remembers who fired it in dmg_inflictor.
 void CFuncTankRocket::Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker)
 {
 	int i;
@@ -922,6 +960,7 @@ void CFuncTankRocket::Fire(const Vector& barrelEnd, const Vector& forward, entva
 			for (i = 0; i < bulletCount; i++)
 			{
 				CBaseEntity* pRocket = CBaseEntity::Create("rpg_rocket", barrelEnd, pev->angles, edict());
+				pRocket->pev->dmg_inflictor = ENT(pevAttacker);
 			}
 			CFuncTank::Fire(barrelEnd, forward, pev);
 		}
@@ -937,7 +976,7 @@ public:
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker) override;
 };
-LINK_ENTITY_TO_CLASS(func_tankmortar, CFuncTankMortar);
+LINK_ENTITY_TO_CLASS(func_tankmortar, CFuncTankMortar); // orig 0x46c00
 
 
 bool CFuncTankMortar::KeyValue(KeyValueData* pkvd)
@@ -952,6 +991,8 @@ bool CFuncTankMortar::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0x46cf0. RC2's blast is ExplodeAt's, of the tank's classname, against the hit surface,
+// credited to whoever fired.
 void CFuncTankMortar::Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker)
 {
 	if (m_fireLast != 0)
@@ -967,7 +1008,7 @@ void CFuncTankMortar::Fire(const Vector& barrelEnd, const Vector& forward, entva
 
 			TankTrace(barrelEnd, forward, gTankSpread[m_spread], tr);
 
-			ExplosionCreate(tr.vecEndPos, pev->angles, edict(), pev->impulse, true);
+			ExplodeAt(tr.vecEndPos, -tr.vecPlaneNormal, (float)pev->impulse, STRING(pev->classname), pevAttacker ? pevAttacker : pev, false);
 
 			CFuncTank::Fire(barrelEnd, forward, pev);
 		}
@@ -995,15 +1036,16 @@ public:
 
 	CFuncTank* m_pTank;
 };
-LINK_ENTITY_TO_CLASS(func_tankcontrols, CFuncTankControls);
+LINK_ENTITY_TO_CLASS(func_tankcontrols, CFuncTankControls); // orig 0x46e40
 
 TYPEDESCRIPTION CFuncTankControls::m_SaveData[] =
 	{
 		DEFINE_FIELD(CFuncTankControls, m_pTank, FIELD_CLASSPTR),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncTankControls, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CFuncTankControls, CBaseEntity); // orig 0x46eb0, orig 0x46ee0
 
+// orig 0x46f10 (SDK 2.3's)
 int CFuncTankControls::ObjectCaps()
 {
 	return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_IMPULSE_USE;
@@ -1019,6 +1061,7 @@ void CFuncTankControls::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 }
 
 
+// orig 0x46f50 (SDK 2.3's)
 void CFuncTankControls::Think()
 {
 	edict_t* pTarget = NULL;

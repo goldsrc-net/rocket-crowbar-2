@@ -1435,6 +1435,8 @@ TYPEDESCRIPTION CGauss::m_SaveData[] =
 };
 IMPLEMENT_SAVERESTORE(CGauss, CBasePlayerWeapon);
 
+// p2: RC2's CEgon has no save table (dlls/egon.cpp); halflife-updated's is disabled.
+#if 0
 TYPEDESCRIPTION CEgon::m_SaveData[] =
 	{
 		//	DEFINE_FIELD( CEgon, m_pBeam, FIELD_CLASSPTR ),
@@ -1447,6 +1449,8 @@ TYPEDESCRIPTION CEgon::m_SaveData[] =
 		DEFINE_FIELD(CEgon, m_flAmmoUseTime, FIELD_TIME),
 };
 IMPLEMENT_SAVERESTORE(CEgon, CBasePlayerWeapon);
+#endif
+
 
 TYPEDESCRIPTION CHgun::m_SaveData[] =
 	{

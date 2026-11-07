@@ -59,6 +59,7 @@ const char* CBreakable::pSpawnObjects[] =
 		"weapon_hornetgun",	  // 21
 };
 
+// orig 0x41ed0 (SDK 2.3's, at RC2's offsets)
 bool CBreakable::KeyValue(KeyValueData* pkvd)
 {
 	// UNDONE_WC: explicitly ignoring these fields, but they shouldn't be in the map file!
@@ -131,7 +132,7 @@ bool CBreakable::KeyValue(KeyValueData* pkvd)
 //
 // func_breakable - bmodel that breaks into pieces after taking damage
 //
-LINK_ENTITY_TO_CLASS(func_breakable, CBreakable);
+LINK_ENTITY_TO_CLASS(func_breakable, CBreakable); // orig 0x421f0
 TYPEDESCRIPTION CBreakable::m_SaveData[] =
 	{
 		DEFINE_FIELD(CBreakable, m_Material, FIELD_INTEGER),
@@ -147,7 +148,7 @@ TYPEDESCRIPTION CBreakable::m_SaveData[] =
 		// Explosion magnitude is stored in pev->impulse
 };
 
-IMPLEMENT_SAVERESTORE(CBreakable, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CBreakable, CBaseEntity); // orig 0x42280, orig 0x422b0
 
 void CBreakable::Spawn()
 {
@@ -438,13 +439,15 @@ void CBreakable::DamageSound()
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, rgpsz[RANDOM_LONG(0, i - 1)], fvol, ATTN_NORM, 0, pitch);
 }
 
+// orig 0x42850. RC2: broken by an active player (IsActivePlayer, not IsPlayer), and the little
+// damage back goes to what he stands for (GetEffectedEnt).
 void CBreakable::BreakTouch(CBaseEntity* pOther)
 {
 	float flDamage;
 	entvars_t* pevToucher = pOther->pev;
 
 	// only players can break these right now
-	if (!pOther->IsPlayer() || !IsBreakable())
+	if (!pOther->IsActivePlayer() || !IsBreakable())
 	{
 		return;
 	}
@@ -459,7 +462,7 @@ void CBreakable::BreakTouch(CBaseEntity* pOther)
 			TakeDamage(pevToucher, pevToucher, flDamage, DMG_CRUSH);
 
 			// do a little damage to player if we broke glass or computer
-			pOther->TakeDamage(pev, pev, flDamage / 4, DMG_SLASH);
+			pOther->GetEffectedEnt()->TakeDamage(pev, pev, flDamage / 4, DMG_SLASH);
 		}
 	}
 
@@ -538,6 +541,7 @@ void CBreakable::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecD
 // exceptions that are breakable-specific
 // bitsDamageType indicates the type of damage sustained ie: DMG_CRUSH
 //=========================================================
+// orig 0x42ac0. SDK 2.3's, and RC2 clears the targetname before Die (Die clears it again).
 bool CBreakable::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	Vector vecTemp;
@@ -578,6 +582,7 @@ bool CBreakable::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 	if (pev->health <= 0)
 	{
 		Killed(pevAttacker, GIB_NORMAL);
+		pev->targetname = 0;
 		Die();
 		return false;
 	}
@@ -591,6 +596,7 @@ bool CBreakable::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 }
 
 
+// orig 0x42d40 (SDK 2.3's, at RC2's offsets)
 void CBreakable::Die()
 {
 	// Don't allow explosives to damage this again to prevent spawning multiple copies of items and gibs.
@@ -815,7 +821,8 @@ public:
 	void EXPORT StopSound();
 	//	virtual void	SetActivator( CBaseEntity *pActivator ) { m_pPusher = pActivator; }
 
-	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_CONTINUOUS_USE; }
+	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_CONTINUOUS_USE; } // orig 0x43430
+	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 0x10; } // orig 0x43420 (as CBreakable's)
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
@@ -840,9 +847,9 @@ TYPEDESCRIPTION CPushable::m_SaveData[] =
 		DEFINE_FIELD(CPushable, m_soundTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CPushable, CBreakable);
+IMPLEMENT_SAVERESTORE(CPushable, CBreakable); // orig 0x43350, orig 0x43380
 
-LINK_ENTITY_TO_CLASS(func_pushable, CPushable);
+LINK_ENTITY_TO_CLASS(func_pushable, CPushable); // orig 0x433b0
 
 const char* CPushable::m_soundNames[3] = {"debris/pushbox1.wav", "debris/pushbox2.wav", "debris/pushbox3.wav"};
 
@@ -923,9 +930,10 @@ bool CPushable::KeyValue(KeyValueData* pkvd)
 
 
 // Pull the func_pushable
+// orig 0x437d0. RC2: an active player (IsActivePlayer, not IsPlayer).
 void CPushable::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	if (!pActivator || !pActivator->IsPlayer())
+	if (!pActivator || !pActivator->IsActivePlayer())
 	{
 		if ((pev->spawnflags & SF_PUSH_BREAKABLE) != 0)
 			this->CBreakable::Use(pActivator, pCaller, useType, value);
@@ -946,6 +954,12 @@ void CPushable::Touch(CBaseEntity* pOther)
 }
 
 
+// orig 0x438d0. RC2's: SDK 2.3's push (forward or use held) and an active player (IsActivePlayer)
+// instead of IsPlayer; a pull (Use) moves it only while the player backs away from where he
+// looks; the push sets the velocity outright (SDK 2.3 adds to it) and the speed clamp applies to
+// pulls too. halflife-updated's changes here (the pull/push button test, the frame-time fudge
+// factor, the velocity comparisons, matching the player only on a push) are dropped: this is
+// code RC2 changed.
 void CPushable::Move(CBaseEntity* pOther, bool push)
 {
 	entvars_t* pevToucher = pOther->pev;
@@ -961,22 +975,23 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 		return;
 	}
 
-
-	if (pOther->IsPlayer())
-	{
-		// JoshA: Used to check for FORWARD too and logic was inverted
-		// from comment which seems wrong.
-		// Fixed to just check for USE being not set for PUSH.
-		// Should have the right effect.
-		if (push && !!(pevToucher->button & IN_USE)) // Don't push unless the player is not useing (pull)
-			return;
-		playerTouch = true;
-	}
-
 	float factor;
 
-	if (playerTouch)
+	if (pOther->IsActivePlayer())
 	{
+		if (push && (pevToucher->button & (IN_FORWARD | IN_USE)) == 0) // Don't push unless the player is pushing forward and NOT use (pull)
+			return;
+		playerTouch = true;
+
+		// a pull only while walking backwards
+		if (!push)
+		{
+			Vector vecForward;
+			g_engfuncs.pfnAngleVectors(pevToucher->v_angle, vecForward, NULL, NULL);
+			if (vecForward.x * pevToucher->velocity.x + vecForward.y * pevToucher->velocity.y > 0)
+				return;
+		}
+
 		if ((pevToucher->flags & FL_ONGROUND) == 0) // Don't push away from jumping/falling players unless in water
 		{
 			if (pev->waterlevel < 1)
@@ -990,20 +1005,8 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 	else
 		factor = 0.25;
 
-	// This used to be added every 'frame', but to be consistent at high fps,
-	// now act as if it's added at a constant rate with a fudge factor.
-	extern cvar_t sv_pushable_fixed_tick_fudge;
-
-	if (!push && sv_pushable_fixed_tick_fudge.value >= 0.0f)
-	{
-		factor *= gpGlobals->frametime * sv_pushable_fixed_tick_fudge.value;
-	}
-
-	// JoshA: Always apply this if pushing, or if under the player's velocity.
-	if (push || (abs(pev->velocity.x) < abs(pevToucher->velocity.x - pevToucher->velocity.x * factor)))
-		pev->velocity.x += pevToucher->velocity.x * factor;
-	if (push || (abs(pev->velocity.y) < abs(pevToucher->velocity.y - pevToucher->velocity.y * factor)))
-		pev->velocity.y += pevToucher->velocity.y * factor;
+	pev->velocity.x = pevToucher->velocity.x * factor;
+	pev->velocity.y = pevToucher->velocity.y * factor;
 
 	float length = sqrt(pev->velocity.x * pev->velocity.x + pev->velocity.y * pev->velocity.y);
 	if (length > MaxSpeed())
@@ -1013,16 +1016,8 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 	}
 	if (playerTouch)
 	{
-		// JoshA: Match the player to our pushable's velocity.
-		// Previously this always happened, but it should only
-		// happen if the player is pushing (or rather, being pushed.)
-		// This either stops the player in their tracks or nudges them along.
-		if (push)
-		{
-			pevToucher->velocity.x = pev->velocity.x;
-			pevToucher->velocity.y = pev->velocity.y;
-		}
-
+		pevToucher->velocity.x = pev->velocity.x;
+		pevToucher->velocity.y = pev->velocity.y;
 		if ((gpGlobals->time - m_soundTime) > 0.7)
 		{
 			m_soundTime = gpGlobals->time;
@@ -1030,8 +1025,6 @@ void CPushable::Move(CBaseEntity* pOther, bool push)
 			{
 				m_lastSound = RANDOM_LONG(0, 2);
 				EMIT_SOUND(ENT(pev), CHAN_WEAPON, m_soundNames[m_lastSound], 0.5, ATTN_NORM);
-				//			SetThink( StopSound );
-				//			pev->nextthink = pev->ltime + 0.1;
 			}
 			else
 				STOP_SOUND(ENT(pev), CHAN_WEAPON, m_soundNames[m_lastSound]);

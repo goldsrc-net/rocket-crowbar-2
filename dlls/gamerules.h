@@ -162,6 +162,12 @@ public:
 
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
+
+public:
+	// p2 needs: orig slot 58 (+0xe8), name ours. Whether pAttacker's projectile may shove or hurt
+	// pVictim (the crowbarang, impailer, shrinker, mines and grenades ask it). VERIFY: the
+	// default; the gamerules package reconstructs it.
+	virtual bool CanAffect(CBaseEntity* pAttacker, CBaseEntity* pVictim) { return true; }
 };
 
 extern CGameRules* InstallGameRules();

@@ -90,7 +90,7 @@ TYPEDESCRIPTION CBaseDoor::m_SaveData[] =
 
 };
 
-IMPLEMENT_SAVERESTORE(CBaseDoor, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CBaseDoor, CBaseToggle); // orig 0x349a0, orig 0x349d0 (SDK 2.3's, at RC2's offsets)
 
 
 #define DOOR_SENTENCEWAIT 6
@@ -192,6 +192,7 @@ void PlayLockSounds(entvars_t* pev, locksound_t* pls, bool flocked, bool fbutton
 // Cache user-entity-field values until spawn is called.
 //
 
+// orig 0x34c20 (SDK 2.3's, at RC2's offsets)
 bool CBaseDoor::KeyValue(KeyValueData* pkvd)
 {
 
@@ -269,11 +270,11 @@ touch or takedamage doors).
 4)      screechy metal
 */
 
-LINK_ENTITY_TO_CLASS(func_door, CBaseDoor);
+LINK_ENTITY_TO_CLASS(func_door, CBaseDoor); // orig 0x34f70
 //
 // func_water - same as a door.
 //
-LINK_ENTITY_TO_CLASS(func_water, CBaseDoor);
+LINK_ENTITY_TO_CLASS(func_water, CBaseDoor); // orig 0x34ff0
 
 
 void CBaseDoor::Spawn()
@@ -520,12 +521,11 @@ void CBaseDoor::Precache()
 //
 // Doors not tied to anything (e.g. button, another door) can be touched, to make them activate.
 //
+// orig 0x357c0. RC2: a player in play (IsActivePlayer) rather than the "player" classname.
 void CBaseDoor::DoorTouch(CBaseEntity* pOther)
 {
-	entvars_t* pevToucher = pOther->pev;
-
 	// Ignore touches by anything but players
-	if (!FClassnameIs(pevToucher, "player"))
+	if (!pOther->IsActivePlayer())
 		return;
 
 	// If door has master, and it's not ready to trigger,
@@ -565,6 +565,7 @@ void CBaseDoor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 //
 // Causes the door to "do its thing", i.e. start moving, and cascade activation.
 //
+// orig 0x35890. RC2: the medkit health goes to an active player (IsActivePlayer, not IsPlayer).
 bool CBaseDoor::DoorActivate()
 {
 	if (!UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
@@ -577,7 +578,7 @@ bool CBaseDoor::DoorActivate()
 	else
 	{ // door should open
 
-		if (m_hActivator != NULL && m_hActivator->IsPlayer())
+		if (m_hActivator != NULL && m_hActivator->IsActivePlayer())
 		{ // give health if player opened the door (medikit)
 			// VARS( m_eoActivator )->health += m_bHealthValue;
 
@@ -598,6 +599,8 @@ extern Vector VecBModelOrigin(entvars_t* pevBModel);
 //
 // Starts the door going to its "up" position (simply ToggleData->vecPosition2).
 //
+// orig 0x35950. SDK 2.3's at RC2's offsets; halflife-updated's fix (no moving sound restart
+// while already moving) is kept.
 void CBaseDoor::DoorGoUp()
 {
 	entvars_t* pevActivator;
@@ -689,6 +692,7 @@ void CBaseDoor::DoorHitTop()
 //
 // Starts the door going to its "down" position (simply ToggleData->vecPosition1).
 //
+// orig 0x35d00. As DoorGoUp: SDK 2.3's, halflife-updated's sound fix kept.
 void CBaseDoor::DoorGoDown()
 {
 	if (!FBitSet(pev->spawnflags, SF_DOOR_SILENT))
@@ -738,10 +742,19 @@ void CBaseDoor::DoorHitBottom()
 		FireTargets(STRING(pev->netname), m_hActivator, this, USE_TOGGLE, 0);
 }
 
+// orig 0x35ef0. RC2 first crushes a gauss beacon outright (damage of its health + 1 to what it
+// stands for). halflife-updated's STOP_SOUND for the other door pieces is kept (SDK 2.3 and
+// RC2 don't stop it).
 void CBaseDoor::Blocked(CBaseEntity* pOther)
 {
 	edict_t* pentTarget = NULL;
 	CBaseDoor* pDoor = NULL;
+
+	if (FClassnameIs(pOther->pev, "gauss_becon"))
+	{
+		CBaseEntity* pVictim = pOther->GetEffectedEnt();
+		pVictim->TakeDamage(pev, pev, pOther->GetEffectedEnt()->pev->health + 1, DMG_CRUSH);
+	}
 
 
 	// Hurt the blocker a little.
@@ -857,7 +870,7 @@ public:
 	void SetToggleState(int state) override;
 };
 
-LINK_ENTITY_TO_CLASS(func_door_rotating, CRotDoor);
+LINK_ENTITY_TO_CLASS(func_door_rotating, CRotDoor); // orig 0x36290
 
 
 void CRotDoor::Spawn()
@@ -929,7 +942,7 @@ public:
 
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
-	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x36640 (0: CBaseEntity's caps are FCAP_ACROSS_TRANSITION)
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -941,14 +954,14 @@ public:
 	byte m_bMoveSnd; // sound a door makes while moving
 };
 
-LINK_ENTITY_TO_CLASS(momentary_door, CMomentaryDoor);
+LINK_ENTITY_TO_CLASS(momentary_door, CMomentaryDoor); // orig 0x365d0
 
 TYPEDESCRIPTION CMomentaryDoor::m_SaveData[] =
 	{
 		DEFINE_FIELD(CMomentaryDoor, m_bMoveSnd, FIELD_CHARACTER),
 };
 
-IMPLEMENT_SAVERESTORE(CMomentaryDoor, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CMomentaryDoor, CBaseToggle); // orig 0x36650, orig 0x36680
 
 void CMomentaryDoor::Spawn()
 {
