@@ -21,8 +21,16 @@
 #include "player.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#ifndef CLIENT_DLL
+#include "rc2prefs.h"
+#endif
 
-LINK_ENTITY_TO_CLASS(weapon_rpg, CRpg);
+// Rocket Crowbar 2: RC2's rpg file starts here (0xb9420-0xb952c are the p6 package's; CRpg's
+// 0xb9530-0xb9770 are in no package yet). The inline CRpg methods in weapons.h are compiled here
+// in the original: iItemSlot returns 4 (orig 0xb9490), ShouldWeaponIdle and UseDecrement return
+// true (orig 0xb94a0, orig 0xb94b0), all as SDK 2.3's.
+// VERIFY: the original's factory also calls RC 1.9's AddToPrecachedList("weapon_rpg") (0xf5a20); the shared macro doesn't yet
+LINK_ENTITY_TO_CLASS(weapon_rpg, CRpg); // orig 0xb9420
 
 #ifndef CLIENT_DLL
 
@@ -304,8 +312,22 @@ void CRpgRocket::FollowThink()
 
 
 
-void CRpg::Reload()
+void CRpg::Reload() // orig 0xb94c0
 {
+#ifndef CLIENT_DLL
+	// Rocket Crowbar 2: the clip size and reload time come from rc2.ini, and none of SDK 2.3's
+	// laser-spot handling is left (no next-attack delay, no suspending the spot, no waiting
+	// for rockets in flight)
+	const int iClipSize = RC2Pref(RC2P_Ammo_RPGClipSize).s;
+	if (m_iClip == iClipSize)
+		return;
+
+	if (m_pPlayer->ammo_rockets <= 0)
+		return;
+
+	if (DefaultReload(iClipSize, RPG_RELOAD, RC2Pref(RC2P_RPG_ReloadTime).f))
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+#else
 	//ALERT(at_console, "RPG Reload, m_cActiveRockets: %d, m_fSpotActive: %d\n", m_cActiveRockets, m_fSpotActive);
 
 	if (m_iClip == 1)
@@ -353,6 +375,7 @@ void CRpg::Reload()
 		if (iResult)
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 	}
+#endif
 }
 
 void CRpg::Spawn()

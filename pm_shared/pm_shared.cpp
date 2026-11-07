@@ -25,6 +25,8 @@
 #include "pm_materials.h"
 #include "pm_movevars.h"
 #include "pm_debug.h"
+#include "rc2prefs.h"
+#include "pm_rc2.h"
 #include <stdio.h>	// NULL
 #include <string.h> // strcpy
 #include <stdlib.h> // atoi
@@ -130,6 +132,18 @@ static char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX];
 static char grgchTextureType[CTEXTURESMAX];
 
 bool g_onladder = false;
+
+// Rocket Crowbar 2: what PM_Move reads at the start of every move (pm_rc2.h). Names ours.
+int g_iPMPlayerEnt = 1;			 // .data 0x1014ddc4: physinfo "eid"
+static int g_bPMShrunk;			 // .bss 0x1019159c: physinfo "shr", speeds/step/jump x0.2 and the point hull
+static int g_iPMFlags;			 // .bss 0x10191594: physinfo "phf", PMF_*
+static int g_iPMMode;			 // .bss 0x10191598: PM_GetPlayerMode, PM_MODE_*
+static int g_iPMRideEnt;		 // .bss 0x101915a0: the player this one rides (PM_GetRideInfo & 0x7f)
+static int g_bPMRideLeft;		 // .bss 0x101915a4: on the left shoulder (bit 7)
+static float g_flPMStopSpeed;	 // .data 0x1014ddc8: friction's stop speed, set per move in PM_Move
+
+void PM_AddGravity();
+
 
 static void PM_InitTrace(trace_t* trace, const Vector& end)
 {
@@ -282,6 +296,7 @@ char PM_FindTextureType(const char* name)
 	return CHAR_TEX_CONCRETE;
 }
 
+// orig 0xa07a0. RC2: also plays in multiplayer when walking slowly in a movement mode
 void PM_PlayStepSound(int step, float fvol)
 {
 	static int iSkipStep = 0;
@@ -304,7 +319,7 @@ void PM_PlayStepSound(int step, float fvol)
 	VectorCopy(pmove->velocity, hvel);
 	hvel[2] = 0.0;
 
-	if (0 != pmove->multiplayer && (!g_onladder && Length(hvel) <= 220))
+	if (0 != pmove->multiplayer && (!g_onladder && Length(hvel) <= 220) && g_iPMMode == PM_MODE_NORMAL)
 		return;
 
 	// irand - 0,1 for right foot, 2,3 for left foot
@@ -528,6 +543,39 @@ int PM_MapTextureTypeStepType(char chTextureType)
 
 /*
 ====================
+PM_CatagorizeTextureTypeAt
+
+Rocket Crowbar 2: PM_CatagorizeTextureType along any line (the wall a wallhop pushes off).
+====================
+*/
+void PM_CatagorizeTextureTypeAt(float* start, float* end) // orig 0xa0fb0, name ours
+{
+	const char* pTextureName;
+
+	// Fill in default values, just in case.
+	pmove->sztexturename[0] = '\0';
+	pmove->chtexturetype = CHAR_TEX_CONCRETE;
+
+	pTextureName = pmove->PM_TraceTexture(pmove->onground, start, end);
+	if (!pTextureName)
+		return;
+
+	// strip leading '-0' or '+0~' or '{' or '!'
+	if (*pTextureName == '-' || *pTextureName == '+')
+		pTextureName += 2;
+
+	if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
+		pTextureName++;
+
+	strcpy(pmove->sztexturename, pTextureName);
+	pmove->sztexturename[CBTEXTURENAMEMAX - 1] = 0;
+
+	// get texture type
+	pmove->chtexturetype = PM_FindTextureType(pmove->sztexturename);
+}
+
+/*
+====================
 PM_CatagorizeTextureType
 
 Determine texture info for the texture we are standing on.
@@ -567,6 +615,7 @@ void PM_CatagorizeTextureType()
 	pmove->chtexturetype = PM_FindTextureType(pmove->sztexturename);
 }
 
+// orig 0xa1180. RC2: no steps for the controller; quieter and slower steps per movement mode
 void PM_UpdateStepSound()
 {
 	float fvol;
@@ -584,6 +633,9 @@ void PM_UpdateStepSound()
 		return;
 
 	if ((pmove->flags & FL_FROZEN) != 0)
+		return;
+
+	if (g_iPMMode == PM_MODE_CONTROLLER)
 		return;
 
 	PM_CatagorizeTextureType();
@@ -690,6 +742,28 @@ void PM_UpdateStepSound()
 			}
 		}
 
+		// Rocket Crowbar 2: the transformed are quieter (the assassin only on the ground,
+		// the headcrab more on the ground than in the air)
+		switch (g_iPMMode)
+		{
+		case PM_MODE_ASSASSIN:
+			if (pmove->onground != -1)
+				fvol *= 0.5;
+			break;
+		case PM_MODE_HOUNDEYE:
+			fvol *= 0.6;
+			break;
+		case PM_MODE_BAT:
+			fvol *= 0.25;
+			break;
+		case PM_MODE_HEADCRAB:
+			if (pmove->onground != -1)
+				fvol *= 0.25;
+			else
+				fvol *= 0.5;
+			break;
+		}
+
 		pmove->flTimeStepSound += flduck; // slower step time if ducking
 
 		// play the sound
@@ -700,6 +774,22 @@ void PM_UpdateStepSound()
 		}
 
 		PM_PlayStepSound(step, fvol);
+
+		// Rocket Crowbar 2: and step at their own pace off ladders
+		if (!fLadder)
+		{
+			switch (g_iPMMode)
+			{
+			case PM_MODE_HOUNDEYE:
+			case PM_MODE_BAT:
+				pmove->flTimeStepSound = 500;
+				break;
+			case PM_MODE_ASSASSIN:
+			case PM_MODE_HEADCRAB:
+				pmove->flTimeStepSound = 300;
+				break;
+			}
+		}
 	}
 }
 
@@ -783,6 +873,7 @@ returns the blocked flags:
 0x02 == step / wall
 ==================
 */
+// orig 0xa1700. Not byte-identical to SDK 2.3's, but it reads the same
 int PM_ClipVelocity(Vector in, Vector normal, Vector& out, float overbounce)
 {
 	float backoff;
@@ -815,11 +906,12 @@ int PM_ClipVelocity(Vector in, Vector normal, Vector& out, float overbounce)
 	return blocked;
 }
 
+// orig 0xa17a0. RC2: no gravity while PMF_HELD
 void PM_AddCorrectGravity()
 {
 	float ent_gravity;
 
-	if (0 != pmove->waterjumptime)
+	if (0 != pmove->waterjumptime || (g_iPMFlags & PMF_HELD) != 0)
 		return;
 
 	if (0 != pmove->gravity)
@@ -837,11 +929,12 @@ void PM_AddCorrectGravity()
 }
 
 
+// orig 0xa1830. RC2: as PM_AddCorrectGravity
 void PM_FixupGravityVelocity()
 {
 	float ent_gravity;
 
-	if (0 != pmove->waterjumptime)
+	if (0 != pmove->waterjumptime || (g_iPMFlags & PMF_HELD) != 0)
 		return;
 
 	if (0 != pmove->gravity)
@@ -857,11 +950,141 @@ void PM_FixupGravityVelocity()
 
 /*
 ============
+Rocket Crowbar 2: the leaping headcrab flies through what it hits. PM_FlyMove asks the game
+(PM_HeadcrabLeapHit) about each entity it bumps; one it may pass is moved out of the way
+(origin 8192, not solid) in physents, visents and moveents for the rest of the move, then put
+back. Names ours; the arrays are the original's, in its .bss order (0x101b0120-0x101b5ae0),
+because the moveent branch writes past its own arrays (see PM_TryPassThrough).
+============
+*/
+#define PM_PASS_MAX_PHYS 600
+#define PM_PASS_MAX_MOVE 64
+
+static struct
+{
+	Vector physOrigin[PM_PASS_MAX_PHYS]; // 0x101b0120
+	int visSolid[PM_PASS_MAX_PHYS];		 // 0x101b1d40
+	Vector moveOrigin[PM_PASS_MAX_MOVE]; // 0x101b26a0
+	int moveIndex[PM_PASS_MAX_MOVE];	 // 0x101b29a0
+	int physSolid[PM_PASS_MAX_PHYS];	 // 0x101b2aa0
+	int visIndex[PM_PASS_MAX_PHYS];		 // 0x101b3400
+	int moveSolid[PM_PASS_MAX_MOVE];	 // 0x101b3d60
+	int physIndex[PM_PASS_MAX_PHYS];	 // 0x101b3e60
+	Vector visOrigin[PM_PASS_MAX_PHYS];	 // 0x101b47c0
+} s_pmPass;							  // name ours
+
+static int s_iPassPhys; // .bss 0x101915b8, name ours
+static int s_iPassVis;	// .bss 0x101915bc, name ours
+static int s_iPassMove; // .bss 0x101915c0, name ours
+
+// write int slot iSlot of s_pmPass counted from field pField, as the original's flat .bss allows
+static void PM_PassWrite(int* pField, int iSlot, int iValue) // name ours, a helper, no original
+{
+	int* pBase = reinterpret_cast<int*>(&s_pmPass);
+	const int iOffset = static_cast<int>(pField - pBase) + iSlot;
+	if (iOffset >= 0 && iOffset < static_cast<int>(sizeof(s_pmPass) / sizeof(int)))
+		pBase[iOffset] = iValue;
+}
+
+void PM_ResetPassThrough() // orig 0xa18a0, name ours
+{
+	s_iPassMove = 0;
+	s_iPassVis = 0;
+	s_iPassPhys = 0;
+}
+
+void PM_RestorePassThrough() // orig 0xa18c0, name ours
+{
+	int i;
+
+	for (i = 0; i < s_iPassPhys; i++)
+	{
+		pmove->physents[s_pmPass.physIndex[i]].origin = s_pmPass.physOrigin[i];
+		pmove->physents[s_pmPass.physIndex[i]].solid = s_pmPass.physSolid[i];
+	}
+
+	for (i = 0; i < s_iPassVis; i++)
+	{
+		pmove->visents[s_pmPass.visIndex[i]].origin = s_pmPass.visOrigin[i];
+		pmove->visents[s_pmPass.visIndex[i]].solid = s_pmPass.visSolid[i];
+	}
+
+	for (i = 0; i < s_iPassMove; i++)
+	{
+		pmove->moveents[s_pmPass.moveIndex[i]].origin = s_pmPass.moveOrigin[i];
+		pmove->moveents[s_pmPass.moveIndex[i]].solid = s_pmPass.moveSolid[i];
+	}
+
+	s_iPassMove = 0;
+	s_iPassVis = 0;
+	s_iPassPhys = 0;
+}
+
+// physent iPhysEnt was hit: if the game lets the leap through it, move it and its visent and
+// moveent copies away and return true
+bool PM_TryPassThrough(int iPhysEnt) // orig 0xa1b10, name ours
+{
+	const Vector vecAway(8192, 8192, 8192);
+	physent_t* pe = &pmove->physents[iPhysEnt];
+	int i;
+
+	if (0 == PM_HeadcrabLeapHit(g_iPMPlayerEnt, pe->info, Length(pmove->velocity)))
+		return false;
+
+	if (s_iPassPhys < PM_PASS_MAX_PHYS)
+	{
+		s_pmPass.physOrigin[s_iPassPhys] = pe->origin;
+		s_pmPass.physSolid[s_iPassPhys] = pe->solid;
+		s_pmPass.physIndex[s_iPassPhys] = iPhysEnt;
+		s_iPassPhys++;
+	}
+	pe->solid = SOLID_NOT;
+	pe->origin = vecAway;
+
+	for (i = 0; i < pmove->numvisent; i++)
+	{
+		if (pmove->visents[i].info == pe->info && s_iPassVis < PM_PASS_MAX_PHYS)
+		{
+			s_pmPass.visOrigin[s_iPassVis] = pmove->visents[i].origin;
+			s_pmPass.visIndex[s_iPassVis] = i;
+			s_pmPass.visSolid[s_iPassVis] = pmove->visents[i].solid;
+			s_iPassVis++;
+			pmove->visents[i].solid = SOLID_NOT;
+			pmove->visents[i].origin = vecAway;
+		}
+	}
+
+	for (i = 0; i < pmove->nummoveent; i++)
+	{
+		if (pmove->moveents[i].info == pe->info && s_iPassMove < PM_PASS_MAX_MOVE)
+		{
+			// Original bug, kept: the origin goes into the visent array (at the moveent count)
+			// and the solid and index into the moveent arrays at the visent count, which can
+			// run past them; PM_RestorePassThrough then restores moveents from slots never
+			// written. VERIFY in game; reference/dossiers/p6.md
+			s_pmPass.visOrigin[s_iPassMove] = pmove->moveents[i].origin;
+			s_iPassMove++;
+			PM_PassWrite(s_pmPass.moveSolid, s_iPassVis, pmove->moveents[i].solid);
+			PM_PassWrite(s_pmPass.moveIndex, s_iPassVis, i);
+			pmove->moveents[i].solid = SOLID_NOT;
+			pmove->moveents[i].origin = vecAway;
+		}
+	}
+
+	return true;
+}
+
+/*
+============
 PM_FlyMove
 
 The basic solid body movement clip that slides along multiple planes
 ============
 */
+// orig 0xa1dc0. RC2: the leaping headcrab passes through what PM_HeadcrabLeapHit allows;
+// PMF_BOUNCE reflects off every plane with some noise and speeds up (the AF grenade); and the
+// reflection branch applies to every plane, as in SDK 2.3 (halflife-updated's first-plane-only
+// fix dropped)
 int PM_FlyMove()
 {
 	int bumpcount, numbumps;
@@ -887,6 +1110,9 @@ int PM_FlyMove()
 	allFraction = 0;
 	time_left = pmove->frametime; // Total time for this movement operation.
 
+	if (g_iPMMode == PM_MODE_HEADCRAB)
+		PM_ResetPassThrough();
+
 	for (bumpcount = 0; bumpcount < numbumps; bumpcount++)
 	{
 		if (pmove->velocity == g_vecZero)
@@ -908,6 +1134,7 @@ int PM_FlyMove()
 		{ // entity is trapped in another solid
 			VectorCopy(vec3_origin, pmove->velocity);
 			//Con_DPrintf("Trapped 4\n");
+			// Original bug, kept: returns without PM_RestorePassThrough
 			return 4;
 		}
 
@@ -933,6 +1160,17 @@ int PM_FlyMove()
 		//  for contact
 		// Add it if it's not already in the list!!!
 		PM_AddToTouched(trace, pmove->velocity);
+
+		// Rocket Crowbar 2: a leaping headcrab goes through it if it may
+		if (g_iPMMode == PM_MODE_HEADCRAB && 0 != PM_GetHeadcrabLeap(g_iPMPlayerEnt))
+		{
+			if (PM_TryPassThrough(trace.ent))
+			{
+				time_left -= time_left * trace.fraction;
+				continue;
+			}
+			PM_SetHeadcrabLeap(g_iPMPlayerEnt, 0);
+		}
 
 		// If the plane we hit has a high z component in the normal, then
 		//  it's probably a floor
@@ -967,12 +1205,37 @@ int PM_FlyMove()
 		numplanes++;
 		//
 
+		if ((g_iPMFlags & PMF_BOUNCE) != 0)
+		{
+			// Rocket Crowbar 2: bounce off every plane, add some noise, speed up per plane
+			Vector vecDir = original_velocity;
+			float flSpeed = VectorNormalize(vecDir);
+
+			for (i = 0; i < numplanes; i++)
+			{
+				d = -DotProduct(vecDir, planes[i]);
+				VectorMA(vecDir, d + d, planes[i], vecDir);
+			}
+
+			const float flEntropy = RC2Pref(RC2P_Grenade_AFGrenPhysBounceEntropy).f;
+			vecDir[0] += pmove->RandomFloat(-flEntropy, flEntropy);
+			vecDir[1] += pmove->RandomFloat(-flEntropy, flEntropy);
+			vecDir[2] += pmove->RandomFloat(-flEntropy, flEntropy);
+			VectorNormalize(vecDir);
+
+			flSpeed *= numplanes * RC2Pref(RC2P_Grenade_AFGrenPhysBounceAccelFactor).f + 1.0;
+			if (flSpeed >= pmove->movevars->maxvelocity)
+				flSpeed = pmove->movevars->maxvelocity - 1.0;
+
+			VectorScale(vecDir, flSpeed, vecDir);
+			VectorCopy(vecDir, pmove->velocity);
+			VectorCopy(vecDir, original_velocity);
+			continue;
+		}
+
 		// modify original_velocity so it parallels all of the clip planes
 		//
-		// relfect player velocity
-		// Only give this a try for first impact plane because you can get yourself stuck in an acute corner by jumping in place
-		//  and pressing forward and nobody was really using this bounce/reflection feature anyway...
-		if (numplanes == 1 && pmove->movetype == MOVETYPE_WALK && ((pmove->onground == -1) || (pmove->friction != 1)))
+		if (pmove->movetype == MOVETYPE_WALK && ((pmove->onground == -1) || (pmove->friction != 1))) // relfect player velocity
 		{
 			for (i = 0; i < numplanes; i++)
 			{
@@ -1048,6 +1311,9 @@ int PM_FlyMove()
 		//Con_DPrintf( "Don't stick\n" );
 	}
 
+	if (g_iPMMode == PM_MODE_HEADCRAB)
+		PM_RestorePassThrough();
+
 	return blocked;
 }
 
@@ -1100,6 +1366,8 @@ PM_WalkMove
 Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
 ======================
 */
+// orig 0xa2540. RC2: the speed attribute scales the wish velocity and the cap, each movement
+// mode has its own ground speed, and shrunk players walk and step up at 0.2
 void PM_WalkMove()
 {
 	int clip;
@@ -1111,6 +1379,7 @@ void PM_WalkMove()
 	float fmove, smove;
 	Vector wishdir;
 	float wishspeed;
+	float flMaxSpeed;
 
 	Vector dest, start;
 	Vector original, originalvel;
@@ -1118,6 +1387,8 @@ void PM_WalkMove()
 	float downdist, updist;
 
 	pmtrace_t trace;
+
+	const float flSpeedScale = PM_GetAttributeScale(1, g_iPMPlayerEnt);
 
 	// Copy movement amounts
 	fmove = pmove->cmd.forwardmove;
@@ -1131,20 +1402,50 @@ void PM_WalkMove()
 	VectorNormalize(pmove->right);	 //
 
 	for (i = 0; i < 2; i++) // Determine x and y parts of velocity
-		wishvel[i] = pmove->forward[i] * fmove + pmove->right[i] * smove;
+	{
+		if (g_iPMMode == PM_MODE_NORMAL)
+			wishvel[i] = (pmove->forward[i] * fmove + pmove->right[i] * smove) * flSpeedScale;
+		else
+			wishvel[i] = pmove->forward[i] * fmove + pmove->right[i] * smove;
+	}
 
 	wishvel[2] = 0; // Zero out z part of velocity
 
 	VectorCopy(wishvel, wishdir); // Determine maginitude of speed of move
 	wishspeed = VectorNormalize(wishdir);
 
+	// Original bug, kept: in a mode with no ground speed of its own (the controller and race
+	// modes, which don't walk here in practice) the cap is the forward move
+	flMaxSpeed = fmove;
+	switch (g_iPMMode)
+	{
+	case PM_MODE_NORMAL:
+		flMaxSpeed = flSpeedScale * pmove->maxspeed;
+		break;
+	case PM_MODE_ASSASSIN:
+		flMaxSpeed = RC2Pref(RC2P_TransformAssassin_RunSpeed).f;
+		break;
+	case PM_MODE_HOUNDEYE:
+		flMaxSpeed = RC2Pref(RC2P_TransformHoundeye_RunSpeed).f;
+		break;
+	case PM_MODE_BAT:
+		flMaxSpeed = RC2Pref(RC2P_TransformBat_GroundSpeed).f;
+		break;
+	case PM_MODE_HEADCRAB:
+		flMaxSpeed = RC2Pref(RC2P_TransformHeadcrab_RunSpeed).f;
+		break;
+	}
+
+	if (0 != g_bPMShrunk)
+		flMaxSpeed *= 0.2;
+
 	//
 	// Clamp to server defined max speed
 	//
-	if (wishspeed > pmove->maxspeed)
+	if (wishspeed > flMaxSpeed && wishspeed != 0)
 	{
-		VectorScale(wishvel, pmove->maxspeed / wishspeed, wishvel);
-		wishspeed = pmove->maxspeed;
+		VectorScale(wishvel, flMaxSpeed / wishspeed, wishvel);
+		wishspeed = flMaxSpeed;
 	}
 
 	// Set pmove velocity
@@ -1192,6 +1493,8 @@ void PM_WalkMove()
 	if (0 != pmove->waterjumptime) // If we are jumping out of water, don't do anything more.
 		return;
 
+	const float flStepSize = 0 != g_bPMShrunk ? pmove->movevars->stepsize * 0.2 : pmove->movevars->stepsize;
+
 	// Try sliding forward both on ground and up 16 pixels
 	//  take the move that goes farthest
 	VectorCopy(pmove->origin, original);	  // Save out original pos &
@@ -1211,7 +1514,7 @@ void PM_WalkMove()
 
 	// Start out up one stair height
 	VectorCopy(pmove->origin, dest);
-	dest[2] += pmove->movevars->stepsize;
+	dest[2] += flStepSize;
 
 	trace = pmove->PM_PlayerTrace(pmove->origin, dest, PM_NORMAL, -1);
 	// If we started okay and made it part of the way at least,
@@ -1228,7 +1531,7 @@ void PM_WalkMove()
 	// Now try going back down from the end point
 	//  press down the stepheight
 	VectorCopy(pmove->origin, dest);
-	dest[2] -= pmove->movevars->stepsize;
+	dest[2] -= flStepSize;
 
 	trace = pmove->PM_PlayerTrace(pmove->origin, dest, PM_NORMAL, -1);
 
@@ -1266,6 +1569,8 @@ PM_Friction
 Handles both ground friction and water friction
 ==================
 */
+// orig 0xa2b60. RC2: none in PMF_BOUNCE, no edge friction for the bat, and the stop speed is
+// g_flPMStopSpeed (PM_Move)
 void PM_Friction()
 {
 	float* vel;
@@ -1275,7 +1580,7 @@ void PM_Friction()
 	Vector newvel;
 
 	// If we are in water jump cycle, don't apply friction
-	if (0 != pmove->waterjumptime)
+	if (0 != pmove->waterjumptime || (g_iPMFlags & PMF_BOUNCE) != 0)
 		return;
 
 	// Get velocity
@@ -1305,7 +1610,7 @@ void PM_Friction()
 
 		trace = pmove->PM_PlayerTrace(start, stop, PM_NORMAL, -1);
 
-		if (trace.fraction == 1.0)
+		if (trace.fraction == 1.0 && g_iPMMode != PM_MODE_BAT)
 			friction = pmove->movevars->friction * pmove->movevars->edgefriction;
 		else
 			friction = pmove->movevars->friction;
@@ -1317,7 +1622,7 @@ void PM_Friction()
 
 		// Bleed off some speed, but if we have less than the bleed
 		//  threshhold, bleed the theshold amount.
-		control = (speed < pmove->movevars->stopspeed) ? pmove->movevars->stopspeed : speed;
+		control = (speed < g_flPMStopSpeed) ? g_flPMStopSpeed : speed;
 		// Add the amount to t'he drop amount.
 		drop += control * friction * pmove->frametime;
 	}
@@ -1342,6 +1647,220 @@ void PM_Friction()
 	VectorCopy(newvel, pmove->velocity);
 }
 
+/*
+==================
+Rocket Crowbar 2: the free-flying moves (the jetpack, the controller, the bat). Each has a
+friction and an accelerate of its own, scaled by its rc2.ini FrictionScale (the accelerate
+too, as the original has it), then moves as one step-up trace and a fly move. Names ours.
+==================
+*/
+static float PM_FlyFriction(float flFrictionScale) // a helper shared by the three below, no original
+{
+	float control = 0 != g_bPMShrunk ? 14.0 : 70.0;
+	const float speed = sqrt(pmove->velocity[0] * pmove->velocity[0] + pmove->velocity[1] * pmove->velocity[1] + pmove->velocity[2] * pmove->velocity[2]);
+
+	if (speed == 0.0)
+		return 0.0;
+
+	if (control <= speed)
+		control = speed;
+
+	float newspeed = speed - control * pmove->frametime * (flFrictionScale * pmove->friction);
+	if (newspeed < 0.0)
+		newspeed = 0.0;
+
+	newspeed /= speed;
+	pmove->velocity[0] *= newspeed;
+	pmove->velocity[1] *= newspeed;
+	pmove->velocity[2] *= newspeed;
+	return newspeed;
+}
+
+static void PM_FlyAccelerate(const Vector& wishdir, float wishspeed, float accel, float flFrictionScale) // a helper, no original
+{
+	if (0 != pmove->dead || 0 != pmove->waterjumptime)
+		return;
+
+	const float addspeed = wishspeed - DotProduct(pmove->velocity, wishdir);
+	if (addspeed <= 0.0)
+		return;
+
+	float accelspeed = pmove->friction * pmove->frametime * flFrictionScale * wishspeed * accel;
+	if (accelspeed > addspeed)
+		accelspeed = addspeed;
+
+	for (int i = 0; i < 3; i++)
+		pmove->velocity[i] += accelspeed * wishdir[i];
+}
+
+// the end of every fly move: step up from the destination, keep that if clear, then slide
+static void PM_FlyStepAndMove() // a helper, no original
+{
+	Vector dest, start;
+	pmtrace_t trace;
+
+	VectorMA(pmove->origin, pmove->frametime, pmove->velocity, dest);
+	VectorCopy(dest, start);
+	start[2] += (0 != g_bPMShrunk ? pmove->movevars->stepsize * 0.2 : pmove->movevars->stepsize) + 1.0;
+
+	trace = pmove->PM_PlayerTrace(start, dest, PM_NORMAL, -1);
+	if (0 == trace.startsolid && 0 == trace.allsolid)
+		VectorCopy(trace.endpos, pmove->origin); // and the fly move still runs from there
+
+	VectorAdd(pmove->velocity, pmove->basevelocity, pmove->velocity);
+	PM_FlyMove();
+	VectorSubtract(pmove->velocity, pmove->basevelocity, pmove->velocity);
+}
+
+float PM_JetpackFriction() // orig 0xa2d20, name ours
+{
+	return PM_FlyFriction(RC2Pref(RC2P_Attributes_JetpackPhysFrictionScale).f);
+}
+
+void PM_JetpackAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa2e00, name ours
+{
+	PM_FlyAccelerate(wishdir, wishspeed, accel, RC2Pref(RC2P_Attributes_JetpackPhysFrictionScale).f);
+}
+
+void PM_JetpackMove() // orig 0xa2eb0, name ours
+{
+	Vector wishvel, wishdir;
+	float wishspeed, flMaxSpeed;
+	int i;
+
+	const float flSpeedScale = PM_GetAttributeScale(1, g_iPMPlayerEnt);
+
+	for (i = 0; i < 3; i++)
+		wishvel[i] = (pmove->right[i] * pmove->cmd.sidemove + pmove->forward[i] * pmove->cmd.forwardmove) * flSpeedScale;
+
+	VectorCopy(wishvel, wishdir);
+	wishspeed = VectorNormalize(wishdir);
+
+	flMaxSpeed = RC2Pref(RC2P_Attributes_JetpackPhysMaxSpeedScale).f * pmove->maxspeed * flSpeedScale;
+	if (0 != g_bPMShrunk)
+		flMaxSpeed *= 0.2;
+
+	if (wishspeed > flMaxSpeed && wishspeed != 0)
+	{
+		VectorScale(wishvel, flMaxSpeed / wishspeed, wishvel);
+		wishspeed = flMaxSpeed;
+	}
+
+	PM_JetpackAccelerate(wishdir, wishspeed, RC2Pref(RC2P_Attributes_JetpackPhysAccelScale).f * pmove->movevars->accelerate);
+	PM_JetpackFriction();
+	PM_CheckVelocity();
+	PM_FlyStepAndMove();
+}
+
+float PM_ControllerFriction() // orig 0xa3110, name ours
+{
+	return PM_FlyFriction(RC2Pref(RC2P_TransformController_FrictionScale).f);
+}
+
+void PM_ControllerAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa31f0, name ours
+{
+	PM_FlyAccelerate(wishdir, wishspeed, accel, RC2Pref(RC2P_TransformController_FrictionScale).f);
+}
+
+bool PM_ApplyPullForces();
+
+void PM_ControllerMove() // orig 0xa32a0, name ours
+{
+	Vector wishvel, wishdir;
+	float wishspeed, flMaxSpeed;
+	int i;
+
+	for (i = 0; i < 3; i++)
+		wishvel[i] = pmove->right[i] * pmove->cmd.sidemove + pmove->forward[i] * pmove->cmd.forwardmove;
+	wishvel[2] += pmove->cmd.upmove;
+
+	VectorCopy(wishvel, wishdir);
+	wishspeed = VectorNormalize(wishdir);
+
+	if (pmove->waterlevel == 0)
+		flMaxSpeed = RC2Pref(RC2P_TransformController_RunSpeed).f;
+	else
+		flMaxSpeed = RC2Pref(RC2P_TransformController_SwimSpeed).f;
+	if (0 != g_bPMShrunk)
+		flMaxSpeed *= 0.2;
+
+	if (wishspeed > flMaxSpeed && wishspeed != 0)
+	{
+		VectorScale(wishvel, flMaxSpeed / wishspeed, wishvel);
+		wishspeed = flMaxSpeed;
+	}
+
+	PM_ControllerAccelerate(wishdir, wishspeed, RC2Pref(RC2P_TransformController_AccelScale).f * pmove->movevars->accelerate);
+	PM_ApplyPullForces();
+	PM_ControllerFriction();
+	PM_CheckVelocity();
+	PM_FlyStepAndMove();
+}
+
+float PM_BatFriction() // orig 0xa3500, name ours
+{
+	return PM_FlyFriction(RC2Pref(RC2P_TransformBat_FrictionScale).f);
+}
+
+void PM_BatAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa35e0, name ours
+{
+	PM_FlyAccelerate(wishdir, wishspeed, accel, RC2Pref(RC2P_TransformBat_FrictionScale).f);
+}
+
+void PM_BatMove() // orig 0xa3690, name ours
+{
+	Vector wishvel, wishdir;
+	float wishspeed, flMaxSpeed;
+	int i;
+
+	// the bat's keys are capped to its walk speed (and half of it up/down and backwards)
+	const float flWalk = RC2Pref(RC2P_TransformBat_WalkSpeed).f;
+	if (pmove->cmd.sidemove > flWalk)
+		pmove->cmd.sidemove = flWalk;
+	else if (pmove->cmd.sidemove < -flWalk)
+		pmove->cmd.sidemove = -flWalk;
+
+	const float flHalf = flWalk * 0.5;
+	if (pmove->cmd.upmove > flHalf)
+		pmove->cmd.upmove = flHalf;
+	else if (pmove->cmd.upmove < -flHalf)
+		pmove->cmd.upmove = -flHalf;
+
+	if (pmove->cmd.forwardmove < -flHalf)
+		pmove->cmd.forwardmove = -flHalf;
+
+	for (i = 0; i < 3; i++)
+		wishvel[i] = pmove->right[i] * pmove->cmd.sidemove + pmove->forward[i] * pmove->cmd.forwardmove;
+	wishvel[2] += pmove->cmd.upmove;
+
+	VectorCopy(wishvel, wishdir);
+	wishspeed = VectorNormalize(wishdir);
+
+	if (pmove->waterlevel == 0)
+		flMaxSpeed = RC2Pref(RC2P_TransformBat_RunSpeed).f;
+	else
+		flMaxSpeed = RC2Pref(RC2P_TransformBat_SwimSpeed).f;
+	if (0 != g_bPMShrunk)
+		flMaxSpeed *= 0.2;
+
+	if (wishspeed > flMaxSpeed && wishspeed != 0)
+	{
+		VectorScale(wishvel, flMaxSpeed / wishspeed, wishvel);
+		wishspeed = flMaxSpeed;
+	}
+
+	PM_BatAccelerate(wishdir, wishspeed, RC2Pref(RC2P_TransformBat_AccelScale).f * pmove->movevars->accelerate);
+	PM_ApplyPullForces();
+	PM_BatFriction();
+
+	if ((g_iPMFlags & PMF_HELD) != 0)
+		PM_AddGravity();
+
+	PM_CheckVelocity();
+	PM_FlyStepAndMove();
+}
+
+// orig 0xa39a0. RC2: the air control cap depends on the movement mode
 void PM_AirAccelerate(Vector wishdir, float wishspeed, float accel)
 {
 	int i;
@@ -1355,8 +1874,25 @@ void PM_AirAccelerate(Vector wishdir, float wishspeed, float accel)
 	// Cap speed
 	//wishspd = VectorNormalize (pmove->wishveloc);
 
-	if (wishspd > 30)
-		wishspd = 30;
+	float flCap;
+	switch (g_iPMMode)
+	{
+	case PM_MODE_ASSASSIN:
+		flCap = 80;
+		break;
+	case PM_MODE_HOUNDEYE:
+		flCap = 5;
+		break;
+	case PM_MODE_HEADCRAB:
+		flCap = 50;
+		break;
+	default:
+		flCap = 30;
+		break;
+	}
+
+	if (wishspd > flCap)
+		wishspd = flCap;
 	// Determine veer amount
 	currentspeed = DotProduct(pmove->velocity, wishdir);
 	// See how much to add
@@ -1384,6 +1920,8 @@ PM_WaterMove
 
 ===================
 */
+// orig 0xa3ac0. RC2: the speed attribute and the swim speed of each movement mode; shrunk
+// players step up at 0.2
 void PM_WaterMove()
 {
 	int i;
@@ -1396,27 +1934,55 @@ void PM_WaterMove()
 
 	float speed, newspeed, addspeed, accelspeed;
 
+	float flSpeedScale = PM_GetAttributeScale(1, g_iPMPlayerEnt);
+
 	//
 	// user intentions
 	//
 	for (i = 0; i < 3; i++)
-		wishvel[i] = pmove->forward[i] * pmove->cmd.forwardmove + pmove->right[i] * pmove->cmd.sidemove;
+	{
+		if (g_iPMMode == PM_MODE_NORMAL)
+			wishvel[i] = (pmove->forward[i] * pmove->cmd.forwardmove + pmove->right[i] * pmove->cmd.sidemove) * flSpeedScale;
+		else
+			wishvel[i] = pmove->forward[i] * pmove->cmd.forwardmove + pmove->right[i] * pmove->cmd.sidemove;
+	}
 
 	// Sinking after no other movement occurs
 	if (0 == pmove->cmd.forwardmove && 0 == pmove->cmd.sidemove && 0 == pmove->cmd.upmove)
 		wishvel[2] -= 60; // drift towards bottom
 	else				  // Go straight up by upmove amount.
-		wishvel[2] += pmove->cmd.upmove;
+		wishvel[2] += flSpeedScale * pmove->cmd.upmove;
 
 	// Copy it over and determine speed
 	VectorCopy(wishvel, wishdir);
 	wishspeed = VectorNormalize(wishdir);
 
-	// Cap speed.
-	if (wishspeed > pmove->maxspeed)
+	// Original bug, kept: the bat (and any mode without a swim speed) caps at the speed
+	// attribute itself, about 1
+	float flMaxSpeed = flSpeedScale;
+	switch (g_iPMMode)
 	{
-		VectorScale(wishvel, pmove->maxspeed / wishspeed, wishvel);
-		wishspeed = pmove->maxspeed;
+	case PM_MODE_NORMAL:
+		flMaxSpeed = flSpeedScale * pmove->maxspeed;
+		break;
+	case PM_MODE_ASSASSIN:
+		flMaxSpeed = RC2Pref(RC2P_TransformAssassin_SwimSpeed).f;
+		break;
+	case PM_MODE_HOUNDEYE:
+		flMaxSpeed = RC2Pref(RC2P_TransformHoundeye_SwimSpeed).f;
+		break;
+	case PM_MODE_HEADCRAB:
+		flMaxSpeed = RC2Pref(RC2P_TransformHeadcrab_SwimSpeed).f;
+		break;
+	}
+	if (0 != g_bPMShrunk)
+		flMaxSpeed *= 0.2;
+
+	// Cap speed.
+	if (wishspeed > flMaxSpeed && wishspeed != 0)
+	{
+		VectorScale(wishvel, flMaxSpeed / wishspeed, wishvel);
+		wishspeed = flMaxSpeed;
 	}
 	// Slow us down a bit.
 	wishspeed *= 0.8;
@@ -1461,7 +2027,7 @@ void PM_WaterMove()
 	// assume it is a stair or a slope, so press down from stepheight above
 	VectorMA(pmove->origin, pmove->frametime, pmove->velocity, dest);
 	VectorCopy(dest, start);
-	start[2] += pmove->movevars->stepsize + 1;
+	start[2] += (0 != g_bPMShrunk ? pmove->movevars->stepsize * 0.2 : pmove->movevars->stepsize) + 1;
 	trace = pmove->PM_PlayerTrace(start, dest, PM_NORMAL, -1);
 	if (0 == trace.startsolid && 0 == trace.allsolid) // FIXME: check steep slope?
 	{												  // walked up the step, so just keep result and exit
@@ -1473,6 +2039,144 @@ void PM_WaterMove()
 	PM_FlyMove();
 }
 
+/*
+===================
+Rocket Crowbar 2: the wallhop (jump off a wall in the air) and the jetboost (an energy-paid
+push where the player looks). Both need their ability (PM_GetAbilityFlags) as a normal
+player; the assassin wallhops by nature. Names ours.
+===================
+*/
+void PM_WallhopApply(const Vector& normal) // orig 0xa3ea0, name ours
+{
+	const float flShrink = 0 != g_bPMShrunk ? 0.2 : 1.0;
+	Vector push;
+
+	if (g_iPMMode == PM_MODE_ASSASSIN)
+	{
+		VectorScale(normal, (Length(pmove->velocity) * RC2Pref(RC2P_TransformAssassin_WallhopVelReboundScale).f + RC2Pref(RC2P_TransformAssassin_WallhopVelBaseAdd).f) * flShrink, push);
+		VectorAdd(pmove->velocity, push, pmove->velocity);
+		if (normal[2] < 0.3 && normal[2] > -0.1)
+			pmove->velocity[2] += RC2Pref(RC2P_TransformAssassin_WallhopWallZAdd).f;
+	}
+	else if (g_iPMMode == PM_MODE_NORMAL)
+	{
+		const float flJump = PM_GetAttributeScale(0, g_iPMPlayerEnt);
+		VectorScale(normal, (Length(pmove->velocity) * RC2Pref(RC2P_Attributes_WallhopVelReboundScale).f + RC2Pref(RC2P_Attributes_WallhopVelBaseAdd).f) * flJump * flShrink, push);
+		VectorAdd(pmove->velocity, push, pmove->velocity);
+		if (normal[2] < 0.3 && normal[2] > -0.1)
+			pmove->velocity[2] += RC2Pref(RC2P_Attributes_WallhopWallZAdd).f * flJump;
+	}
+}
+
+// trace from the origin along vecDir; on a hit take its plane as the wall and the trace's
+// end as where the wall was looked for
+static void PM_WallhopTrace(const Vector& vecDir, Vector& normal, Vector& vecWall) // a helper, no original
+{
+	Vector end;
+	pmtrace_t trace;
+
+	VectorAdd(pmove->origin, vecDir, end);
+	trace = pmove->PM_PlayerTrace(pmove->origin, end, PM_STUDIO_IGNORE, -1);
+	if (trace.fraction < 1.0)
+	{
+		normal = trace.plane.normal;
+		vecWall = end;
+	}
+}
+
+void PM_CheckWallhop() // orig 0xa4030, name ours
+{
+	const float flShrink = 0 != g_bPMShrunk ? 0.2 : 1.0;
+	Vector normal = g_vecZero, vecWall, vecDir;
+	int i;
+
+	if (g_iPMMode == PM_MODE_NORMAL)
+	{
+		if ((PM_GetAbilityFlags(g_iPMPlayerEnt) & 1) == 0)
+			return;
+	}
+	else if (g_iPMMode != PM_MODE_ASSASSIN)
+	{
+		return;
+	}
+
+	if ((pmove->cmd.buttons & IN_JUMP) == 0 || PM_GetPlayerTimer(g_iPMPlayerEnt, 0) >= 1)
+		return;
+
+	PM_SetPlayerTimer(g_iPMPlayerEnt, 0, 100);
+
+	// the first world or brush entity touched this move is the wall
+	bool bFound = false;
+	for (i = 0; i < pmove->numtouch; i++)
+	{
+		const pmtrace_t& touch = pmove->touchindex[i];
+		if (touch.ent == 0 || pmove->physents[touch.ent].model != NULL)
+		{
+			normal = touch.plane.normal;
+			VectorMA(touch.endpos, -32, normal, vecWall);
+			bFound = normal != g_vecZero;
+			break;
+		}
+	}
+
+	// else look for one ahead, then in front and behind
+	if (!bFound)
+	{
+		vecDir = pmove->velocity;
+		VectorNormalize(vecDir);
+		VectorScale(vecDir, RC2Pref(RC2P_Attributes_WallhopCheckDistance).f * flShrink, vecDir);
+		PM_WallhopTrace(vecDir, normal, vecWall);
+	}
+	if (normal == g_vecZero)
+	{
+		VectorScale(pmove->forward, RC2Pref(RC2P_Attributes_WallhopCheckDistance).f * flShrink, vecDir);
+		PM_WallhopTrace(vecDir, normal, vecWall);
+	}
+	if (normal == g_vecZero)
+	{
+		VectorScale(pmove->forward, -(RC2Pref(RC2P_Attributes_WallhopCheckDistance).f * flShrink), vecDir);
+		PM_WallhopTrace(vecDir, normal, vecWall);
+	}
+	if (normal == g_vecZero)
+		return;
+
+	if (normal[2] <= 0.8)
+	{
+		PM_WallhopApply(normal);
+		PM_CatagorizeTextureTypeAt(pmove->origin, vecWall);
+		PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), 1.0);
+	}
+}
+
+void PM_CheckJetboost() // orig 0xa4540, name ours
+{
+	Vector vecDir;
+
+	if ((PM_GetAbilityFlags(g_iPMPlayerEnt) & 4) == 0 || (pmove->cmd.buttons & IN_JUMP) == 0 || g_iPMMode != PM_MODE_NORMAL)
+		return;
+
+	if (PM_GetPlayerTimer(g_iPMPlayerEnt, 1) >= 1)
+		return;
+
+	PM_SetPlayerTimer(g_iPMPlayerEnt, 1, 250);
+
+	if (PM_GetEnergy(g_iPMPlayerEnt) < RC2Pref(RC2P_Attributes_JetboostEnergyCost).f)
+		return;
+
+	PM_UseEnergy(g_iPMPlayerEnt, RC2Pref(RC2P_Attributes_JetboostEnergyCost).f, RC2Pref(RC2P_Attributes_JetboostEnergyRechargeDelay).f);
+
+	AngleVectors(pmove->angles, &vecDir, NULL, NULL);
+	if (vecDir[2] < RC2Pref(RC2P_Attributes_JetboostMinZ).f)
+		vecDir[2] = RC2Pref(RC2P_Attributes_JetboostMinZ).f;
+	if (vecDir[2] > RC2Pref(RC2P_Attributes_JetboostMaxZ).f)
+		vecDir[2] = RC2Pref(RC2P_Attributes_JetboostMaxZ).f;
+	VectorNormalize(vecDir);
+
+	VectorMA(pmove->velocity, RC2Pref(RC2P_Attributes_JetboostVelBoost).f, vecDir, pmove->velocity);
+	PM_JetboostEffect(g_iPMPlayerEnt, 0, vecDir, pmove->velocity);
+	PM_SetPlayerTimer(g_iPMPlayerEnt, 1, (int)(RC2Pref(RC2P_Attributes_JetboostReuseDelay).f * 1000.0));
+}
+
 
 /*
 ===================
@@ -1480,6 +2184,7 @@ PM_AirMove
 
 ===================
 */
+// orig 0xa46a0. RC2: then the wallhop and the jetboost
 void PM_AirMove()
 {
 	int i;
@@ -1524,6 +2229,9 @@ void PM_AirMove()
 	VectorAdd(pmove->velocity, pmove->basevelocity, pmove->velocity);
 
 	PM_FlyMove();
+
+	PM_CheckWallhop();
+	PM_CheckJetboost();
 }
 
 bool PM_InWater()
@@ -1841,11 +2549,33 @@ bool PM_CheckStuck()
 	return true;
 }
 
+// Rocket Crowbar 2: where a chase camera behind physent iTarget sits: 112 units back along
+// angles from 28 above its origin, 4 off whatever the point hull hits on the way
+void PM_GetChaseOrigin(const Vector& angles, int iTarget, const Vector& offset, Vector& vecOut) // orig 0xa4ef0, name ours
+{
+	physent_t* pe = &pmove->physents[iTarget];
+	Vector forward, start, end;
+
+	AngleVectors(angles, &forward, NULL, NULL);
+
+	start = pe->origin;
+	start[2] += 28.0;
+
+	VectorMA(offset, 112.0, forward, end);
+	end = start - end;
+
+	pmtrace_t* trace = pmove->PM_TraceLine(start, end, PM_NORMAL, 2, iTarget);
+	VectorMA(trace->endpos, 4.0, trace->plane.normal, vecOut);
+}
+
 /*
 ===============
 PM_SpectatorMove
 ===============
 */
+// orig 0xa4fc0. RC2's is an older shape than SDK 2.3's: roaming also when there is no
+// target, the stop speed is g_flPMStopSpeed, and a tracking spectator is put behind the
+// target (PM_GetChaseOrigin) instead of on it
 void PM_SpectatorMove()
 {
 	float speed, drop, friction, control, newspeed;
@@ -1861,7 +2591,7 @@ void PM_SpectatorMove()
 	// doesn't need excate track position, only to generate PVS, so just copy
 	// targets position and real view position is calculated on client (saves server CPU)
 
-	if (pmove->iuser1 == OBS_ROAMING)
+	if (pmove->iuser1 == OBS_ROAMING || pmove->iuser2 == 0)
 	{
 
 #ifdef CLIENT_DLL
@@ -1887,7 +2617,7 @@ void PM_SpectatorMove()
 			drop = 0;
 
 			friction = pmove->movevars->friction * 1.5; // extra friction
-			control = speed < pmove->movevars->stopspeed ? pmove->movevars->stopspeed : speed;
+			control = speed < g_flPMStopSpeed ? g_flPMStopSpeed : speed;
 			drop += control * friction * pmove->frametime;
 
 			// scale the velocity
@@ -1918,7 +2648,7 @@ void PM_SpectatorMove()
 		//
 		// clamp to server defined max speed
 		//
-		if (wishspeed > pmove->movevars->spectatormaxspeed)
+		if (wishspeed > pmove->movevars->spectatormaxspeed && wishspeed != 0)
 		{
 			VectorScale(wishvel, pmove->movevars->spectatormaxspeed / wishspeed, wishvel);
 			wishspeed = pmove->movevars->spectatormaxspeed;
@@ -1944,10 +2674,7 @@ void PM_SpectatorMove()
 		// all other modes just track some kind of target, so spectator PVS = target PVS
 
 		int target;
-
-		// no valid target ?
-		if (pmove->iuser2 <= 0)
-			return;
+		Vector angles, vecOrigin;
 
 		// Find the client this player's targeting
 		for (target = 0; target < pmove->numphysent; target++)
@@ -1959,9 +2686,37 @@ void PM_SpectatorMove()
 		if (target == pmove->numphysent)
 			return;
 
-		// use targets position as own origin for PVS
-		VectorCopy(pmove->physents[target].angles, pmove->angles);
-		VectorCopy(pmove->physents[target].origin, pmove->origin);
+		// In-eye looks up the second target too, and uses nothing of it
+		if (pmove->iuser1 == OBS_IN_EYE && 0 != pmove->iuser3)
+		{
+			for (int target2 = 0; target2 < pmove->numphysent; target2++)
+			{
+				if (pmove->physents[target2].info == pmove->iuser3)
+					break;
+			}
+		}
+
+		if (pmove->iuser1 == OBS_CHASE_LOCKED)
+		{
+			angles[0] = 0;
+			angles[1] = pmove->physents[target].angles[1];
+			angles[2] = pmove->physents[target].angles[2];
+		}
+		else if (pmove->iuser1 != OBS_IN_EYE)
+		{
+			angles = pmove->angles;
+		}
+		else
+		{
+			// Original bug: in-eye leaves these angles uninitialised (whatever was on the
+			// stack). VERIFY: zero here, the original's value is undefined
+			angles = g_vecZero;
+		}
+
+		PM_GetChaseOrigin(angles, target, g_vecZero, vecOrigin);
+
+		pmove->origin = vecOrigin;
+		pmove->angles = angles;
 
 		// no velocity
 		VectorCopy(vec3_origin, pmove->velocity);
@@ -1976,6 +2731,7 @@ Use for ease-in, ease-out style interpolation (accel/decel)
 Used by ducking code.
 ==================
 */
+// orig 0xa5380. Not byte-identical to SDK 2.3's, but it reads the same
 float PM_SplineFraction(float value, float scale)
 {
 	float valueSquared;
@@ -2009,6 +2765,7 @@ void PM_FixPlayerCrouchStuck(int direction)
 	VectorCopy(test, pmove->origin); // Failed
 }
 
+// orig 0xa5440. RC2: a shrunk player is never ducked and stays in the point hull
 void PM_UnDuck()
 {
 	int i;
@@ -2016,6 +2773,15 @@ void PM_UnDuck()
 	Vector newOrigin;
 
 	VectorCopy(pmove->origin, newOrigin);
+
+	if (0 != g_bPMShrunk)
+	{
+		pmove->flags &= ~FL_DUCKING;
+		pmove->bInDuck = 0;
+		pmove->flDuckTime = 0;
+		pmove->usehull = 2;
+		return;
+	}
 
 	if (pmove->onground != -1)
 	{
@@ -2043,7 +2809,7 @@ void PM_UnDuck()
 
 		pmove->flags &= ~FL_DUCKING;
 		pmove->bInDuck = 0;
-		pmove->view_ofs = VEC_VIEW;
+		pmove->view_ofs[2] = VEC_VIEW[2];
 		pmove->flDuckTime = 0;
 
 		VectorCopy(newOrigin, pmove->origin);
@@ -2053,6 +2819,7 @@ void PM_UnDuck()
 	}
 }
 
+// orig 0xa55e0. RC2: no ducking when shrunk or in a movement mode
 void PM_Duck()
 {
 	int i;
@@ -2061,9 +2828,6 @@ void PM_Duck()
 
 	int buttonsChanged = (pmove->oldbuttons ^ pmove->cmd.buttons); // These buttons have changed this frame
 	int nButtonPressed = buttonsChanged & pmove->cmd.buttons;	   // The changed ones still down are "pressed"
-
-	bool duckchange = (buttonsChanged & IN_DUCK) != 0;
-	bool duckpressed = (nButtonPressed & IN_DUCK) != 0;
 
 	if ((pmove->cmd.buttons & IN_DUCK) != 0)
 	{
@@ -2075,7 +2839,7 @@ void PM_Duck()
 	}
 
 	// Prevent ducking if the iuser3 variable is set
-	if (0 != pmove->iuser3 || 0 != pmove->dead)
+	if (0 != pmove->iuser3 || 0 != pmove->dead || 0 != g_bPMShrunk || g_iPMMode != PM_MODE_NORMAL)
 	{
 		// Try to unduck
 		if ((pmove->flags & FL_DUCKING) != 0)
@@ -2112,7 +2876,7 @@ void PM_Duck()
 					(pmove->onground == -1))
 				{
 					pmove->usehull = 1;
-					pmove->view_ofs = VEC_DUCK_VIEW;
+					pmove->view_ofs[2] = VEC_DUCK_VIEW[2];
 					pmove->flags |= FL_DUCKING;
 					pmove->bInDuck = 0;
 
@@ -2148,6 +2912,9 @@ void PM_Duck()
 	}
 }
 
+// orig 0xa5840. RC2: climb speed from the speed attribute or the movement mode, jump-off from
+// the jump attribute. halflife-updated's maxspeed cap and ducked climb speed dropped (SDK 2.3
+// and RC2 have neither)
 void PM_LadderMove(physent_t* pLadder)
 {
 	Vector ladderCenter;
@@ -2158,6 +2925,8 @@ void PM_LadderMove(physent_t* pLadder)
 	if (pmove->movetype == MOVETYPE_NOCLIP)
 		return;
 
+	const float flSpeedScale = PM_GetAttributeScale(1, g_iPMPlayerEnt);
+	const float flJumpScale = PM_GetAttributeScale(0, g_iPMPlayerEnt);
 
 	pmove->PM_GetModelBounds(pLadder->model, modelmins, modelmaxs);
 
@@ -2179,19 +2948,30 @@ void PM_LadderMove(physent_t* pLadder)
 	{
 		float forward = 0, right = 0;
 		Vector vpn, v_right;
-		float flSpeed = MAX_CLIMB_SPEED;
-
-		// they shouldn't be able to move faster than their maxspeed
-		if (flSpeed > pmove->maxspeed)
-		{
-			flSpeed = pmove->maxspeed;
-		}
+		float flSpeed;
 
 		AngleVectors(pmove->angles, &vpn, &v_right, NULL);
 
-		if ((pmove->flags & FL_DUCKING) != 0)
+		if (g_iPMMode == PM_MODE_NORMAL)
 		{
-			flSpeed *= PLAYER_DUCKING_MULTIPLIER;
+			flSpeed = flSpeedScale * MAX_CLIMB_SPEED;
+		}
+		else if (g_iPMMode == PM_MODE_ASSASSIN)
+		{
+			flSpeed = RC2Pref(RC2P_TransformAssassin_LadderSpeed).f;
+		}
+		else if (g_iPMMode == PM_MODE_HOUNDEYE)
+		{
+			flSpeed = RC2Pref(RC2P_TransformHoundeye_LadderSpeed).f;
+		}
+		else if (g_iPMMode == PM_MODE_HEADCRAB)
+		{
+			flSpeed = RC2Pref(RC2P_TransformHeadcrab_LadderSpeed).f;
+		}
+		else
+		{
+			// Original bug, kept: other modes climb at the jump attribute (about 1 unit/s)
+			flSpeed = flJumpScale;
 		}
 
 		if ((pmove->cmd.buttons & IN_BACK) != 0)
@@ -2214,7 +2994,7 @@ void PM_LadderMove(physent_t* pLadder)
 		if ((pmove->cmd.buttons & IN_JUMP) != 0)
 		{
 			pmove->movetype = MOVETYPE_WALK;
-			VectorScale(trace.plane.normal, 270, pmove->velocity);
+			VectorScale(trace.plane.normal, flJumpScale * 270, pmove->velocity);
 		}
 		else
 		{
@@ -2258,7 +3038,7 @@ void PM_LadderMove(physent_t* pLadder)
 				VectorMA(lateral, -normal, tmp, pmove->velocity);
 				if (onFloor && normal > 0) // On ground moving away from the ladder
 				{
-					VectorMA(pmove->velocity, MAX_CLIMB_SPEED, trace.plane.normal, pmove->velocity);
+					VectorMA(pmove->velocity, flSpeedScale * MAX_CLIMB_SPEED, trace.plane.normal, pmove->velocity);
 				}
 				//pev->velocity = lateral - (CrossProduct( trace.vecPlaneNormal, perp ) * normal);
 			}
@@ -2382,6 +3162,7 @@ PM_Physics_Toss()
 Dead player flying through air., e.g.
 ============
 */
+// orig 0xa5f50. Not byte-identical to SDK 2.3's, but it reads the same
 void PM_Physics_Toss()
 {
 	pmtrace_t trace;
@@ -2560,9 +3341,23 @@ void PM_PreventMegaBunnyJumping()
 PM_Jump
 =============
 */
+// orig 0xa6380. RC2: the bat doesn't jump here; heights from rc2.ini and the jump attribute
+// (0.2 when shrunk), the houndeye's own height, the other modes jump in PM_AssassinJump and
+// PM_HeadcrabJump; sets the wallhop and jetboost timers. No tfc sounds, and any feigning
+// player (deadflag 5) can't jump.
 void PM_Jump()
 {
 	int i;
+
+	if (g_iPMMode == PM_MODE_BAT)
+		return;
+
+	float flJumpScale = PM_GetAttributeScale(0, g_iPMPlayerEnt);
+	PM_GetAttributeScale(1, g_iPMPlayerEnt); // read and unused
+	if (g_iPMMode != PM_MODE_NORMAL)
+		flJumpScale = 1.0;
+
+	const float flShrink = 0 != g_bPMShrunk ? 0.2 : 1.0;
 
 	if (0 != pmove->dead)
 	{
@@ -2570,11 +3365,8 @@ void PM_Jump()
 		return;
 	}
 
-	const bool tfc = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "tfc")) == 1;
-
 	// Spy that's feigning death cannot jump
-	if (tfc &&
-		(pmove->deadflag == (DEAD_DISCARDBODY + 1)))
+	if (pmove->deadflag == (DEAD_DISCARDBODY + 1))
 	{
 		return;
 	}
@@ -2596,11 +3388,11 @@ void PM_Jump()
 		pmove->onground = -1;
 
 		if (pmove->watertype == CONTENTS_WATER) // We move up a certain amount
-			pmove->velocity[2] = 100;
+			pmove->velocity[2] = flJumpScale * 100;
 		else if (pmove->watertype == CONTENTS_SLIME)
-			pmove->velocity[2] = 80;
+			pmove->velocity[2] = flJumpScale * 80;
 		else // LAVA
-			pmove->velocity[2] = 50;
+			pmove->velocity[2] = flJumpScale * 50;
 
 		// play swiming sound
 		if (pmove->flSwimTime <= 0)
@@ -2645,57 +3437,203 @@ void PM_Jump()
 
 	PM_PreventMegaBunnyJumping();
 
-	// Don't play jump sounds while frozen.
-	if ((pmove->flags & FL_FROZEN) == 0)
+	PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), 1.0);
+
+	if (g_iPMMode == PM_MODE_NORMAL)
 	{
-		if (tfc)
-		{
-			pmove->PM_PlaySound(CHAN_BODY, "player/plyrjmp8.wav", 0.5, ATTN_NORM, 0, PITCH_NORM);
-		}
-		else
-		{
-			PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), 1.0);
-		}
-	}
+		// See if user can super long jump?
+		const bool cansuperjump = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "slj")) == 1;
+		int iWallhopDelay = 50;
 
-	// See if user can super long jump?
-	const bool cansuperjump = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "slj")) == 1;
-
-	// Acclerate upward
-	// If we are ducking...
-	if ((0 != pmove->bInDuck) || (pmove->flags & FL_DUCKING) != 0)
-	{
-		// Adjust for super long jump module
-		// UNDONE -- note this should be based on forward angles, not current velocity.
-		if (cansuperjump &&
-			(pmove->cmd.buttons & IN_DUCK) != 0 &&
-			(pmove->flDuckTime > 0) &&
-			Length(pmove->velocity) > 50)
+		// Acclerate upward
+		// If we are ducking...
+		if ((0 != pmove->bInDuck) || (pmove->flags & FL_DUCKING) != 0)
 		{
-			pmove->punchangle[0] = -5;
-
-			for (i = 0; i < 2; i++)
+			// Adjust for super long jump module
+			// UNDONE -- note this should be based on forward angles, not current velocity.
+			if (cansuperjump &&
+				(pmove->cmd.buttons & IN_DUCK) != 0 &&
+				(pmove->flDuckTime > 0) &&
+				Length(pmove->velocity) > 50)
 			{
-				pmove->velocity[i] = pmove->forward[i] * PLAYER_LONGJUMP_SPEED * 1.6;
-			}
+				pmove->punchangle[0] = -5;
 
-			pmove->velocity[2] = sqrt(2 * 800 * 56.0);
+				for (i = 0; i < 2; i++)
+				{
+					pmove->velocity[i] = RC2Pref(RC2P_Attributes_BasePhysicsLongJumpForwardVel).f * pmove->forward[i] * flJumpScale;
+				}
+
+				iWallhopDelay = 250;
+				pmove->velocity[2] = sqrt(RC2Pref(RC2P_Attributes_BasePhysicsLongJumpHeight).f * flShrink * 1600.0) * flJumpScale;
+			}
+			else
+			{
+				pmove->velocity[2] = sqrt(RC2Pref(RC2P_Attributes_BasePhysicsJumpHeight).f * flShrink * 1600.0) * flJumpScale;
+			}
 		}
 		else
 		{
-			pmove->velocity[2] = sqrt(2 * 800 * 45.0);
+			pmove->velocity[2] = sqrt(RC2Pref(RC2P_Attributes_BasePhysicsJumpHeight).f * flShrink * 1600.0) * flJumpScale;
 		}
+
+		PM_SetPlayerTimer(g_iPMPlayerEnt, 0, iWallhopDelay);
 	}
-	else
+	else if (g_iPMMode == PM_MODE_HOUNDEYE)
 	{
-		pmove->velocity[2] = sqrt(2 * 800 * 45.0);
+		pmove->velocity[2] = sqrt(RC2Pref(RC2P_TransformHoundeye_JumpHeight).f * flShrink * 1600.0);
 	}
+
+	if (PM_GetPlayerTimer(g_iPMPlayerEnt, 1) < 50)
+		PM_SetPlayerTimer(g_iPMPlayerEnt, 1, 50);
 
 	// Decay it for simulation
 	PM_FixupGravityVelocity();
 
 	// Flag that we jumped.
 	pmove->oldbuttons |= IN_JUMP; // don't jump again until released
+}
+
+/*
+=============
+Rocket Crowbar 2: the assassin's and the headcrab's charged jumps, on releasing jump. The
+charge is player timer 2 (counted up in PM_PlayerMove while jump is held, negative while
+the re-jump delay runs). Names ours.
+=============
+*/
+// the water "jump" both have: up by the water type, with the swim sound
+static void PM_ChargedJumpSwim(float flWater, float flSlime, float flLava) // a helper, no original
+{
+	pmove->onground = -1;
+
+	if (pmove->watertype == CONTENTS_WATER)
+		pmove->velocity[2] = flWater;
+	else if (pmove->watertype == CONTENTS_SLIME)
+		pmove->velocity[2] = flSlime;
+	else
+		pmove->velocity[2] = flLava;
+
+	if (pmove->flSwimTime <= 0)
+	{
+		pmove->flSwimTime = 1000;
+		switch (pmove->RandomLong(0, 3))
+		{
+		case 0:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_wade1.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		case 1:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_wade2.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		case 2:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_wade3.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		case 3:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_wade4.wav", 1, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		}
+	}
+}
+
+void PM_AssassinJump() // orig 0xa67b0, name ours
+{
+	const int iCharge = PM_GetPlayerTimer(g_iPMPlayerEnt, 2);
+	if (iCharge < 0)
+		return;
+
+	const float flShrink = 0 != g_bPMShrunk ? 0.2 : 1.0;
+
+	if (0 != pmove->dead)
+		return;
+
+	if (pmove->waterlevel >= 2)
+	{
+		PM_ChargedJumpSwim(150, 100, 80);
+		return;
+	}
+
+	if (pmove->onground == -1)
+		return;
+
+	pmove->onground = -1;
+
+	float flCharge = (float)iCharge / (RC2Pref(RC2P_TransformAssassin_JumpFullChargeTime).f * 1000.0);
+	if (flCharge < 0)
+		flCharge = 0;
+	if (flCharge > 1)
+		flCharge = 1;
+	pmove->velocity[2] = flCharge;
+	pmove->velocity[2] = RC2Pref(RC2P_TransformAssassin_JumpMaxAddVel).f * pmove->velocity[2];
+	pmove->velocity[2] = RC2Pref(RC2P_TransformAssassin_JumpBaseVel).f + pmove->velocity[2];
+	pmove->velocity[2] = flShrink * pmove->velocity[2];
+
+	PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), 1.0);
+
+	if (pmove->cmd.forwardmove > 0)
+	{
+		Vector vecFlat(pmove->forward[0], pmove->forward[1], 0);
+		VectorNormalize(vecFlat);
+		VectorMA(pmove->velocity, RC2Pref(RC2P_TransformAssassin_JumpForwardVelBoost).f * flShrink, vecFlat, pmove->velocity);
+	}
+
+	PM_SetPlayerTimer(g_iPMPlayerEnt, 2, (int)(RC2Pref(RC2P_TransformAssassin_JumpMinRejumpTime).f * -1000.0));
+	PM_SetPlayerTimer(g_iPMPlayerEnt, 0, 100);
+	PM_FixupGravityVelocity();
+}
+
+void PM_HeadcrabJump() // orig 0xa6a90, name ours
+{
+	const int iCharge = PM_GetPlayerTimer(g_iPMPlayerEnt, 2);
+	if (iCharge < 0)
+		return;
+
+	const float flShrink = 0 != g_bPMShrunk ? 0.2 : 1.0;
+
+	if (0 != pmove->dead)
+		return;
+
+	if (pmove->waterlevel > 1)
+	{
+		pmove->onground = -1;
+		return;
+	}
+
+	if (pmove->onground == -1)
+		return;
+
+	switch (pmove->RandomLong(0, 1))
+	{
+	case 0:
+		pmove->PM_PlaySound(CHAN_VOICE, "headcrab/hc_attack1.wav", 1, ATTN_NORM, 0, pmove->RandomLong(95, 105));
+		break;
+	case 1:
+		pmove->PM_PlaySound(CHAN_VOICE, "headcrab/hc_attack2.wav", 1, ATTN_NORM, 0, pmove->RandomLong(95, 105));
+		break;
+	}
+
+	PM_SetHeadcrabLeap(g_iPMPlayerEnt, 1);
+	pmove->onground = -1;
+
+	// not clamped, unlike the assassin's
+	const float flVel = ((float)iCharge / (RC2Pref(RC2P_TransformHeadcrab_JumpFullChargeTime).f * 1000.0)) * RC2Pref(RC2P_TransformHeadcrab_JumpMaxAddVel).f + RC2Pref(RC2P_TransformHeadcrab_JumpBaseVel).f;
+
+	PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), 1.0);
+
+	Vector vecDir = pmove->forward;
+	if (vecDir[2] < 0.2)
+	{
+		vecDir[2] = 0.2;
+		VectorNormalize(vecDir);
+	}
+	VectorMA(pmove->velocity, flVel * flShrink, vecDir, pmove->velocity);
+
+	PM_SetPlayerTimer(g_iPMPlayerEnt, 2, (int)(RC2Pref(RC2P_TransformHeadcrab_JumpMinRejumpTime).f * -1000.0));
+	PM_SetPlayerTimer(g_iPMPlayerEnt, 0, 100);
+
+	// Original oddity, kept: past maxvelocity it is scaled down to the movevars' maxspeed
+	const float flSpeed = Length(pmove->velocity);
+	if (flSpeed != 0 && flSpeed > pmove->movevars->maxvelocity)
+		VectorScale(pmove->velocity, pmove->movevars->maxspeed / flSpeed, pmove->velocity);
+
+	PM_FixupGravityVelocity();
 }
 
 /*
@@ -2768,6 +3706,7 @@ void PM_CheckWaterJump()
 	pmove->usehull = savehull;
 }
 
+// orig 0xa6f30. RC2: no fall pain sounds, and no screen punch for the assassin and headcrab
 void PM_CheckFalling()
 {
 	if (pmove->onground != -1 &&
@@ -2781,28 +3720,10 @@ void PM_CheckFalling()
 		}
 		else if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
 		{
-			// NOTE:  In the original game dll , there were no breaks after these cases, causing the first one to
-			// cascade into the second
-			//switch ( RandomLong(0,1) )
-			//{
-			//case 0:
-			//pmove->PM_PlaySound( CHAN_VOICE, "player/pl_fallpain2.wav", 1, ATTN_NORM, 0, PITCH_NORM );
-			//break;
-			//case 1:
-			pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", 1, ATTN_NORM, 0, PITCH_NORM);
-			//	break;
-			//}
 			fvol = 1.0;
 		}
 		else if (pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2)
 		{
-			const bool tfc = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "tfc")) == 1;
-
-			if (tfc)
-			{
-				pmove->PM_PlaySound(CHAN_VOICE, "player/pl_fallpain3.wav", 1, ATTN_NORM, 0, PITCH_NORM);
-			}
-
 			fvol = 0.85;
 		}
 		else if (pmove->flFallVelocity < PLAYER_MIN_BOUNCE_SPEED)
@@ -2820,12 +3741,15 @@ void PM_CheckFalling()
 			// play step sound for current texture
 			PM_PlayStepSound(PM_MapTextureTypeStepType(pmove->chtexturetype), fvol);
 
-			// Knock the screen around a little bit, temporary effect
-			pmove->punchangle[2] = pmove->flFallVelocity * 0.013; // punch z axis
-
-			if (pmove->punchangle[0] > 8)
+			if (g_iPMMode != PM_MODE_ASSASSIN && g_iPMMode != PM_MODE_HEADCRAB)
 			{
-				pmove->punchangle[0] = 8;
+				// Knock the screen around a little bit, temporary effect
+				pmove->punchangle[2] = pmove->flFallVelocity * 0.013; // punch z axis
+
+				if (pmove->punchangle[0] > 8)
+				{
+					pmove->punchangle[0] = 8;
+				}
 			}
 		}
 	}
@@ -2834,6 +3758,120 @@ void PM_CheckFalling()
 	{
 		pmove->flFallVelocity = 0;
 	}
+}
+
+/*
+=================
+Rocket Crowbar 2: what pulls the player: its 64 tethers, a tractor pull point (the egon's
+tractor), and 64 global pull points. Returns whether anything pulled. Name ours.
+=================
+*/
+static void PM_PullLiftOff() // a helper, no original
+{
+	if (pmove->onground != -1)
+	{
+		pmove->onground = -1;
+		pmove->origin[2] += 2.0;
+	}
+}
+
+bool PM_ApplyPullForces() // orig 0xa7080, name ours
+{
+	bool bPulled = false;
+	Vector vecPull = g_vecZero;
+	Vector vecOrg = pmove->origin;
+	Vector vecPoint, vecDir;
+	float flStrength, flDist, flLen;
+	int i;
+
+	if (0 != g_bPMShrunk)
+		vecOrg[2] += 7.2;
+
+	for (i = 0; i < 64; i++)
+	{
+		if (PM_GetPlayerTether(g_iPMPlayerEnt, i, vecPoint, &flStrength, &flDist) && flStrength != 0)
+		{
+			vecDir = vecPoint - vecOrg;
+			flLen = VectorNormalize(vecDir);
+			if (flLen > flDist && flLen != 0)
+				VectorMA(vecPull, (flLen - flDist) * pmove->frametime * flStrength, vecDir, vecPull);
+		}
+	}
+
+	if (vecPull != g_vecZero)
+	{
+		bPulled = true;
+		VectorAdd(pmove->velocity, vecPull, pmove->velocity);
+
+		if (vecPull[2] > pmove->frametime * 150.0)
+			PM_PullLiftOff();
+
+		float flDrag;
+		if (pmove->waterlevel == 2)
+			flDrag = 0.99;
+		else if (pmove->onground == -1)
+			flDrag = 0.33;
+		else
+			flDrag = 1.0;
+
+		if (flDrag != 1.0)
+		{
+			Vector vecDrag = pmove->velocity;
+			flLen = VectorNormalize(vecDrag);
+			VectorScale(vecDrag, flDrag * pmove->frametime * flLen, vecDrag);
+			VectorSubtract(pmove->velocity, vecDrag, pmove->velocity);
+		}
+	}
+
+	Vector vecTractor;
+	if (PM_GetPlayerPullVec(g_iPMPlayerEnt, vecTractor) && vecTractor[0] != 0 && vecTractor[1] != 0 && vecTractor[2] != 0 && pmove->frametime > 0)
+	{
+		vecDir = vecTractor - pmove->origin;
+		flLen = VectorNormalize(vecDir);
+		const float flDropDist = RC2Pref(RC2P_Egon_TractorDropDist).f;
+		if (flLen <= flDropDist)
+		{
+			bPulled = true;
+			VectorMA(pmove->velocity, ((flLen / flDropDist) * 0.95 + 0.05) * pmove->frametime * RC2Pref(RC2P_Egon_TractorMaxAccel).f, vecDir, pmove->velocity);
+			if (pmove->velocity[2] > pmove->frametime * 800.0)
+				PM_PullLiftOff();
+		}
+		else
+		{
+			PM_ClearPlayerPull(g_iPMPlayerEnt);
+		}
+	}
+
+	for (i = 0; i < 64; i++)
+	{
+		// writes into vecOrg as the original does (its player-origin copy is done with)
+		PM_GetGlobalPuller(i, vecOrg, &flDist, &flStrength);
+		if (vecOrg != g_vecZero)
+		{
+			vecDir = vecOrg - pmove->origin;
+			flLen = Length(vecDir);
+			if (flLen < flDist)
+			{
+				bPulled = true;
+				if (flLen >= 32.0)
+				{
+					VectorScale(vecDir, (flStrength * pmove->frametime) / (flLen * flLen), vecDir);
+					VectorAdd(pmove->velocity, vecDir, pmove->velocity);
+					if (vecDir[2] > pmove->frametime * 500.0)
+						PM_PullLiftOff();
+				}
+				else
+				{
+					if (pmove->frametime != 0)
+						VectorScale(vecDir, 1.0 / pmove->frametime, pmove->velocity);
+					if (pmove->velocity[2] > 0)
+						PM_PullLiftOff();
+				}
+			}
+		}
+	}
+
+	return bPulled;
 }
 
 /*
@@ -2907,6 +3945,7 @@ PM_DropPunchAngle
 
 =============
 */
+// orig 0xa7760. Not byte-identical to SDK 2.3's, but it reads the same
 void PM_DropPunchAngle(Vector& punchangle)
 {
 	float len;
@@ -2923,6 +3962,9 @@ PM_CheckParamters
 
 ==============
 */
+// orig 0xa77b0. RC2: the assassin, houndeye and headcrab run at their own speed; dead view
+// height set as SDK 2.3 does (z only). halflife-updated's slow-down while +use on the ground
+// is not RC2's and is dropped
 void PM_CheckParamters()
 {
 	float spd;
@@ -2940,13 +3982,17 @@ void PM_CheckParamters()
 		pmove->maxspeed = V_min(maxspeed, pmove->maxspeed);
 	}
 
-	// Slow down, I'm pulling it! (a box maybe) but only when I'm standing on ground
-	//
-	// JoshA: Moved this to CheckParamters rather than working on the velocity,
-	// as otherwise it affects every integration step incorrectly.
-	if ((pmove->onground != -1) && (pmove->cmd.buttons & IN_USE))
+	switch (g_iPMMode)
 	{
-		pmove->maxspeed *= 1.0f / 3.0f;
+	case PM_MODE_ASSASSIN:
+		pmove->maxspeed = RC2Pref(RC2P_TransformAssassin_RunSpeed).f;
+		break;
+	case PM_MODE_HOUNDEYE:
+		pmove->maxspeed = RC2Pref(RC2P_TransformHoundeye_RunSpeed).f;
+		break;
+	case PM_MODE_HEADCRAB:
+		pmove->maxspeed = RC2Pref(RC2P_TransformHeadcrab_RunSpeed).f;
+		break;
 	}
 
 	if ((spd != 0.0) &&
@@ -2989,7 +4035,7 @@ void PM_CheckParamters()
 	// Set dead player view_offset
 	if (0 != pmove->dead)
 	{
-		pmove->view_ofs = VEC_DEAD_VIEW;
+		pmove->view_ofs[2] = VEC_DEAD_VIEW[2];
 	}
 
 	// Adjust client view angles to match values used on server.
@@ -2999,6 +4045,8 @@ void PM_CheckParamters()
 	}
 }
 
+// orig 0xa7a20. RC2: a negative duck time (the transforms' refire wait) counts up to 0, and
+// player timers 0 and 1 count down while jump isn't held
 void PM_ReduceTimers()
 {
 	if (pmove->flTimeStepSound > 0)
@@ -3017,12 +4065,193 @@ void PM_ReduceTimers()
 			pmove->flDuckTime = 0;
 		}
 	}
+	else if (g_iPMMode != PM_MODE_NORMAL && pmove->flDuckTime < 0)
+	{
+		pmove->flDuckTime += pmove->cmd.msec;
+		if (pmove->flDuckTime > 0)
+		{
+			pmove->flDuckTime = 0;
+		}
+	}
 	if (pmove->flSwimTime > 0)
 	{
 		pmove->flSwimTime -= pmove->cmd.msec;
 		if (pmove->flSwimTime < 0)
 		{
 			pmove->flSwimTime = 0;
+		}
+	}
+
+	for (int iSlot = 0; iSlot < 2; iSlot++)
+	{
+		int iTimer = PM_GetPlayerTimer(g_iPMPlayerEnt, iSlot);
+		if (iTimer > 0 && (pmove->cmd.buttons & IN_JUMP) == 0)
+		{
+			iTimer -= pmove->cmd.msec;
+			if (iTimer < 1)
+				iTimer = 0;
+			PM_SetPlayerTimer(g_iPMPlayerEnt, iSlot, iTimer);
+		}
+	}
+}
+
+/*
+=============
+Rocket Crowbar 2: the bat's own move. In flight it flies (PM_BatMove); perched it sits at its
+perch (a point, or an offset in a physent's frame) until something pulls it off. Returns
+whether the move is done. Name ours.
+=============
+*/
+bool PM_BatPerchMove() // orig 0xa7c00, name ours
+{
+	int iAttach;
+	Vector vecOffset;
+
+	if ((g_iPMFlags & (PMF_NOINPUT | PMF_HELD)) != 0)
+		return false;
+
+	const int iState = PM_GetBatPerch(g_iPMPlayerEnt, &iAttach, vecOffset);
+	if (iState == 0)
+	{
+		PM_BatMove();
+		return true;
+	}
+
+	if (iState != 2)
+		return false;
+
+	if (PM_ApplyPullForces())
+	{
+		PM_BatUnperch(g_iPMPlayerEnt);
+		return false;
+	}
+
+	if (iAttach == 0)
+	{
+		pmove->origin = vecOffset;
+		pmove->velocity = g_vecZero;
+		return true;
+	}
+
+	int i;
+	for (i = 0; i < pmove->numphysent; i++)
+	{
+		if (pmove->physents[i].info == iAttach)
+			break;
+	}
+
+	if (i < pmove->numphysent)
+	{
+		Vector forward, right, up;
+		AngleVectors(pmove->physents[i].angles, &forward, &right, &up);
+
+		Vector vecPos = pmove->physents[i].origin;
+		VectorMA(vecPos, vecOffset[0], forward, vecPos);
+		VectorMA(vecPos, vecOffset[1], right, vecPos);
+		VectorMA(vecPos, vecOffset[2], up, vecPos);
+		pmove->origin = vecPos;
+		pmove->velocity = g_vecZero;
+	}
+
+	return true;
+}
+
+// Rocket Crowbar 2: the assassin's and the headcrab's charge (player timer 2) and refire
+// waits, once per move before the movetype switch. Name ours; inline in the original.
+static void PM_ChargeTimers(float flFullChargeTime, bool bAssassin) // a helper, no original
+{
+	const int iMsec = pmove->cmd.msec;
+	const int iFull = (int)(flFullChargeTime * 1000.0);
+	int iCharge = PM_GetPlayerTimer(g_iPMPlayerEnt, 2);
+
+	if (pmove->onground == -1)
+	{
+		// in the air
+		if (iCharge > 0)
+		{
+			if ((pmove->cmd.buttons & IN_JUMP) != 0)
+			{
+				iCharge += iMsec;
+				if (iCharge >= iFull)
+					iCharge = iFull;
+				PM_SetPlayerTimer(g_iPMPlayerEnt, 2, iCharge);
+			}
+			else
+			{
+				PM_SetPlayerTimer(g_iPMPlayerEnt, 2, 0);
+			}
+		}
+		else
+		{
+			iCharge += iMsec;
+			PM_SetPlayerTimer(g_iPMPlayerEnt, 2, iCharge < 0 ? iCharge : 0);
+		}
+	}
+	else
+	{
+		if (!bAssassin)
+			PM_SetHeadcrabLeap(g_iPMPlayerEnt, 0);
+
+		// on the ground
+		if (iCharge < 0)
+		{
+			iCharge += iMsec;
+			PM_SetPlayerTimer(g_iPMPlayerEnt, 2, iCharge < 0 ? iCharge : 0);
+		}
+		else if ((pmove->cmd.buttons & IN_JUMP) != 0)
+		{
+			iCharge += iMsec;
+			if (iCharge >= iFull)
+				iCharge = iFull;
+			PM_SetPlayerTimer(g_iPMPlayerEnt, 2, iCharge);
+		}
+		else if ((pmove->oldbuttons & IN_JUMP) == 0 || (g_iPMFlags & PMF_HELD) != 0)
+		{
+			PM_SetPlayerTimer(g_iPMPlayerEnt, 2, 0);
+		}
+		// else keep the charge for the jump on release
+
+		if ((pmove->cmd.buttons & IN_JUMP) != 0)
+			PM_SetPlayerTimer(g_iPMPlayerEnt, 0, 300);
+
+		if (bAssassin && (pmove->cmd.buttons & IN_ATTACK) != 0)
+		{
+			// the gun: stand still for the refire time
+			pmove->flDuckTime = RC2Pref(RC2P_TransformAssassin_GunRefireOnGround).f * 1000.0 + iMsec + 10.0;
+			pmove->cmd.upmove = 0;
+			pmove->cmd.sidemove = 0;
+			pmove->cmd.forwardmove = 0;
+		}
+	}
+
+	if (bAssassin && (pmove->cmd.buttons & IN_ATTACK2) != 0)
+	{
+		// the kick: a negative wait, which also blocks jumping
+		pmove->flDuckTime = RC2Pref(RC2P_TransformAssassin_KickRefireKick).f * 1000.0 + iMsec + 10.0;
+		pmove->flDuckTime *= -1.0;
+		pmove->cmd.upmove = 0;
+		pmove->cmd.sidemove = 0;
+		pmove->cmd.forwardmove = 0;
+		pmove->cmd.buttons &= ~IN_JUMP;
+		pmove->oldbuttons &= ~IN_JUMP;
+		if (iCharge > 0)
+		{
+			PM_SetPlayerTimer(g_iPMPlayerEnt, 2, 0);
+			iCharge = 0;
+		}
+	}
+
+	if (pmove->flDuckTime != 0)
+	{
+		pmove->cmd.upmove = 0;
+		pmove->cmd.sidemove = 0;
+		pmove->cmd.forwardmove = 0;
+		if (pmove->flDuckTime < 0)
+		{
+			pmove->cmd.buttons &= ~IN_JUMP;
+			pmove->oldbuttons &= ~IN_JUMP;
+			if (iCharge > 0)
+				PM_SetPlayerTimer(g_iPMPlayerEnt, 2, 0);
 		}
 	}
 }
@@ -3037,6 +4266,10 @@ Numtouch and touchindex[] will be set if any of the physents
 were contacted during the move.
 =============
 */
+// orig 0xa7dd0. RC2: the race mode hands the move over; a rider is carried on the ridden
+// player's shoulder; PMF_FROZEN stops everything; the controller and the bat have moves of
+// their own; ladders, step sounds and the jump differ per mode; pull forces; jetpack and
+// AF grenade physics. halflife-updated's "duck to get unstuck" is not RC2's and is dropped.
 void PM_PlayerMove(qboolean server)
 {
 	physent_t* pLadder = NULL;
@@ -3053,6 +4286,12 @@ void PM_PlayerMove(qboolean server)
 	// # of msec to apply movement
 	pmove->frametime = pmove->cmd.msec * 0.001;
 
+	if (g_iPMMode == PM_MODE_RACE)
+	{
+		PM_RaceMove();
+		return;
+	}
+
 	PM_ReduceTimers();
 
 	// Convert view angles to vectors
@@ -3068,23 +4307,77 @@ void PM_PlayerMove(qboolean server)
 		return;
 	}
 
+	// Rocket Crowbar 2: riding another player's shoulder
+	if (0 != g_iPMRideEnt)
+	{
+		Vector vecOrigin, vecVAngle, vecMins, vecMaxs;
+		Vector forward, right, up;
+
+		PM_GetEntityBox(g_iPMRideEnt, vecOrigin, vecVAngle, vecMins, vecMaxs);
+		vecVAngle[0] = 0;
+		AngleVectors(vecVAngle, &forward, &right, &up);
+
+		VectorMA(vecOrigin, (0 != g_bPMRideLeft ? -1.0 : 1.0) * 7.0, right, pmove->origin);
+		pmove->origin[2] += (vecMaxs[2] - vecMins[2] >= 70.0) ? 24.0 : 16.0;
+
+		if (pmove->PM_PointContents(pmove->origin, NULL) == CONTENTS_WATER)
+			pmove->waterlevel = 2;
+		else
+			pmove->waterlevel = 0;
+
+		pmove->flags &= ~FL_DUCKING;
+		pmove->bInDuck = 0;
+		pmove->flDuckTime = 0;
+		pmove->usehull = 2;
+		pmove->oldwaterlevel = pmove->waterlevel;
+		pmove->onground = -1;
+		pmove->velocity = g_vecZero;
+		return;
+	}
+
+	if ((g_iPMFlags & PMF_FROZEN) != 0)
+	{
+		pmove->flags &= ~FL_DUCKING;
+		pmove->bInDuck = 0;
+		pmove->flDuckTime = 0;
+		pmove->oldwaterlevel = pmove->waterlevel;
+		pmove->velocity = g_vecZero;
+		return;
+	}
+
 	// Always try and unstick us unless we are in NOCLIP mode
 	if (pmove->movetype != MOVETYPE_NOCLIP && pmove->movetype != MOVETYPE_NONE)
 	{
 		if (PM_CheckStuck())
 		{
-			// Let the user try to duck to get unstuck
-			PM_Duck();
-
-			if (PM_CheckStuck())
-			{
-				return; // Can't move, we're stuck
-			}
+			return; // Can't move, we're stuck
 		}
+	}
+
+	if ((g_iPMFlags & (PMF_NOINPUT | PMF_HELD)) != 0)
+	{
+		// everything but attack
+		pmove->cmd.buttons &= ~(IN_JUMP | IN_DUCK | IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT);
+		pmove->cmd.upmove = 0;
+		pmove->cmd.sidemove = 0;
+		pmove->cmd.forwardmove = 0;
 	}
 
 	// Now that we are "unstuck", see where we are ( waterlevel and type, pmove->onground ).
 	PM_CatagorizePosition();
+
+	if (g_iPMMode == PM_MODE_CONTROLLER)
+	{
+		if (0 == pmove->dead)
+		{
+			PM_ControllerMove();
+			return;
+		}
+	}
+	else if (g_iPMMode == PM_MODE_BAT && 0 == pmove->dead && PM_BatPerchMove())
+	{
+		return;
+	}
 
 	// Store off the starting water level
 	pmove->oldwaterlevel = pmove->waterlevel;
@@ -3097,7 +4390,9 @@ void PM_PlayerMove(qboolean server)
 
 	g_onladder = false;
 	// Don't run ladder code if dead or on a train
-	if (0 == pmove->dead && (pmove->flags & FL_ONTRAIN) == 0)
+	if (0 == pmove->dead && (pmove->flags & FL_ONTRAIN) == 0 && 0 == g_bPMShrunk &&
+		(g_iPMFlags & (PMF_JETPACK | PMF_BOUNCE | PMF_NOLADDER)) == 0 &&
+		g_iPMMode != PM_MODE_HOUNDEYE && g_iPMMode != PM_MODE_BAT && g_iPMMode != PM_MODE_HEADCRAB)
 	{
 		pLadder = PM_Ladder();
 		if (pLadder)
@@ -3106,7 +4401,8 @@ void PM_PlayerMove(qboolean server)
 		}
 	}
 
-	PM_UpdateStepSound();
+	if ((g_iPMFlags & PMF_JETPACK) == 0)
+		PM_UpdateStepSound();
 
 	PM_Duck();
 
@@ -3125,6 +4421,28 @@ void PM_PlayerMove(qboolean server)
 			pmove->movetype = MOVETYPE_WALK;
 		}
 	}
+
+	// Rocket Crowbar 2: pulled players (and some modes and physics) never climb
+	if (PM_ApplyPullForces() && pmove->movetype == MOVETYPE_FLY)
+		pmove->movetype = MOVETYPE_WALK;
+
+	if (((g_iPMFlags & (PMF_BOUNCE | PMF_NOLADDER)) != 0 || g_iPMMode == PM_MODE_HOUNDEYE || g_iPMMode == PM_MODE_CONTROLLER ||
+			g_iPMMode == PM_MODE_BAT || g_iPMMode == PM_MODE_HEADCRAB) &&
+		pmove->movetype == MOVETYPE_FLY)
+	{
+		pmove->movetype = MOVETYPE_WALK;
+	}
+
+	if ((g_iPMFlags & PMF_JETPACK) != 0 && pmove->movetype == MOVETYPE_WALK && pmove->waterlevel < 2)
+	{
+		PM_JetpackMove();
+		return;
+	}
+
+	if (g_iPMMode == PM_MODE_ASSASSIN)
+		PM_ChargeTimers(RC2Pref(RC2P_TransformAssassin_JumpFullChargeTime).f, true);
+	else if (g_iPMMode == PM_MODE_HEADCRAB)
+		PM_ChargeTimers(RC2Pref(RC2P_TransformHeadcrab_JumpFullChargeTime).f, false);
 
 	// Handle movement
 	switch (pmove->movetype)
@@ -3176,6 +4494,36 @@ void PM_PlayerMove(qboolean server)
 			PM_AddCorrectGravity();
 		}
 
+		// Rocket Crowbar 2: the AF grenade's physics: speed up to AFGrenPhysAccVel, kick off
+		// in a random direction when (almost) still
+		if ((g_iPMFlags & PMF_BOUNCE) != 0)
+		{
+			const float flSpeed = Length(pmove->velocity);
+			if (flSpeed < RC2Pref(RC2P_Grenade_AFGrenPhysAccVel).f)
+			{
+				if (flSpeed <= RC2Pref(RC2P_Grenade_AFGrenPhysAccAddVel).f)
+				{
+					pmove->velocity[0] = pmove->RandomFloat(-1.0, 1.0);
+					pmove->velocity[1] = pmove->RandomFloat(-1.0, 1.0);
+					pmove->velocity[2] = 0;
+					VectorScale(pmove->velocity, RC2Pref(RC2P_Grenade_AFGrenPhysAccAddVel).f, pmove->velocity);
+				}
+				else
+				{
+					VectorScale(pmove->velocity, RC2Pref(RC2P_Grenade_AFGrenPhysAccRate).f * pmove->frametime + 1.0, pmove->velocity);
+				}
+			}
+
+			VectorAdd(pmove->velocity, pmove->basevelocity, pmove->velocity);
+			PM_FlyMove();
+			VectorSubtract(pmove->velocity, pmove->basevelocity, pmove->velocity);
+
+			if (!PM_InWater())
+				PM_FixupGravityVelocity();
+			PM_CatagorizePosition();
+			return;
+		}
+
 		// If we are leaping out of the water, just update the counters.
 		if (0 != pmove->waterjumptime)
 		{
@@ -3225,7 +4573,26 @@ void PM_PlayerMove(qboolean server)
 		// Not underwater
 		{
 			// Was jump button pressed?
-			if ((pmove->cmd.buttons & IN_JUMP) != 0)
+			if (g_iPMMode == PM_MODE_ASSASSIN || g_iPMMode == PM_MODE_HEADCRAB)
+			{
+				// Rocket Crowbar 2: they charge while jump is held and leap on release
+				if ((pmove->cmd.buttons & IN_JUMP) != 0)
+				{
+					pmove->oldbuttons |= IN_JUMP;
+				}
+				else
+				{
+					if ((pmove->oldbuttons & IN_JUMP) != 0 && (g_iPMFlags & PMF_HELD) == 0)
+					{
+						if (g_iPMMode == PM_MODE_ASSASSIN)
+							PM_AssassinJump();
+						else
+							PM_HeadcrabJump();
+					}
+					pmove->oldbuttons &= ~IN_JUMP;
+				}
+			}
+			else if ((pmove->cmd.buttons & IN_JUMP) != 0)
 			{
 				if (!pLadder)
 				{
@@ -3292,6 +4659,7 @@ void PM_PlayerMove(qboolean server)
 	}
 }
 
+// orig 0xa8af0. Not byte-identical to SDK 2.3's, but it reads the same
 void PM_CreateStuckTable()
 {
 	float x, y, z;
@@ -3409,13 +4777,114 @@ invoked by each side as appropriate.  There should be no distinction, internally
 and client.  This will ensure that prediction behaves appropriately.
 */
 
+// Rocket Crowbar 2: the callback PM_Move gives the game's hide/restore hooks (PM_SETENTFUNC)
+static void PM_SetEntsByInfo(int iInfo, int iSolid, float* vecOrigin) // orig 0xa8d10, name ours (not in files-rc2.tsv)
+{
+	int i;
+
+	for (i = 0; i < pmove->numphysent; i++)
+	{
+		if (pmove->physents[i].info == iInfo)
+		{
+			pmove->physents[i].solid = iSolid;
+			VectorCopy(vecOrigin, pmove->physents[i].origin);
+		}
+	}
+
+	for (i = 0; i < pmove->numvisent; i++)
+	{
+		if (pmove->visents[i].info == iInfo)
+		{
+			pmove->visents[i].solid = iSolid;
+			VectorCopy(vecOrigin, pmove->visents[i].origin);
+		}
+	}
+
+	for (i = 0; i < pmove->nummoveent; i++)
+	{
+		if (pmove->moveents[i].info == iInfo)
+		{
+			pmove->moveents[i].solid = iSolid;
+			VectorCopy(vecOrigin, pmove->moveents[i].origin);
+		}
+	}
+}
+
+/*
+This modume implements the shared player physics code between any particular game and
+the engine.  The same PM_Move routine is built into the game .dll and the client .dll and is
+invoked by each side as appropriate.  There should be no distinction, internally, between server
+and client.  This will ensure that prediction behaves appropriately.
+*/
+
+// orig 0xa8e60 (not in files-rc2.tsv: Ghidra missed it). RC2: reads the player's index,
+// shrink and movement flags from physinfo and its mode and ride from the game, hides the
+// player's own entities and those it sees through, sets the stop speed, and always resets
+// friction (halflife-updated only for MOVETYPE_WALK; SDK 2.3 only in single player)
 void PM_Move(struct playermove_s* ppmove, qboolean server)
 {
 	assert(pm_shared_initialized);
 
 	pmove = ppmove;
 
-	PM_PlayerMove(server);
+	g_iPMPlayerEnt = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "eid"));
+	g_bPMShrunk = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "shr"));
+	// a missing key leaves the previous move's flags, as in the original
+	sscanf(pmove->PM_Info_ValueForKey(pmove->physinfo, "phf"), "%02X", &g_iPMFlags);
+	g_iPMMode = PM_GetPlayerMode(g_iPMPlayerEnt);
+
+	const unsigned char* pRide = PM_GetRideInfo(g_iPMPlayerEnt);
+	g_iPMRideEnt = *pRide & 0x7f;
+	g_bPMRideLeft = (*pRide >> 7) & 1;
+
+	PM_HideOwnedEnts(g_iPMPlayerEnt, PM_SetEntsByInfo);
+	PM_HideViewers(g_iPMPlayerEnt, PM_SetEntsByInfo);
+
+	g_flPMStopSpeed = pmove->movevars->stopspeed;
+	if (0 != g_bPMShrunk)
+	{
+		pmove->usehull = 2;
+	}
+	else
+	{
+		switch (g_iPMMode)
+		{
+		case PM_MODE_ASSASSIN:
+			pmove->flags &= ~FL_DUCKING;
+			pmove->usehull = 0;
+			g_flPMStopSpeed = RC2Pref(RC2P_TransformAssassin_WalkSpeed).f - 10.0;
+			break;
+		case PM_MODE_HOUNDEYE:
+			pmove->flags &= ~FL_DUCKING;
+			pmove->usehull = 1;
+			g_flPMStopSpeed = RC2Pref(RC2P_TransformHoundeye_WalkSpeed).f - 10.0;
+			break;
+		case PM_MODE_CONTROLLER:
+			pmove->flags &= ~FL_DUCKING;
+			pmove->usehull = 0;
+			g_flPMStopSpeed = RC2Pref(RC2P_TransformController_WalkSpeed).f - 10.0;
+			break;
+		case PM_MODE_BAT:
+			pmove->flags &= ~FL_DUCKING;
+			pmove->usehull = 1;
+			g_flPMStopSpeed = RC2Pref(RC2P_TransformBat_WalkSpeed).f - 10.0;
+			break;
+		case PM_MODE_HEADCRAB:
+			pmove->flags &= ~FL_DUCKING;
+			pmove->usehull = 1;
+			g_flPMStopSpeed = RC2Pref(RC2P_TransformHeadcrab_WalkSpeed).f - 10.0;
+			break;
+		}
+	}
+
+	if (g_iPMMode == PM_MODE_NORMAL)
+		g_flPMStopSpeed *= PM_GetAttributeScale(1, g_iPMPlayerEnt);
+	if (0 != g_bPMShrunk)
+		g_flPMStopSpeed *= 0.2;
+	if (g_flPMStopSpeed < 1.0)
+		g_flPMStopSpeed = 1.0;
+
+	PM_PlayerMove((server != 0) ? true : false);
 
 	if (pmove->onground != -1)
 	{
@@ -3426,11 +4895,11 @@ void PM_Move(struct playermove_s* ppmove, qboolean server)
 		pmove->flags &= ~FL_ONGROUND;
 	}
 
+	PM_RestoreOwnedEnts(g_iPMPlayerEnt, PM_SetEntsByInfo);
+	PM_RestoreViewers(g_iPMPlayerEnt, PM_SetEntsByInfo);
+
 	// Reset friction after each movement so FrictionModifier Triggers work still.
-	if (pmove->movetype == MOVETYPE_WALK)
-	{
-		pmove->friction = 1.0f;
-	}
+	pmove->friction = 1.0f;
 }
 
 int PM_GetVisEntInfo(int ent)
@@ -3493,3 +4962,69 @@ bool PM_GetHullBounds(int hullnumber, float* mins, float* maxs)
 
 	return false;
 }
+
+#ifdef CLIENT_DLL
+/*
+Rocket Crowbar 2: the client's side of the game hooks pm_rc2.h declares, and its copy of the
+rc2.ini values the movement reads. client.dll has the rc2.ini key table too (its strings are in
+it) and its own versions of these hooks; neither is reconstructed yet, so these answer as the
+server's hooks do for "no such player". VERIFY all of it against client.dll: until then the
+client predicts zero for every rc2.ini speed and height (reference/dossiers/p6.md).
+*/
+rc2prefvalue_t g_rc2PrefValues[RC2P_COUNT];
+
+float PM_GetAttributeScale(int iWhich, int iEnt) { return 1.0f; }
+int PM_GetAbilityFlags(int iEnt) { return 0; }
+void PM_SetPlayerTimer(int iEnt, int iSlot, int iMsec) {}
+int PM_GetPlayerTimer(int iEnt, int iSlot) { return 0; }
+float PM_GetEnergy(int iEnt) { return 100.0f; }
+void PM_UseEnergy(int iEnt, float flAmount, float flRechargeDelay) {}
+void PM_JetboostEffect(int iEnt, int iFlag, float* vecDir, float* vecVelocity) {}
+void PM_HideViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
+void PM_RestoreViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
+unsigned char* PM_GetRideInfo(int iEnt)
+{
+	static unsigned char s_ucNone = 0;
+	return &s_ucNone;
+}
+void PM_GetEntityBox(int iEntIndex, float* vecOrigin, float* vecVAngle, float* vecMins, float* vecMaxs) {}
+int PM_GetPlayerMode(int iEnt) { return 0; }
+void PM_HideOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
+void PM_RestoreOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
+int PM_GetBatPerch(int iEnt, int* piAttachInfo, float* vecOffset) { return 0; }
+void PM_BatUnperch(int iEnt) {}
+void PM_SetHeadcrabLeap(int iEnt, int bLeaping) {}
+int PM_GetHeadcrabLeap(int iEnt) { return 0; }
+int PM_HeadcrabLeapHit(int iEnt, int iHitInfo, float flSpeed) { return 0; }
+void PM_RaceMove() {}
+bool PM_GetPlayerTether(int playerEnt, int slot, float* org, float* force, float* dist) { return false; }
+bool PM_GetPlayerPullVec(int playerEnt, float* vec) { return false; }
+void PM_ClearPlayerPull(int playerEnt) {}
+void PM_GetGlobalPuller(int idx, float* org, float* force, float* dist)
+{
+	org[0] = org[1] = org[2] = 0;
+	*force = 0;
+	*dist = 0;
+}
+#else
+// TEMP STUB (p6): real ones belong in player.cpp (rc2.dll 0x95890-0x95ab0, p5), the transforms'
+// files (0xd9a60, 0xd9b00, 0xdf260-0xdf320, p8), triggers (0xe3400, p8) and util (0xf7150,
+// 0xf7200, p8). Each answers as the original does when there is no such player.
+float PM_GetAttributeScale(int iWhich, int iEnt) { return 1.0f; }
+int PM_GetAbilityFlags(int iEnt) { return 0; }
+void PM_SetPlayerTimer(int iEnt, int iSlot, int iMsec) {}
+int PM_GetPlayerTimer(int iEnt, int iSlot) { return 0; }
+float PM_GetEnergy(int iEnt) { return 100.0f; }
+void PM_UseEnergy(int iEnt, float flAmount, float flRechargeDelay) {}
+void PM_JetboostEffect(int iEnt, int iFlag, float* vecDir, float* vecVelocity) {}
+void PM_HideViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
+void PM_RestoreViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
+int PM_GetPlayerMode(int iEnt) { return 0; }
+void PM_HideOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
+void PM_RestoreOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
+int PM_GetBatPerch(int iEnt, int* piAttachInfo, float* vecOffset) { return 0; }
+void PM_BatUnperch(int iEnt) {}
+void PM_SetHeadcrabLeap(int iEnt, int bLeaping) {}
+int PM_GetHeadcrabLeap(int iEnt) { return 0; }
+int PM_HeadcrabLeapHit(int iEnt, int iHitInfo, float flSpeed) { return 0; }
+#endif

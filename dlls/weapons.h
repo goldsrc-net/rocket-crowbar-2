@@ -367,6 +367,16 @@ public:
 	// hle time creep vars
 	float m_flPrevPrimaryAttack;
 	float m_flLastFireTime;
+
+	// p6 needs: RC2's two extra attacks and the weapon-state pair, as the weapons package (p3)
+	// declares them (it owns the names): slots 107, 108 after SecondaryAttack, 114, 115 after
+	// UseDecrement, and the two next-attack times RC2 added before m_flTimeWeaponIdle.
+	virtual void TertiaryAttack() {}						// slot 107, "+cancel", timed by m_flNextTertiaryAttack
+	virtual void QuaternaryAttack() {}						// slot 108, "+alt1", timed by m_flNextQuaternaryAttack
+	virtual void WeaponFrame() {}							// slot 114: first thing in every ItemPostFrame
+	virtual void ReadWeaponState(void* pData, int iSize) {} // slot 115
+	float m_flNextTertiaryAttack;							// orig +0xb0
+	float m_flNextQuaternaryAttack;							// orig +0xb4
 };
 
 
@@ -602,6 +612,36 @@ public:
 
 private:
 	unsigned short m_usFirePython;
+
+	// p6 needs: Rocket Crowbar 2's python (dlls/python.cpp, server only; the client keeps
+	// halflife-updated's above). Size 0x140 in the original. No save table, so every member
+	// name is ours.
+#ifndef CLIENT_DLL
+public:
+	void AddToPlayer(CBasePlayer* pPlayer) override;
+	bool CanHolster() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
+
+	void EXPORT DelayedHurt();
+
+	void FireChain();																			 // ours
+	void FireBall();																			 // ours
+	void ChainTo(int iDepth, Vector vecFrom, edict_t* pentFrom, unsigned char* pHitBits, bool bDischarged); // ours
+
+	float m_flReloadSoundTime;		   // orig +0xdc: 1.5 after a reload starts; WeaponIdle plays 357_reload1 once it runs out
+	int m_fInZoom;					   // orig +0xe0
+	EHANDLE m_hTarget;				   // orig +0xe4: what DelayedHurt hurts
+	TraceResult m_trHurt;			   // orig +0xec: the primary's trace, for TraceAttack
+	Vector m_vecHurtDir;			   // orig +0x124: gpGlobals->v_forward when it fired
+	int m_iChargeState;				   // orig +0x130: 0 none, 2 charging the ball, 3 charging the chain
+	float m_flChargeDone;			   // orig +0x134: when the charge fires (gpGlobals->time)
+	unsigned short m_usPythonLightning; // orig +0x138: events/pythonlightning.sc
+	unsigned short m_usPythonFireball; // orig +0x13a: events/pythonfireball.sc
+	unsigned short m_usPythonChain;	   // orig +0x13c: events/pythonchain.sc
+	unsigned short m_usPythonPrefire;  // orig +0x13e: events/pythonprefire.sc
+#endif
 };
 
 enum mp5_e

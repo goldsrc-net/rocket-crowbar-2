@@ -162,6 +162,16 @@ public:
 
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
+
+public:
+	// p6 needs: RC2's gamerules slot 57 (+0xe4), name ours. CBasePlayer::StartRiding asks it
+	// whether pRider may climb on pRidden. VERIFY: CGameRules' own default, not read
+	virtual bool PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider) { return false; }
+
+	// p6 needs (fork B): RC2's gamerules slot 58 (+0xe8), name ours. Asked before a player's
+	// mine or grenade acts on pTarget (the suck mine's lock, the grenades' pulls); false stops
+	// it. VERIFY: name, and the default (CGameRules' and the multiplayer rules' bodies not read)
+	virtual bool PlayerCanAffect(CBaseEntity* pPlayer, CBaseEntity* pTarget) { return true; }
 };
 
 extern CGameRules* InstallGameRules();
@@ -361,6 +371,11 @@ protected:
 	float m_flIntermissionEndTime = 0;
 	bool m_iEndIntermissionButtonHit;
 	void SendMOTDToClient(edict_t* client);
+
+public:
+	// p6 needs: rc2.dll 0x804b0 is its body; the gamerules package owns it (TEMP STUB with the
+	// original's reading in dlls/rc2/playerride.cpp)
+	bool PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider) override;
 };
 
 //=========================================================
