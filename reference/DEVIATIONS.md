@@ -49,6 +49,12 @@ design or balance, or added a feature; halflife-updated's evident bug fixes stay
 in `reference/audit/FIXES.md`). What halflife-updated changed and we keep, besides restyling and
 the crash guards listed under "Crashes in the original":
 
+- **Flying monsters are smoothed on the client, and living things sound like flesh**
+  (`dlls/client.cpp` AddToFullPack; the tentacle, nihilanth and osprey Spawn). halflife-updated's
+  fixes (halflife#3228 and its flesh impact sounds): EFLAG_SLERP from FL_FLY, in place of SDK 2.x's
+  guess from animtime and velocity, the per-entity `m_EFlags`, and EFLAG_FLESH_SOUND, which the
+  client's bullet impacts read. The original's AddToFullPack, the game's own here, has none of them.
+  Kept by Steven, 2026-11-07.
 - **halflife-updated's bug fixes in stock functions**, kept by Steven, 2026-11-07 (each marked
   `// halflife-updated's fix, kept:` in the code):
   - Doors don't restart their moving sound while already moving (`dlls/doors.cpp` DoorGoUp,

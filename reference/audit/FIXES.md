@@ -29,7 +29,7 @@ rva       file                    function                           what halfli
 0xc0690   scientist.cpp           CScientist::Scream                 FOkToSpeak check dropped (Marphy, 57306ca)                      design   SDK's check (no talking with an enemy in view) is
                                                                                                                                               deliberate; a content retune
 0xc0950   scientist.cpp           CScientist::RunTask                scared scream 8/32 cut to 1/64, second scream removed           design   the retune that goes with Scream
-0xdd2f0   tentacle.cpp            CTentacle::Spawn                   m_EFlags |= EFLAG_SLERP (a02eb83, halflife#3228)                unclear  works only through halflife-updated's AddToFullPack
+0xdd2f0   tentacle.cpp            CTentacle::Spawn                   m_EFlags |= EFLAG_SLERP (a02eb83, halflife#3228)                fix      works only through halflife-updated's AddToFullPack
                                                                                                                                               (m_EFlags), which RC2's own lacks; there SDK's slerp
                                                                                                                                               test already covers the tentacle, so it is inert
 0xfebe0   zombie.cpp              CZombie::IdleSound                 uses its pitch local (95-104) (022b5ea, HL25)                   fix      SDK computed the pitch and never used it
@@ -58,11 +58,11 @@ rva       file                    function                           what halfli
 0x69400   ichthyosaur.cpp         CIchthyosaur::ChangeYaw            same, for the roll                                              fix      same
 0x79f20   monsterstate.cpp        CBaseMonster::RunAI                gag test on spawnflags (15c059d, halflife#3076)                 fix      SDK tested pev->flags: gagged monsters talked,
                                                                                                                                               swimmers (FL_SWIM) never did (Steven)
-0x808d0   nihilanth.cpp           CNihilanth::Spawn                  FL_FLY (29e93ca, halflife#3228)                                 unclear  as the tentacle: the interpolation is in halflife-
+0x808d0   nihilanth.cpp           CNihilanth::Spawn                  FL_FLY (29e93ca, halflife#3228)                                 fix      as the tentacle: the interpolation is in halflife-
                                                                                                                                               updated's AddToFullPack, not RC2's; alone FL_FLY only
                                                                                                                                               changes engine movement
 0x83840   nihilanth.cpp           CNihilanth::CommandUse             no enemy (notarget): touches the first live player (seed)       fix      the ending never fired without an enemy
-0x8c770   osprey.cpp              COsprey::Spawn                     FL_FLY (2bf0ea1, halflife#3228)                                 unclear  as nihilanth's
+0x8c770   osprey.cpp              COsprey::Spawn                     FL_FLY (2bf0ea1, halflife#3228)                                 fix      as nihilanth's
 0x8c770   osprey.cpp              COsprey::Spawn                     max_health (765c1f5, halflife#3261)                             design   osprey AI trigger rework (Steven)
 0x8d320   osprey.cpp              COsprey::HoverThink                Update(): Look, Listen, FCheckAITrigger (765c1f5)               design   same
 0x8d610   osprey.cpp              COsprey::FlyThink                  same (m_pGoalEnt guard stays)                                   design   same
@@ -197,7 +197,7 @@ Counts: fix 28 (27 rows and UpdateSound), design 12, unclear 4.
 
 ## Unclear, for Steven
 
-- `CTentacle::Spawn`, `CNihilanth::Spawn`, `COsprey::Spawn` (mod-rc2): halflife-updated's interpolation
+- (decided, Steven 2026-11-07: restored in both, with the AddToFullPack side) `CTentacle::Spawn`, `CNihilanth::Spawn`, `COsprey::Spawn` (mod-rc2): halflife-updated's interpolation
   fix (halflife#3228) lives in its AddToFullPack, which RC2's own AddToFullPack doesn't have. Restore
   the flags with that AddToFullPack change, or leave both out.
 - `CFlyingMonster::ChangeYaw` (mod-rc2): restore upstream's (time base, but 220 * 220 * delta, the roll

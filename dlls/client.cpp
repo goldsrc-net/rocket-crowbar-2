@@ -1899,7 +1899,7 @@ we could also use the pas/ pvs that we set in SetupVisibility, if we wanted to. 
 // A host with bit 32 is sent every DAMAGE_AIM entity, but those it can't see only as a
 // position and box. A player and those riding it or ridden by it, the host's admin selection
 // and (host member +0x788) everything are forced too. halflife-updated's 2048-entity guard is
-// kept; its m_EFlags, FL_FLY interpolation and flesh-sound flag aren't in RC2.
+// kept, and its m_EFlags, FL_FLY interpolation and flesh-sound flag (bug fixes, kept by Steven).
 int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* host, int hostflags, int player, unsigned char* pSet)
 {
 	// Entities with an index greater than this will corrupt the client's heap because
@@ -2091,15 +2091,24 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 	// RC2 sends takedamage as the team
 	state->team = static_cast<int>(ent->v.takedamage);
 
-	// This non-player entity is being moved by the game .dll and not the physics simulation system
-	//  make sure that we interpolate it's position on the client if it moves
-	if (0 == player &&
-		0 != ent->v.animtime &&
-		ent->v.velocity[0] == 0 &&
-		ent->v.velocity[1] == 0 &&
-		ent->v.velocity[2] == 0)
-	{
+	// halflife-updated's fix, kept (Steven, 2026-11-07; halflife#3228): smooth flying monsters, which
+	// their think moves, by FL_FLY. The original's test here (a non-player with an animtime and no
+	// velocity) was SDK 2.x's, which halflife-updated replaced. Then the per-entity flags
+	// halflife-updated's other fixes set (m_EFlags), and EFLAG_FLESH_SOUND, which the client's
+	// bullet impacts read to play flesh sounds on living things.
+	if ((ent->v.flags & FL_FLY) != 0)
 		state->eflags |= EFLAG_SLERP;
+	else
+		state->eflags &= ~EFLAG_SLERP;
+
+	CBaseEntity* pFlagsEntity = static_cast<CBaseEntity*>(GET_PRIVATE(ent));
+	if (pFlagsEntity)
+	{
+		state->eflags |= pFlagsEntity->m_EFlags;
+		if (pFlagsEntity->Classify() != CLASS_NONE && pFlagsEntity->Classify() != CLASS_MACHINE)
+			state->eflags |= EFLAG_FLESH_SOUND;
+		else
+			state->eflags &= ~EFLAG_FLESH_SOUND;
 	}
 
 	if (!fNoModel && !fPositionOnly)

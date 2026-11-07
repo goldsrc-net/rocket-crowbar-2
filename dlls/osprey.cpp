@@ -159,9 +159,9 @@ void COsprey::Spawn()
 	UTIL_SetSize(pev, Vector(-400, -400, -100), Vector(400, 400, 32));
 	UTIL_SetOrigin(pev, pev->origin);
 
-	// SDK 2.3's (stock in RC2); halflife-updated added FL_FLY, for an interpolation RC2's
-	// AddToFullPack doesn't have, and set max_health, which let the osprey take health.
-	pev->flags |= FL_MONSTER;
+	// SDK 2.3's (stock in RC2) without max_health: halflife-updated set it, which let the osprey take
+	// health. FL_FLY is halflife-updated's fix, kept (Steven, 2026-11-07; halflife#3228): smoothed.
+	pev->flags |= FL_MONSTER | FL_FLY;
 	pev->takedamage = DAMAGE_YES;
 	m_flRightHealth = 200;
 	m_flLeftHealth = 200;

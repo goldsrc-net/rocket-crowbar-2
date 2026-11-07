@@ -268,7 +268,7 @@ void CTentacle::Spawn()
 	pev->health = 75;
 	pev->sequence = 0;
 
-	// SDK 2.3's (stock in RC2); halflife-updated set EFLAG_SLERP here so clients interpolate it
+	m_EFlags |= EFLAG_SLERP; // halflife-updated's fix, kept (Steven, 2026-11-07; halflife#3228): the client smooths it (AddToFullPack)
 
 	SET_MODEL(ENT(pev), "models/tentacle2.mdl");
 	UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));

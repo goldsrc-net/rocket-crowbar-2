@@ -294,9 +294,7 @@ void CNihilanth::Spawn()
 	UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));
 	UTIL_SetOrigin(pev, pev->origin);
 
-	// SDK 2.3's (stock in RC2); halflife-updated added FL_FLY, for an interpolation RC2's
-	// AddToFullPack doesn't have.
-	pev->flags |= FL_MONSTER;
+	pev->flags |= FL_MONSTER | FL_FLY; // halflife-updated's fix, kept (Steven, 2026-11-07; halflife#3228): the client smooths it (AddToFullPack)
 	pev->takedamage = DAMAGE_AIM;
 	pev->health = gSkillData.nihilanthHealth;
 	pev->view_ofs = Vector(0, 0, 300);
