@@ -6667,7 +6667,7 @@ void CInfoIntermission::Think()
 	}
 }
 
-LINK_ENTITY_TO_CLASS(info_intermission, CInfoIntermission);
+LINK_ENTITY_TO_CLASS(info_intermission, CInfoIntermission); // orig 0x9f2b0
 
 // TEMP STUB (p5): real ones belong in the files named in rc2/p5_externs.h (util.cpp,
 // world.cpp, the transformations' file between tentacle.cpp and triggers.cpp, the riding and

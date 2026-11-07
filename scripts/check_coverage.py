@@ -5,7 +5,7 @@ Every function the VC6 SDK 2.3 build doesn't match (reference/names-rc2*.tsv) is
 reconstruct, and a reconstructed one carries its address in a comment, "// orig 0x<rva>"
 (the RVA as in reference/files-rc2.tsv, e.g. orig 0xaea60; a VA such as 0x100aea60 counts
 the same). This lists, per source file of the original (reference/files-rc2.tsv), how many
-there are and how many have a counterpart in dlls/, pm_shared/, game_shared/ and common/.
+there are and how many have a counterpart in dlls/, pm_shared/, game_shared/, common/ and public/.
 
 Usage:
   scripts/check_coverage.py                    summary per file, worst first
@@ -30,7 +30,7 @@ def main():
     # (names-rc2-slots.tsv) has the stock name but didn't match, so its body is RC2's
     matched = {int(r[0], 16) for r in load(os.path.join(ref, "names-rc2.tsv"))}
     covered = collections.defaultdict(list)
-    for d in ("dlls", "pm_shared", "game_shared", "common"):
+    for d in ("dlls", "pm_shared", "game_shared", "common", "public"):
         for dp, _, fs in os.walk(os.path.join(ROOT, d)):
             for f in fs:
                 if f.endswith((".cpp", ".h", ".c")):
@@ -42,7 +42,8 @@ def main():
     per = collections.OrderedDict()
     for rva, size, name, fl in load(os.path.join(ref, "files-rc2.tsv")):
         rva = int(rva, 16)
-        if fl.startswith("libcmt") or rva in matched:
+        # the C runtime, and the stretches between two of its objects, aren't RC2's code
+        if fl.startswith("libcmt") or (fl.startswith("new: libcmt:") and (" .. libcmt:" in fl or fl.endswith(" .. end"))) or rva in matched:
             continue
         e = per.setdefault(fl, [0, 0, []])
         e[0] += 1

@@ -61,6 +61,8 @@ enum
 class CHAssassin : public CBaseMonster
 {
 public:
+	// Rocket Crowbar 2: the RC caps of RC2's slot 75 (as the headcrab, hgrunt and islave have them)
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0x5cdb0
 	void Spawn() override;
 	void Precache() override;
 	void SetYawSpeed() override;
@@ -101,7 +103,7 @@ public:
 
 	int m_iShell;
 };
-LINK_ENTITY_TO_CLASS(monster_human_assassin, CHAssassin);
+LINK_ENTITY_TO_CLASS(monster_human_assassin, CHAssassin); // orig 0x5cd40
 
 
 TYPEDESCRIPTION CHAssassin::m_SaveData[] =

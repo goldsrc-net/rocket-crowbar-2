@@ -469,6 +469,8 @@ void CBaseToggle::PlaySentence(const char* pszSentence, float duration, float vo
 	PlaySentenceCore(pszSentence, duration, volume, attenuation);
 }
 
+// orig 0x79770: the original's CBaseMonster::PlaySentence, which halflife-updated moved here; RC2's
+// differs only in passing SENTENCEG_PlayRndSz the channel, CHAN_VOICE, which is its default here
 void CBaseToggle::PlaySentenceCore(const char* pszSentence, float duration, float volume, float attenuation)
 {
 	if (pszSentence[0] == '!')

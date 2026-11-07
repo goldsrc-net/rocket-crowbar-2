@@ -937,7 +937,7 @@ public:
 	void Precache() override;
 	void Fire(const Vector& barrelEnd, const Vector& forward, entvars_t* pevAttacker) override;
 };
-LINK_ENTITY_TO_CLASS(func_tankrocket, CFuncTankRocket); // its factory (0x46ad0) is in p3's run
+LINK_ENTITY_TO_CLASS(func_tankrocket, CFuncTankRocket); // orig 0x46ad0
 
 void CFuncTankRocket::Precache()
 {

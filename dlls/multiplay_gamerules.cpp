@@ -72,6 +72,10 @@ int PlayerGender(edict_t* pPlayer) // name ours
 // longest the intermission can last, in seconds
 #define MAX_INTERMISSION_TIME 120
 
+// The statics below are stock; the original's compiler-generated code for them: orig 0x7dec0
+// (g_VoiceGameMgr's constructor), orig 0x7ded0 (its atexit), orig 0x7df00 (the helper's
+// constructor), orig 0x7df10 (CMultiplayGameMgrHelper::CanPlayerHearPlayer), orig 0x7df40 (the
+// helper's atexit), orig 0x7df60 (its deleting destructor)
 CVoiceGameMgr g_VoiceGameMgr;
 
 class CMultiplayGameMgrHelper : public IVoiceGameMgrHelper
