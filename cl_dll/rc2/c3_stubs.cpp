@@ -72,12 +72,10 @@ bool CRC2Particles::HasLive() { return false; }
 bool CShieldTent::Think(float flFrametime) { return true; }
 bool CShieldTent::EntityGone(int iEntIndex) { return false; }
 
-// TEMP STUB (c3): real ones belong in c2's CLTE file and the RC2 part of HUD_Init (cvars
-// registered with cl_detail: orig .bss 0x1020b724, .data 0x1020bb28). Here they point at
-// unregistered cvars at 0, since the effects read them without a null check.
-static cvar_t s_StubForkliftLights = {(char*)"cl_forkliftlights", (char*)"0", 0, 0, nullptr};
+// TEMP STUB (c3): real one belongs in c2's CLTE file and the RC2 part of HUD_Init (registered
+// with cl_detail: orig .data 0x1020bb28; cl_forkliftlights, 0x1020b724, is hud.cpp's). Here it
+// points at an unregistered cvar at 0, since the effects read it without a null check.
 static cvar_t s_StubDebugGren = {(char*)"cl_debuggren", (char*)"0", 0, 0, nullptr};
-cvar_t* cl_forkliftlights = &s_StubForkliftLights;
 cvar_t* g_pClDebugGren = &s_StubDebugGren;
 
 // TEMP STUB (c3): real ones belong in c2's CLTE file (orig .bss 0x101edc7c, 0x101f24c4,
@@ -88,9 +86,6 @@ int g_iLocalPlayerFrozen = 0;
 int g_iRC2LocalAntiFriction = 0;
 int g_bLocalTransforming = 0;
 int g_iMaxPlayerEnt = 0;
-
-// TEMP STUB (c3): real one belongs in StudioModelRenderer.cpp (c4's, orig .bss 0x10214200)
-Vector g_rgvecPlayerAttachment[32 + 1][4];
 
 // TEMP STUB (c3): real one belongs in in_camera.cpp (orig 0xa9fd0)
 bool CAM_IsThirdPerson()
