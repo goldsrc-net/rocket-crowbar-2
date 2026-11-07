@@ -623,7 +623,7 @@ void CL_AdjustAngles(float frametime, float* viewangles)
 	float speed;
 	float up, down;
 
-	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 != g_bHoundeyeAsleep)
+	if (0 != g_iLocalPlayerFrozen || 0 != g_bLocalTransforming || 0 != g_bHoundeyeAsleep)
 		return;
 
 	if ((in_speed.state & 1) != 0)
@@ -876,7 +876,7 @@ void DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 	IN_GetInputViewAngles(viewangles);
 	// Set current view angles.
 
-	if (g_iAlive && 0 == g_bViewLockTent && 0 == g_bViewLockEffect && 0 == g_bHoundeyeAsleep)
+	if (g_iAlive && 0 == g_iLocalPlayerFrozen && 0 == g_bLocalTransforming && 0 == g_bHoundeyeAsleep)
 	{
 		VectorCopy(viewangles, cmd->viewangles);
 		VectorCopy(viewangles, oldangles);
@@ -1152,18 +1152,18 @@ void ShutdownInput()
 #include "interface.h"
 void CL_UnloadParticleMan();
 
-extern void VGui_ShutdownState(); // client.dll 0xd9180 (vgui_int area, package c5), name ours
-extern void ClientTents_Clear();  // client.dll 0x52370 (package c2): frees RC2's client tents, name ours
+extern void PlayerID_Disable(); // client.dll 0xd9180 (rc2/vgui_PlayerID.cpp): the player name label off
+extern void CLTE_Shutdown();	// client.dll 0x52370 (rc2/clte.cpp): frees RC2's client tents
 
-// orig client 0xac760. RC2: resets a VGUI state first and frees its client tents after.
+// orig client 0xac760. RC2: turns the player name label off first and frees its client tents after.
 // halflife-updated's file system and particle manager shutdown kept.
 void DLLEXPORT HUD_Shutdown()
 {
 	//	RecClShutdown();
 
-	VGui_ShutdownState();
+	PlayerID_Disable();
 	ShutdownInput();
-	ClientTents_Clear();
+	CLTE_Shutdown();
 
 
 	FileSystem_FreeFileSystem();

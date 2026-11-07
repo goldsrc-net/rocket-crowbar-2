@@ -26,7 +26,8 @@
 
 #define MAX_CLIENT_TENTS 600 // name ours
 
-// The base of every client effect (vtable client 0x1011d84c, 8 bytes)
+// The base of every client effect (vtable client 0x1011d84c, 8 bytes). The vtable has no destructor:
+// the manager frees an effect with plain operator delete, so no effect's (or member's) destructor runs
 class CClientTent // name ours
 {
 public:
@@ -51,6 +52,14 @@ extern CClientTent* g_pClientTents[MAX_CLIENT_TENTS]; // orig .bss 0x101ee07c
 extern unsigned int g_iClientFrame;					  // orig .bss 0x101f6a08: HUD_Frame's count, cleared with the origin cache
 extern int g_iClientDetail;							  // cdll_int.cpp: cl_detail
 extern unsigned int g_iShieldPlayers;				  // orig .bss 0x101f69f4: bit (player - 1) set while that player's shield shows
+extern int g_iHighestEntIndex;						  // entity.cpp (orig .bss 0x10206918): one past the highest entity HUD_AddEntity saw
+
+// Entity and local player state the effects set, cleared with the effects (clte.cpp)
+extern unsigned char g_bEntityFrozen[1024];		// orig .bss 0x101f24c4: set by CLTE 0x2f; the renderer draws the entity unlerped in a white shell, its studio events are skipped
+extern unsigned char g_abRC2AntiFriction[1024]; // orig .bss 0x101edc7c: set by CLTE 0x35; the renderer gives the entity the magenta aftex.spr shell
+extern int g_iLocalPlayerFrozen;				// orig .bss 0x101f69f8: set by CLTE 0x2f on the local player; input and view lock, the screen tints blue
+extern int g_iRC2LocalAntiFriction;				// orig .bss 0x101f69fc: set by CLTE 0x35 on the local player; the screen tints magenta
+extern int g_bLocalTransforming;				// orig .bss 0x101f6a00: set by CLTE 0x40 on the local player; input and view lock
 
 // The view the effects face, refreshed by CLTE_Update and the draw passes
 extern Vector g_vecTentForward; // orig .bss 0x101f3948
@@ -137,7 +146,7 @@ Vector CLTE_GetOrigin(int iEnt);
 void CLTE_SetOriginV(int iEnt, const float* vecOrigin);
 void CLTE_GetOriginV(int iEnt, float* vecOut);
 Vector CLTE_EllipsePoint(float flAngle, float z, float flRadius, float flScale);
-Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecNormal, bool* pbHit);
+Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecNormal, int* pbHit);
 
 // clte_draw.cpp: animating disks, fade quads, strips
 void CLTE_InitShapes();
@@ -197,7 +206,8 @@ class CTentTrail // name ours; 0x28 bytes
 {
 public:
 	CTentTrail();
-	~CTentTrail();
+	~CTentTrail() { Free(); } // orig client 0x51030 is its compiler-generated vector deleting destructor
+	void Free();
 	int Update(float flFrametime);
 	bool CanDraw();
 	void Draw(bool bTexAlong);

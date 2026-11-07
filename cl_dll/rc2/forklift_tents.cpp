@@ -16,12 +16,6 @@
 #include "c3_tents.h"
 #include "pm_defs.h"
 
-// c3 needs:
-// orig .bss 0x1020b724: the cvar "cl_forkliftlights" (archived, default from 0x10136368),
-// registered with cl_detail by the RC2 part of HUD_Init (orig run "new: cdll_int .. com_weapons",
-// c2's half). name ours
-extern cvar_t* cl_forkliftlights;
-
 //
 // CLTE 0x3f: short forklift, byte the driver's index (bit 0x80: a flag, see the constructor).
 //
@@ -30,8 +24,8 @@ class CForkliftLightsTent : public CClientTent // name ours
 public:
 	CForkliftLightsTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;		  // orig +0x8: the forklift
 	int m_iDriver;			  // orig +0xc: the driver's entity index (the byte's low 7 bits)
@@ -48,7 +42,7 @@ public:
 // orig client 0x9ad80). The dispatcher always passes null.
 CClientTent* RC2_NewForkliftLightsTent(const CClientTent* pCopy) // orig client 0x8c5c0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -78,7 +72,7 @@ CForkliftLightsTent::CForkliftLightsTent()
 		return;
 	}
 
-	cl_entity_t* pForklift = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pForklift = GetEntity(m_iEntIndex);
 	if (!pForklift)
 	{
 		m_iEntIndex = 0;
@@ -91,11 +85,11 @@ CForkliftLightsTent::CForkliftLightsTent()
 	if (cl_forkliftlights && cl_forkliftlights->value != 0)
 	{
 		if (m_bFlag)
-			m_iLights = g_iClDetail > 0;
+			m_iLights = g_iClientDetail > 0;
 		else if (pLocal->index != m_iDriver)
-			m_iLights = g_iClDetail > 0;
-		else if (g_iClDetail >= 0)
-			m_iLights = (g_iClDetail != 0) + 1;
+			m_iLights = g_iClientDetail > 0;
+		else if (g_iClientDetail >= 0)
+			m_iLights = (g_iClientDetail != 0) + 1;
 		else
 			m_iLights = 0;
 	}
@@ -142,15 +136,15 @@ static Vector ForkliftLightSpot(const Vector& vecSrc, const Vector& vecDir, pmtr
 
 // Each frame the lights move to where the forklift's front points: two lights aim 0.7 to either
 // side, one aims straight ahead, all a little down; their die time is pushed 10 seconds on.
-bool CForkliftLightsTent::Think(float flFrametime) // orig client 0x8ca70
+bool CForkliftLightsTent::Update(float flFrametime) // orig client 0x8ca70
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pForklift = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pForklift = GetEntity(m_iEntIndex);
 	if (!pForklift)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -170,7 +164,7 @@ bool CForkliftLightsTent::Think(float flFrametime) // orig client 0x8ca70
 	Vector vecForward, vecRight, vecUp;
 	gEngfuncs.pfnAngleVectors(vecAngles, vecForward, vecRight, vecUp);
 
-	Vector vecSrc = RC2_GetEntityOrigin(m_iEntIndex);
+	Vector vecSrc = CLTE_GetOrigin(m_iEntIndex);
 	vecSrc.z += 10.0;
 
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
@@ -209,7 +203,7 @@ bool CForkliftLightsTent::Think(float flFrametime) // orig client 0x8ca70
 }
 
 // The forklift blew up (CLTE 0xfe/0x3f) or is gone: the lights die in a hundredth of a second.
-bool CForkliftLightsTent::EntityGone(int iEntIndex) // orig client 0x8d8d0
+bool CForkliftLightsTent::KillEntity(int iEntIndex) // orig client 0x8d8d0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

@@ -23,10 +23,10 @@
 extern IParticleMan* g_pParticleMan;
 
 // Rocket Crowbar 2: its client tents draw here, on the frames the view lets them
-extern bool g_bDrawClientTents;		  // view.cpp .data 0x101768b8 (V_CalcRefdef, package c5), name ours
-extern void ClientTents_DrawNormal();	  // client.dll 0x52580 (package c2), name ours
-extern void ClientTents_DrawTransparent(); // client.dll 0x52650 (package c2), name ours
-extern void RC2_DrawTransparentExtra();	  // client.dll 0xd6b00 (package c5), name ours. VERIFY: what it draws
+extern bool g_bMainView;			// view.cpp .data 0x101768b8: false while V_CalcRefdef draws its second view
+extern void CLTE_DrawNormal();		// client.dll 0x52580 (rc2/clte.cpp)
+extern void CLTE_DrawTransparent(); // client.dll 0x52650 (rc2/clte.cpp)
+extern void DrawDebugEntityBox();	// client.dll 0xd6b00 (rc2/vgui_DebugPanel.cpp): the debug panel's entity box
 
 /*
 =================
@@ -42,8 +42,8 @@ void DLLEXPORT HUD_DrawNormalTriangles()
 
 	gHUD.m_Spectator.DrawOverview();
 
-	if (g_bDrawClientTents)
-		ClientTents_DrawNormal();
+	if (g_bMainView)
+		CLTE_DrawNormal();
 }
 
 
@@ -54,16 +54,16 @@ HUD_DrawTransparentTriangles
 Render any triangles with transparent rendermode needs here
 =================
 */
-// orig client 0xcba70. RC2: its client tents and 0xd6b00's drawing. halflife-updated's particle
+// orig client 0xcba70. RC2: its client tents and the debug panel's entity box. halflife-updated's particle
 // manager kept.
 void DLLEXPORT HUD_DrawTransparentTriangles()
 {
 	//	RecClDrawTransparentTriangles();
 
-	if (g_bDrawClientTents)
+	if (g_bMainView)
 	{
-		ClientTents_DrawTransparent();
-		RC2_DrawTransparentExtra();
+		CLTE_DrawTransparent();
+		DrawDebugEntityBox();
 	}
 
 	if (g_pParticleMan)

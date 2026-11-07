@@ -504,6 +504,7 @@ public:
 	bool VidInit() override;
 	bool Draw(float flTime) override;
 	bool MsgFunc_Energy(const char* pszName, int iSize, void* pbuf);
+	float GetEnergy() const { return m_flEnergyTarget; } // PM_GetEnergy reads it inline (rc2/attributes.cpp)
 
 private:
 	float m_flEnergy;		// +0x14: what is drawn; moves toward m_flEnergyTarget

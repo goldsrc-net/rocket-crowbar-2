@@ -27,17 +27,15 @@ void VectorAngles(const float* forward, float* angles);
 CClientTent* g_pClientTents[MAX_CLIENT_TENTS]; // orig .bss 0x101ee07c
 unsigned int g_iClientFrame;				   // orig .bss 0x101f6a08
 unsigned int g_iShieldPlayers;				   // orig .bss 0x101f69f4
-static int s_iTentState1;					   // orig .bss 0x101f69f8: cleared with the effects, read by nothing here. VERIFY
-static int s_iTentState2;					   // orig .bss 0x101f69fc: as above. VERIFY
-static int s_iTentState3;					   // orig .bss 0x101f6a00: as above. VERIFY
-static int s_iTentTable1[256];				   // orig .bss 0x101f24c4: cleared with the effects. VERIFY: who uses it
-static int s_iTentTable2[256];				   // orig .bss 0x101edc7c: as above
+int g_iLocalPlayerFrozen;					   // orig .bss 0x101f69f8 (clte.h says who uses these)
+int g_iRC2LocalAntiFriction;				   // orig .bss 0x101f69fc
+int g_bLocalTransforming;					   // orig .bss 0x101f6a00
+unsigned char g_bEntityFrozen[1024];		   // orig .bss 0x101f24c4
+unsigned char g_abRC2AntiFriction[1024];	   // orig .bss 0x101edc7c
 
 Vector g_vecTentForward; // orig .bss 0x101f3948
 Vector g_vecTentRight;	 // orig .bss 0x101f69e8
 Vector g_vecTentUp;		 // orig .bss 0x101ee9e0
-
-extern int g_iMaxPlayerEnt; // cdll_int.cpp (TEMP STUB there)
 
 // The view the effects face: the camera's angles in third person (pitch, yaw, the third
 // component zeroed or not as each caller does), v_angles otherwise
@@ -170,9 +168,9 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 	case 35: pTent = CLTE_CreateChargeHum(NULL); break;
 	case 36: pTent = CLTE_CreateBlueLightning(NULL); break;
 	case 37: pTent = CLTE_CreateShield(NULL); break;
-	case 0x26: pTent = CLTE_CreateType26(NULL); break;
-	case 0x27: pTent = CLTE_CreateType27b(NULL); break;
-	case 0x28: pTent = CLTE_CreateType28b(NULL); break;
+	case 0x26: pTent = RC2_NewShieldHitTent(NULL); break;
+	case 0x27: pTent = RC2_NewShrinkerGlowTent(NULL); break;
+	case 0x28: pTent = RC2_NewShrinkTent(NULL); break;
 
 	case 0x29:
 	{
@@ -181,12 +179,12 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 		const int iEnt = READ_BYTE();
 		for (i = 0; i < MAX_CLIENT_TENTS; i++)
 		{
-			CTentType29* p29 = static_cast<CTentType29*>(g_pClientTents[i]);
-			if (p29 && p29->m_iType == 0x29 && iEnt == p29->m_iEntity)
+			CEgonTractorTent* p29 = static_cast<CEgonTractorTent*>(g_pClientTents[i]);
+			if (p29 && p29->m_iType == 0x29 && iEnt == p29->m_iEntIndex)
 			{
 				const int iValue = READ_SHORT();
 				if (iValue != 0x4000)
-					p29->m_iValue = iValue;
+					p29->m_iHeld = iValue;
 				p29->m_vecEnd.x = READ_COORD();
 				p29->m_vecEnd.y = READ_COORD();
 				p29->m_vecEnd.z = READ_COORD();
@@ -194,14 +192,14 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 			}
 		}
 
-		CTentType29* p29 = static_cast<CTentType29*>(CLTE_CreateType29(NULL));
+		CEgonTractorTent* p29 = static_cast<CEgonTractorTent*>(RC2_NewEgonTractorTent(NULL));
 		if (!p29)
 			return 1;
 
-		p29->m_iEntity = iEnt;
+		p29->m_iEntIndex = iEnt;
 		if (!gEngfuncs.GetEntityByIndex(iEnt))
 		{
-			p29->m_iEntity = 0;
+			p29->m_iEntIndex = 0;
 			p29->m_iType = 0x29;
 		}
 		else
@@ -209,14 +207,14 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 			int iModel;
 			if (gEngfuncs.CL_LoadModel("sprites/lgtning.spr", &iModel))
 			{
-				p29->m_pBeam = gEngfuncs.pEfxAPI->R_BeamEntPoint(p29->m_iEntity | 0x1000, p29->m_vecEnd, iModel,
+				p29->m_pLightning = gEngfuncs.pEfxAPI->R_BeamEntPoint(p29->m_iEntIndex | 0x1000, p29->m_vecEnd, iModel,
 					0, 3.5, 0.2, 0.9, 3, (int)gEngfuncs.pfnRandomFloat(0, 2), 30, 0, 1, 0);
-				if (p29->m_pBeam)
-					p29->m_pBeam->flags |= FBEAM_SINENOISE;
+				if (p29->m_pLightning)
+					p29->m_pLightning->flags |= FBEAM_SINENOISE;
 
 				if (gEngfuncs.CL_LoadModel("sprites/laserbeam.spr", &iModel))
 				{
-					p29->m_pBeam2 = gEngfuncs.pEfxAPI->R_BeamEntPoint(p29->m_iEntity | 0x1000, p29->m_vecEnd, iModel,
+					p29->m_pLaser = gEngfuncs.pEfxAPI->R_BeamEntPoint(p29->m_iEntIndex | 0x1000, p29->m_vecEnd, iModel,
 						0, 0.9, 0.5, 0.9, 0.5, 0, 0, 1, 1, 1);
 					gEngfuncs.CL_LoadModel("sprites/laserbeam.spr", &p29->m_iLaserModel);
 				}
@@ -227,22 +225,22 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 		break;
 	}
 
-	case 0x2a: pTent = CLTE_CreateType2a(NULL); break;
-	case 0x2b: pTent = CLTE_CreateType2b(NULL); break;
-	case 0x2c: pTent = CLTE_CreateType2c(NULL); break;
-	case 0x2d: pTent = CLTE_CreateType2d(NULL); break;
-	case 0x2e: pTent = CLTE_CreateType2e(NULL); break;
-	case 0x2f: pTent = CLTE_CreateType2f(NULL); break;
-	case 0x30: pTent = CLTE_CreateType30(NULL); break;
-	case 0x31: pTent = CLTE_CreateType31(NULL); break;
-	case 0x32: pTent = CLTE_CreateType32(NULL); break;
-	case 0x33: pTent = CLTE_CreateType33b(NULL); break;
-	case 0x34: pTent = CLTE_CreateType34(NULL); break;
-	case 0x35: pTent = CLTE_CreateType35b(NULL); break;
-	case 0x36: pTent = CLTE_CreateType36b(NULL); break;
-	case 0x37: pTent = CLTE_CreateType37(NULL); break;
-	case 0x38: pTent = CLTE_CreateType38(NULL); break;
-	case 0x39: pTent = CLTE_CreateType39(NULL); break;
+	case 0x2a: pTent = RC2_NewNukeTent(NULL); break;
+	case 0x2b: pTent = RC2_NewBlastSphereTent(NULL); break;
+	case 0x2c: pTent = RC2_NewImploderChargeTent(NULL); break;
+	case 0x2d: pTent = RC2_NewImploderShotTent(NULL); break;
+	case 0x2e: pTent = RC2_NewImplodeTent(NULL); break;
+	case 0x2f: pTent = RC2_NewFrozenTent(NULL); break;
+	case 0x30: pTent = RC2_NewFreezeRayTent(NULL); break;
+	case 0x31: pTent = RC2_NewFreezeTrailTent(NULL); break;
+	case 0x32: pTent = RC2_NewGravGrenadeTent(NULL); break;
+	case 0x33: pTent = RC2_NewBlueShockRingTent(NULL); break;
+	case 0x34: pTent = RC2_NewSuckGrenadeTent(NULL); break;
+	case 0x35: pTent = RC2_NewAntiFrictionTent(NULL); break;
+	case 0x36: pTent = RC2_NewPurpleShockRingTent(NULL); break;
+	case 0x37: pTent = RC2_NewUltimaTent(NULL); break;
+	case 0x38: pTent = RC2_NewEnergyBlastTent(NULL); break;
+	case 0x39: pTent = RC2_NewTripmineChargeTent(NULL); break;
 
 	case 0x3a:
 	{
@@ -250,16 +248,16 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 		const int iEnt = READ_SHORT();
 		for (i = 0; i < MAX_CLIENT_TENTS; i++)
 		{
-			CTentType39* p39 = static_cast<CTentType39*>(g_pClientTents[i]);
-			if (p39 && p39->m_iType == 0x39 && iEnt == p39->m_iEntity)
+			CTripmineChargeTent* p39 = static_cast<CTripmineChargeTent*>(g_pClientTents[i]);
+			if (p39 && p39->m_iType == 0x39 && iEnt == p39->m_iEntIndex)
 			{
-				cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(p39->m_iEntity);
+				cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(p39->m_iEntIndex);
 				if (pEnt)
-					gEngfuncs.pEventAPI->EV_PlaySound(p39->m_iEntity, pEnt->origin, CHAN_WEAPON, "debris/beamstart9.wav", 1.0, 0.8, 0, 120);
-				p39->m_iActive = 0;
+					gEngfuncs.pEventAPI->EV_PlaySound(p39->m_iEntIndex, pEnt->origin, CHAN_WEAPON, "debris/beamstart9.wav", 1.0, 0.8, 0, 120);
+				p39->m_flCharge = 0;
 			}
 		}
-		pTent = CLTE_CreateType3a(NULL);
+		pTent = RC2_NewTripmineZapTent(NULL);
 		break;
 	}
 
@@ -271,8 +269,8 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 		{
 			for (i = 0; i < MAX_CLIENT_TENTS; i++)
 			{
-				CTentRoachWalk* pRoach = static_cast<CTentRoachWalk*>(g_pClientTents[i]);
-				if (!pRoach || pRoach->m_iType != 0x3b || iEnt != pRoach->m_iEntity)
+				CRoachWalkTent* pRoach = static_cast<CRoachWalkTent*>(g_pClientTents[i]);
+				if (!pRoach || pRoach->m_iType != 0x3b || iEnt != pRoach->m_iEntIndex)
 					continue;
 
 				int iModel;
@@ -280,16 +278,16 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 				{
 					if (gEngfuncs.CL_LoadModel("sprites/smoke.spr", &iModel))
 					{
-						pRoach->m_pBeam = gEngfuncs.pEfxAPI->R_BeamFollow(pRoach->m_iEntity, iModel, 0.65, 2, 1, 0, 0, 0.6);
+						pRoach->m_pBeam = gEngfuncs.pEfxAPI->R_BeamFollow(pRoach->m_iEntIndex, iModel, 0.65, 2, 1, 0, 0, 0.6);
 						if (pRoach->m_pBeam)
 							pRoach->m_pBeam->flags |= FBEAM_FOREVER;
 					}
 				}
 				else
 				{
-					pRoach->m_vecOrigin = CLTE_GetOrigin(pRoach->m_iEntity);
+					pRoach->m_vecOrigin = CLTE_GetOrigin(pRoach->m_iEntIndex);
 					pRoach->m_Trail.AddPoint(pRoach->m_vecOrigin, Vector(0, 0, 20), Vector(0, 0, 0), Vector(1, 0, 0), 0.8, 2, 0.8, 0, NULL);
-					pRoach->m_pSmokeModel = gEngfuncs.CL_LoadModel("sprites/gradsmoke.spr", &iModel);
+					pRoach->m_pTrailSprite = gEngfuncs.CL_LoadModel("sprites/gradsmoke.spr", &iModel);
 				}
 				pRoach->m_bArmed = true;
 				pRoach->m_flArmTimeLeft = RC2Pref(RC2P_Satchel_RoachArmTime).f;
@@ -298,36 +296,36 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 			return 1;
 		}
 
-		CTentRoachWalk* pRoach = static_cast<CTentRoachWalk*>(CLTE_CreateRoachWalk(NULL));
+		CRoachWalkTent* pRoach = static_cast<CRoachWalkTent*>(RC2_NewRoachWalkTent(NULL));
 		if (!pRoach)
 			return 1;
-		pRoach->m_iEntity = iEnt;
+		pRoach->m_iEntIndex = iEnt;
 		pRoach->m_iType = 0x3b;
 		pTent = pRoach;
 		break;
 	}
 
-	case 0x3c: pTent = CLTE_CreateType3c(NULL); break;
-	case 0x3d: pTent = CLTE_CreateType3d(NULL); break;
-	case 0x3e: pTent = CLTE_CreateType3e(NULL); break;
-	case 0x3f: pTent = CLTE_CreateType3f(NULL); break;
-	case 0x40: pTent = CLTE_CreateType40(NULL); break;
-	case 0x41: pTent = CLTE_CreateType41(NULL); break;
-	case 0x42: pTent = CLTE_CreateType42(NULL); break;
-	case 0x43: pTent = CLTE_CreateType43(NULL); break;
-	case 0x44: pTent = CLTE_CreateType44(NULL); break;
-	case 0x45: pTent = CLTE_CreateType45(NULL); break;
-	case 0x46: pTent = CLTE_CreateType46(NULL); break;
-	case 0x47: pTent = CLTE_CreateType47(NULL); break;
-	case 0x48: pTent = CLTE_CreateType48(NULL); break;
-	case 0x49: pTent = CLTE_CreateType49(NULL); break;
+	case 0x3c: pTent = RC2_NewConcChargeTent(NULL); break;
+	case 0x3d: pTent = RC2_NewExpandingSphereTent(NULL); break;
+	case 0x3e: pTent = RC2_NewSnarkTrailTent(NULL); break;
+	case 0x3f: pTent = RC2_NewForkliftLightsTent(NULL); break;
+	case 0x40: pTent = RC2_NewTransformTent(NULL); break;
+	case 0x41: pTent = RC2_NewHoundeyeChargeTent(NULL); break;
+	case 0x42: pTent = RC2_NewCurvedBeamTent(NULL); break;
+	case 0x43: pTent = RC2_NewRingBlastTent(NULL); break;
+	case 0x44: pTent = RC2_NewAfterimageTent(NULL); break;
+	case 0x45: pTent = RC2_NewControllerThrowGlowTent(NULL); break;
+	case 0x46: pTent = RC2_NewControllerThrowBallTent(NULL); break;
+	case 0x47: pTent = RC2_NewControllerSparksTent(NULL); break;
+	case 0x48: pTent = RC2_NewControllerChargeGlowTent(NULL); break;
+	case 0x49: pTent = RC2_NewControllerChargeBallTent(NULL); break;
 
 	case 0xfc:
 		// every effect lets go of every player, then goes. Original bug kept: an empty slot is
 		// called through too, a crash whenever a second player has been seen (dossier)
 		for (i = 0; i < MAX_CLIENT_TENTS; i++)
 		{
-			for (int j = 1; j < g_iMaxPlayerEnt; j++)
+			for (int j = 1; j < g_iHighestEntIndex; j++)
 				g_pClientTents[i]->KillEntity(j);
 			CLTE_Delete(i);
 		}
@@ -413,12 +411,12 @@ void CLTE_Reset()
 	CLTE_ClearPlayerOverrides();
 	CLTE_ClearOrigins();
 	memset(g_pClientTents, 0, sizeof(g_pClientTents));
-	memset(s_iTentTable1, 0, sizeof(s_iTentTable1));
-	memset(s_iTentTable2, 0, sizeof(s_iTentTable2));
+	memset(g_bEntityFrozen, 0, sizeof(g_bEntityFrozen));
+	memset(g_abRC2AntiFriction, 0, sizeof(g_abRC2AntiFriction));
 	g_iShieldPlayers = 0;
-	s_iTentState1 = 0;
-	s_iTentState3 = 0;
-	s_iTentState2 = 0;
+	g_iLocalPlayerFrozen = 0;
+	g_bLocalTransforming = 0;
+	g_iRC2LocalAntiFriction = 0;
 }
 
 // orig client 0x52370. From HUD_Shutdown: every effect deleted
@@ -430,11 +428,11 @@ void CLTE_Shutdown()
 			CLTE_Delete(i);
 	}
 	g_iShieldPlayers = 0;
-	memset(s_iTentTable1, 0, sizeof(s_iTentTable1));
-	memset(s_iTentTable2, 0, sizeof(s_iTentTable2));
-	s_iTentState1 = 0;
-	s_iTentState3 = 0;
-	s_iTentState2 = 0;
+	memset(g_bEntityFrozen, 0, sizeof(g_bEntityFrozen));
+	memset(g_abRC2AntiFriction, 0, sizeof(g_abRC2AntiFriction));
+	g_iLocalPlayerFrozen = 0;
+	g_bLocalTransforming = 0;
+	g_iRC2LocalAntiFriction = 0;
 }
 
 // orig client 0x523f0. From HUD_TempEntUpdate
@@ -684,21 +682,21 @@ Vector CLTE_EllipsePoint(float flAngle, float z, float flRadius, float flScale)
 
 // orig client 0x59ee0. Where a shot from vecPoint along vecDir meets iPlayer's shield (an ellipsoid
 // round his origin, 20 wide and 40 high, 26 and 30 ducked), and the surface normal there; vecPoint
-// when the player has no shield up (*pbHit false). The original solves along the reversed
+// when the player has no shield up (*pbHit 0; the original writes the flag as a dword). The original solves along the reversed
 // direction from 1024 units past the point. VERIFY: literal reading of the original's quadratic,
 // and of its result, which adds the step along the ray twice when vecNormal is asked for (its
 // variable for the point relative to the origin becomes the hit point first)
-Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecNormal, bool* pbHit)
+Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecNormal, int* pbHit)
 {
 	if (pbHit)
-		*pbHit = false;
+		*pbHit = 0;
 
 	cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(iPlayer);
 	if (!pEnt || 0 == pEnt->player || (g_iShieldPlayers & (1 << (iPlayer - 1))) == 0)
 		return vecPoint;
 
 	if (pbHit)
-		*pbHit = true;
+		*pbHit = 1;
 
 	const Vector vecBack = vecDir * -1.0;
 	const Vector vecOrg = CLTE_GetOrigin(iPlayer);
@@ -761,43 +759,3 @@ Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecN
 
 	return vecRel + vecOrg + vecBack * t;
 }
-
-// TEMP STUB (c2): real ones belong in the rest of the effect file (client 0x71ad0 on, another
-// package's), at the addresses given in clte_types.h
-CClientTent* CLTE_CreateType26(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType27b(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType28b(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType29(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType2a(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType2b(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType2c(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType2d(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType2e(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType2f(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType30(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType31(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType32(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType33b(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType34(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType35b(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType36b(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType37(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType38(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType39(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType3a(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateRoachWalk(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType3c(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType3d(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType3e(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType3f(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType40(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType41(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType42(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType43(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType44(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType45(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType46(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType47(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType48(CClientTent* pCopy) { return NULL; }
-CClientTent* CLTE_CreateType49(CClientTent* pCopy) { return NULL; }
-

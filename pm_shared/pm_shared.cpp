@@ -150,13 +150,14 @@ static int s_iAssassinCharge;	// client .bss 0x1020f6bc: PM_AssassinJump's charg
 static int s_iHeadcrabCharge;	// client .bss 0x1020f6c0: the same for PM_HeadcrabJump
 static Vector s_vecInEyeAngles; // client .bss 0x1020da78: the smoothed in-eye chase angles
 
-// view.cpp's (client 0xe9400-0xebb00, not this package)
-extern Vector v_origin, v_angles; // client 0x10227084, 0x10226848. VERIFY: taken for view.cpp's v_origin and v_angles
-extern int g_iPMSpecView;	   // client 0x10227160: 1 spectating this move; |2 angles and |4 origin follow a target. Name ours
-extern int g_bPMSetViewAngles; // client 0x102270f0: pm_shared set v_angles. Name ours
-extern int g_bPMSetViewOrigin; // client 0x10227164: pm_shared set v_origin. Name ours
-// the client's predicted origin of entity iEnt (client 0x59d50, not this package). Name ours
-void PM_SetPredictedOrigin(int iEnt, const float* vecOrigin);
+// view.cpp's (client 0xe9400-0xebb00)
+extern Vector g_vecLockedViewOrigin; // client 0x10227084: the view origin held while g_bLockViewOrigin
+extern Vector g_vecLockedViewAngles; // client 0x10226848: the view angles held while g_bLockViewAngles
+extern int g_iViewLock;				 // client 0x10227160: 1 spectating this move; |2 angles and |4 origin follow a target
+extern int g_bLockViewAngles;		 // client 0x102270f0: pm_shared set g_vecLockedViewAngles
+extern int g_bLockViewOrigin;		 // client 0x10227164: pm_shared set g_vecLockedViewOrigin
+// rc2/clte.cpp: the origin cache, where the effects draw entity iEnt this frame (client 0x59d50)
+void CLTE_SetOriginV(int iEnt, const float* vecOrigin);
 #endif
 
 void PM_AddGravity();
@@ -2623,7 +2624,7 @@ void PM_SpectatorMove()
 
 #ifdef CLIENT_DLL
 	if (0 != pmove->runfuncs)
-		g_iPMSpecView = 1;
+		g_iViewLock = 1;
 #endif
 
 	if (pmove->iuser1 == OBS_ROAMING || pmove->iuser2 == 0)
@@ -2725,11 +2726,11 @@ void PM_SpectatorMove()
 		{
 			if (0 != pmove->runfuncs)
 			{
-				pmove->origin = v_origin;
-				pmove->angles = v_angles;
+				pmove->origin = g_vecLockedViewOrigin;
+				pmove->angles = g_vecLockedViewAngles;
 				pmove->velocity = vec3_origin;
-				g_bPMSetViewAngles = 1;
-				g_bPMSetViewOrigin = 1;
+				g_bLockViewAngles = 1;
+				g_bLockViewOrigin = 1;
 			}
 			return;
 		}
@@ -2752,7 +2753,7 @@ void PM_SpectatorMove()
 			angles[1] = pmove->physents[target].angles[1];
 			angles[2] = pmove->physents[target].angles[2];
 			if (0 != pmove->runfuncs)
-				g_iPMSpecView |= 6;
+				g_iViewLock |= 6;
 		}
 		else if (pmove->iuser1 == OBS_IN_EYE)
 		{
@@ -2791,7 +2792,7 @@ void PM_SpectatorMove()
 
 			if (0 != pmove->runfuncs)
 			{
-				g_iPMSpecView |= 6;
+				g_iViewLock |= 6;
 				InterpolateAngles(s_vecInEyeAngles, angles, angles, 0.1f);
 				s_vecInEyeAngles = angles;
 			}
@@ -2809,10 +2810,10 @@ void PM_SpectatorMove()
 
 		if (0 != pmove->runfuncs)
 		{
-			v_angles = pmove->angles;
-			g_bPMSetViewAngles = 1;
-			v_origin = pmove->origin;
-			g_bPMSetViewOrigin = 1;
+			g_vecLockedViewAngles = pmove->angles;
+			g_bLockViewAngles = 1;
+			g_vecLockedViewOrigin = pmove->origin;
+			g_bLockViewOrigin = 1;
 		}
 	}
 }
@@ -4456,9 +4457,9 @@ void PM_PlayerMove(qboolean server)
 	// the spectator move sets these again (PM_SpectatorMove); view.cpp reads them
 	if (0 != pmove->runfuncs)
 	{
-		g_iPMSpecView = 0;
-		g_bPMSetViewAngles = 0;
-		g_bPMSetViewOrigin = 0;
+		g_iViewLock = 0;
+		g_bLockViewAngles = 0;
+		g_bLockViewOrigin = 0;
 	}
 #endif
 
@@ -5064,7 +5065,7 @@ void PM_Move(struct playermove_s* ppmove, qboolean server)
 
 #ifdef CLIENT_DLL
 	// the client hides nothing; it records where the move left this player
-	PM_SetPredictedOrigin(g_iPMPlayerEnt, pmove->origin);
+	CLTE_SetOriginV(g_iPMPlayerEnt, pmove->origin);
 #else
 	PM_RestoreOwnedEnts(g_iPMPlayerEnt, PM_SetEntsByInfo);
 	PM_RestoreViewers(g_iPMPlayerEnt, PM_SetEntsByInfo);

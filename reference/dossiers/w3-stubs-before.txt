@@ -1,0 +1,415 @@
+== cl_dll/vgui_ScorePanel.cpp:1175
+   def  bool CVoiceStatus::IsPlayerVoiceEnabled(int iPlayer)
+   0x49110: 
+        cl_dll/voice_status.h:130: // c5 needs: client 0x49110 (RC2's, package c1): whether iPlayerIndex's voice is enabled
+== cl_dll/view.cpp:2254
+   def  int g_bThirdPersonBlocked = 0;
+   def  int g_iPlayerViewState = 0;
+   def  int g_iPlayerViewSubState = 0;
+   def  int g_bPlayerViewBusy = 0;
+   def  bool g_bScopeView = false;
+   def  Vector g_vecFixedViewAngles;
+   def  int g_bTiltBodyWithView = 1;
+   def  int g_bScreenTintBlue = 0;
+   def  int g_bScreenTintMagenta = 0;
+   def  int g_bViewOverride = 0;
+   def  float g_flScreenFlash = 0;
+   def  void VectorAnglesWithRoll(const float* forward, const float* right, const float* up, float* angles); // pm_mat
+   def  void RC2_BasisToAngles(const float* forward, const float* right, const float* up, float* angles)
+== cl_dll/view.cpp:2273
+   def  float AngleBetweenVectors(const float* v1, const float* v2)
+   0xb07d0: 
+        pm_shared/pm_math.cpp:235: // orig client 0xb07d0. Not byte-identical to SDK 2.3's, but it reads the same
+== cl_dll/vgui_TeamFortressViewport.cpp:2213
+   def  CMenuPanel* CreateAttributeMenu(Panel* pParent)
+   0xcf480: 
+        cl_dll/rc2/vgui_attributes.h:134: CAttributeMenu* AttrMenu_Create(vgui::Panel* pParent); // client.dll 0xcf480 (from ShowVGUIMenu, 0xe54de)
+        cl_dll/rc2/vgui_attributes.cpp:715: // orig client 0xcf480
+== cl_dll/vgui_TeamFortressViewport.cpp:2219
+   def  void ResetAttributeMenu()
+   0xcfec0: 
+        cl_dll/rc2/vgui_attributes.h:137: void AttrMenu_Forget();		 // 0xcfec0 (from 0xe2712): the viewport is gone
+        cl_dll/rc2/vgui_attributes.cpp:948: // orig client 0xcfec0
+== cl_dll/cdll_int.cpp:487
+   def  void RC2_ResetEntityTables() {}
+   def  void RC2_ResetViewportFlags() {}
+   def  void RC2_ResetPendingMenu() {}
+   def  void RC2_LoadCrosshairs() {}
+   def  void RC2_ViewportFrame(float flTime) {}
+   def  void RC2_RunPendingMenu() {}
+   def  int g_iMaxPlayerEnt = 0;
+== cl_dll/rc2/pm_client.cpp:54
+   def  __attribute__((weak)) int g_iPMSpecView;	  // client .bss 0x10227160
+   def  __attribute__((weak)) int g_bPMSetViewAngles; // client .bss 0x102270f0
+   def  __attribute__((weak)) int g_bPMSetViewOrigin; // client .bss 0x10227164
+   def  __attribute__((weak)) void PM_SetPredictedOrigin(int iEnt, const float* vecOrigin) {}
+   0x59d50: 
+        cl_dll/rc2/clte.cpp:649: // orig client 0x59d50
+        pm_shared/pm_shared.cpp:158: // the client's predicted origin of entity iEnt (client 0x59d50, not this package). Name ours
+   0xe9400: 
+        cl_dll/view.cpp:164: // orig client 0xe9400. Rocket Crowbar 2: no bob for spectators or while g_iViewLock is set.
+        pm_shared/pm_shared.cpp:153: // view.cpp's (client 0xe9400-0xebb00, not this package)
+   0xebb00: 
+        cl_dll/view.cpp:1809: // orig client 0xebb00. SDK 2.2's: the main view (in eye, the free overview, or free), then the
+        pm_shared/pm_shared.cpp:153: // view.cpp's (client 0xe9400-0xebb00, not this package)
+== cl_dll/rc2/clte_effects3.cpp:25
+   def  int UTIL_PackNormal(Vector vecDir);							// client 0x3b400, as the server's (dlls/util.cpp)
+   def  Vector UTIL_ReflectVector(Vector vecDir, Vector vecNormal); // client 0x3b560, as the server's
+   def  int EV_RideTarget(int iEnt);								// client 0xdd40: the player iEnt rides, else iEnt. name ours
+== cl_dll/rc2/clte_effects3.cpp:1719
+   def  int UTIL_PackNormal(Vector vecDir)
+   0xdd40: nobody else
+   0x3b400: nobody else
+   0x3b560: nobody else
+== cl_dll/rc2/c4_stubs.cpp:3
+== cl_dll/rc2/c4_stubs.cpp:16
+   def  C4_WEAK unsigned char g_bEntityHidden[2048]; // MAX_EDICTS; VERIFY: the original's size
+   def  C4_WEAK int g_iHighestEntIndex;
+   def  C4_WEAK int g_iDetailLevel;
+   def  C4_WEAK void CLTE_Update(float frametime) {}
+== cl_dll/rc2/c4_stubs.cpp:21
+   def  C4_WEAK void RC2_TempEntThink(float frametime) {}
+   def  C4_WEAK void RC2_HudRedraw(float flTime, float flTimeDelta) {}
+== cl_dll/rc2/c4_stubs.cpp:24
+   def  C4_WEAK void RC2_InitHUD() {}
+   0x4fe80: 
+        cl_dll/cdll_int.cpp:92: // orig client 0x4fe80. RC2: what HUD_Init, HUD_VidInit and HUD_Reset all clear. name ours
+        cl_dll/rc2/pullers_client.cpp:229: // Everything back to none (client 0x4fe80 calls it, at the HUD's reset).
+        cl_dll/rc2/ultima_tent.cpp:40: // orig .data 0x1020bb28: the cvar cl_debuggren (registered with cl_detail, orig ~0x4fe80 area,
+        cl_dll/rc2/c4_needs.h:33: // 0x4fe80 (c2): RC2's part of a new game's HUD reset (CHud::MsgFunc_InitHUD)
+== cl_dll/rc2/c4_stubs.cpp:26
+   def  C4_WEAK void DebugPanel_AddEntity(int type, struct cl_entity_s* ent, const char* modelname) {}
+== cl_dll/rc2/c4_stubs.cpp:28
+   def  C4_WEAK void TeamFortressViewport::ToggleServerBrowser() {}
+   def  C4_WEAK bool TeamFortressViewport::MsgFunc_AttrConf(const char* pszName, int iSize, void* pbuf) { return false
+   def  C4_WEAK bool TeamFortressViewport::MsgFunc_VoteBegin(const char* pszName, int iSize, void* pbuf) { return fals
+   def  C4_WEAK bool TeamFortressViewport::MsgFunc_VoteUpdate(const char* pszName, int iSize, void* pbuf) { return fal
+   def  C4_WEAK void TeamFortressViewport::SetDebugPanelVisible(bool bVisible) {}
+   def  C4_WEAK bool TeamFortressViewport::MsgFunc_DBGCounts(const char* pszName, int iSize, void* pbuf) { return fals
+   def  C4_WEAK bool TeamFortressViewport::MsgFunc_DBGEntInfo(const char* pszName, int iSize, void* pbuf) { return fal
+== cl_dll/rc2/c4_stubs.cpp:37
+   def  C4_WEAK int __MsgFunc_SetAttr(const char* pszName, int iSize, void* pbuf) { return 0; }
+   def  C4_WEAK int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf) { return 0; }
+   def  C4_WEAK int __MsgFunc_WeaponSync(const char* pszName, int iSize, void* pbuf) { return 0; }
+   def  C4_WEAK void TeamFortressViewport::HideDebugPanels() {}
+   0x3b900: 
+        cl_dll/rc2/c4_needs.h:41: int __MsgFunc_WeaponSync(const char* pszName, int iSize, void* pbuf); // 0x3b900 (c1)
+   0x4f4f0: 
+        cl_dll/rc2/attributes.cpp:142: // orig client 0x4f4f0. "SetAttr": byte player, a byte of points per attribute, long ability flags
+        cl_dll/rc2/c4_needs.h:39: int __MsgFunc_SetAttr(const char* pszName, int iSize, void* pbuf);	  // 0x4f4f0 (c2)
+   0x510b0: 
+        cl_dll/rc2/tripminezap_tent.cpp:6: *	zap ended. c2's CLTE dispatcher (orig 0x510b0) reads the short, plays debris/beamstart9.wav
+        cl_dll/rc2/clte.cpp:68: // orig client 0x510b0. "CLTE": byte type, then the type's own data
+        cl_dll/rc2/c3_tents.h:3: *	Rocket Crowbar 2 client: c3's client temp effects, for c2's CLTE dispatcher (orig 0x510b0).
+        cl_dll/rc2/egontractor_tent.cpp:7: *	(orig 0x510b0) reads the byte; a player who has the effect already gets the short (unless
+== cl_dll/rc2/transform_hud.cpp:30
+   def  extern void Ammo_RestoreCrosshair();					// client.dll 0x4a900: CHudAmmo's, sets the current weapon's crosshai
+   def  extern void ClientTents_Remove(int iEnt, int iType);	// client.dll 0x52280: frees the client tents of a type o
+   def  extern void GetEntityRenderOrigin(float* vecOut, int iEnt); // client.dll 0x59be0: an entity's origin as drawn
+   def  // client.dll 0xee70 (ev_hldm.cpp, package c1): what is left of flRange after tracing from vecStart
+   def  // along vecDir towards pTarget; 0 when it doesn't get there.
+   def  extern float EV_TraceVisible(Vector vecStart, Vector vecEnd, Vector vecDir, float flRange, cl_entity_t* pTarge
+== cl_dll/rc2/clte.cpp:765
+   def  CClientTent* CLTE_CreateType26(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType27b(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType28b(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType29(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType2a(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType2b(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType2c(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType2d(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType2e(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType2f(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType30(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType31(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType32(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType33b(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType34(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType35b(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType36b(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType37(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType38(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType39(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType3a(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateRoachWalk(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType3c(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType3d(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType3e(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType3f(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType40(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType41(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType42(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType43(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType44(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType45(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType46(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType47(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType48(CClientTent* pCopy) { return NULL; }
+   def  CClientTent* CLTE_CreateType49(CClientTent* pCopy) { return NULL; }
+   0x71ad0: 
+        cl_dll/rc2/shield_tents.cpp:11: *	The original's functions 0x71ad0-0x72ac0 (and 0x99d60) of client.dll's run
+        cl_dll/rc2/shield_tents.cpp:32: void CShieldTent::DrawTransparent() // orig client 0x71ad0
+        cl_dll/rc2/clte_effects4.cpp:2073: void DrawTransparent() override; // client 0x71ad0, the next package's
+        cl_dll/rc2/clte_types.h:45: // c2 needs: the types of the rest of the effect file (client 0x71ad0 on, another package's) as far
+== cl_dll/rc2/vgui_DebugPanel.cpp:457
+   def  int g_iMaxEntityIndex = 0;
+== cl_dll/rc2/attributes.cpp:221
+   def  float HUD_GetEnergy()
+   0x9cdc0: 
+        cl_dll/rc2/hud_energy.cpp:94: // orig client 0x9cdc0 (not in files-client.tsv: Ghidra missed it)
+== cl_dll/rc2/studio_rc2_stubs.cpp:12
+   def  __attribute__((weak)) unsigned char g_rgbEntAftexShell[1024];
+   def  __attribute__((weak)) unsigned int g_iRC2FrameCount;
+   def  __attribute__((weak)) bool g_bViewChasing;
+   0x4f4c0: 
+        cl_dll/rc2/attributes.cpp:134: // orig client 0x4f4c0
+   0x4ff90: 
+        cl_dll/cdll_int.cpp:322: // orig client 0x4ff90. RC2 adds its viewport and menu work, refreshes cl_detail and counts
+        cl_dll/rc2/c3_needs.h:76: // (orig 0x4ff90; 0 while the cvar pointer is null). The effects draw less below 0 and more
+        cl_dll/rc2/c4_needs.h:23: // .data 0x101a9598: the detail level from cl_detail (c2's 0x4ff90 copies it each frame):
+   0x522f0: 
+        cl_dll/rc2/clte.cpp:409: // orig client 0x522f0. From HUD_Init, HUD_VidInit and HUD_Reset: the slots are forgotten, not freed
+   0x59830: 
+        cl_dll/rc2/clte.cpp:508: // orig client 0x59830
+   0x59be0: 
+        cl_dll/rc2/clte.cpp:624: // orig client 0x59be0. The cached origin if it was set this frame or the last and the entity moves
+        cl_dll/rc2/c3_needs.h:97: // orig 0x59be0 (c2): where an entity is drawn: its predicted position (c2's table at 0x101ee9f0,
+   0xe9ee0: 
+        cl_dll/view.cpp:586: // orig client 0xe9ee0. SDK 2.1's with RC2's: a held origin and angles, the angles smoothed as
+        pm_shared/pm_shared.cpp:147: Vector g_vecRaceViewAngles;		// client .bss 0x1022fe30: PM_RaceMove's view angles, read by view.cpp (client 0xe9ee0)
+== cl_dll/rc2/vgui_PlayerID.cpp:233
+   def  unsigned char* RC2_GetPlayerAttachment(int iEntity)
+   0xaf980: 
+        cl_dll/rc2/pm_client.cpp:5: *	0xaf980-0xafab0, between parsemsg.cpp and pm_debug.cpp; rc2.dll has its own versions in
+        cl_dll/rc2/pm_client.cpp:18: unsigned char* PM_GetRideInfo(int iEnt) // orig client 0xaf980
+        cl_dll/rc2/vgui_PlayerID.cpp:30: // client code at client 0xaf980, package c3)
+== cl_dll/rc2/c3_stubs.cpp:12
+   def  int g_iClDetail = 0;
+   0x1a9598: 
+        cl_dll/cdll_int.cpp:43: // RC2: cl_detail as an int, refreshed every HUD_Frame (orig .bss 0x101a9598, right after
+        cl_dll/rc2/c3_needs.h:75: // orig .data 0x101a9598: (int)cl_detail->value, refreshed each frame by HUD_Frame's RC2 part
+        cl_dll/rc2/c4_needs.h:23: // .data 0x101a9598: the detail level from cl_detail (c2's 0x4ff90 copies it each frame):
+== cl_dll/rc2/c3_stubs.cpp:15
+   def  cl_entity_t* RC2_GetEntity(int iEntIndex)
+   0x9e9a0: 
+        cl_dll/ev_common.cpp:37: // orig client 0x9e9a0
+        cl_dll/rc2/pullers_client.cpp:176: // the original calls a one-line wrapper of GetEntityByIndex (client 0x9e9a0)
+        cl_dll/rc2/c3_needs.h:94: // orig 0x9e9a0 ("new: entity .. ev_common"): gEngfuncs.GetEntityByIndex(iEntIndex). name ours
+== cl_dll/rc2/c3_stubs.cpp:21
+   def  Vector RC2_GetEntityOrigin(int iEntIndex)
+   0x59be0: 
+        cl_dll/rc2/clte.cpp:624: // orig client 0x59be0. The cached origin if it was set this frame or the last and the entity moves
+        cl_dll/rc2/c3_needs.h:97: // orig 0x59be0 (c2): where an entity is drawn: its predicted position (c2's table at 0x101ee9f0,
+== cl_dll/rc2/c3_stubs.cpp:30
+   def  void RC2_DrawEllipsoidCap(Vector vecOrigin, Vector vecForward, Vector vecRight, Vector vecUp, float flPoleZ, f
+   0x539b0: 
+        cl_dll/rc2/clte_draw.cpp:394: // orig client 0x539b0. A cone: its apex on the axis at flApex, its rim at flBase, flRadius round
+        cl_dll/rc2/c3_needs.h:104: // orig 0x539b0 (c2): a triangle fan closing an ellipsoid: the pole at origin + up * flPoleZ in
+== cl_dll/rc2/c3_stubs.cpp:35
+   def  void RC2_DrawEllipsoidBand(Vector vecOrigin, Vector vecForward, Vector vecRight, Vector vecUp, float flRadius1
+   0x53ea0: 
+        cl_dll/rc2/clte_draw.cpp:423: // orig client 0x53ea0. A ring of quads between radius 1 at height 1 (color 1) and radius 2 at
+        cl_dll/rc2/c3_needs.h:111: // orig 0x53ea0 (c2): a quad strip between two rings around origin's up axis: radius
+== cl_dll/rc2/c3_stubs.cpp:40
+   def  Vector RC2_SpreadVector(Vector vecDir, Vector vecRight, Vector vecUp, float flSpread)
+   0x3b630: 
+        cl_dll/rc2/c3_needs.h:117: // orig 0x3b630 ("new: hl_hl_weapons .. common_interface"): vecDir spread by up to flSpread
+== cl_dll/rc2/c3_stubs.cpp:46
+   def  CRC2Trail::CRC2Trail() : m_Data() {}
+   def  void CRC2Trail::Free() {}
+   def  int CRC2Trail::Update(float flFrametime) { return 0; }
+   def  bool CRC2Trail::CanDraw() { return false; }
+   def  void CRC2Trail::Draw(bool bFlag) {}
+   def  void CRC2Trail::DrawToHead(Vector vecHead, Vector colColor, float flAlpha, float flWidth, bool bFlag) {}
+   def  void CRC2Trail::AddPoint(Vector vecOrigin, Vector vecVelocity, Vector vecAccel, Vector colColor, float flAlpha
+   def  void CRC2Trail::Clear() {}
+   0x5a6a0: 
+        cl_dll/rc2/clte_particles.cpp:120: // orig client 0x5a6a0
+        cl_dll/rc2/c3_needs.h:132: // that grows by 16, and the flattened copies Update builds for drawing. Constructor orig 0x5a6a0.
+        cl_dll/rc2/c3_needs.h:136: CRC2Trail();					// orig 0x5a6a0 (c2)
+   0x5ad60: 
+        cl_dll/rc2/clte_particles.cpp:267: // orig client 0x5ad60
+        cl_dll/rc2/c3_needs.h:143: void Clear();					// orig 0x5ad60 (c2): drops every point, keeps the arrays
+== cl_dll/rc2/c3_stubs.cpp:56
+   def  CRC2Particles::CRC2Particles() : m_Data() {}
+   def  void CRC2Particles::Add(Vector vecOrigin, Vector vecVelocity, Vector vecAccel, Vector colColor, float flAlpha,
+   def  int CRC2Particles::Update(float flFrametime) { return 0; }
+   def  void CRC2Particles::Draw() {}
+   def  bool CRC2Particles::HasLive() { return false; }
+   0x5af10: 
+        cl_dll/rc2/clte_particles.cpp:324: // orig client 0x5af10
+        cl_dll/rc2/c3_needs.h:152: // array. Constructor orig 0x5af10.
+        cl_dll/rc2/c3_needs.h:156: CRC2Particles();				// orig 0x5af10 (c2)
+   0x5b9e0: 
+        cl_dll/rc2/clte_particles.cpp:439: // orig client 0x5b9e0
+        cl_dll/rc2/c3_needs.h:160: bool HasLive();					// orig 0x5b9e0 (c2): any particle with life left
+== cl_dll/rc2/c3_stubs.cpp:63
+   def  bool CShieldTent::Think(float flFrametime) { return true; }
+   def  bool CShieldTent::EntityGone(int iEntIndex) { return false; }
+   0x717c0: 
+        cl_dll/rc2/clte_effects4.cpp:2135: // orig client 0x717c0. Shown unless out of the current packet (always for the local player); a
+        cl_dll/rc2/c3_needs.h:169: // CLTE 0x25 (c2's factory orig 0x714f0, think 0x717c0, vtable 0x1011dd80): a player's shield,
+        cl_dll/rc2/c3_needs.h:176: bool Think(float flFrametime) override; // orig 0x717c0 (c2)
+   0x71a80: 
+        cl_dll/rc2/clte_effects4.cpp:2210: // orig client 0x71a80
+        cl_dll/rc2/c3_needs.h:178: bool EntityGone(int iEntIndex) override; // orig 0x71a80 (c2)
+== cl_dll/rc2/c3_stubs.cpp:67
+   def  static cvar_t s_StubDebugGren = {(char*)"cl_debuggren", (char*)"0", 0, 0, nullptr};
+   def  cvar_t* g_pClDebugGren = &s_StubDebugGren;
+   0x20b724: 
+        cl_dll/hud.h:676: extern struct cvar_s* cl_forkliftlights; // 0x1020b724 ("0")
+        cl_dll/rc2/forklift_tents.cpp:20: // orig .bss 0x1020b724: the cvar "cl_forkliftlights" (archived, default from 0x10136368),
+   0x20bb28: 
+        cl_dll/hud.h:678: extern struct cvar_s* cl_debuggren;		 // 0x1020bb28 ("0")
+        cl_dll/rc2/ultima_tent.cpp:40: // orig .data 0x1020bb28: the cvar cl_debuggren (registered with cl_detail, orig ~0x4fe80 area,
+== cl_dll/rc2/c3_stubs.cpp:73
+   def  unsigned char g_abRC2AntiFriction[1024];
+   def  byte g_bEntityFrozen[0x400];
+   def  int g_iLocalPlayerFrozen = 0;
+   def  int g_iRC2LocalAntiFriction = 0;
+   def  int g_bLocalTransforming = 0;
+   0x1edc7c: 
+        cl_dll/rc2/antifriction_tents.cpp:18: // orig .bss 0x101edc7c (c2's; c2 clears it, 0x100 dwords, with the rest of the effect state):
+        cl_dll/rc2/clte.cpp:34: static int s_iTentTable2[256];				   // orig .bss 0x101edc7c: as above
+        cl_dll/rc2/studio_rc2.h:17: // Per-entity flag (.bss 0x101edc7c): draw the entity with the magenta aftex.spr shell (set
+   0x1f24c4: 
+        cl_dll/rc2/clte.cpp:33: static int s_iTentTable1[256];				   // orig .bss 0x101f24c4: cleared with the effects. VERIFY: who uses it
+        cl_dll/rc2/freeze_tents.cpp:25: // orig .bss 0x101f24c4 (c2): one byte per entity index, set while it is frozen (cleared with
+        cl_dll/rc2/studio_rc2.h:12: // g_bEntityHidden (c4_needs.h, .data 0x101f24c4): set while a client-side temporary entity
+        cl_dll/rc2/c4_needs.h:15: // .data 0x101f24c4, one byte per entity index: the entity is held by one of RC2's client temp
+   0x1f69f8: 
+        cl_dll/rc2/clte.cpp:30: static int s_iTentState1;					   // orig .bss 0x101f69f8: cleared with the effects, read by nothing here. VERIFY
+        cl_dll/rc2/freeze_tents.cpp:22: // orig .bss 0x101f69f8 (c2): the local player is frozen (c2's view and input code reads it;
+   0x1f69fc: 
+        cl_dll/rc2/antifriction_tents.cpp:21: // orig .bss 0x101f69fc (c2's): the local player is frictionless; view.cpp's 0xec590 reads it.
+        cl_dll/rc2/clte.cpp:31: static int s_iTentState2;					   // orig .bss 0x101f69fc: as above. VERIFY
+   0x1f6a00: 
+        cl_dll/rc2/clte.cpp:32: static int s_iTentState3;					   // orig .bss 0x101f6a00: as above. VERIFY
+        cl_dll/rc2/transform_tents.cpp:29: // orig .bss 0x101f6a00 (c2's): set while the local player is transforming. name ours
+   0x206918: 
+        cl_dll/cdll_int.cpp:89: extern int g_iMaxPlayerEnt;		// 1 + the highest player entity HUD_AddEntity has seen (orig .bss 0x10206918)
+        cl_dll/rc2/tcontroller_tents.cpp:33: // .bss 0x10206918 (c2): one past the highest player/normal entity index HUD_AddEntity saw. name c2's
+        cl_dll/rc2/transform_hud.cpp:21: #include "rc2/c4_needs.h" // g_iHighestEntIndex (.bss 0x10206918)
+        cl_dll/rc2/c4_needs.h:20: // .bss 0x10206918: one past the highest ET_NORMAL/ET_PLAYER entity index HUD_AddEntity saw.
+== cl_dll/rc2/c3_stubs.cpp:81
+   def  bool CAM_IsThirdPerson()
+   0xa9fd0: 
+        cl_dll/in_camera.cpp:633: // orig client 0xa9fd0. RC2: first person while the view finds the camera blocked, and no
+        cl_dll/rc2/tcontroller_tents.cpp:31: // orig 0xa9fd0 (in_camera, a changed SDK file): the camera is in third person. name fork E's
+        cl_dll/rc2/houndeye_tents.cpp:35: // orig 0xa9fd0 (in_camera): the camera is in third person. name ours
+        cl_dll/rc2/transform_tents.cpp:38: // orig 0xa9fd0 (in_camera, a changed SDK file): the camera is in third person (cam_thirdperson
+== cl_dll/rc2/c3_stubs.cpp:87
+   def  float RC2_WaterLevel(const float* vecPos, float flMinZ, float flMaxZ)
+   0xdd80: 
+        cl_dll/rc2/nuke_tents.cpp:19: // orig 0xdd80 ("new: start .. ev_hldm", c1): the height of the water surface above vecPos
+        cl_dll/rc2/gravgrenade_tents.cpp:30: // orig 0xdd80 ("new: start .. ev_hldm"): the height of the water surface above vecPosition
+== cl_dll/rc2/c3_stubs.cpp:93
+   def  void RC2_ViewShake(float flAmplitude, float flFrequency, float flDuration, int iPriority) {}
+   def  void V_StartColorFade(Vector colFrom, Vector colTo, float flFrom, float flTo, float flDuration, int iPriority)
+   0xe9ca0: 
+        cl_dll/view.cpp:479: // orig client 0xe9ca0. A shake of no lower priority replaces the current one.
+        cl_dll/rc2/blastsphere_tent.cpp:20: // orig 0xe9ca0 (view.cpp, changed stock code): starts a view wobble of flAmplitude, flSpeed
+        cl_dll/rc2/energyblast_tents.cpp:23: // orig 0xe9ca0 (view.cpp, a stock file RC2 changed): starts RC2's view shake unless one of a
+        cl_dll/rc2/gravgrenade_tents.cpp:26: // orig 0xe9ca0 (view.cpp, a stock file RC2 changed): starts a view shake unless one of a higher
+   0xec590: 
+        cl_dll/view.cpp:2003: // orig client 0xec590. Not while the magenta tint is on, unless its priority is above 0.
+        cl_dll/rc2/tripminezap_tent.cpp:22: // orig 0xec590 (view, a changed SDK file): starts a screen colour fade from colFrom/flFrom to
+        cl_dll/rc2/antifriction_tents.cpp:21: // orig .bss 0x101f69fc (c2's): the local player is frictionless; view.cpp's 0xec590 reads it.
+        cl_dll/rc2/transform_tents.cpp:35: // orig 0xec590 (view, a changed SDK file): starts a screen colour fade from colFrom/flFrom to
+== cl_dll/rc2/c3_stubs.cpp:97
+   def  void RC2_AddAnimatingDisk(Vector vecOrigin, Vector vecRight, Vector vecUp, Vector vecNormal, int iCircle,
+   def  void RC2_DrawBeamQuad(Vector vecStart, Vector vecEnd, float flWidth, int iUnused, Vector col1, float flAlpha1,
+   def  void RC2_DrawStrip(Vector* pvecPoints, float* pflWidths, Vector* pcolColors, float* pflAlphas, int iCount, boo
+   def  void RC2_DrawTexturedStrip(Vector* pvecPoints, float* pflWidths, Vector* pcolColors, float* pflAlphas, int iCo
+   def  Vector RC2_ShieldIntercept(int iEntIndex, Vector vecSrc, Vector vecDir, float* pflUnused, int* pbHit)
+   0x532f0: 
+        cl_dll/rc2/freeze_tents.cpp:28: // orig 0x532f0 (c2): adds one of c2's 64 animating disks (drawn by c2's transparent pass with
+        cl_dll/rc2/clte_draw.cpp:300: // orig client 0x532f0
+   0x54ad0: 
+        cl_dll/rc2/houndeye_tents.cpp:29: // orig 0x54ad0 (c2): one camera-facing quad from vecStart to vecEnd, flWidth wide, the start in
+        cl_dll/rc2/clte_draw.cpp:458: // orig client 0x54ad0. One quad from start to end, as wide as given at each end. Original quirk
+   0x55190: 
+        cl_dll/rc2/houndeye_tents.cpp:26: // orig 0x55190 (c2): a strip of camera-facing quads through iCount points (see transform_tents.cpp).
+        cl_dll/rc2/transform_tents.cpp:31: // orig 0x55190 (c2): a strip of camera-facing quads through iCount points, each with its
+        cl_dll/rc2/clte_draw.cpp:498: // orig client 0x55190. A strip through iCount points. bTexAlong: the texture runs the strip's
+        cl_dll/rc2/c3_needs.h:140: void Draw(bool bFlag);			// orig 0x5abb0 (c2): the strip (c2's 0x55190)
+   0x58f90: 
+        cl_dll/rc2/clte_draw.cpp:748: // orig client 0x58f90. A strip whose texture runs from flTexStart, flTexScale per unit of length
+        cl_dll/rc2/curvedbeam_tents.cpp:22: // orig 0x58f90 (c2): a strip of camera-facing quads through iCount points, each with its width,
+   0x59ee0: 
+        cl_dll/rc2/tcontroller_tents.cpp:35: // orig 0x59ee0 (c2): where a ray from vecSrc along -vecDir meets the shield (CLTE 0x25) of
+        cl_dll/rc2/clte.cpp:685: // orig client 0x59ee0. Where a shot from vecPoint along vecDir meets iPlayer's shield (an ellipsoid
+== cl_dll/rc2/c3_stubs.cpp:112
+   def  int RC2_TrailPointDrainToBlue(float flFrametime, Vector* pvecOrigin, Vector* pvecVelocity, Vector* pvecAccel, 
+   def  int RC2_ParticleTintBlue(float flFrametime, Vector* pvecOrigin, Vector* pvecVelocity, Vector* pvecAccel, Vecto
+   def  int RC2_HoundeyeChargeParticle(float flFrametime, Vector* pvecOrigin, Vector* pvecVelocity, Vector* pvecAccel,
+   0x508e0: 
+        cl_dll/rc2/clte_particles.cpp:22: // orig client 0x508e0. A trail point darkens to blue: red and green fall 8/7 a second
+        cl_dll/rc2/ultima_tent.cpp:47: // orig 0x508e0 (c2): a CRC2Trail point think that drains red and green at 1.14 a second
+        cl_dll/rc2/clte.h:18: *	from client 0x508e0 well past 0x71ad0 (its vtables and data are one block); this rebuild splits
+   0x509c0: 
+        cl_dll/rc2/clte_particles.cpp:47: // orig client 0x509c0. A particle's color moves to (0.4, 0.4, 1) over the rest of its life
+        cl_dll/rc2/energyblast_tents.cpp:28: // orig 0x509c0 (c2): a CRC2Particles think that tints the particle toward (0.4, 0.4, 1) over
+   0x50b90: 
+        cl_dll/rc2/clte_particles.cpp:67: // orig client 0x50b90. A particle that grows in place for its first fifth, then flies to its effect's
+        cl_dll/rc2/houndeye_tents.cpp:32: // orig 0x50b90 (c2): the motion of the particles this effect sucks in; iUser is the effect.
+== cl_dll/rc2/clte_effects4.cpp:2221
+   def  void CTentShield::DrawTransparent()
+   0x71ad0: 
+        cl_dll/rc2/shield_tents.cpp:11: *	The original's functions 0x71ad0-0x72ac0 (and 0x99d60) of client.dll's run
+        cl_dll/rc2/shield_tents.cpp:32: void CShieldTent::DrawTransparent() // orig client 0x71ad0
+        cl_dll/rc2/clte_effects4.cpp:2073: void DrawTransparent() override; // client 0x71ad0, the next package's
+        cl_dll/rc2/clte_types.h:45: // c2 needs: the types of the rest of the effect file (client 0x71ad0 on, another package's) as far
+== cl_dll/rc2/transform_hud.h:29
+   def  extern int g_iViewMode;				// hud.cpp .bss 0x1020bb38: the ViewMode message's byte (client.dll 0xa10b0)
+   def  extern float g_flTransformFOV;		// hud.cpp .bss 0x1020bb44: the FOV HUD_GetFOV gives in a transform (0xa1f30)
+   def  extern int g_bViewLockTent;			// .bss 0x101f69f8: a client tent locks the local player's view (0x7bff0)
+   def  extern int g_bViewLockEffect;		// .bss 0x101f6a00: an effect on the local player locks the view (0x8ebf0)
+== cl_dll/rc2/input_stubs_V.cpp:1
+== cl_dll/rc2/input_stubs_V.cpp:9
+   def  int g_bViewLockTent = 0;
+   def  int g_bViewLockEffect = 0;
+   0x7bff0: 
+        cl_dll/rc2/freeze_tents.cpp:13: *	The original's functions 0x7bff0-0x7ddd0 of client.dll's run "new: cdll_int .. com_weapons".
+        cl_dll/rc2/freeze_tents.cpp:51: CClientTent* RC2_NewFrozenTent(const CClientTent* pCopy) // orig client 0x7bff0
+        cl_dll/rc2/clte_types.h:106: CClientTent* CLTE_CreateType2f(CClientTent* pCopy);	 // client 0x7bff0
+   0x8ebf0: 
+        cl_dll/rc2/transform_tents.cpp:12: *	The original's functions 0x8d960-0x8ebf0 (with the constructor 0x8ebf0) of client.dll's
+        cl_dll/rc2/transform_tents.cpp:12: *	The original's functions 0x8d960-0x8ebf0 (with the constructor 0x8ebf0) of client.dll's
+        cl_dll/rc2/transform_tents.cpp:127: CTransformTent::CTransformTent() // orig client 0x8ebf0
+== cl_dll/rc2/input_stubs_V.cpp:13
+   def  bool g_bDrawClientTents = true;
+   0x1768b8: 
+        cl_dll/view.cpp:560: bool g_bMainView = true;	 // 0x101768b8: false while the second (scope or overview) view is drawn
+        cl_dll/tri.cpp:26: extern bool g_bDrawClientTents;		  // view.cpp .data 0x101768b8 (V_CalcRefdef, package c5), name ours
+== cl_dll/rc2/input_stubs_V.cpp:16
+   def  void ClientTents_DrawNormal() {}
+   def  void ClientTents_DrawTransparent() {}
+   def  void ClientTents_Clear() {}
+   def  void ClientTents_Remove(int iEnt, int iType) {}
+   def  void GetEntityRenderOrigin(float* vecOut, int iEnt)
+   0x52280: 
+        cl_dll/rc2/clte.cpp:396: // orig client 0x52280. The effects of iType let go of iEnt (0: nothing)
+   0x52650: 
+        cl_dll/tri.cpp:28: extern void ClientTents_DrawTransparent(); // client.dll 0x52650 (package c2), name ours
+        cl_dll/rc2/clte.cpp:487: // orig client 0x52650. From HUD_DrawTransparentTriangles: the effects, then the disks and quads.
+        cl_dll/rc2/clte_draw.cpp:156: // Part of orig client 0x52650 (CLTE_DrawTransparent): the disks and the quads, additive, two-sided
+        cl_dll/rc2/c3_needs.h:45: // slot 3: from HUD_DrawTransparentTriangles (orig 0x52650). Default: nothing.
+== cl_dll/rc2/input_stubs_V.cpp:34
+   def  void RC2_DrawTransparentExtra() {}
+   0xd6b00: 
+        cl_dll/tri.cpp:29: extern void RC2_DrawTransparentExtra();	  // client.dll 0xd6b00 (package c5), name ours. VERIFY: what it draws
+        cl_dll/tri.cpp:57: // orig client 0xcba70. RC2: its client tents and 0xd6b00's drawing. halflife-updated's particle
+        cl_dll/rc2/vgui_DebugPanel.cpp:370: // orig client 0xd6b00. The watched entity's box in red, with blue lines from its origin to each
+== cl_dll/rc2/input_stubs_V.cpp:37
+   def  void VGui_ShutdownState() {}
+   0xd9180: 
+        cl_dll/input.cpp:1155: extern void VGui_ShutdownState(); // client.dll 0xd9180 (vgui_int area, package c5), name ours
+        cl_dll/rc2/vgui_PlayerID.cpp:226: // orig client 0xd9180
+== cl_dll/rc2/input_stubs_V.cpp:40
+   def  void Ammo_RestoreCrosshair() {}
+   0x4a900: nobody else
+== cl_dll/rc2/input_stubs_V.cpp:43
+   def  float EV_TraceVisible(Vector vecStart, Vector vecEnd, Vector vecDir, float flRange, cl_entity_t* pTarget, pmtr
+   0xee70: nobody else
+== cl_dll/rc2/c4_needs.h:6

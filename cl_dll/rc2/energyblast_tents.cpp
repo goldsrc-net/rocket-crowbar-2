@@ -19,27 +19,17 @@
 
 #include <cmath>
 
-// c3 needs:
-// orig 0xe9ca0 (view.cpp, a stock file RC2 changed): starts RC2's view shake unless one of a
-// higher iPriority is running: stores the three floats (orig .bss 0x10227978, 0x1022682c,
-// 0x1022716c) and picks random amplitudes and phases for three axes. What each float means is
-// view.cpp's to settle. name ours
-void RC2_ViewShake(float fl1, float fl2, float fl3, int iPriority);
-// orig 0x509c0 (c2): a CRC2Particles think that tints the particle toward (0.4, 0.4, 1) over
-// its remaining life and clamps the colour to 0-1; leaves the default motion to run. name ours
-int RC2_ParticleTintBlue(float flFrametime, Vector* pvecOrigin, Vector* pvecVelocity, Vector* pvecAccel, Vector* pcolColor, float* pflAlpha, float* pflSize, float* pflFade, float* pflLife, int iUser);
-
 // A sphere of flRadius around vecOrigin in colColor/flAlpha, in rings from the bottom pole up:
 // 8, 10 or 16 by cl_detail. Inline, the same, in both effects' draws in the original.
 static void DrawBlastSphere(const Vector& vecOrigin, float flRadius, const Vector& colColor, float flAlpha, model_s* pSprite) // name ours
 {
 	int iCircle, iRings;
-	if (g_iClDetail >= 1)
+	if (g_iClientDetail >= 1)
 	{
 		iCircle = 3;
 		iRings = 16;
 	}
-	else if (g_iClDetail >= 0)
+	else if (g_iClientDetail >= 0)
 	{
 		iCircle = 1;
 		iRings = 10;
@@ -72,11 +62,11 @@ static void DrawBlastSphere(const Vector& vecOrigin, float flRadius, const Vecto
 	for (int i = 0; i < iRings; i++)
 	{
 		if (i == 0)
-			RC2_DrawEllipsoidCap(vecOrigin, vecForward, vecRight, vecUp, flPrevZ, flZ, flRing, iCircle, colColor, flAlpha, colColor, flAlpha);
+			CLTE_DrawCone(vecOrigin, vecForward, vecRight, vecUp, flPrevZ, flZ, flRing, iCircle, colColor, flAlpha, colColor, flAlpha);
 		else if (i == iRings - 1)
-			RC2_DrawEllipsoidCap(vecOrigin, vecForward, vecRight, vecUp, flZ, flPrevZ, flPrevRing, iCircle, colColor, flAlpha, colColor, flAlpha);
+			CLTE_DrawCone(vecOrigin, vecForward, vecRight, vecUp, flZ, flPrevZ, flPrevRing, iCircle, colColor, flAlpha, colColor, flAlpha);
 		else
-			RC2_DrawEllipsoidBand(vecOrigin, vecForward, vecRight, vecUp, flPrevRing, flRing, flPrevZ, flZ, iCircle, colColor, flAlpha, colColor, flAlpha);
+			CLTE_DrawRing(vecOrigin, vecForward, vecRight, vecUp, flPrevRing, flRing, flPrevZ, flZ, iCircle, colColor, flAlpha, colColor, flAlpha);
 
 		flPrevRing = flRing;
 		flPrevZ = flZ;
@@ -96,7 +86,7 @@ class CEnergyBlastTent : public CClientTent // name ours
 public:
 	CEnergyBlastTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
 
 	Vector m_vecOrigin;		 // orig +0x8
@@ -109,7 +99,7 @@ public:
 	bool m_bShaken;			 // orig +0x2c
 	Vector m_colColor;		 // orig +0x30: white to (0.6, 0.6, 1)
 	BEAM* m_pTorus;			 // orig +0x3c
-	CRC2Particles m_Sparks;	 // orig +0x40
+	CTentParticles m_Sparks;	 // orig +0x40
 	model_s* m_pSprite;		 // orig +0x4c: sprites/noise2.spr
 	model_s* m_pSparkSprite; // orig +0x50: sprites/glow03.spr
 };
@@ -118,7 +108,7 @@ public:
 // out of line in the original (orig client 0x9acb0); the copy shares the sparks' array.
 CClientTent* RC2_NewEnergyBlastTent(const CClientTent* pCopy) // orig client 0x89a40
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -146,7 +136,7 @@ CEnergyBlastTent::CEnergyBlastTent()
 	m_pSprite = gEngfuncs.CL_LoadModel("sprites/noise2.spr", &iModelIndex);
 	m_pSparkSprite = gEngfuncs.CL_LoadModel("sprites/glow03.spr", &iModelIndex);
 
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 	{
 		const int iSparks = gEngfuncs.pfnRandomLong(40, 50);
 		for (int i = 0; i < iSparks; i++)
@@ -160,7 +150,7 @@ CEnergyBlastTent::CEnergyBlastTent()
 			const float flSpeed = gEngfuncs.pfnRandomFloat(1000, 1100);
 			const Vector vecAccel = -vecDir * (flSpeed / flLife);
 			const Vector vecVelocity = vecDir * flSpeed;
-			m_Sparks.Add(m_vecOrigin, vecVelocity, vecAccel, Vector(1, 1, 1), 0.95, 4, 0.95 / flLife, flLife, 0, RC2_ParticleTintBlue);
+			m_Sparks.Add(m_vecOrigin, vecVelocity, vecAccel, Vector(1, 1, 1), 0.95, 4, 0.95 / flLife, flLife, 0, Particle_FadeToBlue);
 		}
 	}
 
@@ -172,7 +162,7 @@ CEnergyBlastTent::CEnergyBlastTent()
 	}
 }
 
-bool CEnergyBlastTent::Think(float flFrametime) // orig client 0x89f30
+bool CEnergyBlastTent::Update(float flFrametime) // orig client 0x89f30
 {
 	m_flTorusRadius += flFrametime * 4000;
 	m_flShakeRadius += flFrametime * 6000;
@@ -224,16 +214,16 @@ bool CEnergyBlastTent::Think(float flFrametime) // orig client 0x89f30
 		cl_entity_t* pPlayer = gEngfuncs.GetLocalPlayer();
 		if (pPlayer)
 		{
-			const Vector vecDelta = RC2_GetEntityOrigin(pPlayer->index) - m_vecOrigin;
+			const Vector vecDelta = CLTE_GetOrigin(pPlayer->index) - m_vecOrigin;
 			if (vecDelta.Length() < m_flShakeRadius)
 			{
 				m_bShaken = true;
-				RC2_ViewShake(3.8, 20, 2.25, 10);
+				V_StartViewShake(3.8, 20, 2.25, 10);
 			}
 		}
 	}
 
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 		m_Sparks.Update(flFrametime);
 	return false;
 }
@@ -245,9 +235,9 @@ void CEnergyBlastTent::DrawTransparent() // orig client 0x8a380
 
 	DrawBlastSphere(m_vecOrigin, m_flSphereRadius, m_colColor, m_flAlpha, m_pSprite);
 
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 	{
-		if (m_pSparkSprite && m_Sparks.HasLive())
+		if (m_pSparkSprite && m_Sparks.HasAlive())
 			gEngfuncs.pTriAPI->SpriteTexture(m_pSparkSprite, 0);
 		m_Sparks.Draw();
 	}
@@ -264,7 +254,7 @@ class CExpandingSphereTent : public CClientTent // name ours
 public:
 	CExpandingSphereTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
 
 	Vector m_vecOrigin;	 // orig +0x8
@@ -279,7 +269,7 @@ public:
 // The factory (the dispatcher's case 0x3d). The implicit copy constructor is inline here.
 CClientTent* RC2_NewExpandingSphereTent(const CClientTent* pCopy) // orig client 0x8b2f0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -307,7 +297,7 @@ CExpandingSphereTent::CExpandingSphereTent()
 	m_pSprite = gEngfuncs.CL_LoadModel("sprites/noise2.spr", &iModelIndex);
 }
 
-bool CExpandingSphereTent::Think(float flFrametime) // orig client 0x8b650
+bool CExpandingSphereTent::Update(float flFrametime) // orig client 0x8b650
 {
 	m_flRadius += flFrametime * 4000;
 	m_flLife -= flFrametime;

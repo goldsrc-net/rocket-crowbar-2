@@ -3,8 +3,8 @@
 *	Rocket Crowbar 2 client: the shield's effects (CLTE 0x25 and 0x26).
 *
 *	CLTE 0x25 is a player's shield, an ellipsoid of sprites/noise1.spr around him with a bright
-*	band (sprites/lgtning.spr) sweeping up and down it; its class, factory and think are c2's
-*	(c3_needs.h), its draw and hit flash are here. CLTE 0x26 is a hit on the shield (server
+*	band (sprites/lgtning.spr) sweeping up and down it; its class (clte_types.h), factory and think are c2's
+*	(clte_effects4.cpp), its draw and hit flash are here. CLTE 0x26 is a hit on the shield (server
 *	shield.cpp, CLTE_SHIELDHIT): a ring of sprites/shockwave.spr spreading on the shield's
 *	surface where the hit landed, which also flashes the shield.
 *
@@ -18,8 +18,8 @@
 
 #include <cmath>
 
-// The radius of an ellipsoid's ring at height flZ (flRadius across, flHeight up): 0 outside
-// it. Inline in the original at each use. name ours
+// The radius of an ellipsoid's ring at height flZ (flRadius its half height, flHeight the
+// radius at its middle): 0 outside it. Inline in the original at each use. name ours
 static float ShieldRingRadius(float flZ, float flRadius, float flHeight)
 {
 	if (flZ <= -flRadius || flZ >= flRadius)
@@ -29,20 +29,20 @@ static float ShieldRingRadius(float flZ, float flRadius, float flHeight)
 
 // The shield: an ellipsoid of rings in pale blue whose brightness is the hit flash, from the
 // bottom pole up (6, 8 or 10 rings by cl_detail, each ring a little ragged), and the bright band.
-void CShieldTent::DrawTransparent() // orig client 0x71ad0
+void CTentShield::DrawTransparent() // orig client 0x71ad0
 {
 	if (!m_bVisible)
 		return;
-	if (m_flFlash <= 0 && !m_bBand)
+	if (m_flFlash <= 0 && !m_bSweeping)
 		return;
 
 	int iCircle, iRings;
-	if (g_iClDetail >= 1)
+	if (g_iClientDetail >= 1)
 	{
 		iCircle = 4;
 		iRings = 10;
 	}
-	else if (g_iClDetail >= 0)
+	else if (g_iClientDetail >= 0)
 	{
 		iCircle = 3;
 		iRings = 8;
@@ -53,10 +53,10 @@ void CShieldTent::DrawTransparent() // orig client 0x71ad0
 		iRings = 6;
 	}
 
-	const float flStep = (m_flRadius + m_flRadius) / iRings;
-	float flZ = flStep - m_flRadius;
-	float flPrevZ = -m_flRadius;
-	float flRing = ShieldRingRadius(flZ, m_flRadius, m_flHeight) + gEngfuncs.pfnRandomFloat(-1, 1);
+	const float flStep = (m_flHeight + m_flHeight) / iRings;
+	float flZ = flStep - m_flHeight;
+	float flPrevZ = -m_flHeight;
+	float flRing = ShieldRingRadius(flZ, m_flHeight, m_flWidth) + gEngfuncs.pfnRandomFloat(-1, 1);
 	float flPrevRing = 0;
 	const Vector colShield(0.25, 0.25, 1.0);
 
@@ -73,54 +73,54 @@ void CShieldTent::DrawTransparent() // orig client 0x71ad0
 
 	if (flAlpha > 0)
 	{
-		if (m_pSprite)
-			gEngfuncs.pTriAPI->SpriteTexture(m_pSprite, 0);
+		if (m_pNoise)
+			gEngfuncs.pTriAPI->SpriteTexture(m_pNoise, 0);
 
 		for (int i = 0; i < iRings; i++)
 		{
 			if (i == 0)
-				RC2_DrawEllipsoidCap(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flPrevZ, flZ, flRing, iCircle, colShield, flAlpha, colShield, flAlpha);
+				CLTE_DrawCone(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flPrevZ, flZ, flRing, iCircle, colShield, flAlpha, colShield, flAlpha);
 			else if (i == iRings - 1)
-				RC2_DrawEllipsoidCap(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flZ, flPrevZ, flPrevRing, iCircle, colShield, flAlpha, colShield, flAlpha);
+				CLTE_DrawCone(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flZ, flPrevZ, flPrevRing, iCircle, colShield, flAlpha, colShield, flAlpha);
 			else
-				RC2_DrawEllipsoidBand(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flPrevRing, flRing, flPrevZ, flZ, iCircle, colShield, flAlpha, colShield, flAlpha);
+				CLTE_DrawRing(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flPrevRing, flRing, flPrevZ, flZ, iCircle, colShield, flAlpha, colShield, flAlpha);
 
 			flPrevRing = flRing;
 			flPrevZ = flZ;
 			flZ += flStep;
-			flRing = ShieldRingRadius(flZ, m_flRadius, m_flHeight) + gEngfuncs.pfnRandomFloat(-1, 1);
+			flRing = ShieldRingRadius(flZ, m_flHeight, m_flWidth) + gEngfuncs.pfnRandomFloat(-1, 1);
 		}
 	}
 
-	if (m_bBand)
+	if (m_bSweeping)
 	{
 		// VERIFY: the original tests the noise sprite (+0x1c) but binds the band's (+0x20)
-		if (m_pSprite)
-			gEngfuncs.pTriAPI->SpriteTexture(m_pBandSprite, (int)m_flBandFrame % 2);
+		if (m_pNoise)
+			gEngfuncs.pTriAPI->SpriteTexture(m_pLightning, (int)m_flFrame % 2);
 
-		const float flTop = m_flBandHalf + m_flBandZ;
-		const float flBottom = m_flBandZ - m_flBandHalf;
-		const float flTopRing = ShieldRingRadius(flTop, m_flRadius, m_flHeight) + 1.0;
-		const float flBottomRing = ShieldRingRadius(flBottom, m_flRadius, m_flHeight) + 1.0;
+		const float flTop = m_flSweepMargin + m_flSweepZ;
+		const float flBottom = m_flSweepZ - m_flSweepMargin;
+		const float flTopRing = ShieldRingRadius(flTop, m_flHeight, m_flWidth) + 1.0;
+		const float flBottomRing = ShieldRingRadius(flBottom, m_flHeight, m_flWidth) + 1.0;
 		const Vector colBand(0.8, 0.8, 1.0);
 
 		// the band fades toward the poles
-		float flBandAlpha = 0.8 - pow(fabs(m_flBandZ) / m_flRadius, 6.0) * 0.8;
+		float flBandAlpha = 0.8 - pow(fabs(m_flSweepZ) / m_flHeight, 6.0) * 0.8;
 		if (flBandAlpha < 0)
 			flBandAlpha = 0;
 		else if (flBandAlpha > 1)
 			flBandAlpha = 1;
 
-		RC2_DrawEllipsoidBand(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flBottomRing, flTopRing, flBottom, flTop, iCircle, colBand, flBandAlpha, colBand, flBandAlpha);
+		CLTE_DrawRing(m_vecOrigin, m_vecForward, m_vecRight, m_vecUp, flBottomRing, flTopRing, flBottom, flTop, iCircle, colBand, flBandAlpha, colBand, flBandAlpha);
 	}
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }
 
 // A hit on this player's shield brightens it: more for a stronger hit, up to 0.8.
-void CShieldTent::Flash(int iEntIndex, int iStrength) // orig client 0x727a0
+void CTentShield::Flash(int iEntIndex, int iStrength) // orig client 0x727a0
 {
-	if (iEntIndex != m_iEntIndex)
+	if (iEntIndex != m_iEntity)
 		return;
 
 	float flFlash = (iStrength + 1) * 0.0375 + gEngfuncs.pfnRandomFloat(-0.05, 0.05) + m_flFlash + 0.3;
@@ -146,9 +146,9 @@ class CShieldHitTent : public CClientTent // name ours
 public:
 	CShieldHitTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	Vector RingPoint(float flYaw, float flZ);
 
@@ -179,7 +179,7 @@ public:
 // (orig client 0x99d60). The dispatcher always passes null.
 CClientTent* RC2_NewShieldHitTent(const CClientTent* pCopy) // orig client 0x721b0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -211,7 +211,7 @@ CShieldHitTent::CShieldHitTent()
 	m_flMaxInner += gEngfuncs.pfnRandomFloat(-1, 0);
 	m_flMaxOuter += gEngfuncs.pfnRandomFloat(0, 1);
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -263,7 +263,7 @@ CShieldHitTent::CShieldHitTent()
 	for (int i = 0; i < MAX_CLIENT_TENTS; i++)
 	{
 		if (g_pClientTents[i] && g_pClientTents[i]->m_iType == 0x25)
-			static_cast<CShieldTent*>(g_pClientTents[i])->Flash(m_iEntIndex, m_iStrength);
+			static_cast<CTentShield*>(g_pClientTents[i])->Flash(m_iEntIndex, m_iStrength);
 	}
 
 	int iModelIndex;
@@ -278,21 +278,21 @@ Vector CShieldHitTent::RingPoint(float flYaw, float flZ) // orig client 0x72840
 }
 
 // The ring spreads to its full size and fades over its quarter second, following the player.
-bool CShieldHitTent::Think(float flFrametime) // orig client 0x728e0
+bool CShieldHitTent::Update(float flFrametime) // orig client 0x728e0
 {
 	if (!m_iEntIndex)
 		return true;
 
 	if ((m_iFlags & SHIELDHIT_NORING) != 0)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
 
-	if (!RC2_GetEntity(m_iEntIndex))
+	if (!GetEntity(m_iEntIndex))
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -300,14 +300,14 @@ bool CShieldHitTent::Think(float flFrametime) // orig client 0x728e0
 	m_flLife -= flFrametime;
 	if (m_flLife < 0)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
 
 	m_vecAngles.z = gEngfuncs.pfnRandomFloat(0, 360);
 	gEngfuncs.pfnAngleVectors(m_vecAngles, nullptr, m_vecRight, m_vecUp);
-	m_vecOrigin = RC2_GetEntityOrigin(m_iEntIndex);
+	m_vecOrigin = CLTE_GetOrigin(m_iEntIndex);
 
 	float flFrac = m_flLife / m_flMaxLife;
 	if (flFrac < 0)
@@ -322,7 +322,7 @@ bool CShieldHitTent::Think(float flFrametime) // orig client 0x728e0
 	return false;
 }
 
-bool CShieldHitTent::EntityGone(int iEntIndex) // orig client 0x72a90
+bool CShieldHitTent::KillEntity(int iEntIndex) // orig client 0x72a90
 {
 	if (m_iEntIndex == iEntIndex)
 	{
@@ -344,7 +344,7 @@ void CShieldHitTent::DrawTransparent() // orig client 0x72ac0
 		gEngfuncs.pTriAPI->SpriteTexture(m_pSprite, 0);
 
 	const Vector colRing(0.9, 0.9, 1.0);
-	RC2_DrawEllipsoidBand(m_vecOrigin + m_vecHit, m_vecRight, m_vecUp, m_vecNormal, m_flInner, m_flOuter, 0, 0, 1, colRing, m_flInnerAlpha, colRing, m_flOuterAlpha);
+	CLTE_DrawRing(m_vecOrigin + m_vecHit, m_vecRight, m_vecUp, m_vecNormal, m_flInner, m_flOuter, 0, 0, 1, colRing, m_flInnerAlpha, colRing, m_flOuterAlpha);
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }

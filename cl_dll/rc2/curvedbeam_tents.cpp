@@ -18,12 +18,6 @@
 
 #include <cmath>
 
-// c3 needs:
-// orig 0x58f90 (c2): a strip of camera-facing quads through iCount points, each with its width,
-// colour and alpha, the bound texture running flTexScale per unit of length from flTexOffset.
-// name ours
-void RC2_DrawTexturedStrip(Vector* pvecPoints, float* pflWidths, Vector* pcolColors, float* pflAlphas, int iCount, float flTexScale, float flTexOffset);
-
 #define CURVEDBEAM_POINTS 8 // name ours
 
 //
@@ -35,9 +29,9 @@ class CCurvedBeamTent : public CClientTent // name ours
 public:
 	CCurvedBeamTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	Vector m_vecStart;			  // orig +0x8
 	Vector m_vecDir;			  // orig +0x14
@@ -57,7 +51,7 @@ public:
 // orig client 0x9b070). The dispatcher always passes null.
 CClientTent* RC2_NewCurvedBeamTent(const CClientTent* pCopy) // orig client 0x914e0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -113,7 +107,7 @@ CCurvedBeamTent::CCurvedBeamTent()
 
 // Over its life the alpha goes from 0.95 to 0 and the colour's red and blue from 0.1 to 0;
 // the start point keeps its own (alpha 0).
-bool CCurvedBeamTent::Think(float flFrametime) // orig client 0x91a10
+bool CCurvedBeamTent::Update(float flFrametime) // orig client 0x91a10
 {
 	m_flTimeLeft -= flFrametime;
 	if (m_flTimeLeft < 0)
@@ -148,13 +142,13 @@ void CCurvedBeamTent::DrawTransparent() // orig client 0x91b90
 	if (m_pSprite)
 		gEngfuncs.pTriAPI->SpriteTexture(m_pSprite, 0);
 
-	RC2_DrawTexturedStrip(m_vecPoints, m_flWidths, m_colPoints, m_flAlphas, CURVEDBEAM_POINTS, 0.01, m_flTexOffset);
+	CLTE_DrawStripScrolled(m_vecPoints, m_flWidths, m_colPoints, m_flAlphas, CURVEDBEAM_POINTS, 0.01, m_flTexOffset);
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }
 
 // It belongs to no entity: nothing kills it early.
-bool CCurvedBeamTent::EntityGone(int iEntIndex) // orig client 0x91c20
+bool CCurvedBeamTent::KillEntity(int iEntIndex) // orig client 0x91c20
 {
 	return false;
 }

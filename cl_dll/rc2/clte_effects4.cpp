@@ -2065,32 +2065,7 @@ bool CTentType36::Update(float flFrametime)
 // --- CLTE 37: a player's shield (player.cpp, m_bClientShield): drawn by DrawTransparent round him,
 // a band sweeping up it now and then; the bit in g_iShieldPlayers makes shots meet it ---
 
-// vtable client 0x1011dd80, 0x6c bytes
-class CTentShield : public CClientTent
-{
-public:
-	bool Update(float flFrametime) override;
-	void DrawTransparent() override; // client 0x71ad0, the next package's
-	bool KillEntity(int iEnt) override;
-
-	int m_iEntity;		   // +8
-	float m_flFlash;	   // +0xc: 0-1, falls 20/3 a second. VERIFY: what raises it (not this package)
-	bool m_bSweeping;	   // +0x10
-	float m_flSweepWait;   // +0x14
-	float m_flSweepZ;	   // +0x18
-	model_s* m_pNoise;	   // +0x1c: sprites/noise1.spr
-	model_s* m_pLightning; // +0x20: sprites/lgtning.spr
-	float m_flYaw;		   // +0x24: turns 180 a second
-	float m_flHeight;	   // +0x28: 40, 30 ducked
-	float m_flWidth;	   // +0x2c: 20, 26 ducked
-	float m_flSweepMargin; // +0x30: 2
-	float m_flFrame;	   // +0x34: 0-3, 12 a second
-	Vector m_vecOrigin;	   // +0x38
-	Vector m_vecForward;   // +0x44
-	Vector m_vecRight;	   // +0x50
-	Vector m_vecUp;		   // +0x5c
-	bool m_bVisible;	   // +0x68
-};
+// vtable client 0x1011dd80, 0x6c bytes: CTentShield, in clte_types.h
 
 // orig client 0x714f0. byte player
 CClientTent* CLTE_CreateShield(CClientTent* pCopy)
@@ -2216,10 +2191,5 @@ bool CTentShield::KillEntity(int iEnt)
 	g_iShieldPlayers &= ~(1 << (m_iEntity - 1));
 	m_iEntity = 0;
 	return true;
-}
-
-// TEMP STUB (c2): real one belongs at client 0x71ad0 (the next package, c3)
-void CTentShield::DrawTransparent()
-{
 }
 

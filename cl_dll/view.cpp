@@ -19,6 +19,7 @@
 #include "shake.h"
 #include "hltv.h"
 #include "Exports.h"
+#include "rc2/transform_hud.h"
 
 int CL_IsThirdPerson();
 void CL_CameraOffset(float* ofs);
@@ -33,7 +34,7 @@ int PM_GetPhysEntInfo(int ent);
 void InterpolateAngles(float* start, float* end, float* output, float frac);
 void NormalizeAngles(float* angles);
 float Distance(const float* v1, const float* v2);
-float AngleBetweenVectors(const float* v1, const float* v2);
+float AngleBetweenVectors(const Vector& v1, const Vector& v2); // pm_math.cpp (client 0xb07d0); mathlib.h declares a float* one nothing defines
 
 extern float vJumpOrigin[3];
 extern float vJumpAngles[3];
@@ -558,24 +559,24 @@ Vector g_vecLockedViewOrigin; // 0x10227084: the origin held while g_bLockViewOr
 int g_bLockViewAngles = 0;	 // 0x102270f0
 Vector g_vecLockedViewAngles; // 0x10226848
 bool g_bMainView = true;	 // 0x101768b8: false while the second (scope or overview) view is drawn
-static bool g_bViewEntityOverride; // 0x10227991
+bool g_bViewEntityOverride; // 0x10227991: the view is another entity's (the studio renderer draws the local player then)
 
 // RC2's view mode (ViewMode message, hud.cpp): 1 ahead of the view entity, 2 on its up axis, 3 a
 // turret on it; 0 its own view
-extern int g_iViewMode;				 // name ours
-extern int g_bThirdPersonBlocked;	 // name ours: set when the third person camera has no room
-extern int g_iPlayerViewState;		 // name ours: 1 scoped (second view), 4 with g_iPlayerViewSubState 2 upside down, 6 fixed angles
-extern int g_iPlayerViewSubState;	 // name ours
-extern int g_bPlayerViewBusy;		 // name ours
-extern bool g_bScopeView;			 // name ours: the scope's second view is drawn this frame
-extern Vector g_vecFixedViewAngles;	 // name ours
-extern int g_bTiltBodyWithView;		 // name ours: the player model pitches with a third person view
-extern int g_bScreenTintBlue;		 // name ours
-extern int g_bScreenTintMagenta;	 // name ours
-extern int g_bViewOverride;			 // name ours
+extern int g_iViewMode;				 // hud.cpp, 0x1020bb38
+extern int cam_blocked;				 // in_camera.cpp, 0x1020be40: set here when the third person camera has no room
+extern Vector g_vecRaceViewAngles;	 // pm_shared.cpp, 0x1022fe30: the race's view angles (transform mode 6)
+extern bool g_iAlive;				 // entity.cpp, .data 0x1013cfa0: the player model pitches with a third person view only alive
+extern int g_iLocalPlayerFrozen;	 // rc2/clte.cpp, 0x101f69f8: CLTE 0x2f froze the local player (blue tint, no pitch)
+extern int g_iRC2LocalAntiFriction;	 // rc2/clte.cpp, 0x101f69fc: CLTE 0x35 on the local player (magenta tint)
+extern int g_bLocalTransforming;	 // rc2/clte.cpp, 0x101f6a00: CLTE 0x40 transforms the local player
+// g_iPlayerClass (0x10220c3c: 1 the assassin's scope view, 4 with g_iBatPerch 2 the bat upside
+// down, 6 the race's fixed angles), g_iBatPerch (0x10220c4c), g_bHoundeyeAsleep (0x10220c40) and
+// g_flHoundeyeSleepFade (0x10220c48): rc2/transform_hud.h
+bool g_bScopeView = false; // .bss 0x10220c44 (among transform_hud.cpp's, read and written only here): the scope's second view is drawn this frame. name ours
 
-// VectorAngles of a basis with its roll (RC2's own code at client 0xb0e50, package c3)
-extern void RC2_BasisToAngles(const float* forward, const float* right, const float* up, float* angles); // name ours
+// VectorAngles of a basis with its roll (pm_math.cpp, client 0xb0e50)
+void VectorAnglesWithRoll(const float* forward, const float* right, const float* up, float* angles);
 
 /*
 ==================
@@ -766,7 +767,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	// Treating cam_ofs[2] as the distance, backed off walls
 	if (0 == pparams->nextView)
 	{
-		g_bThirdPersonBlocked = 0;
+		cam_blocked = 0;
 
 		if (0 != CL_IsThirdPerson())
 		{
@@ -799,12 +800,12 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 			if (flDist < 18 || 0 != tr.allsolid || 0 != tr.startsolid)
 			{
 				bThirdPerson = false;
-				g_bThirdPersonBlocked = 1;
+				cam_blocked = 1;
 			}
 			else
 			{
 				bThirdPerson = true;
-				g_bThirdPersonBlocked = 0;
+				cam_blocked = 0;
 				for (i = 0; i < 3; i++)
 					pparams->vieworg[i] -= flDist * camForward[i];
 			}
@@ -981,7 +982,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 				pitch += 360.0;
 
 			// the player model leans with the camera's pitch
-			if (0 != g_bTiltBodyWithView && 0 == g_bScreenTintBlue && 0 == g_bViewOverride && 0 == g_bPlayerViewBusy)
+			if (g_iAlive && 0 == g_iLocalPlayerFrozen && 0 == g_bLocalTransforming && 0 == g_bHoundeyeAsleep)
 			{
 				pitch *= -0.33333334f;
 				ent->angles[PITCH] = pitch;
@@ -993,12 +994,12 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	}
 
 	// RC2's player view states: fixed angles, or upside down
-	if (g_iPlayerViewState == 6)
+	if (g_iPlayerClass == 6)
 	{
-		VectorCopy(g_vecFixedViewAngles, pparams->viewangles);
+		VectorCopy(g_vecRaceViewAngles, pparams->viewangles);
 		v_angles = pparams->viewangles;
 	}
-	else if (g_iPlayerViewState == 4 && g_iPlayerViewSubState == 2)
+	else if (g_iPlayerClass == 4 && g_iBatPerch == 2)
 	{
 		pparams->viewangles[ROLL] = 180;
 		v_angles = pparams->viewangles;
@@ -1062,7 +1063,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 				VectorMA(newup, 0, delta, newup);
 				VectorMA(newup, 1, up, newup);
 
-				RC2_BasisToAngles(forward, right, newup, result);
+				VectorAnglesWithRoll(forward, right, newup, result);
 				pparams->viewangles[0] = -result[0];
 				pparams->viewangles[1] = result[1];
 				pparams->viewangles[2] = result[2];
@@ -1114,7 +1115,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 	// RC2's scope: a second, smaller view in the middle of the screen, moved along the view to
 	// what it looks at (in steps that shrink with the distance)
-	if (g_iPlayerViewState == 1 && 0 != pparams->nextView)
+	if (g_iPlayerClass == 1 && 0 != pparams->nextView)
 	{
 		pparams->nextView = 0;
 		pparams->viewport[2] = XRES(160);
@@ -1991,7 +1992,6 @@ static Vector g_vecScreenTintRate;	  // 0x102270b8
 static float g_flScreenTintAlpha;	  // 0x10227154
 static float g_flScreenTintAlphaRate; // 0x10226858
 static float g_flScreenTintTime;	  // 0x10227070
-extern float g_flScreenFlash;		  // name ours: 0 to 1, a black flash
 
 // orig client 0xec560
 void V_ResetScreenTint() // name ours
@@ -2005,7 +2005,7 @@ void V_StartScreenTint(float r1, float g1, float b1, float r2, float g2, float b
 {
 	if (g_bScreenTint && iPriority < g_iScreenTintPriority)
 		return;
-	if (0 != g_bScreenTintMagenta && iPriority <= 0)
+	if (0 != g_iRC2LocalAntiFriction && iPriority <= 0)
 		return;
 
 	g_vecScreenTint = Vector(r1, g1, b1);
@@ -2033,9 +2033,9 @@ static void V_SetScreenTint(int r, int g, int b, int a) // name ours
 // original's clamp to 255 compares the byte, so it never applies).
 void V_UpdateScreenTint(float flFrameTime) // name ours
 {
-	if (g_flScreenFlash > 0)
+	if (g_flHoundeyeSleepFade > 0)
 	{
-		float a = g_flScreenFlash;
+		float a = g_flHoundeyeSleepFade;
 		if (a < 0)
 			a = 0;
 		else if (a > 1)
@@ -2045,7 +2045,7 @@ void V_UpdateScreenTint(float flFrameTime) // name ours
 		return;
 	}
 
-	if (0 != g_bScreenTintBlue)
+	if (0 != g_iLocalPlayerFrozen)
 	{
 		V_SetScreenTint(130, 130, 255, 100);
 		g_bScreenTintSet = true;
@@ -2060,7 +2060,7 @@ void V_UpdateScreenTint(float flFrameTime) // name ours
 			g_bScreenTintSet = false;
 		}
 
-		if (0 != g_bScreenTintMagenta)
+		if (0 != g_iRC2LocalAntiFriction)
 		{
 			V_SetScreenTint(255, 0, 255, 72);
 			g_bScreenTintSet = true;
@@ -2249,34 +2249,4 @@ void V_Move(int mx, int my)
 }
 
 #endif
-
-
-// TEMP STUB (c5): real ones belong in RC2's client code elsewhere (hud.cpp's ViewMode message,
-// the camera and player state code; packages c1 to c4). Names ours. g_iViewMode is hud.cpp's.
-int g_bThirdPersonBlocked = 0;
-int g_iPlayerViewState = 0;
-int g_iPlayerViewSubState = 0;
-int g_bPlayerViewBusy = 0;
-bool g_bScopeView = false;
-Vector g_vecFixedViewAngles;
-int g_bTiltBodyWithView = 1;
-int g_bScreenTintBlue = 0;
-int g_bScreenTintMagenta = 0;
-int g_bViewOverride = 0;
-float g_flScreenFlash = 0;
-void VectorAnglesWithRoll(const float* forward, const float* right, const float* up, float* angles); // pm_math.cpp
-void RC2_BasisToAngles(const float* forward, const float* right, const float* up, float* angles)
-{
-	VectorAnglesWithRoll(forward, right, up, angles);
-}
-
-// TEMP STUB (c5): real one belongs in util.cpp (SDK 2.3's, RC2's at client 0xb07d0, package c3)
-float AngleBetweenVectors(const float* v1, const float* v2)
-{
-	float l1 = Length(v1);
-	float l2 = Length(v2);
-	if (0 == l1 || 0 == l2)
-		return 0.0f;
-	return (acos(DotProduct(v1, v2) / (l1 * l2)) * 180.0f) / M_PI;
-}
 

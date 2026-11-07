@@ -25,10 +25,10 @@ static model_s* g_pWhiteSprite;	   // name ours
 static char g_szDebugCounts[512];  // name ours
 static char g_szDebugLine[128];	   // name ours
 
-// the highest entity index HUD_AddEntity has seen, plus one (entity.cpp, package c3)
-extern int g_iMaxEntityIndex; // name ours
-// the entity's interpolated origin (RC2's own client code, package c2)
-extern Vector RC2_GetEntityOrigin(int iEntity); // name ours
+// the highest entity index HUD_AddEntity has seen, plus one (entity.cpp, .bss 0x10206918)
+extern int g_iHighestEntIndex;
+// where the client effects draw an entity (rc2/clte.cpp, client 0x59be0)
+extern Vector CLTE_GetOrigin(int iEnt);
 
 #define DEBUG_PANEL_WIDE 616
 #define DEBUG_PANEL_TALL 117
@@ -372,7 +372,7 @@ bool CDebugPanel::MsgFunc_DBGEntInfo(const char* pszName, int iSize, void* pbuf)
 // frame's packet. The bottom is lifted half a unit.
 void DrawDebugEntityBox()
 {
-	if (g_iDebugEntity <= 0 || g_iDebugEntity > g_iMaxEntityIndex)
+	if (g_iDebugEntity <= 0 || g_iDebugEntity > g_iHighestEntIndex)
 		return;
 
 	cl_entity_t* pPlayer = gEngfuncs.GetLocalPlayer();
@@ -391,7 +391,7 @@ void DrawDebugEntityBox()
 			return;
 	}
 
-	Vector vecOrigin = RC2_GetEntityOrigin(g_iDebugEntity);
+	Vector vecOrigin = CLTE_GetOrigin(g_iDebugEntity);
 	Vector vecMins = pEntity->curstate.mins + vecOrigin;
 	Vector vecMaxs = pEntity->curstate.maxs + vecOrigin;
 
@@ -454,5 +454,3 @@ void DrawDebugEntityBox()
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }
 
-// TEMP STUB (c5): real one belongs in entity.cpp (HUD_AddEntity, package c3)
-int g_iMaxEntityIndex = 0;

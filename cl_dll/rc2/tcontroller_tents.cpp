@@ -28,15 +28,6 @@
 // .bss 0x10214200 (c4, StudioModelRenderer.cpp): each player's four attachments as last drawn,
 // by player index. The controller's hands are attachments 2 and 3. name c4's
 extern Vector g_rgvecPlayerAttachment[32 + 1][4];
-// orig 0xa9fd0 (in_camera, a changed SDK file): the camera is in third person. name fork E's
-bool CAM_IsThirdPerson();
-// .bss 0x10206918 (c2): one past the highest player/normal entity index HUD_AddEntity saw. name c2's
-extern int g_iMaxPlayerEnt;
-// orig 0x59ee0 (c2): where a ray from vecSrc along -vecDir meets the shield (CLTE 0x25) of
-// entity iEntIndex, when that entity's bit is set in c2's shield mask (0x101f69f4; *pbHit = 1
-// then), else (it seems) vecSrc; pflUnused is passed null here. name ours. VERIFY: the
-// function is c2's; read only as far as its entry
-Vector RC2_ShieldIntercept(int iEntIndex, Vector vecSrc, Vector vecDir, float* pflUnused, int* pbHit);
 
 // The flags RC2 puts on its looping sprite tempents (FTENT_SPRANIMATE | FTENT_PERSIST |
 // FTENT_SPRANIMATELOOP). name ours
@@ -58,7 +49,7 @@ static void ControllerGlowSetup(TEMPENTITY* pTent, int iRenderAmt)
 	pTent->entity.curstate.frame = gEngfuncs.pfnRandomFloat(0, 10);
 }
 
-// A dynamic or entity light at vecOrigin for ten seconds (Think keeps it alive frame by frame).
+// A dynamic or entity light at vecOrigin for ten seconds (Update keeps it alive frame by frame).
 static void ControllerLightSetup(dlight_t* pLight, const Vector& vecOrigin, float flRadius, int r, int g, int b)
 {
 	pLight->origin = vecOrigin;
@@ -103,8 +94,8 @@ class CControllerThrowGlowTent : public CClientTent // name ours
 public:
 	CControllerThrowGlowTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;	  // orig +0x8: the player (1-32)
 	float m_flCharge;	  // orig +0xc: 0.01 up to 1 over 0.6 s
@@ -116,7 +107,7 @@ public:
 // The factory. The copy constructor is out of line in the original (orig client 0x9b320).
 CClientTent* RC2_NewControllerThrowGlowTent(const CClientTent* pCopy) // orig client 0x93220
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -131,7 +122,7 @@ CControllerThrowGlowTent::CControllerThrowGlowTent()
 	m_iEntIndex = READ_BYTE();
 	if (m_iEntIndex < 1 || m_iEntIndex > 32)
 	{
-		// the rest stays unset, as in the original; Think ends it at once
+		// the rest stays unset, as in the original; Update ends it at once
 		m_iEntIndex = 0;
 		return;
 	}
@@ -141,7 +132,7 @@ CControllerThrowGlowTent::CControllerThrowGlowTent()
 	m_pDlight = nullptr;
 	m_pElight = nullptr;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -152,7 +143,7 @@ CControllerThrowGlowTent::CControllerThrowGlowTent()
 	if (iSound >= 0 && iSound <= 2)
 		gEngfuncs.pEventAPI->EV_PlaySound(m_iEntIndex, pEntity->origin, CHAN_WEAPON, s_szControllerAttack[iSound], 1.0, 0.7, 0, gEngfuncs.pfnRandomLong(95, 105));
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_pDlight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		if (m_pDlight)
@@ -175,15 +166,15 @@ CControllerThrowGlowTent::CControllerThrowGlowTent()
 }
 
 // The glow brightens in the hand (attachment 2), unseen by the player himself in first person.
-bool CControllerThrowGlowTent::Think(float flFrametime) // orig client 0x93710
+bool CControllerThrowGlowTent::Update(float flFrametime) // orig client 0x93710
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -191,7 +182,7 @@ bool CControllerThrowGlowTent::Think(float flFrametime) // orig client 0x93710
 	cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
 	if (!pLocal || pEntity->curstate.messagenum < pLocal->curstate.messagenum)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -207,7 +198,7 @@ bool CControllerThrowGlowTent::Think(float flFrametime) // orig client 0x93710
 	if (m_pGlow)
 	{
 		m_pGlow->entity.origin = vecHand;
-		if (pLocal->index == pEntity->index && !CAM_IsThirdPerson())
+		if (pLocal->index == pEntity->index && !CL_IsThirdPerson())
 			m_pGlow->entity.curstate.renderamt = 0;
 		else
 			m_pGlow->entity.curstate.renderamt = (int)(m_flCharge * 240);
@@ -236,7 +227,7 @@ bool CControllerThrowGlowTent::Think(float flFrametime) // orig client 0x93710
 	return false;
 }
 
-bool CControllerThrowGlowTent::EntityGone(int iEntIndex) // orig client 0x939c0
+bool CControllerThrowGlowTent::KillEntity(int iEntIndex) // orig client 0x939c0
 {
 	if (m_iEntIndex != iEntIndex)
 		return false;
@@ -259,8 +250,8 @@ class CControllerThrowBallTent : public CClientTent // name ours
 public:
 	CControllerThrowBallTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;	  // orig +0x8: the ball
 	float m_flGrow;		  // orig +0xc: 0 up to 1.2, twice the frame time a frame
@@ -274,7 +265,7 @@ public:
 // constructor (orig 0x9b430).
 CClientTent* RC2_NewControllerThrowBallTent(const CClientTent* pCopy) // orig client 0x93a50
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -292,14 +283,14 @@ CControllerThrowBallTent::CControllerThrowBallTent()
 	m_pElight = nullptr;
 	m_flGrow = 0;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
 		return;
 	}
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_pDlight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		if (m_pDlight)
@@ -328,15 +319,15 @@ CControllerThrowBallTent::CControllerThrowBallTent()
 }
 
 // The glow swells and spins on the ball; the lights follow it.
-bool CControllerThrowBallTent::Think(float flFrametime) // orig client 0x93eb0
+bool CControllerThrowBallTent::Update(float flFrametime) // orig client 0x93eb0
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -370,7 +361,7 @@ bool CControllerThrowBallTent::Think(float flFrametime) // orig client 0x93eb0
 	return false;
 }
 
-bool CControllerThrowBallTent::EntityGone(int iEntIndex) // orig client 0x94030
+bool CControllerThrowBallTent::KillEntity(int iEntIndex) // orig client 0x94030
 {
 	if (m_iEntIndex != iEntIndex)
 		return false;
@@ -394,7 +385,7 @@ class CControllerSparksTent : public CClientTent // name ours
 public:
 	CControllerSparksTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
 
 	Vector m_vecOrigin;		 // orig +0x8
@@ -402,13 +393,13 @@ public:
 	Vector m_vecRight;		 // orig +0x20: a random axis square to m_vecDir
 	Vector m_vecUp;			 // orig +0x2c
 	model_s* m_pSprite;		 // orig +0x38: sprites/glow04.spr
-	CRC2Particles m_Sparks;	 // orig +0x3c
+	CTentParticles m_Sparks;	 // orig +0x3c
 };
 
 // The factory. The copy constructor is out of line in the original (orig client 0x9b370).
 CClientTent* RC2_NewControllerSparksTent(const CClientTent* pCopy) // orig client 0x940f0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -447,9 +438,9 @@ CControllerSparksTent::CControllerSparksTent()
 	m_pSprite = gEngfuncs.CL_LoadModel("sprites/glow04.spr", &iModelIndex);
 
 	int iCount;
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		iCount = gEngfuncs.pfnRandomLong(25, 35);
-	else if (g_iClDetail == 0)
+	else if (g_iClientDetail == 0)
 		iCount = gEngfuncs.pfnRandomLong(55, 65);
 	else
 		iCount = gEngfuncs.pfnRandomLong(100, 120);
@@ -469,14 +460,14 @@ CControllerSparksTent::CControllerSparksTent()
 	}
 }
 
-bool CControllerSparksTent::Think(float flFrametime) // orig client 0x946e0
+bool CControllerSparksTent::Update(float flFrametime) // orig client 0x946e0
 {
 	return m_Sparks.Update(flFrametime) < 1;
 }
 
 void CControllerSparksTent::DrawTransparent() // orig client 0x94710
 {
-	if (!m_Sparks.HasLive())
+	if (!m_Sparks.HasAlive())
 		return;
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
@@ -495,8 +486,8 @@ class CControllerChargeGlowTent : public CClientTent // name ours
 public:
 	CControllerChargeGlowTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;		   // orig +0x8: the player (1-32)
 	float m_flCharge;		   // orig +0xc: 0.01 up to 1 over five seconds
@@ -511,7 +502,7 @@ public:
 
 CClientTent* RC2_NewControllerChargeGlowTent(const CClientTent* pCopy) // orig client 0x94790
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -525,7 +516,7 @@ CControllerChargeGlowTent::CControllerChargeGlowTent() // orig client 0x95590
 	m_iEntIndex = READ_BYTE();
 	if (m_iEntIndex < 1 || m_iEntIndex > 32)
 	{
-		// the rest stays unset, as in the original; Think ends it at once
+		// the rest stays unset, as in the original; Update ends it at once
 		m_iEntIndex = 0;
 		return;
 	}
@@ -543,7 +534,7 @@ CControllerChargeGlowTent::CControllerChargeGlowTent() // orig client 0x95590
 	for (int i = 0; i < 8; i++)
 		m_pBeams[i] = nullptr;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -560,7 +551,7 @@ CControllerChargeGlowTent::CControllerChargeGlowTent() // orig client 0x95590
 	if (iSound >= 0 && iSound <= 2)
 		gEngfuncs.pEventAPI->EV_PlaySound(m_iEntIndex, pEntity->origin, CHAN_WEAPON, s_szControllerAttack[iSound], 0.8, 0.7, 0, gEngfuncs.pfnRandomLong(110, 115));
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_pFaceDlight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		if (m_pFaceDlight)
@@ -616,22 +607,22 @@ CControllerChargeGlowTent::CControllerChargeGlowTent() // orig client 0x95590
 }
 
 // Everything brightens as the charge builds; out of the PVS it is all parked far away.
-bool CControllerChargeGlowTent::Think(float flFrametime) // orig client 0x94970
+bool CControllerChargeGlowTent::Update(float flFrametime) // orig client 0x94970
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
 	cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
 	if (!pLocal)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -679,7 +670,7 @@ bool CControllerChargeGlowTent::Think(float flFrametime) // orig client 0x94970
 		if (!pGlow)
 			continue;
 		pGlow->entity.origin = g_rgvecPlayerAttachment[m_iEntIndex][2 + i];
-		if (bOwnView && !CAM_IsThirdPerson())
+		if (bOwnView && !CL_IsThirdPerson())
 			pGlow->entity.curstate.renderamt = 0;
 		else
 			pGlow->entity.curstate.renderamt = (int)(m_flCharge * 240);
@@ -716,7 +707,7 @@ bool CControllerChargeGlowTent::Think(float flFrametime) // orig client 0x94970
 	// the face glow: 32 units in front of him, 8 up
 	Vector vecForward;
 	gEngfuncs.pfnAngleVectors(pEntity->angles, vecForward, nullptr, nullptr);
-	const Vector vecOrigin = RC2_GetEntityOrigin(pEntity->index);
+	const Vector vecOrigin = CLTE_GetOrigin(pEntity->index);
 	Vector vecFace;
 	vecFace.x = vecForward.x * 32 + vecOrigin.x;
 	vecFace.y = vecOrigin.y + vecForward.y * 32;
@@ -726,7 +717,7 @@ bool CControllerChargeGlowTent::Think(float flFrametime) // orig client 0x94970
 	{
 		m_pFaceGlow->entity.origin = vecFace;
 		// VERIFY: read as the local player against this one, as for the hand glows
-		if (bOwnView && !CAM_IsThirdPerson())
+		if (bOwnView && !CL_IsThirdPerson())
 			m_pFaceGlow->entity.curstate.renderamt = 0;
 		else
 			m_pFaceGlow->entity.curstate.renderamt = (int)(m_flCharge * 240);
@@ -755,7 +746,7 @@ bool CControllerChargeGlowTent::Think(float flFrametime) // orig client 0x94970
 	return false;
 }
 
-bool CControllerChargeGlowTent::EntityGone(int iEntIndex) // orig client 0x95400
+bool CControllerChargeGlowTent::KillEntity(int iEntIndex) // orig client 0x95400
 {
 	if (m_iEntIndex != iEntIndex)
 		return false;
@@ -795,9 +786,9 @@ class CControllerChargeBallTent : public CClientTent // name ours
 public:
 	CControllerChargeBallTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;		 // orig +0x8: the ball
 	int m_iThrower;			 // orig +0xc
@@ -813,7 +804,7 @@ public:
 	float* m_pflStreamFrac;	 // orig +0x60: by stream, how far it still has to go (1 to 0; 0 free)
 	Vector* m_pvecStreamStart; // orig +0x64: where it started (the ball)
 	Vector* m_pvecStreamPos; // orig +0x68: where its head is
-	CRC2Trail* m_pTrails;	 // orig +0x6c: by stream (new[])
+	CTentTrail* m_pTrails;	 // orig +0x6c: by stream (new[])
 	float m_flTrailTime;	 // orig +0x70: until the trails get their next points
 	float m_flStreamTime;	 // orig +0x74: until the next stream may start (0.5 s)
 	float m_flHits;			 // orig +0x78: leeches since the last stream started
@@ -822,7 +813,7 @@ public:
 
 CClientTent* RC2_NewControllerChargeBallTent(const CClientTent* pCopy) // orig client 0x95c20
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -859,7 +850,7 @@ CControllerChargeBallTent::CControllerChargeBallTent() // orig client 0x97510
 	for (int i = 0; i < 8; i++)
 		m_pBeams[i] = nullptr;
 
-	cl_entity_t* pBall = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pBall = GetEntity(m_iEntIndex);
 	if (!pBall)
 	{
 		m_iEntIndex = 0;
@@ -867,7 +858,7 @@ CControllerChargeBallTent::CControllerChargeBallTent() // orig client 0x97510
 		return;
 	}
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_pDlight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		if (m_pDlight)
@@ -913,7 +904,7 @@ CControllerChargeBallTent::CControllerChargeBallTent() // orig client 0x97510
 	m_pflStreamFrac = (float*)malloc(m_cStreams * sizeof(float));
 	m_pvecStreamStart = (Vector*)malloc(m_cStreams * sizeof(Vector));
 	m_pvecStreamPos = (Vector*)malloc(m_cStreams * sizeof(Vector));
-	m_pTrails = new CRC2Trail[m_cStreams];
+	m_pTrails = new CTentTrail[m_cStreams];
 	memset(m_pflStreamFrac, 0, m_cStreams * sizeof(float));
 	memset(m_pvecStreamStart, 0, m_cStreams * sizeof(Vector));
 	memset(m_pvecStreamPos, 0, m_cStreams * sizeof(Vector));
@@ -925,15 +916,15 @@ CControllerChargeBallTent::CControllerChargeBallTent() // orig client 0x97510
 // ChargeBallLeechRadius and in front of it (ChargeBallLeechMinDot) with nothing between, and
 // every half second a leech starts a stream back from the ball. Done when the ball is gone and
 // every trail has faded.
-bool CControllerChargeBallTent::Think(float flFrametime) // orig client 0x95e50
+bool CControllerChargeBallTent::Update(float flFrametime) // orig client 0x95e50
 {
 	if (!m_iThrower)
 		return true;
 
-	cl_entity_t* pThrower = RC2_GetEntity(m_iThrower);
+	cl_entity_t* pThrower = GetEntity(m_iThrower);
 	if (!pThrower)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		if (m_pGlow)
 			KillLoopTent(m_pGlow);
@@ -969,7 +960,7 @@ bool CControllerChargeBallTent::Think(float flFrametime) // orig client 0x95e50
 		return true;
 	}
 
-	const Vector vecThrower = RC2_GetEntityOrigin(pThrower->index);
+	const Vector vecThrower = CLTE_GetOrigin(pThrower->index);
 
 	bool bTrailsLeft = false;
 	for (int i = 0; i < m_cStreams; i++)
@@ -1000,9 +991,9 @@ bool CControllerChargeBallTent::Think(float flFrametime) // orig client 0x95e50
 	m_flTrailTime -= flFrametime;
 	if (m_flTrailTime < 0)
 	{
-		if (g_iClDetail < 0)
+		if (g_iClientDetail < 0)
 			m_flTrailTime = 0.4;
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flTrailTime = 0.25;
 		else
 			m_flTrailTime = 0.1;
@@ -1023,17 +1014,17 @@ bool CControllerChargeBallTent::Think(float flFrametime) // orig client 0x95e50
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pBall = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pBall = GetEntity(m_iEntIndex);
 	if (!pBall)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return false;
 	}
 	cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
 	if (!pLocal)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return false;
 	}
@@ -1073,12 +1064,12 @@ bool CControllerChargeBallTent::Think(float flFrametime) // orig client 0x95e50
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 
 	int iBeam = 0;
-	for (int iEnt = 1; iEnt < g_iMaxPlayerEnt; iEnt++)
+	for (int iEnt = 1; iEnt < g_iHighestEntIndex; iEnt++)
 	{
 		if (iBeam >= 8)
 			goto streams;
 
-		cl_entity_t* pVictim = RC2_GetEntity(iEnt);
+		cl_entity_t* pVictim = GetEntity(iEnt);
 		if (!pVictim)
 			continue;
 		if (pVictim->curstate.messagenum < pLocal->curstate.messagenum)
@@ -1108,9 +1099,9 @@ bool CControllerChargeBallTent::Think(float flFrametime) // orig client 0x95e50
 			continue;
 
 		// VERIFY: the original passes the ball's entity index, not the victim's, to the shield
-		// intercept (see RC2_ShieldIntercept)
+		// intercept (see CLTE_ShieldPoint)
 		int bShielded = 0;
-		const Vector vecHit = RC2_ShieldIntercept(pBall->index, vecCenter, (vecCenter - vecBall).Normalize(), nullptr, &bShielded);
+		const Vector vecHit = CLTE_ShieldPoint(pBall->index, vecCenter, (vecCenter - vecBall).Normalize(), nullptr, &bShielded);
 		if (!bShielded)
 			m_flHits = m_flHits + 1.0;
 
@@ -1176,7 +1167,7 @@ void CControllerChargeBallTent::DrawTransparent() // orig client 0x970a0
 
 // The thrower gone: everything ends. The ball gone (it hit): its lights, glow and beams end,
 // and if it leeched anything every free stream starts back from it at once; the trails play out.
-bool CControllerChargeBallTent::EntityGone(int iEntIndex) // orig client 0x971c0
+bool CControllerChargeBallTent::KillEntity(int iEntIndex) // orig client 0x971c0
 {
 	if (m_iThrower == 0 || m_iThrower == iEntIndex)
 	{
@@ -1200,7 +1191,7 @@ bool CControllerChargeBallTent::EntityGone(int iEntIndex) // orig client 0x971c0
 			free(m_pvecStreamPos);
 		if (m_pTrails)
 		{
-			// VERIFY: as in Think, the original's operator delete of the array is left out
+			// VERIFY: as in Update, the original's operator delete of the array is left out
 			m_pTrails->Free();
 		}
 		m_pflStreamFrac = nullptr;
@@ -1216,7 +1207,7 @@ bool CControllerChargeBallTent::EntityGone(int iEntIndex) // orig client 0x971c0
 
 	if (m_iEntIndex != 0 && m_pflStreamFrac && m_pvecStreamStart && m_pvecStreamPos)
 	{
-		cl_entity_t* pBall = RC2_GetEntity(m_iEntIndex);
+		cl_entity_t* pBall = GetEntity(m_iEntIndex);
 		if (pBall && m_flHits > 0)
 		{
 			for (int i = 0; i < m_cStreams; i++)

@@ -1186,7 +1186,7 @@ StudioDrawModel
 // orig client 0xc29d0. RC2: the attachments always; no interpolation for an entity a temporary
 // entity holds; a dead player keeps his sequence, frame and playerclass; an entity flagged in
 // playerclass (0x40000000) is drawn as the player in curstate.owner; a TransTexture model at
-// renderamt 1 isn't drawn; and the draw origin is remembered (RC2_SetEntityDrawOrigin)
+// renderamt 1 isn't drawn; and the draw origin is remembered (CLTE_SetOrigin)
 bool CStudioModelRenderer::StudioDrawModel(int flags)
 {
 	alight_t lighting;
@@ -1198,7 +1198,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
 	IEngineStudio.GetAliasScale(&m_fSoftwareXScale, &m_fSoftwareYScale);
 
-	m_fDoInterp = 0 == g_bEntityHidden[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
 
 	if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)
 	{
@@ -1350,7 +1350,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 		StudioRenderModel(false);
 	}
 
-	RC2_SetEntityDrawOrigin(m_pCurrentEntity->index, m_vecModelPos);
+	CLTE_SetOrigin(m_pCurrentEntity->index, m_vecModelPos.x, m_vecModelPos.y, m_vecModelPos.z);
 	return true;
 }
 
@@ -1643,7 +1643,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = m_pCurrentEntity->index < 1 || 0 == g_bEntityHidden[m_pCurrentEntity->index];
+	m_fDoInterp = m_pCurrentEntity->index < 1 || 0 == g_bEntityFrozen[m_pCurrentEntity->index];
 
 	// RC2: riders
 	iIndex = m_pCurrentEntity->index;
@@ -1664,11 +1664,11 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		if (iLocalRide != 0)
 		{
 			// in first person, the player we ride and whoever else rides him are hidden
-			if (iLocalRide == m_pCurrentEntity->index && 0 == CL_IsThirdPerson() && !g_bViewChasing)
+			if (iLocalRide == m_pCurrentEntity->index && 0 == CL_IsThirdPerson() && !g_bViewEntityOverride)
 				return false;
 			if (iRide == 0)
 				bSkipRide = true;
-			else if (iRide == iLocalRide && 0 == CL_IsThirdPerson() && !g_bViewChasing)
+			else if (iRide == iLocalRide && 0 == CL_IsThirdPerson() && !g_bViewEntityOverride)
 				return false;
 		}
 	}
@@ -1676,14 +1676,14 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	if (!bSkipRide && iRide != 0)
 	{
 		// and so are the riders on us
-		if (0 != gEngfuncs.pEventAPI->EV_IsLocal(iRide - 1) && 0 == CL_IsThirdPerson() && !g_bViewChasing)
+		if (0 != gEngfuncs.pEventAPI->EV_IsLocal(iRide - 1) && 0 == CL_IsThirdPerson() && !g_bViewEntityOverride)
 			return false;
 
 		cl_entity_t* pRidden = gEngfuncs.GetEntityByIndex(iRide);
 		Vector& vecSeat = g_rgvecRiderSeat[bRideLeft ? 1 : 0][iRide];
 
 		// the seat wasn't worked out this frame or the last: work it out from the ridden player
-		if ((g_rgiRiderSeatFrame[iRide] < g_iRC2FrameCount - 1 || g_iRC2FrameCount < g_rgiRiderSeatFrame[iRide]) && pRidden)
+		if ((g_rgiRiderSeatFrame[iRide] < g_iClientFrame - 1 || g_iClientFrame < g_rgiRiderSeatFrame[iRide]) && pRidden)
 		{
 			float flScale = 1.0;
 			if (pRidden->curstate.scale > 0)
@@ -1817,7 +1817,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 		// RC2: the draw origin, when this is the player's own model
 		if (m_pRenderModel == m_pCurrentEntity->model)
-			RC2_SetEntityDrawOrigin(m_pCurrentEntity->index, m_vecModelPos);
+			CLTE_SetOrigin(m_pCurrentEntity->index, m_vecModelPos.x, m_vecModelPos.y, m_vecModelPos.z);
 
 		bool bDrawJetpack = true; // name ours
 		const int iPlayer = m_pCurrentEntity->index;
@@ -1847,7 +1847,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		}
 
 		// RC2: the jetpack
-		if (0 != (int)cl_visiblejetpack->value && bDrawJetpack && iPlayer >= 1 && iPlayer <= 33 && (RC2_GetPlayerStateBits(iPlayer) & 8) != 0)
+		if (0 != (int)cl_visiblejetpack->value && bDrawJetpack && iPlayer >= 1 && iPlayer <= 33 && (PM_GetAbilityFlags(iPlayer) & 8) != 0)
 		{
 			if (!m_pJetpackModel && !(m_pJetpackModel = gEngfuncs.CL_LoadModel("models/jetpack.mdl", &iIndex)))
 				return true;
@@ -1905,7 +1905,7 @@ void CStudioModelRenderer::StudioCalcAttachments()
 			Vector vecZero(0, 0, 0);
 			VectorTransform(vecZero, (*m_plighttransform)[i], g_rgvecRiderSeat[0][iIndex]);
 		}
-		else if (g_rgiRiderSeatFrame[iIndex] != g_iRC2FrameCount)
+		else if (g_rgiRiderSeatFrame[iIndex] != g_iClientFrame)
 		{
 			Vector forward, right, up;
 			gEngfuncs.pfnAngleVectors(m_pCurrentEntity->angles, forward, right, up);
@@ -1924,7 +1924,7 @@ void CStudioModelRenderer::StudioCalcAttachments()
 			Vector vecZero(0, 0, 0);
 			VectorTransform(vecZero, (*m_plighttransform)[i], g_rgvecRiderSeat[1][iIndex]);
 		}
-		else if (g_rgiRiderSeatFrame[iIndex] != g_iRC2FrameCount)
+		else if (g_rgiRiderSeatFrame[iIndex] != g_iClientFrame)
 		{
 			Vector forward, right, up;
 			gEngfuncs.pfnAngleVectors(m_pCurrentEntity->angles, forward, right, up);
@@ -1932,7 +1932,7 @@ void CStudioModelRenderer::StudioCalcAttachments()
 			g_rgvecRiderSeat[1][iIndex][2] += flScale * 24.0;
 		}
 
-		g_rgiRiderSeatFrame[iIndex] = g_iRC2FrameCount;
+		g_rgiRiderSeatFrame[iIndex] = g_iClientFrame;
 	}
 
 	if (m_pStudioHeader->numattachments > 4)
@@ -1961,7 +1961,7 @@ StudioRenderModel
 ====================
 */
 // orig client 0xc6710. RC2: bShellColor draws the model a second time in the player's coloured
-// shell (RC2_GetEntityShellColor), and the RC2 shells (StudioRenderShells) come last
+// shell (CLTE_GetPlayerOverride), and the RC2 shells (StudioRenderShells) come last
 void CStudioModelRenderer::StudioRenderModel(bool bShellColor)
 {
 	IEngineStudio.SetChromeOrigin();
@@ -1976,7 +1976,7 @@ void CStudioModelRenderer::StudioRenderModel(bool bShellColor)
 		float vecColor[3];
 		float flAmount;
 
-		if (RC2_GetEntityShellColor(m_pCurrentEntity->index, vecColor, &flAmount))
+		if (CLTE_GetPlayerOverride(m_pCurrentEntity->index, vecColor, &flAmount))
 		{
 			StudioRenderFinal();
 
@@ -2175,7 +2175,7 @@ void CStudioModelRenderer::StudioRenderShells()
 {
 	int iIndex;
 
-	if (0 != g_bEntityHidden[m_pCurrentEntity->index])
+	if (0 != g_bEntityFrozen[m_pCurrentEntity->index])
 	{
 		if (0 == IEngineStudio.IsHardware())
 			gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
@@ -2209,7 +2209,7 @@ void CStudioModelRenderer::StudioRenderShells()
 		m_pCurrentEntity->curstate.renderamt = renderamt;
 	}
 
-	if (0 != g_rgbEntAftexShell[m_pCurrentEntity->index])
+	if (0 != g_abRC2AntiFriction[m_pCurrentEntity->index])
 	{
 		const byte g = m_pCurrentEntity->curstate.rendercolor.g;
 		const byte b = m_pCurrentEntity->curstate.rendercolor.b;
@@ -2534,7 +2534,7 @@ bool CStudioModelRenderer::StudioDrawTransformFinish(int iMode, int flags, entit
 
 		StudioRenderModel(false);
 
-		RC2_SetEntityDrawOrigin(m_pCurrentEntity->index, m_vecModelPos);
+		CLTE_SetOrigin(m_pCurrentEntity->index, m_vecModelPos.x, m_vecModelPos.y, m_vecModelPos.z);
 	}
 
 	return true;
@@ -2638,7 +2638,7 @@ bool CStudioModelRenderer::StudioDrawAssassin(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityHidden[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);
@@ -2728,7 +2728,7 @@ bool CStudioModelRenderer::StudioDrawHoundeye(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityHidden[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);
@@ -2780,7 +2780,7 @@ bool CStudioModelRenderer::StudioDrawController(int flags, entity_state_t* pplay
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityHidden[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
@@ -2816,7 +2816,7 @@ bool CStudioModelRenderer::StudioDrawStukabat(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityHidden[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);
@@ -2875,7 +2875,7 @@ bool CStudioModelRenderer::StudioDrawHeadcrab(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityHidden[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);

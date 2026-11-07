@@ -35,7 +35,7 @@ class CBlueShockRingTent : public CClientTent // name ours
 public:
 	CBlueShockRingTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 
 	Vector m_vecOrigin;	 // orig +0x8
 	float m_flRadius;	 // orig +0x14
@@ -48,7 +48,7 @@ public:
 // implicit copy constructor (inline in the original).
 CClientTent* RC2_NewBlueShockRingTent(const CClientTent* pCopy) // orig client 0x814b0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -77,7 +77,7 @@ CBlueShockRingTent::CBlueShockRingTent()
 	}
 }
 
-bool CBlueShockRingTent::Think(float flFrametime) // orig client 0x81750
+bool CBlueShockRingTent::Update(float flFrametime) // orig client 0x81750
 {
 	m_flRadius = flFrametime * 2000 + m_flRadius;
 	m_flLife -= flFrametime;
@@ -118,7 +118,7 @@ class CPurpleShockRingTent : public CClientTent // name ours
 public:
 	CPurpleShockRingTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 
 	Vector m_vecOrigin;	 // orig +0x8
 	float m_flRadius;	 // orig +0x14
@@ -131,7 +131,7 @@ public:
 // implicit copy constructor (inline in the original).
 CClientTent* RC2_NewPurpleShockRingTent(const CClientTent* pCopy) // orig client 0x83770
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -160,7 +160,7 @@ CPurpleShockRingTent::CPurpleShockRingTent()
 	}
 }
 
-bool CPurpleShockRingTent::Think(float flFrametime) // orig client 0x83a10
+bool CPurpleShockRingTent::Update(float flFrametime) // orig client 0x83a10
 {
 	m_flRadius = flFrametime * 960 + m_flRadius;
 	m_flLife -= flFrametime;

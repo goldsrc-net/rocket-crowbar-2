@@ -8,7 +8,7 @@
 *	0x4000) and the end into it. Otherwise it calls the factory here, which reads the rest, and
 *	then sets m_iEntIndex and, the player in view, makes m_pLightning (sprites/lgtning.spr,
 *	attachment 1 to the end, FBEAM_SINENOISE) and m_pLaser (sprites/laserbeam.spr, the same)
-*	and puts laserbeam.spr's index in m_iLaserModel. Think keeps both beams on the end, green
+*	and puts laserbeam.spr's index in m_iLaserModel. Update keeps both beams on the end, green
 *	with nothing held and red with something, and draws a third, white, beam from the end to the
 *	middle of what is held.
 *
@@ -19,26 +19,9 @@
 #include "c3_needs.h"
 #include "c3_tents.h"
 
-class CEgonTractorTent : public CClientTent // name ours
-{
-public:
-	CEgonTractorTent();
-
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
-
-	int m_iEntIndex;	 // orig +0x8: the player (the dispatcher sets it); -1 once ended
-	int m_iHeld;		 // orig +0xc: what the beam holds, 0 nothing
-	BEAM* m_pLightning;	 // orig +0x10 (the dispatcher makes it)
-	BEAM* m_pLaser;		 // orig +0x14 (the dispatcher makes it)
-	BEAM* m_pHoldBeam;	 // orig +0x18: from the end to what is held
-	Vector m_vecEnd;	 // orig +0x1c
-	int m_iLaserModel;	 // orig +0x28: sprites/laserbeam.spr's index (the dispatcher sets it)
-};
-
 CClientTent* RC2_NewEgonTractorTent(const CClientTent* pCopy) // orig client 0x991f0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -77,17 +60,17 @@ static void KillTractorBeam(BEAM*& pBeam)
 	pBeam = nullptr;
 }
 
-bool CEgonTractorTent::Think(float flFrametime) // orig client 0x99420
+bool CEgonTractorTent::Update(float flFrametime) // orig client 0x99420
 {
 	if (!m_iEntIndex)
 	{
-		EntityGone(0);
+		KillEntity(0);
 		return true;
 	}
 
-	if (!RC2_GetEntity(m_iEntIndex))
+	if (!GetEntity(m_iEntIndex))
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -99,7 +82,7 @@ bool CEgonTractorTent::Think(float flFrametime) // orig client 0x99420
 	}
 	else
 	{
-		cl_entity_t* pHeld = RC2_GetEntity(m_iHeld);
+		cl_entity_t* pHeld = GetEntity(m_iHeld);
 		if (!pHeld)
 		{
 			m_iHeld = 0;
@@ -107,7 +90,7 @@ bool CEgonTractorTent::Think(float flFrametime) // orig client 0x99420
 		else
 		{
 			const Vector vecHalf = (pHeld->curstate.maxs + pHeld->curstate.mins) * 0.5;
-			const Vector vecOrigin = RC2_GetEntityOrigin(m_iHeld);
+			const Vector vecOrigin = CLTE_GetOrigin(m_iHeld);
 			Vector vecCenter = vecHalf + vecOrigin;
 			if (!m_pHoldBeam)
 			{
@@ -150,9 +133,9 @@ bool CEgonTractorTent::Think(float flFrametime) // orig client 0x99420
 	return false;
 }
 
-// The player gone: all three beams end and m_iEntIndex becomes -1 (so Think ends it next).
+// The player gone: all three beams end and m_iEntIndex becomes -1 (so Update ends it next).
 // What is held gone: its beam ends. Never deletes on its own.
-bool CEgonTractorTent::EntityGone(int iEntIndex) // orig client 0x99770
+bool CEgonTractorTent::KillEntity(int iEntIndex) // orig client 0x99770
 {
 	if (iEntIndex == m_iEntIndex)
 	{

@@ -27,8 +27,8 @@ class CAfterimageTent : public CClientTent // name ours
 public:
 	CAfterimageTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	void HideAll();
 
@@ -42,7 +42,7 @@ public:
 // passes null.
 CClientTent* RC2_NewAfterimageTent(const CClientTent* pCopy) // orig client 0x92ac0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -59,10 +59,10 @@ CAfterimageTent::CAfterimageTent()
 		m_pImage[i] = nullptr;
 	m_vecLastOrigin = Vector(0, 0, 0);
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		// (the original keeps m_iEntIndex; Think then finds no entity and ends it)
+		// (the original keeps m_iEntIndex; Update then finds no entity and ends it)
 		for (int i = 0; i < AFTERIMAGES; i++)
 		{
 			if (m_pImage[i])
@@ -99,7 +99,7 @@ CAfterimageTent::CAfterimageTent()
 	}
 }
 
-// Inline four times in Think (orig 0x92e70): every copy invisible. name ours
+// Inline four times in Update (orig 0x92e70): every copy invisible. name ours
 void CAfterimageTent::HideAll()
 {
 	for (int i = 0; i < AFTERIMAGES; i++)
@@ -109,19 +109,19 @@ void CAfterimageTent::HideAll()
 	}
 }
 
-bool CAfterimageTent::Think(float flFrametime) // orig client 0x92e70
+bool CAfterimageTent::Update(float flFrametime) // orig client 0x92e70
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 	{
 		HideAll();
 		return false;
@@ -168,7 +168,7 @@ bool CAfterimageTent::Think(float flFrametime) // orig client 0x92e70
 }
 
 // The copies die at once. (The original leaves m_iEntIndex set.)
-bool CAfterimageTent::EntityGone(int iEntIndex) // orig client 0x931d0
+bool CAfterimageTent::KillEntity(int iEntIndex) // orig client 0x931d0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

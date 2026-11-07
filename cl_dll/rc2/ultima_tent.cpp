@@ -37,16 +37,6 @@
 // The client's own copy of rc2.ini: rc2prefs.h's RC2Pref() over the client's g_rc2PrefValues
 // (orig .bss 0x10210aa8, filled from the RCCFG message by orig 0xbd490). name ours, after the
 // server's
-// orig .data 0x1020bb28: the cvar cl_debuggren (registered with cl_detail, orig ~0x4fe80 area,
-// "new: cdll_int .. com_weapons" c2 or c1). name ours
-extern cvar_t* g_pClDebugGren;
-// orig 0xec590 (view.cpp, a stock file RC2 changed): RC2's screen flash, colStart to colEnd and
-// flAlphaStart to flAlphaEnd over flDuration, unless one of a higher iPriority is running. name
-// ours
-void V_StartColorFade(Vector colStart, Vector colEnd, float flAlphaStart, float flAlphaEnd, float flDuration, int iPriority);
-// orig 0x508e0 (c2): a CRC2Trail point think that drains red and green at 1.14 a second
-// (toward blue), clamped at 0; leaves the default motion to run. name ours
-int RC2_TrailPointDrainToBlue(float flFrametime, Vector* pvecOrigin, Vector* pvecVelocity, Vector* pvecAccel, Vector* pcolColor, float* pflAlpha, float* pflWidth, float* pflFade, int iUser);
 
 // the engine's sound flags (dlls/util.h; the client has no header with them)
 #ifndef SND_CHANGE_VOL
@@ -128,9 +118,9 @@ class CUltimaTent : public CClientTent // name ours
 public:
 	CUltimaTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	Vector OscillatorAngles(const UltimaOscillator* pOsc);
 	void UpdateParticles(float flFrametime);
@@ -175,13 +165,13 @@ public:
 	Vector m_vecSpokeRingSpin;	  // orig +0x264: 100-150 of yaw, against the ground ring
 
 	BEAM* m_pDownBeam[2];			// orig +0x270: from the grenade to ground ring points 0 and 4
-	CRC2Particles m_RingSparks;		// orig +0x278: streaming out along the ground
+	CTentParticles m_RingSparks;		// orig +0x278: streaming out along the ground
 	float m_flRingSparksDue;		// orig +0x284
-	CRC2Particles m_BurstSparks;	// orig +0x288: bursting from the grenade
+	CTentParticles m_BurstSparks;	// orig +0x288: bursting from the grenade
 	float m_flBurstSparksDue;		// orig +0x294
 	Vector m_vecBarAngles;			// orig +0x298
 	Vector m_vecBarSpin;			// orig +0x2a4
-	CRC2Trail m_BarTrail[2];		// orig +0x2b0
+	CTentTrail m_BarTrail[2];		// orig +0x2b0
 	Vector m_vecBarEnd[2];			// orig +0x300: the grenade +- 48 along the bar
 	float m_flBarTrailDue;			// orig +0x318
 
@@ -191,7 +181,7 @@ public:
 	UltimaOscillator m_TetraOsc[3]; // orig +0x37c
 	Vector m_vecTetraAngles;		// orig +0x3c4
 	float m_flTetraTrailDue;		// orig +0x3d0
-	CRC2Trail m_TetraTrail[4];		// orig +0x3d4
+	CTentTrail m_TetraTrail[4];		// orig +0x3d4
 
 	// the tumbling ring: 8 points of radius 32 on the grenade, turned by m_RingOsc
 	Vector m_vecTumbleRing[9];		// orig +0x474, the last a copy of the first
@@ -210,7 +200,7 @@ public:
 	float m_flRiseAlpha;			// orig +0x6bc
 	float m_flRiseRadius;			// orig +0x6c0
 	float m_flRiseWait;				// orig +0x6c4: -1 while it runs, else the wait for the next cycle
-	CRC2Trail m_RiseTrail[2][2];	// orig +0x6c8: two pairs, from points 0 and 4; they alternate by cycle
+	CTentTrail m_RiseTrail[2][2];	// orig +0x6c8: two pairs, from points 0 and 4; they alternate by cycle
 	int m_iRiseTrailSet;			// orig +0x768
 	float m_flRiseTrailDue;			// orig +0x76c
 	short m_sDebug;					// orig +0x770: the cl_debuggren counter; its complement's bits gate the drawing
@@ -221,7 +211,7 @@ public:
 // trail and particle array.
 CClientTent* RC2_NewUltimaTent(const CClientTent* pCopy) // orig client 0x83c60
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -254,7 +244,7 @@ CUltimaTent::CUltimaTent() // orig client 0x83dd0
 	m_sDebug = 0;
 
 	// the debug counter: read, bumped (1-32), written back
-	if ((int)g_pClDebugGren->value != 0)
+	if ((int)cl_debuggren->value != 0)
 	{
 		char szPath[256];
 		char szLine[256];
@@ -363,7 +353,7 @@ CUltimaTent::CUltimaTent() // orig client 0x83dd0
 	m_vecTetraAngles = Vector(0, 0, 0);
 	m_flTetraTrailDue = 0;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -436,7 +426,7 @@ CUltimaTent::CUltimaTent() // orig client 0x83dd0
 			m_vecRiseRingPos[i] = m_vecOrigin;
 			m_pRiseBeam[i] = gEngfuncs.pEfxAPI->R_BeamPoints(m_vecOrigin, m_vecOrigin, iModelIndex, 0, 0.5, 0.05, 0.95, 0, 0, 0, 0.95, 0.95, 1.0);
 		}
-		if (g_iClDetail >= 0)
+		if (g_iClientDetail >= 0)
 		{
 			for (int i = 0; i < 7; i++)
 			{
@@ -475,7 +465,7 @@ CUltimaTent::CUltimaTent() // orig client 0x83dd0
 		if (m_pCoreGlow)
 			SetupGlowTent(m_pCoreGlow, 1.0, 254, 20);
 
-		if (g_iClDetail >= 0)
+		if (g_iClientDetail >= 0)
 		{
 			for (int i = 0; i < 8; i++)
 			{
@@ -570,7 +560,7 @@ CUltimaTent::CUltimaTent() // orig client 0x83dd0
 			// VERIFY: the trace skips physent m_iEntIndex, an entity index used as a physent one
 			gEngfuncs.pEventAPI->EV_PlayerTrace(m_vecOrigin, vecEye, PM_STUDIO_IGNORE | PM_GLASS_IGNORE, m_iEntIndex, &tr);
 			if (tr.fraction >= 1.0 || (tr.ent != 0 && gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr) == pPlayer->index))
-				V_StartColorFade(Vector(255, 255, 255), Vector(255, 255, 255), 200, 0, 0.4, 1);
+				V_StartScreenTint(255, 255, 255, 255, 255, 255, 200, 0, 0.4, 1);
 		}
 	}
 	gEngfuncs.pEventAPI->EV_PopPMStates();
@@ -582,15 +572,15 @@ Vector CUltimaTent::OscillatorAngles(const UltimaOscillator* pOsc) // orig clien
 	return Vector(EvalOscillator(pOsc[0], m_flTime), EvalOscillator(pOsc[1], m_flTime), EvalOscillator(pOsc[2], m_flTime));
 }
 
-bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
+bool CUltimaTent::Update(float flFrametime) // orig client 0x85a20
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -753,7 +743,7 @@ bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
 			m_pRiseBeam[i]->brightness = m_flRiseAlpha;
 		}
 
-		if (g_iClDetail > 0)
+		if (g_iClientDetail > 0)
 		{
 			m_flRiseTrailDue -= flFrametime;
 			if (m_flRiseTrailDue <= 0)
@@ -783,8 +773,8 @@ bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
 			m_vecRiseRingAngles.y = gEngfuncs.pfnRandomFloat(0, 360);
 			m_vecRiseRingSpin.y = m_vecRiseRingSpin.y * -1.0;
 			m_iRiseTrailSet = m_iRiseTrailSet == 0;
-			m_RiseTrail[m_iRiseTrailSet][0].Clear();
-			m_RiseTrail[m_iRiseTrailSet][1].Clear();
+			m_RiseTrail[m_iRiseTrailSet][0].Reset();
+			m_RiseTrail[m_iRiseTrailSet][1].Reset();
 			m_flRiseAlpha = 0.25;
 			m_flRiseZ = -m_flGroundDist;
 			m_flRiseRadius = m_flGroundRingRadius;
@@ -817,7 +807,7 @@ bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
 		m_pELight->radius = flPulse * 20 + m_flCharge * 40 + 230;
 	}
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		// the spinning bar's two trails
 		m_vecBarAngles = m_vecBarAngles + m_vecBarSpin * flFrametime * flSpinScale;
@@ -827,7 +817,7 @@ bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
 		m_flBarTrailDue -= flFrametime;
 		if (m_flBarTrailDue <= 0)
 		{
-			if (g_iClDetail == 0)
+			if (g_iClientDetail == 0)
 				m_flBarTrailDue = 0.075;
 			else
 				m_flBarTrailDue = 0.05;
@@ -837,7 +827,7 @@ bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
 		m_BarTrail[0].Update(flFrametime);
 		m_BarTrail[1].Update(flFrametime);
 
-		if (g_iClDetail > 0)
+		if (g_iClientDetail > 0)
 		{
 			// the tumbling tetrahedron, shedding trails that fly out and turn blue
 			m_vecTetraAngles = OscillatorAngles(m_TetraOsc);
@@ -854,7 +844,7 @@ bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
 				for (int i = 0; i < 4; i++)
 				{
 					const Vector vecDir = (m_vecTetraPos[i] - m_vecOrigin).Normalize();
-					m_TetraTrail[i].AddPoint(m_vecTetraPos[i], vecDir * 160, Vector(0, 0, 0), Vector(0.8, 0.8, 1.0), 0.95, 1.5, 1.3571428, 0, RC2_TrailPointDrainToBlue);
+					m_TetraTrail[i].AddPoint(m_vecTetraPos[i], vecDir * 160, Vector(0, 0, 0), Vector(0.8, 0.8, 1.0), 0.95, 1.5, 1.3571428, 0, Point_Darken);
 				}
 			}
 			for (int i = 0; i < 4; i++)
@@ -870,11 +860,11 @@ bool CUltimaTent::Think(float flFrametime) // orig client 0x85a20
 // more as it winds up), and above cl_detail 0 bursting from the grenade (30-50 a second).
 void CUltimaTent::UpdateParticles(float flFrametime) // orig client 0x88b50
 {
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	float flRate;
-	if (g_iClDetail == 0)
+	if (g_iClientDetail == 0)
 		flRate = m_flCharge * 10 + 20;
 	else
 		flRate = m_flCharge * 15 + 30;
@@ -897,7 +887,7 @@ void CUltimaTent::UpdateParticles(float flFrametime) // orig client 0x88b50
 	}
 	m_RingSparks.Update(flFrametime);
 
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 	{
 		m_flBurstSparksDue += (m_flCharge * 20 + 30) * flFrametime;
 		while (m_flBurstSparksDue >= 1.0)
@@ -923,7 +913,7 @@ void CUltimaTent::UpdateParticles(float flFrametime) // orig client 0x88b50
 void CUltimaTent::DrawTransparent() // orig client 0x892a0
 {
 	const short sMask = ~m_sDebug;
-	if (!m_bVisible || g_iClDetail < 0)
+	if (!m_bVisible || g_iClientDetail < 0)
 		return;
 
 	// VERIFY: the original tests the first bar trail twice and the first rising trail four
@@ -935,9 +925,9 @@ void CUltimaTent::DrawTransparent() // orig client 0x892a0
 	bool bBurstSparks = true;
 	if (!m_BarTrail[0].CanDraw() && !m_BarTrail[0].CanDraw())
 		bBarTrails = false;
-	if (!m_RingSparks.HasLive())
+	if (!m_RingSparks.HasAlive())
 		bRingSparks = false;
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 	{
 		if (!m_RiseTrail[0][0].CanDraw() && !m_RiseTrail[0][0].CanDraw() && !m_RiseTrail[0][0].CanDraw() && !m_RiseTrail[0][0].CanDraw())
 			bRiseTrails = false;
@@ -949,7 +939,7 @@ void CUltimaTent::DrawTransparent() // orig client 0x892a0
 		}
 		if (i >= 4)
 			bTetraTrails = false;
-		if (!m_BurstSparks.HasLive())
+		if (!m_BurstSparks.HasAlive())
 			bBurstSparks = false;
 	}
 	else
@@ -973,7 +963,7 @@ void CUltimaTent::DrawTransparent() // orig client 0x892a0
 		m_BarTrail[1].DrawToHead(m_vecBarEnd[1], Vector(0.9, 0.9, 1.0), 0.8, 2, true);
 	}
 
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 	{
 		if ((sMask & 2) != 0)
 		{
@@ -997,7 +987,7 @@ void CUltimaTent::DrawTransparent() // orig client 0x892a0
 		m_RingSparks.Draw();
 	}
 
-	if ((sMask & 0x10) != 0 && g_iClDetail > 0)
+	if ((sMask & 0x10) != 0 && g_iClientDetail > 0)
 	{
 		if (m_pBurstSparkSprite && bBurstSparks)
 			gEngfuncs.pTriAPI->SpriteTexture(m_pBurstSparkSprite, 0);
@@ -1009,7 +999,7 @@ void CUltimaTent::DrawTransparent() // orig client 0x892a0
 
 // The grenade is gone: the sound stops, the tents, lights and beams are let go. The trails and
 // particle arrays are never freed (the effect is deleted without a destructor).
-bool CUltimaTent::EntityGone(int iEntIndex) // orig client 0x897a0
+bool CUltimaTent::KillEntity(int iEntIndex) // orig client 0x897a0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

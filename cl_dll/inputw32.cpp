@@ -187,7 +187,7 @@ void Force_CenterView_f()
 {
 	Vector viewangles;
 
-	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 != g_bHoundeyeAsleep)
+	if (0 != g_iLocalPlayerFrozen || 0 != g_bLocalTransforming || 0 != g_bHoundeyeAsleep)
 		return;
 
 	if (!iMouseInUse)
@@ -535,7 +535,7 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 	Point pos;
 	Vector viewangles;
 
-	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 != g_bHoundeyeAsleep)
+	if (0 != g_iLocalPlayerFrozen || 0 != g_bLocalTransforming || 0 != g_bHoundeyeAsleep)
 		return;
 
 	IN_GetInputViewAngles(viewangles);
@@ -971,7 +971,7 @@ void IN_JoyMove(float frametime, usercmd_t* cmd)
 	int i;
 	Vector viewangles;
 
-	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 == g_bHoundeyeAsleep)
+	if (0 != g_iLocalPlayerFrozen || 0 != g_bLocalTransforming || 0 == g_bHoundeyeAsleep)
 		return;
 
 	gEngfuncs.GetViewAngles((float*)viewangles);

@@ -18,31 +18,14 @@
 
 #include <cmath>
 
-// c3 needs:
-// orig .bss 0x101f69f8 (c2): the local player is frozen (c2's view and input code reads it;
-// cleared with the effects on level change). name ours
-extern int g_iLocalPlayerFrozen;
-// orig .bss 0x101f24c4 (c2): one byte per entity index, set while it is frozen (cleared with
-// the effects on level change, 0x400 bytes). name ours
-extern byte g_bEntityFrozen[];
-// orig 0x532f0 (c2): adds one of c2's 64 animating disks (drawn by c2's transparent pass with
-// its sphere helpers), each value going linearly from its start to its end over flLife:
-// at vecOrigin in the plane of vecRight and vecUp, facing vecNormal, on c2's unit circle
-// iCircle, with model pszModel; "Error: overflow: %i animating disks" when all 64 are in use.
-// The pairs are the original's argument order; what each pair drives is c2's to say. name ours
-void RC2_AddAnimatingDisk(Vector vecOrigin, Vector vecRight, Vector vecUp, Vector vecNormal, int iCircle,
-	float flA0, float flA1, float flB0, float flB1, float flC0, float flC1, float flD0, float flD1,
-	Vector col1Start, Vector col1End, float flE0, float flE1, Vector col2Start, Vector col2End, float flF0, float flF1,
-	float flLife, const char* pszModel, int iUser1, int iUser2, int iUser3);
-
 //
 // CLTE 0x2f: short entity.
 //
 class CFrozenTent : public CClientTent // name ours
 {
 public:
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex; // orig +0x8
 };
@@ -50,7 +33,7 @@ public:
 // The factory (the dispatcher's case 0x2f; c3_tents.h). Constructs inline; the copy too.
 CClientTent* RC2_NewFrozenTent(const CClientTent* pCopy) // orig client 0x7bff0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -73,12 +56,12 @@ CClientTent* RC2_NewFrozenTent(const CClientTent* pCopy) // orig client 0x7bff0
 	return pTent;
 }
 
-bool CFrozenTent::Think(float flFrametime) // orig client 0x7c1d0
+bool CFrozenTent::Update(float flFrametime) // orig client 0x7c1d0
 {
 	return m_iEntIndex == 0;
 }
 
-bool CFrozenTent::EntityGone(int iEntIndex) // orig client 0x7c1f0
+bool CFrozenTent::KillEntity(int iEntIndex) // orig client 0x7c1f0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;
@@ -100,7 +83,7 @@ class CFreezeRayTent : public CClientTent // name ours
 public:
 	CFreezeRayTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
 
 	void FlareVertex(float flRight, float flUp, float s, float t);
@@ -122,7 +105,7 @@ public:
 // The factory (the dispatcher's case 0x30; c3_tents.h). The copy is inline here.
 CClientTent* RC2_NewFreezeRayTent(const CClientTent* pCopy) // orig client 0x7c240
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -161,11 +144,11 @@ CFreezeRayTent::CFreezeRayTent() // orig client 0x7cba0
 	m_pBeam = nullptr;
 	m_pTail = nullptr;
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		const float flRadius = m_flSize * 4.0 + 12.0;
 		const Vector colDisk(0.8, 0.8, 1.0);
-		RC2_AddAnimatingDisk(m_vecEnd + m_vecNormal, m_vecRight, m_vecUp, m_vecNormal, 1,
+		CLTE_AddDiskRing(m_vecEnd + m_vecNormal, m_vecRight, m_vecUp, m_vecNormal, 1,
 			0, 0, 0, 0, 1, flRadius, 6, flRadius,
 			colDisk, colDisk, 0.3, 0,
 			colDisk, colDisk, 0.9, 0.05,
@@ -203,7 +186,7 @@ static void KillRayBeam(BEAM*& pBeam) // name ours; inline in the original
 }
 
 // The flare fades in 0.65 seconds per unit of size, the beams in 0.2.
-bool CFreezeRayTent::Think(float flFrametime) // orig client 0x7c460
+bool CFreezeRayTent::Update(float flFrametime) // orig client 0x7c460
 {
 	m_flAlpha = m_flAlpha - (1.0 / (m_flSize * 0.65)) * flFrametime;
 	if (m_flAlpha <= 0)
@@ -287,9 +270,9 @@ class CFreezeTrailTent : public CClientTent // name ours
 public:
 	CFreezeTrailTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;	   // orig +0x8
 	float m_flPuffWait;	   // orig +0xc: time to the next puff
@@ -299,7 +282,7 @@ public:
 	Vector m_vecPuff;	   // orig +0x1c: where puffs start: 2 right of the grenade, 1 back
 	Vector m_vecPuffVel;   // orig +0x28: 16 along its heading flat, 72 up
 	model_s* m_pSprite;	   // orig +0x34: sprites/gradsmoke.spr
-	CRC2Trail m_Trail;	   // orig +0x38
+	CTentTrail m_Trail;	   // orig +0x38
 	BEAM* m_pBeam;		   // orig +0x60: below cl_detail 0 only
 };
 
@@ -307,7 +290,7 @@ public:
 // base class's out-of-line copy constructor, orig 0x9b430).
 CClientTent* RC2_NewFreezeTrailTent(const CClientTent* pCopy) // orig client 0x7d2b0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -318,9 +301,9 @@ CClientTent* RC2_NewFreezeTrailTent(const CClientTent* pCopy) // orig client 0x7
 
 static float FreezeTrailPuffWait() // name ours; inline in the original
 {
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		return 0.15;
-	if (g_iClDetail == 0)
+	if (g_iClientDetail == 0)
 		return 0.1;
 	return 0.075;
 }
@@ -334,7 +317,7 @@ CFreezeTrailTent::CFreezeTrailTent()
 	m_pSprite = nullptr;
 	m_pBeam = nullptr;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -342,7 +325,7 @@ CFreezeTrailTent::CFreezeTrailTent()
 	}
 
 	int iModelIndex;
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 	{
 		if (!gEngfuncs.CL_LoadModel("sprites/smoke.spr", &iModelIndex))
 			return;
@@ -353,7 +336,7 @@ CFreezeTrailTent::CFreezeTrailTent()
 	}
 
 	m_flSpin = gEngfuncs.pfnRandomFloat(0, 360);
-	m_vecPuff = RC2_GetEntityOrigin(m_iEntIndex);
+	m_vecPuff = CLTE_GetOrigin(m_iEntIndex);
 	Vector vecAngles(-pEntity->angles.x, pEntity->angles.y, m_flSpin);
 	Vector vecForward, vecRight, vecUp;
 	gEngfuncs.pfnAngleVectors(vecAngles, vecForward, vecRight, vecUp);
@@ -364,21 +347,21 @@ CFreezeTrailTent::CFreezeTrailTent()
 	m_pSprite = gEngfuncs.CL_LoadModel("sprites/gradsmoke.spr", &iModelIndex);
 }
 
-bool CFreezeTrailTent::Think(float flFrametime) // orig client 0x7d820
+bool CFreezeTrailTent::Update(float flFrametime) // orig client 0x7d820
 {
 	if (!m_iEntIndex)
 	{
-		if (g_iClDetail < 0)
+		if (g_iClientDetail < 0)
 			return true;
 		// the grenade is gone: what's left of the trail fades out
 		return !(m_Trail.Update(flFrametime) > 0 && m_bVisible);
 	}
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
-		if (g_iClDetail < 0)
+		KillEntity(m_iEntIndex);
+		if (g_iClientDetail < 0)
 			return true;
 		return !(m_Trail.Update(flFrametime) > 0 && m_bVisible);
 	}
@@ -387,16 +370,16 @@ bool CFreezeTrailTent::Think(float flFrametime) // orig client 0x7d820
 	cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
 	if (pLocal && pEntity->curstate.messagenum < pLocal->curstate.messagenum)
 	{
-		if (g_iClDetail >= 0)
+		if (g_iClientDetail >= 0)
 			m_Trail.Update(flFrametime);
 		m_bVisible = false;
 		return false;
 	}
 
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		return false;
 
-	m_vecPuff = RC2_GetEntityOrigin(m_iEntIndex);
+	m_vecPuff = CLTE_GetOrigin(m_iEntIndex);
 	Vector vecAngles(-pEntity->angles.x, pEntity->angles.y, m_flSpin);
 	Vector vecForward, vecRight, vecUp;
 	gEngfuncs.pfnAngleVectors(vecAngles, vecForward, vecRight, vecUp);
@@ -416,7 +399,7 @@ bool CFreezeTrailTent::Think(float flFrametime) // orig client 0x7d820
 
 void CFreezeTrailTent::DrawTransparent() // orig client 0x7dcb0
 {
-	if (!m_bVisible || g_iClDetail < 0)
+	if (!m_bVisible || g_iClientDetail < 0)
 		return;
 	if (!m_Trail.CanDraw())
 		return;
@@ -439,8 +422,8 @@ void CFreezeTrailTent::DrawTransparent() // orig client 0x7dcb0
 }
 
 // Lets the low-detail beam go, puffs one last point. Done at once below cl_detail 0; otherwise
-// Think lets the trail fade first.
-bool CFreezeTrailTent::EntityGone(int iEntIndex) // orig client 0x7ddd0
+// Update lets the trail fade first.
+bool CFreezeTrailTent::KillEntity(int iEntIndex) // orig client 0x7ddd0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;
@@ -452,8 +435,8 @@ bool CFreezeTrailTent::EntityGone(int iEntIndex) // orig client 0x7ddd0
 		m_pBeam->startEntity = 0;
 		m_pBeam = nullptr;
 	}
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 		m_Trail.AddPoint(m_vecPuff, m_vecPuffVel, Vector(0, 0, 0), Vector(0.8, 0.8, 1.0), 0.8, 3.0, 1.0666667, 0, nullptr);
 	m_iEntIndex = 0;
-	return g_iClDetail < 0;
+	return g_iClientDetail < 0;
 }

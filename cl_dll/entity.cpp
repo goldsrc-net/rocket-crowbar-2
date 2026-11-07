@@ -21,6 +21,10 @@ extern IParticleMan* g_pParticleMan;
 
 #include "rc2/c4_needs.h"
 
+// .bss 0x10206918: one past the highest ET_NORMAL/ET_PLAYER entity index HUD_AddEntity saw (the
+// client effects and the transform HUD loop to it; RC2_ResetClientState clears it). name ours
+int g_iHighestEntIndex = 0;
+
 void Game_AddObjects();
 
 extern Vector v_origin;
@@ -33,14 +37,14 @@ HUD_AddEntity
 	Return 0 to filter entity from visible list for rendering
 ========================
 */
-// orig client 0x9d2e0. RC2: the debug panel sees every entity, the highest player and normal
+// orig client 0x9d2e0. RC2: the player name label sees every entity, the highest player and normal
 // entity index is kept (g_iHighestEntIndex), and the overview filter is SDK 2.2's: HLTV
 // spectators only (IsSpectateOnly), by the spectator's own main and inset modes
 int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
 {
 	//	RecClAddEntity(type, ent, modelname);
 
-	DebugPanel_AddEntity(type, ent, modelname);
+	PlayerID_AddEntity(type, ent);
 
 	if ((type == ET_NORMAL || type == ET_PLAYER) && ent->index >= g_iHighestEntIndex)
 		g_iHighestEntIndex = ent->index + 1;
@@ -325,7 +329,7 @@ void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s* event, const struct 
 {
 	//	RecClStudioEvent(event, entity);
 
-	if (entity->index > 0 && 0 != g_bEntityHidden[entity->index])
+	if (entity->index > 0 && 0 != g_bEntityFrozen[entity->index])
 		return;
 
 	bool iMuzzleFlash = true;
@@ -873,9 +877,9 @@ TEMPENTITY* CL_SpawnGib(Vector vecOrigin, Vector vecVelocity, int bHuman, int bS
 	pTemp->die += atof(cl_giblife->string);
 
 	// the decals it may leave
-	if (g_iDetailLevel > 0)
+	if (g_iClientDetail > 0)
 		pTemp->entity.baseline.owner = 5;
-	else if (g_iDetailLevel < 0)
+	else if (g_iClientDetail < 0)
 		pTemp->entity.baseline.owner = 2;
 	else
 		pTemp->entity.baseline.owner = 4;

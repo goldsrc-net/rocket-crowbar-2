@@ -23,65 +23,13 @@
 // c3 needs:
 // orig .bss 0x10210aa8: the client's copy of the rc2.ini values (8 bytes a key, in the server's
 // key order), read through rc2prefs.h's RC2Pref() over the client's g_rc2PrefValues.
-// orig 0x55190 (c2): a strip of camera-facing quads through iCount points (see transform_tents.cpp).
-// name ours
-void RC2_DrawStrip(Vector* pvecPoints, float* pflWidths, Vector* pcolColors, float* pflAlphas, int iCount, bool bStretch, bool bByLength, float* pflSegLengths);
-// orig 0x54ad0 (c2): one camera-facing quad from vecStart to vecEnd, flWidth wide, the start in
-// col1/flAlpha1 and the end in col2/flAlpha2, with the bound texture; iUnused isn't read. name ours
-void RC2_DrawBeamQuad(Vector vecStart, Vector vecEnd, float flWidth, int iUnused, Vector col1, float flAlpha1, Vector col2, float flAlpha2);
-// orig 0x50b90 (c2): the motion of the particles this effect sucks in; iUser is the effect.
-// name ours
-int RC2_HoundeyeChargeParticle(float flFrametime, Vector* pvecOrigin, Vector* pvecVelocity, Vector* pvecAccel, Vector* pcolColor, float* pflAlpha, float* pflSize, float* pflFade, float* pflLife, int iUser);
-// orig 0xa9fd0 (in_camera): the camera is in third person. name ours
-bool CAM_IsThirdPerson();
-
-#define HOUNDEYE_ARCS 4		 // name ours
-#define HOUNDEYE_ARC_POINTS 6 // name ours
-#define HOUNDEYE_SPARKS 16	 // name ours
-
-//
-// CLTE 0x41: byte the houndeye (a player).
-//
-class CHoundeyeChargeTent : public CClientTent // name ours
-{
-public:
-	CHoundeyeChargeTent();
-
-	bool Think(float flFrametime) override;
-	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
-
-	int m_iEntIndex;			 // orig +0x8
-	bool m_bVisible;			 // orig +0xc
-	bool m_bDrawInner;			 // orig +0xd: the particles and sparks; off for the houndeye himself in first person
-	float m_flTimeLeft;			 // orig +0x10
-	float m_flChargeTime;		 // orig +0x14
-	Vector m_vecOrigin;			 // orig +0x18: in front of his head
-	TEMPENTITY* m_pGlow;		 // orig +0x24: sprites/heflare1.spr
-	CRC2Particles m_Particles;	 // orig +0x28
-	model_s* m_pParticleSprite;	 // orig +0x34: sprites/heflare2.spr
-	float m_flNextParticle;		 // orig +0x38
-	Vector m_vecArc[HOUNDEYE_ARCS][HOUNDEYE_ARC_POINTS]; // orig +0x3c
-	Vector m_colArc[HOUNDEYE_ARC_POINTS];				 // orig +0x15c
-	float m_flArcSegLen[HOUNDEYE_ARC_POINTS];			 // orig +0x1a4: scratch for RC2_DrawStrip
-	float m_flArcAlpha[HOUNDEYE_ARC_POINTS];			 // orig +0x1bc
-	float m_flArcWidth[HOUNDEYE_ARC_POINTS];			 // orig +0x1d4
-	model_s* m_pArcSprite;		 // orig +0x1ec: sprites/gradsmoke3.spr
-	float m_flArcPhase;			 // orig +0x1f0
-	float m_flArcSpin;			 // orig +0x1f4: radians a second, +-4 pi at most
-	Vector m_vecSpark[HOUNDEYE_SPARKS][2]; // orig +0x1f8: each spark's head, and its place in front of him (forward, right, up)
-	Vector m_colSpark[HOUNDEYE_SPARKS];	   // orig +0x378
-	float m_flSparkLife[HOUNDEYE_SPARKS];  // orig +0x438
-	int m_iSparks;				 // orig +0x478
-	model_s* m_pSparkSprite;	 // orig +0x47c: sprites/gradsmoke.spr
-};
 
 // The factory (the dispatcher's case 0x41; c3_tents.h). pCopy: a copy of that one instead,
 // through the implicit copy constructor, which the original has out of line (
 // orig client 0x9ae40). The dispatcher always passes null.
 CClientTent* RC2_NewHoundeyeChargeTent(const CClientTent* pCopy) // orig client 0x8f460
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -117,7 +65,7 @@ CHoundeyeChargeTent::CHoundeyeChargeTent()
 	for (int i = 0; i < HOUNDEYE_SPARKS; i++)
 		m_flSparkLife[i] = 0;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -154,15 +102,15 @@ CHoundeyeChargeTent::CHoundeyeChargeTent()
 	}
 }
 
-bool CHoundeyeChargeTent::Think(float flFrametime) // orig client 0x8fa00
+bool CHoundeyeChargeTent::Update(float flFrametime) // orig client 0x8fa00
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -196,10 +144,10 @@ bool CHoundeyeChargeTent::Think(float flFrametime) // orig client 0x8fa00
 			return false;
 		}
 		if (pEntity->index == pLocal->index)
-			m_bDrawInner = CAM_IsThirdPerson();
+			m_bDrawInner = CL_IsThirdPerson();
 	}
 
-	m_vecOrigin = RC2_GetEntityOrigin(pEntity->index);
+	m_vecOrigin = CLTE_GetOrigin(pEntity->index);
 	Vector vecAngles = pEntity->angles;
 	vecAngles.x = 0;
 	Vector vecForward, vecRight, vecUp;
@@ -216,9 +164,9 @@ bool CHoundeyeChargeTent::Think(float flFrametime) // orig client 0x8fa00
 	m_flNextParticle -= flFrametime;
 	if (m_flNextParticle <= 0)
 	{
-		if (g_iClDetail < 0)
+		if (g_iClientDetail < 0)
 			m_flNextParticle = 0.15 - flGlow * 0.1;
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flNextParticle = 0.1 - flGlow * 0.075;
 		else
 			m_flNextParticle = 0.1 - flGlow * 0.0999;
@@ -229,7 +177,7 @@ bool CHoundeyeChargeTent::Think(float flFrametime) // orig client 0x8fa00
 		Vector vecDir = vecForward * sin(flOff);
 		vecDir = vecRight * (sin(flAround) * flCosOff) + vecDir;
 		vecDir = vecUp * (cos(flAround) * flCosOff) + vecDir;
-		m_Particles.Add(m_vecOrigin + vecDir * gEngfuncs.pfnRandomFloat(64, 72), Vector(0, 0, 0), Vector(0, 0, 0), Vector(1, 1, 1), 0.01, 0.05, 1.0, 1.0, (int)(intptr_t)this, RC2_HoundeyeChargeParticle); // VERIFY: the effect passed as an int (32-bit only, as the original)
+		m_Particles.Add(m_vecOrigin + vecDir * gEngfuncs.pfnRandomFloat(64, 72), Vector(0, 0, 0), Vector(0, 0, 0), Vector(1, 1, 1), 0.01, 0.05, 1.0, 1.0, this, Particle_Seek); // the user pointer is the effect: Particle_Seek flies to m_vecOrigin
 	}
 	m_Particles.Update(flFrametime);
 
@@ -314,8 +262,8 @@ void CHoundeyeChargeTent::DrawTransparent() // orig client 0x91290
 	bool bParticles = false;
 	bool bSparks = false;
 	if (m_bDrawInner)
-		bParticles = m_Particles.HasLive();
-	if (g_iClDetail >= 0 && m_bDrawInner)
+		bParticles = m_Particles.HasAlive();
+	if (g_iClientDetail >= 0 && m_bDrawInner)
 		bSparks = m_iSparks > 0;
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
@@ -331,21 +279,21 @@ void CHoundeyeChargeTent::DrawTransparent() // orig client 0x91290
 	if (m_pArcSprite)
 		gEngfuncs.pTriAPI->SpriteTexture(m_pArcSprite, 0);
 	for (int i = 0; i < HOUNDEYE_ARCS; i++)
-		RC2_DrawStrip(m_vecArc[i], m_flArcWidth, m_colArc, m_flArcAlpha, HOUNDEYE_ARC_POINTS, true, true, m_flArcSegLen);
+		CLTE_DrawStrip(m_vecArc[i], m_flArcWidth, m_colArc, m_flArcAlpha, HOUNDEYE_ARC_POINTS, true, true, m_flArcSegLen);
 
 	if (bSparks)
 	{
 		if (m_pSparkSprite)
 			gEngfuncs.pTriAPI->SpriteTexture(m_pSparkSprite, 0);
 		for (int i = 0; i < m_iSparks; i++)
-			RC2_DrawBeamQuad(m_vecOrigin, m_vecSpark[i][0], 3.0, 0, m_colSpark[i], m_flSparkLife[i], m_colSpark[i], 0);
+			CLTE_DrawBeamQuad(m_vecOrigin, m_vecSpark[i][0], 3.0, 0, m_colSpark[i], m_flSparkLife[i], m_colSpark[i], 0);
 	}
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }
 
 // The beam fired or the charge stopped (CLTE 0xfe/0x41). The suck sound plays out.
-bool CHoundeyeChargeTent::EntityGone(int iEntIndex) // orig client 0x91490
+bool CHoundeyeChargeTent::KillEntity(int iEntIndex) // orig client 0x91490
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;
