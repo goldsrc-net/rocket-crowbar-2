@@ -425,16 +425,4 @@ void CScientistMine::LookAround() // orig 0xb4510
 	}
 }
 
-// TEMP STUB (p6): real one belongs in monsters.cpp (rc2.dll 0x74d0, CBaseMonster's slot 147);
-// this is the reading of the original's body, for its package to check
-int CBaseMonster::ScaledPitchShift()
-{
-	if (pev->scale == 0 || pev->scale == 1)
-		return 0;
-	float flShift = (1.0 - pev->scale) * 1.25 * 40;
-	if (flShift < 0)
-		flShift = 0;
-	else if (flShift > 40)
-		flShift = 40;
-	return (int)flShift;
-}
+// CBaseMonster::ScaledPitchShift is inline in basemonster.h (p1's reconstruction of 0x74d0)

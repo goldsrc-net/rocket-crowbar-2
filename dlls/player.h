@@ -361,8 +361,8 @@ public:
 	// (dlls/rc2prefs.cpp, dlls/rc2/playerride.cpp) use. Not saved, so every name is ours.
 	unsigned char m_ucRideInfo; // orig +0x640: 0, or the ridden player's index (|0x80 on the left shoulder); 0 in Spawn
 	int m_iPhysKeyFlags;		// orig +0x644: sent to the engine as physics key "phf" ("%02X")
-	int m_iPhysKeyFlags2;		// orig +0x648: when it clears to 0, bit 2 of m_iPhysKeyFlags goes too
-	bool m_bRC2State650;		// orig +0x650 (a byte). VERIFY: what sets it; riding clears it with phys flag 1 and a CLTE 4
+	int m_iMoveLock;		// orig +0x648: when it clears to 0, bit 2 of m_iPhysKeyFlags goes too
+	bool m_fJetpackOn;		// orig +0x650 (a byte). VERIFY: what sets it; riding clears it with phys flag 1 and a CLTE 4
 	int m_iAdminLevel;			// orig +0x674: >0 may setkey/reset, >1 save/savediff/load
 	int m_iShrunk;				// orig +0x68c: nonzero while shrunk (physics key "shr")
 	int m_iRidingIndex;			// orig +0x69c: entity index of the player this one rides, 0 if none
@@ -372,7 +372,7 @@ public:
 	int m_iRC2State4ac;			// orig +0x4ac: bit flags, 0 in Spawn. VERIFY: bit 1 goes with base byte +0x66, bit 0x10 with shrinking
 	float m_flEnergy;			// orig +0x758: shield and weapon energy, 100 in Spawn; riding costs 40, getting off 20, the sphere mine and roman candle their EnergyCost
 	float m_flEnergyRegenTime;	// orig +0x760: gpGlobals->time + the EnergyRegenDelay whenever energy is spent (p7)
-	int m_iRC2PlayerFlags708;	// orig +0x708: flags; bit 0x200 lets the shotgun fire under water (p7)
+	unsigned int m_iAbilities; // orig +0x708: the attribute system's ability bits in effect (p1); bit 0x200 lets the shotgun fire under water (p7)
 	bool m_fShieldOn;			// orig +0x778 (a byte): the shield deflects only while set (p7), cleared below [Shield] MinRunEnergy; riding clears it
 	int m_iTransformType;		// orig +0x10f8: what the player is transformed into, 0 if not (6: the race forklift); also pev->playerclass
 	bool m_bTransforming;		// orig +0x10fc (a byte), read with m_iTransformType. VERIFY: name
@@ -523,6 +523,36 @@ public:
 
 	// p2: the egon's nuke can't fire again before this. Name ours.
 	float m_flRC2NextSuperWeapon; // orig +0x780
+
+	// p1: the admin commands (dlls/rc2/maintainent.cpp), client.cpp's commands (setattr,
+	// AddToFullPack, ...) and the attribute system. Names ours. VERIFY (p1): RC2's player layout
+	// differs from the RC2-layout reference around +0x63c, so offsets there can't be checked
+	// against it.
+	bool m_fGiveBan;				  // orig +0x690 (an int there): set by the admin command giveban
+	bool m_fSuicideBan;				  // orig +0x694 (an int there): set by suicideban
+	bool m_fForceSpawn;				  // orig +0x698 (an int there): set by forcespawn
+	int m_iAdminSelected;			  // orig +0x784: cleared with the admin selection. VERIFY: what it holds
+	edict_t* m_pentAdminSelected;	  // orig +0x78c: the admin's selected entity (selectent)
+	CBaseEntity* m_pRC2Player798;	  // orig +0x798: an entity of the player's own, removed on disconnect. VERIFY: what it is
+	float m_flNextGiveTime;			  // orig +0x684: give, givefor and drop wait until this (0.1 s after each)
+	float m_flDmgScore;				  // orig +0x67c: the damage-based score (mp_scoremode 1); CBaseMonster::TakeDamage adds to it
+	int m_iRC2Player688;			  // orig +0x688: 0 while the player is in play (IsActivePlayer); nonzero, AddToFullPack sends it the entity iuser2 names when +0x7a4 is 1 and iuser1 is 2. VERIFY
+	int m_iRC2Player66c;			  // orig +0x66c: ServerDeactivate clears it. VERIFY: what it is
+	float m_flAttrPending[10];		  // orig +0x6ac: the attribute values setattr asked for (jump, speed, attack, defend, health, extra health, armor, extra armor, energy regen, damage reflect)
+	unsigned int m_iAbilitiesPending; // orig +0x6d4: setattr's ability bits
+	unsigned int m_iWeaponsPending;	  // orig +0x6d8: setattr's weapon bits
+	int m_iTransformPending;		  // orig +0x6dc: setattr's transform, -1 for none
+	float m_flAttributes[10];		  // orig +0x6e0: the attribute values in effect
+	unsigned int m_iAttrWeapons;	  // orig +0x70c: the weapon bits in effect
+	bool m_fAttributesSet;			  // orig +0x754 (byte): single player lets attributes change once
+	float m_flEnergyDrawDone;		  // orig +0x764: the energy draw ends then
+	bool m_fDrawingEnergy;			  // orig +0x768 (byte)
+	float m_flCreateHealthDone;		  // orig +0x76c: making health ends then
+	bool m_fCreatingHealth;			  // orig +0x770 (byte)
+	int m_iRC2Player774;			  // orig +0x774: 0 when making health starts. VERIFY: what it counts
+	int m_iRC2Player788;			  // orig +0x788: nonzero, AddToFullPack sends this player every entity. VERIFY: what sets it
+	int m_iRC2Player7a4;			  // orig +0x7a4: see m_iRC2Player688. VERIFY
+	void RC2StartObserver();		  // orig 0x9b990 (player.cpp): "spectate"/"observe". Name ours
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

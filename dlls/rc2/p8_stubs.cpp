@@ -43,4 +43,3 @@ CBaseEntity* SqueakGrenade_Owner(CBaseEntity* pSnark)
 	return NULL;
 }
 
-// CBaseMonster::ScaledPitchShift: TEMP STUB in dlls/rc2/scientistmine.cpp (p6)

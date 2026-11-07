@@ -125,7 +125,6 @@ bool CBaseMonster::FRouteClear() { return false; }
 bool CBaseMonster::FRefreshRoute() { return false; }
 bool CBaseMonster::MoveToEnemy(Activity movementAct, float waitTime) { return false; }
 // p6 needs: client stub for RC2's CBaseMonster slot 147 (basemonster.h)
-int CBaseMonster::ScaledPitchShift() { return 0; }
 bool CBaseMonster::MoveToLocation(Activity movementAct, float waitTime, const Vector& goal) { return false; }
 bool CBaseMonster::MoveToTarget(Activity movementAct, float waitTime) { return false; }
 bool CBaseMonster::MoveToNode(Activity movementAct, float waitTime, const Vector& goal) { return false; }

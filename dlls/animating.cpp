@@ -35,13 +35,15 @@ TYPEDESCRIPTION CBaseAnimating::m_SaveData[] =
 		DEFINE_FIELD(CBaseMonster, m_fSequenceLoops, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CBaseAnimating, CBaseDelay);
+IMPLEMENT_SAVERESTORE(CBaseAnimating, CBaseDelay); // orig 0x9320 Save, orig 0x9350 Restore (stock)
 
 
 //=========================================================
 // StudioFrameAdvance - advance the animation frame up to the current time
 // if an flInterval is passed in, only advance animation that number of seconds
 //=========================================================
+// orig 0x9380. RC2: a frozen entity (m_bFrozen, the byte at orig +0x66) keeps its frame
+// and only moves animtime on.
 float CBaseAnimating::StudioFrameAdvance(float flInterval)
 {
 	if (flInterval == 0.0)
@@ -55,6 +57,12 @@ float CBaseAnimating::StudioFrameAdvance(float flInterval)
 	}
 	if (0 == pev->animtime)
 		flInterval = 0.0;
+
+	if (m_bFrozen) // set by the freeze grenade's CFreezeTimer (p3/p4)
+	{
+		pev->animtime = gpGlobals->time;
+		return flInterval;
+	}
 
 	pev->frame += flInterval * m_flFrameRate * pev->framerate;
 	pev->animtime = gpGlobals->time;
@@ -74,6 +82,7 @@ float CBaseAnimating::StudioFrameAdvance(float flInterval)
 //=========================================================
 // LookupActivity
 //=========================================================
+// orig 0x94d0 (stock)
 int CBaseAnimating::LookupActivity(int activity)
 {
 	ASSERT(activity != 0);
@@ -88,6 +97,7 @@ int CBaseAnimating::LookupActivity(int activity)
 // Get activity with highest 'weight'
 //
 //=========================================================
+// orig 0x9500 (stock)
 int CBaseAnimating::LookupActivityHeaviest(int activity)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
@@ -168,6 +178,7 @@ void CBaseAnimating::DispatchAnimEvents(float flInterval)
 
 //=========================================================
 //=========================================================
+// orig 0x9720 (stock)
 float CBaseAnimating::SetBoneController(int iController, float flValue)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
@@ -189,6 +200,7 @@ void CBaseAnimating::InitBoneControllers()
 
 //=========================================================
 //=========================================================
+// orig 0x97b0 (stock)
 float CBaseAnimating::SetBlending(int iBlender, float flValue)
 {
 	void* pmodel = GET_MODEL_PTR(ENT(pev));
@@ -198,6 +210,7 @@ float CBaseAnimating::SetBlending(int iBlender, float flValue)
 
 //=========================================================
 //=========================================================
+// orig 0x97e0 (stock)
 void CBaseAnimating::GetBonePosition(int iBone, Vector& origin, Vector& angles)
 {
 	GET_BONE_POSITION(ENT(pev), iBone, origin, angles);
@@ -205,6 +218,7 @@ void CBaseAnimating::GetBonePosition(int iBone, Vector& origin, Vector& angles)
 
 //=========================================================
 //=========================================================
+// orig 0x9810 (stock)
 void CBaseAnimating::GetAttachment(int iAttachment, Vector& origin, Vector& angles)
 {
 	GET_ATTACHMENT(ENT(pev), iAttachment, origin, angles);

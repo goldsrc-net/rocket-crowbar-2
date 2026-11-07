@@ -361,14 +361,20 @@ public:
 	*/
 	CBaseEntity* DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng);
 
-	// p6 needs (fork B): RC2's slot 147, right after StopFollowing (reference/BASE_VIRTUALS.md).
-	// Name ours: the voice pitch shift for a monster scaled by pev->scale (0 at scale 0 or 1,
-	// else (1 - scale) * 1.25 * 40 clamped to 0..40). Its body (rc2.dll 0x74d0) is the monsters
-	// package's; a TEMP STUB with that reading is in dlls/rc2/scientistmine.cpp.
-	virtual int ScaledPitchShift();
+	// RC2's one added CBaseMonster virtual (orig slot 147, right after StopFollowing). Name ours:
+	// how far a shrunken monster's voice is raised, 0 at scale 0 or 1, else (1 - scale) * 1.25 * 40
+	// clamped to 0..40 (the original reads doubles). Callers add it to the pitch (p1, p6, p8).
+	virtual int ScaledPitchShift() // orig 0x74d0
+	{
+		if (pev->scale == 0.0 || pev->scale == 1.0)
+			return 0;
+		return static_cast<int>(std::min(std::max((1.0 - pev->scale) * 1.25 * 40.0, 0.0), 40.0));
+	}
+	// orig slot 74: monsters can be killed by the admin command kill (92 classes inherit this; p1)
+	bool IsCleanupKillable() override { return true; } // orig 0x7550
 
-	// p7 needs: the byte at orig +0x2b0 (RC2's 4 bytes after m_pCine). The scientists' Spawns
-	// set it to 1; the function at 0x13b0 sets it together with clearing bits_MEMORY_PROVOKED and
-	// 0x1450 clears it while setting that bit. Name ours (the monsters package, p4, owns it).
-	bool m_fRC2NotProvoked;
+	// the byte at orig +0x2b0 (RC2's 4 bytes after m_pCine). Name ours: 1 after the admin command
+	// mkally (0x13b0, which also clears bits_MEMORY_PROVOKED), 0 after mkhostile (0x1450, which sets
+	// it); the scientists' Spawns set it (p1, p7).
+	bool m_fAdminAllied;
 };

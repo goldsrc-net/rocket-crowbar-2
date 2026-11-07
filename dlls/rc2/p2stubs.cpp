@@ -53,10 +53,7 @@ int RC2PlayerButtons(int iIndex)
 	return 0;
 }
 
-// TEMP STUB (p2): real one is CXBowTeather::DieThink (0x29aa0), p1's crossbow bolts
-void XBowTeatherDie(CBaseEntity* pTeather)
-{
-}
+// XBowTeatherDie: the real one is reconstructed elsewhere now
 
 // RC2ReadStateByte: the real one is reconstructed elsewhere now
 

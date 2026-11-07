@@ -26,6 +26,36 @@
 #include "soundent.h"
 #include "hornet.h"
 
+// Rocket Crowbar 2: the start of this file's object in rc2.dll (orig 0x7260-0x7610) holds the
+// inline virtuals and constructors the compiler emitted here. All stock (the headers' inlines):
+// orig 0x7260 CBaseMonster's implicit constructor (sets the vtable)
+// orig 0x72a0 WayPoint_t's empty implicit constructor (m_Route)
+// orig 0x75f0 another empty implicit constructor
+// orig 0x72b0 CBaseAnimating::HandleAnimEvent
+// orig 0x72c0 CBaseToggle::GetToggleState
+// orig 0x72d0 CBaseToggle::GetDelay
+// orig 0x72e0 CBaseMonster::BloodColor
+// orig 0x72f0 CBaseMonster::MyMonsterPointer
+// orig 0x7320 CBaseMonster::GetStoppedActivity
+// orig 0x7330 CBaseMonster::Stop
+// orig 0x7350 CBaseMonster::ScheduleChange
+// orig 0x7360 CBaseMonster::CanPlaySentence
+// orig 0x7370 CBaseMonster::SetYawSpeed
+// orig 0x7380 CBaseMonster::FValidateCover
+// orig 0x7390 CBaseMonster::CoverRadius
+// orig 0x73a0 CBaseMonster::CheckAmmo
+// orig 0x73b0 CBaseMonster::HearingSensitivity
+// orig 0x73c0 CBaseMonster::PrescheduleThink
+// orig 0x7470 CBaseMonster::IsMoving
+// orig 0x7480 CBaseMonster::DeathSound
+// orig 0x7490 CBaseMonster::AlertSound
+// orig 0x74a0 CBaseMonster::IdleSound
+// orig 0x74b0 CBaseMonster::PainSound
+// orig 0x74c0 CBaseMonster::StopFollowing
+// orig 0x75e0 CSquadMonster::MySquadMonsterPointer
+// RC2's own inlines among them are in basemonster.h (orig 0x74d0 ScaledPitchShift, orig 0x7550
+// IsCleanupKillable).
+
 //=========================================================
 // monster-specific schedule types
 //=========================================================
@@ -77,7 +107,7 @@ public:
 	int Classify() override;
 	int ISoundMask() override;
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
-	void SetObjectCollisionBox() override
+	void SetObjectCollisionBox() override // orig 0x7610 (stock)
 	{
 		pev->absmin = pev->origin + Vector(-32, -32, 0);
 		pev->absmax = pev->origin + Vector(32, 32, 85);
@@ -96,6 +126,7 @@ public:
 	void PrescheduleThink() override;
 	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 	int IRelationship(CBaseEntity* pTarget) override;
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0x7600
 	void StopTalking();
 	bool ShouldSpeak();
 	CUSTOM_SCHEDULES;
@@ -122,7 +153,7 @@ public:
 	float m_flNextWordTime;
 	int m_iLastWord;
 };
-LINK_ENTITY_TO_CLASS(monster_alien_grunt, CAGrunt);
+LINK_ENTITY_TO_CLASS(monster_alien_grunt, CAGrunt); // orig 0x7560 (stock)
 
 TYPEDESCRIPTION CAGrunt::m_SaveData[] =
 	{
@@ -134,7 +165,7 @@ TYPEDESCRIPTION CAGrunt::m_SaveData[] =
 		DEFINE_FIELD(CAGrunt, m_iLastWord, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CAGrunt, CSquadMonster);
+IMPLEMENT_SAVERESTORE(CAGrunt, CSquadMonster); // orig 0x76c0 Save, orig 0x76f0 Restore (stock)
 
 const char* CAGrunt::pAttackHitSounds[] =
 	{
@@ -192,19 +223,28 @@ const char* CAGrunt::pAlertSounds[] =
 // IRelationship - overridden because Human Grunts are
 // Alien Grunt's nemesis.
 //=========================================================
+// orig 0x7720. RC2: a shrunken agrunt (scale in (0, 0.5)) fears anything not shrunken
+// (scale 0 or above 0.5).
 int CAGrunt::IRelationship(CBaseEntity* pTarget)
 {
+	if (pev->scale < 0.5 && pev->scale > 0.0)
+	{
+		if (pTarget->pev->scale == 0.0 || pTarget->pev->scale > 0.5)
+			return R_FR;
+	}
+
 	if (FClassnameIs(pTarget->pev, "monster_human_grunt"))
 	{
 		return R_NM;
 	}
 
-	return CSquadMonster::IRelationship(pTarget);
+	return CBaseMonster::IRelationship(pTarget);
 }
 
 //=========================================================
 // ISoundMask
 //=========================================================
+// orig 0x77f0 (stock)
 int CAGrunt::ISoundMask()
 {
 	return bits_SOUND_WORLD |
@@ -300,6 +340,7 @@ bool CAGrunt::ShouldSpeak()
 //=========================================================
 // PrescheduleThink
 //=========================================================
+// orig 0x7aa0
 void CAGrunt::PrescheduleThink()
 {
 	if (ShouldSpeak())
@@ -315,8 +356,8 @@ void CAGrunt::PrescheduleThink()
 
 			m_iLastWord = num;
 
-			// play a new sound
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, pIdleSounds[num], 1.0, ATTN_NORM);
+			// play a new sound. RC2: pitched up when shrunken
+			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, pIdleSounds[num], 1.0, ATTN_NORM, 0, 100 + ScaledPitchShift());
 
 			// is this word our last?
 			if (RANDOM_LONG(1, 10) <= 1)
@@ -335,36 +376,40 @@ void CAGrunt::PrescheduleThink()
 //=========================================================
 // DieSound
 //=========================================================
+// orig 0x7b60. RC2: pitched up when shrunken
 void CAGrunt::DeathSound()
 {
 	StopTalking();
 
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1.0, ATTN_NORM);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1.0, ATTN_NORM, 0, 100 + ScaledPitchShift());
 }
 
 //=========================================================
 // AlertSound
 //=========================================================
+// orig 0x7bb0. RC2: pitched up when shrunken
 void CAGrunt::AlertSound()
 {
 	StopTalking();
 
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM, 0, 100 + ScaledPitchShift());
 }
 
 //=========================================================
 // AttackSound
 //=========================================================
+// orig 0x7c00. RC2: pitched up when shrunken
 void CAGrunt::AttackSound()
 {
 	StopTalking();
 
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_NORM);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_NORM, 0, 100 + ScaledPitchShift());
 }
 
 //=========================================================
 // PainSound
 //=========================================================
+// orig 0x7c50. RC2: pitched up when shrunken
 void CAGrunt::PainSound()
 {
 	if (m_flNextPainTime > gpGlobals->time)
@@ -376,13 +421,14 @@ void CAGrunt::PainSound()
 
 	StopTalking();
 
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0, ATTN_NORM);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0, ATTN_NORM, 0, 100 + ScaledPitchShift());
 }
 
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x7cd0 (stock)
 int CAGrunt::Classify()
 {
 	return CLASS_ALIEN_MILITARY;
@@ -415,6 +461,8 @@ void CAGrunt::SetYawSpeed()
 //
 // Returns number of events handled, 0 if none.
 //=========================================================
+// orig 0x7d10 (its jump table at orig 0x8475). RC2: no fire sound with the hornet, and only
+// an active player is knocked around by the punches.
 void CAGrunt::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
@@ -471,18 +519,7 @@ void CAGrunt::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 
 
-		switch (RANDOM_LONG(0, 2))
-		{
-		case 0:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "agrunt/ag_fire1.wav", 1.0, ATTN_NORM, 0, 100);
-			break;
-		case 1:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "agrunt/ag_fire2.wav", 1.0, ATTN_NORM, 0, 100);
-			break;
-		case 2:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "agrunt/ag_fire3.wav", 1.0, ATTN_NORM, 0, 100);
-			break;
-		}
+		// RC2 dropped SDK 2.3's ag_fire1-3 sound here
 
 		CBaseMonster* pHornetMonster = pHornet->MyMonsterPointer();
 
@@ -528,7 +565,7 @@ void CAGrunt::HandleAnimEvent(MonsterEvent_t* pEvent)
 			pHurt->pev->punchangle.x = 8;
 
 			// OK to use gpGlobals without calling MakeVectors, cause CheckTraceHullAttack called it above.
-			if (pHurt->IsPlayer())
+			if (pHurt->IsActivePlayer())
 			{
 				// this is a player. Knock him around.
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 250;
@@ -558,7 +595,7 @@ void CAGrunt::HandleAnimEvent(MonsterEvent_t* pEvent)
 			pHurt->pev->punchangle.x = 8;
 
 			// OK to use gpGlobals without calling MakeVectors, cause CheckTraceHullAttack called it above.
-			if (pHurt->IsPlayer())
+			if (pHurt->IsActivePlayer())
 			{
 				// this is a player. Knock him around.
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -250;
@@ -579,7 +616,7 @@ void CAGrunt::HandleAnimEvent(MonsterEvent_t* pEvent)
 	break;
 
 	default:
-		CSquadMonster::HandleAnimEvent(pEvent);
+		CBaseMonster::HandleAnimEvent(pEvent);
 		break;
 	}
 }
@@ -872,6 +909,7 @@ IMPLEMENT_CUSTOM_SCHEDULES(CAGrunt, CSquadMonster);
 // because they can use their smart weapons against unseen
 // enemies. Base class doesn't attack anyone it can't see.
 //=========================================================
+// orig 0x8700 (stock)
 bool CAGrunt::FCanCheckAttacks()
 {
 	if (!HasConditions(bits_COND_ENEMY_TOOFAR))
@@ -904,6 +942,7 @@ bool CAGrunt::CheckMeleeAttack1(float flDot, float flDist)
 // tracelines are done, so we may not want to do this every
 // server frame. Definitely not while firing.
 //=========================================================
+// orig 0x8760 (stock)
 bool CAGrunt::CheckRangeAttack1(float flDot, float flDist)
 {
 	if (gpGlobals->time < m_flNextHornetAttackCheck)

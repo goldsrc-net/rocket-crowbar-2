@@ -34,6 +34,7 @@
 #include "com_model.h"
 #include "saverestore.h"
 #include "player.h"
+#include "rc2/virtualhull.h"
 #include "spectator.h"
 #include "client.h"
 #include "soundent.h"
@@ -47,6 +48,12 @@
 #include "pm_shared.h"
 #include "pm_defs.h"
 #include "UserMessages.h"
+#include "rc2prefs.h"
+#include <cmath>
+
+// Rocket Crowbar 2 (RC 1.9's name): set while a client command creates entities, so
+// CBaseEntity::Create refuses classnames nothing has precached. orig 0x18f3f0
+bool g_bUnsafeCreate = false;
 
 DLL_GLOBAL unsigned int g_ulFrameCount;
 
@@ -71,6 +78,35 @@ void set_suicide_frame(entvars_t* pev)
 }
 
 
+// Rocket Crowbar 2: what client.cpp uses from other files (see reference/dossiers/p1.md)
+extern void UTIL_KillEntityEffects(edict_t* pEdict);		 // orig 0xf55b0 (util, p9; p3's name): TE_KILLBEAM and a CLTE kill for it
+extern void UTIL_ExtendTime(float* pflTime, float flBase, float flDelay); // orig 0xf5900 (util, p9; p2's name): *pflTime = max(*pflTime, flBase + flDelay)
+extern int RC2PlayerButtons(int iIndex);					 // orig 0x958b0 (player, p5; p2's name): the ability bits (m_iAbilities) of player iIndex
+extern bool g_fRC2Randomize;								 // orig 0x181430 (weapons.cpp; p3/p9's name)
+extern void Admin_Command(edict_t* pEntity);				 // orig 0x2de0 (p1, dlls/rc2/maintainent.cpp)
+extern void RC2Prefs_ClientCommand(edict_t* pEntity);		 // orig 0xb0050 (rc2prefs.cpp, p6's)
+extern void StopVote();										 // orig 0xf7f20 (p9), name ours
+extern void ResetVote();									 // orig 0xf7ed0 (p9), name ours
+extern void VoteThink();									 // orig 0xf8280 (p9), name ours
+extern void Vote_Command(edict_t* pEntity);					 // orig 0xf8520 (p9): "vote <yes|no>", name ours
+extern void VoteMap_Command(edict_t* pEntity);				 // orig 0xf8620 (p9): "votemap", name ours
+extern void VoteKick_Command(edict_t* pEntity);				 // orig 0xf89d0 (p9): "votekick", name ours
+extern void UpdateVirtualHulls();							 // orig 0xf7600 (p9): the virtual_hull entities each frame, name ours
+extern void PrecacheTransforms();							 // orig 0xe3450 (p8): what the five transforms need, name ours
+extern int gmsgCLTE;										 // "CLTE"
+extern bool IsClassnamePrecachedNoInvalid(const char* pszClassname); // orig 0xf5a80 (util, p9; RC 1.9's name)
+extern const char* GetPrecachedClassname(const char* pszClassname);	 // orig 0xf5bf0 (util, p9): the precache list's copy, name ours
+extern int gmsgAttrConf;									 // "AttrConf"
+extern int gmsgSetAttr;										 // "SetAttr"
+
+// Rocket Crowbar 2: which clients are connected, one bit per client index (the util package's
+// UTIL_IsValidEntity tests it for player slots). orig 0x1af2a8, name ours.
+unsigned int g_iConnectedClients = 0;
+
+// SDK 2.3's g_flWeaponCheat, which halflife-updated replaced with g_psv_cheats: RC2 reads
+// sv_cheats into it every frame (StartFrame) and its give, givefor and fov test it. orig 0x1afd34
+extern float g_flWeaponCheat; // world.cpp (SDK 2.3's place)
+
 /*
 ===========
 ClientConnect
@@ -78,8 +114,11 @@ ClientConnect
 called when a player connects to a server
 ============
 */
+// orig 0x1a8f0. RC2: clears what the client's entity drew and marks the client connected.
 qboolean ClientConnect(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128])
 {
+	UTIL_KillEntityEffects(pEntity);
+	g_iConnectedClients |= 1u << ((ENTINDEX(pEntity) - 1) & 31);
 	return static_cast<qboolean>(g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason));
 
 	// a client connecting during an intermission can cause problems
@@ -97,15 +136,20 @@ called when a player disconnects from a server
 GLOBALS ASSUMED SET:  g_fGameOver
 ============
 */
+// orig 0x1a940 (unlisted: no function at it in the decompile). RC2: marks the client gone (even
+// at game over), kills what it owned, lets go of riders, and removes its roach charges.
+// halflife-updated's tank release isn't in RC2 (SDK 2.3 had none either).
 void ClientDisconnect(edict_t* pEntity)
 {
+	g_iConnectedClients &= ~(1u << ((ENTINDEX(pEntity) - 1) & 31));
+
 	if (g_fGameOver)
 		return;
 
-	char text[256] = "";
-	if (!FStringNull(pEntity->v.netname))
-		snprintf(text, sizeof(text), "- %s has left the game\n", STRING(pEntity->v.netname));
-	text[sizeof(text) - 1] = 0;
+	UTIL_KillEntityEffects(pEntity);
+
+	char text[256];
+	sprintf(text, "- %s has left the game\n", STRING(pEntity->v.netname));
 	MESSAGE_BEGIN(MSG_ALL, gmsgSayText, NULL);
 	WRITE_BYTE(ENTINDEX(pEntity));
 	WRITE_STRING(text);
@@ -121,27 +165,67 @@ void ClientDisconnect(edict_t* pEntity)
 		}
 	}
 
+	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(CBaseEntity::Instance(pEntity));
+	if (pPlayer)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			CBaseEntity* pOwned = pPlayer->m_rgpVirtualHulls[i];
+			if (pOwned)
+			{
+				pOwned->pev->solid = SOLID_NOT;
+				UTIL_SetSize(pOwned->pev, g_vecZero, g_vecZero);
+				pOwned->pev->flags |= FL_KILLME;
+				pPlayer->m_rgpVirtualHulls[i] = NULL;
+			}
+		}
+
+		if (pPlayer->m_iRightRider)
+		{
+			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iRightRider));
+			if (pRider)
+				pRider->StopRiding(false);
+		}
+		if (pPlayer->m_iLeftRider)
+		{
+			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iLeftRider));
+			if (pRider)
+				pRider->StopRiding(false);
+		}
+		if (pPlayer->m_iRidingIndex)
+			pPlayer->StopRiding(true);
+
+		if (pPlayer->m_pRC2Player798)
+		{
+			UTIL_Remove(pPlayer->m_pRC2Player798);
+			pPlayer->m_pRC2Player798 = NULL;
+		}
+		if (pPlayer->m_pRC2Player79c)
+		{
+			UTIL_Remove(pPlayer->m_pRC2Player79c);
+			pPlayer->m_pRC2Player79c = NULL;
+		}
+	}
+
+	// the roach charges it threw and hasn't set off
+	for (CBaseEntity* pCharge = UTIL_FindEntityByClassname(NULL, "roach_charge"); pCharge; pCharge = UTIL_FindEntityByClassname(pCharge, "roach_charge"))
+	{
+		if (pCharge->pev->impulse == 0 && pCharge->pev->dmg_inflictor == pEntity)
+			pCharge->SUB_Remove();
+	}
+
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
+	pEntity->v.deadflag = DEAD_DEAD;
 	pEntity->v.takedamage = DAMAGE_NO; // don't attract autoaim
 	pEntity->v.solid = SOLID_NOT;	   // nonsolid
 	UTIL_SetOrigin(&pEntity->v, pEntity->v.origin);
-
-	auto pPlayer = reinterpret_cast<CBasePlayer*>(GET_PRIVATE(pEntity));
-
-	if (pPlayer)
-	{
-		if (pPlayer->m_pTank != NULL)
-		{
-			pPlayer->m_pTank->Use(pPlayer, pPlayer, USE_OFF, 0);
-			pPlayer->m_pTank = NULL;
-		}
-	}
 
 	g_pGameRules->ClientDisconnected(pEntity);
 }
 
 
 // called by ClientKill and DeadThink
+// orig 0x1ab80 (stock)
 void respawn(entvars_t* pev, bool fCopyCorpse)
 {
 	if (0 != gpGlobals->coop || 0 != gpGlobals->deathmatch)
@@ -170,16 +254,21 @@ Player entered the suicide command
 GLOBALS ASSUMED SET:  g_ulModelIndexPlayer
 ============
 */
+// orig 0x1ad90 (unlisted). RC2: not while dead, suicide-banned or in the race forklift, and 5
+// seconds apart (SDK 2.3: 1).
 void ClientKill(edict_t* pEntity)
 {
 	entvars_t* pev = &pEntity->v;
 
-	CBasePlayer* pl = (CBasePlayer*)CBasePlayer::Instance(pev);
+	CBasePlayer* pl = (CBasePlayer*)CBasePlayer::Instance(pev->pContainingEntity);
 
 	if (pl->m_fNextSuicideTime > gpGlobals->time)
 		return; // prevent suiciding too ofter
 
-	pl->m_fNextSuicideTime = gpGlobals->time + 1; // don't let them suicide for 5 seconds after suiciding
+	if (pl->pev->deadflag != DEAD_NO || pl->m_fSuicideBan || pl->m_iTransformType == 6)
+		return;
+
+	pl->m_fNextSuicideTime = gpGlobals->time + 5;
 
 	// have the player kill themself
 	pev->health = 0;
@@ -197,6 +286,7 @@ ClientPutInServer
 called each time a player is spawned
 ============
 */
+// orig 0x1ae20 (unlisted; stock). halflife-updated's spectator reset kept (RC2 has none).
 void ClientPutInServer(edict_t* pEntity)
 {
 	CBasePlayer* pPlayer;
@@ -340,6 +430,9 @@ bool Q_UnicodeValidate(const char* pUTF8)
 // or as
 // blah blah blah
 //
+// orig 0x1aec0. RC2's is SDK 2.0's: no chat flood limit, no voice muting, no spectator chat;
+// every client by index, and the log line (before the message is built) carries the WON id.
+// halflife-updated's UTF-8 check is kept.
 void Host_Say(edict_t* pEntity, bool teamonly)
 {
 	CBasePlayer* client;
@@ -353,13 +446,6 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 
 	// We can get a raw string now, without the "say " prepended
 	if (CMD_ARGC() == 0)
-		return;
-
-	entvars_t* pev = &pEntity->v;
-	CBasePlayer* player = GetClassPtr((CBasePlayer*)pev);
-
-	//Not yet.
-	if (player->m_flNextChatTime > gpGlobals->time)
 		return;
 
 	if (!stricmp(pcmd, cpSay) || !stricmp(pcmd, cpSayTeam))
@@ -378,12 +464,12 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	{
 		if (CMD_ARGC() >= 2)
 		{
-			sprintf(szTemp, "%s %s", (char*)pcmd, (char*)CMD_ARGS());
+			snprintf(szTemp, sizeof(szTemp), "%s %s", (char*)pcmd, (char*)CMD_ARGS());
 		}
 		else
 		{
 			// Just a one word command, use the first word...sigh
-			sprintf(szTemp, "%s", (char*)pcmd);
+			snprintf(szTemp, sizeof(szTemp), "%s", (char*)pcmd);
 		}
 		p = szTemp;
 	}
@@ -396,15 +482,31 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	}
 
 	// make sure the text has content
-
-	if (!p || '\0' == p[0] || !Q_UnicodeValidate(p))
+	char* pc;
+	for (pc = p; pc != NULL && *pc != 0; pc++)
+	{
+		if (0 != isprint((unsigned char)*pc) && 0 == isspace((unsigned char)*pc))
+		{
+			pc = NULL; // we've found an alphanumeric character,  so text is valid
+			break;
+		}
+	}
+	if (pc != NULL)
 		return; // no character found, so say nothing
 
+	// halflife-updated: drop text the client can't decode
+	if (!Q_UnicodeValidate(p))
+		return;
+
+	UTIL_LogPrintf("\"%s<%i><%u>\" said: \"%s\"%s\n",
+		STRING(pEntity->v.netname),
+		GETPLAYERUSERID(pEntity),
+		g_engfuncs.pfnGetPlayerWONId(pEntity),
+		p,
+		teamonly ? " TEAM" : "");
+
 	// turn on color set 2  (color on,  no sound)
-	// turn on color set 2  (color on,  no sound)
-	if (player->IsObserver() && (teamonly))
-		sprintf(text, "%c(SPEC) %s: ", 2, STRING(pEntity->v.netname));
-	else if (teamonly)
+	if (teamonly)
 		sprintf(text, "%c(TEAM) %s: ", 2, STRING(pEntity->v.netname));
 	else
 		sprintf(text, "%c%s: ", 2, STRING(pEntity->v.netname));
@@ -416,18 +518,11 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	strcat(text, p);
 	strcat(text, "\n");
 
-
-	player->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
-
 	// loop through all players
-	// Start with the first player.
-	// This may return the world in single player if the client types something between levels or during spawn
-	// so check it, or it will infinite loop
-
-	client = NULL;
-	while (((client = (CBasePlayer*)UTIL_FindEntityByClassname(client, "player")) != NULL) && (!FNullEnt(client->edict())))
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		if (!client->pev)
+		client = (CBasePlayer*)UTIL_PlayerByIndex(i);
+		if (!client || !client->pev)
 			continue;
 
 		if (client->edict() == pEntity)
@@ -436,62 +531,310 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 		if (!(client->IsNetClient())) // Not a client ? (should never be true)
 			continue;
 
-		// can the receiver hear the sender? or has he muted him?
-		if (g_VoiceGameMgr.PlayerHasBlockedPlayer(client, player))
+		if (teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE)
 			continue;
 
-		if (!player->IsObserver() && teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE)
-			continue;
-
-		// Spectators can only talk to other specs
-		if (player->IsObserver() && teamonly)
-			if (!client->IsObserver())
-				continue;
-
-		MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, client->pev);
+		MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, client->edict());
 		WRITE_BYTE(ENTINDEX(pEntity));
 		WRITE_STRING(text);
 		MESSAGE_END();
 	}
 
 	// print to the sending client
-	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, &pEntity->v);
+	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, pEntity->v.pContainingEntity);
 	WRITE_BYTE(ENTINDEX(pEntity));
 	WRITE_STRING(text);
 	MESSAGE_END();
 
 	// echo to server console
 	g_engfuncs.pfnServerPrint(text);
-
-	const char* temp;
-	if (teamonly)
-		temp = "say_team";
-	else
-		temp = "say";
-
-	// team match?
-	if (g_teamplay)
-	{
-		UTIL_LogPrintf("\"%s<%i><%s><%s>\" %s \"%s\"\n",
-			STRING(pEntity->v.netname),
-			GETPLAYERUSERID(pEntity),
-			GETPLAYERAUTHID(pEntity),
-			g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pEntity), "model"),
-			temp,
-			p);
-	}
-	else
-	{
-		UTIL_LogPrintf("\"%s<%i><%s><%i>\" %s \"%s\"\n",
-			STRING(pEntity->v.netname),
-			GETPLAYERUSERID(pEntity),
-			GETPLAYERAUTHID(pEntity),
-			GETPLAYERUSERID(pEntity),
-			temp,
-			p);
-	}
 }
 
+// Rocket Crowbar 1.9's (there orig 0xfdbf0), RC2's at orig 0x1b200: "say_private <name or index>
+// <text>", a message to one player (and an echo to the sender). RC2 also logs it.
+void SayPrivate(edict_t* pEntity)
+{
+	if (CMD_ARGC() < 3)
+		return;
+
+	CBaseEntity* pTarget = NULL;
+
+	// an all-digits first argument is a client index
+	const char* pc;
+	for (pc = CMD_ARGV(1); *pc != 0; pc++)
+	{
+		if (0 == isdigit((unsigned char)*pc))
+			break;
+	}
+
+	if (*pc == 0 && CMD_ARGV(1)[0] != 0)
+	{
+		CBaseEntity* pPlayer = UTIL_PlayerByIndex(atoi(CMD_ARGV(1)));
+		if (pPlayer && pPlayer->IsNetClient() && pPlayer->edict() != pEntity)
+			pTarget = pPlayer;
+	}
+
+	if (!pTarget)
+	{
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+			if (!pPlayer || !pPlayer->pev)
+				continue;
+			edict_t* pEdict = pPlayer->edict();
+			if (!pEdict || !pEdict->pvPrivateData || 0 != pEdict->free || pEdict == pEntity)
+				continue;
+			if (!pPlayer->IsNetClient())
+				continue;
+			if (!stricmp(STRING(pPlayer->pev->netname), CMD_ARGV(1)))
+			{
+				pTarget = pPlayer;
+				break;
+			}
+		}
+	}
+
+	if (!pTarget || !pTarget->IsNetClient())
+		return;
+
+	// VERIFY: guard, the original can overrun its stack here: it strncat's each word (up to 192
+	// chars at a time) into its 256-byte buffer, then cuts it at 191. Ours builds it in a
+	// std::string and cuts it the same way. The plain text for the log is cut at 255.
+	char prefix[256];
+	snprintf(prefix, sizeof(prefix), "%c(PRIVATE <%s>) %s: ", 2, STRING(pTarget->pev->netname), STRING(pEntity->v.netname));
+	std::string strText = prefix;
+	std::string strPlain;
+	for (int i = 2; i < CMD_ARGC(); i++)
+	{
+		strText.append(CMD_ARGV(i), 0, 192);
+		strPlain.append(CMD_ARGV(i), 0, 255);
+		if (i + 1 < CMD_ARGC())
+		{
+			strText += " ";
+			strPlain += " ";
+		}
+		else
+			strText += "\n";
+	}
+	if (strText.size() > 191)
+		strText.resize(191);
+	if (strPlain.size() > 255)
+		strPlain.resize(255);
+	const char* text = strText.c_str();
+
+	edict_t* pTargetEdict = pTarget->edict();
+	UTIL_LogPrintf("\"%s<%i><%u>\" said: \"%s\" PRIVATE to \"%s<%i><%u>\"\n",
+		STRING(pEntity->v.netname), GETPLAYERUSERID(pEntity), g_engfuncs.pfnGetPlayerWONId(pEntity),
+		strPlain.c_str(),
+		STRING(pTarget->pev->netname), GETPLAYERUSERID(pTargetEdict), g_engfuncs.pfnGetPlayerWONId(pTargetEdict));
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, pTargetEdict);
+	WRITE_BYTE(ENTINDEX(pEntity));
+	WRITE_STRING(text);
+	MESSAGE_END();
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, pEntity->v.pContainingEntity);
+	WRITE_BYTE(ENTINDEX(pEntity));
+	WRITE_STRING(text);
+	MESSAGE_END();
+
+	g_engfuncs.pfnServerPrint(text);
+}
+
+// --- RC2's player attributes (setattr) ---
+// Ten values bought with points (jump, speed, attack, defend, health, extra health, armor,
+// extra armor, energy regeneration, damage reflection), ability bits, weapon bits and a
+// transform; rc2.ini's [Attributes] prices them. All names ours.
+
+// orig 0x1d070. Points for attribute i, held to [0, max] (jump .. reflection) or [1, max] (speed,
+// energy regeneration).
+int Attr_ClampPoints(int i, int iPoints)
+{
+	int iMax;
+	switch (i)
+	{
+	case 0: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxJumpPoints).c; break;
+	case 1:
+		iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxSpeedPoints).c;
+		if (iPoints > iMax)
+			return iMax;
+		return iPoints < 1 ? 1 : iPoints;
+	case 2: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxAttackPoints).c; break;
+	case 3: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxDefendPoints).c; break;
+	case 4: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxHealthPoints).c; break;
+	case 5: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxExtraHealthPoints).c; break;
+	case 6: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxArmorPoints).c; break;
+	case 7: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxExtraArmorPoints).c; break;
+	case 8:
+		iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxEnergyRegenPoints).c;
+		if (iPoints > iMax)
+			return iMax;
+		return iPoints < 1 ? 1 : iPoints;
+	case 9: iMax = (unsigned char)RC2Pref(RC2P_Attributes_MaxDamageReflectionPoints).c; break;
+	default: return iPoints;
+	}
+	if (iPoints > iMax)
+		return iMax;
+	return iPoints < 0 ? 0 : iPoints;
+}
+
+// orig 0x1cf60. The value iPoints buy of attribute i.
+float Attr_PointsToValue(int i, int iPoints)
+{
+	switch (i)
+	{
+	case 0: return iPoints / RC2Pref(RC2P_Attributes_JumpCost).f;
+	case 1: return iPoints / RC2Pref(RC2P_Attributes_SpeedCost).f;
+	case 2: return exp(iPoints * RC2Pref(RC2P_Attributes_AttackConstant).f) / RC2Pref(RC2P_Attributes_AttackScaler).f;
+	case 3: return exp(-(iPoints * RC2Pref(RC2P_Attributes_DefendConstant).f)) * RC2Pref(RC2P_Attributes_DefendScaler).f;
+	case 4: return iPoints / RC2Pref(RC2P_Attributes_HealthCost).f + RC2Pref(RC2P_Attributes_MinHealth).f;
+	case 5: return iPoints / RC2Pref(RC2P_Attributes_ExtraHealthCost).f;
+	case 6: return iPoints / RC2Pref(RC2P_Attributes_ArmorCost).f;
+	case 7: return iPoints / RC2Pref(RC2P_Attributes_ExtraArmorCost).f;
+	case 8: return iPoints / RC2Pref(RC2P_Attributes_EnergyRegenCost).f;
+	case 9: return iPoints / RC2Pref(RC2P_Attributes_DamageReflectionCost).f;
+	}
+	return 0;
+}
+
+// orig 0x1cd50. The points a value of attribute i costs (the inverse, rounded, never below 0).
+int Attr_ValueToPoints(int i, float flValue)
+{
+	double flPoints;
+	switch (i)
+	{
+	case 0: flPoints = RC2Pref(RC2P_Attributes_JumpCost).f * flValue; break;
+	case 1: flPoints = RC2Pref(RC2P_Attributes_SpeedCost).f * flValue; break;
+	case 2: flPoints = log(RC2Pref(RC2P_Attributes_AttackScaler).f * flValue) / RC2Pref(RC2P_Attributes_AttackConstant).f; break;
+	case 3: flPoints = log(flValue / RC2Pref(RC2P_Attributes_DefendScaler).f) / -RC2Pref(RC2P_Attributes_DefendConstant).f; break;
+	case 4: flPoints = (flValue - RC2Pref(RC2P_Attributes_MinHealth).f) * RC2Pref(RC2P_Attributes_HealthCost).f; break;
+	case 5: flPoints = RC2Pref(RC2P_Attributes_ExtraHealthCost).f * flValue; break;
+	case 6: flPoints = RC2Pref(RC2P_Attributes_ArmorCost).f * flValue; break;
+	case 7: flPoints = RC2Pref(RC2P_Attributes_ExtraArmorCost).f * flValue; break;
+	case 8: flPoints = RC2Pref(RC2P_Attributes_EnergyRegenCost).f * flValue; break;
+	case 9: flPoints = RC2Pref(RC2P_Attributes_DamageReflectionCost).f * flValue; break;
+	default: return 0;
+	}
+	if (!(flPoints > 0.0))
+		flPoints = 0.0;
+	return static_cast<int>(flPoints + 0.5);
+}
+
+// orig 0x1d170. The price of one ability bit.
+int Attr_AbilityCost(unsigned int iBit)
+{
+	switch (iBit)
+	{
+	case 0x1: return (unsigned short)RC2Pref(RC2P_Attributes_WallhopPointCost).s;
+	case 0x2: return (unsigned short)RC2Pref(RC2P_Attributes_AqualungPointCost).s;
+	case 0x4: return (unsigned short)RC2Pref(RC2P_Attributes_JetboostPointCost).s;
+	case 0x8: return (unsigned short)RC2Pref(RC2P_Attributes_JetpackPointCost).s;
+	case 0x10: return (unsigned short)RC2Pref(RC2P_Attributes_EnergyDrawPointCost).s;
+	case 0x20: return (unsigned short)RC2Pref(RC2P_Attributes_CreateHealthPointCost).s;
+	case 0x40: return (unsigned short)RC2Pref(RC2P_Attributes_CrowbarControlPointCost).s;
+	case 0x80: return (unsigned short)RC2Pref(RC2P_Attributes_ShieldPointCost).s;
+	case 0x100: return (unsigned short)RC2Pref(RC2P_Attributes_LongJumpPointCost).s;
+	case 0x200: return (unsigned short)RC2Pref(RC2P_Attributes_SubmersibleWeaponsPointCost).s;
+	}
+	return 0;
+}
+
+// orig 0x1d140: the ten ability bits' prices
+int Attr_AbilitiesCost(unsigned int iBits)
+{
+	int iCost = 0;
+	for (int i = 0; i < 10; i++)
+	{
+		if ((iBits & (1u << i)) != 0)
+			iCost += Attr_AbilityCost(1u << i);
+	}
+	return iCost;
+}
+
+// orig 0x1d250. The price of one weapon bit.
+int Attr_WeaponCost(unsigned int iBit)
+{
+	switch (iBit)
+	{
+	case 0x1: return (unsigned short)RC2Pref(RC2P_Attributes_GlockPointCost).s;
+	case 0x2: return (unsigned short)RC2Pref(RC2P_Attributes_PythonPointCost).s;
+	case 0x4: return (unsigned short)RC2Pref(RC2P_Attributes_MP5PointCost).s;
+	case 0x8: return (unsigned short)RC2Pref(RC2P_Attributes_ShotgunPointCost).s;
+	case 0x10: return (unsigned short)RC2Pref(RC2P_Attributes_CrossbowPointCost).s;
+	case 0x20: return (unsigned short)RC2Pref(RC2P_Attributes_RPGPointCost).s;
+	case 0x40: return (unsigned short)RC2Pref(RC2P_Attributes_EgonPointCost).s;
+	case 0x80: return (unsigned short)RC2Pref(RC2P_Attributes_GaussPointCost).s;
+	case 0x100: return (unsigned short)RC2Pref(RC2P_Attributes_HornetgunPointCost).s;
+	}
+	return 0;
+}
+
+// orig 0x1d220: the nine weapon bits' prices
+int Attr_WeaponsCost(unsigned int iBits)
+{
+	int iCost = 0;
+	for (int i = 0; i < 9; i++)
+	{
+		if ((iBits & (1u << i)) != 0)
+			iCost += Attr_WeaponCost(1u << i);
+	}
+	return iCost;
+}
+
+// orig 0x1d2f0. The price of a transform (0-4; anything else is free).
+int Attr_TransformCost(int iTransform)
+{
+	switch (iTransform)
+	{
+	case 0: return (unsigned short)RC2Pref(RC2P_Attributes_TransformAssassinPointCost).s;
+	case 1: return (unsigned short)RC2Pref(RC2P_Attributes_TransformHoundeyePointCost).s;
+	case 2: return (unsigned short)RC2Pref(RC2P_Attributes_TransformControllerPointCost).s;
+	case 3: return (unsigned short)RC2Pref(RC2P_Attributes_TransformBatPointCost).s;
+	case 4: return (unsigned short)RC2Pref(RC2P_Attributes_TransformHeadcrabPointCost).s;
+	}
+	return 0;
+}
+
+// orig 0x1d360. Attribute i's value when the points run out: 1 for jump, speed, attack, defend
+// and energy regeneration, 100 health, nothing extra.
+float Attr_DefaultValue(int i)
+{
+	switch (i)
+	{
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+	case 8:
+		return 1.0;
+	case 4:
+		return 100.0;
+	}
+	return 0.0;
+}
+
+// "give" and "givefor": the same gates (orig 0x1b550's)
+static bool CanGive(CBasePlayer* pPlayer, bool fActive)
+{
+	if (g_flWeaponCheat == 0.0)
+		return false;
+	if (!fActive && pPlayer->m_iAdminLevel < 2)
+		return false;
+	if (sv_allowgive.value == 0.0)
+		return false;
+	if (pPlayer->m_fGiveBan || pPlayer->m_bFrozen)
+		return false;
+	return pPlayer->m_flNextGiveTime <= gpGlobals->time;
+}
+
+// a CLTE message about the player: type, entity index
+static void SendPlayerCLTE(edict_t* pEntity, int iType)
+{
+	MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
+	WRITE_BYTE(iType);
+	WRITE_BYTE(ENTINDEX(pEntity));
+	MESSAGE_END();
+}
 
 /*
 ===========
@@ -499,11 +842,14 @@ ClientCommand
 called each time a player uses a "cmd" command
 ============
 */
+extern float g_flWeaponCheat;
+
 // Use CMD_ARGV,  CMD_ARGV, and CMD_ARGC to get pointers the character string command.
+// orig 0x1b550 (unlisted: no function at it in the decompile, read from the disassembly). RC2's
+// set; halflife-updated's fullupdate, specmode, closemenus and follownext aren't in it.
 void ClientCommand(edict_t* pEntity)
 {
 	const char* pcmd = CMD_ARGV(0);
-	const char* pstr;
 
 	// Is the client spawned yet?
 	if (!pEntity->pvPrivateData)
@@ -511,87 +857,407 @@ void ClientCommand(edict_t* pEntity)
 
 	entvars_t* pev = &pEntity->v;
 
-	auto player = GetClassPtr<CBasePlayer>(reinterpret_cast<CBasePlayer*>(&pEntity->v));
+	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(CBaseEntity::Instance(pEntity));
+	const bool fActive = pPlayer->IsActivePlayer();
 
-	if (FStrEq(pcmd, "say"))
+	if (!strcmp(pcmd, "say"))
 	{
 		Host_Say(pEntity, false);
 	}
-	else if (FStrEq(pcmd, "say_team"))
+	else if (!strcmp(pcmd, "say_team"))
 	{
 		Host_Say(pEntity, true);
 	}
-	else if (FStrEq(pcmd, "fullupdate"))
+	else if (!strcmp(pcmd, "sayprivate") || !strcmp(pcmd, "say_private"))
 	{
-		player->ForceClientDllUpdate();
+		SayPrivate(pEntity);
 	}
-	else if (FStrEq(pcmd, "give"))
+	else if (!strcmp(pcmd, "give"))
 	{
-		if (0 != g_psv_cheats->value)
+		// give <classname>: weapons, ammo and items go to the player, anything else stays where
+		// it spawned (at the player's feet)
+		if (!CanGive(pPlayer, fActive))
+			return;
+		if (CMD_ARGC() < 2 || !IsClassnamePrecachedNoInvalid(CMD_ARGV(1)))
 		{
-			int iszItem = ALLOC_STRING(CMD_ARGV(1)); // Make a copy of the classname
-			player->GiveNamedItem(STRING(iszItem));
+			ClientPrint(pev, HUD_PRINTCONSOLE, "Entity not precached! (create aborted)\n");
+			return;
 		}
-	}
 
-	else if (FStrEq(pcmd, "drop"))
+		pPlayer->m_flNextGiveTime = gpGlobals->time + 0.1;
+		g_bUnsafeCreate = true;
+		g_fRC2Randomize = false;
+		CBaseEntity* pItem = CBaseEntity::Create(GetPrecachedClassname(CMD_ARGV(1)), pev->origin, g_vecZero, NULL);
+		g_fRC2Randomize = true;
+		g_bUnsafeCreate = false;
+		if (!pItem)
+		{
+			ClientPrint(pev, HUD_PRINTCONSOLE, "Cannot create entity\n");
+			return;
+		}
+
+		pItem->pev->spawnflags |= SF_NORESPAWN | (1 << 29); // VERIFY: what RC2's bit 29 does
+		edict_t* pentItem = pItem->pev->pContainingEntity;
+
+		if (strstr(CMD_ARGV(1), "weapon_") || strstr(CMD_ARGV(1), "ammo_"))
+		{
+			// VERIFY: game rules slot 30, CanHavePlayerItem if RC2 inserted one virtual before it
+			// (its PlayerRelationship is slot 51, SDK 2.3's 50)
+			if (g_pGameRules->CanHavePlayerItem(static_cast<CBasePlayer*>(CBaseEntity::Instance(pEntity)), static_cast<CBasePlayerItem*>(pItem)) && pPlayer->m_iTransformType == 0 && !pPlayer->m_bTransforming)
+			{
+				pItem->Touch(CBaseEntity::Instance(pEntity));
+				return;
+			}
+			pItem->pev->flags |= FL_KILLME;
+			return;
+		}
+		if (!strstr(CMD_ARGV(1), "item"))
+			return;
+
+		pItem->Touch(CBaseEntity::Instance(pEntity));
+		if (UTIL_IsValidEntity(pentItem))
+			pItem->pev->flags |= FL_KILLME;
+	}
+	else if (!strcmp(pcmd, "givefor"))
+	{
+		// givefor <classname> [distance]: in front of the player (default 128 units), facing its
+		// way
+		if (!CanGive(pPlayer, fActive))
+			return;
+		if (CMD_ARGC() < 2 || !IsClassnamePrecachedNoInvalid(CMD_ARGV(1)))
+		{
+			ClientPrint(pev, HUD_PRINTCONSOLE, "Entity not precached! (create aborted)\n");
+			return;
+		}
+
+		pPlayer->m_flNextGiveTime = gpGlobals->time + 0.1;
+		UTIL_MakeVectors(pev->v_angle);
+		g_bUnsafeCreate = true;
+		g_fRC2Randomize = false;
+		const float flDist = CMD_ARGC() >= 3 ? atof(CMD_ARGV(2)) : 128.0;
+		const Vector vecAngles(0, pev->v_angle.y, 0);
+		CBaseEntity* pItem = CBaseEntity::Create(GetPrecachedClassname(CMD_ARGV(1)), pev->origin + gpGlobals->v_forward * flDist, vecAngles, NULL);
+		g_fRC2Randomize = true;
+		g_bUnsafeCreate = false;
+		if (!pItem)
+		{
+			ClientPrint(pev, HUD_PRINTCONSOLE, "Cannot create entity\n");
+			return;
+		}
+		pItem->pev->spawnflags |= SF_NORESPAWN;
+	}
+	else if (!strcmp(pcmd, "drop"))
 	{
 		// player is dropping an item.
-		player->DropPlayerItem((char*)CMD_ARGV(1));
+		if (pPlayer->m_flNextGiveTime > gpGlobals->time)
+			return;
+		pPlayer->DropPlayerItem((char*)CMD_ARGV(1));
+		pPlayer->m_flNextGiveTime = gpGlobals->time + 0.1;
 	}
-	else if (FStrEq(pcmd, "fov"))
+	else if (!strcmp(pcmd, "fov"))
 	{
-		if (0 != g_psv_cheats->value && CMD_ARGC() > 1)
+		if (0 != g_flWeaponCheat && CMD_ARGC() > 1)
 		{
-			player->m_iFOV = atoi(CMD_ARGV(1));
+			pPlayer->m_iFOV = atoi(CMD_ARGV(1));
 		}
 		else
 		{
-			CLIENT_PRINTF(pEntity, print_console, UTIL_VarArgs("\"fov\" is \"%d\"\n", (int)player->m_iFOV));
+			CLIENT_PRINTF(pEntity, print_console, UTIL_VarArgs("\"fov\" is \"%d\"\n", (int)GetClassPtr((CBasePlayer*)pev)->m_iFOV));
 		}
 	}
-	else if (FStrEq(pcmd, "use"))
+	else if (!strcmp(pcmd, "use"))
 	{
-		player->SelectItem((char*)CMD_ARGV(1));
+		pPlayer->SelectItem((char*)CMD_ARGV(1));
 	}
-	else if (((pstr = strstr(pcmd, "weapon_")) != NULL) && (pstr == pcmd))
+	else if (!strcmp(pcmd, "jetpack"))
 	{
-		player->SelectItem(pcmd);
-	}
-	else if (FStrEq(pcmd, "lastinv"))
-	{
-		player->SelectLastItem();
-	}
-	else if (FStrEq(pcmd, "spectate")) // clients wants to become a spectator
-	{
-		// always allow proxies to become a spectator
-		if ((pev->flags & FL_PROXY) != 0 || 0 != allow_spectators.value)
+		// toggles the jetpack (ability bit 8)
+		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x8) == 0 || pPlayer->pev->deadflag != DEAD_NO || pPlayer->m_iTransformType != 0)
 		{
-			edict_t* pentSpawnSpot = g_pGameRules->GetPlayerSpawnSpot(player);
-			player->StartObserver(pev->origin, VARS(pentSpawnSpot)->angles);
+			CLIENT_PRINTF(pEntity, print_console, "You don't have a jetpack\n");
+			return;
+		}
+		if (pPlayer->m_fCreatingHealth || pPlayer->m_fDrawingEnergy || pPlayer->m_bTransforming || pPlayer->m_iRidingIndex || pPlayer->m_bFrozen)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You can't activate your jetpack right now\n");
+			return;
+		}
+		if (pPlayer->m_fJetpackOn)
+		{
+			pPlayer->m_fJetpackOn = false;
+			pPlayer->RemovePhysFlags(1);
+			MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
+			WRITE_BYTE(4);
+			WRITE_BYTE(ENTINDEX(pEntity));
+			WRITE_BYTE(0);
+			MESSAGE_END();
+			return;
+		}
+		if (pPlayer->m_flEnergy < RC2Pref(RC2P_Attributes_JetpackTurnOnCost).f)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "Not enough energy to start jetpack\n");
+			return;
+		}
+		pPlayer->m_flEnergy -= RC2Pref(RC2P_Attributes_JetpackTurnOnCost).f;
+		UTIL_ExtendTime(&pPlayer->m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Attributes_JetpackTurnOnRechargeDelay).f);
+		pPlayer->m_fJetpackOn = true;
+		pPlayer->AddPhysFlags(1);
+		pev->velocity.z += RC2Pref(RC2P_Attributes_JetpackTurnZVelBoost).f;
+		SendPlayerCLTE(pEntity, 3);
+	}
+	else if (!strcmp(pcmd, "energydraw") || !strcmp(pcmd, "drawenergy"))
+	{
+		// standing still to draw energy (ability bit 0x10)
+		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x10) == 0 || pPlayer->pev->deadflag != DEAD_NO)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You can't draw energy\n");
+			return;
+		}
+		if (pPlayer->m_flEnergyDrawDone < gpGlobals->time && !pPlayer->m_fDrawingEnergy && (pev->flags & FL_ONGROUND) != 0 && 0 == pPlayer->m_iShrunk)
+		{
+			pPlayer->AddMoveLock(1);
+			pPlayer->m_fDrawingEnergy = true;
+			pPlayer->m_flEnergyDrawDone = RC2Pref(RC2P_Attributes_EnergyDrawTimeTaken).f + gpGlobals->time;
+			SendPlayerCLTE(pEntity, 5);
+			return;
+		}
+		CLIENT_PRINTF(pEntity, print_console, "You can't draw energy right now\n");
+	}
+	else if (!strcmp(pcmd, "createhealth") || !strcmp(pcmd, "makehealth") || !strcmp(pcmd, "energy2health"))
+	{
+		// energy into health (ability bit 0x20)
+		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x20) == 0 || pPlayer->pev->deadflag != DEAD_NO)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You can't create health\n");
+			return;
+		}
+		if (pPlayer->m_flCreateHealthDone < gpGlobals->time && !pPlayer->m_fCreatingHealth && 0 == pPlayer->m_iShrunk)
+		{
+			pPlayer->m_fCreatingHealth = true;
+			pPlayer->m_flCreateHealthDone = RC2Pref(RC2P_Attributes_CreateHealthTimeTaken).f + gpGlobals->time;
+			pPlayer->m_iRC2Player774 = 0;
+			SendPlayerCLTE(pEntity, 9);
+			return;
+		}
+		CLIENT_PRINTF(pEntity, print_console, "You can't create health right now\n");
+	}
+	else if (!strcmp(pcmd, "shield"))
+	{
+		// toggles the shield (ability bit 0x80)
+		if ((RC2PlayerButtons(ENTINDEX(pPlayer->edict())) & 0x80) == 0 || pPlayer->pev->deadflag != DEAD_NO || 0 != pPlayer->m_iShrunk || pPlayer->m_iTransformType != 0 || pPlayer->m_bTransforming || pPlayer->m_iRidingIndex)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You don't have a shield\n");
+			return;
+		}
+		if (pPlayer->m_fShieldOn)
+		{
+			pPlayer->m_fShieldOn = false;
+			return;
+		}
+		if (RC2Pref(RC2P_Shield_ActivationEnergy).f + RC2Pref(RC2P_Shield_MinRunEnergy).f <= pPlayer->m_flEnergy)
+		{
+			pPlayer->m_flEnergy -= RC2Pref(RC2P_Shield_ActivationEnergy).f;
+			pPlayer->m_fShieldOn = true;
+			return;
+		}
+		CLIENT_PRINTF(pEntity, print_console, "You don't have enough energy to activate your shield\n");
+	}
+	else if (!strcmp(pcmd, "transform"))
+	{
+		// into the transform the attributes chose, or back when already that
+		if (0 == static_cast<int>(mp_allowtransform.value))
+		{
+			CLIENT_PRINTF(pEntity, print_console, "Server has disallowed transforming\n");
+			return;
+		}
+		if (pPlayer->m_iChosenTransform < 0 || pPlayer->m_iChosenTransform >= 5)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You can't transform\n");
+			return;
+		}
+		if (pPlayer->pev->deadflag != DEAD_NO || 0 != pPlayer->m_iShrunk || pPlayer->m_bFrozen || pPlayer->m_flEnergy < RC2Pref(RC2P_Attributes_TransformEnergyCost).f || pPlayer->m_bTransforming || 0 != pPlayer->m_iMoveLock)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You can't transform right now\n");
+			return;
+		}
+		if (pPlayer->m_iRidingIndex)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You can't transform while riding\n");
+			return;
+		}
+		if (pPlayer->m_iRightRider || pPlayer->m_iLeftRider)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You can't transform while being ridden\n");
+			return;
+		}
+		if (pPlayer->m_iTransformType == 6)
+		{
+			CLIENT_PRINTF(pEntity, print_console, "You don't want to transform right now...\n");
+			return;
+		}
 
-			// notify other clients of player switching to spectator mode
-			UTIL_ClientPrintAll(HUD_PRINTNOTIFY, UTIL_VarArgs("%s switched to spectator mode\n",
-													 (!FStringNull(pev->netname) && STRING(pev->netname)[0] != 0) ? STRING(pev->netname) : "unconnected"));
+		int iTransform;
+		switch (pPlayer->m_iChosenTransform)
+		{
+		case 0: iTransform = 1; break;
+		case 1: iTransform = 2; break;
+		case 2: iTransform = 3; break;
+		case 3: iTransform = 4; break;
+		case 4: iTransform = 5; break;
+		default:
+			// unreachable after the range check (the original's line 727)
+			ALERT(at_console, "BUGBUG: Unsupported transform/wierdness (%s:%i)\n", "C:\\SIERRA\\Half-Life\\RC2dev\\dlls\\client.cpp", 727);
+			return;
 		}
+
+		if (pPlayer->m_iTransformType == iTransform)
+			pPlayer->StartUntransform();
 		else
-			ClientPrint(pev, HUD_PRINTCONSOLE, "Spectator mode is disabled.\n");
+			pPlayer->StartTransform();
 	}
-	else if (FStrEq(pcmd, "specmode")) // new spectator mode
+	else if (!strcmp(pcmd, "rideplayer"))
 	{
-		if (player->IsObserver())
-			player->Observer_SetMode(atoi(CMD_ARGV(1)));
+		pPlayer->StartRiding();
 	}
-	else if (FStrEq(pcmd, "closemenus"))
+	else if (strstr(pcmd, "weapon_") == pcmd && (pPlayer->m_iHideHUD & 0x10) == 0)
 	{
-		// just ignore it
+		// VERIFY: RC2 tests bit 0x10 of the player's +0x4ac, m_iHideHUD's offset in the
+		// RC2-layout reference (p6 reads +0x4ac as RC2 state bits, 0x10 with shrinking). With it
+		// set, a weapon_ command goes on down the list (to the game rules, else unknown).
+		if (pPlayer->m_bFrozen)
+			return;
+		pPlayer->SelectItem(pcmd);
 	}
-	else if (FStrEq(pcmd, "follownext")) // follow next player
+	else if (!strcmp(pcmd, "lastinv"))
 	{
-		if (player->IsObserver())
-			player->Observer_FindNextPlayer(atoi(CMD_ARGV(1)) != 0);
+		if (pPlayer->m_bFrozen)
+			return;
+		pPlayer->SelectLastItem();
 	}
-	else if (g_pGameRules->ClientCommand(player, pcmd))
+	else if (!strcmp(pcmd, "attrconfig"))
+	{
+		// opens the client's attribute menu
+		MESSAGE_BEGIN(MSG_ONE, gmsgAttrConf, NULL, pev->pContainingEntity);
+		MESSAGE_END();
+	}
+	else if (!strcmp(pcmd, "spectate") || !strcmp(pcmd, "observe"))
+	{
+		if (pPlayer->m_fSuicideBan)
+			return;
+		pPlayer->RC2StartObserver();
+	}
+	else if (!strcmp(pcmd, "vote"))
+	{
+		if (CMD_ARGC() >= 2)
+			Vote_Command(pEntity);
+		else
+			CLIENT_PRINTF(pEntity, print_console, "Ussage: vote <yes or no>\n");
+	}
+	else if (!strcmp(pcmd, "votemap"))
+	{
+		if (g_fGameOver)
+			return;
+		if (CMD_ARGC() >= 2)
+			VoteMap_Command(pEntity);
+		else
+			CLIENT_PRINTF(pEntity, print_console, "Ussage: votemap\n");
+	}
+	else if (!strcmp(pcmd, "votekick"))
+	{
+		if (g_fGameOver)
+			return;
+		VoteKick_Command(pEntity);
+	}
+	else if (!strcmp(pcmd, "setattr"))
+	{
+		// setattr <10 attribute points> <ability bits> <weapon bits> <transform>, as the client's
+		// attribute menu sends it
+		if (CMD_ARGC() != 14)
+		{
+			ClientPrint(pev, HUD_PRINTTALK, "Please use the \"attrconfig\" command to change attributes\n");
+			return;
+		}
+
+		int iTotal = 0;
+		int i;
+		for (i = 0; i < 10; i++)
+		{
+			const int iPoints = Attr_ClampPoints(i, abs(atoi(CMD_ARGV(i + 1))));
+			const float flValue = Attr_PointsToValue(i, iPoints);
+			pPlayer->m_flAttrPending[i] = flValue;
+			iTotal += Attr_ValueToPoints(i, flValue);
+		}
+		sscanf(CMD_ARGV(i + 1), "%u", &pPlayer->m_iAbilitiesPending);
+		iTotal += Attr_AbilitiesCost(pPlayer->m_iAbilitiesPending);
+		sscanf(CMD_ARGV(i + 2), "%u", &pPlayer->m_iWeaponsPending);
+		iTotal += Attr_WeaponsCost(pPlayer->m_iWeaponsPending);
+		sscanf(CMD_ARGV(i + 3), "%d", &pPlayer->m_iTransformPending);
+		if (pPlayer->m_iTransformPending < 0 || pPlayer->m_iTransformPending >= 5)
+			pPlayer->m_iTransformPending = -1;
+		iTotal += Attr_TransformCost(pPlayer->m_iTransformPending);
+
+		if (iTotal > (unsigned short)RC2Pref(RC2P_Attributes_TotalPoints).s)
+		{
+			ClientPrint(pev, HUD_PRINTCONSOLE, "Too many attribute points used, using defaults\n");
+			for (i = 0; i < 10; i++)
+				pPlayer->m_flAttrPending[i] = Attr_DefaultValue(i);
+			pPlayer->m_iAbilitiesPending = 0;
+			pPlayer->m_iWeaponsPending = 1;
+			pPlayer->m_iTransformPending = -1;
+		}
+
+		if (g_pGameRules->IsMultiplayer())
+		{
+			// the player's next spawn takes them
+			if (pev->deadflag != DEAD_NO)
+				return;
+			ClientPrint(pev, HUD_PRINTTALK, "* Changes will take effect on next spawn\n");
+			return;
+		}
+
+		// single player: now, once
+		if (pPlayer->m_fAttributesSet)
+		{
+			ClientPrint(pev, HUD_PRINTTALK, "* Can only change your attributes once\n");
+			return;
+		}
+
+		bool fChanged = false;
+		for (i = 0; i < 10; i++)
+		{
+			if (pPlayer->m_flAttrPending[i] != pPlayer->m_flAttributes[i])
+			{
+				pPlayer->m_flAttributes[i] = pPlayer->m_flAttrPending[i];
+				fChanged = true;
+			}
+		}
+		if (pPlayer->m_iAbilitiesPending != pPlayer->m_iAbilities)
+		{
+			pPlayer->m_iAbilities = pPlayer->m_iAbilitiesPending;
+			fChanged = true;
+		}
+		pPlayer->m_iAttrWeapons = pPlayer->m_iWeaponsPending;
+		pPlayer->m_iChosenTransform = pPlayer->m_iTransformPending;
+		if (!fChanged)
+			return;
+
+		MESSAGE_BEGIN(MSG_ALL, gmsgSetAttr);
+		WRITE_BYTE(ENTINDEX(pPlayer->edict()));
+		for (i = 0; i < 10; i++)
+			WRITE_BYTE(Attr_ValueToPoints(i, pPlayer->m_flAttributes[i]));
+		WRITE_LONG(pPlayer->m_iAbilities);
+		MESSAGE_END();
+		pPlayer->m_fAttributesSet = true;
+	}
+	else if (!strcmp(pcmd, "rcadmin"))
+	{
+		Admin_Command(pEntity);
+	}
+	else if (!strcmp(pcmd, "rccfg"))
+	{
+		RC2Prefs_ClientCommand(pEntity);
+	}
+	else if (g_pGameRules->ClientCommand(GetClassPtr((CBasePlayer*)pev), pcmd))
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
 	}
@@ -604,7 +1270,7 @@ void ClientCommand(edict_t* pEntity)
 		// max total length is 192 ...and we're adding a string below ("Unknown command: %s\n")
 		strncpy(command, pcmd, 127);
 		command[127] = '\0';
-		// First parse the name and remove any %'s
+		// halflife-updated: First parse the name and remove any %'s (RC2 doesn't)
 		for (char* pApersand = command; pApersand != NULL && *pApersand != 0; pApersand++)
 		{
 			// Replace it with a space
@@ -627,6 +1293,8 @@ userinfo - gives dll a chance to modify it before
 it gets sent into the rest of the engine.
 ========================
 */
+// orig 0x1d3b0 (unlisted). RC2: the rename goes out in single player too, and the log line
+// carries the WON id instead of the auth id.
 void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 {
 	// Is the client spawned yet?
@@ -652,7 +1320,6 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		// Set the name
 		g_engfuncs.pfnSetClientKeyValue(ENTINDEX(pEntity), infobuffer, "name", sName);
 
-		if (gpGlobals->maxClients > 1)
 		{
 			char text[256];
 			sprintf(text, "* %s changed name to %s\n", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
@@ -665,19 +1332,19 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		// team match?
 		if (g_teamplay)
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%s>\" changed name to \"%s\"\n",
+			UTIL_LogPrintf("\"%s<%i><%u><%s>\" changed name to \"%s\"\n",
 				STRING(pEntity->v.netname),
 				GETPLAYERUSERID(pEntity),
-				GETPLAYERAUTHID(pEntity),
+				g_engfuncs.pfnGetPlayerWONId(pEntity),
 				g_engfuncs.pfnInfoKeyValue(infobuffer, "model"),
 				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 		}
 		else
 		{
-			UTIL_LogPrintf("\"%s<%i><%s><%i>\" changed name to \"%s\"\n",
+			UTIL_LogPrintf("\"%s<%i><%u><%i>\" changed name to \"%s\"\n",
 				STRING(pEntity->v.netname),
 				GETPLAYERUSERID(pEntity),
-				GETPLAYERAUTHID(pEntity),
+				g_engfuncs.pfnGetPlayerWONId(pEntity),
 				GETPLAYERUSERID(pEntity),
 				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 		}
@@ -688,6 +1355,7 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 
 static int g_serveractive = 0;
 
+// orig 0x1d650 (unlisted). RC2: clears a player member and ends any vote.
 void ServerDeactivate()
 {
 	// It's possible that the engine will call this function more times than is necessary
@@ -697,12 +1365,24 @@ void ServerDeactivate()
 		return;
 	}
 
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer* pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
+		if (pPlayer)
+			pPlayer->m_iRC2Player66c = 0;
+	}
+
 	g_serveractive = 0;
 
 	// Peform any shutdown operations here...
 	//
+	StopVote();
+	ResetVote();
 }
 
+// orig 0x1d6b0. RC2 keeps an older SDK's client test: it skips the entities below clientMax
+// (the world included) and activates the one at clientMax (dossier: original bugs). The vote
+// is reset after the user messages are linked.
 void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 {
 	int i;
@@ -718,7 +1398,7 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 			continue;
 
 		// Clients aren't necessarily initialized until ClientPutInServer()
-		if ((i > 0 && i <= clientMax) || !pEdictList[i].pvPrivateData)
+		if (i < clientMax || !pEdictList[i].pvPrivateData)
 			continue;
 
 		pClass = CBaseEntity::Instance(&pEdictList[i]);
@@ -735,6 +1415,7 @@ void ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 
 	// Link user messages here to make sure first client can get them...
 	LinkUserMessages();
+	ResetVote();
 }
 
 
@@ -886,6 +1567,8 @@ static bool g_LastAllowBunnyHoppingState = false;
 //
 // GLOBALS ASSUMED SET:  g_ulFrameCount
 //
+// orig 0x1d7d0 (unlisted). RC2: reads sv_cheats into g_flWeaponCheat each frame, then runs
+// the virtual hulls and the vote. halflife-updated's bunny hopping key and map loader are kept.
 void StartFrame()
 {
 	if (g_pGameRules)
@@ -894,8 +1577,12 @@ void StartFrame()
 	if (g_fGameOver)
 		return;
 
+	g_flWeaponCheat = CVAR_GET_FLOAT("sv_cheats");
 	gpGlobals->teamplay = teamplay.value;
 	g_ulFrameCount++;
+
+	UpdateVirtualHulls();
+	VoteThink();
 
 	const bool allowBunnyHopping = sv_allowbunnyhopping.value != 0;
 
@@ -925,120 +1612,121 @@ void StartFrame()
 }
 
 
+// orig 0x1d820. RC2's list: SDK 2.3's (without halflife-updated's vehicle sound and grunt),
+// then sprites and sounds of its own (the jetpack, energy draw, making health), the five
+// transforms' (p8), and while sv_pcstuff is set, eight monsters (the human grunt twice).
 void ClientPrecache()
 {
-	// setup precaches always needed
-	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound for PreAlpha
-
-	// PRECACHE_SOUND("player/pl_jumpland2.wav");		// UNDONE: play 2x step sound
-
+	PRECACHE_SOUND("player/sprayer.wav");
 	PRECACHE_SOUND("player/pl_fallpain2.wav");
 	PRECACHE_SOUND("player/pl_fallpain3.wav");
-
-	PRECACHE_SOUND("player/pl_step1.wav"); // walk on concrete
+	PRECACHE_SOUND("player/pl_step1.wav");
 	PRECACHE_SOUND("player/pl_step2.wav");
 	PRECACHE_SOUND("player/pl_step3.wav");
 	PRECACHE_SOUND("player/pl_step4.wav");
-
-	PRECACHE_SOUND("common/npc_step1.wav"); // NPC walk on concrete
+	PRECACHE_SOUND("common/npc_step1.wav");
 	PRECACHE_SOUND("common/npc_step2.wav");
 	PRECACHE_SOUND("common/npc_step3.wav");
 	PRECACHE_SOUND("common/npc_step4.wav");
-
-	PRECACHE_SOUND("player/pl_metal1.wav"); // walk on metal
+	PRECACHE_SOUND("player/pl_metal1.wav");
 	PRECACHE_SOUND("player/pl_metal2.wav");
 	PRECACHE_SOUND("player/pl_metal3.wav");
 	PRECACHE_SOUND("player/pl_metal4.wav");
-
-	PRECACHE_SOUND("player/pl_dirt1.wav"); // walk on dirt
+	PRECACHE_SOUND("player/pl_dirt1.wav");
 	PRECACHE_SOUND("player/pl_dirt2.wav");
 	PRECACHE_SOUND("player/pl_dirt3.wav");
 	PRECACHE_SOUND("player/pl_dirt4.wav");
-
-	PRECACHE_SOUND("player/pl_duct1.wav"); // walk in duct
+	PRECACHE_SOUND("player/pl_duct1.wav");
 	PRECACHE_SOUND("player/pl_duct2.wav");
 	PRECACHE_SOUND("player/pl_duct3.wav");
 	PRECACHE_SOUND("player/pl_duct4.wav");
-
-	PRECACHE_SOUND("player/pl_grate1.wav"); // walk on grate
+	PRECACHE_SOUND("player/pl_grate1.wav");
 	PRECACHE_SOUND("player/pl_grate2.wav");
 	PRECACHE_SOUND("player/pl_grate3.wav");
 	PRECACHE_SOUND("player/pl_grate4.wav");
-
-	PRECACHE_SOUND("player/pl_slosh1.wav"); // walk in shallow water
+	PRECACHE_SOUND("player/pl_slosh1.wav");
 	PRECACHE_SOUND("player/pl_slosh2.wav");
 	PRECACHE_SOUND("player/pl_slosh3.wav");
 	PRECACHE_SOUND("player/pl_slosh4.wav");
-
-	PRECACHE_SOUND("player/pl_tile1.wav"); // walk on tile
+	PRECACHE_SOUND("player/pl_tile1.wav");
 	PRECACHE_SOUND("player/pl_tile2.wav");
 	PRECACHE_SOUND("player/pl_tile3.wav");
 	PRECACHE_SOUND("player/pl_tile4.wav");
 	PRECACHE_SOUND("player/pl_tile5.wav");
-
-	PRECACHE_SOUND("player/pl_swim1.wav"); // breathe bubbles
+	PRECACHE_SOUND("player/pl_swim1.wav");
 	PRECACHE_SOUND("player/pl_swim2.wav");
 	PRECACHE_SOUND("player/pl_swim3.wav");
 	PRECACHE_SOUND("player/pl_swim4.wav");
-
-	PRECACHE_SOUND("player/pl_ladder1.wav"); // climb ladder rung
+	PRECACHE_SOUND("player/pl_ladder1.wav");
 	PRECACHE_SOUND("player/pl_ladder2.wav");
 	PRECACHE_SOUND("player/pl_ladder3.wav");
 	PRECACHE_SOUND("player/pl_ladder4.wav");
-
-	PRECACHE_SOUND("player/pl_wade1.wav"); // wade in water
+	PRECACHE_SOUND("player/pl_wade1.wav");
 	PRECACHE_SOUND("player/pl_wade2.wav");
 	PRECACHE_SOUND("player/pl_wade3.wav");
 	PRECACHE_SOUND("player/pl_wade4.wav");
-
-	PRECACHE_SOUND("debris/wood1.wav"); // hit wood texture
+	PRECACHE_SOUND("debris/wood1.wav");
 	PRECACHE_SOUND("debris/wood2.wav");
 	PRECACHE_SOUND("debris/wood3.wav");
-
-	PRECACHE_SOUND("plats/train_use1.wav"); // use a train
-	PRECACHE_SOUND("plats/vehicle_ignition.wav");
-
-	PRECACHE_SOUND("buttons/spark5.wav"); // hit computer texture
+	PRECACHE_SOUND("plats/train_use1.wav");
+	PRECACHE_SOUND("buttons/spark5.wav");
 	PRECACHE_SOUND("buttons/spark6.wav");
 	PRECACHE_SOUND("debris/glass1.wav");
 	PRECACHE_SOUND("debris/glass2.wav");
 	PRECACHE_SOUND("debris/glass3.wav");
-
-	PRECACHE_SOUND(SOUND_FLASHLIGHT_ON);
-	PRECACHE_SOUND(SOUND_FLASHLIGHT_OFF);
-
-	// player gib sounds
+	PRECACHE_SOUND("items/flashlight1.wav");
+	PRECACHE_SOUND("items/flashlight1.wav");
+	PRECACHE_MODEL("sprites/shockwave.spr");
 	PRECACHE_SOUND("common/bodysplat.wav");
-
-	// player pain sounds
 	PRECACHE_SOUND("player/pl_pain2.wav");
 	PRECACHE_SOUND("player/pl_pain4.wav");
 	PRECACHE_SOUND("player/pl_pain5.wav");
 	PRECACHE_SOUND("player/pl_pain6.wav");
 	PRECACHE_SOUND("player/pl_pain7.wav");
-
 	PRECACHE_MODEL("models/player.mdl");
-
-	// hud sounds
-
 	PRECACHE_SOUND("common/wpn_hudoff.wav");
 	PRECACHE_SOUND("common/wpn_hudon.wav");
 	PRECACHE_SOUND("common/wpn_moveselect.wav");
 	PRECACHE_SOUND("common/wpn_select.wav");
 	PRECACHE_SOUND("common/wpn_denyselect.wav");
-
-
-	// geiger sounds
-
 	PRECACHE_SOUND("player/geiger6.wav");
 	PRECACHE_SOUND("player/geiger5.wav");
 	PRECACHE_SOUND("player/geiger4.wav");
 	PRECACHE_SOUND("player/geiger3.wav");
 	PRECACHE_SOUND("player/geiger2.wav");
 	PRECACHE_SOUND("player/geiger1.wav");
-
-	if (giPrecacheGrunt)
+	PRECACHE_MODEL("sprites/sqflare.spr");
+	PRECACHE_MODEL("sprites/bigflare1.spr");
+	PRECACHE_MODEL("sprites/gradsmoke.spr");
+	PRECACHE_MODEL("sprites/gradsmoke2.spr");
+	PRECACHE_MODEL("sprites/gradsmoke3.spr");
+	PRECACHE_MODEL("sprites/gradpulse.spr");
+	PRECACHE_MODEL("sprites/laserbeam.spr");
+	PRECACHE_MODEL("sprites/smoke.spr");
+	PRECACHE_SOUND("weapons/jetboost.wav");
+	PRECACHE_MODEL("sprites/xfireball3.spr");
+	PRECACHE_MODEL("sprites/stmbal1.spr");
+	PRECACHE_MODEL("models/jetpack.mdl");
+	PRECACHE_MODEL("sprites/xspark4.spr");
+	PRECACHE_SOUND("ambience/industrial4.wav");
+	PRECACHE_MODEL("sprites/gradbeam.spr");
+	PRECACHE_MODEL("sprites/b-tele1.spr");
+	PRECACHE_SOUND("weapons/energydraw.wav");
+	PRECACHE_MODEL("sprites/lgtning.spr");
+	PRECACHE_SOUND("weapons/mkhealth.wav");
+	PRECACHE_MODEL("sprites/noise1.spr");
+	PrecacheTransforms();
+	if (sv_pcstuff.value != 0.0)
+	{
 		UTIL_PrecacheOther("monster_human_grunt");
+		UTIL_PrecacheOther("monster_scientist");
+		UTIL_PrecacheOther("monster_barney");
+		UTIL_PrecacheOther("monster_alien_slave");
+		UTIL_PrecacheOther("monster_ichthyosaur");
+		UTIL_PrecacheOther("monster_human_grunt");
+		UTIL_PrecacheOther("monster_headcrab");
+		UTIL_PrecacheOther("monster_gargantua");
+	}
 }
 
 /*
@@ -1048,12 +1736,10 @@ GetGameDescription
 Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 ===============
 */
+// orig 0x1dce0 (unlisted): RC2's is a constant
 const char* GetGameDescription()
 {
-	if (g_pGameRules) // this function may be called before the world has spawned, and the game rules initialized
-		return g_pGameRules->GetGameDescription();
-	else
-		return "Half-Life";
+	return "Rocket Crowbar 2";
 }
 
 /*
@@ -1063,6 +1749,7 @@ Sys_Error
 Engine is going to shut down, allows setting a breakpoint in game .dll to catch that occasion
 ================
 */
+// orig 0x1dcf0 (unlisted; stock)
 void Sys_Error(const char* error_string)
 {
 	// Default case, do nothing.  MOD AUTHORS:  Add code ( e.g., _asm { int 3 }; here to cause a breakpoint for debugging your game .dlls
@@ -1117,6 +1804,7 @@ SpectatorConnect
 A spectator has joined the game
 ================
 */
+// orig 0x1dd70 (unlisted; stock)
 void SpectatorConnect(edict_t* pEntity)
 {
 	entvars_t* pev = &pEntity->v;
@@ -1133,6 +1821,7 @@ SpectatorConnect
 A spectator has left the game
 ================
 */
+// orig 0x1dd90 (unlisted; stock)
 void SpectatorDisconnect(edict_t* pEntity)
 {
 	entvars_t* pev = &pEntity->v;
@@ -1149,6 +1838,7 @@ SpectatorConnect
 A spectator has sent a usercmd
 ================
 */
+// orig 0x1ddb0 (unlisted; stock)
 void SpectatorThink(edict_t* pEntity)
 {
 	entvars_t* pev = &pEntity->v;
@@ -1219,9 +1909,21 @@ player is 1 if the ent/e is a player and 0 otherwise
 pSet is either the PAS or PVS that we previous set up.  We can use it to ask the engine to filter the entity against the PAS or PVS.
 we could also use the pas/ pvs that we set in SetupVisibility, if we wanted to.  Caching the value is valid in that case, but still only for the current frame
 */
+// orig 0x1ded0 (unlisted: no function at it in the decompile, read from the disassembly).
+// RC2: the entity's m_iRC2Flags and the host's state can force it into the update past the
+// visibility tests ("forced"), and change what it shows. Names ours:
+//   bit 1  forced to its owner
+//   bit 2  sent even without a model or drawn (EF_NODRAW), but without its model fields
+//   bit 4  to its owner: non-solid, and owned by it
+//   bit 8  forced to everyone
+//   bit 16 forced to the player it is attached to (dmg_inflictor), and drawn invisible
+// A host with bit 32 is sent every DAMAGE_AIM entity, but those it can't see only as a
+// position and box. A player and those riding it or ridden by it, the host's admin selection
+// and (host member +0x788) everything are forced too. halflife-updated's 2048-entity guard is
+// kept; its m_EFlags, FL_FLY interpolation and flesh-sound flag aren't in RC2.
 int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* host, int hostflags, int player, unsigned char* pSet)
 {
-	// Entities with an index greater than this will corrupt the client's heap because 
+	// Entities with an index greater than this will corrupt the client's heap because
 	// the index is sent with only 11 bits of precision (2^11 == 2048).
 	// So we don't send them, just like having too many entities would result
 	// in the entity not being sent.
@@ -1232,39 +1934,112 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 
 	int i;
 
-	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
+	bool fForce = false;	   // name ours
+	bool fNoModel = false;	   // bit 2
+	bool fOwnedByHost = false; // bit 4, or the host's view
+	bool fPositionOnly = false;
+	bool fInvisible = false; // bit 16
 
-	// don't send if flagged for NODRAW and it's not the host getting the message
-	if ((ent->v.effects & EF_NODRAW) != 0 &&
-		(ent != host))
-		return 0;
-
-	// Ignore ents without valid / visible models
-	if (0 == ent->v.modelindex || !STRING(ent->v.model))
-		return 0;
-
-	// Don't send spectators to other players
-	if ((ent->v.flags & FL_SPECTATOR) != 0 && (ent != host))
+	if (UTIL_IsValidEntity(ent))
 	{
-		return 0;
-	}
-
-	// Ignore if not the host and not touching a PVS/PAS leaf
-	// If pSet is NULL, then the test will always succeed and the entity will be added to the update
-	if (ent != host)
-	{
-		if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
+		CBaseEntity* pEntity = CBaseEntity::Instance(ent);
+		CBaseEntity* pHost = CBaseEntity::Instance(host);
+		if (pEntity)
 		{
-			return 0;
+			const int iFlags = pEntity->m_iRC2Flags;
+			if ((iFlags & 1) != 0 && pEntity->pev->owner == host)
+				fForce = true;
+			if ((iFlags & 2) != 0)
+				fNoModel = true;
+			if ((iFlags & 4) != 0 && pEntity->pev->owner == host)
+				fOwnedByHost = true;
+			if ((iFlags & 8) != 0)
+				fForce = true;
+			if ((iFlags & 0x10) != 0 && pEntity->pev->dmg_inflictor == host)
+			{
+				fForce = true;
+				fInvisible = true;
+			}
+
+			if (pHost && pHost->IsPlayer())
+			{
+				CBasePlayer* pHostPlayer = static_cast<CBasePlayer*>(pHost);
+				if (0 != pHostPlayer->m_iRC2Player788)
+					fForce = true;
+				if (0 != pHostPlayer->m_iAdminSelected && pHostPlayer->m_pentAdminSelected && UTIL_IsValidEntity(pHostPlayer->m_pentAdminSelected) && pHostPlayer->m_pentAdminSelected == ent)
+					fForce = true;
+				if (pEntity->IsViewOfPlayer(pHost))
+					fOwnedByHost = true;
+				if ((pHost->m_iRC2Flags & 0x20) != 0 && pEntity->pev->takedamage == DAMAGE_AIM && pEntity->edict() != pHost->edict())
+				{
+					fForce = true;
+					if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet))
+						fPositionOnly = true;
+				}
+
+				const int iEnt = ENTINDEX(ent);
+				if (0 != iEnt)
+				{
+					if (pHostPlayer->m_iRidingIndex == iEnt)
+						fForce = true;
+					if (pHostPlayer->m_iRightRider == iEnt || pHostPlayer->m_iLeftRider == iEnt)
+						fForce = true;
+					if (pEntity->IsPlayer())
+					{
+						CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pEntity);
+						const int iHost = ENTINDEX(host);
+						if (pPlayer->m_iRidingIndex == iHost)
+							fForce = true;
+						if (pPlayer->m_iRightRider == iHost || pPlayer->m_iLeftRider == iHost)
+							fForce = true;
+					}
+				}
+			}
 		}
 	}
 
-
-	// Don't send entity to local client if the client says it's predicting the entity itself.
-	if ((ent->v.flags & FL_SKIPLOCALHOST) != 0)
+	if (UTIL_IsValidEntity(host))
 	{
-		if ((hostflags & 1) != 0 && (ent->v.owner == host))
+		// VERIFY: what +0x688 and +0x7a4 are; with iuser1 2 and iuser2 the target this looks
+		// like RC2's own spectator chase
+		CBasePlayer* pHostPlayer = static_cast<CBasePlayer*>(CBaseEntity::Instance(host));
+		if (pHostPlayer && 0 != pHostPlayer->m_iRC2Player688 && pHostPlayer->m_iRC2Player7a4 == 1 && pHostPlayer->pev->iuser1 == 2 && pHostPlayer->pev->iuser2 > 0 && pHostPlayer->pev->iuser2 == ENTINDEX(ent))
+			fForce = true;
+	}
+
+	if ((host->v.flags & FL_PROXY) == 0 && !fForce)
+	{
+		// don't send if flagged for NODRAW and it's not the host getting the message
+		// (RC2 tests effects == EF_NODRAW, not the bit)
+		if (ent->v.effects == EF_NODRAW && ent != host && !fNoModel)
 			return 0;
+
+		// Ignore ents without valid / visible models
+		if ((0 == ent->v.modelindex || !STRING(ent->v.model)) && !fNoModel)
+			return 0;
+
+		// Don't send spectators to other players
+		if ((ent->v.flags & FL_SPECTATOR) != 0 && (ent != host))
+		{
+			return 0;
+		}
+
+		// Ignore if not the host and not touching a PVS/PAS leaf
+		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
+		if (ent != host)
+		{
+			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s*)ent, pSet) && (host->v.flags & FL_PROXY) == 0)
+			{
+				return 0;
+			}
+		}
+
+		// Don't send entity to local client if the client says it's predicting the entity itself.
+		if ((ent->v.flags & FL_SKIPLOCALHOST) != 0)
+		{
+			if ((hostflags & 1) != 0 && (ent->v.owner == host))
+				return 0;
+		}
 	}
 
 	if (0 != host->v.groupinfo)
@@ -1307,29 +2082,38 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 	//
 
 	// Round animtime to nearest millisecond
-	state->animtime = (int)(1000.0 * ent->v.animtime) / 1000.0;
+	if (!fPositionOnly)
+		state->animtime = (int)(1000.0 * ent->v.animtime) / 1000.0;
 
 	memcpy(state->origin, ent->v.origin, 3 * sizeof(float));
-	memcpy(state->angles, ent->v.angles, 3 * sizeof(float));
+	if (!fPositionOnly)
+		memcpy(state->angles, ent->v.angles, 3 * sizeof(float));
 	memcpy(state->mins, ent->v.mins, 3 * sizeof(float));
 	memcpy(state->maxs, ent->v.maxs, 3 * sizeof(float));
 
-	memcpy(state->startpos, ent->v.startpos, 3 * sizeof(float));
-	memcpy(state->endpos, ent->v.endpos, 3 * sizeof(float));
+	if (!fPositionOnly)
+	{
+		memcpy(state->startpos, ent->v.startpos, 3 * sizeof(float));
+		memcpy(state->endpos, ent->v.endpos, 3 * sizeof(float));
 
-	state->impacttime = ent->v.impacttime;
-	state->starttime = ent->v.starttime;
+		state->impacttime = ent->v.impacttime;
+		state->starttime = ent->v.starttime;
+	}
 
-	state->modelindex = ent->v.modelindex;
+	if (!fNoModel && !fPositionOnly)
+	{
+		state->modelindex = ent->v.modelindex;
+		state->frame = ent->v.frame;
+		state->skin = ent->v.skin;
+	}
+	if (!fPositionOnly)
+		state->effects = ent->v.effects;
 
-	state->frame = ent->v.frame;
-
-	state->skin = ent->v.skin;
-	state->effects = ent->v.effects;
+	// RC2 sends takedamage as the team
+	state->team = static_cast<int>(ent->v.takedamage);
 
 	// This non-player entity is being moved by the game .dll and not the physics simulation system
 	//  make sure that we interpolate it's position on the client if it moves
-	/*
 	if (0 == player &&
 		0 != ent->v.animtime &&
 		ent->v.velocity[0] == 0 &&
@@ -1338,61 +2122,72 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 	{
 		state->eflags |= EFLAG_SLERP;
 	}
-	*/
 
-	if ((ent->v.flags & FL_FLY) != 0)
+	if (!fNoModel && !fPositionOnly)
 	{
-		state->eflags |= EFLAG_SLERP;
-	}
-	else
-	{
-		state->eflags &= ~EFLAG_SLERP;
-	}
+		state->scale = ent->v.scale;
+		state->colormap = ent->v.colormap;
 
-	state->eflags |= entity->m_EFlags;
+		state->movetype = ent->v.movetype;
+		state->sequence = ent->v.sequence;
+		state->framerate = ent->v.framerate;
+		state->body = ent->v.body;
 
-	state->scale = ent->v.scale;
-	state->solid = ent->v.solid;
-	state->colormap = ent->v.colormap;
-
-	state->movetype = ent->v.movetype;
-	state->sequence = ent->v.sequence;
-	state->framerate = ent->v.framerate;
-	state->body = ent->v.body;
-
-	for (i = 0; i < 4; i++)
-	{
-		state->controller[i] = ent->v.controller[i];
-	}
-
-	for (i = 0; i < 2; i++)
-	{
-		state->blending[i] = ent->v.blending[i];
-	}
-
-	state->rendermode = ent->v.rendermode;
-	state->renderamt = ent->v.renderamt;
-	state->renderfx = ent->v.renderfx;
-	state->rendercolor.r = ent->v.rendercolor.x;
-	state->rendercolor.g = ent->v.rendercolor.y;
-	state->rendercolor.b = ent->v.rendercolor.z;
-
-	state->aiment = 0;
-	if (ent->v.aiment)
-	{
-		state->aiment = ENTINDEX(ent->v.aiment);
-	}
-
-	state->owner = 0;
-	if (ent->v.owner)
-	{
-		int owner = ENTINDEX(ent->v.owner);
-
-		// Only care if owned by a player
-		if (owner >= 1 && owner <= gpGlobals->maxClients)
+		for (i = 0; i < 4; i++)
 		{
-			state->owner = owner;
+			state->controller[i] = ent->v.controller[i];
 		}
+
+		for (i = 0; i < 2; i++)
+		{
+			state->blending[i] = ent->v.blending[i];
+		}
+
+		state->rendermode = ent->v.rendermode;
+		state->renderamt = ent->v.renderamt;
+		state->renderfx = ent->v.renderfx;
+		state->rendercolor.r = ent->v.rendercolor.x;
+		state->rendercolor.g = ent->v.rendercolor.y;
+		state->rendercolor.b = ent->v.rendercolor.z;
+	}
+
+	if (!fPositionOnly)
+	{
+		state->aiment = 0;
+		if (ent->v.aiment)
+		{
+			state->aiment = ENTINDEX(ent->v.aiment);
+		}
+
+		state->owner = 0;
+		if (ent->v.owner)
+		{
+			int owner = ENTINDEX(ent->v.owner);
+
+			// Only care if owned by a player
+			if (owner >= 1 && owner <= gpGlobals->maxClients)
+			{
+				state->owner = owner;
+			}
+		}
+	}
+
+	if (fOwnedByHost)
+	{
+		state->solid = SOLID_NOT;
+		state->owner = ENTINDEX(host);
+	}
+	else if (!fPositionOnly)
+		state->solid = ent->v.solid;
+
+	if (fInvisible)
+	{
+		state->rendermode = kRenderTransColor;
+		state->renderamt = 0;
+		state->rendercolor.r = 0;
+		state->rendercolor.g = 0;
+		state->rendercolor.b = 0;
+		state->renderfx = kRenderFxNone;
 	}
 
 	// HACK:  Somewhat...
@@ -1400,30 +2195,60 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 	if (0 == player)
 	{
 		state->playerclass = ent->v.playerclass;
+		return 1;
 	}
 
 	// Special stuff for players only
-	if (0 != player)
+	if (fPositionOnly)
+		return 1;
+
+	memcpy(state->basevelocity, ent->v.basevelocity, 3 * sizeof(float));
+
+	state->weaponmodel = MODEL_INDEX(STRING(ent->v.weaponmodel));
+	state->gaitsequence = ent->v.gaitsequence;
+	state->spectator = ent->v.flags & FL_SPECTATOR;
+	state->friction = ent->v.friction;
+	// VERIFY: RC2 then sets spectator from state->iuser1, which is still 0 here (memset), so
+	// it always sends 0
+	state->spectator = state->iuser1 > 0;
+
+	state->gravity = ent->v.gravity;
+	state->usehull = (ent->v.flags & FL_DUCKING) != 0 ? 1 : 0;
+	state->health = ent->v.health;
+	state->iuser1 = ent->v.iuser1;
+	state->iuser2 = ent->v.iuser2;
+	state->iuser3 = ent->v.iuser3;
+	state->playerclass = 0;
+
+	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(CBaseEntity::Instance(ent));
+	if (pPlayer)
 	{
-		memcpy(state->basevelocity, ent->v.basevelocity, 3 * sizeof(float));
-
-		state->weaponmodel = MODEL_INDEX(STRING(ent->v.weaponmodel));
-		state->gaitsequence = ent->v.gaitsequence;
-		state->spectator = ent->v.flags & FL_SPECTATOR;
-		state->friction = ent->v.friction;
-
-		state->gravity = ent->v.gravity;
-		//		state->team			= ent->v.team;
-		//
-		state->usehull = (ent->v.flags & FL_DUCKING) != 0 ? 1 : 0;
-		state->health = ent->v.health;
+		// the transform as the class, and its hull
+		state->playerclass = pPlayer->m_iTransformType;
+		switch (pPlayer->m_iTransformType)
+		{
+		case 6:
+			state->usehull = 2;
+			break;
+		case 1:
+		case 3:
+			state->usehull = 0;
+			break;
+		case 2:
+		case 4:
+		case 5:
+			state->usehull = 1;
+			break;
+		}
+		if (0 != pPlayer->m_iShrunk)
+			state->usehull = 2;
+		if (0 != pPlayer->m_iRidingIndex)
+		{
+			// a rider is small, and its hull the point one
+			state->usehull = 2;
+			state->scale = 0.3f;
+		}
 	}
-
-	CBaseEntity* pEntity = static_cast<CBaseEntity*>(GET_PRIVATE(ent));
-	if (pEntity && pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
-		state->eflags |= EFLAG_FLESH_SOUND;
-	else
-		state->eflags &= ~EFLAG_FLESH_SOUND;
 
 	return 1;
 }
@@ -1435,6 +2260,8 @@ CreateBaseline
 Creates baselines used for network encoding, especially for player data since players are not spawned until connect time.
 ===================
 */
+// orig 0x1e740. RC2: a player's baseline has no scale and zeroes iuser1, spectator,
+// playerclass and usehull.
 void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, struct edict_s* entity, int playermodelindex, Vector* player_mins, Vector* player_maxs)
 {
 	baseline->origin = entity->v.origin;
@@ -1455,12 +2282,16 @@ void CreateBaseline(int player, int eindex, struct entity_state_s* baseline, str
 		baseline->mins = *player_mins;
 		baseline->maxs = *player_maxs;
 
+		baseline->iuser1 = 0;
+		baseline->spectator = 0;
+		baseline->playerclass = 0;
+		baseline->usehull = 0;
+
 		baseline->colormap = eindex;
 		baseline->modelindex = playermodelindex;
 		baseline->friction = 1.0;
 		baseline->movetype = MOVETYPE_WALK;
 
-		baseline->scale = entity->v.scale;
 		baseline->solid = SOLID_SLIDEBOX;
 		baseline->framerate = 1.0;
 		baseline->gravity = 1.0;
@@ -1522,6 +2353,7 @@ Callback for sending entity_state_t info over network.
 FIXME:  Move to script
 ==================
 */
+// orig 0x1e960 (unlisted; stock)
 void Entity_Encode(struct delta_s* pFields, const unsigned char* from, const unsigned char* to)
 {
 	entity_state_t *f, *t;
@@ -1592,6 +2424,7 @@ Player_Encode
 Callback for sending entity_state_t for players info over network. 
 ==================
 */
+// orig 0x1eb00 (unlisted; stock)
 void Player_Encode(struct delta_s* pFields, const unsigned char* from, const unsigned char* to)
 {
 	entity_state_t *f, *t;
@@ -1733,6 +2566,9 @@ void RegisterEncoders()
 	DELTA_ADDENCODER("Player_Encode", Player_Encode);
 }
 
+// orig 0x1edc0 (unlisted). RC2: nothing for a transformed player (pev->playerclass set), and
+// two more timers (the weapon's m_flNextTertiaryAttack and m_flNextQuaternaryAttack, as
+// m_flPumpTime and fuser4). halflife-updated's per-weapon GetWeaponData call isn't in RC2.
 int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 {
 	memset(info, 0, MAX_WEAPONS * sizeof(weapon_data_t));
@@ -1747,6 +2583,9 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 	ItemInfo II;
 
 	if (!pl)
+		return 1;
+
+	if (0 != pl->pev->playerclass)
 		return 1;
 
 	// go through all of the weapons and make a list of the ones to pack
@@ -1784,8 +2623,8 @@ int GetWeaponData(struct edict_s* player, struct weapon_data_s* info)
 						item->iuser1 = gun->m_chargeReady;
 						item->iuser2 = gun->m_fInAttack;
 						item->iuser3 = gun->m_fireState;
-
-						gun->GetWeaponData(*item);
+						item->m_flPumpTime = V_max(gun->m_flNextTertiaryAttack, -0.001f);
+						item->fuser4 = V_max(gun->m_flNextQuaternaryAttack, -0.001f);
 
 						//						item->m_flPumpTime				= V_max( gun->m_flPumpTime, -0.001f );
 					}
@@ -1806,6 +2645,8 @@ Data sent to current client only
 engine sets cd to 0 before calling.
 =================
 */
+// orig 0x1f000 (unlisted). RC2: iuser3 too, and no weapon data for a transformed player
+// (pev->playerclass set); halflife-updated's RPG fields aren't in RC2.
 void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* cd)
 {
 	if (!ent || !ent->pvPrivateData)
@@ -1881,13 +2722,14 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 		cd->iuser1 = pev->iuser1;
 		cd->iuser2 = pev->iuser2;
 	}
+	cd->iuser3 = pev->iuser3;
 
 
 
 #if defined(CLIENT_WEAPONS)
 	if (0 != sendweapons)
 	{
-		if (pl)
+		if (pl && 0 == pev->playerclass)
 		{
 			cd->m_flNextAttack = pl->m_flNextAttack;
 			cd->fuser2 = pl->m_flNextAmmoBurn;
@@ -1917,12 +2759,6 @@ void UpdateClientData(const edict_t* ent, int sendweapons, struct clientdata_s* 
 					cd->vuser4.x = gun->m_iPrimaryAmmoType;
 					cd->vuser4.y = pl->m_rgAmmo[gun->m_iPrimaryAmmoType];
 					cd->vuser4.z = pl->m_rgAmmo[gun->m_iSecondaryAmmoType];
-
-					if (pl->m_pActiveItem->m_iId == WEAPON_RPG)
-					{
-						cd->vuser2.y = static_cast<vec_t>(((CRpg*)pl->m_pActiveItem)->m_fSpotActive);
-						cd->vuser2.z = ((CRpg*)pl->m_pActiveItem)->m_cActiveRockets;
-					}
 				}
 			}
 		}
@@ -1982,6 +2818,7 @@ ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
+// orig 0x1f340 (unlisted; stock)
 int ConnectionlessPacket(const struct netadr_s* net_from, const char* args, char* response_buffer, int* response_buffer_size)
 {
 	// Parse stuff from args
@@ -2062,7 +2899,36 @@ AllowLagCompensation
   if you want.
 ================================
 */
+// orig 0x1f3c0 (unlisted; stock)
 int AllowLagCompensation()
 {
 	return 1;
 }
+
+// orig 0x1f3d0: compiler-generated, the start of CBasePlayer's constructor (the CBaseMonster
+// part RC2's GetClassPtr<CBasePlayer> calls before its member constructors), stock
+
+// orig 0x1ad20 CBasePlayer::IsAlive, 0x1ad50 ShouldFadeOnDeath, 0x1ad60 IsPlayer, 0x1ad70
+// IsNetClient, 0x1ad80 ObjectCaps: player.h's inline bodies, emitted here, stock (each "orig"
+// listed: orig 0x1ad20, orig 0x1ad50, orig 0x1ad60, orig 0x1ad70, orig 0x1ad80)
+
+// UTIL_KillEntityEffects: the real one is reconstructed elsewhere now
+// UTIL_ExtendTime: the real one is reconstructed elsewhere now
+// RC2PlayerButtons: the real one is reconstructed elsewhere now
+// g_fRC2Randomize: the real one is reconstructed elsewhere now
+// RC2Prefs_ClientCommand: the real one is reconstructed elsewhere now
+// ResetVote: the real one is reconstructed elsewhere now
+// VoteThink: the real one is reconstructed elsewhere now
+void Vote_Command(edict_t* pEntity) {}
+void VoteMap_Command(edict_t* pEntity) {}
+void VoteKick_Command(edict_t* pEntity) {}
+void UpdateVirtualHulls() {}
+void PrecacheTransforms() {}
+int gmsgAttrConf = 0;
+int gmsgSetAttr = 0;
+// StopRiding: the real one is reconstructed elsewhere now
+// StartRiding: the real one is reconstructed elsewhere now
+// StartTransform: the real one is reconstructed elsewhere now
+// StartUntransform: the real one is reconstructed elsewhere now
+// AddMoveLock: the real one is reconstructed elsewhere now
+void CBasePlayer::RC2StartObserver() {}

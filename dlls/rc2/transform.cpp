@@ -249,9 +249,9 @@ void CBasePlayer::StartTransform()
 	m_iHideHUD |= 0x10;
 	m_fShieldOn = false;
 
-	if (m_bRC2State650)
+	if (m_fJetpackOn)
 	{
-		m_bRC2State650 = false;
+		m_fJetpackOn = false;
 		RemovePhysFlags(1);
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(4);

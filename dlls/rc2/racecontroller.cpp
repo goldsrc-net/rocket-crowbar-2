@@ -127,7 +127,7 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 		return;
 	if (pPlayer->m_flEnergy < RC2Pref(RC2P_Attributes_TransformEnergyCost).f)
 		return;
-	if (pPlayer->m_bTransforming || pPlayer->m_iPhysKeyFlags2 != 0)
+	if (pPlayer->m_bTransforming || pPlayer->m_iMoveLock != 0)
 		return;
 	if (pPlayer->m_iRidingIndex != 0 || pPlayer->m_iRightRider != 0 || pPlayer->m_iLeftRider != 0)
 		return;
@@ -158,9 +158,9 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	pPlayer->m_iRC2State4ac |= 0x10;
 	pPlayer->m_fShieldOn = false;
 
-	if (pPlayer->m_bRC2State650)
+	if (pPlayer->m_fJetpackOn)
 	{
-		pPlayer->m_bRC2State650 = false;
+		pPlayer->m_fJetpackOn = false;
 		pPlayer->ClearPhysKeyFlags(1);
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(4);

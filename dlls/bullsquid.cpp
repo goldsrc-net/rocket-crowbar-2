@@ -72,14 +72,14 @@ public:
 	int m_maxFrame;
 };
 
-LINK_ENTITY_TO_CLASS(squidspit, CSquidSpit);
+LINK_ENTITY_TO_CLASS(squidspit, CSquidSpit); // orig 0x14760 (stock)
 
 TYPEDESCRIPTION CSquidSpit::m_SaveData[] =
 	{
 		DEFINE_FIELD(CSquidSpit, m_maxFrame, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CSquidSpit, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CSquidSpit, CBaseEntity); // orig 0x147d0 Save, orig 0x14800 Restore (stock)
 
 void CSquidSpit::Spawn()
 {
@@ -99,6 +99,7 @@ void CSquidSpit::Spawn()
 	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
 }
 
+// orig 0x14930 (stock)
 void CSquidSpit::Animate()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -112,6 +113,7 @@ void CSquidSpit::Animate()
 	}
 }
 
+// orig 0x14990 (stock)
 void CSquidSpit::Shoot(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
 {
 	CSquidSpit* pSpit = GetClassPtr((CSquidSpit*)NULL);
@@ -125,6 +127,7 @@ void CSquidSpit::Shoot(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
 	pSpit->pev->nextthink = gpGlobals->time + 0.1;
 }
 
+// orig 0x14a40. RC2: on what it hit's GetEffectedEnt.
 void CSquidSpit::Touch(CBaseEntity* pOther)
 {
 	TraceResult tr;
@@ -145,7 +148,7 @@ void CSquidSpit::Touch(CBaseEntity* pOther)
 		break;
 	}
 
-	if (0 == pOther->pev->takedamage)
+	if (0 == pOther->GetEffectedEnt()->pev->takedamage)
 	{
 
 		// make a splat on the wall
@@ -169,7 +172,7 @@ void CSquidSpit::Touch(CBaseEntity* pOther)
 	}
 	else
 	{
-		pOther->TakeDamage(pev, pev, gSkillData.bullsquidDmgSpit, DMG_GENERIC);
+		pOther->GetEffectedEnt()->TakeDamage(pev, pev, gSkillData.bullsquidDmgSpit, DMG_GENERIC);
 	}
 
 	SetThink(&CSquidSpit::SUB_Remove);
@@ -214,6 +217,9 @@ public:
 	int IgnoreConditions() override;
 	MONSTERSTATE GetIdealState() override;
 
+	// Rocket Crowbar 2 (reference/BASE_VIRTUALS.md)
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37fe; } // orig 0x14cd0
+
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
@@ -225,7 +231,7 @@ public:
 	float m_flLastHurtTime; // we keep track of this, because if something hurts a squid, it will forget about its love of headcrabs for a while.
 	float m_flNextSpitTime; // last time the bullsquid used the spit attack.
 };
-LINK_ENTITY_TO_CLASS(monster_bullchicken, CBullsquid);
+LINK_ENTITY_TO_CLASS(monster_bullchicken, CBullsquid); // orig 0x14c60 (stock)
 
 TYPEDESCRIPTION CBullsquid::m_SaveData[] =
 	{
@@ -234,7 +240,7 @@ TYPEDESCRIPTION CBullsquid::m_SaveData[] =
 		DEFINE_FIELD(CBullsquid, m_flNextSpitTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CBullsquid, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CBullsquid, CBaseMonster); // orig 0x14ce0 Save, orig 0x14d10 Restore (stock)
 
 //=========================================================
 // IgnoreConditions
@@ -383,6 +389,7 @@ bool CBullsquid::CheckMeleeAttack2(float flDot, float flDist)
 //=========================================================
 //  FValidateHintType
 //=========================================================
+// orig 0x15190 (stock)
 bool CBullsquid::FValidateHintType(short sHint)
 {
 	int i;
@@ -409,6 +416,7 @@ bool CBullsquid::FValidateHintType(short sHint)
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
+// orig 0x151d0 (stock)
 int CBullsquid::ISoundMask()
 {
 	return bits_SOUND_WORLD |
@@ -423,6 +431,7 @@ int CBullsquid::ISoundMask()
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x151e0 (stock)
 int CBullsquid::Classify()
 {
 	return CLASS_ALIEN_PREDATOR;
@@ -432,6 +441,7 @@ int CBullsquid::Classify()
 // IdleSound
 //=========================================================
 #define SQUID_ATTN_IDLE (float)1.5
+// orig 0x151f0 (stock; its jump table is the unlisted gap at 0x152c9)
 void CBullsquid::IdleSound()
 {
 	switch (RANDOM_LONG(0, 4))
@@ -532,13 +542,15 @@ void CBullsquid::SetYawSpeed()
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
+// orig 0x15460 (its jump table is the unlisted gap at 0x15e04). RC2: the spit flies straight ahead
+// with no enemy, and the throw pushes only a player in play (IsActivePlayer).
 void CBullsquid::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
 	{
 	case BSQUID_AE_SPIT:
 	{
-		if (m_hEnemy)
+		// RC2: with no enemy (halflife-updated skips the spit instead) it spits straight ahead
 		{
 			Vector vecSpitOffset;
 			Vector vecSpitDir;
@@ -549,7 +561,10 @@ void CBullsquid::HandleAnimEvent(MonsterEvent_t* pEvent)
 			// we should be able to read the position of bones at runtime for this info.
 			vecSpitOffset = (gpGlobals->v_right * 8 + gpGlobals->v_forward * 37 + gpGlobals->v_up * 23);
 			vecSpitOffset = (pev->origin + vecSpitOffset);
-			vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
+			if (m_hEnemy)
+				vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
+			else
+				vecSpitDir = gpGlobals->v_forward;
 
 			vecSpitDir.x += RANDOM_FLOAT(-0.05, 0.05);
 			vecSpitDir.y += RANDOM_FLOAT(-0.05, 0.05);
@@ -660,7 +675,7 @@ void CBullsquid::HandleAnimEvent(MonsterEvent_t* pEvent)
 			// screeshake transforms the viewmodel as well as the viewangle. No problems with seeing the ends of the viewmodels.
 			UTIL_ScreenShake(pHurt->pev->origin, 25.0, 1.5, 0.7, 2);
 
-			if (pHurt->IsPlayer())
+			if (pHurt->IsActivePlayer())
 			{
 				UTIL_MakeVectors(pev->angles);
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 300 + gpGlobals->v_up * 300;
@@ -745,6 +760,7 @@ void CBullsquid::Precache()
 //=========================================================
 // DeathSound
 //=========================================================
+// orig 0x16030 (stock)
 void CBullsquid::DeathSound()
 {
 	switch (RANDOM_LONG(0, 2))

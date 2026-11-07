@@ -132,7 +132,7 @@ void CShotgun::Holster() // orig 0xc7610
 // original reaches by entity index through 0x95860).
 static bool CanFireUnderwater(CBasePlayer* pPlayer) // name ours
 {
-	return (pPlayer->m_iRC2PlayerFlags708 & 0x200) != 0;
+	return (pPlayer->m_iAbilities & 0x200) != 0;
 }
 
 // name ours: the head the first three attacks share. False when it can't fire; on the server

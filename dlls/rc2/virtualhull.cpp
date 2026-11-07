@@ -16,20 +16,7 @@
 extern void DispatchTouch(edict_t* pentTouched, edict_t* pentOther);
 extern void DispatchBlocked(edict_t* pentBlocked, edict_t* pentOther);
 
-class CVirtualHull : public CBaseEntity
-{
-public:
-	void Spawn() override;
-	CBaseEntity* GetEffectedEnt() override;
-	bool IsViewOfPlayer(CBaseEntity* pPlayer) override;
-
-	bool OwnerGone();
-	void EXPORT HullTouch(CBaseEntity* pOther);
-	void EXPORT HullUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	void EXPORT HullBlocked(CBaseEntity* pOther);
-
-	EHANDLE m_hOwner; // name ours. orig +0x70: the player
-};
+#include "virtualhull.h"
 
 // the player's hull iHull, made when it doesn't exist yet
 CVirtualHull* GetVirtualHull(CBasePlayer* pPlayer, int iHull) // orig 0xf7550

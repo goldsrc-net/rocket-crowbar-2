@@ -24,7 +24,7 @@
 #define RC2_HOLD_FROZEN 2	 // the hold bit in CBasePlayer +0x648 (name ours)
 
 // orig 0x9a800, 0x9a820 (player.cpp), names ours: set and clear hold bits in CBasePlayer +0x648
-// (m_iPhysKeyFlags2); each also calls a player function with 2 (0x9a730 on set, 0x9a780 when the
+// (m_iMoveLock); each also calls a player function with 2 (0x9a730 on set, 0x9a780 when the
 // last bit goes)
 extern void RC2PlayerAddHold(CBasePlayer* pPlayer, int iBits);
 extern void RC2PlayerRemoveHold(CBasePlayer* pPlayer, int iBits);

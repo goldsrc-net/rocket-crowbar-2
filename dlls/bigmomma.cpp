@@ -50,15 +50,16 @@ public:
 	int m_preSequence;
 };
 
-LINK_ENTITY_TO_CLASS(info_bigmomma, CInfoBM);
+LINK_ENTITY_TO_CLASS(info_bigmomma, CInfoBM); // orig 0xf910 (stock)
 
 TYPEDESCRIPTION CInfoBM::m_SaveData[] =
 	{
 		DEFINE_FIELD(CInfoBM, m_preSequence, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CInfoBM, CPointEntity);
+IMPLEMENT_SAVERESTORE(CInfoBM, CPointEntity); // orig 0xf980 Save, orig 0xf9b0 Restore (stock)
 
+// orig 0xf9e0 (stock)
 void CInfoBM::Spawn()
 {
 }
@@ -114,14 +115,14 @@ public:
 	int m_maxFrame;
 };
 
-LINK_ENTITY_TO_CLASS(bmortar, CBMortar);
+LINK_ENTITY_TO_CLASS(bmortar, CBMortar); // orig 0xfbc0 (stock)
 
 TYPEDESCRIPTION CBMortar::m_SaveData[] =
 	{
 		DEFINE_FIELD(CBMortar, m_maxFrame, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CBMortar, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CBMortar, CBaseEntity); // orig 0xfc30 Save, orig 0xfc60 Restore (stock)
 
 
 //=========================================================
@@ -193,6 +194,10 @@ public:
 	void SetYawSpeed() override;
 	int Classify() override;
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
+
+	// Rocket Crowbar 2's added virtuals (reference/BASE_VIRTUALS.md)
+	float BeamViewDamage() override { return 0; }						   // orig 0xfd10: the houndeye beam's view damage doesn't hurt her
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x2006; } // orig 0xfd00
 	void LayHeadcrab();
 
 	int GetNodeSequence()
@@ -248,7 +253,7 @@ public:
 	}
 
 	// Restart the crab count on each new level
-	void OverrideReset() override
+	void OverrideReset() override // orig 0xfd20 (stock)
 	{
 		m_crabCount = 0;
 	}
@@ -278,7 +283,7 @@ public:
 
 	void LaunchMortar();
 
-	void SetObjectCollisionBox() override
+	void SetObjectCollisionBox() override // orig 0xfd30 (stock)
 	{
 		pev->absmin = pev->origin + Vector(-95, -95, 0);
 		pev->absmax = pev->origin + Vector(95, 95, 190);
@@ -311,7 +316,7 @@ private:
 	float m_painSoundTime;
 	int m_crabCount;
 };
-LINK_ENTITY_TO_CLASS(monster_bigmomma, CBigMomma);
+LINK_ENTITY_TO_CLASS(monster_bigmomma, CBigMomma); // orig 0xfc90 (stock)
 
 TYPEDESCRIPTION CBigMomma::m_SaveData[] =
 	{
@@ -322,7 +327,7 @@ TYPEDESCRIPTION CBigMomma::m_SaveData[] =
 		DEFINE_FIELD(CBigMomma, m_crabCount, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CBigMomma, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CBigMomma, CBaseMonster); // orig 0xfde0 Save, orig 0xfe10 Restore (stock)
 
 const char* CBigMomma::pChildDieSounds[] =
 	{
@@ -386,6 +391,7 @@ const char* CBigMomma::pFootSounds[] =
 
 
 
+// orig 0xfe40 (stock)
 bool CBigMomma::KeyValue(KeyValueData* pkvd)
 {
 #if 0
@@ -403,6 +409,7 @@ bool CBigMomma::KeyValue(KeyValueData* pkvd)
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0xfe50 (stock)
 int CBigMomma::Classify()
 {
 	return CLASS_ALIEN_MONSTER;
@@ -433,6 +440,8 @@ void CBigMomma::SetYawSpeed()
 //
 // Returns number of events handled, 0 if none.
 //=========================================================
+// orig 0xfe90 (its jump table is the unlisted gap at 0x1096c). RC2: the slash hurts the hit
+// entity's GetEffectedEnt.
 void CBigMomma::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
@@ -464,6 +473,7 @@ void CBigMomma::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 		if (pHurt)
 		{
+			pHurt = pHurt->GetEffectedEnt();
 			pHurt->TakeDamage(pev, pev, gSkillData.bigmommaDmgSlash, DMG_CRUSH | DMG_SLASH);
 			pHurt->pev->punchangle.x = 15;
 			switch (pEvent->event)
@@ -554,6 +564,7 @@ void CBigMomma::HandleAnimEvent(MonsterEvent_t* pEvent)
 	}
 }
 
+// orig 0x109e0. RC2: no pain sound while frozen.
 void CBigMomma::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	if (ptr->iHitgroup != 1)
@@ -571,7 +582,8 @@ void CBigMomma::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDi
 	else if (gpGlobals->time > m_painSoundTime)
 	{
 		m_painSoundTime = gpGlobals->time + RANDOM_LONG(1, 3);
-		EMIT_SOUND_ARRAY_DYN(CHAN_VOICE, pPainSounds);
+		if (!m_bFrozen)
+			EMIT_SOUND_ARRAY_DYN(CHAN_VOICE, pPainSounds);
 	}
 
 
@@ -675,6 +687,7 @@ void CBigMomma::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
+// orig 0x10f50 (stock)
 void CBigMomma::Precache()
 {
 	PRECACHE_MODEL("models/big_mom.mdl");
@@ -709,6 +722,7 @@ void CBigMomma::Activate()
 }
 
 
+// orig 0x110d0 (stock)
 void CBigMomma::NodeStart(int iszNextNode)
 {
 	pev->netname = iszNextNode;
@@ -761,6 +775,7 @@ void CBigMomma::NodeReach()
 
 
 // Slash
+// orig 0x11260 (stock)
 bool CBigMomma::CheckMeleeAttack1(float flDot, float flDist)
 {
 	if (flDot >= 0.7)
@@ -867,7 +882,9 @@ DEFINE_CUSTOM_SCHEDULES(CBigMomma){
 	slNodeFail,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CBigMomma, CBaseMonster);
+IMPLEMENT_CUSTOM_SCHEDULES(CBigMomma, CBaseMonster); // orig 0x11490 ScheduleFromName (stock)
+// COMDATs emitted in this file's object, stock: orig 0x11a30 CBaseEntity::edict, orig 0x11be0
+// CPointEntity::ObjectCaps
 
 
 
@@ -1165,6 +1182,7 @@ void CBMortar::Spawn()
 	pev->dmgtime = gpGlobals->time + 0.4;
 }
 
+// orig 0x11fe0 (stock)
 void CBMortar::Animate()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -1183,6 +1201,7 @@ void CBMortar::Animate()
 	}
 }
 
+// orig 0x12130 (stock)
 CBMortar* CBMortar::Shoot(edict_t* pOwner, Vector vecStart, Vector vecVelocity)
 {
 	CBMortar* pSpit = GetClassPtr((CBMortar*)NULL);

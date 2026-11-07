@@ -23,6 +23,7 @@
 #include "game.h"
 #include "pm_shared.h"
 #include "rc2prefs.h"
+#include "player.h"
 
 void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd);
 
@@ -214,6 +215,8 @@ void DispatchKeyValue(edict_t* pentKeyvalue, KeyValueData* pkvd)
 	pkvd->fHandled = static_cast<int32>(pEntity->KeyValue(pkvd));
 }
 
+// orig 0x194f0. RC2: the touch lands on each side's GetEffectedEnt, so does the engine's
+// trace_ent, and a player doesn't touch what counts as its own view (IsViewOfPlayer).
 void DispatchTouch(edict_t* pentTouched, edict_t* pentOther)
 {
 	if (gTouchDisabled)
@@ -222,18 +225,33 @@ void DispatchTouch(edict_t* pentTouched, edict_t* pentOther)
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pentTouched);
 	CBaseEntity* pOther = (CBaseEntity*)GET_PRIVATE(pentOther);
 
-	if (pEntity && pOther && ((pEntity->pev->flags | pOther->pev->flags) & FL_KILLME) == 0)
-		pEntity->Touch(pOther);
+	if (!pEntity || !pOther)
+		return;
+
+	if (((pEntity->pev->flags | pOther->pev->flags) & FL_KILLME) == 0)
+	{
+		if (UTIL_IsValidEntity(gpGlobals->trace_ent))
+			gpGlobals->trace_ent = CBaseEntity::Instance(gpGlobals->trace_ent)->GetEffectedEnt()->edict();
+
+		if (pEntity->IsPlayer() && pOther->IsViewOfPlayer(pEntity))
+			return;
+		if (pOther->IsPlayer() && pEntity->IsViewOfPlayer(pOther))
+			return;
+
+		pEntity->GetEffectedEnt()->Touch(pOther->GetEffectedEnt());
+	}
 }
 
 
+// orig 0x19600 (unlisted: no function at it in the decompile). RC2: between the two sides'
+// GetEffectedEnt. pOther isn't checked (stock passes it on, RC2 calls through it).
 void DispatchUse(edict_t* pentUsed, edict_t* pentOther)
 {
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pentUsed);
 	CBaseEntity* pOther = (CBaseEntity*)GET_PRIVATE(pentOther);
 
 	if (pEntity && (pEntity->pev->flags & FL_KILLME) == 0)
-		pEntity->Use(pOther, pOther, USE_TOGGLE, 0);
+		pEntity->GetEffectedEnt()->Use(pOther->GetEffectedEnt(), pOther->GetEffectedEnt(), USE_TOGGLE, 0);
 }
 
 void DispatchThink(edict_t* pent)
@@ -253,8 +271,9 @@ void DispatchBlocked(edict_t* pentBlocked, edict_t* pentOther)
 	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(pentBlocked);
 	CBaseEntity* pOther = (CBaseEntity*)GET_PRIVATE(pentOther);
 
+	// orig 0x196c0. RC2: between the two sides' GetEffectedEnt (pOther not checked)
 	if (pEntity)
-		pEntity->Blocked(pOther);
+		pEntity->GetEffectedEnt()->Blocked(pOther->GetEffectedEnt());
 }
 
 void DispatchSave(edict_t* pent, SAVERESTOREDATA* pSaveData)
@@ -306,6 +325,7 @@ void OnFreeEntPrivateData(edict_s* pEdict)
 
 // Find the matching global entity.  Spit out an error if the designer made entities of
 // different classes with the same global name
+// orig 0x197e0 (stock)
 CBaseEntity* FindGlobalEntity(string_t classname, string_t globalname)
 {
 	edict_t* pent = FIND_ENTITY_BY_STRING(NULL, "globalname", STRING(globalname));
@@ -496,6 +516,8 @@ edict_t* EHANDLE::Set(edict_t* pent)
 };
 
 
+// orig 0x19ce0 (stock). RC2 has a second, identical copy at orig 0x19cf0 that it uses to read a
+// player's members through an EHANDLE (CImpailer::PullingThink); a cast here.
 EHANDLE::operator CBaseEntity*()
 {
 	return (CBaseEntity*)GET_PRIVATE(Get());
@@ -518,6 +540,8 @@ CBaseEntity* EHANDLE::operator=(CBaseEntity* pEntity)
 	return pEntity;
 }
 
+// orig 0x19d40 (stock). orig 0x19d30 is SDK 2.3's operator int (stock), which halflife-updated
+// dropped: the conversion to CBaseEntity* does its job.
 CBaseEntity* EHANDLE::operator->()
 {
 	return (CBaseEntity*)GET_PRIVATE(Get());
@@ -544,9 +568,14 @@ bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType)
 
 // inflict damage on this entity.  bitsDamageType indicates type of damage inflicted, ie: DMG_CRUSH
 
+// orig 0x19dc0. RC2: damage to an entity that has a GetEffectedEnt goes to that.
 bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	Vector vecTemp;
+
+	CBaseEntity* pEffected = GetEffectedEnt();
+	if (pEffected->pev != pev)
+		return pEffected->TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 
 	if (0 == pev->takedamage)
 		return false;
@@ -603,6 +632,7 @@ void CBaseEntity::Killed(entvars_t* pevAttacker, int iGib)
 }
 
 
+// orig 0x1a1d0 (stock)
 CBaseEntity* CBaseEntity::GetNextTarget()
 {
 	if (FStringNull(pev->target))
@@ -699,6 +729,7 @@ void SetObjectCollisionBox(entvars_t* pev)
 }
 
 
+// orig 0x1a520 (stock)
 void CBaseEntity::SetObjectCollisionBox()
 {
 	::SetObjectCollisionBox(pev);
@@ -733,11 +764,13 @@ void CBaseEntity::MakeDormant()
 	UTIL_SetOrigin(pev, pev->origin);
 }
 
+// orig 0x1a620 (stock)
 bool CBaseEntity::IsDormant()
 {
 	return FBitSet(pev->flags, FL_DORMANT);
 }
 
+// orig 0x1a630. RC2: the position only.
 bool CBaseEntity::IsInWorld()
 {
 	// position
@@ -753,19 +786,7 @@ bool CBaseEntity::IsInWorld()
 		return false;
 	if (pev->origin.z <= -4096)
 		return false;
-	// speed
-	if (pev->velocity.x >= 2000)
-		return false;
-	if (pev->velocity.y >= 2000)
-		return false;
-	if (pev->velocity.z >= 2000)
-		return false;
-	if (pev->velocity.x <= -2000)
-		return false;
-	if (pev->velocity.y <= -2000)
-		return false;
-	if (pev->velocity.z <= -2000)
-		return false;
+	// RC2 dropped SDK 2.3's speed limits (velocity beyond +-2000 counted as out of the world)
 
 	return true;
 }
@@ -794,12 +815,23 @@ int CBaseEntity::DamageDecal(int bitsDamageType)
 
 
 
+// The client commands that create entities set this (client.cpp's ClientCommand); while it is
+// set Create refuses what isn't on the precache list and the classnames that must come from
+// the map. RC 1.9's name.
+extern bool g_bUnsafeCreate;		  // orig 0x18f3f0
+extern bool IsClassnamePrecachedNoInvalid(const char* pszClassname); // orig 0xf5a80 (p9)
+extern bool IsClassnameMapOnly(const char* pszClassname);	  // orig 0xf5af0 (p9), name ours
+
 // NOTE: szName must be a pointer to constant memory, e.g. "monster_class" because the entity
 // will keep a pointer to it after this call.
+// orig 0x1a710. RC2: the g_bUnsafeCreate gate.
 CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner)
 {
 	edict_t* pent;
 	CBaseEntity* pEntity;
+
+	if (g_bUnsafeCreate && (!IsClassnamePrecachedNoInvalid(szName) || IsClassnameMapOnly(szName)))
+		return NULL;
 
 	pent = CREATE_NAMED_ENTITY(MAKE_STRING(szName));
 	if (FNullEnt(pent))
@@ -975,10 +1007,19 @@ bool CBaseEntity::ApplyExternalForce(float flInterval) // orig 0xa9ba0
 	return bPulled;
 }
 
-// TEMP STUB for 0x1a7e0: true when pPlayer is a player and this entity's owner is one of three
-// entity indices the player keeps (RC2 members at +0x69c, +0x6a4, +0x6a8); the player package
-// reconstructs it with those members.
+// orig 0x1a7e0. True when pPlayer is a player and this entity's owner is the player it rides
+// or one riding its shoulders (CBasePlayer's RC2 members at +0x69c, +0x6a4, +0x6a8; p6's names).
 bool CBaseEntity::IsViewOfPlayer(CBaseEntity* pPlayer)
 {
-	return false;
+	if (!pPlayer->IsPlayer())
+		return false;
+	if (0 == ENTINDEX(edict()))
+		return false;
+	if (!UTIL_IsValidEntity(pev->owner))
+		return false;
+	const int iOwner = ENTINDEX(pev->owner);
+	if (0 == iOwner)
+		return false;
+	CBasePlayer* pThePlayer = static_cast<CBasePlayer*>(pPlayer);
+	return iOwner == pThePlayer->m_iRidingIndex || iOwner == pThePlayer->m_iRightRider || iOwner == pThePlayer->m_iLeftRider;
 }

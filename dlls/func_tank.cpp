@@ -452,7 +452,7 @@ void CFuncTank::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 		if (!pActivator->IsActivePlayer())
 			return;
 		CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
-		if (pPlayer->m_iShrunk != 0 || pPlayer->m_iRidingIndex != 0 || pPlayer->m_bTransforming || pPlayer->m_iPhysKeyFlags2 != 0)
+		if (pPlayer->m_iShrunk != 0 || pPlayer->m_iRidingIndex != 0 || pPlayer->m_bTransforming || pPlayer->m_iMoveLock != 0)
 			return;
 
 		if (value == 2 && useType == USE_SET)

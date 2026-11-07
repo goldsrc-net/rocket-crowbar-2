@@ -232,7 +232,7 @@ void CCrossbowBolt::ExplodeThink()
 }
 #endif
 
-LINK_ENTITY_TO_CLASS(weapon_crossbow, CCrossbow);
+LINK_ENTITY_TO_CLASS(weapon_crossbow, CCrossbow); // orig 0x2ad30 (p1's range; the rest of crossbow.cpp is p2's)
 
 void CCrossbow::Spawn()
 {

@@ -15,11 +15,7 @@
 // TEMP STUB (p2): real one belongs in weapons.cpp (W_Precache, 0xf9360, precaches events/explode.sc)
 unsigned short g_usRC2Explode = 0;
 
-// TEMP STUB (p2): real one belongs in pm_shared's pm_math (0xa0260)
-void VectorsToAngles(const Vector& vecForward, const Vector& vecRight, const Vector& vecUp, Vector& vecAngles)
-{
-	vecAngles = UTIL_VecToAngles(vecForward);
-}
+// VectorsToAngles: the real one is reconstructed elsewhere now
 
 // UTIL_PackDirection: the real one is reconstructed elsewhere now
 // RC2RadiusDamage: util.cpp (p9); its third argument is an edict_t*

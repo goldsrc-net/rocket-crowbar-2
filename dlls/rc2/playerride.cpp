@@ -179,9 +179,9 @@ void CBasePlayer::StartRiding() // orig 0xb16b0
 	pev->solid = SOLID_NOT;
 	m_fShieldOn = false;
 
-	if (m_bRC2State650)
+	if (m_fJetpackOn)
 	{
-		m_bRC2State650 = false;
+		m_fJetpackOn = false;
 		ClearPhysKeyFlags(1);
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(4);
@@ -390,8 +390,8 @@ void CBasePlayer::ClearPhysKeyFlags(int iBits)
 // TEMP STUB (p6): real one belongs in player.cpp (orig 0x9a820)
 void CBasePlayer::ClearPhysKeyFlags2(int iBits)
 {
-	m_iPhysKeyFlags2 &= ~iBits;
-	if (m_iPhysKeyFlags2 == 0)
+	m_iMoveLock &= ~iBits;
+	if (m_iMoveLock == 0)
 		ClearPhysKeyFlags(2);
 }
 
