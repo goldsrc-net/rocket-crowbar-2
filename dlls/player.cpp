@@ -1293,7 +1293,6 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 
 	// reset FOV
 	m_iFOV = m_iClientFOV = 0;
-	pev->fov = 0;
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, NULL, pev);
 	WRITE_BYTE(0);
@@ -4186,7 +4185,6 @@ void CBasePlayer::Spawn()
 	m_bSpecChase = false;
 
 	m_iFOV = 0; // init field of view.
-	pev->fov = 0;
 	m_iClientFOV = -1; // make sure fov reset is sent
 	m_ClientSndRoomtype = -1;
 

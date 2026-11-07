@@ -70,14 +70,11 @@ void CGrenade::Explode(TraceResult* pTrace, int bitsDamageType)
 
 	if (pTrace->flFraction != 1.0)
 	{
-		// RC2 moves it again, by SDK 2.3's pull-out distance (halflife-updated's fix of that
-		// expression doesn't apply: this is RC2's own line, with a clamp SDK 2.3 didn't have)
-		float flPull = (pev->dmg - 24) * 0.6;
-		if (flPull < 0)
-			flPull = 0;
-		else if (flPull > 256)
-			flPull = 256;
-		UTIL_SetOrigin(pev, pTrace->vecEndPos + pTrace->vecPlaneNormal * flPull);
+		// RC2 moves it again for the damage. halflife-updated's fix, kept (Steven 2026-11-07:
+		// unclear goes to halflife-updated): 0.6 units off the surface (078e787, halflife#3244). RC2
+		// pulled out by SDK 2.3's (dmg - 24) * 0.6, held to 0-256, so a big blast sat far enough
+		// out to reach through a wall.
+		UTIL_SetOrigin(pev, pTrace->vecEndPos + pTrace->vecPlaneNormal * 0.6);
 	}
 
 	entvars_t* pevOwner;

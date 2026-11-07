@@ -10,7 +10,8 @@ projects.
 
 - fix: halflife-updated's code is restored, the comment reads `// halflife-updated's fix, kept: ...`.
 - design: the revert stays.
-- unclear: the revert stays until Steven decides (listed at the end).
+- unclear: left for Steven. His rule of 2026-11-07: an unclear call goes to halflife-updated's
+  version and design reverts already made stay, except where the decided list below says otherwise.
 
 "seed" is halflife-updated's first commit de70fad, Valve's 2013 SDK; "SDK 2.2+" is a change Valve made
 after SDK 2.1, so RC2's SDK 2.3 already has it. Where one row splits, each part has its own verdict.
@@ -118,8 +119,32 @@ projects match mod-rockcrowbar's r3 and r6 rows):
 0xb2d60   roach.cpp               CRoach::MonsterThink               fabs (e19fe47)                                                  fix      same
 ```
 
-Counts (rows above, a split row counted once per part): fix 34 (31 audit rows and the 3 above), design 21,
-unclear 8.
+Counts (the audit rows and the three e19fe47 rows, a split row counted once per part): fix 34 (31
+audit rows and the 3), design 21, unclear 8 (each decided by Steven, list below).
+
+Outside the audits too, after Steven's rule of 2026-11-07 (unclear goes to halflife-updated; p6's
+pm_shared drops and the same calls mod-ozdm made), applied, with RC2's own code in the same
+functions kept:
+
+```
+0xa1dc0   pm_shared.cpp           PM_FlyMove                         reflects off the first plane only (854187a, HL25)               fix      a jump into an acute corner stuck; p6 had dropped it
+                                                                                                                                              (RC2's PMF_BOUNCE branch stays)
+0xa7dd0   pm_shared.cpp           PM_PlayerMove                      duck to get unstuck (854187a)                                   fix      p6 had dropped it; CheckStuck was already upstream's
+0xa77b0   pm_shared.cpp           PM_CheckParamters                  +use on the ground cuts maxspeed to a third (4f0d502, HL25)     fix      RC2 has no slowdown, SDK 2.3 scaled the velocity each
+                                                                                                                                              step; after RC2's mode speeds
+0x509f0   ggrenade.cpp            CGrenade::Explode(TraceResult*)    pull-out 0.6, was (dmg - 24) * 0.6 (078e787, halflife#3244)     fix      (Steven 2026-11-07: unclear goes to halflife-updated);
+                                                                                                                                              RC2's 0-256 clamp goes with it, its 16-unit move for
+                                                                                                                                              the event stays
+0xabd10.. python.cpp, crossbow,   CPython::QuaternaryAttack, Reload  zoom in m_iFOV alone, no pev->fov (6f8aac9, halflife#3044)      fix      Steven 2026-11-07; RC2 kept both in step and tested
+          hornetgun, player.cpp,  (0xad6b0), CCrossbow::Quaternary-                                                                           pev->fov; the client copies cd->fov into m_iFOV
+          hl_weapons.cpp          Attack (0x2c250), Reload (0x2cc30),
+                                  CHgun::Deploy (0x65200), Holster
+                                  (0x652a0), QuaternaryAttack
+                                  (0x65aa0), CBasePlayer::Killed
+                                  (0x96020), Spawn (0x9a880)
+```
+
+Counts (this block): fix 5 (1 of them unclear until Steven's rule).
 
 ## mod-rockcrowbar (verdicts only; applied after the go-ahead)
 
@@ -213,10 +238,12 @@ rva        file                     function                           what half
                                                                                                                                          override stays)
 0x23b250   weapons.cpp              CBasePlayerWeapon::ExtractAmmo     |= the secondary result (d42b905, halflife#3027)             fix      the weapon was left behind when its ammo was taken
 0x23b370   weapons.cpp              CBasePlayerWeapon::RetireWeapon    as mod-rc2                                                   fix      as mod-rc2
-0x23af00   weapons.cpp              CBasePlayerWeapon::PlayEmptySound  as mod-rc2                                                   unclear  see the list below
+0x23af00   weapons.cpp              CBasePlayerWeapon::PlayEmptySound  as mod-rc2                                                   fix      (Steven 2026-11-07: unclear goes to halflife-updated)
 0x23a250   weapons_shared.cpp       CBasePlayerWeapon::ItemPostFrame   TabulateAmmo, m_flLastFireTime (SDK 2.2+)                    design   prediction bookkeeping; nothing reads it here
 0x19c7d0   ggrenade.cpp             CGrenade::Explode                  source 1 unit lower against RadiusDamage's + 1 (d6accf1,     fix      damage through the brush a grenade hit from below
-                                                                       halflife#3244)                                                            (RC's own pull-out distance stays)
+                                                                       halflife#3244)
+0x19c7d0   ggrenade.cpp             CGrenade::Explode                  pull-out 0.6, was (dmg - 24) * 0.6 (078e787, halflife#3244)  fix      (Steven 2026-11-07: unclear goes to halflife-updated);
+                                                                                                                                         RC's +-512 clamp goes with it
 0x19d500   ggrenade.cpp             CGrenade::BounceTouch              as mod-rc2                                                   fix      as mod-rc2
 0x19dc60   ggrenade.cpp             CGrenade::ShootTimed               as mod-rc2                                                   fix      as mod-rc2 (after RC's later SET_MODEL)
 0x1c4e00   monsters.cpp             CBaseMonster::MonsterUse           no MONSTERSTATE_ALERT (08975b8, halflife#3061)               fix      resurrected a dying monster (mod-rc2 keeps it)
@@ -243,8 +270,8 @@ rva        file                     function                           what half
 0x207ba0   scientist.cpp            CScientist::GetSchedule,           Marphy disregard-enemy changes                               design   Marphy content, mod-rc2 has SDK 2.3's too
                                     GetIdealState
 0x207490   scientist.cpp            CScientist::TalkInit               % NUM_SCIENTIST_HEADS (4, HL25's head)                       design   mod-rc2 keeps % 3 too
-0x2076d0   scientist.cpp            CScientist::ISoundMask             smells meat, carcass, garbage (SDK 2.2+)                     unclear  see the list below
-0x2073f0.. scientist.cpp            CScientist::Precache, Spawn,       _sv_override_scientist_mdl                                   unclear  see the list below
+0x2076d0   scientist.cpp            CScientist::ISoundMask             smells meat, carcass, garbage (SDK 2.2+)                     fix      (Steven 2026-11-07: unclear goes to halflife-updated)
+0x2073f0.. scientist.cpp            CScientist::Precache, Spawn,       _sv_override_scientist_mdl                                   fix      (Steven 2026-11-07: unclear goes to halflife-updated)
                                     CDeadScientist, CSittingScientist
 -          houndeye.cpp             HOUNDEYE_EYE_FRAMES 3, not 4       (e5f9c39, Marphy)                                            fix      houndeye.mdl has 3 skin families: skin 3 isn't
                                                                                                                                          there (mod-rc2 keeps 3)
@@ -278,21 +305,22 @@ rva        file                     function                           what half
                                                                                                                                          stays)
 0x1ec5b0   player.cpp               CBasePlayer::PlayerDeathThink      4 s, not 120 think frames (ac6b664, HL25)                    fix      the frames followed the client's command rate
 0x1ec5b0   player.cpp               CBasePlayer::PlayerDeathThink      grounded corpse MOVETYPE_NONE (SDK 2.2+)                     fix      the body went to a player's head walking over it
-0x1ec5b0   player.cpp               CBasePlayer::PlayerDeathThink      body copied at once in multiplayer (ac6b664, with            design   HL25's corpses (RC fades its own)
-                                                                       CopyToBodyQue's modelindex test)
+0x1ec5b0   player.cpp               CBasePlayer::PlayerDeathThink      body copied at once in multiplayer (ac6b664)                 design   HL25's corpses (RC fades its own)
+0x23ecd0   world.cpp                CopyToBodyQue                      modelindex 0 test (ac6b664)                                  fix      as mod-rc2 and mod-ozdm (Steven 2026-11-07); RC's
+                                                                                                                                         frame 255 stays
 0x1ef420   player.cpp               CBasePlayer::PreThink              m_bResetViewEntity (5fd0acb, halflife#3031)                  fix      a camera's view lost on a save load (singleplayer)
 0x1f44a0   player.cpp               CBasePlayer::UpdateClientData      health held to a short (5a0c6c1, #2149), 0-1 sent as 1       fix      wrap past 32767; a live player's HUD read 0
                                                                        (SDK 2.2+)
-0x1eb6a0   player.cpp               CBasePlayer::Killed                holsters the active weapon (SDK 2.2+)                        unclear  see the list below
-0x1eb6a0   player.cpp               CBasePlayer::Killed                pev->modelindex = player model, "don't use eyes" (SDK 2.2+)  unclear  see the list below
+0x1eb6a0   player.cpp               CBasePlayer::Killed                holsters the active weapon (SDK 2.2+)                        fix      (Steven 2026-11-07: unclear goes to halflife-updated)
+0x1eb6a0   player.cpp               CBasePlayer::Killed                pev->modelindex = player model, "don't use eyes" (SDK 2.2+)  fix      (Steven 2026-11-07: unclear goes to halflife-updated)
 0x0fd490   client.cpp               ClientDisconnect                   lets go of a func_tank (de2751c, halflife#2594)              fix      as RemoveAllItems' tank release
 0x102cc0   client.cpp               ClientUserInfoChanged              % in a new name becomes a space (SDK 2.2+)                   fix      a name worked as a format string where printed
 0x0fd7e0   client.cpp               Host_Say, ClientPutInServer,       chat flood timer, spectator, voice mute, log lines           design   features (spectator mode, logs)
                                     ClientCommand
 -          multiplay_gamerules.cpp  Think, GoToIntermission, FShould-  mp_chattime, cl_autowepswitch, func_vehicle credit, log      design   features
                                     SwitchWeapon, PlayerKilled, ...    lines, motdfile and ServerName
-0x1cf840   multiplay_gamerules.cpp  CHalfLifeMultiplay::DeathNotice    HLTV director event (SDK 2.2+)                               unclear  see the list below
-0x220d90.. teamplay_gamerules.cpp   CHalfLifeTeamplay::InitHUD,        TeamNames, ScoreInfo on a team change, TeamInfo resend       unclear  see the list below
+0x1cf840   multiplay_gamerules.cpp  CHalfLifeMultiplay::DeathNotice    HLTV director event (SDK 2.2+)                               fix      (Steven 2026-11-07: unclear goes to halflife-updated)
+0x220d90.. teamplay_gamerules.cpp   CHalfLifeTeamplay::InitHUD,        TeamNames, ScoreInfo on a team change, TeamInfo resend       fix      (Steven 2026-11-07: unclear goes to halflife-updated)
                                     ChangePlayerTeam (0x221020),       (SDK 2.2+)
                                     RecountTeams (0x221b70)
 0x1a7810   handgrenade.cpp          CHandGrenade::Holster              clears m_flStartThrow (70dd419, halflife#3251)               fix      a primed grenade was thrown on the next deploy
@@ -304,8 +332,12 @@ rva        file                     function                           what half
 -          satchel, rpg, squeak-    HL25 satchel controls and live     (1c202f5, fd97136, 2353ca4, e9986c0)                         design   features and balance
            grenade                  limit, RPG NOAUTOSWITCHTO, snark
                                     throw and world-brush test
--          crossbow, hornetgun      CCrossbow::Reload's ammo_bolts,    (SDK 2.2+, f347954)                                          design   prediction mirrors
-                                    CHgun::ReloadAmmo's TabulateAmmo
+-          crossbow, hornetgun      CCrossbow::Reload's ammo_bolts,    (SDK 2.2+, f347954)                                          design   prediction mirrors; ReloadAmmo's TabulateAmmo
+                                    CHgun::ReloadAmmo's TabulateAmmo                                                                         is a fix (halflife#556), restored
+0x0dfaf0   pm_shared.cpp            PM_Jump                            no jump sound while frozen (f3810c7)                         fix      as mod-ozdm (Steven 2026-11-07); the server's missing
+                                                                                                                                         bunny-hop cap stays
+0x1054e0   client.cpp               UpdateClientData                   cd->fov from m_iFOV (6f8aac9, halflife#3044)                 fix      Steven 2026-11-07; RC's zooms already set only
+                                                                                                                                         m_iFOV, and the original's pev->fov was always 0
 ```
 
 Not reverts (RC 1.9's own, since SDK 2.1 already has halflife-updated's code there):
@@ -315,28 +347,15 @@ weapon and sets weaponanim; the original does neither), `CHalfLifeMultiplay::Cha
 egon, crowbar, python, mp5, glock fire code), whose halflife-updated fixes are for code RC
 dropped.
 
-Counts (rows above, a multi-function row once): fix 45, design 18, unclear 7.
+Counts (rows above, a multi-function row once): fix 56 (8 of them unclear until Steven's rule),
+design 18.
 
-Unclear, for Steven (kept as the original until decided):
-- `CBasePlayerWeapon::PlayEmptySound`: mod-rc2's verdict is fix, but EMIT_SOUND_PREDICTED skips a
-  client with cl_lw 1 on the assumption that it predicts the sound. This server has no
-  CLIENT_WEAPONS and sends no weapon data, so such a client may hear nothing. Settle with an HL25
-  client, cl_lw 1, dry-firing an empty weapon against our build.
-- `CBasePlayer::Killed`'s Holster of the active weapon (SDK 2.2+, "to allow it to cleanup"): no
-  stated bug, and RC's Holster bodies have side effects (snark cam, zoom). Settle by reading what
-  each RC Holster would do on a death, or keep.
-- `CBasePlayer::Killed`'s modelindex reset to the player model ("don't use eyes", SDK 2.2+): no
-  stated bug; matters only for a player whose model index was changed (RC's observer or drive
-  states). Settle with RC's observer and drive deaths in an engine run.
-- `CScientist::ISoundMask`'s scents (SDK 2.2+): Valve's AI change with no stated reason, as the
-  roach's height was.
-- `_sv_override_scientist_mdl` (four scientist functions): a feature by the rule, but Steven kept
-  it in mod-rc2 (its DEVIATIONS.md). Parity or the original.
-- `CHalfLifeMultiplay::DeathNotice`'s HLTV director event: a feature, but r7 kept the same message
-  in `CBasePlayer::TakeDamage`.
-- teamplay's TeamNames message, ScoreInfo on a team change and TeamInfo resend (InitHUD,
-  ChangePlayerTeam, RecountTeams): today's client's scoreboard may want them, as it wanted the
-  9-byte ScoreInfo. Settle with mp_teamplay 1 on an HL25 client.
+The seven left unclear here and the grenade's pull-out follow Steven's rule of 2026-11-07 (unclear
+goes to halflife-updated's version), applied, in `reference/DEVIATIONS.md`. Still to check in an
+engine run: PlayEmptySound's EMIT_SOUND_PREDICTED skips a client with cl_lw 1 on the assumption
+that it predicts the sound, and this server sends no weapon data, so such a client may hear no
+empty click (an HL25 client, cl_lw 1, dry-firing an empty weapon); Killed's Holster runs RC's
+Holster bodies at death (snark cam, zooms, the egon's beam).
 
 ## Unclear, decided by Steven 2026-11-07 (each line says how)
 
@@ -449,7 +468,6 @@ rva       file                    function                           what halfli
 0x97480   client.cpp              ServerActivate                     loop bounds                                                     fix
 0x9a370   client.cpp              UpdateClientData                   fov from m_iFOV (6f8aac9, halflife #3044)                      fix      one FOV; OZ's zooms set m_iFOV (Steven 2026-11-07:
                                                                                                                                               unclear goes to halflife-updated)
-                                                                                                                                              m_iFOV, so m_iFOV wins
 0x9a370   client.cpp              UpdateClientData                   m_WeaponBits sync                                               fix
 0xda7a0   multiplay_gamerules.cpp CHalfLifeMultiplay ctor            no servercfgfile exec                                           fix      left to the engine (Steven 2026-11-07)
 0xf0350   UserMessages.cpp        LinkUserMessages                   Health 2 bytes (5a0c6c1, halflife#2149)                         fix      as mod-rockcrowbar
@@ -571,7 +589,7 @@ rva       file                    function                           what halfli
 0x1297b0  weapons.cpp             CBasePlayerItem::FallThink         stops once a player holds it (e0ba8ce)                          fix      as mod-rockcrowbar (its busters branch inert)
 0x12a630  weapons.cpp             CBasePlayerWeapon::AddPrimaryAmmo  sound test (3d13792)                                            fix      goes with 6951bf1
 0x12a7b0  weapons.cpp             CBasePlayerWeapon::IsUseable       secondary ammo, WEAPON_NOCLIP, CanDeploy                        fix      as mod-rc2
-0x12ab20  weapons.cpp             CBasePlayerWeapon::PlayEmptySound  EMIT_SOUND_PREDICTED (063b8a5)                                  fix      as mod-rc2 (mod-rockcrowbar: unclear, see below)
+0x12ab20  weapons.cpp             CBasePlayerWeapon::PlayEmptySound  EMIT_SOUND_PREDICTED (063b8a5)                                  fix      as mod-rc2 and mod-rockcrowbar (see below)
 0x12b020  weapons.cpp             CBasePlayerWeapon::RetireWeapon    deferred to DoRetireWeapon (c4a67d4)                            fix      as mod-rc2
 0x12a530  weapons.cpp             CBasePlayerWeapon::SendWeaponAnim  m_ForceSendAnimations (42f45bd)                                 fix      as mod-rc2
 0x12a300  weapons.cpp             CBasePlayerWeapon::AddToPlayer     no extract (6951bf1)                                            fix      as mod-rc2
@@ -638,14 +656,16 @@ Counts (rows above): fix 126 (7 of them unclear until Steven's rule), design 52.
   three.
 - The HL25 sentence rework (3d8b933, sentences on `CBaseToggle`): OZ's world package kept it;
   mod-rockcrowbar calls the restructure design and keeps the sentence code in `CBaseMonster`. Both
-  keep 85467c5's IsAllowedToSpeak. Resolved: halflife-updated's in all three.
+  keep 85467c5's IsAllowedToSpeak, so the behavior is the same and only the code's place differs.
+  Resolved: no change; the restructure stays design in mod-rockcrowbar.
 - `CHgun::Reload`'s TabulateAmmo after the recharge (f347954): fix in OZ (weapons-b); design in
-  mod-rockcrowbar wave 2 ("prediction mirrors"). Resolved: halflife-updated's in all three.
+  mod-rockcrowbar wave 2 ("prediction mirrors"), wrongly: the TabulateAmmo is server code, the HUD
+  fix of halflife#556. Resolved: fix in all three; mod-rockcrowbar's CHgun::ReloadAmmo has it.
 - `CBasePlayerWeapon::PlayEmptySound` (063b8a5): fix in OZ and mod-rc2; unclear in mod-rockcrowbar
   wave 2. Resolved: halflife-updated's in all three.
 - `CHandGrenade::Holster` clearing m_flStartThrow (70dd419): fix in OZ and mod-rockcrowbar; mod-rc2
-  keeps RC2's, which doesn't clear it (`dlls/handgrenade.cpp`). Resolved: halflife-updated's in all
-  three.
+  keeps RC2's, which doesn't clear it (`dlls/handgrenade.cpp`). Resolved: RC2 rewrote that Holster
+  itself, and a mod's own code stays; the other two keep halflife-updated's.
 - `PM_Jump`'s silent jump while frozen (f3810c7): fix in OZ; mod-rockcrowbar's server build plays the
   sound as the original does (`pm_shared.cpp`; its client build has halflife-updated's). Resolved:
   halflife-updated's in all three.
@@ -653,8 +673,8 @@ Counts (rows above): fix 126 (7 of them unclear until Steven's rule), design 52.
   Resolved: halflife-updated's int in all three (Steven 2026-11-07).
 - client.cpp `UpdateClientData`'s fov (6f8aac9): OZ's rules and weapons-a packages differed.
   Resolved: halflife-updated's m_iFOV; OZ's zooms (glock, python, mp5, crossbow, DefaultDeploy)
-  set m_iFOV alone. mod-rockcrowbar still sends pev->fov (its DEVIATIONS.md): to be brought to
-  m_iFOV the same way.
+  set m_iFOV alone. mod-rockcrowbar now sends m_iFOV too (its zooms already set only m_iFOV), and
+  mod-rc2's zooms set m_iFOV alone (rows in their sections).
 
 ### The unclear calls in mod-ozdm, applied
 

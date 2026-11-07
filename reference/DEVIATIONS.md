@@ -79,7 +79,7 @@ the crash guards listed under "Crashes in the original":
     X Axis doesn't spark (`dlls/buttons.cpp` ButtonSpark, ButtonBackHome).
   - `func_breakable`'s "explosion" 1 is directed, it can't break twice, and its break volume uses
     `fabs` (`dlls/func_break.cpp` KeyValue, Die). Its directed gibs still fly along the attack
-    direction, as SDK 2.3 (FIXES.md, unclear).
+    direction, as SDK 2.3 (Steven, 2026-11-07).
   - `fabs` where SDK 2.3 called the int `abs()` on a float: the train's pitch (`dlls/plats.cpp`
     UpdateSound), the fan's pitch, volume and full-speed test (`dlls/bmodels.cpp` RampPitchVol,
     SpinUp), the roach's food height (`dlls/roach.cpp` MonsterThink).
@@ -92,7 +92,17 @@ the crash guards listed under "Crashes in the original":
   - A talking monster doesn't reset a dying friend's schedule (`dlls/talkmonster.cpp` TakeDamage).
   - The zombie's idle and attack sounds use its 95-104 pitch (`dlls/zombie.cpp`).
   - Hand grenades set up their sequence timing when thrown and when landing, and stop on frame 0
-    (`dlls/ggrenade.cpp` ShootTimed, BounceTouch).
+    (`dlls/ggrenade.cpp` ShootTimed, BounceTouch). A grenade's blast does its damage from 0.6
+    units off the surface it hit, not RC2's (dmg - 24) * 0.6 held to 0-256, which put big blasts
+    through thin walls (Explode, 078e787; RC2's 16-unit move for the explosion event stays).
+  - Player movement (`pm_shared/pm_shared.cpp`, server and client): the bounce off a surface is
+    tried on the first plane hit only, so a jump into an acute corner doesn't stick (PM_FlyMove;
+    RC2's PMF_BOUNCE grenade physics unchanged); a stuck player tries ducking out (PM_PlayerMove);
+    +use on the ground cuts the speed to a third, after RC2's per-mode speeds (PM_CheckParamters;
+    RC2 has no +use slowdown). halflife-updated's 854187a and 4f0d502.
+  - Zooms set `m_iFOV` alone (`dlls/crossbow.cpp`, `python.cpp`, `hornetgun.cpp`, the resets in
+    `dlls/player.cpp`, the client's `cl_dll/hl/hl_weapons.cpp`); RC2 kept `pev->fov` in step and
+    tested it (6f8aac9, halflife #3044).
   - The nihilanth's ending fires with no enemy (notarget) (`dlls/nihilanth.cpp` CommandUse); the
     osprey smokes from the engine that was hit (`dlls/osprey.cpp` TraceAttack).
   - `trigger_camera` turns at a rate that doesn't follow the frame rate (`dlls/triggers.cpp`
@@ -112,9 +122,9 @@ the crash guards listed under "Crashes in the original":
   (`maps/graphs/<map>.nod`, `.nod64` on amd64; `dlls/nodes.cpp`). The original's
   LOAD_FILE_FOR_ME also found a graph in the fallback game directory.
 - **The dedicated server's `servercfgfile` is run by the engine, not the game rules**
-  (`dlls/multiplay_gamerules.cpp`, `CHalfLifeMultiplay` constructor). Today's engine execs it once
-  per map itself, so the original's call would run it twice. A listen server still runs
-  `lservercfgfile` from the game.
+  (`dlls/multiplay_gamerules.cpp`, `CHalfLifeMultiplay` constructor), as halflife-updated and
+  Valve's 2013 SDK leave it ("moved into engine, to only run server.cfg once"). The original ran
+  it at every map. A listen server still runs `lservercfgfile` from the game.
 - **The suit test and weapon bits go through `m_WeaponBits`** (`dlls/player.cpp` HasSuit,
   `dlls/weapons.cpp` SetWeaponBit), 64 bits for today's client, mirrored into `pev->weapons`
   below bit 32.
@@ -139,9 +149,9 @@ the crash guards listed under "Crashes in the original":
   held (MOVETYPE_FOLLOW) item the weapon would turn back into a pickup and could be removed from
   the inventory. Kept as a guard by Steven, 2026-11-07.
 
-Kept as SDK 2.3 until Steven decides (FIXES.md "Unclear"): the tentacle's, nihilanth's and osprey's
-interpolation flags, `CFlyingMonster::ChangeYaw`, `CBaseMonster::SetActivity`, `LinearMoveDone`,
-`PlayCDTrack`'s "cd pause", and `func_breakable`'s gib direction.
+Kept as SDK 2.3, decided by Steven 2026-11-07 (FIXES.md): `LinearMoveDone`'s snap,
+`PlayCDTrack`'s "cd pause" for track -1 until today's engine is shown to resume a paused track, and
+`func_breakable`'s gib direction.
 
 ## Client
 

@@ -1110,9 +1110,7 @@ The basic solid body movement clip that slides along multiple planes
 ============
 */
 // orig 0xa1dc0, orig client 0xb3150. RC2: the leaping headcrab passes through what PM_HeadcrabLeapHit allows;
-// PMF_BOUNCE reflects off every plane with some noise and speeds up (the AF grenade); and the
-// reflection branch applies to every plane, as in SDK 2.3 (halflife-updated's first-plane-only
-// fix dropped)
+// PMF_BOUNCE reflects off every plane with some noise and speeds up (the AF grenade)
 int PM_FlyMove()
 {
 	int bumpcount, numbumps;
@@ -1263,7 +1261,13 @@ int PM_FlyMove()
 
 		// modify original_velocity so it parallels all of the clip planes
 		//
-		if (pmove->movetype == MOVETYPE_WALK && ((pmove->onground == -1) || (pmove->friction != 1))) // relfect player velocity
+		// relfect player velocity
+		// halflife-updated's fix, kept (Steven 2026-11-07): the reflection is tried on the first
+		// impact plane only (854187a, HL25's stuck fixes); RC2's, as SDK 2.3, reflected off every
+		// plane, which could stick a player in an acute corner
+		// Only give this a try for first impact plane because you can get yourself stuck in an acute corner by jumping in place
+		//  and pressing forward and nobody was really using this bounce/reflection feature anyway...
+		if (numplanes == 1 && pmove->movetype == MOVETYPE_WALK && ((pmove->onground == -1) || (pmove->friction != 1)))
 		{
 			for (i = 0; i < numplanes; i++)
 			{
@@ -4117,8 +4121,7 @@ PM_CheckParamters
 ==============
 */
 // orig 0xa77b0, orig client 0xba640. RC2: the assassin, houndeye and headcrab run at their own speed; dead view
-// height set as SDK 2.3 does (z only). halflife-updated's slow-down while +use on the ground
-// is not RC2's and is dropped
+// height set as SDK 2.3 does (z only)
 void PM_CheckParamters()
 {
 	float spd;
@@ -4147,6 +4150,19 @@ void PM_CheckParamters()
 	case PM_MODE_HEADCRAB:
 		pmove->maxspeed = RC2Pref(RC2P_TransformHeadcrab_RunSpeed).f;
 		break;
+	}
+
+	// halflife-updated's fix, kept (Steven 2026-11-07): +use on the ground cuts the speed to a third
+	// here, once per move (4f0d502, HL25). RC2 has no +use slowdown; SDK 2.3 scaled the velocity
+	// by 0.3 in PM_PlayerMove, which hit every integration step. After RC2's mode speeds, so a
+	// transformed player is slowed too.
+	// Slow down, I'm pulling it! (a box maybe) but only when I'm standing on ground
+	//
+	// JoshA: Moved this to CheckParamters rather than working on the velocity,
+	// as otherwise it affects every integration step incorrectly.
+	if ((pmove->onground != -1) && (pmove->cmd.buttons & IN_USE))
+	{
+		pmove->maxspeed *= 1.0f / 3.0f;
 	}
 
 	if ((spd != 0.0) &&
@@ -4425,7 +4441,7 @@ were contacted during the move.
 // orig 0xa7dd0, orig client 0xbae00. RC2: the race mode hands the move over; a rider is carried on the ridden
 // player's shoulder; PMF_FROZEN stops everything; the controller and the bat have moves of
 // their own; ladders, step sounds and the jump differ per mode; pull forces; jetpack and
-// AF grenade physics. halflife-updated's "duck to get unstuck" is not RC2's and is dropped.
+// AF grenade physics.
 void PM_PlayerMove(qboolean server)
 {
 	physent_t* pLadder = NULL;
@@ -4516,7 +4532,15 @@ void PM_PlayerMove(qboolean server)
 	{
 		if (PM_CheckStuck())
 		{
-			return; // Can't move, we're stuck
+			// halflife-updated's fix, kept (Steven 2026-11-07): a stuck player tries ducking out
+			// (854187a, HL25's stuck fixes); RC2, as SDK 2.3, just stops
+			// Let the user try to duck to get unstuck
+			PM_Duck();
+
+			if (PM_CheckStuck())
+			{
+				return; // Can't move, we're stuck
+			}
 		}
 	}
 

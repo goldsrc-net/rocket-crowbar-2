@@ -168,17 +168,17 @@ void CPython::Holster() // orig 0xabc90, orig client 0x3f690
 // The zoom toggle
 void CPython::QuaternaryAttack() // orig 0xabd10, orig client 0x3f750
 {
-	if (m_pPlayer->pev->fov != 0)
+	// halflife-updated's fix, kept (Steven 2026-11-07): the zoom lives in m_iFOV alone, no
+	// pev->fov to keep in step with it (6f8aac9, halflife #3044); RC2 set and tested pev->fov
+	if (m_pPlayer->m_iFOV != 0)
 	{
 		m_fInZoom = 0;
 		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
-		m_pPlayer->pev->fov = 0;
 	}
-	else if (m_pPlayer->pev->fov != RC2Pref(RC2P_Python_ZoomedFOV).f)
+	else if (m_pPlayer->m_iFOV != RC2Pref(RC2P_Python_ZoomedFOV).f)
 	{
 		m_fInZoom = 1;
 		m_pPlayer->m_iFOV = (int)RC2Pref(RC2P_Python_ZoomedFOV).f;
-		m_pPlayer->pev->fov = m_pPlayer->m_iFOV;
 	}
 
 	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Python_QuaternaryRefirePrimary).f);
@@ -652,11 +652,10 @@ void CPython::Reload() // orig 0xad6b0, orig client 0x406f0
 	if (m_pPlayer->ammo_357 <= 0 || 0 != m_fInAttack)
 		return;
 
-	if (m_pPlayer->pev->fov != 0)
+	if (m_pPlayer->m_iFOV != 0)
 	{
 		m_fInZoom = 0;
 		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
-		m_pPlayer->pev->fov = 0;
 	}
 
 	if (DefaultReload(RC2Pref(RC2P_Ammo_PythonClipSize).s, PYTHON_RELOAD, RC2Pref(RC2P_Python_ReloadTime).f, PYTHON_MULTIPLAYER() ? 1 : 0))

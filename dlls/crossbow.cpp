@@ -516,19 +516,19 @@ void CCrossbow::TertiaryAttack()
 // orig 0x2c250, orig client 0x9070: zoom in or out
 void CCrossbow::QuaternaryAttack()
 {
-	if (m_pPlayer->pev->fov == 0)
+	// halflife-updated's fix, kept (Steven 2026-11-07): the zoom lives in m_iFOV alone, no
+	// pev->fov to keep in step with it (6f8aac9, halflife #3044); RC2 set and tested pev->fov
+	if (m_pPlayer->m_iFOV == 0)
 	{
-		if (m_pPlayer->pev->fov != RC2Pref(RC2P_Crossbow_ZoomedFOV).f)
+		if (m_pPlayer->m_iFOV != RC2Pref(RC2P_Crossbow_ZoomedFOV).f)
 		{
 			m_pPlayer->m_iFOV = (int)RC2Pref(RC2P_Crossbow_ZoomedFOV).f;
-			m_pPlayer->pev->fov = m_pPlayer->m_iFOV;
 			m_fInZoom = 1;
 		}
 	}
 	else
 	{
 		m_pPlayer->m_iFOV = 0;
-		m_pPlayer->pev->fov = 0;
 		m_fInZoom = 0;
 	}
 
@@ -652,7 +652,6 @@ void CCrossbow::Reload()
 	if (m_pPlayer->ammo_bolts > 0 && m_fInAttack == 0)
 	{
 		m_pPlayer->m_iFOV = 0;
-		m_pPlayer->pev->fov = 0;
 		m_fInZoom = 0;
 
 		if (DefaultReload(RC2Pref(RC2P_Ammo_CrossbowClipSize).s, CROSSBOW_RELOAD, RC2Pref(RC2P_Crossbow_ReloadTime).f))

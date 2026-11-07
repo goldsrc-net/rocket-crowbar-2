@@ -126,7 +126,6 @@ bool CHgun::Deploy()
 	m_fCharging = false;
 	m_flChargeStart = gpGlobals->time;
 	m_pPlayer->m_iFOV = 0;
-	m_pPlayer->pev->fov = 0;
 
 	// clear the client's charge display
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, ENTINDEX(m_pPlayer->edict()), 0, 1, 0);
@@ -148,7 +147,6 @@ void CHgun::Holster()
 
 	// Rocket Crowbar 2: unzoom, drop any charge
 	m_pPlayer->m_iFOV = 0;
-	m_pPlayer->pev->fov = 0;
 	m_fInAttack = 0;
 	m_fCharging = false;
 	m_flChargeStart = gpGlobals->time;
@@ -272,15 +270,15 @@ void CHgun::QuaternaryAttack()
 	if (m_fCharging || 0 != m_fInAttack)
 		return;
 
-	if (m_pPlayer->pev->fov != 0)
+	// halflife-updated's fix, kept (Steven 2026-11-07): the zoom lives in m_iFOV alone, no
+	// pev->fov to keep in step with it (6f8aac9, halflife #3044); RC2 set and tested pev->fov
+	if (m_pPlayer->m_iFOV != 0)
 	{
 		m_pPlayer->m_iFOV = 0;
-		m_pPlayer->pev->fov = 0;
 	}
 	else
 	{
 		m_pPlayer->m_iFOV = (int)RC2Pref(RC2P_HornetGun_ZoomedFOV).f;
-		m_pPlayer->pev->fov = m_pPlayer->m_iFOV;
 	}
 
 	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_QuaternaryRefirePrimary).f);
