@@ -23,3 +23,7 @@
 #define SF_ENVEXPLOSION_NOSPARKS (1 << 5)	// don't make a scorch mark
 
 extern void ExplosionCreate(const Vector& center, const Vector& angles, edict_t* pOwner, int magnitude, bool doDamage);
+
+// Rocket Crowbar 2 (explode.cpp, orig 0x40ab0): an explosion entity of class pszClassname at
+// vecOrigin, blowing along vecDir (the client's explosion event shows it). Name ours
+void ExplodeAt(Vector vecOrigin, Vector vecDir, float flDamage, const char* pszClassname, entvars_t* pevOwner, bool bOtherDamage);

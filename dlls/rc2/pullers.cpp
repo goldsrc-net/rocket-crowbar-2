@@ -12,7 +12,8 @@
 #include "player.h"
 #include "usercmd.h"
 #include "pm_defs.h"
-#include "p6stubs.h"
+#include "UserMessages.h"
+#include "racecontroller.h"
 #include "rc2/pullers.h"
 
 extern playermove_t* pmove;

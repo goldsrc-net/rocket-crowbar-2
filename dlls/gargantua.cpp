@@ -29,7 +29,7 @@
 #include "explode.h"
 #include "func_break.h"
 
-#include "p3b_temp.h" // TEMP STUBs: RC2ShieldDamage, RC2EntMark*
+#include "rc2/shield.h"
 
 //=========================================================
 // Gargantua Monster
@@ -168,7 +168,7 @@ void CStomp::Think()
 		if (pEntity)
 		{
 			Vector vecShieldHit;
-			float flDamage = RC2ShieldDamage(pEntity, gSkillData.gargantuaDmgStomp, 0.6, tr.vecEndPos, pev->movedir, &vecShieldHit, NULL, 8);
+			float flDamage = ShieldDeflect(pEntity, gSkillData.gargantuaDmgStomp, 0.6, tr.vecEndPos, pev->movedir, &vecShieldHit, NULL, 8);
 			if (flDamage != 0)
 				pEntity->GetEffectedEnt()->TakeDamage(pev, pevOwner, flDamage, DMG_SONIC);
 		}
@@ -656,14 +656,14 @@ void CGargantua::FlameDamage(Vector vecStart, Vector vecEnd, entvars_t* pevInfli
 
 	Vector vecAim = (vecEnd - vecStart).Normalize();
 
-	RC2EntMarkPush();
+	UTIL_PushEntityMarks();
 
 	// iterate on all entities in the vicinity.
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecMid, searchRadius)) != NULL)
 	{
 		if (pEntity->GetEffectedEnt()->pev->takedamage == DAMAGE_NO)
 			continue;
-		if (RC2EntMarkTest(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
 			continue;
 
 		// UNDONE: this should check a damage mask, not an ignore
@@ -701,8 +701,8 @@ void CGargantua::FlameDamage(Vector vecStart, Vector vecEnd, entvars_t* pevInfli
 			}
 
 			// RC2: the shield may move the hit point (it writes tr.vecEndPos)
-			flAdjustedDamage = RC2ShieldDamage(pEntity, flAdjustedDamage, 0.8, tr.vecEndPos, vecAim, &tr.vecEndPos, NULL, 8);
-			RC2EntMarkSet(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
+			flAdjustedDamage = ShieldDeflect(pEntity, flAdjustedDamage, 0.8, tr.vecEndPos, vecAim, &tr.vecEndPos, NULL, 8);
+			UTIL_MarkEntity(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
 
 			if (flAdjustedDamage > 0)
 			{
@@ -721,7 +721,7 @@ void CGargantua::FlameDamage(Vector vecStart, Vector vecEnd, entvars_t* pevInfli
 		}
 	}
 
-	RC2EntMarkPop();
+	UTIL_PopEntityMarks();
 }
 
 
@@ -1085,7 +1085,7 @@ CBaseEntity* CGargantua::GargantuaCheckTraceHullAttack(float flDist, int iDamage
 		if (iDamage > 0)
 		{
 			// RC2: through the shield (2.0)
-			float flDamage = RC2ShieldDamage(pEntity, iDamage, 2.0, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 10);
+			float flDamage = ShieldDeflect(pEntity, iDamage, 2.0, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 10);
 			if (flDamage > 0)
 				pEntity->TakeDamage(pev, pev, flDamage, iDmgType);
 		}

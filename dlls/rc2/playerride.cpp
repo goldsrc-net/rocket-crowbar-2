@@ -20,7 +20,6 @@
 
 extern edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer);
 
-extern int gmsgCLTE; // "CLTE", RC2's own (orig .bss 0x18f4b8)
 
 // orig .bss 0x18f4e8: what PM_GetRideInfo hands out for an index that isn't a player
 static unsigned char s_ucNoRideInfo; // name ours
@@ -373,12 +372,5 @@ bool PlayerHasRider(edict_t* pPlayer, edict_t* pRider) // orig 0xb28b0
 	return pEntity->m_iShoulderRider[0] == iRider || pEntity->m_iShoulderRider[1] == iRider;
 }
 
-
-// TEMP STUB (p6): real one belongs in UserMessages.cpp (LinkUserMessages registers "CLTE")
-// gmsgCLTE: UserMessages.h (p5)
-
-// CBasePlayer::ClearPhysFlags: the real one is reconstructed elsewhere now
-
-// CBasePlayer::RemovePhysFlag2Source: the real one is reconstructed elsewhere now
 
 // CHalfLifeMultiplay::PlayerAllowsRiding is in multiplay_gamerules.cpp (p5)

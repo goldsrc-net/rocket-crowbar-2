@@ -30,7 +30,6 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 #include "game.h"
-#include "p4_needs.h"
 
 class CWorldItem : public CBaseEntity
 {
@@ -102,7 +101,7 @@ void CItem::Spawn()
 	// Rocket Crowbar 2: items no longer drop to the floor (nor get removed for falling out of
 	// the level); with mp_random set, multiplayer swaps them for a random one
 	if (g_pGameRules->IsMultiplayer() && mp_random.value != 0)
-		ReplaceWithRandomItem(this);
+		RC2RandomizeItem(this);
 }
 
 // orig 0x6c4c0
@@ -173,7 +172,7 @@ void CItem::Materialize()
 
 	// Rocket Crowbar 2: mp_random above 2 swaps it for a random item on every respawn too
 	if (g_pGameRules->IsMultiplayer() && mp_random.value > 2)
-		ReplaceWithRandomItem(this);
+		RC2RandomizeItem(this);
 }
 
 #define SF_SUIT_SHORTLOGON 0x0001
@@ -247,9 +246,9 @@ class CItemBattery : public CItem
 
 		// Rocket Crowbar 2: the cap is the player's attribute 6 (when over 100) plus attribute 7
 		int iMaxArmor = MAX_NORMAL_BATTERY;
-		if (RC2_PlayerAttribute(6, ENTINDEX(pPlayer->edict())) > 100)
-			iMaxArmor = (int)RC2_PlayerAttribute(6, ENTINDEX(pPlayer->edict()));
-		iMaxArmor = (int)(RC2_PlayerAttribute(7, ENTINDEX(pPlayer->edict())) + iMaxArmor);
+		if (PM_GetAttributeScale(6, ENTINDEX(pPlayer->edict())) > 100)
+			iMaxArmor = (int)PM_GetAttributeScale(6, ENTINDEX(pPlayer->edict()));
+		iMaxArmor = (int)(PM_GetAttributeScale(7, ENTINDEX(pPlayer->edict())) + iMaxArmor);
 
 		if ((pPlayer->pev->armorvalue < (float)iMaxArmor) &&
 			pPlayer->HasSuit())

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "pm_materials.h"
+#include "pm_rc2.h"
 
 
 #define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
@@ -378,9 +379,13 @@ public:
 
 	void StartRiding();				   // ours: the "ride" command (dlls/rc2/playerride.cpp)
 	void StopRiding(bool bQuiet);	   // ours (orig 0xb1f50)
-	void SetPhysFlag10For(float flDuration); // ours: 0x9a860, bit 0x10 of m_iPhysKeyFlags, and +0x64c = time + flDuration (p7; player.cpp's package)
-	void ClearPhysFlags(int iBits);	// ours, player.cpp's package (TEMP STUB in dlls/rc2/playerride.cpp)
-	void RemovePhysFlag2Source(int iBits); // ours, as above
+	// The physics key "phf" (m_iPhysKeyFlags) and the sources holding its bit 2 (m_iMoveLock: the
+	// first one set sets the bit, the last one cleared clears it). player.cpp, names ours
+	void SetPhysFlags(int iBits);			 // orig 0x9a730
+	void ClearPhysFlags(int iBits);			 // orig 0x9a780
+	void AddPhysFlag2Source(int iBits);		 // orig 0x9a800
+	void RemovePhysFlag2Source(int iBits);	 // orig 0x9a820
+	void SetPhysFlag10For(float flDuration); // orig 0x9a860: bit 0x10, and m_flPhysFlag10Time = time + flDuration
 
 	// p6 needs (fork B): the player's 64 tethers, what pulls this player towards an entity
 	// (the suck mine; dlls/rc2/pullers.cpp). pm_shared reads them through PM_GetPlayerTether;
@@ -510,13 +515,6 @@ public:
 	void THoundeye_DeathSound();
 	void THoundeye_PainSound();
 	void THoundeye_HandleAnimEvent(MonsterEvent_t* pEvent);
-
-	// The player package's (TEMP STUBs in p8_stubs_transform.cpp, at 0x9a800, 0x9a820, 0x9a730,
-	// 0x9a780): bits of the move-lock mask at +0x648 (the first set / last cleared sets / clears
-	// physinfo bit 2), and the physinfo mask at +0x644 itself
-	void AddPhysFlag2Source(int bits);
-	void RemoveMoveLock(int bits);
-	void SetPhysFlags(int bits);
 #endif
 
 	float m_flJoinTime; // orig +0x780 (p5's name). VERIFY: p2 reads it as when the egon's nuke may fire again; one member either way
@@ -549,7 +547,6 @@ public:
 	float m_flHealthCreated;			  // orig +0x774: health given so far by this creation (p5)
 	int m_iRC2Player788;			  // orig +0x788: nonzero, AddToFullPack sends this player every entity. VERIFY: what sets it
 	bool m_bSpecChase;			  // orig +0x7a4: the pre-join view follows a player, else spawn points (p5)
-	void RC2StartObserver();		  // orig 0x9b990 (player.cpp): "spectate"/"observe". Name ours
 
 	// p5 (the player package): RC2's members from orig +0x638 that no other package named. From
 	// +0x638 on RC2 has none of SDK 2.3's status bar members and moves the gauss charge floats to
@@ -561,7 +558,7 @@ public:
 	float m_flLastPreThink;		// orig +0x664
 	int m_iInitStage;			// orig +0x670: the first frames of a new client: 3 resets the HUD, 2 the MOTD, 1 AttrConf
 	float m_flClientDmgScore;	// orig +0x680: what ScoreInfo last sent of m_flDmgScore
-	int m_rgiAttrInt[8];		// orig +0x714: per-player ints the rest of rc2.dll keeps through Get/SetPlayerAttrInt
+	int m_rgiAttrInt[8];		// orig +0x714: per-player ints the rest of rc2.dll keeps through PM_GetPlayerTimer / PM_SetPlayerTimer
 	float m_rgflAttrValue[8];	// orig +0x734: per-player floats, through Get/SetPlayerAttrFloat
 	int m_iClientEnergy;		// orig +0x75c
 	bool m_bClientShield;		// orig +0x779: the shield's effect was sent (CLTE 0x25)
@@ -610,21 +607,20 @@ enum
 #define RC2ATTRF_LONGJUMP 0x100 // has the long jump
 
 // Rocket Crowbar 2's per-player attribute access by entity index, as the rest of rc2.dll uses
-// it (orig 0x95690-0x95970: each is a wrapper around an inner function). Names ours.
-float PlayerAttr(int iAttr, int iPlayer);
-int PlayerAttrFlags(int iPlayer);
-void SetPlayerAttrInt(int iPlayer, int i, int iValue);
-int GetPlayerAttrInt(int iPlayer, int i);
+// it (orig 0x95690-0x95970: each is a wrapper around an inner function). Names ours; the ones
+// pm_shared calls are declared in pm_rc2.h (PM_GetAttributeScale .. PM_JetboostEffect,
+// PM_HideViewers, PM_RestoreViewers).
 void SetPlayerAttrFloat(int iPlayer, int i, float flValue);
 float GetPlayerAttrFloat(int iPlayer, int i);
-float PlayerEnergy(int iPlayer);
-void UsePlayerEnergy(int iPlayer, float flAmount, float flRegenDelay);
-void PlayerEnergyEffect(int iPlayer, int iMode, Vector vecA, Vector vecB);
-bool PlayerHasAttrFlag200(CBaseEntity* pPlayer);
+bool PlayerHasAttrFlag200(CBaseEntity* pPlayer); // ability 0x200: the RC2 weapons fire under water
 int AttrPoints(int iAttr, float flValue);
 float AttrDefault(int iAttr);
-void PlayerHideViewEntities(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin));
-void PlayerShowViewEntities(int iPlayer, void (*pfnSetSolid)(int iEnt, int iSolid, float* vecOrigin));
+
+// RC2's ability bit for a crowbarang its thrower steers (m_iAbilities, PM_GetAbilityFlags). Name ours
+#define RC2_IN_CROWBARANG 0x40
+
+// CBasePlayer::TakeDamage's damage reflection guard (orig .data 0x18f4dc); CWorld clears it
+extern bool g_fRC2InDamageReflect;
 
 // RC2's transformation events (CBasePlayer::Precache); names ours
 inline unsigned short g_usTAssassinGun;

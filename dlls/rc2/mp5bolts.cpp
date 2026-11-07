@@ -19,7 +19,7 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "rc2prefs.h"
-#include "p4_needs.h"
+#include "shield.h"
 
 // The hit event every bolt plays: at vecOrigin, carrying the bolt's impulse and button.
 // Name ours.
@@ -32,7 +32,7 @@ static void BoltHitEvent(entvars_t* pev, unsigned short usEvent, const Vector& v
 // live (NULL when the edict is NULL), the bolt otherwise. Name ours.
 static entvars_t* BoltAttacker(entvars_t* pev)
 {
-	if (0 != UTIL_IsValidEdict(pev->dmg_inflictor))
+	if (0 != UTIL_IsValidEntity(pev->dmg_inflictor))
 		return VARS(pev->dmg_inflictor);
 	return pev;
 }
@@ -119,14 +119,14 @@ void CMP5BouncyBolt::BounceMove(Vector vecStart, Vector vecEnd, int iDepth)
 		return;
 	}
 
-	if (0 != UTIL_IsValidEdict(tr.pHit) && CBaseEntity::Instance(tr.pHit))
+	if (0 != UTIL_IsValidEntity(tr.pHit) && CBaseEntity::Instance(tr.pHit))
 	{
 		CBaseEntity* pTarget = CBaseEntity::Instance(tr.pHit)->GetEffectedEnt();
 		if (pTarget->pev->takedamage != 0)
 		{
 			entvars_t* pevAttacker = BoltAttacker(pev);
 			// a player's shield also turns the hit normal into its own
-			const float flDamage = ShieldAbsorbDamage(pTarget, RC2Pref(RC2P_MP5_TertiaryDamage).f, RC2Pref(RC2P_MP5_TertiaryShieldFraction).f, tr.vecEndPos, pev->movedir, NULL, &tr.vecPlaneNormal, 4);
+			const float flDamage = ShieldDeflect(pTarget, RC2Pref(RC2P_MP5_TertiaryDamage).f, RC2Pref(RC2P_MP5_TertiaryShieldFraction).f, tr.vecEndPos, pev->movedir, NULL, &tr.vecPlaneNormal, 4);
 
 			if (!pTarget->IsBSPModel() && pTarget->GetEffectedEnt()->IsAlive())
 			{
@@ -242,11 +242,11 @@ void CMP5Pulse::Explode(Vector vecSrc)
 	entvars_t* pevAttacker = BoltAttacker(pev);
 	pev->owner = NULL;
 
-	UTIL_PushEntityMask();
+	UTIL_PushEntityMarks();
 	CBaseEntity* pEntity = NULL;
 	float flDist;
 	Vector vecSpot;
-	while ((pEntity = UTIL_FindEntityInSphereDist(pEntity, vecSrc, flRadius, &flDist, &vecSpot)) != NULL)
+	while ((pEntity = UTIL_FindEntityNearestInSphere(pEntity, vecSrc, flRadius, &flDist, &vecSpot)) != NULL)
 	{
 		if (pEntity->pev->takedamage == 0)
 			continue;
@@ -266,14 +266,14 @@ void CMP5Pulse::Explode(Vector vecSrc)
 		else if (flBlast > flMaxDamage)
 			flBlast = flMaxDamage;
 
-		const float flDamage = ShieldAbsorbDamage(pEntity->GetEffectedEnt(), (float)flBlast, RC2Pref(RC2P_MP5_PulseBlastShieldFraction).f, tr.vecEndPos, (vecSpot - vecSrc).Normalize(), NULL, NULL, 6);
+		const float flDamage = ShieldDeflect(pEntity->GetEffectedEnt(), (float)flBlast, RC2Pref(RC2P_MP5_PulseBlastShieldFraction).f, tr.vecEndPos, (vecSpot - vecSrc).Normalize(), NULL, NULL, 6);
 		if (flDamage <= 0)
 			continue;
 
 		UTIL_MarkEntity(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
 		pEntity->GetEffectedEnt()->TakeDamage(pev, pevAttacker, flDamage, DMG_ENERGYBEAM | DMG_RADIATION);
 	}
-	UTIL_PopEntityMask();
+	UTIL_PopEntityMarks();
 }
 
 // orig 0x7b5a0
@@ -293,11 +293,11 @@ void CMP5Pulse::BBThink()
 	}
 
 	const Vector vecHit = tr.vecEndPos + tr.vecPlaneNormal * 4;
-	if (0 != UTIL_IsValidEdict(tr.pHit))
+	if (0 != UTIL_IsValidEntity(tr.pHit))
 	{
 		CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
 		if (pHit && !pHit->IsBSPModel() && pHit->GetEffectedEnt()->IsAlive())
-			BoltHitEvent(pev, m_usHit, vecHit, UTIL_PackDirection(pev->movedir));
+			BoltHitEvent(pev, m_usHit, vecHit, UTIL_PackNormal(pev->movedir));
 	}
 
 	Explode(vecHit);
@@ -363,15 +363,15 @@ void CMP5BlasterBolt::BBThink()
 	}
 
 	// its own shooter: it waits (the trace ignores the owner, so this is a guard)
-	if (tr.pHit && 0 != UTIL_IsValidEdict(tr.pHit) && tr.pHit == pev->owner)
+	if (tr.pHit && 0 != UTIL_IsValidEntity(tr.pHit) && tr.pHit == pev->owner)
 		return;
 
 	const Vector vecHit = tr.vecEndPos + tr.vecPlaneNormal * 4;
-	if (0 != UTIL_IsValidEdict(tr.pHit) && CBaseEntity::Instance(tr.pHit))
+	if (0 != UTIL_IsValidEntity(tr.pHit) && CBaseEntity::Instance(tr.pHit))
 	{
 		CBaseEntity* pTarget = CBaseEntity::Instance(tr.pHit)->GetEffectedEnt();
 		entvars_t* pevAttacker = BoltAttacker(pev);
-		const float flDamage = ShieldAbsorbDamage(pTarget, RC2Pref(RC2P_MP5_PrimaryDamage).f, RC2Pref(RC2P_MP5_PrimaryShieldFraction).f, tr.vecEndPos, pev->movedir, NULL, NULL, 4);
+		const float flDamage = ShieldDeflect(pTarget, RC2Pref(RC2P_MP5_PrimaryDamage).f, RC2Pref(RC2P_MP5_PrimaryShieldFraction).f, tr.vecEndPos, pev->movedir, NULL, NULL, 4);
 
 		// the hit effect only shows on something alive; walls and the world get none
 		if (!pTarget->IsBSPModel() && pTarget->GetEffectedEnt()->IsAlive())

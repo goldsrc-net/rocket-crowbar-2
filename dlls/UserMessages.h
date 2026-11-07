@@ -68,7 +68,7 @@ inline int gmsgScoreMode = 0;
 inline int gmsgVGUIDebugOn = 0;
 inline int gmsgDBGCounts = 0;
 inline int gmsgDBGEntInfo = 0;
-inline int gmsgCLTE = 0;
+inline int gmsgCLTE = 0; // RC2's client temp entities: a type byte, then that type's data
 inline int gmsgPullerCtrl = 0;
 inline int gmsgWeaponSync = 0;
 inline int gmsgRCCFG = 0;
@@ -77,5 +77,9 @@ inline int gmsgPlrStat = 0;
 inline int gmsgRaceStat = 0;
 inline int gmsgVoteBegin = 0;
 inline int gmsgVoteUpdate = 0;
+
+// The CLTE type that drops every client effect on an entity (short entity), as
+// UTIL_KillEntityEffects sends it. Name ours
+#define RC2_CLTE_KILL 0xff
 
 void LinkUserMessages();

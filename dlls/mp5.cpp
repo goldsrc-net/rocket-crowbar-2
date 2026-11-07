@@ -29,7 +29,6 @@
 #include "UserMessages.h"
 #ifndef CLIENT_DLL
 #include "rc2prefs.h"
-#include "p4_needs.h"
 #endif
 
 LINK_ENTITY_TO_CLASS(weapon_mp5, CMP5);	  // orig 0x7be40
@@ -184,7 +183,7 @@ void CMP5::FireBolt(const char* pszBolt, short& sCount, unsigned short usEvent, 
 {
 #ifndef CLIENT_DLL
 	// under water only with the player's attribute for it
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2_PlayerFiresUnderwater(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
 		WeaponTimeout(0.15);
@@ -211,7 +210,7 @@ void CMP5::FireBolt(const char* pszBolt, short& sCount, unsigned short usEvent, 
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, sCount, 0, 0);
 
 	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -267,7 +266,7 @@ void CMP5::SecondaryAttack()
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	m_pPlayer->SetAnimation(PLAYER_SUPERJUMP);
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5Fart, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, m_pPlayer->pev->waterlevel >= 2 ? 1 : 0, 0);
 
 	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_MP5_SecondaryRefirePrimary).f);
@@ -301,10 +300,10 @@ void CMP5::SecondaryAttack()
 		const float flMinDot = RC2Pref(RC2P_MP5_FartDamageMinDot).f;
 		const float flMaxDist = RC2Pref(RC2P_MP5_FartDamageMaxDist).f;
 
-		UTIL_PushEntityMask();
+		UTIL_PushEntityMarks();
 		CBaseEntity* pEntity = NULL;
 		Vector vecSpot;
-		while ((pEntity = UTIL_FindEntityInSphereDist(pEntity, vecSrc, flMaxDist, NULL, &vecSpot)) != NULL)
+		while ((pEntity = UTIL_FindEntityNearestInSphere(pEntity, vecSrc, flMaxDist, NULL, &vecSpot)) != NULL)
 		{
 			CBaseEntity* pTarget = pEntity->GetEffectedEnt();
 			if (!pTarget)
@@ -332,10 +331,10 @@ void CMP5::SecondaryAttack()
 			if (tr.flFraction < 1.0 && tr.pHit != pEntity->edict())
 				continue;
 
-			pTarget->TakeDamage(UTIL_NamedInflictor("mp5_fart"), m_pPlayer->pev, pTarget->FartDamageInflict(), DMG_NERVEGAS | DMG_NEVERGIB);
+			pTarget->TakeDamage(UTIL_RC2DamageInflictor("mp5_fart"), m_pPlayer->pev, pTarget->FartDamageInflict(), DMG_NERVEGAS | DMG_NEVERGIB);
 			UTIL_MarkEntity(ENTINDEX(pTarget->edict()));
 		}
-		UTIL_PopEntityMask();
+		UTIL_PopEntityMarks();
 
 		// an event for HLTV (the old SVC_HLTV director message, type 50)
 		MESSAGE_BEGIN(MSG_SPEC, 50);
@@ -364,7 +363,7 @@ void CMP5::QuaternaryAttack()
 {
 #ifndef CLIENT_DLL
 	// start charging a phase pulse: grenade ammo now, clip ammo while it charges (WeaponFrame)
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2_PlayerFiresUnderwater(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		PlayEmptySound();
 		WeaponTimeout(0.15);
@@ -399,7 +398,7 @@ void CMP5::QuaternaryAttack()
 	m_flPulseReady = gpGlobals->time + RC2Pref(RC2P_MP5_PulseChargeTime).f;
 	m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] -= (unsigned short)RC2Pref(RC2P_MP5_PulseSecondaryAmmoCost).s;
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5Charge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, 0, 0);
 #endif
 }
@@ -408,14 +407,14 @@ void CMP5::QuaternaryAttack()
 void CMP5::FirePulse()
 {
 #ifndef CLIENT_DLL
-	if (m_pPlayer->pev->waterlevel == 3 && !RC2_PlayerFiresUnderwater(m_pPlayer))
+	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
 		// went under water while charging: the charge is lost
 		PlayEmptySound();
 		m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 0.3;
 		m_flNextTertiaryAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-		if (0 != g_iRC2WeaponFrame)
+		if (0 != g_fRC2PlayWeaponEvents)
 		{
 			m_iPulseCharging = 0;
 			m_fInAttack = 0;
@@ -430,7 +429,7 @@ void CMP5::FirePulse()
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5Pulse, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, m_sPulseCount, 0, 0);
 
 	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -452,7 +451,7 @@ void CMP5::FirePulse()
 	PLAYER_CNX_STATS(m_pPlayer->edict(), &iPing, &iLoss);
 	pPulse->pev->armorvalue = iPing * 0.001;
 
-	if (0 != g_iRC2WeaponFrame)
+	if (0 != g_fRC2PlayWeaponEvents)
 	{
 		m_sPulseCount++;
 		m_fInAttack = 0;
@@ -559,9 +558,9 @@ void CMP5::ReadWeaponState(void* pData, int iSize)
 {
 #ifndef CLIENT_DLL
 	// the server's readers answer 0, so on the server this zeroes the counts
-	m_sBlasterCount = ReadSyncShort(&pData, &iSize);
-	m_sBouncyCount = ReadSyncShort(&pData, &iSize);
-	m_sPulseCount = ReadSyncShort(&pData, &iSize);
+	m_sBlasterCount = RC2ReadStateShort(&pData, &iSize);
+	m_sBouncyCount = RC2ReadStateShort(&pData, &iSize);
+	m_sPulseCount = RC2ReadStateShort(&pData, &iSize);
 #endif
 }
 

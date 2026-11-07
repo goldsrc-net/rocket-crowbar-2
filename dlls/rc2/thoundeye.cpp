@@ -18,7 +18,10 @@
 #include "weapons.h"
 #include "player.h"
 #include "soundent.h"
-#include "p8_needs_transform.h"
+#include "shield.h"
+#include "UserMessages.h"
+#include "transform.h"
+#include "rc2prefs.h"
 
 // orig 0xdf620
 void CBasePlayer::THoundeye_SetAnimation(PLAYER_ANIM playerAnim)
@@ -247,7 +250,7 @@ void CBasePlayer::THoundeye_SonicBlast()
 
 	m_iTransformState3 = 0;
 	m_flTransformTimer2 = -1;
-	RemoveMoveLock(4);
+	RemovePhysFlag2Source(4);
 	m_flTransformNextAttack1 = RC2Pref(RC2P_TransformHoundeye_SonicRefireTime).f + gpGlobals->time;
 	m_flTransformLastAttack = gpGlobals->time;
 	PLAYBACK_EVENT_FULL(0, edict(), g_usTHoundeyeSonic, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
@@ -272,7 +275,7 @@ void CBasePlayer::THoundeye_SonicBlast()
 	float flDmgExp = RC2Pref(RC2P_TransformHoundeye_SonicDmgFalloffExp).f;
 	Vector vecSrc = pev->origin + pev->view_ofs;
 
-	UTIL_PushEntFlags();
+	UTIL_PushEntityMarks();
 	for (int i = 1; i < gpGlobals->maxEntities; i++)
 	{
 		edict_t* pent = INDEXENT(i);
@@ -288,7 +291,7 @@ void CBasePlayer::THoundeye_SonicBlast()
 		if ((pEnt->GetEffectedEnt()->GetRCCaps(this, this) & 0x1000) == 0 &&
 			(pEnt->GetEffectedEnt()->GetRCCaps2(this, this) & 0x10) == 0)
 			continue;
-		if (UTIL_TestEntFlag(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
 			continue;
 
 		Vector vecDir = pEnt->Center() - vecSrc;
@@ -317,7 +320,7 @@ void CBasePlayer::THoundeye_SonicBlast()
 		if (flDamage <= 0 && flVel <= 0)
 			continue;
 
-		UTIL_SetEntFlag(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
+		UTIL_MarkEntity(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
 
 		TraceResult tr;
 		UTIL_TraceLine(vecSrc, pEnt->Center(), ignore_monsters, edict(), &tr);
@@ -331,7 +334,7 @@ void CBasePlayer::THoundeye_SonicBlast()
 		Vector vecPush = (vecDir * 0.25 + vecAim * 0.75).Normalize();
 
 		float flBefore = flDamage;
-		flDamage = RC2_ShieldFilterDamage(pEnt->GetEffectedEnt(), flDamage, 1.5, tr.vecEndPos, vecPush, NULL, NULL, 10);
+		flDamage = ShieldDeflect(pEnt->GetEffectedEnt(), flDamage, 1.5, tr.vecEndPos, vecPush, NULL, NULL, 10);
 		if (flDamage != flBefore && flBefore != 0)
 			flVel = flDamage / flBefore * flVel;
 		if (flDamage <= 0 && flVel <= 0)
@@ -346,9 +349,9 @@ void CBasePlayer::THoundeye_SonicBlast()
 		}
 
 		// original: damages even when the shield left nothing but a push
-		pEnt->GetEffectedEnt()->TakeDamage(UTIL_NamedInflictor("houndeye_sonic"), pev, flDamage, DMG_SONIC | DMG_ALWAYSGIB);
+		pEnt->GetEffectedEnt()->TakeDamage(UTIL_RC2DamageInflictor("houndeye_sonic"), pev, flDamage, DMG_SONIC | DMG_ALWAYSGIB);
 	}
-	UTIL_PopEntFlags();
+	UTIL_PopEntityMarks();
 }
 
 // One sample point of an entity against the beam (from vecStart along vecDir for flLength):
@@ -397,7 +400,7 @@ void CBasePlayer::THoundeye_BeamFire()
 {
 	m_iTransformState1 = 0;
 	m_flTransformTimer1 = -1;
-	RemoveMoveLock(4);
+	RemovePhysFlag2Source(4);
 
 	UTIL_MakeVectors(pev->v_angle);
 	Vector vecFlat = Vector(gpGlobals->v_forward.x, gpGlobals->v_forward.y, 0).Normalize();
@@ -429,7 +432,7 @@ void CBasePlayer::THoundeye_BeamFire()
 	// the beam's reach: on until it has punched BeamPunchDistance of solid
 	float flPunch = RC2Pref(RC2P_TransformHoundeye_BeamPunchDistance).f;
 	TraceResult tr;
-	UTIL_PunchTrace(vecStart, vecStart + vecAim * 8192, vecAim, &flPunch, edict(), NULL, &tr, 32);
+	UTIL_BlastReaches(vecStart, vecStart + vecAim * 8192, vecAim, &flPunch, edict(), NULL, &tr, 32);
 	float flLength = (tr.vecEndPos - vecStart).Length();
 
 	memset(pflTable, 0, gpGlobals->maxEntities * sizeof(float));
@@ -503,10 +506,10 @@ void CBasePlayer::THoundeye_BeamFire()
 			continue;
 
 		int iBits = (pflTable[ENTINDEX(pEnt->edict())] > 100) ? 15 : 10;
-		float flDamage = RC2_ShieldFilterDamage(pEnt, pflTable[ENTINDEX(pEnt->edict())], 0.6, g_vecZero, g_vecZero, NULL, NULL, iBits);
+		float flDamage = ShieldDeflect(pEnt, pflTable[ENTINDEX(pEnt->edict())], 0.6, g_vecZero, g_vecZero, NULL, NULL, iBits);
 		pflTable[ENTINDEX(pEnt->edict())] = 0;
 		if (flDamage > 0)
-			pEnt->TakeDamage(UTIL_NamedInflictor("houndeye_beam"), pev, flDamage, DMG_ENERGYBEAM | DMG_RADIATION);
+			pEnt->TakeDamage(UTIL_RC2DamageInflictor("houndeye_beam"), pev, flDamage, DMG_ENERGYBEAM | DMG_RADIATION);
 	}
 
 	free(pflTable);
@@ -570,7 +573,7 @@ void CBasePlayer::THoundeye_Think()
 			{
 				m_iTransformState2 = 1;
 				m_flEnergy -= RC2Pref(RC2P_TransformHoundeye_LocatorTurnOnEnergyCost).f;
-				UTIL_SetMaxTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformHoundeye_LocatorEnergyRegenDelay).f);
+				UTIL_ExtendTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformHoundeye_LocatorEnergyRegenDelay).f);
 				EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, "debris/beamstart1.wav", 0.2, ATTN_NORM, 0, RANDOM_LONG(150, 160));
 				m_flTransformNextAttack4 = gpGlobals->time + 0.2;
 				THoundeye_SendStatus();
@@ -588,7 +591,7 @@ void CBasePlayer::THoundeye_Think()
 	if (0 != m_iTransformState2)
 	{
 		m_flEnergy -= RC2Pref(RC2P_TransformHoundeye_LocatorRunEnergyUse).f * m_flFrameInterval;
-		UTIL_SetMaxTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformHoundeye_LocatorEnergyRegenDelay).f);
+		UTIL_ExtendTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformHoundeye_LocatorEnergyRegenDelay).f);
 		if (m_flEnergy <= 0)
 		{
 			m_iTransformState2 = 0;
@@ -615,7 +618,7 @@ void CBasePlayer::THoundeye_Think()
 			return;
 		m_iTransformState1 = 0;
 		m_flTransformTimer1 = -1;
-		RemoveMoveLock(4);
+		RemovePhysFlag2Source(4);
 		m_flTransformNextAttack2 = RC2Pref(RC2P_TransformHoundeye_BeamRefireTime).f + gpGlobals->time;
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(0xfe);
@@ -638,7 +641,7 @@ void CBasePlayer::THoundeye_Think()
 			return;
 		m_iTransformState3 = 0;
 		m_flTransformTimer2 = -1;
-		RemoveMoveLock(4);
+		RemovePhysFlag2Source(4);
 		m_flTransformNextAttack1 = RC2Pref(RC2P_TransformHoundeye_BeamRefireTime).f + gpGlobals->time; // original: the beam's refire, and the beam's CLTE kill below
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(0xfe);
@@ -744,7 +747,7 @@ void CBasePlayer::THoundeye_Think()
 			m_iTransformState4 = 0;
 			SetAnimation(PLAYER_IDLE);
 			pev->skin = 0;
-			RemoveMoveLock(4);
+			RemovePhysFlag2Source(4);
 			THoundeye_SendStatus();
 		}
 		// the eyes open
@@ -824,7 +827,7 @@ void CBasePlayer::THoundeye_PainSound()
 		else if (flEnergy > 100)
 			flEnergy = 100;
 		m_flEnergy = flEnergy;
-		UTIL_SetMaxTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformHoundeye_SleepDamageGetUpEnergyRegenDelay).f);
+		UTIL_ExtendTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_TransformHoundeye_SleepDamageGetUpEnergyRegenDelay).f);
 		m_flTransformLastAttack = gpGlobals->time;
 	}
 

@@ -21,7 +21,9 @@
 #include "effects.h"
 #include "gamerules.h"
 #ifndef CLIENT_DLL
-#include "p8_needs.h"
+#include "rc2/shield.h"
+#include "UserMessages.h"
+#include "rc2prefs.h"
 #endif
 
 #define TRIPMINE_PRIMARY_VOLUME 450
@@ -30,11 +32,10 @@
 
 #include "soundent.h"
 #include "decals.h"
-#include "p8_needs_tripmine.h"
 
 // Rocket Crowbar 2's tripmines (orig 0xe7e60-0xeca6f). SDK 2.3's mine that exploded when its
 // beam was crossed is gone: RC2's beam is a laser that hurts what it touches (each target's
-// GlobalBeamDamage, slot 62, as DMG_ENERGYBEAM, after RC2_ShieldFilterDamage lets it through)
+// GlobalBeamDamage, slot 62, as DMG_ENERGYBEAM, after ShieldDeflect lets it through)
 // and the mine itself only blows up when shot, when its life runs out or when what it sticks to
 // moves. Four kinds share the code: monster_tripmine (one beam), bouncy_tripmine (a beam that
 // reflects off surfaces), punch_tripmine (a beam that bores through walls) and target_tripmine
@@ -50,39 +51,7 @@
 // the linker placed among tripmine.obj's functions; called from CTriggerHurt's code. The
 // compiler writes it, so there is no source for it.
 
-class CTripmineGrenade : public CGrenade
-{
-public:
-	void Spawn() override;
-	void Precache() override;
-	void Killed(entvars_t* pevAttacker, int iGib) override;
-	float GlobalBeamDamage() override { return 0; }					 // orig 0xe7f50: beams don't hurt mines
-	int GetRCCaps2(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x12; } // orig 0xe7f40. VERIFY: what bits 0x2 and 0x10 mean
-	bool IsViewOfPlayer(CBaseEntity* pPlayer) override;
-
-	void EXPORT KillThink();
-	void EXPORT PowerupThink();
-	void EXPORT TraceThink();
-
-	// Rocket Crowbar 2: virtual here (orig slots 149-151), so each kind draws its own beam
-	virtual void MakeBeam();
-	virtual void KillBeam();
-	virtual void BeamUpdate(); // name ours: trace the beam, hurt what it hits
-
-	void CheckAttach(bool bExplode); // name ours
-
-	bool m_bOnWorld;		// orig +0x2b8, name ours: stuck to the world, so nothing to follow
-	Vector m_posOwner;		// orig +0x2bc: the entity it sticks to (pev->owner), as SDK 2.3
-	Vector m_angleOwner;	// orig +0x2c8
-	Vector m_vecOrigin;		// orig +0x2d4, name ours: where it was planted; put back there each think
-	Vector m_vecEnd;		// orig +0x2e0: the beam's last solid end, for the impact decal
-	Vector m_vecDir;		// orig +0x2ec: the surface normal it was planted on
-	float m_flLastBeamTime; // orig +0x2f8, name ours
-	int m_iAmmoCost;		// orig +0x2fc, name ours: the mines a weapon_tripmine it turns back into holds
-	CBeam* m_pBeam;			// orig +0x300
-	EHANDLE m_hOwner;		// orig +0x304: the player who planted it (SDK 2.3's m_pRealOwner)
-	bool m_bOwnerLeft;		// orig +0x30c, name ours: the planter has moved more than 64 units off
-};
+// CTripmineGrenade: weapons.h (the tripmine weapon counts each player's mines by m_hOwner)
 
 LINK_ENTITY_TO_CLASS(monster_tripmine, CTripmineGrenade); // orig 0xe7ea0
 
@@ -211,7 +180,7 @@ void CTripmineGrenade::KillThink()
 	UTIL_MakeAimVectors(pev->angles);
 	UTIL_TraceLine(pev->origin + gpGlobals->v_forward * 8, pev->origin - gpGlobals->v_forward * 64, ignore_monsters, ENT(pev), &tr);
 
-	RC2_GrenadeExplode(this, &tr);
+	RadialExplode(&tr);
 }
 
 // iGib 0x10 is the tripmine's own "explode now" (CheckAttach): no delay.
@@ -265,11 +234,11 @@ void CTripmineGrenade::CheckAttach(bool bExplode)
 		return;
 	}
 
-	g_iAllowWeaponReplace = 0;
+	g_fRC2Randomize = 0;
 	CBaseEntity* pMine = Create("weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles, NULL);
 	pMine->pev->spawnflags |= SF_NORESPAWN;
 	((CBasePlayerWeapon*)pMine)->m_iDefaultAmmo = m_iAmmoCost;
-	g_iAllowWeaponReplace = 1;
+	g_fRC2Randomize = 1;
 	KillBeam();
 	UTIL_Remove(this);
 }
@@ -295,11 +264,11 @@ void CTripmineGrenade::PowerupThink()
 
 			if (tr.flFraction >= 1.0 || tr.pHit != pev->owner)
 			{
-				g_iAllowWeaponReplace = 0;
+				g_fRC2Randomize = 0;
 				CBaseEntity* pMine = Create("weapon_tripmine", pev->origin + m_vecDir * 24, pev->angles, NULL);
 				pMine->pev->spawnflags |= SF_NORESPAWN;
 				((CBasePlayerWeapon*)pMine)->m_iDefaultAmmo = m_iAmmoCost;
-				g_iAllowWeaponReplace = 1;
+				g_fRC2Randomize = 1;
 				KillBeam();
 				UTIL_Remove(this);
 				return;
@@ -384,7 +353,7 @@ static void TripmineBeamHurt(CTripmineGrenade* pMine, TraceResult& tr, const Vec
 		pevAttacker = pMine->m_hOwner->pev;
 
 	Vector vecOut = g_vecZero;
-	if (RC2_ShieldFilterDamage(pHit, flShieldDamagePerSec * flDelta, 1.0, tr.vecEndPos, vecDir, (float*)&vecOut, NULL, 0) != 0)
+	if (ShieldDeflect(pHit, flShieldDamagePerSec * flDelta, 1.0, tr.vecEndPos, vecDir, &vecOut, NULL, 0) != 0)
 	{
 		ClearMultiDamage();
 		CBaseEntity* pEffected = pHit->GetEffectedEnt();
@@ -427,14 +396,14 @@ void CTripmineGrenade::BeamUpdate()
 				continue;
 
 			float flDist;
-			if (UTIL_RayHitsBox(pev->origin, m_vecDir, pEff->pev->absmin, pEff->pev->absmax, &flDist))
+			if (UTIL_RayIntersectsBox(pev->origin, m_vecDir, pEff->pev->absmin, pEff->pev->absmax, &flDist))
 			{
 				bFound = true;
 				if (flDist < flBest)
 				{
 					vecHit = pev->origin + m_vecDir * flDist;
 					pTarget = pEff;
-					bTargetShielded = pEff->IsActivePlayer() && RC2_PlayerShieldOn(pEff);
+					bTargetShielded = pEff->IsActivePlayer() && static_cast<CBasePlayer*>(pEff)->m_fShieldOn;
 					flBest = flDist;
 				}
 			}
@@ -678,7 +647,7 @@ void CBouncyTripmine::BeamUpdate()
 			{
 				if (m_pvecPoints[j] == g_vecZero)
 					continue;
-				if (UTIL_RayHitsBox(vecStart, vecDir, pEff->pev->absmin, pEff->pev->absmax, &flDist) && flDist <= flSegLength)
+				if (UTIL_RayIntersectsBox(vecStart, vecDir, pEff->pev->absmin, pEff->pev->absmax, &flDist) && flDist <= flSegLength)
 					break;
 				if (j < m_iMaxBounces)
 				{
@@ -702,7 +671,7 @@ void CBouncyTripmine::BeamUpdate()
 					vecHit = vecStart + vecDir * flDist;
 					pTarget = pEff;
 					iHitSegment = j;
-					bTargetShielded = pEff->IsActivePlayer() && RC2_PlayerShieldOn(pEff);
+					bTargetShielded = pEff->IsActivePlayer() && static_cast<CBasePlayer*>(pEff)->m_fShieldOn;
 					flBest = flDist + flTravelled;
 				}
 			}
@@ -844,7 +813,7 @@ void CBouncyTripmine::BeamUpdate()
 				pevAttacker = m_hOwner->pev;
 
 			Vector vecOut = g_vecZero;
-			if (RC2_ShieldFilterDamage(pHit, RC2Pref(RC2P_Tripmine_BouncyShieldDamagePerSec).f * flDelta, 1.0, tr.vecEndPos, vecDir, (float*)&vecOut, NULL, 0) == 0)
+			if (ShieldDeflect(pHit, RC2Pref(RC2P_Tripmine_BouncyShieldDamagePerSec).f * flDelta, 1.0, tr.vecEndPos, vecDir, &vecOut, NULL, 0) == 0)
 			{
 				// held off by a shield: the beam stops at the shield
 				if (vecOut != g_vecZero)
@@ -1008,14 +977,14 @@ void CPunchTripmine::BeamUpdate()
 				continue;
 
 			float flDist;
-			if (UTIL_RayHitsBox(pev->origin, m_vecDir, pEff->pev->absmin, pEff->pev->absmax, &flDist))
+			if (UTIL_RayIntersectsBox(pev->origin, m_vecDir, pEff->pev->absmin, pEff->pev->absmax, &flDist))
 			{
 				bFound = true;
 				if (flDist < flBest)
 				{
 					vecHit = pev->origin + m_vecDir * flDist;
 					pTarget = pEff;
-					bTargetShielded = pEff->IsActivePlayer() && RC2_PlayerShieldOn(pEff);
+					bTargetShielded = pEff->IsActivePlayer() && static_cast<CBasePlayer*>(pEff)->m_fShieldOn;
 					flBest = flDist;
 				}
 			}
@@ -1294,7 +1263,7 @@ void CTargetTripmine::BeamUpdate()
 			if (pHit && pHit->GetEffectedEnt()->GlobalBeamDamage() > 0)
 			{
 				Vector vecOut; // filled by the shield filter
-				if (RC2_ShieldFilterDamage(pHit, RC2Pref(RC2P_Tripmine_TargetUpBeamShieldDamagePerSec).f * flDelta, 1.0, tr.vecEndPos, m_vecDir, (float*)&vecOut, NULL, 0) == 0)
+				if (ShieldDeflect(pHit, RC2Pref(RC2P_Tripmine_TargetUpBeamShieldDamagePerSec).f * flDelta, 1.0, tr.vecEndPos, m_vecDir, &vecOut, NULL, 0) == 0)
 				{
 					m_vecEnd = vecOut;
 				}
@@ -1430,7 +1399,7 @@ void CTargetTripmine::BeamUpdate()
 	for (int i = 0;;)
 	{
 		Vector vecOut;
-		if (RC2_ShieldFilterDamage(pZap, RC2Pref(RC2P_Tripmine_TargetMainShieldDamage).f, 1.0, vecPoint, vecBestDir, (float*)&vecOut, NULL, 8) == 0)
+		if (ShieldDeflect(pZap, RC2Pref(RC2P_Tripmine_TargetMainShieldDamage).f, 1.0, vecPoint, vecBestDir, &vecOut, NULL, 8) == 0)
 			break;
 
 		entvars_t* pevAttacker = pev;

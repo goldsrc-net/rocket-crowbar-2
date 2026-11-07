@@ -14,7 +14,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "rc2prefs.h"
-#include "p7_extern.h"
+#include "UserMessages.h"
 #include <algorithm>
 
 #define CLTE_SHIELDHIT 38 // name ours: byte player, byte yaw, byte height, byte effect

@@ -572,11 +572,3 @@ void CGrenade::UseSatchelCharges(entvars_t* pevOwner, SATCHELCODE code)
 }
 
 //======================end grenade
-
-// TEMP STUB (p3): real ones belong in util.cpp (UTIL_KillEntityEffects 0xf55b0, UTIL_PackNormal
-// 0xf5920, RC2RadiusDamage 0xf3900). Weak, so
-// whichever file defines them for real wins and other packages' stubs of the same don't collide.
-__attribute__((weak)) void UTIL_KillEntityEffects(edict_t* pEdict) {}
-__attribute__((weak)) int UTIL_PackNormal(Vector vecDir) { return 0; }
-__attribute__((weak)) void RC2RadiusDamage(entvars_t* pevAttacker, entvars_t* pevInflictor, edict_t* pentIgnore, Vector vecSrc, float flRadius,
-	float flDamage, float flExponent, int bitsDamageType, int iFlags) {}

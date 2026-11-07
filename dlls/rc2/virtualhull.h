@@ -8,6 +8,8 @@
 
 #include "cbase.h"
 
+class CBasePlayer;
+
 class CVirtualHull : public CBaseEntity
 {
 public:
@@ -22,3 +24,8 @@ public:
 
 	EHANDLE m_hOwner; // name ours. orig +0x70: the player
 };
+
+// At a level change: the hulls of players who aren't connected any more go. Name ours
+void RemoveOrphanVirtualHulls();
+// Whether pent stands (groundentity) on one of pPlayer's hulls. Name ours
+bool IsOnVirtualHull(CBasePlayer* pPlayer, edict_t* pent);

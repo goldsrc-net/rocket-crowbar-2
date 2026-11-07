@@ -32,7 +32,7 @@
 
 #ifndef CLIENT_DLL
 #include "rc2prefs.h"
-#include "p3b_temp.h" // gmsgCLTE, RC2RaiseTime (TEMP STUB header of p3 B)
+#include "UserMessages.h"
 
 extern bool g_fRC2PlayWeaponEvents; // weapons.cpp
 
@@ -144,18 +144,18 @@ void CGlock::Holster()
 // (inline there).
 static void GlockRaiseAll(CGlock* pGlock, float flDelay) // name ours
 {
-	RC2RaiseTime(&pGlock->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flDelay);
-	RC2RaiseTime(&pGlock->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flDelay);
-	RC2RaiseTime(&pGlock->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flDelay);
-	RC2RaiseTime(&pGlock->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&pGlock->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&pGlock->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&pGlock->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&pGlock->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flDelay);
 }
 
 static void GlockRaiseAll(CGlock* pGlock, float flPrimary, float flSecondary, float flTertiary, float flQuaternary) // name ours
 {
-	RC2RaiseTime(&pGlock->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flPrimary);
-	RC2RaiseTime(&pGlock->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flSecondary);
-	RC2RaiseTime(&pGlock->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flTertiary);
-	RC2RaiseTime(&pGlock->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flQuaternary);
+	UTIL_ExtendTime(&pGlock->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flPrimary);
+	UTIL_ExtendTime(&pGlock->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flSecondary);
+	UTIL_ExtendTime(&pGlock->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flTertiary);
+	UTIL_ExtendTime(&pGlock->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flQuaternary);
 }
 
 // A thrown gib is owned by the player in the player's m_iRidingIndex (orig +0x69c) when there

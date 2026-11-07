@@ -30,7 +30,7 @@
 #include "player.h"
 #ifndef CLIENT_DLL
 #include "rc2prefs.h"
-#include "p3b_temp.h" // TEMP STUB: gmsgWeaponSync, RC2RaiseTime
+#include "UserMessages.h"
 #endif
 
 
@@ -239,9 +239,9 @@ void CHandGrenade::ReadWeaponState(void* pData, int iSize)
 // The attack timers each throw (or abort) pushes forward.
 static void RaiseAttackTimers(CHandGrenade* pWeapon, float flPrimary, float flSecondary, float flTertiary)
 {
-	RC2RaiseTime(&pWeapon->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flPrimary);
-	RC2RaiseTime(&pWeapon->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flSecondary);
-	RC2RaiseTime(&pWeapon->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flTertiary);
+	UTIL_ExtendTime(&pWeapon->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flPrimary);
+	UTIL_ExtendTime(&pWeapon->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flSecondary);
+	UTIL_ExtendTime(&pWeapon->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flTertiary);
 }
 #endif
 
@@ -297,7 +297,7 @@ void CHandGrenade::WeaponFrame()
 			m_flReleaseThrow = -1;
 			m_flStartThrow = 0;
 			RaiseAttackTimers(this, 0.5, 0.5, 0.5);
-			RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.5);
+			UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.5);
 			SendWeaponAnim(HANDGRENADE_DRAW);
 			return;
 		}
@@ -392,7 +392,7 @@ void CHandGrenade::WeaponFrame()
 			break;
 		case 3:
 			RaiseAttackTimers(this, RC2Pref(RC2P_Grenade_PrimaryRefirePrimary).f, RC2Pref(RC2P_Grenade_PrimaryRefireSecondary).f, RC2Pref(RC2P_Grenade_PrimaryRefireTertiary).f);
-			RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Grenade_PrimaryRefireQuaternary).f);
+			UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Grenade_PrimaryRefireQuaternary).f);
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= (unsigned short)RC2Pref(RC2P_Grenade_GravGrenAmmoCost).s;
 			break;
 		}
@@ -401,7 +401,7 @@ void CHandGrenade::WeaponFrame()
 		{
 			// just threw the last one: let the throw animation finish
 			RaiseAttackTimers(this, 0.5, 0.5, 0.5);
-			RC2RaiseTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.5);
+			UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.5);
 		}
 		return;
 	}

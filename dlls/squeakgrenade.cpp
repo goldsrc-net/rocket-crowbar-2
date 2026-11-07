@@ -35,42 +35,13 @@ enum w_squeak_e
 #include <algorithm>
 
 #include "rc2prefs.h"
-#include "rc2/p7_extern.h"
+#include "rc2/shield.h"
 
 // Rocket Crowbar 2's snark: rc2.ini's [Snark] keys replace the skill values, and while it hunts
 // it fires snark_project bolts at what it is facing. CMiniGrunt (mini_grunt) is the snark
 // launcher's grunt: it runs along the ground toward a target and bursts on contact.
 
-class CSqueakGrenade : public CGrenade
-{
-	void Spawn() override;
-	void Precache() override;
-	int Classify() override;
-	void EXPORT SuperBounceTouch(CBaseEntity* pOther);
-	void EXPORT HuntThink();
-	int BloodColor() override { return BLOOD_COLOR_YELLOW; } // orig 0xd0a80
-	void Killed(entvars_t* pevAttacker, int iGib) override;
-	void GibMonster() override;
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
-	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0xd0a70. VERIFY: meaning of the bits
-
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-
-	static TYPEDESCRIPTION m_SaveData[];
-
-	static float m_flNextBounceSoundTime;
-
-	// CBaseEntity *m_pTarget;
-	float m_flDie;		 // orig +0x2b8
-	Vector m_vecTarget;	 // orig +0x2bc
-	float m_flNextHunt;	 // orig +0x2c8
-	float m_flNextHit;	 // orig +0x2cc
-	Vector m_posPrev;	 // orig +0x2d0
-	EHANDLE m_hOwner;	 // orig +0x2dc
-	int m_iMyClass;		 // orig +0x2e4
-	float m_flNextFire; // orig +0x2e8, name ours: when the snark may fire its next snark_project
-};
+// CSqueakGrenade: weapons.h (the snark weapon counts each player's snarks by m_hOwner)
 
 float CSqueakGrenade::m_flNextBounceSoundTime = 0;
 
@@ -742,7 +713,7 @@ void CMiniGrunt::DoTouch(CBaseEntity* pOther) // orig 0xd2860
 		vecDir = vecDir.Normalize();
 	}
 
-	PLAYBACK_EVENT_FULL(0, edict(), m_usBlast, 0.0, vecSrc, g_vecZero, 0.0, 0.0, UTIL_PackDirection(vecDir), 0, 0, 0);
+	PLAYBACK_EVENT_FULL(0, edict(), m_usBlast, 0.0, vecSrc, g_vecZero, 0.0, 0.0, UTIL_PackNormal(vecDir), 0, 0, 0);
 
 	SetThink(NULL);
 	SetTouch(NULL);

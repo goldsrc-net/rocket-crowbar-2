@@ -14,7 +14,8 @@
 #include "soundent.h"
 #include "decals.h"
 #include "rc2prefs.h"
-#include "p7_extern.h"
+#include "UserMessages.h"
+#include "weapons.h"
 #include "snarkcam.h"
 
 // The byte at +0x66 of RC2's CBaseEntity block, which the original reads on players as "can't
@@ -151,12 +152,12 @@ void CSnarkProjectile::ExplodeTouch(CBaseEntity* pOther)
 	{
 		vecOrigin = tr.vecEndPos + tr.vecPlaneNormal * 4;
 		PLAYBACK_EVENT_FULL(FEV_GLOBAL, edict(), m_usHit, 0.0, vecOrigin, g_vecZero, 0.0, 0.0,
-			UTIL_PackDirection(-tr.vecPlaneNormal), 0, 1, 0);
+			UTIL_PackNormal(-tr.vecPlaneNormal), 0, 1, 0);
 	}
 	else
 	{
 		PLAYBACK_EVENT_FULL(FEV_GLOBAL, edict(), m_usHit, 0.0, vecOrigin, g_vecZero, 0.0, 0.0,
-			UTIL_PackDirection(pev->velocity.Normalize()), 0, 0, 0);
+			UTIL_PackNormal(pev->velocity.Normalize()), 0, 0, 0);
 
 		if (pOther->IsAlive())
 		{

@@ -123,7 +123,7 @@ void CGravGrenade::StartDetonate()
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetSize(pev, Vector(-8, -8, -8), Vector(8, 8, 8));
 
-	m_iPullPoint = RC2AddPullPoint(pev->origin, RC2Pref(RC2P_Grenade_GravGrenPullRadius).f,
+	m_iPullPoint = AddPullPoint(pev->origin, RC2Pref(RC2P_Grenade_GravGrenPullRadius).f,
 		RC2Pref(RC2P_Grenade_GravGrenPullPlayerConstant).f, RC2Pref(RC2P_Grenade_GravGrenPullMonsterConstant).f);
 	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin, 500, RC2Pref(RC2P_Grenade_GravGrenDetonateTime).f);
 
@@ -149,7 +149,7 @@ void CGravGrenade::Detonating()
 
 	float flDist = 0;
 	CBaseEntity* pEntity = NULL;
-	while ((pEntity = RC2FindEntityNear(pEntity, pev->origin, 24.0, &flDist, NULL)) != NULL)
+	while ((pEntity = UTIL_FindEntityNearestInSphere(pEntity, pev->origin, 24.0, &flDist, NULL)) != NULL)
 	{
 		if (flDist > 8.0)
 		{
@@ -167,7 +167,7 @@ void CGravGrenade::EndDetonate()
 {
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL, ENT(pev), m_usDetonate, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 1, 0);
 	RadiusDamage(pev->origin, pev, RC2GrenadeAttacker(pev), RC2Pref(RC2P_Grenade_GravGrenFinalBlastDamage).f, CLASS_NONE, DMG_BLAST);
-	RC2RemovePullPoint(m_iPullPoint);
+	RemovePullPoint(m_iPullPoint);
 	SetThink(NULL);
 	SetTouch(NULL);
 	UTIL_Remove(this);

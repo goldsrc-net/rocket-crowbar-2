@@ -21,15 +21,8 @@
 #include "player.h"
 #include "soundent.h"
 #include "rc2prefs.h"
-#include "p3b_temp.h" // RC2ShieldDamage, RC2EntMark*, gmsgCLTE (TEMP STUB header of p3 B)
-
-// From other files of the original (TEMP STUBs at the bottom)
-// util 0xf33b0: UTIL_FindEntityInSphere that also reports the distance and the point of the
-// entity nearest the centre (either out pointer may be NULL). Name ours.
-CBaseEntity* UTIL_FindEntityInSphereEx(CBaseEntity* pStartEntity, Vector vecCenter, float flRadius, float* pflDist, Vector* pvecNearest);
-// player 0x958b0: per-player state bits by player index; bit 2 keeps the sticky gib's gas off
-// the player. Name ours. VERIFY: what the bits are (0x956c0 does the work)
-int RC2PlayerStateBits(int iPlayerIndex);
+#include "shield.h"
+#include "UserMessages.h"
 
 #define RC2_GIBCAP_STICKY 4 // GetRCCaps bit: the sticky gib may attach to it even past a shield. Name ours
 
@@ -334,16 +327,16 @@ void CGlockStickyGib::AttachedThink()
 	if (pev->waterlevel >= 2)
 		return; // no gas under water
 
-	RC2EntMarkPush();
+	UTIL_PushEntityMarks();
 	CBaseEntity* pEntity = NULL;
-	while ((pEntity = UTIL_FindEntityInSphereEx(pEntity, pev->origin, RC2Pref(RC2P_Glock_StickyGasRadius).f, NULL, &vecNearest)) != NULL)
+	while ((pEntity = UTIL_FindEntityNearestInSphere(pEntity, pev->origin, RC2Pref(RC2P_Glock_StickyGasRadius).f, NULL, &vecNearest)) != NULL)
 	{
 		CBaseEntity* pVictim = pEntity->GetEffectedEnt();
 		if (pVictim->pev->deadflag != DEAD_NO)
 			continue;
 		if (pVictim->pev->takedamage != DAMAGE_AIM)
 			continue;
-		if (RC2EntMarkTest(ENTINDEX(pVictim->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pVictim->edict())))
 			continue;
 		if (!pVictim->IsAlive())
 			continue;
@@ -351,7 +344,7 @@ void CGlockStickyGib::AttachedThink()
 			continue; // the host is gassed below
 		if (pEntity->pev->waterlevel >= 2)
 			continue;
-		if (pVictim->IsActivePlayer() && (RC2PlayerStateBits(ENTINDEX(pVictim->edict())) & 2) != 0)
+		if (pVictim->IsActivePlayer() && (PM_GetAbilityFlags(ENTINDEX(pVictim->edict())) & 2) != 0)
 			continue;
 
 		TraceResult tr;
@@ -365,9 +358,9 @@ void CGlockStickyGib::AttachedThink()
 			flAmount = RC2Pref(RC2P_Glock_StickyMovementDmgFraction).f * flDamage;
 
 		pVictim->TakeDamage(pev, GibAttacker(this), flAmount, DMG_NERVEGAS);
-		RC2EntMarkSet(ENTINDEX(pVictim->edict()));
+		UTIL_MarkEntity(ENTINDEX(pVictim->edict()));
 	}
-	RC2EntMarkPop();
+	UTIL_PopEntityMarks();
 
 	if (m_fOnWorld)
 		return;
@@ -381,7 +374,7 @@ void CGlockStickyGib::AttachedThink()
 	if (pHost == NULL)
 		return;
 	CBaseEntity* pVictim = pHost->GetEffectedEnt();
-	if (pVictim->IsActivePlayer() && (RC2PlayerStateBits(ENTINDEX(pVictim->edict())) & 2) != 0)
+	if (pVictim->IsActivePlayer() && (PM_GetAbilityFlags(ENTINDEX(pVictim->edict())) & 2) != 0)
 		return;
 	if (pVictim->pev->waterlevel >= 2)
 		return;
@@ -406,7 +399,7 @@ void CGlockStickyGib::AttachTouch(CBaseEntity* pOther)
 	TraceResult tr;
 	UTIL_TraceLine(vecBack, vecFront, dont_ignore_monsters, pentSelf, &tr);
 
-	float flLeft = RC2ShieldDamage(pOther, RC2Pref(RC2P_Glock_StickyShieldDamage).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 6);
+	float flLeft = ShieldDeflect(pOther, RC2Pref(RC2P_Glock_StickyShieldDamage).f, 1.0, tr.vecEndPos, pev->velocity.Normalize(), NULL, NULL, 6);
 
 	bool fStick = false;
 	if ((iCaps & RC2_GIBCAP_STICKY) != 0 && flLeft >= RC2Pref(RC2P_Glock_StickyShieldDamage).f &&
@@ -614,7 +607,7 @@ void CGlockGib::BounceTouch(CBaseEntity* pOther)
 
 	int iCaps = pOther->GetRCCaps2(GibCapsAsker(this), this);
 
-	float flLeft = RC2ShieldDamage(pOther, RC2Pref(RC2P_Glock_GibShieldDamage).f, 1.0, pev->origin, pev->velocity.Normalize(), NULL, NULL, 7);
+	float flLeft = ShieldDeflect(pOther, RC2Pref(RC2P_Glock_GibShieldDamage).f, 1.0, pev->origin, pev->velocity.Normalize(), NULL, NULL, 7);
 	TraceResult tr = UTIL_GetGlobalTrace();
 
 	if (flLeft == RC2Pref(RC2P_Glock_GibShieldDamage).f && pOther->pev->takedamage != DAMAGE_NO && !pOther->IsBSPModel() && (iCaps & 1) == 0)
@@ -639,25 +632,4 @@ void CGlockGib::BounceTouch(CBaseEntity* pOther)
 		UTIL_PackNormal(pev->velocity.Normalize()), 0, pOther->IsBSPModel() ? 1 : 0, 1);
 	SetTouch(NULL);
 	UTIL_Remove(this);
-}
-
-
-// TEMP STUB (p3 C): real ones belong in util.cpp (UTIL_FindEntityInSphereEx, orig 0xf33b0) and
-// player.cpp (RC2PlayerStateBits, orig 0x958b0). Weak, so a real definition wins.
-__attribute__((weak)) CBaseEntity* UTIL_FindEntityInSphereEx(CBaseEntity* pStartEntity, Vector vecCenter, float flRadius, float* pflDist, Vector* pvecNearest)
-{
-	CBaseEntity* pEntity = UTIL_FindEntityInSphere(pStartEntity, vecCenter, flRadius);
-	if (pEntity != NULL)
-	{
-		if (pvecNearest)
-			*pvecNearest = pEntity->Center();
-		if (pflDist)
-			*pflDist = (pEntity->Center() - vecCenter).Length();
-	}
-	return pEntity;
-}
-
-__attribute__((weak)) int RC2PlayerStateBits(int iPlayerIndex)
-{
-	return 0;
 }

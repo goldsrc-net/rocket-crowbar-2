@@ -13,15 +13,11 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
+#include "UserMessages.h"
 #include "weapons.h"
 #include "gamerules.h"
 #include "rc2prefs.h"
-#include "rc2/p6stubs.h"
-
-extern int gmsgCLTE;
-extern int gmsgRaceStat; // "RaceStat", RC2's own (orig .bss 0x18f4d0)
-
-void UntransformPlayer(CBasePlayer* pPlayer); // name ours: orig 0xe2f90 (TEMP STUB below)
+#include "racecontroller.h"
 
 // One point of the track, 16 bytes as in the original.
 struct racepoint_t // name ours
@@ -146,12 +142,12 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 				pPlayer->pev->angles = pExit->pev->angles;
 				pPlayer->pev->punchangle = g_vecZero;
 				pPlayer->pev->fixangle = 1;
-				UntransformPlayer(pPlayer);
+				pPlayer->FinishUntransform();
 				return;
 			}
 		}
 		g_pGameRules->GetPlayerSpawnSpot(pPlayer);
-		UntransformPlayer(pPlayer);
+		pPlayer->FinishUntransform();
 		return;
 	}
 
@@ -285,14 +281,14 @@ bool CRacePath::KeyValue(KeyValueData* pkvd) // orig 0xae4c0
 	return false;
 }
 
-// While racing: +use gives up the race at a spawn spot. Name ours; nothing in rc2.dll calls it
-// directly (VERIFY: the caller, likely the transforms' per-frame table in another package).
+// While racing: +use gives up the race at a spawn spot. Name ours; CBasePlayer::PreThink calls it
+// every frame for transform 6.
 void RaceUseFrame(CBasePlayer* pPlayer) // orig 0xae540
 {
 	if ((pPlayer->m_afButtonPressed & IN_USE) != 0)
 	{
 		g_pGameRules->GetPlayerSpawnSpot(pPlayer);
-		UntransformPlayer(pPlayer);
+		pPlayer->FinishUntransform();
 	}
 }
 
@@ -370,14 +366,4 @@ void RacePath_GetHeight(int iPlayer, float* pflHeight) // orig 0xae830
 	if (!pController || !pflHeight)
 		return;
 	*pflHeight = pPlayer->m_flTransformVar1;
-}
-
-
-// TEMP STUB (p6): real one belongs in UserMessages.cpp (LinkUserMessages registers "RaceStat")
-int gmsgRaceStat = 0;
-
-// TEMP STUB (p6): real one belongs in the package with 0xe2f90 (p8): back to the player
-// model, m_iTransformType and m_bTransforming 0, health scaled back to the saved max health
-void UntransformPlayer(CBasePlayer* pPlayer)
-{
 }

@@ -30,7 +30,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "p4_needs.h"
+#include "maintainent.h"
 #include "alteration.h"
 
 // orig 0x71c00
@@ -270,7 +270,7 @@ float ALT_EvalFloat(const char* pszExpr)
 	const char chName = (char)tolower((unsigned char)s[0]);
 	if (chName == 'p')
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(ALT_ParseIndex(s, 2, g_iRC2AlterPlayer, iPos));
+		CBaseEntity* pPlayer = UTIL_PlayerByIndex(ALT_ParseIndex(s, 2, g_iLCSCallerIndex, iPos));
 		if (!pPlayer)
 		{
 			free(pszBuf);
@@ -312,7 +312,7 @@ float ALT_EvalFloat(const char* pszExpr)
 
 	if (chName == 'e')
 	{
-		CBaseEntity* pEntity = CBaseEntity::Instance(INDEXENT(ALT_ParseIndex(s, 4, g_iRC2AlterEntity, iPos)));
+		CBaseEntity* pEntity = CBaseEntity::Instance(INDEXENT(ALT_ParseIndex(s, 4, g_iLCSSelectedIndex, iPos)));
 		if (!pEntity)
 		{
 			free(pszBuf);
@@ -505,7 +505,7 @@ Vector ALT_EvalVector(const char* pszExpr)
 	const char chName = (char)tolower((unsigned char)s[0]);
 	if (chName == 'p')
 	{
-		CBaseEntity* pPlayer = UTIL_PlayerByIndex(ALT_ParseIndex(s, 2, g_iRC2AlterPlayer, iPos));
+		CBaseEntity* pPlayer = UTIL_PlayerByIndex(ALT_ParseIndex(s, 2, g_iLCSCallerIndex, iPos));
 		if (!pPlayer)
 		{
 			free(pszBuf);
@@ -546,7 +546,7 @@ Vector ALT_EvalVector(const char* pszExpr)
 	}
 	else if (chName == 'e')
 	{
-		CBaseEntity* pEntity = CBaseEntity::Instance(INDEXENT(ALT_ParseIndex(s, 4, g_iRC2AlterEntity, iPos)));
+		CBaseEntity* pEntity = CBaseEntity::Instance(INDEXENT(ALT_ParseIndex(s, 4, g_iLCSSelectedIndex, iPos)));
 		if (!pEntity)
 		{
 			free(pszBuf);
@@ -611,7 +611,7 @@ Vector ALT_EvalVector(const char* pszExpr)
 		return ALT_Normalized(vec);
 	}
 
-	CBaseEntity* pPlayer = UTIL_PlayerByIndex(g_iRC2AlterPlayer);
+	CBaseEntity* pPlayer = UTIL_PlayerByIndex(g_iLCSCallerIndex);
 	if (pPlayer)
 	{
 		switch (chName)

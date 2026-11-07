@@ -11,8 +11,8 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-
-extern int gmsgCLTE; // "CLTE" (dlls/rc2/maintainent.cpp has p1's TEMP STUB)
+#include "UserMessages.h"
+#include "antifrictimer.h"
 
 class CAntiFricTimer : public CBaseEntity
 {
@@ -165,6 +165,3 @@ void StopAntiFriction(edict_t* pent) // name ours
 			static_cast<CAntiFricTimer*>(pTimer)->StopFriction();
 	}
 }
-
-// SetPhysFlags: the real one is reconstructed elsewhere now
-// ClearPhysFlags: the real one is reconstructed elsewhere now

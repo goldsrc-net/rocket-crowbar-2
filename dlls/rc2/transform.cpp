@@ -14,7 +14,8 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "p8_needs_transform.h"
+#include "UserMessages.h"
+#include "rc2prefs.h"
 
 // The original's __FILE__, which its warnings print
 #define TRANSFORM_FILE "C:\\SIERRA\\Half-Life\\RC2dev\\dlls\\transform.cpp"
@@ -289,7 +290,7 @@ void CBasePlayer::StartTransform()
 	m_flTransformIdleTime = gpGlobals->time - 120;
 
 	m_flEnergy -= RC2Pref(RC2P_Attributes_TransformEnergyCost).f;
-	UTIL_SetMaxTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Attributes_TransformEnergyRegenDelay).f);
+	UTIL_ExtendTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Attributes_TransformEnergyRegenDelay).f);
 	if (m_flEnergy < 0)
 		m_flEnergy = 0;
 
@@ -485,7 +486,7 @@ void CBasePlayer::StartUntransform()
 	pev->skin = 0;
 
 	m_flEnergy -= RC2Pref(RC2P_Attributes_TransformEnergyCost).f;
-	UTIL_SetMaxTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Attributes_TransformEnergyRegenDelay).f);
+	UTIL_ExtendTime(m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Attributes_TransformEnergyRegenDelay).f);
 	if (m_flEnergy < 0)
 		m_flEnergy = 0;
 
@@ -617,7 +618,7 @@ int Transform_DeathDirection(CBasePlayer* pPlayer)
 }
 
 // orig 0xe3400
-int Transform_OfPlayer(int iPlayer)
+int PM_GetPlayerMode(int iPlayer)
 {
 	edict_t* pent = INDEXENT(iPlayer);
 	if (!UTIL_IsValidEntity(pent))

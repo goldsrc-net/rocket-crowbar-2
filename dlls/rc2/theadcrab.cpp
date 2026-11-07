@@ -5,7 +5,7 @@
 *	File name ours, by its place in the original's link order (after tentacle) and the other
 *	transforms' files. The leap itself is movement code (pm_shared, another package's): it sets
 *	and reads the leaping flag here by player index and reports what it lands on to
-*	THeadcrab_LeapHit. rc2.ini [TransformHeadcrab].
+*	PM_HeadcrabLeapHit. rc2.ini [TransformHeadcrab].
 *
 ****/
 
@@ -14,7 +14,8 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "player.h"
-#include "p8_needs_transform.h"
+#include "shield.h"
+#include "rc2prefs.h"
 
 // orig 0xded30
 void CBasePlayer::THeadcrab_SetAnimation(PLAYER_ANIM playerAnim)
@@ -194,7 +195,7 @@ static CBasePlayer* THeadcrab_Player(int iPlayer) // ours: the original repeats 
 }
 
 // orig 0xdf260
-void THeadcrab_SetLeaping(int iPlayer, int iLeaping)
+void PM_SetHeadcrabLeap(int iPlayer, int iLeaping)
 {
 	CBasePlayer* pPlayer = THeadcrab_Player(iPlayer);
 	if (pPlayer)
@@ -202,7 +203,7 @@ void THeadcrab_SetLeaping(int iPlayer, int iLeaping)
 }
 
 // orig 0xdf2c0
-int THeadcrab_IsLeaping(int iPlayer)
+int PM_GetHeadcrabLeap(int iPlayer)
 {
 	CBasePlayer* pPlayer = THeadcrab_Player(iPlayer);
 	if (pPlayer)
@@ -215,7 +216,7 @@ int THeadcrab_IsLeaping(int iPlayer)
 // when the leap should go on through (the victim is gone, hidden, modelless or a non-solid
 // brush), 0 when it stops.
 // orig 0xdf320
-int THeadcrab_LeapHit(int iPlayer, int iVictim, float flSpeed)
+int PM_HeadcrabLeapHit(int iPlayer, int iVictim, float flSpeed)
 {
 	CBasePlayer* pPlayer = THeadcrab_Player(iPlayer);
 	if (!pPlayer || 0 == pPlayer->m_iTransformState1)
@@ -249,11 +250,11 @@ int THeadcrab_LeapHit(int iPlayer, int iVictim, float flSpeed)
 		return 0;
 	}
 
-	flDamage = RC2_ShieldFilterDamage(pVictim, flDamage, RC2Pref(RC2P_TransformHeadcrab_JumpShieldFraction).f, pPlayer->pev->origin, pPlayer->pev->velocity.Normalize(), NULL, NULL, 12);
+	flDamage = ShieldDeflect(pVictim, flDamage, RC2Pref(RC2P_TransformHeadcrab_JumpShieldFraction).f, pPlayer->pev->origin, pPlayer->pev->velocity.Normalize(), NULL, NULL, 12);
 	if (flDamage <= 0)
 		return 0;
 
-	pVictim->TakeDamage(UTIL_NamedInflictor("headcrab_leap"), pPlayer->pev, flDamage, DMG_SLASH | ((flDamage > 120) ? DMG_ALWAYSGIB : 0));
+	pVictim->TakeDamage(UTIL_RC2DamageInflictor("headcrab_leap"), pPlayer->pev, flDamage, DMG_SLASH | ((flDamage > 120) ? DMG_ALWAYSGIB : 0));
 	EMIT_SOUND_DYN(pPlayer->edict(), CHAN_ITEM, "headcrab/hc_headbite.wav", ATTN_NORM, ATTN_NORM, 0, RANDOM_LONG(85, 105)); // volume 0.8
 
 	if (!UTIL_IsValidEntity(pentVictim))

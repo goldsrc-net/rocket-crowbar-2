@@ -18,6 +18,7 @@
 #include "game.h"
 #include "UserMessages.h"
 #include "rc2prefs.h"
+#include "rc2/maintainent.h"
 
 #include <ctype.h>
 #include <math.h>
@@ -25,9 +26,6 @@
 // orig .bss 0x191bc8: one 8-byte slot per key of g_rc2Prefs
 rc2prefvalue_t g_rc2PrefValues[RC2P_COUNT];
 
-extern int gmsgRCCFG; // "RCCFG", RC2's own (orig .bss 0x18f4c4)
-
-bool IsTempAdmin(edict_t* pEntity); // name ours: orig 0x1160, sv_tempadmins (TEMP STUB below)
 
 static void RC2Prefs_ParseValue(int iIndex, const char* pszText, rc2prefvalue_t* pValue);
 static void RC2Prefs_FormatValue(int iIndex, const rc2prefvalue_t* pValue, char* pszOut);
@@ -587,7 +585,7 @@ void RC2Prefs_ClientCommand(edict_t* pEntity) // orig 0xb0050
 	bool bAdmin = pPlayer->m_iAdminLevel > 0;
 	const bool bSuperAdmin = pPlayer->m_iAdminLevel > 1;
 	if (!bAdmin)
-		bAdmin = IsTempAdmin(pEntity);
+		bAdmin = Admin_IsTempAdmin(pEntity);
 
 	char szArg1[64];
 	char szArg2[64];
@@ -866,15 +864,5 @@ static bool RC2Prefs_ValuesEqual(int iIndex, const rc2prefvalue_t* pA, const rc2
 	case RC2PT_BOOL:
 		return (pA->c != 0) == (pB->c != 0);
 	}
-	return false;
-}
-
-
-// gmsgRCCFG: UserMessages.h (p5)
-
-// TEMP STUB (p6): real one belongs in the run before aflock (orig 0x1160): whether the
-// player's WON id is listed in the sv_tempadmins cvar
-bool IsTempAdmin(edict_t* pEntity)
-{
 	return false;
 }

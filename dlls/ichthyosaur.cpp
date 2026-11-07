@@ -28,7 +28,7 @@
 #include "animation.h"
 #include "effects.h"
 #include "weapons.h"
-#include "p4_needs.h"
+#include "rc2/shield.h"
 
 #define SEARCH_RETRY 16
 
@@ -451,7 +451,7 @@ void CIchthyosaur::HandleAnimEvent(MonsterEvent_t* pEvent)
 			UTIL_MakeAimVectors(pev->angles);
 
 			// Rocket Crowbar 2: a player's shield stops the shake altogether
-			if (DotProduct(vecShootDir, gpGlobals->v_forward) > 0.707 && ShieldAbsorbDamage(pHurt, 45, 1, pev->origin, vecShootDir, NULL, NULL, 12) == 45)
+			if (DotProduct(vecShootDir, gpGlobals->v_forward) > 0.707 && ShieldDeflect(pHurt, 45, 1, pev->origin, vecShootDir, NULL, NULL, 12) == 45)
 			{
 				m_bOnAttack = true;
 				pHurt->pev->punchangle.z = -18;

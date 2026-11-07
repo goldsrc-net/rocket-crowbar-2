@@ -529,7 +529,7 @@ void CBaseMonster::MonsterThink()
 	// Rocket Crowbar 2: a frozen monster doesn't think; only outside forces still move it
 	if (m_bFrozen)
 	{
-		ApplyExternalForce(RC2FrameAdvance(0));
+		ApplyExternalForce(StudioFrameAdvance(0));
 		return;
 	}
 

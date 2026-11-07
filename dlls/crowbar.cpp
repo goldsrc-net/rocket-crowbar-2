@@ -26,7 +26,10 @@
 #include "rc2prefs.h"
 #include "soundent.h"
 #ifndef CLIENT_DLL
-#include "p2shared.h"
+#include "rc2/shield.h"
+#include "UserMessages.h"
+
+#define RC2_CAP_SHOVE 0x1 // GetRCCaps: may be knocked about (name ours)
 #endif
 
 #define CROWBAR_BODYHIT_VOLUME 128
@@ -516,7 +519,7 @@ void CCrowbar::SecondaryAttack()
 	ChargeStop(true);
 
 	// Original oddity, kept: bparam1 is 4
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrowbarSwing, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 4, 0);
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -653,7 +656,7 @@ bool CCrowbar::Swing(bool fFirst)
 		}
 	}
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrowbar, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
 	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_PrimaryRefirePrimary).f);
@@ -730,7 +733,7 @@ bool CCrowbar::Swing(bool fFirst)
 		m_pPlayer->pev->flags &= ~FL_ONGROUND;
 	}
 
-	float flDamage = RC2ShieldDamage(pEntity, (RC2Pref(RC2P_Crowbar_PrimaryChargeDamageFraction).f * flCharge + 1.0) * RC2Pref(RC2P_Crowbar_PrimaryDamage).f,
+	float flDamage = ShieldDeflect(pEntity, (RC2Pref(RC2P_Crowbar_PrimaryChargeDamageFraction).f * flCharge + 1.0) * RC2Pref(RC2P_Crowbar_PrimaryDamage).f,
 		RC2Pref(RC2P_Crowbar_PrimaryShieldFraction).f, vecEnd, gpGlobals->v_forward, NULL, NULL, (int)flCharge + 10);
 	if (flDamage > 0)
 	{
@@ -829,7 +832,7 @@ void CCrowbar::WeaponFrame()
 		m_flNextSync = gpGlobals->time + 0.1;
 	}
 
-	if (g_runfuncs && m_flNextChargeEvent < gpGlobals->time)
+	if (g_fRC2PlayWeaponEvents && m_flNextChargeEvent < gpGlobals->time)
 	{
 		edict_t* pPlayer = m_pPlayer->edict();
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_UPDATE, pPlayer, m_usCbarCharge, 0, g_vecZero, g_vecZero, m_flCharge, 0, ENTINDEX(pPlayer), 0, 0, 0);
@@ -869,7 +872,7 @@ void CCrowbar::WeaponFrame()
 	// out of energy
 	if (flAdd * RC2Pref(RC2P_Crowbar_EnergyPerUnitCharge).f > m_pPlayer->m_flEnergy)
 	{
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 		{
 			edict_t* pPlayer = m_pPlayer->edict();
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_UPDATE, pPlayer, m_usCbarCharge, 0, g_vecZero, g_vecZero, m_flCharge, 0, ENTINDEX(pPlayer), 0, 0, 0);

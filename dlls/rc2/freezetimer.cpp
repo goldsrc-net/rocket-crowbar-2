@@ -17,17 +17,12 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "p2shared.h"
+#include "UserMessages.h"
+#include "freezetimer.h"
 
 #define RC2_CLTE_FROZEN 0x2f // short entity: draw it frozen; RC2_CLTE_KILL-like 0xfe, short, byte 0x2f ends it (name ours)
 #define RC2_CLTE_END 0xfe	 // short entity, byte the effect to end (name ours)
 #define RC2_HOLD_FROZEN 2	 // the hold bit in CBasePlayer +0x648 (name ours)
-
-// orig 0x9a800, 0x9a820 (player.cpp), names ours: set and clear hold bits in CBasePlayer +0x648
-// (m_iMoveLock); each also calls a player function with 2 (0x9a730 on set, 0x9a780 when the
-// last bit goes)
-extern void RC2PlayerAddHold(CBasePlayer* pPlayer, int iBits);
-extern void RC2PlayerRemoveHold(CBasePlayer* pPlayer, int iBits);
 
 // RC2's byte at CBaseEntity +0x66 (the third byte of the int at +0x64): the entity is held
 static void SetHeld(CBaseEntity* pEnt, bool bHeld) // name ours
@@ -76,7 +71,7 @@ bool CFreezeTimer::OwnerGone()
 
 static void FreezePlayer(CBasePlayer* pPlayer, bool bTied) // name ours
 {
-	RC2PlayerAddHold(pPlayer, RC2_HOLD_FROZEN);
+	pPlayer->AddPhysFlag2Source(RC2_HOLD_FROZEN);
 	pPlayer->m_fShieldOn = false;
 	if (bTied)
 		SetHeld(pPlayer, true);
@@ -155,7 +150,7 @@ void CFreezeTimer::EntFrozen()
 
 static void ThawPlayer(CBasePlayer* pPlayer, bool bTied) // name ours
 {
-	RC2PlayerRemoveHold(pPlayer, RC2_HOLD_FROZEN);
+	pPlayer->RemovePhysFlag2Source(RC2_HOLD_FROZEN);
 	if (bTied)
 		SetHeld(pPlayer, false);
 	pPlayer->m_iHideHUD &= ~HIDEHUD_WEAPONS;
@@ -177,7 +172,7 @@ void CFreezeTimer::EndFreeze()
 	if (pOwner->IsPlayer())
 	{
 		CBasePlayer* pPlayer = (CBasePlayer*)pOwner;
-		RC2PlayerRemoveHold(pPlayer, RC2_HOLD_FROZEN);
+		pPlayer->RemovePhysFlag2Source(RC2_HOLD_FROZEN);
 		pPlayer->m_iHideHUD &= ~HIDEHUD_WEAPONS;
 
 		int iTied[2] = {pPlayer->m_iShoulderRider[0], pPlayer->m_iShoulderRider[1]};

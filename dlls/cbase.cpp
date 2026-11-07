@@ -819,8 +819,6 @@ int CBaseEntity::DamageDecal(int bitsDamageType)
 // set Create refuses what isn't on the precache list and the classnames that must come from
 // the map. RC 1.9's name.
 extern bool g_bUnsafeCreate;		  // orig 0x18f3f0
-extern bool IsClassnamePrecachedNoInvalid(const char* pszClassname); // orig 0xf5a80 (p9)
-extern bool IsClassnameMapOnly(const char* pszClassname);	  // orig 0xf5af0 (p9), name ours
 
 // NOTE: szName must be a pointer to constant memory, e.g. "monster_class" because the entity
 // will keep a pointer to it after this call.

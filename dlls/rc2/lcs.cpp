@@ -14,7 +14,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "gamerules.h"
-#include "p4_needs.h"
+#include "maintainent.h"
 #include "lcs.h"
 
 //=========================================================
@@ -63,7 +63,7 @@ void CLCSSpawner::CreateThink()
 	}
 
 	AddToPrecachedList(m_szClassname);
-	m_pEntity = CBaseEntity::Create(UTIL_PersistentClassname(m_szClassname), pev->origin, pev->angles, edict());
+	m_pEntity = CBaseEntity::Create(GetPrecachedName(m_szClassname), pev->origin, pev->angles, edict());
 	if (m_pEntity)
 	{
 		m_pEntity->pev->spawnflags |= 0x80000200;
@@ -199,7 +199,7 @@ static void LCS_ForEachNamed(LCSACTION pfnAction, const char* pszPattern)
 		return;
 	for (int i = 1; i < gpGlobals->maxEntities; i++, pent++)
 	{
-		if (0 != UTIL_IsValidEdict(pent) && LCS_ClassnameMatches(STRING(pent->v.classname), pszPattern))
+		if (0 != UTIL_IsValidEntity(pent) && LCS_ClassnameMatches(STRING(pent->v.classname), pszPattern))
 			pfnAction((CBaseEntity*)GET_PRIVATE(pent));
 	}
 }
@@ -208,7 +208,7 @@ static void LCS_ForEachNamed(LCSACTION pfnAction, const char* pszPattern)
 static void LCS_ForIndex(LCSACTION pfnAction, int iEntity)
 {
 	edict_t* pent = INDEXENT(iEntity);
-	if (pent && 0 != UTIL_IsValidEdict(pent))
+	if (pent && 0 != UTIL_IsValidEntity(pent))
 		pfnAction((CBaseEntity*)GET_PRIVATE(pent));
 }
 
@@ -347,15 +347,15 @@ void LCS_Load(int iPass)
 		else if (stricmp(szCommand, "advcreate") == 0)
 		{
 			if (LCS_GetToken(szLine, szArg, 1))
-				AdvCreateEntity(szArg, szLine, 1);
+				LCS_CreateWithScript(szArg, szLine, 1);
 		}
 		else if (stricmp(szCommand, "edit") == 0)
 		{
 			if (LCS_GetToken(szLine, szArg, 1))
 			{
 				edict_t* pent = INDEXENT(atoi(szArg));
-				if (0 != UTIL_IsValidEdict(pent))
-					EditEntity(pent, szLine, 0);
+				if (0 != UTIL_IsValidEntity(pent))
+					LCS_RunOnEntity(pent, szLine, 0);
 			}
 		}
 		else if (stricmp(szCommand, "maintain") == 0)
@@ -363,16 +363,16 @@ void LCS_Load(int iPass)
 			if (LCS_GetToken(szLine, szArg, 1))
 			{
 				edict_t* pent = INDEXENT(atoi(szArg));
-				if (0 != UTIL_IsValidEdict(pent))
-					MaintainEdit(pent, szLine, 0);
+				if (0 != UTIL_IsValidEntity(pent))
+					LCS_MaintainOnEntity(pent, szLine, 0);
 			}
 		}
 		else if (stricmp(szCommand, "setspawncommand") == 0)
 		{
 			// LCS_Command writes these lines as "setspawncmd", which this never matches
-			strncpy(g_szRC2SpawnCommand, szLine, 0x1ff);
-			g_szRC2SpawnCommand[0x1ff] = '\0';
-			g_iRC2SpawnCommandRun = 0;
+			strncpy(g_szLCSPlayerScript, szLine, 0x1ff);
+			g_szLCSPlayerScript[0x1ff] = '\0';
+			g_iLCSPlayerScriptFirstArg = 0;
 		}
 	}
 
@@ -462,7 +462,7 @@ void LCS_Command(int iArg, edict_t* pEntity)
 			"Ussage: kill <classname if not aimed at a killable ent>\n",
 			"Ussage: use <classname if not aimed at a useable ent>\n"};
 
-		CBaseEntity* pAimed = GetAimedEntity(pev);
+		CBaseEntity* pAimed = Admin_GetAimedEntity(pev);
 		if (pAimed)
 		{
 			sprintf(szLine, s_pszEnt[iVerb], ENTINDEX(pAimed->edict()));
@@ -487,7 +487,7 @@ void LCS_Command(int iArg, edict_t* pEntity)
 			ClientPrint(pev, HUD_PRINTCONSOLE, bMaintain ? "Ussage: maintain <alteration arguments (need to be aimed at an ent)>\n" : "Ussage: edit <alteration arguments (need to be aimed at an ent)>\n");
 			return;
 		}
-		CBaseEntity* pAimed = GetAimedEntity(pev);
+		CBaseEntity* pAimed = Admin_GetAimedEntity(pev);
 		if (!pAimed)
 			return;
 		sprintf(szLine, bMaintain ? "maintain %i " : "edit %i ", ENTINDEX(pAimed->edict()));

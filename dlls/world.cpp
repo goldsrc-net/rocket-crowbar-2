@@ -33,6 +33,10 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
+#include "rc2prefs.h"
+#include "rc2/lcs.h"
+#include "rc2/maintainent.h"
+#include "rc2/pullers.h"
 
 CGlobalState gGlobalState;
 
@@ -515,19 +519,6 @@ CWorld::~CWorld()
 float g_flWeaponCheat; // orig .bss 0x1afd34, SDK 2.3's name (HLU dropped it): sv_cheats at map start
 int g_iRC2ScoreMode;   // orig .bss 0x1afd38: mp_scoremode at map start, 0 or 1
 int g_iRC2GibEvent;	   // orig .bss 0x1afd3c: events/gib.sc (CBaseMonster::GibMonster plays it)
-entvars_t* g_pevRC2WorldDummy; // orig .bss 0x1afd30: a plain entity classnamed "worldspawn" that util's 0xf58a0 hands out
-
-// From other RC2 files (declared here until their packages land). Names ours.
-extern int g_iRC2ClientBits;			   // orig 0x1af2a8: a bit per client index, set on connect (client)
-extern char g_szRC2SpawnCommand[512];	   // orig 0x18be80: an .lcs file's setspawncommand
-extern int g_rgiRC2ForceState[0xc0];	   // orig 0x1915c8: ApplyExternalForce's state (pm_shared .. python)
-extern bool g_fRC2InDamageReflect;		   // orig 0x18f4dc: CBasePlayer::TakeDamage's reflection guard (player)
-extern void RC2ResetPrefs();			   // orig 0xb1150: every rc2.ini value back to its default (rat .. roach)
-extern void RC2LoadPrefs(const char* pszFile); // orig 0xaf030: load rc2.ini; NULL means the rccfgfile cvar (rat .. roach)
-extern void RC2ResetUtil4c50();			   // orig 0xf4c50: clears util's table at 0x1af084 and its count (util)
-extern void RC2ResetPrecachedList();	   // orig 0xf5c60: empties AddToPrecachedList's list (util)
-extern void RC2LoadLCS(int iWhen);		   // orig 0x6d4d0: run maps/lcs/<map>.lcs (items .. leech)
-extern void UTIL_RC2TimedEvent(void (*pfn)(int), int iArg, float flDelay); // orig 0xf5d80: a "timedevent" entity (util)
 
 // orig 0xfc9d0. RC2: also caches sv_cheats (as SDK 2.3 did) and mp_scoremode.
 void CWorld::Spawn()
@@ -552,11 +543,11 @@ void CWorld::Precache()
 
 	// Rocket Crowbar 2: per-map resets, rc2.ini back to its defaults
 	g_iRC2ClientBits = 0;
-	RC2ResetPrefs();
+	RC2Prefs_ResetToDefaults();
 	g_pLastSpawn = NULL;
-	RC2ResetUtil4c50();
-	memset(g_rgiRC2ForceState, 0, sizeof(g_rgiRC2ForceState));
-	g_szRC2SpawnCommand[0] = '\0';
+	UTIL_ClearEntityMarks();
+	memset(g_vecPullPointOrg, 0, sizeof(g_vecPullPointOrg));
+	g_szLCSPlayerScript[0] = '\0';
 
 #if 1
 	CVAR_SET_STRING("sv_gravity", "800"); // 67ft/sec
@@ -575,7 +566,7 @@ void CWorld::Precache()
 	g_pGameRules = InstallGameRules();
 
 	// Rocket Crowbar 2: load rc2.ini (the rccfgfile cvar)
-	RC2LoadPrefs(NULL);
+	RC2Prefs_LoadConfig(NULL);
 
 	//!!!UNDONE why is there so much Spawn code in the Precache function? I'll just keep it here
 
@@ -584,7 +575,7 @@ void CWorld::Precache()
 	pSoundEnt = GetClassPtr((CSoundEnt*)NULL);
 	pSoundEnt->Spawn();
 
-	RC2ResetPrecachedList(); // Rocket Crowbar 2
+	ResetPrecachedList(); // Rocket Crowbar 2
 
 	if (!pSoundEnt)
 	{
@@ -632,7 +623,7 @@ void CWorld::Precache()
 	PRECACHE_SOUND("weapons/ric4.wav");
 	PRECACHE_SOUND("weapons/ric5.wav");
 
-	RC2LoadLCS(0); // Rocket Crowbar 2: the map's .lcs, first pass
+	LCS_Load(0); // Rocket Crowbar 2: the map's .lcs, first pass
 	//
 	// Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
 	//
@@ -747,9 +738,9 @@ void CWorld::Precache()
 	CBaseEntity* pDummy = GetClassPtr((CBaseEntity*)NULL);
 	pDummy->Spawn();
 	pDummy->pev->classname = MAKE_STRING("worldspawn");
-	g_pevRC2WorldDummy = pDummy->pev;
+	g_pevRC2DamageInflictor = pDummy->pev;
 
-	UTIL_RC2TimedEvent(RC2LoadLCS, 1, 3.0);
+	UTIL_RC2TimedEvent(LCS_Load, 1, 3.0);
 }
 
 
@@ -827,21 +818,3 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 }
 
 
-// g_iRC2ClientBits: defined in util.cpp (p9)
-// TEMP STUB (p3): real one belongs in the .lcs loader's file (items .. leech, 0x6d4d0)
-char g_szRC2SpawnCommand[512];
-// TEMP STUB (p3): real one belongs with ApplyExternalForce (pm_shared .. python, 0xa9ba0)
-int g_rgiRC2ForceState[0xc0];
-// TEMP STUB (p3): real one belongs in player.cpp (CBasePlayer::TakeDamage)
-bool g_fRC2InDamageReflect;
-// TEMP STUB (p3): real one belongs in rc2prefs.cpp (0xb1150)
-void RC2ResetPrefs() {}
-// TEMP STUB (p3): real one belongs in rc2prefs.cpp (0xaf030)
-void RC2LoadPrefs(const char* pszFile) {}
-// TEMP STUB (p3): real one belongs in util.cpp (0xf4c50)
-void RC2ResetUtil4c50() {}
-// TEMP STUB (p3): real one belongs in util.cpp (0xf5c60)
-void RC2ResetPrecachedList() {}
-// TEMP STUB (p3): real one belongs in the .lcs loader's file (items .. leech, 0x6d4d0)
-void RC2LoadLCS(int iWhen) {}
-// UTIL_RC2TimedEvent: the real one is reconstructed elsewhere now

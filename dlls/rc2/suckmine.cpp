@@ -17,11 +17,10 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
+#include "UserMessages.h"
 #include "gamerules.h"
 #include "rc2prefs.h"
-#include "p6stubs.h"
 
-extern int gmsgCLTE; // RC2's "CLTE" user message (orig .bss 0x18f4b8); TEMP STUB in dlls/rc2/playerride.cpp
 
 #define CLTE_SUCKMINE_ROPE 0x1f // ours: the rope from the mine to its target
 #define CLTE_KILL 0xfe			// ours: kills a client effect of the entity (the subtype follows)

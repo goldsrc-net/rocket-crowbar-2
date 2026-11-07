@@ -17,7 +17,7 @@
 #include "weapons.h"
 #include "rc2prefs.h"
 #include "gaussbecon.h"
-#include "p3b_temp.h" // TEMP STUB: gmsgCLTE
+#include "UserMessages.h"
 
 // RC2's CLTE message types the beacon sends (byte 0 of the message). Names ours.
 #define RC2_CLTE_ATTACH 0x19	// short beacon, short entity, coord offset x3, coord angle offset x3

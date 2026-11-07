@@ -25,7 +25,9 @@
 #include "rc2prefs.h"
 #include "hltv.h"
 #ifndef CLIENT_DLL
-#include "p2shared.h"
+#include "rc2/shield.h"
+#include "rc2/crossbowbolts.h"
+#include "explode.h"
 #endif
 
 #ifdef CLIENT_DLL
@@ -668,7 +670,7 @@ void CCrossbow::DelayedHurt()
 		if (pEnt)
 		{
 			CBaseEntity* pEffected = pEnt->GetEffectedEnt();
-			float flDamage = RC2ShieldDamage(pEnt->GetEffectedEnt(), pEffected->ZoomedPrimaryDamage(), 0.2, m_trHurt.vecEndPos, m_vecHurtDir, NULL, NULL, 10);
+			float flDamage = ShieldDeflect(pEnt->GetEffectedEnt(), pEffected->ZoomedPrimaryDamage(), 0.2, m_trHurt.vecEndPos, m_vecHurtDir, NULL, NULL, 10);
 			if (flDamage > 0)
 			{
 				UTIL_BloodDrips(m_trHurt.vecEndPos, m_vecHurtDir, pEnt->GetEffectedEnt()->BloodColor(), 60);
@@ -699,7 +701,7 @@ void CCrossbow::DelayedHurt()
 
 		if (pEnt)
 		{
-			flDamage = RC2ShieldDamage(pEnt->GetEffectedEnt(), RC2Pref(RC2P_Crossbow_ZoomedTertiaryDirectDamage).f, RC2Pref(RC2P_Crossbow_ZoomedTertiaryShieldFraction).f,
+			flDamage = ShieldDeflect(pEnt->GetEffectedEnt(), RC2Pref(RC2P_Crossbow_ZoomedTertiaryDirectDamage).f, RC2Pref(RC2P_Crossbow_ZoomedTertiaryShieldFraction).f,
 				m_trHurt.vecEndPos, m_vecHurtDir, &vecBlast, NULL, 8);
 			if (flDamage > 0)
 			{
@@ -732,7 +734,7 @@ void CCrossbow::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = 200;
 		m_iClip -= RC2Pref(RC2P_Crossbow_ZoomedPrimaryAmmoCost).c & 0xff;
 
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usZoom1, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, m_iClip != 0, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0);
 
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -809,7 +811,7 @@ void CCrossbow::PrimaryAttack()
 	m_pPlayer->m_iWeaponVolume = 600;
 	m_pPlayer->m_iWeaponFlash = 256;
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usImpailer, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, m_iClip != 0, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0);
 
 	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_PrimaryRefirePrimary).f);
@@ -843,7 +845,7 @@ void CCrossbow::SecondaryAttack()
 	{
 		if ((RC2Pref(RC2P_Crossbow_SecondaryAmmoUse).c & 0xff) <= m_iClip)
 		{
-			if (g_runfuncs)
+			if (g_fRC2PlayWeaponEvents)
 				PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCharge2, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
 			m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flNextTertiaryAttack = m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 1.0;
@@ -859,7 +861,7 @@ void CCrossbow::SecondaryAttack()
 	{
 		if ((RC2Pref(RC2P_Crossbow_ZoomedSecondaryAmmoUse).c & 0xff) <= m_iClip)
 		{
-			if (g_runfuncs)
+			if (g_fRC2PlayWeaponEvents)
 				PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCharge, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
 			m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flNextTertiaryAttack = m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 1.0;
@@ -902,7 +904,7 @@ void CCrossbow::TertiaryAttack()
 		}
 
 		// Original oddity, kept: bparam1 is 1 here, unlike the other charge events
-		if (g_runfuncs)
+		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCharge, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 1, 0);
 
 		m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flNextTertiaryAttack = m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 1.0;
@@ -917,7 +919,7 @@ void CCrossbow::TertiaryAttack()
 	CBaseEntity* pTeather = FindMyTeather();
 	if (pTeather)
 	{
-		XBowTeatherDie(pTeather);
+		static_cast<CXBowTeather*>(pTeather)->DieThink();
 		m_fTeatherOut = false;
 		return;
 	}
@@ -941,7 +943,7 @@ void CCrossbow::TertiaryAttack()
 	m_pPlayer->m_iWeaponVolume = 600;
 	m_pPlayer->m_iWeaponFlash = 256;
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usTeather, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, m_iClip != 0, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0);
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
@@ -995,7 +997,7 @@ void CCrossbow::QuaternaryAttack()
 	m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_Crossbow_##Keys##RefireQuaternary).f;                                    \
 	m_pPlayer->m_iWeaponVolume = 200;                                                                                                        \
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);                                                                                                 \
-	if (g_runfuncs)                                                                                                                          \
+	if (g_fRC2PlayWeaponEvents)                                                                                                                          \
 	{                                                                                                                                        \
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), usEvent, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, m_iClip != 0, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0); \
 		m_iChargeType = 0;                                                                                                                   \
@@ -1044,7 +1046,7 @@ void CCrossbow::SecondaryFire()
 	m_pPlayer->m_iWeaponVolume = 200;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	if (g_runfuncs)
+	if (g_fRC2PlayWeaponEvents)
 	{
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usExplodeBolt, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, m_iClip != 0, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0);
 		m_iChargeType = 0;

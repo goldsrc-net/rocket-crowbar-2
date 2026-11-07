@@ -77,6 +77,12 @@ inline rc2prefvalue_t& RC2Pref(rc2pref_e index)
 	return g_rc2PrefValues[index];
 }
 
+// A short key read zero-extended (movzx), as the original reads them. Name ours (p8's)
+inline int RC2PrefWord(rc2pref_e index)
+{
+	return RC2Pref(index).us;
+}
+
 // rc2prefs.cpp, names ours
 void RC2Prefs_LoadConfig(const char* pszFile);	   // NULL: the rccfgfile cvar; a file in the game dir
 void RC2Prefs_SaveConfig(const char* pszFile);	   // every key

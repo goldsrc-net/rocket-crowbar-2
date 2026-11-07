@@ -8,12 +8,12 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
+#include "UserMessages.h"
 #include "weapons.h"
 #include "rc2prefs.h"
-#include "p6stubs.h"
+#include "shield.h"
 #include "rc2/balllightning.h"
 
-extern int gmsgCLTE; // RC2's "CLTE" user message (orig .bss 0x18f4b8); TEMP STUB in dlls/rc2/playerride.cpp
 
 // CLTE 0x0f: the ball's glow on the client; 0xfe kills a client effect (subtype 0x0f here)
 #define CLTE_BALLLIGHTNING 0x0f // ours
@@ -72,7 +72,7 @@ void CBallLighting::BlastDamage(Vector vecOrigin) // orig 0xaaf40
 		pevAttacker = pev->dmg_inflictor ? VARS(pev->dmg_inflictor) : NULL;
 	pev->owner = NULL; // so the traces below don't skip the shooter
 
-	UTIL_RC2PushHitSet();
+	UTIL_PushEntityMarks();
 	for (int i = 1; i < gpGlobals->maxEntities; i++)
 	{
 		edict_t* pent = INDEXENT(i);
@@ -81,7 +81,7 @@ void CBallLighting::BlastDamage(Vector vecOrigin) // orig 0xaaf40
 		CBaseEntity* pEnt = CBaseEntity::Instance(pent);
 		if (!pEnt || pEnt->pev->takedamage == DAMAGE_NO || pEnt->pev->waterlevel >= 2)
 			continue;
-		if (UTIL_RC2WasHit(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
+		if (UTIL_IsEntityMarked(ENTINDEX(pEnt->GetEffectedEnt()->edict())))
 			continue;
 
 		Vector vecCenter = pEnt->Center();
@@ -101,7 +101,7 @@ void CBallLighting::BlastDamage(Vector vecOrigin) // orig 0xaaf40
 		else if (flHurt > flDamage)
 			flHurt = flDamage;
 
-		flHurt = RC2ShieldAbsorb(pEnt, flHurt, RC2Pref(RC2P_Python_BallBlastShieldFraction).f, tr.vecEndPos, vecTo.Normalize(), NULL, NULL, 6);
+		flHurt = ShieldDeflect(pEnt, flHurt, RC2Pref(RC2P_Python_BallBlastShieldFraction).f, tr.vecEndPos, vecTo.Normalize(), NULL, NULL, 6);
 		if (!(flHurt > 0))
 			continue;
 
@@ -115,7 +115,7 @@ void CBallLighting::BlastDamage(Vector vecOrigin) // orig 0xaaf40
 		bool bInWater = pEnt->pev->waterlevel > 0;
 
 		pEnt->GetEffectedEnt()->TakeDamage(pev, pevAttacker, flHurt, DMG_SHOCK | DMG_ENERGYBEAM);
-		UTIL_RC2MarkHit(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
+		UTIL_MarkEntity(ENTINDEX(pEnt->GetEffectedEnt()->edict()));
 
 		if (!bDischarged && bInWater)
 		{
@@ -123,7 +123,7 @@ void CBallLighting::BlastDamage(Vector vecOrigin) // orig 0xaaf40
 			UTIL_RC2WaterDischarge(vecFeet, RC2Pref(RC2P_Python_BallSecondaryDischargeDamage).f, UTIL_RC2DamageInflictor("357_discharge"), pev);
 		}
 	}
-	UTIL_RC2PopHitSet();
+	UTIL_PopEntityMarks();
 }
 
 void CBallLighting::ImpactTouch(CBaseEntity* pOther) // orig 0xab330
@@ -146,7 +146,7 @@ void CBallLighting::ImpactTouch(CBaseEntity* pOther) // orig 0xab330
 	}
 	else
 	{
-		PLAYBACK_EVENT_FULL(0, edict(), m_usBallImpact, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, UTIL_RC2PackNormal(-tr.vecPlaneNormal), 0, false, false);
+		PLAYBACK_EVENT_FULL(0, edict(), m_usBallImpact, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, UTIL_PackNormal(-tr.vecPlaneNormal), 0, false, false);
 		BlastDamage(tr.vecEndPos + tr.vecPlaneNormal * 16);
 	}
 

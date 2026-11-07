@@ -17,7 +17,6 @@
 #include "cbase.h"
 #include "effects.h"
 #include "weapons.h"
-#include "p2shared.h"
 #include "explode.h"
 
 #include "player.h"

@@ -18,36 +18,15 @@
 #include "monsters.h"
 #include "trains.h"
 #include "client.h"
+#include "UserMessages.h"
+#include "maintainent.h"
+#include "alteration.h"
+#include "lcs.h"
+#include "vote.h"
 
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-
-// --- from other packages (declared here; see the dossier's cross-file needs) ---
-
-// util (p9), orig 0xf5a20 / 0xf5a80 / 0xf5bf0: RC 1.9's classname precache list. The last one
-// (ours) returns the list's own copy of the classname, or the argument when it isn't listed.
-extern void AddToPrecachedList(const char* pszClassname);
-extern bool IsClassnamePrecachedNoInvalid(const char* pszClassname);
-extern const char* GetPrecachedClassname(const char* pszClassname); // name ours
-
-// The LCS expression parser (p4, the run between maprules and monstermaker), names ours:
-// orig 0x73fb0 splits a script into whitespace separated tokens (brackets, braces, parens and
-// quotes group) and calls pfnToken(index, token) for each; orig 0x71c60 / 0x72a90 evaluate a
-// token's value as a float / a vector.
-typedef void (*LCSTOKENFUNC)(int iArg, char* pszToken);
-extern void LCS_ParseTokens(char* pszScript, LCSTOKENFUNC pfnToken);
-extern float LCS_EvalFloat(char* pszToken);
-extern Vector LCS_EvalVector(char* pszToken);
-// orig 0x6db00 (p4): the "lcs" command, its subcommand at argument iFirstArg
-extern void LCS_Command(int iFirstArg, edict_t* pClient); // name ours
-// orig 0xf7f20 (p9): ends a running vote
-extern void StopVote(); // name ours
-
-// user messages RC2 added (registered with the others, in p8's player.cpp or wherever
-// LinkUserMessages lands)
-extern int gmsgViewMode; // "ViewMode", 1 byte
-extern int gmsgCLTE;	 // "CLTE", variable
 
 // --- admin rights ---
 
@@ -102,7 +81,7 @@ int Admin_GetLevel(edict_t* pEntity) // name ours
 
 // orig 0x1160. True when the player's WON id is listed in sv_tempadmins (separated by
 // " \t\n\r,;").
-static bool Admin_IsTempAdmin(edict_t* pEntity) // name ours
+bool Admin_IsTempAdmin(edict_t* pEntity) // name ours
 {
 	int wonid = g_engfuncs.pfnGetPlayerWONId(pEntity);
 	char szList[128];
@@ -221,8 +200,8 @@ static void Admin_FixTrain(CBaseEntity* pEntity) // name ours
 static edict_t* g_pentLCS = NULL;		 // orig 0x18be78
 static int g_iLCSFirstArg = 1;			 // orig 0x136074
 int g_iLCSPlayerScriptFirstArg = 2;		 // orig 0x136078: the map's player script, set by the LCS loader
-static int g_iLCSCallerIndex = 0;		 // orig 0x149c68
-static int g_iLCSSelectedIndex = 0;		 // orig 0x149c6c
+int g_iLCSCallerIndex = 0;			 // orig 0x149c68
+int g_iLCSSelectedIndex = 0;		 // orig 0x149c6c
 static bool g_fLCSPreSpawn = false;		 // orig 0x18be7c
 char g_szLCSPlayerScript[0x200];		 // orig 0x18be80: run on every player (CBasePlayer); the loader fills it, CWorld clears it
 static char g_szLCSKeyName[256];		 // orig 0x183c70
@@ -271,35 +250,35 @@ static void LCS_EntityToken(int iArg, char* pszToken) // name ours
 	entvars_t* pev = &g_pentLCS->v;
 
 	if (LCS_TokenIs(pszToken, "vel"))
-		pev->velocity = LCS_EvalVector(pszToken);
+		pev->velocity = ALT_EvalVector(pszToken);
 	else if (LCS_TokenIs(pszToken, "avel"))
-		pev->avelocity = LCS_EvalVector(pszToken);
+		pev->avelocity = ALT_EvalVector(pszToken);
 	else if (LCS_TokenIs(pszToken, "ang"))
-		pev->angles = LCS_EvalVector(pszToken);
+		pev->angles = ALT_EvalVector(pszToken);
 	else if (LCS_TokenIs(pszToken, "v_a"))
-		pev->v_angle = LCS_EvalVector(pszToken);
+		pev->v_angle = ALT_EvalVector(pszToken);
 	else if (LCS_TokenIs(pszToken, "movedir"))
-		pev->movedir = LCS_EvalVector(pszToken);
+		pev->movedir = ALT_EvalVector(pszToken);
 	else if (LCS_TokenIs(pszToken, "origin") || LCS_TokenIs(pszToken, "org") || LCS_TokenIs(pszToken, "pos"))
 	{
-		pev->origin = LCS_EvalVector(pszToken);
+		pev->origin = ALT_EvalVector(pszToken);
 		if (!g_fLCSPreSpawn)
 			UTIL_SetOrigin(pev, pev->origin);
 	}
 	else if (LCS_TokenIs(pszToken, "dmg_time") || LCS_TokenIs(pszToken, "dmgtime") || LCS_TokenIs(pszToken, "tdmg"))
-		pev->dmgtime = LCS_EvalFloat(pszToken);
+		pev->dmgtime = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "dmg"))
-		pev->dmg = LCS_EvalFloat(pszToken);
+		pev->dmg = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "air_finished"))
-		pev->air_finished = LCS_EvalFloat(pszToken);
+		pev->air_finished = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "friction"))
-		pev->friction = LCS_EvalFloat(pszToken);
+		pev->friction = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "health"))
-		pev->health = LCS_EvalFloat(pszToken);
+		pev->health = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "armorvalue"))
-		pev->armorvalue = LCS_EvalFloat(pszToken);
+		pev->armorvalue = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "max_health") || LCS_TokenIs(pszToken, "maxhealth"))
-		pev->max_health = LCS_EvalFloat(pszToken);
+		pev->max_health = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "fixangle"))
 		pev->fixangle = 1;
 	else if (LCS_TokenIs(pszToken, "trans"))
@@ -307,13 +286,13 @@ static void LCS_EntityToken(int iArg, char* pszToken) // name ours
 	else if (LCS_TokenIs(pszToken, "notrans"))
 		pev->rendermode = kRenderNormal;
 	else if (LCS_TokenIs(pszToken, "ramt") || LCS_TokenIs(pszToken, "alpha"))
-		pev->renderamt = LCS_EvalFloat(pszToken);
+		pev->renderamt = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "rcolor"))
-		pev->rendercolor = LCS_EvalVector(pszToken);
+		pev->rendercolor = ALT_EvalVector(pszToken);
 	else if (LCS_TokenIs(pszToken, "grav"))
-		pev->gravity = LCS_EvalFloat(pszToken);
+		pev->gravity = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "nextthink"))
-		pev->nextthink = LCS_EvalFloat(pszToken);
+		pev->nextthink = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "glowsh"))
 		pev->renderfx = kRenderFxGlowShell;
 	else if (LCS_TokenIs(pszToken, "noglowsh"))
@@ -332,18 +311,18 @@ static void LCS_EntityToken(int iArg, char* pszToken) // name ours
 	{
 		// con0..con3: the bone controller in the fourth character
 		int i = std::min(std::max(pszToken[3] - '0', 0), 3);
-		pev->controller[i] = static_cast<byte>(std::min(std::max(LCS_EvalFloat(pszToken), 0.0f), 255.0f));
+		pev->controller[i] = static_cast<byte>(std::min(std::max(ALT_EvalFloat(pszToken), 0.0f), 255.0f));
 	}
 	else if (LCS_TokenIs(pszToken, "blend"))
 	{
 		// VERIFY: the original reads the index from the fourth character here too ("blend"'s
 		// 'n'), so it is always blending[1]
 		int i = std::min(std::max(pszToken[3] - '0', 0), 1);
-		pev->blending[i] = static_cast<byte>(std::min(std::max(LCS_EvalFloat(pszToken), 0.0f), 255.0f));
+		pev->blending[i] = static_cast<byte>(std::min(std::max(ALT_EvalFloat(pszToken), 0.0f), 255.0f));
 	}
 	else if (LCS_TokenIs(pszToken, "seq"))
 	{
-		pev->sequence = static_cast<int>(LCS_EvalFloat(pszToken));
+		pev->sequence = static_cast<int>(ALT_EvalFloat(pszToken));
 		if ((pev->flags & (FL_CLIENT | FL_MONSTER)) == 0 && 0 != strcmp(STRING(pev->classname), "cycler"))
 			return;
 		CBaseEntity* pEntity = CBaseEntity::Instance(g_pentLCS);
@@ -357,9 +336,9 @@ static void LCS_EntityToken(int iArg, char* pszToken) // name ours
 			static_cast<CBaseAnimating*>(pEntity)->ResetSequenceInfo();
 	}
 	else if (LCS_TokenIs(pszToken, "frate"))
-		pev->framerate = LCS_EvalFloat(pszToken);
+		pev->framerate = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "scale"))
-		pev->scale = LCS_EvalFloat(pszToken);
+		pev->scale = ALT_EvalFloat(pszToken);
 	else if (LCS_TokenIs(pszToken, "owner"))
 	{
 		// owner=<entindex>, or alone: whoever runs the script
@@ -395,11 +374,11 @@ static void LCS_EntityToken(int iArg, char* pszToken) // name ours
 		CBaseEntity* pEntity = CBaseEntity::Instance(g_pentLCS);
 		if (!pEntity || !pEntity->IsPlayer())
 			return;
-		static_cast<CBasePlayer*>(pEntity)->m_flNextAttack = LCS_EvalFloat(pszToken);
+		static_cast<CBasePlayer*>(pEntity)->m_flNextAttack = ALT_EvalFloat(pszToken);
 	}
 	else if (LCS_TokenIs(pszToken, "speed"))
 	{
-		pev->speed = LCS_EvalFloat(pszToken);
+		pev->speed = ALT_EvalFloat(pszToken);
 		if (0 != strcmp(STRING(pev->classname), "func_tracktrain"))
 			return;
 		CBaseEntity* pEntity = CBaseEntity::Instance(g_pentLCS);
@@ -411,7 +390,7 @@ static void LCS_EntityToken(int iArg, char* pszToken) // name ours
 	else if (LCS_TokenIs(pszToken, "select"))
 	{
 		// select=<entindex>: later tokens change that entity instead (not a client)
-		int iIndex = static_cast<int>(LCS_EvalFloat(pszToken));
+		int iIndex = static_cast<int>(ALT_EvalFloat(pszToken));
 		if (iIndex <= gpGlobals->maxClients || iIndex <= 0 || iIndex >= gpGlobals->maxEntities)
 			return;
 		edict_t* pent = INDEXENT(iIndex);
@@ -452,7 +431,7 @@ static void LCS_MessageToken(int iArg, char* pszToken) // name ours
 
 	if (LCS_TokenIs(pszToken, "vec"))
 	{
-		Vector vec = LCS_EvalVector(pszToken);
+		Vector vec = ALT_EvalVector(pszToken);
 		WRITE_COORD(vec.x);
 		WRITE_COORD(vec.y);
 		WRITE_COORD(vec.z);
@@ -461,7 +440,7 @@ static void LCS_MessageToken(int iArg, char* pszToken) // name ours
 	{
 		// VERIFY: VC6 wrote these as x, z, y, and for a zero vector the third from a stack slot
 		// it never set; ours writes x, z, y of the normalized vector ((0, 0, 1) for zero)
-		Vector vec = LCS_EvalVector(pszToken).Normalize();
+		Vector vec = ALT_EvalVector(pszToken).Normalize();
 		WRITE_SHORT(static_cast<int>(vec.x * 32767));
 		WRITE_SHORT(static_cast<int>(vec.z * 32767));
 		WRITE_SHORT(static_cast<int>(vec.y * 32767));
@@ -469,17 +448,17 @@ static void LCS_MessageToken(int iArg, char* pszToken) // name ours
 	else if (LCS_TokenIs(pszToken, "fl"))
 	{
 		// the float's bits as a long
-		float fl = LCS_EvalFloat(pszToken);
+		float fl = ALT_EvalFloat(pszToken);
 		int iBits;
 		memcpy(&iBits, &fl, sizeof(iBits));
 		WRITE_LONG(iBits);
 	}
 	else if (LCS_TokenIs(pszToken, "int"))
-		WRITE_LONG(static_cast<int>(LCS_EvalFloat(pszToken)));
+		WRITE_LONG(static_cast<int>(ALT_EvalFloat(pszToken)));
 	else if (LCS_TokenIs(pszToken, "short"))
-		WRITE_SHORT(static_cast<int>(LCS_EvalFloat(pszToken)));
+		WRITE_SHORT(static_cast<int>(ALT_EvalFloat(pszToken)));
 	else if (LCS_TokenIs(pszToken, "byte"))
-		WRITE_BYTE(static_cast<int>(LCS_EvalFloat(pszToken)));
+		WRITE_BYTE(static_cast<int>(ALT_EvalFloat(pszToken)));
 	else if (LCS_TokenIs(pszToken, "string"))
 	{
 		// the original writes from the '=' on, '=' included (dossier: original bugs)
@@ -499,7 +478,7 @@ static void LCS_MessageToken(int iArg, char* pszToken) // name ours
 // --- admin command helpers ---
 
 // orig 0x25e0. A player by index, else the first whose name contains pszName.
-static CBasePlayer* Admin_FindPlayer(const char* pszName) // name ours
+CBasePlayer* Admin_FindPlayer(const char* pszName) // name ours
 {
 	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(atoi(pszName)));
 	if (pPlayer)
@@ -515,7 +494,7 @@ static CBasePlayer* Admin_FindPlayer(const char* pszName) // name ours
 }
 
 // orig 0x2660. What the admin aims at (its GetEffectedEnt), else the admin's selection.
-static CBaseEntity* Admin_GetAimedEntity(entvars_t* pevAdmin) // name ours
+CBaseEntity* Admin_GetAimedEntity(entvars_t* pevAdmin) // name ours
 {
 	UTIL_MakeVectors(pevAdmin->v_angle);
 	const Vector vecSrc = pevAdmin->origin + pevAdmin->view_ofs;
@@ -611,7 +590,7 @@ static void Admin_Create(entvars_t* pevAdmin) // name ours
 		return;
 	}
 
-	edict_t* pent = CREATE_NAMED_ENTITY(MAKE_STRING(GetPrecachedClassname(pszClassname)));
+	edict_t* pent = CREATE_NAMED_ENTITY(MAKE_STRING(GetPrecachedName(pszClassname)));
 	if (!pent || 0 == OFFSET(pent))
 	{
 		ClientPrint(pevAdmin, HUD_PRINTCONSOLE, UTIL_VarArgs("Could not create \"%s\"\n", pszClassname));
@@ -624,7 +603,7 @@ static void Admin_Create(entvars_t* pevAdmin) // name ours
 	g_iLCSCallerIndex = ENTINDEX(pevAdmin->pContainingEntity);
 	g_iLCSSelectedIndex = ENTINDEX(pEntity->edict());
 	g_fLCSPreSpawn = true;
-	LCS_ParseTokens(const_cast<char*>(CMD_ARGS()), LCS_EntityToken);
+	ALT_SplitArgs(CMD_ARGS(), LCS_EntityToken);
 	DispatchSpawn(pEntity->edict());
 
 	g_iLCSFirstArg = 3;
@@ -632,7 +611,7 @@ static void Admin_Create(entvars_t* pevAdmin) // name ours
 	g_iLCSCallerIndex = ENTINDEX(pevAdmin->pContainingEntity);
 	g_iLCSSelectedIndex = ENTINDEX(pEntity->edict());
 	g_fLCSPreSpawn = false;
-	LCS_ParseTokens(const_cast<char*>(CMD_ARGS()), LCS_EntityToken);
+	ALT_SplitArgs(CMD_ARGS(), LCS_EntityToken);
 }
 
 static void Admin_CameraSet(edict_t* pClient);
@@ -1122,7 +1101,7 @@ void CMaintainEnt::MaintainThink()
 		g_iLCSCallerIndex = ENTINDEX(m_pentCaller);
 		g_iLCSSelectedIndex = ENTINDEX(m_pentTarget);
 		g_fLCSPreSpawn = false;
-		LCS_ParseTokens(m_szScript, LCS_EntityToken);
+		ALT_SplitArgs(m_szScript, LCS_EntityToken);
 		pev->nextthink = gpGlobals->time + 0.001;
 		return;
 	}
@@ -1132,21 +1111,21 @@ void CMaintainEnt::MaintainThink()
 }
 
 // orig 0x4eb0. Runs a script on an entity now, as itself.
-void LCS_RunOnEntity(edict_t* pent, char* pszScript, int iFirstArg) // name ours
+void LCS_RunOnEntity(edict_t* pent, const char* pszScript, int iFirstArg) // name ours
 {
 	g_iLCSFirstArg = iFirstArg;
 	g_pentLCS = pent;
 	g_iLCSCallerIndex = ENTINDEX(pent);
 	g_iLCSSelectedIndex = ENTINDEX(pent);
 	g_fLCSPreSpawn = false;
-	LCS_ParseTokens(pszScript, LCS_EntityToken);
+	ALT_SplitArgs(pszScript, LCS_EntityToken);
 }
 
 // orig 0x4f00. Creates an entity and runs a script on it before it spawns and after.
-void LCS_CreateWithScript(const char* pszClassname, char* pszScript, int iFirstArg) // name ours
+void LCS_CreateWithScript(const char* pszClassname, const char* pszScript, int iFirstArg) // name ours
 {
 	AddToPrecachedList(pszClassname);
-	edict_t* pent = CREATE_NAMED_ENTITY(MAKE_STRING(GetPrecachedClassname(pszClassname)));
+	edict_t* pent = CREATE_NAMED_ENTITY(MAKE_STRING(GetPrecachedName(pszClassname)));
 	if (!pent || 0 == OFFSET(pent))
 	{
 		ALERT(at_console, UTIL_VarArgs("Could not create \"%s\"\n", pszClassname));
@@ -1165,7 +1144,7 @@ void LCS_CreateWithScript(const char* pszClassname, char* pszScript, int iFirstA
 	g_iLCSCallerIndex = ENTINDEX(pEntity->edict());
 	g_iLCSSelectedIndex = ENTINDEX(pEntity->edict());
 	g_fLCSPreSpawn = true;
-	LCS_ParseTokens(pszScript, LCS_EntityToken);
+	ALT_SplitArgs(pszScript, LCS_EntityToken);
 	DispatchSpawn(pEntity->edict());
 
 	g_pentLCS = pEntity->edict();
@@ -1173,7 +1152,7 @@ void LCS_CreateWithScript(const char* pszClassname, char* pszScript, int iFirstA
 	g_iLCSCallerIndex = ENTINDEX(pEntity->edict());
 	g_iLCSSelectedIndex = ENTINDEX(pEntity->edict());
 	g_fLCSPreSpawn = false;
-	LCS_ParseTokens(pszScript, LCS_EntityToken);
+	ALT_SplitArgs(pszScript, LCS_EntityToken);
 }
 
 // orig 0x5040. Runs a script on an entity every frame from now on (a maintainer_ent).
@@ -1197,7 +1176,7 @@ void LCS_RunPlayerScript(edict_t* pent) // name ours
 	g_iLCSCallerIndex = ENTINDEX(pent);
 	g_iLCSSelectedIndex = ENTINDEX(pent);
 	g_fLCSPreSpawn = false;
-	LCS_ParseTokens(g_szLCSPlayerScript, LCS_EntityToken);
+	ALT_SplitArgs(g_szLCSPlayerScript, LCS_EntityToken);
 }
 
 // --- the admin camera: an invisible stand-in the admin can look through ---
@@ -1323,15 +1302,3 @@ static void Admin_CameraPlayer(edict_t* pClient, edict_t* pTarget)
 //     cbase.h's signature is the SDK's (dossier: cross-file needs)
 // The added virtuals' defaults at 0x4ab0-0x4d80 are in cbase.h and cbase.cpp, orig 0x4d50
 // (IsCleanupKillable) among them.
-
-// gmsgViewMode: the real one is reconstructed elsewhere now
-// gmsgCLTE: the real one is reconstructed elsewhere now
-// AddToPrecachedList: the real one is reconstructed elsewhere now
-// IsClassnamePrecachedNoInvalid: the real one is reconstructed elsewhere now
-// IsClassnameMapOnly: the real one is reconstructed elsewhere now
-const char* GetPrecachedClassname(const char* pszClassname) { return pszClassname; }
-void LCS_ParseTokens(char* pszScript, LCSTOKENFUNC pfnToken) {}
-float LCS_EvalFloat(char* pszToken) { return 0; }
-Vector LCS_EvalVector(char* pszToken) { return g_vecZero; }
-// LCS_Command: the real one is reconstructed elsewhere now
-// StopVote: the real one is reconstructed elsewhere now

@@ -17,7 +17,8 @@
 #include "player.h"
 #include "weapons.h"
 #include "rc2prefs.h"
-#include "rc2/p9_needs.h"
+#include "shield.h"
+#include "UserMessages.h"
 
 // what tells the four mines apart: everything else in the original's four copies is the same
 struct tripmineattack_t
@@ -48,7 +49,7 @@ int CTripmine::CountMines(const char* szClassname) // orig 0xece60
 
 	while ((pMine = UTIL_FindEntityByClassname(pMine, szClassname)) != NULL)
 	{
-		CBaseEntity* pPlacer = TripmineGrenade_GetPlacer(pMine);
+		CBaseEntity* pPlacer = static_cast<CTripmineGrenade*>(pMine)->m_hOwner;
 		if (pPlacer && pPlacer->edict() == m_pPlayer->edict())
 			iCount++;
 	}

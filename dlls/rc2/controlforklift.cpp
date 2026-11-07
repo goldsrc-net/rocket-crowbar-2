@@ -22,14 +22,11 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
+#include "UserMessages.h"
 #include "client.h"
 #include "soundent.h"
 #include "rc2prefs.h"
-#include "p2shared.h"
-
-extern int gmsgViewMode; // "ViewMode": 2 the player watches through an entity, 0 back to his own view
-// orig 0xa0260 (pm_math): angles from a forward, right and up vector
-extern void VectorsToAngles(const Vector& vecForward, const Vector& vecRight, const Vector& vecUp, Vector& vecAngles);
+#include "pm_rc2.h"
 
 #define RC2_CLTE_FORKLIFT_VIEW 0x3f	 // short entity, byte the driver's index (name ours)
 #define RC2_CLTE_FORKLIFT_BOOM 0xfe	 // short entity, byte 0x3f (name ours)
@@ -280,7 +277,7 @@ void CControlForklift::ControlThink()
 
 		Vector vecForward = vecAhead * c + vecSide * s;
 		Vector vecRight = vecAhead * s - vecSide * c;
-		VectorsToAngles(vecForward, vecRight, m_vecSurfaceNormal, pev->angles);
+		VectorAnglesWithRoll(vecForward, vecRight, m_vecSurfaceNormal, pev->angles);
 		pev->velocity = vecForward * pev->speed;
 	}
 	else

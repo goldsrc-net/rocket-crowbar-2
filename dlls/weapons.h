@@ -21,8 +21,6 @@
 class CBasePlayer;
 class CBasePlayerWeapon;
 
-void DeactivateSatchels(CBasePlayer* pOwner);
-
 // Rocket Crowbar 2 (p3, ggrenade): from other files of the original, used by the grenades
 extern unsigned short g_usExplodeEvent; // events/explode.sc, precached in W_Precache (weapons.cpp, .data 0x101afd18); name ours
 void UTIL_KillEntityEffects(edict_t* pEdict); // util 0xf55b0: TE_KILLBEAM on it, and RC2's user message; name ours
@@ -82,6 +80,76 @@ public:
 	// p3 needs (D grenades):
 	// end p3 (D grenades)
 };
+
+#ifndef CLIENT_DLL
+// Rocket Crowbar 2: the snark (squeakgrenade.cpp) and the tripmine (tripmine.cpp), declared here
+// because the RC2 weapons (dlls/rc2/squeak.cpp, tripmine_weapon.cpp) read their m_hOwner
+class CSqueakGrenade : public CGrenade
+{
+public:
+	void Spawn() override;
+	void Precache() override;
+	int Classify() override;
+	void EXPORT SuperBounceTouch(CBaseEntity* pOther);
+	void EXPORT HuntThink();
+	int BloodColor() override { return BLOOD_COLOR_YELLOW; } // orig 0xd0a80
+	void Killed(entvars_t* pevAttacker, int iGib) override;
+	void GibMonster() override;
+	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0xd0a70. VERIFY: meaning of the bits
+
+	bool Save(CSave& save) override;
+	bool Restore(CRestore& restore) override;
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	static float m_flNextBounceSoundTime;
+
+	// CBaseEntity *m_pTarget;
+	float m_flDie;		 // orig +0x2b8
+	Vector m_vecTarget;	 // orig +0x2bc
+	float m_flNextHunt;	 // orig +0x2c8
+	float m_flNextHit;	 // orig +0x2cc
+	Vector m_posPrev;	 // orig +0x2d0
+	EHANDLE m_hOwner;	 // orig +0x2dc
+	int m_iMyClass;		 // orig +0x2e4
+	float m_flNextFire; // orig +0x2e8, name ours: when the snark may fire its next snark_project
+};
+
+class CTripmineGrenade : public CGrenade
+{
+public:
+	void Spawn() override;
+	void Precache() override;
+	void Killed(entvars_t* pevAttacker, int iGib) override;
+	float GlobalBeamDamage() override { return 0; }					 // orig 0xe7f50: beams don't hurt mines
+	int GetRCCaps2(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x12; } // orig 0xe7f40. VERIFY: what bits 0x2 and 0x10 mean
+	bool IsViewOfPlayer(CBaseEntity* pPlayer) override;
+
+	void EXPORT KillThink();
+	void EXPORT PowerupThink();
+	void EXPORT TraceThink();
+
+	// Rocket Crowbar 2: virtual here (orig slots 149-151), so each kind draws its own beam
+	virtual void MakeBeam();
+	virtual void KillBeam();
+	virtual void BeamUpdate(); // name ours: trace the beam, hurt what it hits
+
+	void CheckAttach(bool bExplode); // name ours
+
+	bool m_bOnWorld;		// orig +0x2b8, name ours: stuck to the world, so nothing to follow
+	Vector m_posOwner;		// orig +0x2bc: the entity it sticks to (pev->owner), as SDK 2.3
+	Vector m_angleOwner;	// orig +0x2c8
+	Vector m_vecOrigin;		// orig +0x2d4, name ours: where it was planted; put back there each think
+	Vector m_vecEnd;		// orig +0x2e0: the beam's last solid end, for the impact decal
+	Vector m_vecDir;		// orig +0x2ec: the surface normal it was planted on
+	float m_flLastBeamTime; // orig +0x2f8, name ours
+	int m_iAmmoCost;		// orig +0x2fc, name ours: the mines a weapon_tripmine it turns back into holds
+	CBeam* m_pBeam;			// orig +0x300
+	EHANDLE m_hOwner;		// orig +0x304: the player who planted it (SDK 2.3's m_pRealOwner)
+	bool m_bOwnerLeft;		// orig +0x30c, name ours: the planter has moved more than 64 units off
+};
+#endif
 
 
 // constant items

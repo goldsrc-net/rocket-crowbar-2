@@ -32,7 +32,7 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 #include "rc2prefs.h"
-#include "rc2/p9_needs.h"
+#include "rc2/shield.h"
 
 float UTIL_WeaponTimeBase() // orig 0xf0a90 (CLIENT_WEAPONS: 0)
 {

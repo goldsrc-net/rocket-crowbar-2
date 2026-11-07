@@ -10,7 +10,6 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "p2shared.h"
 
 // The line's shape: which names it takes, in order (sprintf arguments). K is the killer, V the
 // victim (or "self"), W the weapon; the pronouns are the victim's.
