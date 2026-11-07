@@ -11,7 +11,9 @@ which can mask the wrong 4 bytes mid-instruction and miss the function. A functi
 original's .text and no other reference function has the same pattern. Everything else is
 left for the next steps (exports, vtables, call graph).
 
-Writes reference/names-<lib>.tsv: rva, size, mangled name, demangled name, reference object.
+Writes reference/names-<lib>.tsv: rva, size, mangled name, demangled name, reference object; and
+names-<lib>-present.tsv, the reference functions whose body the original has but that can't be
+named (shared by several reference functions, or found more than once), with the first rva found.
 Usage:
   scripts/vc6/match.py build-vc6/hl/hl.map build-vc6/hl/hl.dll reference/rc2.dll
   scripts/vc6/match.py build-vc6/client/cl_dll.map build-vc6/client/cl_dll.dll reference/client.dll
@@ -163,11 +165,11 @@ def main():
             continue
         if len(owners) > 1:
             ambiguous += 1
-            retry += owners
+            retry += [o + (tva + hits[0],) for o in owners]
             continue
         if len(hits) > 1:
             multi += 1
-            retry += owners
+            retry += [o + (tva + hits[0],) for o in owners]
             continue
         name, obj, size = owners[0]
         found.append((tva + hits[0], len(re.match(p, ttext[hits[0]:], re.S).group(0)), name, obj))
@@ -178,16 +180,16 @@ def main():
     # lands where nothing else was named.
     count = collections.Counter(guessed.values())
     taken = {f[0] for f in found}
-    rescued = 0
-    for name, obj, size in retry:
+    rescued, present = 0, []
+    for name, obj, size, first in retry:
         g = guessed.get(name)
-        if not g or count[g] > 1:
-            continue
-        hits = [m.start() for m, _ in zip(re.finditer(g, ttext, re.S), range(2))]
+        hits = [m.start() for m, _ in zip(re.finditer(g, ttext, re.S), range(2))] if g and count[g] == 1 else []
         if len(hits) == 1 and tva + hits[0] not in taken:
             found.append((tva + hits[0], len(re.match(g, ttext[hits[0]:], re.S).group(0)), name, obj))
             taken.add(tva + hits[0])
             rescued += 1
+        else:
+            present.append((first, size, name, obj))
 
     found.sort()
     dm = demangle([f[2] for f in found if f[2].startswith("?")])
@@ -197,6 +199,15 @@ def main():
         f.write("rva\tsize\tname\tdemangled\tref_object\n")
         for rva, size, name, obj in found:
             f.write("0x%x\t%d\t%s\t%s\t%s\n" % (rva, size, name, dm.get(name, name), obj))
+    # The rest of the bodies the original has but no one name can be given: shared by several
+    # reference functions (an empty think, say) or found more than once. Their code is SDK 2.3's
+    # all the same, so scripts/stock_drift.py audits them too; the rva is the first place found.
+    present.sort()
+    pdm = demangle([f[2] for f in present if f[2].startswith("?")])
+    with open(os.path.splitext(out)[0] + "-present.tsv", "w") as f:
+        f.write("rva\tsize\tname\tdemangled\tref_object\n")
+        for rva, size, name, obj in present:
+            f.write("0x%x\t%d\t%s\t%s\t%s\n" % (rva, size, name, pdm.get(name, name), obj))
     sdk = sum(1 for x in found if not x[3].startswith("LIBCMT"))
     print("%s: %d reference patterns, %d named (%d SDK, %d C runtime); %d skipped as shared by "
           "several reference functions, %d as found more than once (%d of their functions named by the "
