@@ -83,6 +83,10 @@ target_sources(hl PRIVATE
 	player.cpp
 	python.cpp
 	rat.cpp
+	rc2prefs.cpp
+	rc2prefs.h
+	rc2prefs_table.cpp
+	rc2prefs_table.h
 	roach.cpp
 	rpg.cpp
 	satchel.cpp
