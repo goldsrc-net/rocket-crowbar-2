@@ -45,6 +45,8 @@ mkdir -p build-vc6
 git -C ../hlds64-buildchain/hlsdk archive c026655 singleplayer | tar -x -C build-vc6
 scripts/vc6/build_dsp.py build-vc6/singleplayer/dlls   hl.dsp     build-vc6/hl      # ~6 min
 scripts/vc6/build_dsp.py build-vc6/singleplayer/cl_dll cl_dll.dsp build-vc6/client  # ~5 min
+scripts/vc6/rc2_layout.py build-vc6/singleplayer build-vc6/layout-rc2 --entity-pad b
+scripts/vc6/build_dsp.py build-vc6/layout-rc2/dlls hl.dsp build-vc6/hl-rc2           # the reference the tables use
 ```
 
 Each writes the `.dll`, its `.map` (every function's name and address) and a `.pdb`.

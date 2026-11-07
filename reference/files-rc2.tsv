@@ -54,9 +54,35 @@ rva	size	name	file
 0x4a50	17	CBaseEntity::Touch	new: start .. aflock
 0x4a70	32	CBaseEntity::Use	new: start .. aflock
 0x4a90	17	CBaseEntity::Blocked	new: start .. aflock
+0x4ab0	3	CBaseEntity::RC2V47	new: start .. aflock
+0x4ac0	3	CBaseEntity::Respawn	new: start .. aflock
+0x4ad0	1	CBaseEntity::UpdateOwner	new: start .. aflock
+0x4ae0	3	CBaseEntity::FBecomeProne	new: start .. aflock
 0x4af0	104	CBaseEntity::Center	new: start .. aflock
 0x4b60	61	CBaseEntity::EyePosition	new: start .. aflock
 0x4ba0	61	CBaseEntity::EarPosition	new: start .. aflock
+0x4be0	44	CBaseEntity::BodyTarget	new: start .. aflock
+0x4c10	20	CBaseEntity::Illumination	new: start .. aflock
+0x4c30	5	CBaseEntity::RC2V58	new: start .. aflock
+0x4c40	7	CBaseEntity::RC2V59	new: start .. aflock
+0x4c50	7	CBaseEntity::RC2V61	new: start .. aflock
+0x4c60	7	CBaseEntity::RC2V62	new: start .. aflock
+0x4c70	7	CBaseEntity::RC2V63	new: start .. aflock
+0x4c80	7	CBaseEntity::RC2V64	new: start .. aflock
+0x4c90	7	CBaseEntity::RC2V65	new: start .. aflock
+0x4ca0	7	CBaseEntity::RC2V66	new: start .. aflock
+0x4cb0	7	CBaseEntity::RC2V67	new: start .. aflock
+0x4cc0	7	CBaseEntity::RC2V68	new: start .. aflock
+0x4cd0	3	CBaseEntity::RC2V69	new: start .. aflock
+0x4ce0	6	CBaseEntity::RC2V70	new: start .. aflock
+0x4cf0	7	CBaseEntity::RC2V71	new: start .. aflock
+0x4d00	57	CBaseEntity::RC2V72	new: start .. aflock
+0x4d40	3	CBaseEntity::RC2V73	new: start .. aflock
+0x4d50	3	FUN_10004d50	new: start .. aflock
+0x4d60	5	CBaseEntity::RC2V75	new: start .. aflock
+0x4d70	5	CBaseEntity::RC2V76	new: start .. aflock
+0x4d80	5	CBaseEntity::RC2V78	new: start .. aflock
+0x4d90	90	FUN_10004d90	new: start .. aflock
 0x4df0	187	CMaintainEnt::MaintainThink	new: start .. aflock
 0x4eb0	71	FUN_10004eb0	new: start .. aflock
 0x4f00	310	FUN_10004f00	new: start .. aflock
@@ -76,32 +102,34 @@ rva	size	name	file
 0x55f0	181	CFlockingFlyerFlock::KeyValue	aflock
 0x56b0	36	CFlockingFlyerFlock::Spawn	aflock
 0x56e0	67	CFlockingFlyerFlock::Precache	aflock
-0x5730	520	FUN_10005730	aflock
+0x5730	520	CFlockingFlyerFlock::SpawnFlock	aflock
 0x5940	60	CFlockingFlyer::Spawn	aflock
 0x5980	19	CFlockingFlyer::Precache	aflock
-0x59a0	209	FUN_100059a0	aflock
+0x59a0	209	CFlockingFlyer::MakeSound	aflock
 0x5a80	220	CFlockingFlyer::Killed	aflock
 0x5b60	188	CFlockingFlyer::FallHack	aflock
-0x5c20	203	FUN_10005c20	aflock
+0x5c20	203	CFlockingFlyer::SpawnCommonCode	aflock
 0x5cf0	163	CFlockingFlyer::BoidAdvanceFrame	aflock
 0x5da0	93	CFlockingFlyer::IdleThink	aflock
-0x5e00	90	CFlockingFlyer::Start	new: aflock .. agrunt
-0x5e60	247	CFlockingFlyer::FormFlock	new: aflock .. agrunt
-0x5f60	677	FUN_10005f60	new: aflock .. agrunt
-0x6210	324	FUN_10006210	new: aflock .. agrunt
-0x6360	1107	FUN_10006360	new: aflock .. agrunt
-0x67c0	51	Vector::operator+	new: aflock .. agrunt
-0x6800	51	Vector::operator-	new: aflock .. agrunt
-0x6840	51	Vector::operator*	new: aflock .. agrunt
-0x6880	1220	CFlockingFlyer::FlockLeaderThink	new: aflock .. agrunt
-0x6d50	1010	CFlockingFlyer::FlockFollowerThink	new: aflock .. agrunt
-0x7150	15	FUN_10007150	new: aflock .. agrunt
-0x7160	31	FUN_10007160	new: aflock .. agrunt
-0x7180	146	FUN_10007180	new: aflock .. agrunt
-0x7220	24	FUN_10007220	new: aflock .. agrunt
-0x7240	30	FUN_10007240	new: aflock .. agrunt
+0x5e00	90	CFlockingFlyer::Start	aflock
+0x5e60	247	CFlockingFlyer::FormFlock	aflock
+0x5f60	677	CFlockingFlyer::SpreadFlock	aflock
+0x6210	324	CFlockingFlyer::SpreadFlock2	aflock
+0x6360	1107	CFlockingFlyer::FPathBlocked	aflock
+0x67c0	51	Vector::operator+	aflock
+0x6800	51	Vector::operator-	aflock
+0x6840	51	Vector::operator*	aflock
+0x6880	1220	CFlockingFlyer::FlockLeaderThink	aflock
+0x6d50	1010	CFlockingFlyer::FlockFollowerThink	aflock
+0x7150	15	FUN_10007150	aflock
+0x7160	31	CFlockingFlyer::SquadAdd	aflock
+0x7180	146	CFlockingFlyer::SquadRemove	aflock
+0x7220	24	CFlockingFlyer::SquadCount	aflock
+0x7240	30	CFlockingFlyer::SquadDisband	aflock
 0x7260	9	FUN_10007260	new: aflock .. agrunt
 0x7270	42	`vector_constructor_iterator'	new: aflock .. agrunt
+0x72a0	3	FUN_100072a0	new: aflock .. agrunt
+0x72b0	3	CBaseAnimating::HandleAnimEvent	new: aflock .. agrunt
 0x72c0	7	CBaseToggle::GetToggleState	new: aflock .. agrunt
 0x72d0	7	CBaseToggle::GetDelay	new: aflock .. agrunt
 0x72e0	7	CBaseMonster::BloodColor	new: aflock .. agrunt
@@ -117,25 +145,35 @@ rva	size	name	file
 0x73a0	1	CBaseMonster::CheckAmmo	new: aflock .. agrunt
 0x73b0	7	CBaseMonster::HearingSensitivity	new: aflock .. agrunt
 0x73c0	1	CBaseMonster::PrescheduleThink	new: aflock .. agrunt
+0x73d0	157	CBaseMonster::BodyTarget	new: aflock .. agrunt
 0x7470	14	CBaseMonster::IsMoving	new: aflock .. agrunt
 0x7480	1	CBaseMonster::DeathSound	new: aflock .. agrunt
+0x7490	1	CBaseMonster::AlertSound	new: aflock .. agrunt
+0x74a0	1	CBaseMonster::IdleSound	new: aflock .. agrunt
+0x74b0	1	CBaseMonster::PainSound	new: aflock .. agrunt
+0x74c0	3	CBaseMonster::StopFollowing	new: aflock .. agrunt
+0x74d0	117	CBaseMonster::RC2V147	new: aflock .. agrunt
+0x7550	6	CBaseEntity::RC2V74	new: aflock .. agrunt
 0x7560	118	monster_alien_grunt	new: aflock .. agrunt
 0x75e0	3	CSquadMonster::MySquadMonsterPointer	new: aflock .. agrunt
 0x75f0	3	FUN_100075f0	new: aflock .. agrunt
+0x7600	8	FUN_10007600	new: aflock .. agrunt
 0x7610	173	CAGrunt::SetObjectCollisionBox	new: aflock .. agrunt
 0x76c0	48	CAGrunt::Save	agrunt
 0x76f0	48	CAGrunt::Restore	agrunt
+0x7720	198	CAGrunt::IRelationship	agrunt
 0x77f0	6	CAGrunt::ISoundMask	agrunt
 0x7800	515	CAGrunt::TraceAttack	agrunt
-0x7a10	53	FUN_10007a10	agrunt
-0x7a50	75	FUN_10007a50	agrunt
+0x7a10	53	CAGrunt::StopTalking	agrunt
+0x7a50	75	CAGrunt::ShouldSpeak	agrunt
 0x7aa0	188	CAGrunt::PrescheduleThink	agrunt
-0x7b60	79	FUN_10007b60	agrunt
-0x7bb0	79	FUN_10007bb0	agrunt
+0x7b60	79	CAGrunt::DeathSound	agrunt
+0x7bb0	79	CAGrunt::AlertSound	agrunt
 0x7c00	79	FUN_10007c00	agrunt
-0x7c50	116	FUN_10007c50	agrunt
+0x7c50	116	CAGrunt::PainSound	agrunt
 0x7cd0	6	CAGrunt::Classify	agrunt
 0x7ce0	48	CAGrunt::SetYawSpeed	agrunt
+0x7d10	1893	CAGrunt::HandleAnimEvent	agrunt
 0x84a0	297	CAGrunt::Spawn	agrunt
 0x85d0	253	CAGrunt::Precache	agrunt
 0x86d0	38	CAGrunt::ScheduleFromName	agrunt
@@ -152,7 +190,7 @@ rva	size	name	file
 0x90c0	227	CAirtank::Spawn	airtank
 0x91b0	26	CAirtank::Precache	airtank
 0x91d0	95	CAirtank::Killed	airtank
-0x9230	21	CAirtank::TankThink	new: airtank .. animating
+0x9230	21	CAirtank::TankThink	airtank
 0x9250	194	CAirtank::TankTouch	new: airtank .. animating
 0x9320	48	FUN_10009320	new: airtank .. animating
 0x9350	48	FUN_10009350	new: airtank .. animating
@@ -160,9 +198,9 @@ rva	size	name	file
 0x94d0	41	FUN_100094d0	new: airtank .. animating
 0x9500	41	FUN_10009500	new: airtank .. animating
 0x9530	33	CBaseAnimating::LookupSequence	animating
-0x9560	110	FUN_10009560	animating
+0x9560	110	CBaseAnimating::ResetSequenceInfo	animating
 0x95d0	34	CBaseAnimating::GetSequenceFlags	animating
-0x9600	280	FUN_10009600	animating
+0x9600	280	CBaseAnimating::DispatchAnimEvents	animating
 0x9720	46	FUN_10009720	animating
 0x9750	92	CBaseAnimating::InitBoneControllers	animating
 0x97b0	46	FUN_100097b0	animating
@@ -183,12 +221,13 @@ rva	size	name	file
 0x9db0	224	FUN_10009db0	animation
 0x9e90	53	GetSequenceFlags	animation
 0x9ed0	329	GetAnimationEvent	animation
-0xa020	366	FUN_1000a020	animation
-0xa190	319	FUN_1000a190	animation
+0xa020	366	SetController	animation
+0xa190	319	SetBlending	animation
 0xa2d0	261	FindTransition	animation
 0xa3e0	93	SetBodygroup	animation
 0xa440	81	GetBodygroup	animation
 0xa600	102	antifric_timer	new: animation .. apache
+0xa670	13	FUN_1000a670	new: animation .. apache
 0xa680	97	FUN_1000a680	new: animation .. apache
 0xa6f0	42	FUN_1000a6f0	new: animation .. apache
 0xa720	321	CAntiFricTimer::StartFriction	new: animation .. apache
@@ -196,6 +235,12 @@ rva	size	name	file
 0xa8f0	330	FUN_1000a8f0	new: animation .. apache
 0xaa40	70	FUN_1000aa40	new: animation .. apache
 0xaa90	138	monster_apache	new: animation .. apache
+0xab20	8	FUN_1000ab20	new: animation .. apache
+0xab30	8	FUN_1000ab30	new: animation .. apache
+0xab40	7	FUN_1000ab40	new: animation .. apache
+0xab50	7	FUN_1000ab50	new: animation .. apache
+0xab60	7	FUN_1000ab60	new: animation .. apache
+0xab70	7	FUN_1000ab70	new: animation .. apache
 0xab80	6	CApache::Classify	new: animation .. apache
 0xab90	4	CApache::BloodColor	new: animation .. apache
 0xaba0	179	CApache::SetObjectCollisionBox	new: animation .. apache
@@ -213,9 +258,9 @@ rva	size	name	file
 0xb960	2844	CApache::HuntThink	apache
 0xc480	33	Vector::Length	apache
 0xc4b0	1856	FUN_1000c4b0	apache
-0xcbf0	1242	FUN_1000cbf0	apache
-0xd0e0	1124	FUN_1000d0e0	apache
-0xd550	203	FUN_1000d550	apache
+0xcbf0	1242	CApache::FireRocket	apache
+0xd0e0	1124	CApache::FireGun	apache
+0xd550	203	CApache::ShowDamage	apache
 0xd620	71	CApache::TakeDamage	apache
 0xd670	129	CApache::TraceAttack	apache
 0xd700	118	hvr_rocket	apache
@@ -227,6 +272,7 @@ rva	size	name	file
 0xd9f0	370	CApacheHVR::AccelerateThink	new: apache .. barnacle
 0xdb70	4	CGrenade::BloodColor	new: apache .. barnacle
 0xdb80	105	monster_barnacle	new: apache .. barnacle
+0xdbf0	8	FUN_1000dbf0	new: apache .. barnacle
 0xdc00	48	CBarnacle::Save	barnacle
 0xdc30	48	CBarnacle::Restore	barnacle
 0xdc60	6	CBarnacle::Classify	barnacle
@@ -239,6 +285,7 @@ rva	size	name	file
 0xe5a0	92	CBarnacle::Precache	barnacle
 0xe600	363	FUN_1000e600	new: barnacle .. barney
 0xe770	118	monster_barney	new: barnacle .. barney
+0xe7f0	8	FUN_1000e7f0	new: barnacle .. barney
 0xe800	6	CBarney::ObjectCaps	new: barnacle .. barney
 0xe810	48	CBarney::Save	barney
 0xe840	48	CBarney::Restore	barney
@@ -247,25 +294,29 @@ rva	size	name	file
 0xe8b0	90	CBarney::RunTask	barney
 0xe910	6	CBarney::ISoundMask	barney
 0xe920	6	CBarney::Classify	barney
-0xe930	81	FUN_1000e930	barney
+0xe930	81	CBarney::AlertSound	barney
 0xe990	49	CBarney::SetYawSpeed	barney
 0xe9d0	389	CBarney::CheckRangeAttack1	barney
-0xeb60	368	FUN_1000eb60	barney
+0xeb60	368	CBarney::BarneyFirePistol	barney
+0xecd0	77	CBarney::HandleAnimEvent	barney
 0xed20	277	CBarney::Spawn	barney
 0xee40	121	CBarney::Precache	barney
 0xeec0	204	FUN_1000eec0	barney
 0xef90	367	CBarney::TakeDamage	barney
 0xf100	244	FUN_1000f100	barney
+0xf200	230	CBarney::PainSound	barney
 0xf2f0	176	CBarney::DeathSound	barney
 0xf3a0	156	CBarney::TraceAttack	barney
 0xf440	100	CBarney::Killed	barney
 0xf4b0	129	CBarney::GetScheduleOfType	barney
 0xf570	428	CBarney::GetSchedule	barney
 0xf720	5	CBarney::GetIdealState	barney
+0xf730	29	CBarney::DeclineFollowing	barney
 0xf750	114	CDeadBarney::KeyValue	barney
 0xf7d0	105	monster_barney_dead	barney
 0xf840	6	CDeadBarney::Classify	barney
 0xf850	164	CDeadBarney::Spawn	barney
+0xf900	7	CTalkMonster::FriendNumber	new: barney .. bigmomma
 0xf910	102	info_bigmomma	new: barney .. bigmomma
 0xf980	48	CInfoBM::Save	bigmomma
 0xf9b0	48	CInfoBM::Restore	bigmomma
@@ -275,6 +326,8 @@ rva	size	name	file
 0xfc30	48	CBMortar::Save	bigmomma
 0xfc60	48	CBMortar::Restore	bigmomma
 0xfc90	105	monster_bigmomma	bigmomma
+0xfd00	8	FUN_1000fd00	bigmomma
+0xfd10	7	FUN_1000fd10	bigmomma
 0xfd20	11	CBigMomma::OverrideReset	bigmomma
 0xfd30	173	CBigMomma::SetObjectCollisionBox	bigmomma
 0xfde0	48	CBigMomma::Save	bigmomma
@@ -282,22 +335,23 @@ rva	size	name	file
 0xfe40	13	CBigMomma::KeyValue	bigmomma
 0xfe50	6	CBigMomma::Classify	bigmomma
 0xfe60	41	CBigMomma::SetYawSpeed	bigmomma
+0xfe90	2780	CBigMomma::HandleAnimEvent	bigmomma
 0x109e0	297	CBigMomma::TraceAttack	bigmomma
 0x10b10	123	CBigMomma::TakeDamage	bigmomma
-0x10b90	336	FUN_10010b90	bigmomma
+0x10b90	336	CBigMomma::LayHeadcrab	bigmomma
 0x10ce0	105	CBigMomma::DeathNotice	bigmomma
-0x10d50	255	FUN_10010d50	bigmomma
+0x10d50	255	CBigMomma::LaunchMortar	bigmomma
 0x10e50	246	CBigMomma::Spawn	bigmomma
 0x10f50	346	CBigMomma::Precache	bigmomma
 0x110b0	30	CBigMomma::Activate	bigmomma
 0x110d0	154	FUN_100110d0	bigmomma
-0x11170	225	FUN_10011170	bigmomma
+0x11170	225	CBigMomma::NodeReach	bigmomma
 0x11260	47	CBigMomma::CheckMeleeAttack1	bigmomma
 0x11290	214	CBigMomma::CheckMeleeAttack2	bigmomma
 0x11370	281	CBigMomma::CheckRangeAttack1	bigmomma
 0x11490	38	CBigMomma::ScheduleFromName	bigmomma
 0x114c0	39	CBigMomma::GetScheduleOfType	bigmomma
-0x114f0	41	FUN_100114f0	bigmomma
+0x114f0	41	CBigMomma::ShouldGoToNode	bigmomma
 0x11520	35	CBigMomma::GetSchedule	bigmomma
 0x11550	1136	CBigMomma::StartTask	bigmomma
 0x11a30	10	FUN_10011a30	bigmomma
@@ -315,6 +369,9 @@ rva	size	name	file
 0x12530	6	CBloater::Classify	bloater
 0x12540	14	CBloater::SetYawSpeed	bloater
 0x12550	42	CBloater::TakeDamage	bloater
+0x12580	1	CBloater::PainSound	bloater
+0x12590	1	CBloater::AlertSound	bloater
+0x125a0	1	CBloater::IdleSound	bloater
 0x125b0	1	FUN_100125b0	bloater
 0x125c0	26	CBloater::HandleAnimEvent	bloater
 0x125e0	256	CBloater::Spawn	bloater
@@ -351,11 +408,12 @@ rva	size	name	file
 0x131b0	568	CFuncRotating::Spawn	bmodels
 0x133f0	372	CFuncRotating::Precache	bmodels
 0x13580	367	CFuncRotating::HurtTouch	bmodels
-0x136f0	255	FUN_100136f0	bmodels
+0x136f0	255	CFuncRotating::RampPitchVol	bmodels
 0x137f0	443	CFuncRotating::SpinUp	bmodels
 0x139b0	460	CFuncRotating::SpinDown	bmodels
 0x13b80	22	CFuncRotating::Rotate	bmodels
 0x13ba0	373	CFuncRotating::RotatingUse	bmodels
+0x13d20	206	CFuncRotating::Blocked	bmodels
 0x13df0	105	func_pendulum	bmodels
 0x13e60	3	CPendulum::ObjectCaps	bmodels
 0x13e70	48	CPendulum::Save	bmodels
@@ -364,6 +422,7 @@ rva	size	name	file
 0x13fa0	424	CPendulum::Spawn	bmodels
 0x14150	279	CPendulum::PendulumUse	bmodels
 0x14270	77	CPendulum::Stop	bmodels
+0x142c0	175	CPendulum::Blocked	bmodels
 0x14370	482	CPendulum::Swing	bmodels
 0x14560	377	CPendulum::Touch	bmodels
 0x146e0	123	CPendulum::RopeTouch	new: bmodels .. bullsquid
@@ -375,9 +434,11 @@ rva	size	name	file
 0x14990	171	FUN_10014990	bullsquid
 0x14a40	535	CSquidSpit::Touch	bullsquid
 0x14c60	105	monster_bullchicken	bullsquid
+0x14cd0	8	FUN_10014cd0	bullsquid
 0x14ce0	48	CBullsquid::Save	bullsquid
 0x14d10	48	CBullsquid::Restore	bullsquid
 0x14d40	151	CBullsquid::IgnoreConditions	bullsquid
+0x14de0	124	CBullsquid::IRelationship	bullsquid
 0x14e60	412	CBullsquid::TakeDamage	bullsquid
 0x15000	249	CBullsquid::CheckRangeAttack1	bullsquid
 0x15100	80	CBullsquid::CheckMeleeAttack1	bullsquid
@@ -389,11 +450,12 @@ rva	size	name	file
 0x152e0	188	CBullsquid::PainSound	bullsquid
 0x153b0	125	CBullsquid::AlertSound	bullsquid
 0x15430	40	CBullsquid::SetYawSpeed	bullsquid
+0x15460	2467	CBullsquid::HandleAnimEvent	bullsquid
 0x15e20	218	CBullsquid::Spawn	bullsquid
 0x15f00	298	CBullsquid::Precache	bullsquid
 0x16030	150	CBullsquid::DeathSound	bullsquid
 0x160d0	106	CBullsquid::AttackSound	bullsquid
-0x16140	159	FUN_10016140	bullsquid
+0x16140	159	CBullsquid::RunAI	bullsquid
 0x161e0	38	CBullsquid::ScheduleFromName	bullsquid
 0x16210	428	CBullsquid::GetSchedule	bullsquid
 0x163c0	101	CBullsquid::GetScheduleOfType	bullsquid
@@ -425,7 +487,7 @@ rva	size	name	file
 0x17910	449	DoSpark	buttons
 0x17af0	66	CBaseButton::ButtonSpark	buttons
 0x17b40	143	CBaseButton::ButtonUse	buttons
-0x17bd0	87	FUN_10017bd0	buttons
+0x17bd0	87	CBaseButton::ButtonResponseToTouch	buttons
 0x17c30	223	CBaseButton::ButtonTouch	buttons
 0x17d10	231	FUN_10017d10	buttons
 0x17e00	154	CBaseButton::TriggerAndWait	buttons
@@ -499,14 +561,16 @@ rva	size	name	file
 0x1a6b0	44	CBaseEntity::ShouldToggle	cbase
 0x1a6e0	48	CBaseEntity::DamageDecal	cbase
 0x1a710	195	FUN_1001a710	new: cbase .. client
-0x1a7e0	141	FUN_1001a7e0	new: cbase .. client
+0x1a7e0	141	CBaseEntity::RC2V77	new: cbase .. client
 0x1a870	118	set_suicide_frame	client
 0x1a8f0	74	FUN_1001a8f0	client
 0x1ab80	192	FUN_1001ab80	client
+0x1ac40	121	CBasePlayer::BodyTarget	client
 0x1acc0	20	CBasePlayer::StartSneaking	client
 0x1ace0	20	CBasePlayer::StopSneaking	client
 0x1ad00	29	CBasePlayer::IsSneaking	client
 0x1ad20	41	CBasePlayer::IsAlive	client
+0x1ad50	3	CBasePlayer::ShouldFadeOnDeath	client
 0x1ad60	6	CBasePlayer::IsPlayer	client
 0x1ad70	6	CBasePlayer::IsNetClient	client
 0x1ad80	3	CBasePlayer::ObjectCaps	client
@@ -522,6 +586,8 @@ rva	size	name	file
 0x1d2f0	83	FUN_1001d2f0	client
 0x1d360	37	FUN_1001d360	client
 0x1d6b0	159	FUN_1001d6b0	client
+0x1d750	24	PlayerPreThink	client
+0x1d770	24	PlayerPostThink	client
 0x1d7a0	35	ParmsChangeLevel	client
 0x1d820	1207	FUN_1001d820	client
 0x1dd00	104	PlayerCustomization	client
@@ -532,6 +598,7 @@ rva	size	name	file
 0x1ebe0	166	Custom_Entity_FieldInit	client
 0x1ec90	226	Custom_Encode	client
 0x1ed80	52	RegisterEncoders	client
+0x1f2b0	72	CmdStart	client
 0x1f300	54	CmdEnd	client
 0x1f350	22	GetHullBounds	client
 0x1f380	59	InconsistentFile	client
@@ -543,7 +610,7 @@ rva	size	name	file
 0x201f0	119	CBaseMonster::FadeMonster	combat
 0x20270	266	CBaseMonster::GibMonster	combat
 0x20380	703	CBaseMonster::GetDeathActivity	combat
-0x20640	108	FUN_10020640	combat
+0x20640	108	CBaseMonster::GetSmallFlinchActivity	combat
 0x206d0	61	CBaseMonster::BecomeDead	combat
 0x20710	48	CBaseMonster::ShouldGibMonster	combat
 0x20740	106	FUN_10020740	combat
@@ -553,7 +620,7 @@ rva	size	name	file
 0x209c0	158	CGib::WaitTillLand	combat
 0x20a60	435	CGib::BounceGibTouch	combat
 0x20c20	470	CGib::StickyGibTouch	combat
-0x20e00	258	FUN_10020e00	combat
+0x20e00	258	CGib::Spawn	combat
 0x20f10	71	CBaseMonster::TakeHealth	combat
 0x20f60	2053	CBaseMonster::TakeDamage	combat
 0x21770	244	FUN_10021770	combat
@@ -566,12 +633,15 @@ rva	size	name	file
 0x22070	372	FUN_10022070	combat
 0x221f0	216	CBaseMonster::FInViewCone	combat
 0x222d0	210	CBaseMonster::FInViewCone	combat
+0x223b0	274	CBaseEntity::FVisible	combat
+0x224d0	115	CBaseEntity::FVisible	combat
 0x22550	299	CBaseEntity::TraceAttack	combat
 0x22680	212	CBaseMonster::TraceAttack	combat
 0x22770	2575	FUN_10022770	combat
 0x23960	505	CBaseEntity::TraceBleed	combat
 0x23b60	368	CBaseMonster::MakeDamageBloodDecal	combat
 0x23cd0	145	monster_alien_controller	new: combat .. controller
+0x23d70	8	FUN_10023d70	new: combat .. controller
 0x23d80	48	CController::Save	controller
 0x23db0	48	CController::Restore	controller
 0x23de0	6	CController::Classify	controller
@@ -584,12 +654,13 @@ rva	size	name	file
 0x23f90	70	CController::IdleSound	controller
 0x23fe0	70	FUN_10023fe0	controller
 0x24030	70	CController::DeathSound	controller
+0x24080	870	CController::HandleAnimEvent	controller
 0x24400	258	CController::Spawn	controller
 0x24510	191	CController::Precache	controller
 0x245d0	38	CController::ScheduleFromName	controller
 0x24600	408	CController::StartTask	controller
 0x247a0	541	FUN_100247a0	controller
-0x249c0	409	FUN_100249c0	controller
+0x249c0	409	CController::LookupFloat	controller
 0x24b60	1517	CController::RunTask	controller
 0x25150	143	CController::GetSchedule	controller
 0x251e0	74	CController::GetScheduleOfType	controller
@@ -597,6 +668,7 @@ rva	size	name	file
 0x252a0	64	CController::CheckRangeAttack2	controller
 0x252e0	5	CController::CheckMeleeAttack1	controller
 0x252f0	33	CController::SetActivity	controller
+0x25320	570	CController::RunAI	controller
 0x25560	19	CController::Stop	controller
 0x25580	1338	CController::Move	controller
 0x25ac0	30	CController::ShouldAdvanceRoute	controller
@@ -607,28 +679,38 @@ rva	size	name	file
 0x25f70	37	CControllerHeadBall::Precache	controller
 0x25fa0	1099	CControllerHeadBall::HuntThink	controller
 0x263f0	8	CControllerHeadBall::DieThink	controller
-0x26400	641	FUN_10026400	controller
-0x26690	595	CControllerHeadBall::Crawl	controller
+0x26400	641	CControllerHeadBall::MovetoTarget	controller
 0x268f0	586	CControllerHeadBall::BounceTouch	controller
 0x26b40	105	controller_energy_ball	controller
 0x26bb0	312	CControllerZapBall::Spawn	controller
 0x26cf0	13	CControllerZapBall::Precache	controller
-0x26d00	160	CControllerZapBall::AnimateThink	controller
+0x26d00	160	CControllerZapBall::AnimateThink	new: controller .. crossbow
 0x26da0	317	CControllerZapBall::ExplodeTouch	new: controller .. crossbow
 0x26ee0	145	impailer	new: controller .. crossbow
+0x26f80	8	FUN_10026f80	new: controller .. crossbow
+0x26f90	70	FUN_10026f90	new: controller .. crossbow
+0x26fe0	434	FUN_10026fe0	new: controller .. crossbow
 0x271a0	2786	CImpailer::AttachTouch	new: controller .. crossbow
 0x27c90	45	FUN_10027c90	new: controller .. crossbow
 0x27cc0	20	FUN_10027cc0	new: controller .. crossbow
 0x27ce0	1048	CImpailer::PullingThink	new: controller .. crossbow
+0x28100	8	FUN_10028100	new: controller .. crossbow
 0x28110	885	CImpailer::DieThink	new: controller .. crossbow
 0x28490	112	FUN_10028490	new: controller .. crossbow
 0x28500	68	FUN_10028500	new: controller .. crossbow
 0x28550	145	xbow_teather	new: controller .. crossbow
+0x285f0	8	FUN_100285f0	new: controller .. crossbow
+0x28600	73	FUN_10028600	new: controller .. crossbow
+0x28650	37	FUN_10028650	new: controller .. crossbow
+0x28680	592	FUN_10028680	new: controller .. crossbow
 0x288d0	3569	CXBowTeather::AttachTouch	new: controller .. crossbow
 0x296d0	972	CXBowTeather::PullingThink	new: controller .. crossbow
 0x29aa0	473	CXBowTeather::DieThink	new: controller .. crossbow
+0x29c80	8	FUN_10029c80	new: controller .. crossbow
 0x29c90	379	FUN_10029c90	new: controller .. crossbow
 0x29e10	145	explode_bolt	new: controller .. crossbow
+0x29eb0	8	FUN_10029eb0	new: controller .. crossbow
+0x29ec0	37	FUN_10029ec0	new: controller .. crossbow
 0x29ef0	316	FUN_10029ef0	new: controller .. crossbow
 0x2a030	2161	CExplodeBolt::EmbedTouch	new: controller .. crossbow
 0x2a8b0	962	CExplodeBolt::ArmingThink	new: controller .. crossbow
@@ -636,23 +718,39 @@ rva	size	name	file
 0x2ace0	73	CExplodeBolt::FlyThink	new: controller .. crossbow
 0x2ad30	105	weapon_crossbow	new: controller .. crossbow
 0x2ada0	1	CBasePlayerItem::ItemPreFrame	new: controller .. crossbow
+0x2adb0	15	CBasePlayerWeapon::AddWeapon	new: controller .. crossbow
 0x2adc0	1	CBasePlayerWeapon::UpdateItemInfo	new: controller .. crossbow
+0x2add0	3	CBasePlayerWeapon::RC2VW3	new: controller .. crossbow
+0x2ade0	3	CBasePlayerWeapon::GetWeaponPtr	new: controller .. crossbow
+0x2adf0	6	CCrossbow::iItemSlot	new: controller .. crossbow
+0x2ae00	6	FUN_1002ae00	new: controller .. crossbow
 0x2ae10	89	CCrossbow::Spawn	crossbow
+0x2ae70	84	CCrossbow::AddToPlayer	crossbow
 0x2aed0	278	CCrossbow::Precache	crossbow
-0x2b0c0	121	FUN_1002b0c0	new: crossbow .. crowbar
+0x2aff0	138	CCrossbow::GetItemInfo	crossbow
+0x2b080	64	CCrossbow::Deploy	crossbow
+0x2b0c0	121	CCrossbow::Holster	crossbow
+0x2b140	11	FUN_1002b140	new: crossbow .. crowbar
 0x2b150	929	CCrossbow::DelayedHurt	new: crossbow .. crowbar
+0x2b500	2013	FUN_1002b500	new: crossbow .. crowbar
 0x2bce0	478	FUN_1002bce0	new: crossbow .. crowbar
+0x2bec0	909	FUN_1002bec0	new: crossbow .. crowbar
 0x2c250	256	FUN_1002c250	new: crossbow .. crowbar
 0x2c350	814	FUN_1002c350	new: crossbow .. crowbar
 0x2c680	814	FUN_1002c680	new: crossbow .. crowbar
 0x2c9b0	498	FUN_1002c9b0	new: crossbow .. crowbar
 0x2cbb0	113	FUN_1002cbb0	new: crossbow .. crowbar
 0x2cc30	180	FUN_1002cc30	new: crossbow .. crowbar
-0x2d040	52	FUN_1002d040	new: crossbow .. crowbar
+0x2ccf0	248	FUN_1002ccf0	new: crossbow .. crowbar
+0x2cdf0	579	FUN_1002cdf0	new: crossbow .. crowbar
+0x2d040	52	CCrossbow::UseDecrement	new: crossbow .. crowbar
 0x2d080	102	ammo_crossbow	new: crossbow .. crowbar
 0x2d0f0	41	CCrossbowAmmo::Spawn	new: crossbow .. crowbar
 0x2d120	26	CCrossbowAmmo::Precache	new: crossbow .. crowbar
+0x2d140	94	CCrossbowAmmo::AddAmmo	new: crossbow .. crowbar
 0x2d1a0	105	crowbarang	new: crossbow .. crowbar
+0x2d210	92	FUN_1002d210	new: crossbow .. crowbar
+0x2d270	483	FUN_1002d270	new: crossbow .. crowbar
 0x2d460	3757	CCrowbarang::CrowbarangFlyingThink	new: crossbow .. crowbar
 0x2e310	3485	CCrowbarang::CrowbarangFlyingTouch	new: crossbow .. crowbar
 0x2f0b0	1740	FUN_1002f0b0	new: crossbow .. crowbar
@@ -660,21 +758,33 @@ rva	size	name	file
 0x2f8a0	797	CCrowbarang::CrowbarangEmbededThink	new: crossbow .. crowbar
 0x2fbc0	885	FUN_1002fbc0	new: crossbow .. crowbar
 0x2ff40	118	crowbar_rocket	new: crossbow .. crowbar
+0x2ffc0	37	FUN_1002ffc0	new: crossbow .. crowbar
+0x2fff0	427	FUN_1002fff0	new: crossbow .. crowbar
 0x301a0	475	CCrowbarRocket::DrunkenThink	new: crossbow .. crowbar
 0x30380	82	CCrowbarRocket::DrunkenTouch	new: crossbow .. crowbar
 0x303e0	105	weapon_crowbar	new: crossbow .. crowbar
+0x30450	6	CBasePlayerItem::CanHolster	new: crossbow .. crowbar
+0x30460	1	FUN_10030460	new: crossbow .. crowbar
+0x30470	1	FUN_10030470	new: crossbow .. crowbar
+0x30480	6	CCrowbar::iItemSlot	new: crossbow .. crowbar
+0x30490	6	FUN_10030490	new: crossbow .. crowbar
 0x304a0	120	FUN_100304a0	new: crossbow .. crowbar
 0x30520	170	FUN_10030520	new: crossbow .. crowbar
 0x305d0	129	CCrowbar::Spawn	crowbar
 0x30660	212	CCrowbar::Precache	crowbar
-0x30780	53	FUN_10030780	crowbar
-0x307c0	66	FUN_100307c0	crowbar
+0x30740	64	CCrowbar::GetItemInfo	crowbar
+0x30780	53	CCrowbar::Deploy	crowbar
+0x307c0	66	CCrowbar::Holster	crowbar
 0x30810	573	FindHullIntersection	crowbar
 0x30a50	45	FUN_10030a50	new: crowbar .. defaultai
+0x30a80	734	FUN_10030a80	new: crowbar .. defaultai
+0x30d60	708	FUN_10030d60	new: crowbar .. defaultai
+0x31030	316	FUN_10031030	new: crowbar .. defaultai
 0x31170	18	CCrowbar::Smack	new: crowbar .. defaultai
 0x31190	8	CCrowbar::SwingAgain	new: crowbar .. defaultai
 0x311a0	2487	FUN_100311a0	new: crowbar .. defaultai
-0x31b60	31	FUN_10031b60	new: crowbar .. defaultai
+0x31b60	31	CCrowbar::UseDecrement	new: crowbar .. defaultai
+0x31b80	930	FUN_10031b80	new: crowbar .. defaultai
 0x31f30	169	FUN_10031f30	new: crowbar .. defaultai
 0x31fe0	188	FUN_10031fe0	new: crowbar .. defaultai
 0x320a0	31	FUN_100320a0	new: crowbar .. defaultai
@@ -687,12 +797,16 @@ rva	size	name	file
 0x325a0	143	CBaseMonster::ScheduleInList	defaultai
 0x32630	499	CBaseMonster::GetScheduleOfType	defaultai
 0x328e0	118	control_forklift	new: defaultai .. doors
+0x32960	8	FUN_10032960	new: defaultai .. doors
+0x32970	26	FUN_10032970	new: defaultai .. doors
+0x32990	688	FUN_10032990	new: defaultai .. doors
 0x32c40	3055	CControlForklift::ControlThink	new: defaultai .. doors
 0x33830	1786	FUN_10033830	new: defaultai .. doors
 0x33f30	53	operator*	new: defaultai .. doors
 0x33f70	29	FUN_10033f70	new: defaultai .. doors
 0x33f90	151	FUN_10033f90	new: defaultai .. doors
 0x34030	415	CControlForklift::DoTouch	new: defaultai .. doors
+0x341d0	8	FUN_100341d0	new: defaultai .. doors
 0x341e0	1972	CControlForklift::GoBoom	new: defaultai .. doors
 0x349a0	48	CBaseDoor::Save	doors
 0x349d0	48	CBaseDoor::Restore	doors
@@ -705,11 +819,13 @@ rva	size	name	file
 0x35250	52	CBaseDoor::SetToggleState	doors
 0x35290	1167	CBaseDoor::Precache	doors
 0x357c0	141	CBaseDoor::DoorTouch	doors
+0x35850	57	CBaseDoor::Use	doors
 0x35890	187	FUN_10035890	doors
 0x35950	631	CBaseDoor::DoorGoUp	doors
 0x35bd0	300	CBaseDoor::DoorHitTop	doors
 0x35d00	232	CBaseDoor::DoorGoDown	doors
 0x35df0	251	CBaseDoor::DoorHitBottom	doors
+0x35ef0	916	CBaseDoor::Blocked	doors
 0x36290	105	func_door_rotating	doors
 0x36300	606	CRotDoor::Spawn	doors
 0x36560	105	CRotDoor::SetToggleState	doors
@@ -764,7 +880,7 @@ rva	size	name	file
 0x38240	980	CLightning::StrikeThink	effects
 0x38620	408	FUN_10038620	effects
 0x387c0	78	CLightning::DamageThink	effects
-0x38810	311	FUN_10038810	effects
+0x38810	311	CLightning::Zap	effects
 0x38950	1095	FUN_10038950	effects
 0x38da0	485	FUN_10038da0	effects
 0x38f90	541	FUN_10038f90	effects
@@ -775,17 +891,17 @@ rva	size	name	file
 0x393e0	76	CLaser::Precache	effects
 0x39430	749	CLaser::KeyValue	effects
 0x39720	17	CLaser::IsOn	effects
-0x39740	44	FUN_10039740	effects
-0x39770	69	FUN_10039770	effects
+0x39740	44	CLaser::TurnOff	effects
+0x39770	69	CLaser::TurnOn	effects
 0x397c0	54	CLaser::Use	effects
-0x39800	86	FUN_10039800	effects
+0x39800	86	CLaser::FireAtPoint	effects
 0x39860	134	CLaser::StrikeThink	effects
 0x398f0	102	env_glow	effects
 0x39960	48	CGlow::Save	effects
 0x39990	48	CGlow::Restore	effects
 0x399c0	244	CGlow::Spawn	effects
 0x39ac0	69	CGlow::Think	effects
-0x39b10	48	FUN_10039b10	effects
+0x39b10	48	CGlow::Animate	effects
 0x39b40	102	env_sprite	effects
 0x39bb0	22	CSprite::ObjectCaps	effects
 0x39bd0	48	CSprite::Save	effects
@@ -793,13 +909,14 @@ rva	size	name	file
 0x39c30	212	CSprite::Spawn	effects
 0x39d10	130	CSprite::Precache	effects
 0x39da0	62	CSprite::SpriteInit	effects
-0x39de0	156	FUN_10039de0	effects
+0x39de0	156	CSprite::SpriteCreate	effects
 0x39e80	69	CSprite::AnimateThink	effects
 0x39ed0	63	CSprite::AnimateUntilDead	effects
+0x39f10	63	CSprite::Expand	effects
 0x39f50	127	CSprite::ExpandThink	effects
-0x39fd0	97	FUN_10039fd0	effects
+0x39fd0	97	CSprite::Animate	effects
 0x3a040	27	CSprite::TurnOff	effects
-0x3a060	119	FUN_1003a060	effects
+0x3a060	119	CSprite::TurnOn	effects
 0x3a0e0	69	CSprite::Use	effects
 0x3a130	48	CGibShooter::Save	effects
 0x3a160	48	CGibShooter::Restore	effects
@@ -808,11 +925,12 @@ rva	size	name	file
 0x3a240	364	CGibShooter::KeyValue	effects
 0x3a3b0	27	CGibShooter::Use	effects
 0x3a3d0	122	CGibShooter::Spawn	effects
+0x3a450	191	CGibShooter::CreateGib	effects
 0x3a510	979	CGibShooter::ShootThink	effects
 0x3a8f0	105	env_shooter	effects
 0x3a960	302	CEnvShooter::KeyValue	effects
 0x3aab0	56	CEnvShooter::Precache	effects
-0x3aaf0	290	FUN_1003aaf0	effects
+0x3aaf0	290	CEnvShooter::CreateGib	effects
 0x3ac20	105	test_effect	effects
 0x3ac90	5	CTestEffect::Spawn	effects
 0x3aca0	13	CTestEffect::Precache	effects
@@ -851,26 +969,41 @@ rva	size	name	file
 0x3c090	144	CItemSoda::CanThink	effects
 0x3c120	144	CItemSoda::CanTouch	effects
 0x3c1b0	102	shrinker_project	new: effects .. egon
+0x3c220	8	FUN_1003c220	new: effects .. egon
+0x3c230	283	FUN_1003c230	new: effects .. egon
 0x3c350	79	FUN_1003c350	new: effects .. egon
 0x3c3a0	1190	CShrinkerProject::ShrinkTouch	new: effects .. egon
 0x3c850	105	implode_timer	new: effects .. egon
 0x3c8c0	198	FUN_1003c8c0	new: effects .. egon
+0x3c990	48	FUN_1003c990	new: effects .. egon
 0x3c9c0	103	FUN_1003c9c0	new: effects .. egon
 0x3ca30	757	CImplodeTimer::PreImplodeThink	new: effects .. egon
 0x3cd30	394	CImplodeTimer::BeginImplode	new: effects .. egon
 0x3cec0	974	CImplodeTimer::ImplodeEnt	new: effects .. egon
 0x3d290	105	weapon_egon	new: effects .. egon
+0x3d300	6	CEgon::iItemSlot	new: effects .. egon
+0x3d310	6	FUN_1003d310	new: effects .. egon
 0x3d320	106	CEgon::Spawn	egon
 0x3d390	293	CEgon::Precache	egon
-0x3d4c0	101	FUN_1003d4c0	new: egon .. explode
-0x3d590	269	FUN_1003d590	new: egon .. explode
+0x3d4c0	101	CEgon::Deploy	egon
+0x3d530	84	CEgon::AddToPlayer	egon
+0x3d590	269	CEgon::Holster	egon
+0x3d6a0	14	FUN_1003d6a0	egon
+0x3d6b0	109	CEgon::GetItemInfo	egon
+0x3d720	1707	FUN_1003d720	new: egon .. explode
+0x3ddd0	1028	FUN_1003ddd0	new: egon .. explode
 0x3e1e0	544	FUN_1003e1e0	new: egon .. explode
+0x3e400	1854	FUN_1003e400	new: egon .. explode
 0x3eb40	259	FUN_1003eb40	new: egon .. explode
 0x3ec50	1821	FUN_1003ec50	new: egon .. explode
 0x3f370	680	FUN_1003f370	new: egon .. explode
+0x3f620	159	FUN_1003f620	new: egon .. explode
+0x3f6c0	269	CEgon::UseDecrement	new: egon .. explode
+0x3f7d0	1710	FUN_1003f7d0	new: egon .. explode
 0x3fe80	102	ammo_egonclip	new: egon .. explode
 0x3fef0	41	CEgonAmmo::Spawn	new: egon .. explode
 0x3ff20	26	CEgonAmmo::Precache	new: egon .. explode
+0x3ff40	94	CEgonAmmo::AddAmmo	new: egon .. explode
 0x3ffa0	102	spark_shower	new: egon .. explode
 0x40010	6	CShower::ObjectCaps	new: egon .. explode
 0x40020	373	CShower::Spawn	explode
@@ -889,15 +1022,16 @@ rva	size	name	file
 0x40d60	366	CFlyingMonster::CheckLocalMove	flyingmonster
 0x40ed0	33	CFlyingMonster::FTriangulate	flyingmonster
 0x40f00	22	CFlyingMonster::GetStoppedActivity	flyingmonster
-0x40f20	83	FUN_10040f20	flyingmonster
-0x40f80	174	FUN_10040f80	flyingmonster
+0x40f20	83	CFlyingMonster::Stop	flyingmonster
+0x40f80	174	CFlyingMonster::ChangeYaw	flyingmonster
 0x41030	63	CFlyingMonster::Killed	flyingmonster
-0x41070	84	FUN_10041070	flyingmonster
-0x410d0	34	FUN_100410d0	flyingmonster
+0x41070	84	CFlyingMonster::HandleAnimEvent	flyingmonster
+0x410d0	34	CFlyingMonster::Move	flyingmonster
 0x41100	128	CFlyingMonster::ShouldAdvanceRoute	flyingmonster
 0x415e0	584	CFlyingMonster::ProbeZ	flyingmonster
 0x41830	93	CFlyingMonster::FloorZ	flyingmonster
 0x41890	102	freeze_timer	new: flyingmonster .. func_break
+0x41900	89	FUN_10041900	new: flyingmonster .. func_break
 0x41960	42	FUN_10041960	new: flyingmonster .. func_break
 0x41990	686	CFreezeTimer::StartFreeze	new: flyingmonster .. func_break
 0x41c40	120	CFreezeTimer::EntFrozen	new: flyingmonster .. func_break
@@ -905,6 +1039,7 @@ rva	size	name	file
 0x41e80	70	FUN_10041e80	new: flyingmonster .. func_break
 0x41ed0	798	CBreakable::KeyValue	func_break
 0x421f0	105	func_breakable	func_break
+0x42260	8	FUN_10042260	func_break
 0x42270	3	CBreakable::ObjectCaps	func_break
 0x42280	48	CBreakable::Save	func_break
 0x422b0	48	CBreakable::Restore	func_break
@@ -913,7 +1048,7 @@ rva	size	name	file
 0x42460	65	CBreakable::MaterialSoundPrecache	func_break
 0x424b0	84	CBreakable::MaterialSoundRandom	func_break
 0x42510	368	CBreakable::Precache	func_break
-0x426b0	187	FUN_100426b0	func_break
+0x426b0	187	CBreakable::DamageSound	func_break
 0x42850	279	CBreakable::BreakTouch	func_break
 0x42970	83	CBreakable::Use	func_break
 0x429d0	234	CBreakable::TraceAttack	func_break
@@ -924,6 +1059,7 @@ rva	size	name	file
 0x43350	48	CPushable::Save	func_break
 0x43380	48	CPushable::Restore	func_break
 0x433b0	105	func_pushable	func_break
+0x43420	8	FUN_10043420	func_break
 0x43430	6	CPushable::ObjectCaps	func_break
 0x43440	276	CPushable::Spawn	func_break
 0x43560	54	CPushable::Precache	func_break
@@ -953,8 +1089,9 @@ rva	size	name	file
 0x459d0	91	CFuncTank::StartRotSound	func_tank
 0x45a30	85	CFuncTank::StopRotSound	func_tank
 0x45a90	105	func_tank	func_tank
+0x45b00	57	CFuncTank::UpdateTargetPosition	func_tank
 0x45b40	3	CFuncTank::ObjectCaps	func_tank
-0x45b50	299	FUN_10045b50	func_tank
+0x45b50	299	CFuncTankGun::Fire	func_tank
 0x45c80	105	func_tanklaser	func_tank
 0x45cf0	48	CFuncTankLaser::Save	func_tank
 0x45d20	48	CFuncTankLaser::Restore	func_tank
@@ -962,6 +1099,7 @@ rva	size	name	file
 0x45d90	118	CFuncTankLaser::KeyValue	func_tank
 0x45e10	230	FUN_10045e10	func_tank
 0x45f00	47	CFuncTankLaser::Think	func_tank
+0x45f30	317	CFuncTankLaser::Fire	func_tank
 0x46070	118	rpg_rocket	new: func_tank .. weapons
 0x460f0	48	CRpgRocket::Save	weapons
 0x46120	48	CRpgRocket::Restore	weapons
@@ -972,9 +1110,10 @@ rva	size	name	file
 0x46440	1678	CRpgRocket::FollowThink	new: rpg .. func_tank
 0x46ad0	105	func_tankrocket	new: rpg .. func_tank
 0x46b40	25	CFuncTankRocket::Precache	func_tank
-0x46b60	160	FUN_10046b60	func_tank
+0x46b60	160	CFuncTankRocket::Fire	func_tank
 0x46c00	105	func_tankmortar	func_tank
 0x46c70	117	CFuncTankMortar::KeyValue	func_tank
+0x46cf0	323	CFuncTankMortar::Fire	func_tank
 0x46e40	102	func_tankcontrols	func_tank
 0x46eb0	48	CFuncTankControls::Save	func_tank
 0x46ee0	48	CFuncTankControls::Restore	func_tank
@@ -990,24 +1129,31 @@ rva	size	name	file
 0x485d0	102	streak_spiral	new: gamerules .. gargantua
 0x48640	6	CSpiral::ObjectCaps	new: gamerules .. gargantua
 0x48650	102	garg_stomp	new: gamerules .. gargantua
-0x486c0	310	FUN_100486c0	new: gamerules .. gargantua
+0x486c0	310	CStomp::StompCreate	gargantua
 0x48800	166	CStomp::Spawn	gargantua
 0x488b0	1254	CStomp::Think	gargantua
 0x48da0	143	StreakSplash	gargantua
 0x48e30	105	monster_gargantua	gargantua
+0x48ea0	8	FUN_10048ea0	gargantua
+0x48eb0	8	FUN_10048eb0	gargantua
+0x48ec0	7	FUN_10048ec0	gargantua
+0x48ed0	7	FUN_10048ed0	gargantua
+0x48ee0	7	FUN_10048ee0	gargantua
+0x48ef0	7	FUN_10048ef0	gargantua
+0x48f00	7	FUN_10048f00	gargantua
 0x48f10	173	CGargantua::SetObjectCollisionBox	gargantua
 0x48fc0	48	CGargantua::Save	gargantua
 0x48ff0	48	CGargantua::Restore	gargantua
 0x49020	38	CGargantua::ScheduleFromName	gargantua
 0x49050	13	FUN_10049050	gargantua
 0x49060	11	FUN_10049060	gargantua
-0x49070	134	FUN_10049070	gargantua
+0x49070	134	CGargantua::EyeUpdate	gargantua
 0x49100	629	CGargantua::StompAttack	gargantua
-0x49380	607	FUN_10049380	gargantua
-0x495e0	212	FUN_100495e0	gargantua
-0x496c0	975	FUN_100496c0	gargantua
+0x49380	607	CGargantua::FlameCreate	gargantua
+0x495e0	212	CGargantua::FlameControls	gargantua
+0x496c0	975	CGargantua::FlameUpdate	gargantua
 0x49a90	1511	FUN_10049a90	gargantua
-0x4a080	85	FUN_1004a080	gargantua
+0x4a080	85	CGargantua::FlameDestroy	gargantua
 0x4a0e0	66	CGargantua::PrescheduleThink	gargantua
 0x4a130	6	CGargantua::Classify	gargantua
 0x4a140	74	CGargantua::SetYawSpeed	gargantua
@@ -1020,6 +1166,7 @@ rva	size	name	file
 0x4a880	47	CGargantua::CheckMeleeAttack1	gargantua
 0x4a8b0	84	CGargantua::CheckMeleeAttack2	gargantua
 0x4a910	67	CGargantua::CheckRangeAttack1	gargantua
+0x4a960	655	CGargantua::HandleAnimEvent	gargantua
 0x4ac10	592	FUN_1004ac10	gargantua
 0x4ae60	62	CGargantua::GetScheduleOfType	gargantua
 0x4aea0	237	CGargantua::StartTask	gargantua
@@ -1028,10 +1175,14 @@ rva	size	name	file
 0x4b470	113	CSmoker::Spawn	gargantua
 0x4b4f0	322	CSmoker::Think	gargantua
 0x4b640	113	CSpiral::Spawn	gargantua
-0x4b6c0	224	FUN_1004b6c0	gargantua
+0x4b6c0	224	CSpiral::Create	gargantua
 0x4b7a0	596	CSpiral::Think	gargantua
 0x4ba00	220	SpawnExplosion	gargantua
 0x4bae0	105	gauss_becon	new: gargantua .. gauss
+0x4bb50	8	FUN_1004bb50	new: gargantua .. gauss
+0x4bb60	13	FUN_1004bb60	new: gargantua .. gauss
+0x4bb70	48	FUN_1004bb70	new: gargantua .. gauss
+0x4bba0	347	FUN_1004bba0	new: gargantua .. gauss
 0x4bd00	434	CGaussBecon::FlyingThink	new: gargantua .. gauss
 0x4bec0	1723	CGaussBecon::AttachTouch	new: gargantua .. gauss
 0x4c580	1023	CGaussBecon::AttachedThink	new: gargantua .. gauss
@@ -1039,28 +1190,39 @@ rva	size	name	file
 0x4ca70	105	weapon_gauss	new: gargantua .. gauss
 0x4cae0	95	CGauss::Spawn	gauss
 0x4cb40	306	CGauss::Precache	gauss
-0x4cc80	749	FUN_1004cc80	new: gauss .. genericmonster
-0x4cf70	483	FUN_1004cf70	new: gauss .. genericmonster
-0x4d160	417	FUN_1004d160	new: gauss .. genericmonster
-0x4d410	63	FUN_1004d410	new: gauss .. genericmonster
+0x4cc80	749	FUN_1004cc80	gauss
+0x4cf70	483	FUN_1004cf70	gauss
+0x4d160	417	FUN_1004d160	gauss
+0x4d310	84	CGauss::AddToPlayer	gauss
+0x4d370	109	CGauss::GetItemInfo	gauss
+0x4d3e0	48	CGauss::Deploy	gauss
+0x4d410	63	CGauss::Holster	gauss
+0x4d450	11	FUN_1004d450	new: gauss .. genericmonster
 0x4d460	74	FUN_1004d460	new: gauss .. genericmonster
 0x4d4b0	12	FUN_1004d4b0	new: gauss .. genericmonster
 0x4d4c0	351	FUN_1004d4c0	new: gauss .. genericmonster
 0x4d620	437	FUN_1004d620	new: gauss .. genericmonster
 0x4d7e0	69	FUN_1004d7e0	new: gauss .. genericmonster
 0x4d830	84	FUN_1004d830	new: gauss .. genericmonster
+0x4d890	3233	FUN_1004d890	new: gauss .. genericmonster
 0x4e540	1287	FUN_1004e540	new: gauss .. genericmonster
 0x4ea50	1065	FUN_1004ea50	new: gauss .. genericmonster
+0x4ee80	1629	FUN_1004ee80	new: gauss .. genericmonster
 0x4f4e0	1946	FUN_1004f4e0	new: gauss .. genericmonster
+0x4fc80	6	CGauss::iItemSlot	new: gauss .. genericmonster
+0x4fc90	6	FUN_1004fc90	new: gauss .. genericmonster
 0x4fca0	1459	FUN_1004fca0	new: gauss .. genericmonster
-0x50330	36	FUN_10050330	new: gauss .. genericmonster
+0x50260	204	FUN_10050260	new: gauss .. genericmonster
+0x50330	36	CGauss::UseDecrement	new: gauss .. genericmonster
 0x50360	513	FUN_10050360	new: gauss .. genericmonster
 0x50570	102	ammo_gaussclip	new: gauss .. genericmonster
 0x505e0	41	CGaussAmmo::Spawn	new: gauss .. genericmonster
 0x50610	26	CGaussAmmo::Precache	new: gauss .. genericmonster
+0x50630	94	CGaussAmmo::AddAmmo	new: gauss .. genericmonster
 0x50690	105	monster_generic	new: gauss .. genericmonster
 0x50700	6	CGenericMonster::Classify	genericmonster
 0x50710	14	CGenericMonster::SetYawSpeed	genericmonster
+0x50720	13	CGenericMonster::HandleAnimEvent	genericmonster
 0x50730	3	CGenericMonster::ISoundMask	genericmonster
 0x50740	419	CGenericMonster::Spawn	genericmonster
 0x508f0	32	CGenericMonster::Precache	genericmonster
@@ -1082,36 +1244,58 @@ rva	size	name	file
 0x51e00	150	CGrenade::BounceSound	ggrenade
 0x51ea0	334	CGrenade::TumbleThink	ggrenade
 0x51ff0	175	CGrenade::Spawn	ggrenade
-0x520a0	265	FUN_100520a0	new: ggrenade .. globals
-0x521b0	468	FUN_100521b0	new: ggrenade .. globals
+0x520a0	265	CGrenade::ShootContact	ggrenade
+0x521b0	468	FUN_100521b0	ggrenade
+0x52390	402	CGrenade::ShootSatchelCharge	ggrenade
 0x52620	31	_$E13	globals
 0x52640	102	transphasic_gib	new: globals .. wpn_shared_hl_wpn_glock
 0x526b0	189	FUN_100526b0	new: globals .. wpn_shared_hl_wpn_glock
+0x52770	70	FUN_10052770	new: globals .. wpn_shared_hl_wpn_glock
 0x527c0	1830	FUN_100527c0	new: globals .. wpn_shared_hl_wpn_glock
 0x52ef0	504	CTransphasicGib::TGibThink	new: globals .. wpn_shared_hl_wpn_glock
 0x530f0	105	glock_stickygib	new: globals .. wpn_shared_hl_wpn_glock
+0x53160	8	FUN_10053160	new: globals .. wpn_shared_hl_wpn_glock
+0x53170	483	FUN_10053170	new: globals .. wpn_shared_hl_wpn_glock
 0x53360	81	FUN_10053360	new: globals .. wpn_shared_hl_wpn_glock
 0x533c0	1353	CGlockStickyGib::AttachedThink	new: globals .. wpn_shared_hl_wpn_glock
 0x53910	2598	CGlockStickyGib::AttachTouch	new: globals .. wpn_shared_hl_wpn_glock
 0x54340	737	FUN_10054340	new: globals .. wpn_shared_hl_wpn_glock
 0x54630	102	glock_gib	new: globals .. wpn_shared_hl_wpn_glock
+0x546a0	487	FUN_100546a0	new: globals .. wpn_shared_hl_wpn_glock
 0x54890	69	FUN_10054890	new: globals .. wpn_shared_hl_wpn_glock
 0x548e0	790	CGlockGib::BounceTouch	new: globals .. wpn_shared_hl_wpn_glock
 0x54c00	105	weapon_glock	new: globals .. wpn_shared_hl_wpn_glock
+0x54c70	3	FUN_10054c70	new: globals .. wpn_shared_hl_wpn_glock
+0x54c80	6	CGlock::iItemSlot	new: globals .. wpn_shared_hl_wpn_glock
+0x54c90	6	FUN_10054c90	new: globals .. wpn_shared_hl_wpn_glock
+0x54ca0	11	FUN_10054ca0	new: globals .. wpn_shared_hl_wpn_glock
 0x54cb0	105	weapon_9mmhandgun	new: globals .. wpn_shared_hl_wpn_glock
 0x54d20	97	CGlock::Spawn	wpn_shared_hl_wpn_glock
 0x54d90	281	CGlock::Precache	wpn_shared_hl_wpn_glock
+0x54eb0	107	CGlock::GetItemInfo	wpn_shared_hl_wpn_glock
+0x54f20	36	CGlock::Deploy	wpn_shared_hl_wpn_glock
 0x54f50	119	FUN_10054f50	new: wpn_shared_hl_wpn_glock .. gman
+0x54fd0	784	FUN_10054fd0	new: wpn_shared_hl_wpn_glock .. gman
+0x552e0	819	FUN_100552e0	new: wpn_shared_hl_wpn_glock .. gman
+0x55620	794	FUN_10055620	new: wpn_shared_hl_wpn_glock .. gman
+0x55940	561	FUN_10055940	new: wpn_shared_hl_wpn_glock .. gman
 0x55b80	858	FUN_10055b80	new: wpn_shared_hl_wpn_glock .. gman
+0x55ee0	132	FUN_10055ee0	new: wpn_shared_hl_wpn_glock .. gman
+0x55f70	215	FUN_10055f70	new: wpn_shared_hl_wpn_glock .. gman
+0x56050	258	FUN_10056050	new: wpn_shared_hl_wpn_glock .. gman
 0x56160	102	ammo_glockclip	new: wpn_shared_hl_wpn_glock .. gman
 0x561d0	41	CGlockAmmo::Spawn	new: wpn_shared_hl_wpn_glock .. gman
 0x56200	26	CGlockAmmo::Precache	new: wpn_shared_hl_wpn_glock .. gman
+0x56220	94	CGlockAmmo::AddAmmo	new: wpn_shared_hl_wpn_glock .. gman
 0x56280	102	ammo_9mmclip	new: wpn_shared_hl_wpn_glock .. gman
 0x562f0	105	monster_gman	new: wpn_shared_hl_wpn_glock .. gman
+0x56360	8	FUN_10056360	new: wpn_shared_hl_wpn_glock .. gman
+0x56370	8	FUN_10056370	new: wpn_shared_hl_wpn_glock .. gman
 0x56380	48	CGMan::Save	gman
 0x563b0	48	CGMan::Restore	gman
 0x563e0	3	CGMan::Classify	gman
 0x563f0	14	CGMan::SetYawSpeed	gman
+0x56400	13	CGMan::HandleAnimEvent	gman
 0x56410	3	CGMan::ISoundMask	gman
 0x56420	186	CGMan::Spawn	gman
 0x564e0	13	CGMan::Precache	gman
@@ -1121,7 +1305,7 @@ rva	size	name	file
 0x56730	49	CGMan::TraceAttack	gman
 0x56770	76	CGMan::PlayScriptedSentence	gman
 0x567c0	371	FBoxVisible	h_ai
-0x56940	1361	VecCheckToss	h_ai
+0x56940	1361	FUN_10056940	h_ai
 0x56ea0	628	VecCheckThrow	h_ai
 0x57120	48	CRecharge::Save	h_battery
 0x57150	48	CRecharge::Restore	h_battery
@@ -1131,7 +1315,7 @@ rva	size	name	file
 0x57380	144	CRecharge::Spawn	h_battery
 0x57410	37	CRecharge::Precache	h_battery
 0x57440	734	CRecharge::Use	h_battery
-0x57720	42	CRecharge::Recharge	new: h_battery .. h_cine
+0x57720	42	CRecharge::Recharge	h_battery
 0x57750	138	CRecharge::Off	new: h_battery .. h_cine
 0x577e0	118	monster_cine_scientist	new: h_battery .. h_cine
 0x57860	11	CCineScientist::Spawn	new: h_battery .. h_cine
@@ -1149,7 +1333,7 @@ rva	size	name	file
 0x57bc0	11	CCine3Scientist::Spawn	new: h_battery .. h_cine
 0x57bd0	118	monster_cine3_barney	new: h_battery .. h_cine
 0x57c50	11	CCine3Barney::Spawn	new: h_battery .. h_cine
-0x57c60	253	FUN_10057c60	new: h_battery .. h_cine
+0x57c60	253	CLegacyCineMonster::CineSpawn	h_cine
 0x57d60	40	CLegacyCineMonster::Use	h_cine
 0x57d90	8	FUN_10057d90	h_cine
 0x57da0	40	CLegacyCineMonster::Pain	h_cine
@@ -1167,7 +1351,7 @@ rva	size	name	file
 0x58380	118	cycler_prdroid	h_cycler
 0x58400	171	CCyclerProbe::Spawn	h_cycler
 0x584b0	170	CCycler::GenericCyclerSpawn	h_cycler
-0x58560	206	FUN_10058560	h_cycler
+0x58560	206	CCycler::Spawn	h_cycler
 0x58630	156	CCycler::Think	h_cycler
 0x586d0	55	CCycler::Use	h_cycler
 0x58710	175	CCycler::TakeDamage	h_cycler
@@ -1179,12 +1363,19 @@ rva	size	name	file
 0x58970	92	CCyclerSprite::Think	h_cycler
 0x589d0	53	CCyclerSprite::Use	h_cycler
 0x58a10	34	CCyclerSprite::TakeDamage	h_cycler
-0x58a40	63	FUN_10058a40	h_cycler
+0x58a40	63	CCyclerSprite::Animate	h_cycler
 0x58a80	105	cycler_weapon	h_cycler
+0x58af0	1	FUN_10058af0	h_cycler
+0x58b00	1	FUN_10058b00	h_cycler
+0x58b10	3	CBasePlayerWeapon::RC2VW4	h_cycler
+0x58b20	1	CBasePlayerWeapon::ShouldWeaponIdle	h_cycler
+0x58b30	6	CWeaponCycler::iItemSlot	h_cycler
+0x58b40	5	CWeaponCycler::GetItemInfo	h_cycler
 0x58b50	219	CWeaponCycler::Spawn	h_cycler
-0x58c30	80	FUN_10058c30	h_cycler
-0x58c80	30	FUN_10058c80	h_cycler
+0x58c30	80	CWeaponCycler::Deploy	h_cycler
+0x58c80	30	CWeaponCycler::Holster	h_cycler
 0x58ca0	48	FUN_10058ca0	h_cycler
+0x58cd0	173	FUN_10058cd0	h_cycler
 0x58d80	48	CWreckage::Save	h_cycler
 0x58db0	48	CWreckage::Restore	h_cycler
 0x58de0	105	cycler_wreckage	h_cycler
@@ -1194,6 +1385,7 @@ rva	size	name	file
 0x590a0	8	FUN_100590a0	new: h_cycler .. h_export
 0x590b0	32	GiveFnptrsToDll	h_export
 0x590d0	118	gravity_grenade	new: h_export .. handgrenade
+0x59150	24	FUN_10059150	new: h_export .. handgrenade
 0x59170	158	FUN_10059170	new: h_export .. handgrenade
 0x59210	265	FUN_10059210	new: h_export .. handgrenade
 0x59320	535	CGravGrenade::PreDetonate	new: h_export .. handgrenade
@@ -1202,57 +1394,83 @@ rva	size	name	file
 0x59820	192	CGravGrenade::EndDetonate	new: h_export .. handgrenade
 0x598e0	83	CGravGrenade::KillTouch	new: h_export .. handgrenade
 0x59940	118	suck_grenade	new: h_export .. handgrenade
+0x599c0	24	FUN_100599c0	new: h_export .. handgrenade
+0x599e0	70	FUN_100599e0	new: h_export .. handgrenade
+0x59a30	358	FUN_10059a30	new: h_export .. handgrenade
 0x59ba0	535	CSuckGrenade::PreDetonate	new: h_export .. handgrenade
 0x59dc0	289	FUN_10059dc0	new: h_export .. handgrenade
 0x59ef0	52	CSuckGrenade::Detonating	new: h_export .. handgrenade
 0x59f30	107	CSuckGrenade::EndDetonate	new: h_export .. handgrenade
 0x59fa0	118	antifriction_grenade	new: h_export .. handgrenade
 0x5a020	82	FUN_1005a020	new: h_export .. handgrenade
+0x5a080	340	FUN_1005a080	new: h_export .. handgrenade
 0x5a1e0	312	CAFGrenade::PreDetonate	new: h_export .. handgrenade
 0x5a320	1078	CAFGrenade::Detonate	new: h_export .. handgrenade
 0x5a760	1186	FUN_1005a760	new: h_export .. handgrenade
 0x5ac10	118	ultima_grenade	new: h_export .. handgrenade
+0x5ac90	24	FUN_1005ac90	new: h_export .. handgrenade
+0x5acb0	8	FUN_1005acb0	new: h_export .. handgrenade
 0x5acc0	127	FUN_1005acc0	new: h_export .. handgrenade
+0x5ad40	361	FUN_1005ad40	new: h_export .. handgrenade
 0x5aeb0	535	CUltimaGrenade::PreDetonate	new: h_export .. handgrenade
 0x5b0d0	1160	FUN_1005b0d0	new: h_export .. handgrenade
 0x5b560	426	FUN_1005b560	new: h_export .. handgrenade
+0x5b710	21	FUN_1005b710	new: h_export .. handgrenade
 0x5b730	193	CUltimaGrenade::KillTouch	new: h_export .. handgrenade
 0x5b800	52	CUltimaGrenade::DetonateWarmup	new: h_export .. handgrenade
 0x5b840	554	FUN_1005b840	new: h_export .. handgrenade
 0x5ba70	698	FUN_1005ba70	new: h_export .. handgrenade
 0x5bd30	153	CUltimaGrenade::DetonateExplode	new: h_export .. handgrenade
 0x5bdd0	105	weapon_handgrenade	new: h_export .. handgrenade
+0x5be40	6	CHandGrenade::iItemSlot	new: h_export .. handgrenade
+0x5be50	6	FUN_1005be50	new: h_export .. handgrenade
 0x5be60	106	CHandGrenade::Spawn	handgrenade
 0x5bed0	77	CHandGrenade::Precache	handgrenade
+0x5bf20	109	CHandGrenade::GetItemInfo	handgrenade
+0x5bf90	59	CHandGrenade::Deploy	handgrenade
 0x5bfd0	25	CHandGrenade::CanHolster	handgrenade
 0x5bff0	163	CHandGrenade::Holster	handgrenade
 0x5c0a0	115	FUN_1005c0a0	new: handgrenade .. hassassin
 0x5c120	136	FUN_1005c120	new: handgrenade .. hassassin
 0x5c1b0	136	FUN_1005c1b0	new: handgrenade .. hassassin
+0x5c240	1	FUN_1005c240	new: handgrenade .. hassassin
+0x5c250	214	FUN_1005c250	new: handgrenade .. hassassin
 0x5c330	106	FUN_1005c330	new: handgrenade .. hassassin
-0x5c3a0	62	FUN_1005c3a0	new: handgrenade .. hassassin
+0x5c3a0	62	CHandGrenade::UseDecrement	new: handgrenade .. hassassin
+0x5c3e0	2399	FUN_1005c3e0	new: handgrenade .. hassassin
 0x5cd40	105	monster_human_assassin	new: handgrenade .. hassassin
+0x5cdb0	8	FUN_1005cdb0	new: handgrenade .. hassassin
 0x5cdc0	48	CHAssassin::Save	hassassin
 0x5cdf0	48	CHAssassin::Restore	hassassin
+0x5ce20	1	CHAssassin::DeathSound	hassassin
+0x5ce30	1	CHAssassin::IdleSound	hassassin
 0x5ce40	6	CHAssassin::ISoundMask	hassassin
 0x5ce50	6	CHAssassin::Classify	hassassin
 0x5ce60	26	CHAssassin::SetYawSpeed	hassassin
 0x5ce80	1142	FUN_1005ce80	hassassin
+0x5d300	323	CHAssassin::HandleAnimEvent	hassassin
 0x5d450	304	CHAssassin::Spawn	hassassin
 0x5d580	69	CHAssassin::Precache	hassassin
 0x5d5d0	38	CHAssassin::ScheduleFromName	hassassin
 0x5d600	517	CHAssassin::CheckMeleeAttack1	hassassin
 0x5d810	227	CHAssassin::CheckRangeAttack1	hassassin
 0x5d900	322	CHAssassin::CheckRangeAttack2	hassassin
+0x5da50	535	CHAssassin::RunAI	hassassin
 0x5dc80	60	CHAssassin::StartTask	hassassin
 0x5dcc0	278	CHAssassin::RunTask	hassassin
 0x5dde0	418	CHAssassin::GetSchedule	hassassin
 0x5df90	215	CHAssassin::GetScheduleOfType	hassassin
 0x5e0c0	105	monster_headcrab	new: hassassin .. headcrab
+0x5e130	8	FUN_1005e130	new: hassassin .. headcrab
+0x5e140	7	CHeadCrab::GetDamageAmount	new: hassassin .. headcrab
+0x5e150	6	CHeadCrab::GetVoicePitch	new: hassassin .. headcrab
+0x5e160	7	CHeadCrab::GetSoundVolue	new: hassassin .. headcrab
 0x5e170	38	CHeadCrab::ScheduleFromName	headcrab
 0x5e1a0	6	CHeadCrab::Classify	headcrab
 0x5e1b0	49	CHeadCrab::Center	headcrab
+0x5e1f0	44	CHeadCrab::BodyTarget	headcrab
 0x5e220	97	CHeadCrab::SetYawSpeed	headcrab
+0x5e2b0	797	CHeadCrab::HandleAnimEvent	headcrab
 0x5e5d0	247	CHeadCrab::Spawn	headcrab
 0x5e6d0	158	CHeadCrab::Precache	headcrab
 0x5e770	77	CHeadCrab::RunTask	headcrab
@@ -1262,12 +1480,13 @@ rva	size	name	file
 0x5ea70	61	CHeadCrab::CheckRangeAttack1	headcrab
 0x5eab0	5	CHeadCrab::CheckRangeAttack2	headcrab
 0x5eac0	43	CHeadCrab::TakeDamage	headcrab
-0x5eaf0	78	FUN_1005eaf0	headcrab
-0x5eb40	78	FUN_1005eb40	headcrab
-0x5eb90	78	FUN_1005eb90	headcrab
-0x5ebe0	78	FUN_1005ebe0	headcrab
+0x5eaf0	78	CHeadCrab::IdleSound	headcrab
+0x5eb40	78	CHeadCrab::AlertSound	headcrab
+0x5eb90	78	CHeadCrab::PainSound	headcrab
+0x5ebe0	78	CHeadCrab::DeathSound	headcrab
 0x5ec30	26	CHeadCrab::GetScheduleOfType	headcrab
 0x5ec50	118	monster_babycrab	headcrab
+0x5ecd0	13	CBabyCrab::GetDamageAmount	headcrab
 0x5ece0	17	CBabyCrab::GetVoicePitch	headcrab
 0x5ed00	7	CBabyCrab::GetSoundVolue	headcrab
 0x5ed10	154	CBabyCrab::Spawn	headcrab
@@ -1278,6 +1497,7 @@ rva	size	name	file
 0x5ee80	102	item_healthkit	new: headcrab .. healthkit
 0x5eef0	41	CHealthKit::Spawn	healthkit
 0x5ef20	26	CHealthKit::Precache	healthkit
+0x5ef40	511	CHealthKit::MyTouch	healthkit
 0x5f140	48	CWallHealth::Save	healthkit
 0x5f170	48	CWallHealth::Restore	healthkit
 0x5f1a0	105	func_healthcharger	healthkit
@@ -1286,16 +1506,18 @@ rva	size	name	file
 0x5f3a0	144	CWallHealth::Spawn	healthkit
 0x5f430	37	CWallHealth::Precache	healthkit
 0x5f460	593	CWallHealth::Use	healthkit
-0x5f6c0	81	CWallHealth::Recharge	new: healthkit .. hgrunt
-0x5f720	138	CWallHealth::Off	new: healthkit .. hgrunt
-0x5f7b0	118	monster_human_grunt	new: healthkit .. hgrunt
+0x5f6c0	81	CWallHealth::Recharge	healthkit
+0x5f720	138	CWallHealth::Off	h_battery
+0x5f7b0	118	monster_human_grunt	new: h_battery .. hgrunt
+0x5f830	8	FUN_1005f830	new: h_battery .. hgrunt
 0x5f840	48	CHGrunt::Save	hgrunt
 0x5f870	48	CHGrunt::Restore	hgrunt
 0x5f8a0	83	FUN_1005f8a0	hgrunt
+0x5f900	248	CHGrunt::IRelationship	hgrunt
 0x5fa00	498	CHGrunt::GibMonster	hgrunt
 0x5fc00	6	CHGrunt::ISoundMask	hgrunt
-0x5fc10	56	FUN_1005fc10	hgrunt
-0x5fc50	47	FUN_1005fc50	hgrunt
+0x5fc10	56	CHGrunt::FOkToSpeak	hgrunt
+0x5fc50	47	CHGrunt::JustSpoke	hgrunt
 0x5fc80	140	CHGrunt::PrescheduleThink	hgrunt
 0x5fd10	14	CHGrunt::FCanCheckAttacks	hgrunt
 0x5fd20	115	CHGrunt::CheckMeleeAttack1	hgrunt
@@ -1304,17 +1526,19 @@ rva	size	name	file
 0x603d0	134	CHGrunt::TraceAttack	hgrunt
 0x60460	42	CHGrunt::TakeDamage	hgrunt
 0x60490	143	CHGrunt::SetYawSpeed	hgrunt
-0x60570	365	FUN_10060570	hgrunt
+0x60570	365	CHGrunt::IdleSound	hgrunt
 0x606e0	25	CHGrunt::CheckAmmo	hgrunt
 0x60700	6	CHGrunt::Classify	hgrunt
 0x60710	210	CHGrunt::Kick	hgrunt
 0x607f0	108	CHGrunt::GetGunPosition	hgrunt
-0x60860	787	FUN_10060860	hgrunt
-0x60b80	797	FUN_10060b80	hgrunt
+0x60860	787	CHGrunt::Shoot	hgrunt
+0x60b80	797	CHGrunt::Shotgun	hgrunt
+0x60ea0	1259	CHGrunt::HandleAnimEvent	hgrunt
 0x613c0	481	CHGrunt::Spawn	hgrunt
 0x615b0	258	CHGrunt::Precache	hgrunt
 0x616c0	165	CHGrunt::StartTask	hgrunt
 0x617d0	156	CHGrunt::RunTask	hgrunt
+0x61870	237	CHGrunt::PainSound	hgrunt
 0x61980	150	CHGrunt::DeathSound	hgrunt
 0x61a20	38	CHGrunt::ScheduleFromName	hgrunt
 0x61a50	389	CHGrunt::SetActivity	hgrunt
@@ -1338,28 +1562,44 @@ rva	size	name	file
 0x62c00	35	CHornet::Classify	hornet
 0x62c30	46	CHornet::StartTrack	hornet
 0x62c60	46	CHornet::StartDart	hornet
-0x62c90	172	FUN_10062c90	hornet
+0x62c90	172	CHornet::IgniteTrail	hornet
 0x62d40	2075	CHornet::TrackTarget	hornet
 0x63560	475	CHornet::TrackTouch	hornet
 0x63740	13	CHornet::DartTouch	hornet
 0x63750	271	CHornet::DieTouch	hornet
-0x63860	145	freeze_grenade	new: hornet .. hornetgun
-0x63910	105	FUN_10063910	new: hornet .. hornetgun
-0x63af0	299	CFreezeGrenade::FlyingThink	new: hornet .. hornetgun
-0x63c20	1775	CFreezeGrenade::AttachTouch	new: hornet .. hornetgun
-0x64310	1137	CFreezeGrenade::AttachedThink	new: hornet .. hornetgun
-0x64790	1096	CFreezeGrenade::Detonate	new: hornet .. hornetgun
-0x64be0	185	FUN_10064be0	new: hornet .. hornetgun
-0x64ca0	772	FUN_10064ca0	new: hornet .. hornetgun
-0x64fb0	105	weapon_hornetgun	new: hornet .. hornetgun
+0x63860	145	freeze_grenade	new: hornet .. weapons
+0x63900	8	FUN_10063900	new: hornet .. weapons
+0x63910	105	FUN_10063910	new: hornet .. weapons
+0x63980	365	FUN_10063980	new: hornet .. weapons
+0x63af0	299	CFreezeGrenade::FlyingThink	new: hornet .. weapons
+0x63c20	1775	CFreezeGrenade::AttachTouch	new: hornet .. weapons
+0x64310	1137	CFreezeGrenade::AttachedThink	new: hornet .. weapons
+0x64790	1096	CFreezeGrenade::Detonate	new: hornet .. weapons
+0x64be0	185	FUN_10064be0	new: hornet .. weapons
+0x64ca0	772	FUN_10064ca0	new: hornet .. weapons
+0x64fb0	105	weapon_hornetgun	new: hornet .. weapons
+0x65020	6	CBasePlayerWeapon::ResetEmptySound	weapons
 0x65030	64	CHgun::Spawn	hornetgun
 0x65070	156	CHgun::Precache	hornetgun
-0x65200	149	FUN_10065200	new: hornetgun .. houndeye
-0x652a0	216	FUN_100652a0	new: hornetgun .. houndeye
-0x65bd0	1186	FUN_10065bd0	new: hornetgun .. houndeye
-0x66080	113	FUN_10066080	new: hornetgun .. houndeye
-0x66100	155	FUN_10066100	new: hornetgun .. houndeye
+0x65110	125	CHgun::AddToPlayer	hornetgun
+0x65190	109	CHgun::GetItemInfo	hornetgun
+0x65200	149	CHgun::Deploy	hornetgun
+0x652a0	216	CHgun::Holster	hornetgun
+0x65380	811	CBasePlayerWeapon::SendWeaponAnim	weapons
+0x656b0	282	CHgun::IsUseable	hornetgun
+0x657d0	715	CHgun::PrimaryAttack	hornetgun
+0x65aa0	291	CHgun::SecondaryAttack	hornetgun
+0x65bd0	1186	FUN_10065bd0	hornetgun
+0x66080	113	FUN_10066080	hornetgun
+0x66100	155	CHgun::WeaponIdle	hornetgun
+0x661a0	470	FUN_100661a0	new: hornetgun .. houndeye
+0x66380	6	CHgun::iItemSlot	new: hornetgun .. houndeye
+0x66390	6	FUN_10066390	new: hornetgun .. houndeye
 0x663a0	118	monster_houndeye	new: hornetgun .. houndeye
+0x66420	8	FUN_10066420	new: hornetgun .. houndeye
+0x66430	7	FUN_10066430	new: hornetgun .. houndeye
+0x66440	7	FUN_10066440	new: hornetgun .. houndeye
+0x66450	7	FUN_10066450	new: hornetgun .. houndeye
 0x66460	48	CHoundeye::Save	houndeye
 0x66490	48	CHoundeye::Restore	houndeye
 0x664c0	6	CHoundeye::Classify	houndeye
@@ -1368,12 +1608,16 @@ rva	size	name	file
 0x66580	47	CHoundeye::CheckRangeAttack1	houndeye
 0x665b0	106	CHoundeye::SetYawSpeed	houndeye
 0x66640	132	CHoundeye::SetActivity	houndeye
+0x666d0	329	CHoundeye::HandleAnimEvent	houndeye
 0x66840	234	CHoundeye::Spawn	houndeye
 0x66930	270	CHoundeye::Precache	houndeye
+0x66a40	150	CHoundeye::IdleSound	houndeye
 0x66ae0	106	CHoundeye::WarmUpSound	houndeye
 0x66b50	150	FUN_10066b50	houndeye
-0x66bf0	186	FUN_10066bf0	houndeye
-0x66df0	174	FUN_10066df0	houndeye
+0x66bf0	186	CHoundeye::AlertSound	houndeye
+0x66cb0	150	CHoundeye::DeathSound	houndeye
+0x66d50	150	CHoundeye::PainSound	houndeye
+0x66df0	174	CHoundeye::WriteBeamColor	houndeye
 0x66ea0	1142	FUN_10066ea0	houndeye
 0x67320	223	CHoundeye::StartTask	houndeye
 0x67470	501	CHoundeye::RunTask	houndeye
@@ -1382,6 +1626,7 @@ rva	size	name	file
 0x67870	382	CHoundeye::GetScheduleOfType	houndeye
 0x67a40	331	CHoundeye::GetSchedule	houndeye
 0x67b90	166	monster_ichthyosaur	new: houndeye .. ichthyosaur
+0x67c40	8	FUN_10067c40	new: houndeye .. ichthyosaur
 0x67c50	48	CIchthyosaur::Save	ichthyosaur
 0x67c80	48	CIchthyosaur::Restore	ichthyosaur
 0x67cb0	70	CIchthyosaur::IdleSound	ichthyosaur
@@ -1399,6 +1644,7 @@ rva	size	name	file
 0x67fd0	14	CIchthyosaur::SetYawSpeed	ichthyosaur
 0x67fe0	80	CIchthyosaur::Killed	ichthyosaur
 0x68030	48	CIchthyosaur::BecomeDead	ichthyosaur
+0x68060	969	CIchthyosaur::HandleAnimEvent	ichthyosaur
 0x68430	595	CIchthyosaur::Spawn	ichthyosaur
 0x68690	185	CIchthyosaur::Precache	ichthyosaur
 0x68750	175	CIchthyosaur::GetSchedule	ichthyosaur
@@ -1407,23 +1653,32 @@ rva	size	name	file
 0x68970	2234	CIchthyosaur::RunTask	ichthyosaur
 0x69260	111	CIchthyosaur::VectorToPitch	ichthyosaur
 0x692d0	13	CIchthyosaur::Move	ichthyosaur
+0x692e0	123	CIchthyosaur::FlPitchDiff	ichthyosaur
+0x69360	151	CIchthyosaur::ChangePitch	ichthyosaur
+0x69400	157	CIchthyosaur::ChangeYaw	ichthyosaur
 0x694a0	22	CIchthyosaur::GetStoppedActivity	ichthyosaur
 0x694c0	87	CIchthyosaur::MoveExecute	ichthyosaur
-0x69520	191	FUN_10069520	ichthyosaur
+0x69520	191	CIchthyosaur::MonsterThink	ichthyosaur
 0x695e0	21	CIchthyosaur::Stop	ichthyosaur
 0x69600	3425	FUN_10069600	new: ichthyosaur .. islave
 0x6a370	893	FUN_1006a370	new: ichthyosaur .. islave
 0x6a710	121	CreateInterface	new: ichthyosaur .. islave
 0x6a7e0	118	monster_alien_slave	new: ichthyosaur .. islave
+0x6a860	8	FUN_1006a860	new: ichthyosaur .. islave
 0x6a870	118	monster_vortigaunt	new: ichthyosaur .. islave
 0x6a8f0	48	CISlave::Save	islave
 0x6a920	48	CISlave::Restore	islave
 0x6a950	6	CISlave::Classify	islave
-0x6a9a0	230	FUN_1006a9a0	islave
-0x6aa90	99	FUN_1006aa90	islave
+0x6a960	63	CISlave::IRelationship	islave
+0x6a9a0	230	CISlave::CallForHelp	islave
+0x6aa90	99	CISlave::AlertSound	islave
+0x6ab00	66	CISlave::IdleSound	islave
+0x6ab50	84	CISlave::PainSound	islave
+0x6abb0	63	CISlave::DeathSound	islave
 0x6abf0	6	CISlave::ISoundMask	islave
 0x6ac00	29	CISlave::Killed	islave
 0x6ac20	87	CISlave::SetYawSpeed	islave
+0x6ac80	1332	CISlave::HandleAnimEvent	islave
 0x6b1d0	43	CISlave::CheckRangeAttack1	islave
 0x6b200	5	CISlave::CheckRangeAttack2	islave
 0x6b210	24	CISlave::StartTask	islave
@@ -1434,40 +1689,44 @@ rva	size	name	file
 0x6b4f0	38	CISlave::ScheduleFromName	islave
 0x6b520	199	CISlave::GetSchedule	islave
 0x6b5f0	57	CISlave::GetScheduleOfType	islave
-0x6b630	1220	FUN_1006b630	new: islave .. items
-0x6bb00	102	FUN_1006bb00	new: islave .. items
-0x6bb70	311	FUN_1006bb70	new: islave .. items
-0x6bcb0	1229	FUN_1006bcb0	new: islave .. items
-0x6c180	103	FUN_1006c180	new: islave .. items
+0x6b630	1220	CISlave::ArmBeam	islave
+0x6bb00	102	CISlave::BeamGlow	islave
+0x6bb70	311	CISlave::WackBeam	islave
+0x6bcb0	1229	FUN_1006bcb0	islave
+0x6c180	103	CISlave::ClearBeams	islave
 0x6c1f0	36	CBeam::SetEndAttachment	new: islave .. items
 0x6c220	42	CBeam::SetColor	new: islave .. items
 0x6c250	102	world_items	new: islave .. items
 0x6c2c0	110	CWorldItem::KeyValue	items
 0x6c330	208	CWorldItem::Spawn	items
-0x6c410	170	FUN_1006c410	new: items .. leech
-0x6c4c0	150	CItem::ItemTouch	new: items .. leech
+0x6c410	170	FUN_1006c410	items
+0x6c4c0	150	CItem::ItemTouch	items
+0x6c560	102	CItem::Respawn	items
 0x6c5d0	142	CItem::Materialize	new: items .. leech
 0x6c660	102	item_suit	new: items .. leech
 0x6c6d0	41	CItemSuit::Spawn	new: items .. leech
 0x6c700	13	CItemSuit::Precache	new: items .. leech
-0x6c710	118	FUN_1006c710	new: items .. leech
+0x6c710	118	CItemSuit::MyTouch	new: items .. leech
 0x6c790	102	item_battery	new: items .. leech
 0x6c800	41	CItemBattery::Spawn	new: items .. leech
 0x6c830	26	CItemBattery::Precache	new: items .. leech
+0x6c850	482	CItemBattery::MyTouch	new: items .. leech
 0x6ca40	102	item_antidote	new: items .. leech
 0x6cab0	41	CItemAntidote::Spawn	new: items .. leech
 0x6cae0	13	CItemAntidote::Precache	new: items .. leech
-0x6caf0	59	FUN_1006caf0	new: items .. leech
+0x6caf0	59	CItemAntidote::MyTouch	new: items .. leech
 0x6cb30	102	item_security	new: items .. leech
 0x6cba0	41	CItemSecurity::Spawn	new: items .. leech
 0x6cbd0	13	CItemSecurity::Precache	new: items .. leech
+0x6cbe0	25	CItemSecurity::MyTouch	new: items .. leech
 0x6cc00	102	item_longjump	new: items .. leech
 0x6cc70	41	CItemLongJump::Spawn	new: items .. leech
 0x6cca0	13	CItemLongJump::Precache	new: items .. leech
-0x6ccb0	181	FUN_1006ccb0	new: items .. leech
+0x6ccb0	181	CItemLongJump::MyTouch	new: items .. leech
 0x6cd70	105	lcs_spawner	new: items .. leech
 0x6cde0	102	FUN_1006cde0	new: items .. leech
 0x6ce50	250	CLCSSpawner::CreateThink	new: items .. leech
+0x6cf50	32	FUN_1006cf50	new: items .. leech
 0x6cf70	297	FUN_1006cf70	new: items .. leech
 0x6d170	165	FUN_1006d170	new: items .. leech
 0x6d220	47	FUN_1006d220	new: items .. leech
@@ -1486,17 +1745,18 @@ rva	size	name	file
 0x6e740	48	CLeech::Restore	leech
 0x6e770	311	CLeech::Spawn	leech
 0x6e8b0	5	CLeech::Activate	leech
-0x6e8c0	291	FUN_1006e8c0	leech
-0x6e9f0	195	FUN_1006e9f0	leech
-0x6eac0	45	FUN_1006eac0	leech
-0x6eaf0	101	FUN_1006eaf0	leech
+0x6e8c0	291	CLeech::RecalculateWaterlevel	leech
+0x6e9f0	195	CLeech::SwitchLeechState	leech
+0x6eac0	45	CLeech::IRelationship	leech
+0x6eaf0	101	CLeech::AttackSound	leech
 0x6eb60	58	CLeech::AlertSound	leech
 0x6eba0	73	CLeech::Precache	leech
 0x6ebf0	297	CLeech::TakeDamage	leech
+0x6ed20	490	CLeech::HandleAnimEvent	leech
 0x6ef10	54	CLeech::MakeVectors	leech
-0x6ef50	1056	FUN_1006ef50	leech
+0x6ef50	1056	CLeech::ObstacleDistance	leech
 0x6f370	292	CLeech::DeadThink	leech
-0x6f4a0	610	FUN_1006f4a0	leech
+0x6f4a0	610	CLeech::UpdateMotion	leech
 0x6f710	1708	CLeech::SwimThink	leech
 0x6fdc0	276	CLeech::Killed	leech
 0x6fee0	102	light	new: leech .. lights
@@ -1513,7 +1773,7 @@ rva	size	name	file
 0x70580	48	CRuleEntity::Restore	maprules
 0x705b0	34	CRuleEntity::Spawn	maprules
 0x705e0	111	CRuleEntity::KeyValue	maprules
-0x70650	38	FUN_10070650	maprules
+0x70650	38	CRuleEntity::CanFireForActivator	maprules
 0x70680	30	CRulePointEntity::Spawn	maprules
 0x706a0	54	CRuleBrushEntity::Spawn	maprules
 0x706e0	102	game_score	maprules
@@ -1533,7 +1793,7 @@ rva	size	name	file
 0x70f80	149	CGameTeamMaster::Use	maprules
 0x71020	13	CGameTeamMaster::IsTriggered	maprules
 0x71030	29	CGameTeamMaster::TeamID	maprules
-0x71050	75	FUN_10071050	maprules
+0x71050	75	CGameTeamMaster::TeamMatch	maprules
 0x710a0	102	game_team_set	maprules
 0x71110	75	CGameTeamSet::Use	maprules
 0x71160	105	game_zone_player	maprules
@@ -1551,7 +1811,7 @@ rva	size	name	file
 0x71840	105	game_player_equip	maprules
 0x718b0	146	CGamePlayerEquip::KeyValue	maprules
 0x71950	43	CGamePlayerEquip::Touch	maprules
-0x71980	100	FUN_10071980	maprules
+0x71980	100	CGamePlayerEquip::EquipPlayer	maprules
 0x719f0	13	CGamePlayerEquip::Use	maprules
 0x71a00	102	game_player_team	maprules
 0x71a70	140	CGamePlayerTeam::TargetTeamName	maprules
@@ -1567,18 +1827,18 @@ rva	size	name	file
 0x741f0	281	CMonsterMaker::KeyValue	monstermaker
 0x74310	165	CMonsterMaker::Spawn	monstermaker
 0x743c0	26	CMonsterMaker::Precache	monstermaker
-0x743e0	636	FUN_100743e0	monstermaker
+0x743e0	636	CMonsterMaker::MakeMonster	monstermaker
 0x74660	8	CMonsterMaker::CyclicUse	monstermaker
 0x74670	104	CMonsterMaker::ToggleUse	monstermaker
 0x746e0	24	CMonsterMaker::MakerThink	monstermaker
 0x74700	40	CMonsterMaker::DeathNotice	monstermaker
 0x74730	48	CBaseMonster::Save	monsters
 0x74760	102	CBaseMonster::Restore	monsters
-0x747d0	20	FUN_100747d0	monsters
-0x747f0	29	FUN_100747f0	monsters
+0x747d0	20	CBaseMonster::Eat	monsters
+0x747f0	29	CBaseMonster::FShouldEat	monsters
 0x74810	29	CBaseMonster::BarnacleVictimBitten	monsters
 0x74830	56	CBaseMonster::BarnacleVictimReleased	monsters
-0x74870	320	FUN_10074870	monsters
+0x74870	320	CBaseMonster::Listen	monsters
 0x749b0	60	CBaseMonster::FLSoundVolume	monsters
 0x749f0	5	CBaseMonster::FValidateHintType	monsters
 0x74a00	680	CBaseMonster::Look	monsters
@@ -1588,31 +1848,34 @@ rva	size	name	file
 0x74e60	219	CBaseMonster::MonsterThink	monsters
 0x74f40	13	CBaseMonster::MonsterUse	monsters
 0x74f50	54	CBaseMonster::IgnoreConditions	monsters
-0x74f90	44	FUN_10074f90	monsters
+0x74f90	44	CBaseMonster::RouteClear	monsters
 0x74fc0	15	FUN_10074fc0	monsters
-0x74fd0	39	FUN_10074fd0	monsters
-0x75000	292	FUN_10075000	monsters
-0x751b0	70	FUN_100751b0	monsters
-0x75200	38	FUN_10075200	monsters
+0x74fd0	39	CBaseMonster::FRouteClear	monsters
+0x75000	292	CBaseMonster::FRefreshRoute	monsters
+0x75180	38	CBaseMonster::MoveToEnemy	monsters
+0x751b0	70	CBaseMonster::MoveToLocation	monsters
+0x75200	38	CBaseMonster::MoveToTarget	monsters
+0x75230	70	CBaseMonster::MoveToNode	monsters
 0x75280	25	ShouldSimplify	monsters
-0x752a0	1150	FUN_100752a0	monsters
+0x752a0	1150	CBaseMonster::RouteSimplify	monsters
+0x75720	42	CBaseMonster::FBecomeProne	monsters
 0x75750	64	CBaseMonster::CheckRangeAttack1	monsters
 0x75790	64	CBaseMonster::CheckRangeAttack2	monsters
 0x757d0	88	CBaseMonster::CheckMeleeAttack1	monsters
 0x75830	47	CBaseMonster::CheckMeleeAttack2	monsters
-0x75860	427	FUN_10075860	monsters
+0x75860	427	CBaseMonster::CheckAttacks	monsters
 0x75a10	23	CBaseMonster::FCanCheckAttacks	monsters
 0x75a30	1022	CBaseMonster::CheckEnemy	monsters
-0x75e30	115	FUN_10075e30	monsters
-0x75eb0	137	FUN_10075eb0	monsters
+0x75e30	115	CBaseMonster::PushEnemy	monsters
+0x75eb0	137	CBaseMonster::PopEnemy	monsters
 0x75f40	186	CBaseMonster::SetActivity	monsters
-0x76000	136	FUN_10076000	monsters
+0x76000	136	CBaseMonster::SetSequenceByName	monsters
 0x76090	472	CBaseMonster::CheckLocalMove	monsters
 0x76270	312	FUN_10076270	monsters
-0x763b0	336	FUN_100763b0	monsters
+0x763b0	336	CBaseMonster::AdvanceRoute	monsters
 0x76500	71	CBaseMonster::RouteClassify	monsters
-0x76550	360	FUN_10076550	monsters
-0x766c0	134	FUN_100766c0	monsters
+0x76550	360	CBaseMonster::BuildRoute	monsters
+0x766c0	134	CBaseMonster::InsertWaypoint	monsters
 0x76750	2634	CBaseMonster::FTriangulate	monsters
 0x771a0	1245	CBaseMonster::Move	monsters
 0x77680	30	CBaseMonster::ShouldAdvanceRoute	monsters
@@ -1620,27 +1883,27 @@ rva	size	name	file
 0x77750	245	CBaseMonster::MonsterInit	monsters
 0x77850	8	CBaseMonster::MonsterInitThink	monsters
 0x77860	550	CBaseMonster::StartMonster	monsters
-0x77a90	105	FUN_10077a90	monsters
-0x77b10	25	FUN_10077b10	monsters
+0x77a90	105	CBaseMonster::MovementComplete	monsters
+0x77b10	25	CBaseMonster::TaskIsRunning	monsters
 0x77b30	182	CBaseMonster::IRelationship	monsters
 0x77bf0	753	CBaseMonster::FindCover	monsters
 0x77ef0	630	CBaseMonster::BuildNearestRoute	monsters
 0x78170	254	CBaseMonster::BestVisibleEnemy	monsters
-0x78270	272	FUN_10078270	monsters
+0x78270	272	CBaseMonster::MakeIdealYaw	monsters
 0x78380	82	CBaseMonster::FlYawDiff	monsters
 0x783e0	353	CBaseMonster::ChangeYaw	monsters
 0x78550	74	CBaseMonster::VecToYaw	monsters
 0x785a0	163	CBaseMonster::SetEyePosition	monsters
-0x78650	677	FUN_10078650	monsters
+0x78650	677	CBaseMonster::HandleAnimEvent	monsters
 0x78930	317	CBaseMonster::GetGunPosition	monsters
-0x78a70	303	FUN_10078a70	monsters
+0x78a70	303	CBaseMonster::FGetNodeRoute	monsters
 0x78ba0	381	FUN_10078ba0	monsters
 0x78d20	661	CBaseMonster::ReportAIState	monsters
 0x78fc0	197	CBaseMonster::KeyValue	monsters
 0x79090	371	FUN_10079090	monsters
 0x79230	82	CBaseMonster::CanPlaySequence	monsters
-0x79290	856	FUN_10079290	monsters
-0x795f0	333	FUN_100795f0	monsters
+0x79290	856	CBaseMonster::FindLateralCover	monsters
+0x795f0	333	CBaseMonster::ShootAtEnemy	monsters
 0x79740	29	CBaseMonster::FacingIdeal	monsters
 0x79760	3	CBaseMonster::FCanActiveIdle	monsters
 0x79770	109	CBaseMonster::PlaySentence	monsters
@@ -1652,7 +1915,7 @@ rva	size	name	file
 0x79c70	327	FUN_10079c70	monsters
 0x79dc0	205	FUN_10079dc0	monsters
 0x79e90	62	CBaseMonster::ShouldFadeOnDeath	monsters
-0x79ed0	74	FUN_10079ed0	new: monsters .. monsterstate
+0x79ed0	74	CBaseMonster::SetState	monsterstate
 0x79f20	291	CBaseMonster::RunAI	monsterstate
 0x7a050	439	CBaseMonster::GetIdealState	monsterstate
 0x7a230	105	func_mortar_field	new: monsterstate .. mortar
@@ -1666,7 +1929,7 @@ rva	size	name	file
 0x7a810	118	monster_mortar	mortar
 0x7a890	54	CMortar::Spawn	mortar
 0x7a8d0	25	CMortar::Precache	mortar
-0x7a8f0	401	CMortar::MortarExplode	new: mortar .. mp5
+0x7a8f0	401	CMortar::MortarExplode	mortar
 0x7aa90	102	bouncy_bolt	new: mortar .. mp5
 0x7ab00	191	FUN_1007ab00	new: mortar .. mp5
 0x7abc0	47	FUN_1007abc0	new: mortar .. mp5
@@ -1683,39 +1946,61 @@ rva	size	name	file
 0x7b9f0	1100	CMP5BlasterBolt::BBThink	new: mortar .. mp5
 0x7be40	105	weapon_mp5	new: mortar .. mp5
 0x7beb0	105	weapon_9mmAR	new: mortar .. mp5
+0x7bf20	7	CMP5::SecondaryAmmoIndex	mp5
 0x7bf30	140	CMP5::Spawn	mp5
 0x7bfc0	367	CMP5::Precache	mp5
-0x7c210	161	FUN_1007c210	new: mp5 .. multiplay_gamerules
+0x7c130	114	CMP5::GetItemInfo	mp5
+0x7c1b0	84	CMP5::AddToPlayer	mp5
+0x7c210	161	CMP5::Deploy	mp5
+0x7c2c0	26	FUN_1007c2c0	new: mp5 .. multiplay_gamerules
+0x7c2e0	30	FUN_1007c2e0	new: mp5 .. multiplay_gamerules
+0x7c300	991	FUN_1007c300	new: mp5 .. multiplay_gamerules
+0x7c6e0	1747	FUN_1007c6e0	new: mp5 .. multiplay_gamerules
+0x7cdc0	991	FUN_1007cdc0	new: mp5 .. multiplay_gamerules
+0x7d1a0	637	FUN_1007d1a0	new: mp5 .. multiplay_gamerules
 0x7d420	911	FUN_1007d420	new: mp5 .. multiplay_gamerules
-0x7da00	76	FUN_1007da00	new: mp5 .. multiplay_gamerules
+0x7d7b0	45	FUN_1007d7b0	new: mp5 .. multiplay_gamerules
+0x7d7e0	136	FUN_1007d7e0	new: mp5 .. multiplay_gamerules
+0x7d870	390	FUN_1007d870	new: mp5 .. multiplay_gamerules
+0x7da00	76	CMP5::UseDecrement	new: mp5 .. multiplay_gamerules
 0x7da50	102	ammo_mp5clip	new: mp5 .. multiplay_gamerules
 0x7dac0	41	CMP5AmmoClip::Spawn	new: mp5 .. multiplay_gamerules
 0x7daf0	26	CMP5AmmoClip::Precache	new: mp5 .. multiplay_gamerules
+0x7db10	96	CMP5AmmoClip::AddAmmo	new: mp5 .. multiplay_gamerules
 0x7db70	102	ammo_9mmAR	new: mp5 .. multiplay_gamerules
 0x7dbe0	102	ammo_9mmbox	new: mp5 .. multiplay_gamerules
 0x7dc50	41	CMP5Chainammo::Spawn	new: mp5 .. multiplay_gamerules
 0x7dc80	26	CMP5Chainammo::Precache	new: mp5 .. multiplay_gamerules
+0x7dca0	96	CMP5Chainammo::AddAmmo	new: mp5 .. multiplay_gamerules
 0x7dd00	102	ammo_mp5grenades	new: mp5 .. multiplay_gamerules
 0x7dd70	41	CMP5AmmoGrenade::Spawn	new: mp5 .. multiplay_gamerules
 0x7dda0	26	CMP5AmmoGrenade::Precache	new: mp5 .. multiplay_gamerules
+0x7ddc0	96	FUN_1007ddc0	new: mp5 .. multiplay_gamerules
 0x7de20	102	ammo_ARgrenades	new: mp5 .. multiplay_gamerules
+0x7de90	6	CMP5::iItemSlot	new: mp5 .. multiplay_gamerules
+0x7dea0	6	FUN_1007dea0	new: mp5 .. multiplay_gamerules
 0x7dec0	10	FUN_1007dec0	new: mp5 .. multiplay_gamerules
 0x7ded0	12	FUN_1007ded0	new: mp5 .. multiplay_gamerules
 0x7df00	11	FUN_1007df00	new: mp5 .. multiplay_gamerules
+0x7df10	48	FUN_1007df10	new: mp5 .. multiplay_gamerules
 0x7df40	12	FUN_1007df40	new: mp5 .. multiplay_gamerules
+0x7df60	32	FUN_1007df60	new: mp5 .. multiplay_gamerules
 0x7df80	235	CHalfLifeMultiplay::CHalfLifeMultiplay	multiplay_gamerules
 0x7e070	29	CHalfLifeMultiplay::ClientCommand	multiplay_gamerules
 0x7e090	156	CHalfLifeMultiplay::RefreshSkillData	multiplay_gamerules
 0x7e130	705	FUN_1007e130	multiplay_gamerules
 0x7e430	184	FUN_1007e430	multiplay_gamerules
+0x7e4f0	270	CHalfLifeMultiplay::GetNextBestWeapon	multiplay_gamerules
 0x7e600	23	CHalfLifeMultiplay::ClientConnected	multiplay_gamerules
 0x7e620	50	CHalfLifeMultiplay::UpdateGameMode	multiplay_gamerules
 0x7e660	654	FUN_1007e660	multiplay_gamerules
 0x7e8f0	233	CHalfLifeMultiplay::ClientDisconnected	multiplay_gamerules
 0x7e9f0	8	FUN_1007e9f0	multiplay_gamerules
+0x7ea00	58	CHalfLifeMultiplay::PlayerThink	multiplay_gamerules
 0x7ed10	693	FUN_1007ed10	multiplay_gamerules
 0x7efd0	91	FUN_1007efd0	multiplay_gamerules
 0x7f030	1400	FUN_1007f030	multiplay_gamerules
+0x7f5c0	72	CHalfLifeMultiplay::FlWeaponRespawnTime	multiplay_gamerules
 0x7f610	90	FUN_1007f610	multiplay_gamerules
 0x7f6a0	28	CHalfLifeMultiplay::WeaponShouldRespawn	multiplay_gamerules
 0x7f7e0	30	CHalfLifeMultiplay::ItemShouldRespawn	multiplay_gamerules
@@ -1730,6 +2015,9 @@ rva	size	name	file
 0x7ff40	293	FUN_1007ff40	multiplay_gamerules
 0x80370	317	CHalfLifeMultiplay::SendMOTDToClient	multiplay_gamerules
 0x80600	138	monster_nihilanth	new: multiplay_gamerules .. nihilanth
+0x80690	8	FUN_10080690	new: multiplay_gamerules .. nihilanth
+0x806a0	7	FUN_100806a0	new: multiplay_gamerules .. nihilanth
+0x806b0	7	FUN_100806b0	new: multiplay_gamerules .. nihilanth
 0x806c0	6	CNihilanth::Classify	new: multiplay_gamerules .. nihilanth
 0x806d0	6	CNihilanth::BloodColor	new: multiplay_gamerules .. nihilanth
 0x806e0	179	CNihilanth::SetObjectCollisionBox	new: multiplay_gamerules .. nihilanth
@@ -1740,6 +2028,7 @@ rva	size	name	file
 0x808a0	48	CNihilanthHVR::Restore	nihilanth
 0x808d0	732	CNihilanth::Spawn	nihilanth
 0x80bb0	225	CNihilanth::Precache	nihilanth
+0x80ca0	173	CNihilanth::PainSound	nihilanth
 0x80d50	55	CNihilanth::DeathSound	nihilanth
 0x80d90	36	CNihilanth::NullThink	nihilanth
 0x80dc0	39	CNihilanth::StartupUse	nihilanth
@@ -1748,14 +2037,16 @@ rva	size	name	file
 0x80ed0	2218	CNihilanth::DyingThink	nihilanth
 0x81790	43	CNihilanth::CrashTouch	nihilanth
 0x817c0	1	CNihilanth::GibMonster	nihilanth
-0x817d0	224	FUN_100817d0	nihilanth
+0x817d0	224	CNihilanth::FloatSequence	nihilanth
 0x818b0	1389	FUN_100818b0	nihilanth
-0x81e20	604	FUN_10081e20	nihilanth
+0x81e20	604	CNihilanth::MakeFriend	nihilanth
 0x82080	1857	FUN_10082080	nihilanth
 0x827d0	743	CNihilanth::HuntThink	nihilanth
 0x82ac0	1100	FUN_10082ac0	nihilanth
-0x82f10	89	FUN_10082f10	nihilanth
-0x82f70	259	FUN_10082f70	nihilanth
+0x82f10	89	CNihilanth::AbsorbSphere	nihilanth
+0x82f70	259	CNihilanth::EmitSphere	nihilanth
+0x83080	334	CNihilanth::TargetSphere	nihilanth
+0x831d0	1615	CNihilanth::HandleAnimEvent	nihilanth
 0x83840	106	CNihilanth::CommandUse	nihilanth
 0x838b0	97	CNihilanth::TakeDamage	nihilanth
 0x83920	338	CNihilanth::TraceAttack	nihilanth
@@ -1769,14 +2060,14 @@ rva	size	name	file
 0x844a0	237	FUN_100844a0	nihilanth
 0x84590	107	CNihilanthHVR::GreenBallInit	nihilanth
 0x84600	732	CNihilanthHVR::TeleportThink	nihilanth
-0x848e0	224	FUN_100848e0	nihilanth
+0x848e0	224	CNihilanthHVR::AbsorbInit	nihilanth
 0x849c0	200	CNihilanthHVR::TeleportTouch	nihilanth
 0x84a90	361	CNihilanthHVR::DissipateThink	nihilanth
 0x84c00	1284	FUN_10084c00	nihilanth
-0x85110	640	FUN_10085110	nihilanth
+0x85110	640	CNihilanthHVR::MovetoTarget	nihilanth
 0x85390	592	CNihilanthHVR::Crawl	nihilanth
 0x855e0	46	CNihilanthHVR::RemoveTouch	nihilanth
-0x85610	586	CNihilanthHVR::BounceTouch	new: nihilanth .. nodes
+0x85610	586	CNihilanthHVR::BounceTouch	nihilanth
 0x85880	102	info_node	new: nihilanth .. nodes
 0x858f0	102	info_node_air	new: nihilanth .. nodes
 0x85960	139	CGraph::InitGraph	nodes
@@ -1786,7 +2077,7 @@ rva	size	name	file
 0x85ef0	43	CGraph::NodeType	nodes
 0x85f20	214	CGraph::PathLength	nodes
 0x86000	137	CGraph::NextNodeInRoute	nodes
-0x86090	861	CGraph::FindShortestPath	nodes
+0x86090	861	FUN_10086090	nodes
 0x86400	886	CGraph::CheckNode	nodes
 0x86780	65	CalcBounds	nodes
 0x867d0	30	CGraph::FindNearestNode	nodes
@@ -1827,22 +2118,28 @@ rva	size	name	file
 0x89db0	159	CGraph::BuildLinkLookups	nodes
 0x89e50	1167	CGraph::BuildRegionTables	nodes
 0x8a2e0	1509	CGraph::ComputeStaticRoutingTables	nodes
-0x8a8d0	897	CGraph::TestRoutingTables	nodes
 0x8ac60	105	node_viewer	nodes
 0x8acd0	105	node_viewer_human	nodes
 0x8ad40	105	node_viewer_fly	nodes
 0x8adb0	105	node_viewer_large	nodes
 0x8ae20	670	CNodeViewer::Spawn	nodes
-0x8b0c0	143	FUN_1008b0c0	new: nodes .. osprey
-0x8b150	97	FUN_1008b150	new: nodes .. osprey
-0x8b1c0	435	CNodeViewer::DrawThink	new: nodes .. osprey
+0x8b0c0	143	CNodeViewer::FindNodeConnections	nodes
+0x8b150	97	CNodeViewer::AddNode	nodes
+0x8b1c0	435	CNodeViewer::DrawThink	nodes
 0x8b380	102	nuclear_missile	new: nodes .. osprey
+0x8b3f0	8	FUN_1008b3f0	new: nodes .. osprey
+0x8b400	514	FUN_1008b400	new: nodes .. osprey
 0x8b610	124	FUN_1008b610	new: nodes .. osprey
 0x8b690	1769	CNuke::NukeThink	new: nodes .. osprey
 0x8bd80	554	FUN_1008bd80	new: nodes .. osprey
 0x8bfb0	966	FUN_1008bfb0	new: nodes .. osprey
 0x8c380	631	CNuke::NukeDetonateTouch	new: nodes .. osprey
 0x8c600	138	monster_osprey	new: nodes .. osprey
+0x8c690	8	FUN_1008c690	new: nodes .. osprey
+0x8c6a0	8	FUN_1008c6a0	new: nodes .. osprey
+0x8c6b0	7	FUN_1008c6b0	new: nodes .. osprey
+0x8c6c0	7	FUN_1008c6c0	new: nodes .. osprey
+0x8c6d0	7	FUN_1008c6d0	new: nodes .. osprey
 0x8c6e0	3	COsprey::ObjectCaps	new: nodes .. osprey
 0x8c6f0	6	COsprey::Classify	new: nodes .. osprey
 0x8c700	4	COsprey::BloodColor	new: nodes .. osprey
@@ -1853,17 +2150,17 @@ rva	size	name	file
 0x8c9a0	25	COsprey::CommandUse	osprey
 0x8c9c0	206	COsprey::FindAllThink	osprey
 0x8ca90	1439	COsprey::DeployThink	osprey
-0x8d030	127	FUN_1008d030	osprey
+0x8d030	127	COsprey::HasDead	osprey
 0x8d0b0	621	FUN_1008d0b0	osprey
 0x8d320	158	COsprey::HoverThink	osprey
-0x8d3c0	592	FUN_1008d3c0	osprey
+0x8d3c0	592	COsprey::UpdateGoal	osprey
 0x8d610	324	COsprey::FlyThink	osprey
 0x8d760	1140	FUN_1008d760	osprey
 0x8dbe0	25	COsprey::HitTouch	osprey
 0x8dc00	331	COsprey::Killed	osprey
 0x8dd50	84	COsprey::CrashTouch	osprey
 0x8ddb0	1916	COsprey::DyingThink	osprey
-0x8e530	584	FUN_1008e530	osprey
+0x8e530	584	COsprey::ShowDamage	osprey
 0x8e780	229	COsprey::TraceAttack	osprey
 0x8e870	102	path_corner	new: osprey .. pathcorner
 0x8e8e0	4	CPathCorner::GetDelay	new: osprey .. pathcorner
@@ -1881,9 +2178,9 @@ rva	size	name	file
 0x8ed00	19	CPathTrack::Activate	pathcorner
 0x8ed20	33	CPathTrack::ValidPath	pathcorner
 0x8ed50	290	CPathTrack::Project	pathcorner
-0x8ee80	33	FUN_1008ee80	pathcorner
-0x8eeb0	33	FUN_1008eeb0	pathcorner
-0x8eee0	100	FUN_1008eee0	pathcorner
+0x8ee80	33	CPathTrack::GetNext	pathcorner
+0x8eeb0	33	CPathTrack::GetPrevious	pathcorner
+0x8eee0	100	CPathTrack::SetPrevious	pathcorner
 0x8ef50	1009	CPathTrack::LookAhead	pathcorner
 0x8f350	209	CPathTrack::Nearest	pathcorner
 0x8f430	105	FUN_1008f430	new: pathcorner .. plane
@@ -1899,31 +2196,35 @@ rva	size	name	file
 0x8fad0	8	CFuncPlat::CallHitBottom	plats
 0x8fae0	105	func_plat	plats
 0x8fb50	3	CBasePlatTrain::ObjectCaps	plats
-0x8fb70	363	FUN_1008fb70	plats
+0x8fb60	13	CBasePlatTrain::IsTogglePlat	plats
+0x8fb70	363	CFuncPlat::Setup	plats
 0x8fce0	36	CFuncPlat::Precache	plats
 0x8fd10	91	CFuncPlat::Spawn	plats
-0x8fd70	164	FUN_1008fd70	plats
-0x8fe30	346	FUN_1008fe30	plats
+0x8fd70	164	PlatSpawnInsideTrigger	plats
+0x8fe30	346	CPlatTrigger::SpawnInsideTrigger	plats
 0x8ff90	93	FUN_1008ff90	plats
 0x8fff0	106	CFuncPlat::PlatUse	plats
-0x90060	123	FUN_10090060	plats
-0x900e0	132	FUN_100900e0	plats
-0x90170	123	FUN_10090170	plats
-0x901f0	174	FUN_100901f0	plats
+0x90060	123	CFuncPlat::GoDown	plats
+0x900e0	132	CFuncPlat::HitBottom	plats
+0x90170	123	CFuncPlat::GoUp	plats
+0x901f0	174	CFuncPlat::HitTop	plats
+0x902a0	169	CFuncPlat::Blocked	plats
 0x90350	118	func_platrot	plats
 0x903d0	48	CFuncPlatRot::Save	plats
 0x90400	48	CFuncPlatRot::Restore	plats
-0x90430	283	FUN_10090430	plats
+0x90430	283	CFuncPlatRot::SetupRotation	plats
 0x90550	17	CFuncPlatRot::Spawn	plats
-0x90570	43	FUN_10090570	plats
-0x905a0	70	FUN_100905a0	plats
-0x905f0	43	FUN_100905f0	plats
-0x90620	70	FUN_10090620	plats
-0x90670	199	CFuncPlatRot::RotMove	plats
+0x90570	43	CFuncPlatRot::GoDown	plats
+0x905a0	70	CFuncPlatRot::HitBottom	plats
+0x905f0	43	CFuncPlatRot::GoUp	plats
+0x90620	70	CFuncPlatRot::HitTop	plats
+0x90670	199	FUN_10090670	plats
 0x90740	105	func_train	plats
 0x907b0	48	CFuncTrain::Save	plats
 0x907e0	48	CFuncTrain::Restore	plats
 0x90810	114	CFuncTrain::KeyValue	plats
+0x90890	194	CFuncTrain::Blocked	plats
+0x90960	171	CFuncTrain::Use	plats
 0x90a10	436	CFuncTrain::Wait	plats
 0x90bd0	744	CFuncTrain::Next	plats
 0x90ec0	300	CFuncTrain::Activate	plats
@@ -1935,15 +2236,16 @@ rva	size	name	file
 0x91220	105	func_tracktrain	plats
 0x91290	539	CFuncTrackTrain::KeyValue	plats
 0x914b0	53	CFuncTrackTrain::NextThink	plats
-0x91740	403	FUN_10091740	plats
-0x918e0	143	FUN_100918e0	plats
+0x914f0	579	CFuncTrackTrain::Blocked	plats
+0x91740	403	CFuncTrackTrain::Use	plats
+0x918e0	143	CFuncTrackTrain::StopSound	plats
 0x91970	328	FUN_10091970	plats
 0x91ac0	1513	CFuncTrackTrain::Next	plats
 0x920b0	44	FixupAngles	plats
 0x920e0	69	Fix	plats
 0x92130	6	CFuncTrackTrain::ObjectCaps	plats
 0x92140	290	CFuncTrackTrain::DeadEnd	plats
-0x92270	208	FUN_10092270	plats
+0x92270	208	CFuncTrackTrain::SetControls	plats
 0x92340	285	CFuncTrackTrain::OnControls	plats
 0x92460	437	CFuncTrackTrain::Find	plats
 0x92620	541	CFuncTrackTrain::NearestPath	plats
@@ -1956,23 +2258,26 @@ rva	size	name	file
 0x92c40	230	CFuncTrainControls::Find	plats
 0x92d30	122	CFuncTrainControls::Spawn	plats
 0x92db0	117	func_trackchange	plats
+0x92e30	6	CFuncTrackChange::IsTogglePlat	plats
 0x92e40	48	CFuncTrackChange::Save	plats
 0x92e70	48	CFuncTrackChange::Restore	plats
 0x92ea0	225	CFuncTrackChange::Spawn	plats
 0x92f90	26	CFuncTrackChange::Precache	plats
+0x92fb0	3	CFuncTrackChange::Touch	plats
 0x92fc0	283	CFuncTrackChange::KeyValue	plats
 0x930e0	29	CFuncTrackChange::OverrideReset	plats
 0x93100	673	CFuncTrackChange::Find	plats
-0x933b0	183	FUN_100933b0	plats
-0x93470	542	FUN_10093470	plats
+0x933b0	183	CFuncTrackChange::EvaluateTrain	plats
+0x93470	542	CFuncTrackChange::UpdateTrain	plats
 0x93690	175	CFuncTrackChange::GoDown	plats
 0x93740	175	CFuncTrackChange::GoUp	plats
 0x937f0	101	CFuncTrackChange::UpdateAutoTargets	plats
-0x93860	185	FUN_10093860	plats
+0x93860	185	CFuncTrackChange::Use	plats
 0x93920	117	CFuncTrackChange::HitBottom	plats
 0x939a0	117	CFuncTrackChange::HitTop	plats
 0x93a20	117	func_trackautochange	plats
 0x93aa0	179	CFuncTrackAuto::UpdateAutoTargets	plats
+0x93b60	309	CFuncTrackAuto::Use	plats
 0x93ca0	105	func_guntarget	plats
 0x93d10	4	CGunTarget::BloodColor	plats
 0x93d20	6	CGunTarget::Classify	plats
@@ -1992,9 +2297,10 @@ rva	size	name	file
 0x94230	9	FUN_10094230	new: plats .. player
 0x94240	971	FUN_10094240	new: plats .. player
 0x94610	138	player	new: plats .. player
-0x946b0	329	VecVelocityForDamage	player
 0x94800	87	TrainSpeed	player
+0x94860	24	CBasePlayer::DeathSound	player
 0x94880	18	CBasePlayer::TakeHealth	player
+0x948a0	61	CBasePlayer::GetGunPosition	player
 0x948e0	170	CBasePlayer::TraceAttack	player
 0x949b0	2253	CBasePlayer::TakeDamage	player
 0x95280	565	FUN_10095280	player
@@ -2020,24 +2326,28 @@ rva	size	name	file
 0x95b80	1176	FUN_10095b80	player
 0x96020	1602	CBasePlayer::Killed	player
 0x96670	1318	FUN_10096670	player
-0x96bf0	197	FUN_10096bf0	player
+0x96bf0	197	CBasePlayer::TabulateAmmo	player
 0x96cc0	1415	FUN_10096cc0	player
 0x97270	18	CBasePlayer::IsOnLadder	player
 0x97290	1165	CBasePlayer::PlayerDeathThink	player
 0x97720	387	FUN_10097720	player
 0x978b0	220	FUN_100978b0	player
 0x97990	973	FUN_10097990	player
+0x97d60	286	CBasePlayer::Jump	player
 0x97e80	77	FixPlayerCrouchStuck	player
+0x97ed0	29	CBasePlayer::Duck	player
 0x97ef0	47	CBasePlayer::Classify	player
 0x97f20	224	CBasePlayer::AddPoints	player
 0x98000	124	CBasePlayer::AddPointsToTeam	player
 0x98080	1662	FUN_10098080	player
 0x98700	798	FUN_10098700	player
+0x98a20	3304	CBasePlayer::PreThink	player
 0x99710	366	FUN_10099710	player
-0x998a0	165	FUN_100998a0	player
-0x99950	307	FUN_10099950	player
+0x998a0	165	CBasePlayer::UpdateGeigerCounter	player
+0x99950	307	CBasePlayer::CheckSuitUpdate	player
 0x99a90	377	FUN_10099a90	player
 0x99c10	441	FUN_10099c10	player
+0x99dd0	1500	CBasePlayer::PostThink	player
 0x9a3b0	1	FUN_1009a3b0	player
 0x9a3c0	111	FUN_1009a3c0	player
 0x9a430	767	FUN_1009a430	player
@@ -2053,25 +2363,24 @@ rva	size	name	file
 0x9b2c0	1662	FUN_1009b2c0	player
 0x9b940	37	FUN_1009b940	player
 0x9b990	879	FUN_1009b990	player
+0x9bd00	14	FUN_1009bd00	player
 0x9bd10	266	CBasePlayer::Precache	player
 0x9be20	48	CBasePlayer::Save	player
 0x9be50	1	FUN_1009be50	player
 0x9be60	587	CBasePlayer::Restore	player
 0x9c0b0	206	FUN_1009c0b0	player
 0x9c180	322	FUN_1009c180	player
-0x9c2d0	110	FUN_1009c2d0	player
-0x9c340	31	FUN_1009c340	player
+0x9c2d0	110	CBasePlayer::SelectLastItem	player
+0x9c340	31	CBasePlayer::HasWeapons	player
 0x9c370	19	CBasePlayer::TeamID	player
-0x9c390	200	CSprayCan::Spawn	player
-0x9c460	332	CSprayCan::Think	player
-0x9c5b0	156	CBloodSplat::Spawn	player
-0x9c650	200	CBloodSplat::Spray	player
+0x9c390	200	FUN_1009c390	player
 0x9c720	147	CBasePlayer::GiveNamedItem	player
 0x9c7c0	307	FindEntityForward	player
 0x9c900	13	FUN_1009c900	player
-0x9c910	166	FUN_1009c910	player
+0x9c910	166	CBasePlayer::FlashlightTurnOn	player
 0x9c9c0	148	FUN_1009c9c0	player
 0x9ca60	51	FUN_1009ca60	player
+0x9caa0	763	CBasePlayer::ImpulseCommands	player
 0x9ce30	367	FUN_1009ce30	player
 0x9cfa0	285	FUN_1009cfa0	player
 0x9d0c0	140	FUN_1009d0c0	player
@@ -2079,23 +2388,26 @@ rva	size	name	file
 0x9d300	197	CBasePlayer::RemovePlayerItem	player
 0x9d3d0	238	FUN_1009d3d0	player
 0x9d4c0	297	CBasePlayer::GiveAmmo	player
-0x9d5f0	38	FUN_1009d5f0	player
+0x9d5f0	38	CBasePlayer::ItemPreFrame	player
 0x9d620	106	FUN_1009d620	player
-0x9d690	24	FUN_1009d690	player
+0x9d690	24	CBasePlayer::AmmoInventory	player
 0x9d6b0	66	CBasePlayer::GetAmmoIndex	player
 0x9d700	126	FUN_1009d700	player
 0x9d780	211	FUN_1009d780	player
+0x9d860	2071	CBasePlayer::UpdateClientData	player
+0x9e080	20	CBasePlayer::FBecomeProne	player
 0x9e0a0	38	CBasePlayer::BarnacleVictimBitten	player
 0x9e0d0	15	CBasePlayer::BarnacleVictimReleased	player
-0x9e0e0	44	FUN_1009e0e0	player
+0x9e0e0	44	CBasePlayer::Illumination	player
 0x9e110	41	CBasePlayer::EnableControl	player
-0x9e140	1001	FUN_1009e140	player
+0x9e140	1001	CBasePlayer::GetAutoaimVector	player
 0x9e530	33	FUN_1009e530	player
-0x9e560	136	FUN_1009e560	player
-0x9e5f0	35	FUN_1009e5f0	player
+0x9e560	136	CBasePlayer::ResetAutoaim	player
+0x9e5f0	35	CBasePlayer::SetCustomDecalFrames	player
 0x9e620	7	FUN_1009e620	player
 0x9e630	836	FUN_1009e630	player
-0x9e980	135	FUN_1009e980	player
+0x9e980	135	CBasePlayer::HasPlayerItem	player
+0x9ea10	162	CBasePlayer::HasNamedPlayerItem	player
 0x9eac0	112	FUN_1009eac0	player
 0x9eb30	114	CDeadHEV::KeyValue	player
 0x9ebb0	105	monster_hevsuit_dead	player
@@ -2125,7 +2437,7 @@ rva	size	name	file
 0x9fb00	222	_AngleMatrix	pm_shared_pm_math
 0x9fbe0	222	_AngleIMatrix	pm_shared_pm_math
 0x9fcc0	64	_NormalizeAngles	pm_shared_pm_math
-0x9fd00	121	FUN_1009fd00	pm_shared_pm_math
+0x9fd00	121	_InterpolateAngles	pm_shared_pm_math
 0x9fd80	129	_AngleBetweenVectors	pm_shared_pm_math
 0x9fe10	92	_VectorTransform	pm_shared_pm_math
 0x9fe70	45	_VectorCompare	pm_shared_pm_math
@@ -2143,10 +2455,10 @@ rva	size	name	file
 0xa00e0	159	_VectorMatrix	pm_shared_pm_math
 0xa0180	209	_VectorAngles	pm_shared_pm_math
 0xa0260	272	FUN_100a0260	new: pm_shared_pm_math .. pm_shared_pm_shared
-0xa0370	179	FUN_100a0370	new: pm_shared_pm_math .. pm_shared_pm_shared
+0xa0370	179	_PM_SwapTextures	pm_shared_pm_shared
 0xa0430	101	_PM_SortTextures	pm_shared_pm_shared
-0xa04a0	660	FUN_100a04a0	pm_shared_pm_shared
-0xa0740	94	FUN_100a0740	pm_shared_pm_shared
+0xa04a0	660	_PM_InitTextureTypes	pm_shared_pm_shared
+0xa0740	94	_PM_FindTextureType	pm_shared_pm_shared
 0xa07a0	1743	FUN_100a07a0	pm_shared_pm_shared
 0xa0f30	67	_PM_MapTextureTypeStepType	pm_shared_pm_shared
 0xa0fb0	196	FUN_100a0fb0	pm_shared_pm_shared
@@ -2154,7 +2466,7 @@ rva	size	name	file
 0xa1180	966	FUN_100a1180	pm_shared_pm_shared
 0xa1570	160	_PM_AddToTouched	pm_shared_pm_shared
 0xa1610	235	_PM_CheckVelocity	pm_shared_pm_shared
-0xa1700	159	_PM_ClipVelocity	pm_shared_pm_shared
+0xa1700	159	FUN_100a1700	pm_shared_pm_shared
 0xa17a0	130	FUN_100a17a0	pm_shared_pm_shared
 0xa1830	102	FUN_100a1830	pm_shared_pm_shared
 0xa18a0	18	FUN_100a18a0	pm_shared_pm_shared
@@ -2196,13 +2508,13 @@ rva	size	name	file
 0xa5d60	179	_PM_WaterJump	pm_shared_pm_shared
 0xa5e20	95	_PM_AddGravity	pm_shared_pm_shared
 0xa5e80	203	_PM_PushEntity	pm_shared_pm_shared
-0xa5f50	779	_PM_Physics_Toss	pm_shared_pm_shared
+0xa5f50	779	FUN_100a5f50	pm_shared_pm_shared
 0xa6260	174	_PM_NoClip	pm_shared_pm_shared
 0xa6310	97	_PM_PreventMegaBunnyJumping	pm_shared_pm_shared
 0xa6380	1048	FUN_100a6380	pm_shared_pm_shared
 0xa67b0	709	FUN_100a67b0	pm_shared_pm_shared
 0xa6a90	556	FUN_100a6a90	pm_shared_pm_shared
-0xa6cc0	610	FUN_100a6cc0	pm_shared_pm_shared
+0xa6cc0	610	_PM_CheckWaterJump	pm_shared_pm_shared
 0xa6f30	331	FUN_100a6f30	pm_shared_pm_shared
 0xa7080	1353	FUN_100a7080	pm_shared_pm_shared
 0xa75d0	222	_PM_PlayWaterSounds	pm_shared_pm_shared
@@ -2212,7 +2524,7 @@ rva	size	name	file
 0xa7a20	473	FUN_100a7a20	pm_shared_pm_shared
 0xa7c00	459	FUN_100a7c00	pm_shared_pm_shared
 0xa7dd0	3309	FUN_100a7dd0	pm_shared_pm_shared
-0xa8af0	539	_PM_CreateStuckTable	pm_shared_pm_shared
+0xa8af0	539	FUN_100a8af0	pm_shared_pm_shared
 0xa9120	46	_PM_GetVisEntInfo	pm_shared_pm_shared
 0xa9150	30	_PM_Init	pm_shared_pm_shared
 0xa9170	1398	FUN_100a9170	new: pm_shared_pm_shared .. python
@@ -2221,6 +2533,7 @@ rva	size	name	file
 0xa98b0	64	FUN_100a98b0	new: pm_shared_pm_shared .. python
 0xa98f0	78	FUN_100a98f0	new: pm_shared_pm_shared .. python
 0xa9940	608	FUN_100a9940	new: pm_shared_pm_shared .. python
+0xa9ba0	3107	CBaseEntity::RC2V60	new: pm_shared_pm_shared .. python
 0xaa7d0	167	FUN_100aa7d0	new: pm_shared_pm_shared .. python
 0xaa880	54	FUN_100aa880	new: pm_shared_pm_shared .. python
 0xaa8c0	64	FUN_100aa8c0	new: pm_shared_pm_shared .. python
@@ -2233,6 +2546,8 @@ rva	size	name	file
 0xaabb0	110	FUN_100aabb0	new: pm_shared_pm_shared .. python
 0xaac20	239	FUN_100aac20	new: pm_shared_pm_shared .. python
 0xaad10	102	ball_lightning	new: pm_shared_pm_shared .. python
+0xaad80	8	FUN_100aad80	new: pm_shared_pm_shared .. python
+0xaad90	307	FUN_100aad90	new: pm_shared_pm_shared .. python
 0xaaed0	102	FUN_100aaed0	new: pm_shared_pm_shared .. python
 0xaaf40	1004	FUN_100aaf40	new: pm_shared_pm_shared .. python
 0xab330	627	CBallLighting::ImpactTouch	new: pm_shared_pm_shared .. python
@@ -2242,25 +2557,40 @@ rva	size	name	file
 0xab850	218	CChainHurter::HurtEnt	new: pm_shared_pm_shared .. python
 0xab930	105	weapon_python	new: pm_shared_pm_shared .. python
 0xab9a0	105	weapon_357	new: pm_shared_pm_shared .. python
+0xaba10	111	CPython::GetItemInfo	python
+0xaba80	84	CPython::AddToPlayer	python
 0xabae0	90	CPython::Spawn	python
 0xabb40	222	CPython::Precache	python
-0xabc20	110	FUN_100abc20	new: python .. rat
-0xabc90	128	FUN_100abc90	new: python .. rat
+0xabc20	110	CPython::Deploy	python
+0xabc90	128	CPython::Holster	python
 0xabd10	256	FUN_100abd10	new: python .. rat
+0xabe10	1219	FUN_100abe10	new: python .. rat
 0xac2e0	15	FUN_100ac2e0	new: python .. rat
 0xac2f0	689	FUN_100ac2f0	new: python .. rat
+0xac5b0	676	FUN_100ac5b0	new: python .. rat
 0xac860	262	CPython::DelayedHurt	new: python .. rat
 0xac970	1315	FUN_100ac970	new: python .. rat
 0xacea0	1308	FUN_100acea0	new: python .. rat
 0xad3c0	743	FUN_100ad3c0	new: python .. rat
 0xad6b0	121	FUN_100ad6b0	new: python .. rat
+0xad730	332	FUN_100ad730	new: python .. rat
+0xad880	250	FUN_100ad880	new: python .. rat
 0xad980	102	ammo_357	new: python .. rat
 0xad9f0	41	CPythonAmmo::Spawn	new: python .. rat
 0xada20	26	CPythonAmmo::Precache	new: python .. rat
+0xada40	94	CPythonAmmo::AddAmmo	new: python .. rat
+0xadaa0	6	CPython::iItemSlot	new: python .. rat
+0xadab0	6	FUN_100adab0	new: python .. rat
+0xadac0	11	FUN_100adac0	new: python .. rat
 0xadad0	102	race_controller	new: python .. rat
+0xadb40	3	FUN_100adb40	new: python .. rat
 0xadb50	48	FUN_100adb50	new: python .. rat
+0xadb80	13	FUN_100adb80	new: python .. rat
 0xadb90	582	CRaceController::InitPath	new: python .. rat
+0xadde0	1415	FUN_100adde0	new: python .. rat
+0xae370	196	FUN_100ae370	new: python .. rat
 0xae440	102	race_path	new: python .. rat
+0xae4b0	3	FUN_100ae4b0	new: python .. rat
 0xae4c0	116	FUN_100ae4c0	new: python .. rat
 0xae540	33	FUN_100ae540	new: python .. rat
 0xae570	235	FUN_100ae570	new: python .. rat
@@ -2308,34 +2638,61 @@ rva	size	name	file
 0xb2c50	48	CRoach::Precache	roach
 0xb2c80	216	CRoach::Killed	roach
 0xb2d60	708	CRoach::MonsterThink	roach
-0xb3030	450	FUN_100b3030	roach
+0xb3030	450	CRoach::PickNewDest	roach
 0xb3200	380	CRoach::Move	roach
+0xb3380	335	CRoach::Look	roach
 0xb34d0	118	scientist_mine	new: roach .. rpg
+0xb3550	8	FUN_100b3550	new: roach .. rpg
+0xb3560	6	FUN_100b3560	new: roach .. rpg
+0xb3570	6	FUN_100b3570	new: roach .. rpg
+0xb3580	37	FUN_100b3580	new: roach .. rpg
+0xb35b0	740	FUN_100b35b0	new: roach .. rpg
 0xb38a0	101	CScientistMine::SciMineActivate	new: roach .. rpg
 0xb3910	1206	CScientistMine::SciMineThink	new: roach .. rpg
 0xb3dd0	83	CScientistMine::PreExplodeThink	new: roach .. rpg
 0xb3e30	151	CScientistMine::ExplodeThink	new: roach .. rpg
+0xb3ed0	34	FUN_100b3ed0	new: roach .. rpg
 0xb3f00	112	FUN_100b3f00	new: roach .. rpg
 0xb3f70	1435	FUN_100b3f70	new: roach .. rpg
 0xb4510	1186	FUN_100b4510	new: roach .. rpg
 0xb49c0	145	suck_mine	new: roach .. rpg
+0xb4a60	8	FUN_100b4a60	new: roach .. rpg
+0xb4a70	6	FUN_100b4a70	new: roach .. rpg
+0xb4a80	7	FUN_100b4a80	new: roach .. rpg
+0xb4a90	6	FUN_100b4a90	new: roach .. rpg
+0xb4aa0	48	FUN_100b4aa0	new: roach .. rpg
+0xb4ad0	483	FUN_100b4ad0	new: roach .. rpg
 0xb4cc0	64	CSuckMine::FlyingThink	new: roach .. rpg
 0xb4d00	159	CSuckMine::ActivateTouch	new: roach .. rpg
 0xb4da0	3606	CSuckMine::ActiveThink	new: roach .. rpg
 0xb5bc0	321	CSuckMine::DieThink	new: roach .. rpg
 0xb5d10	373	FUN_100b5d10	new: roach .. rpg
+0xb5e90	202	FUN_100b5e90	new: roach .. rpg
 0xb5f60	261	FUN_100b5f60	new: roach .. rpg
 0xb6070	118	sphere_mine	new: roach .. rpg
+0xb60f0	8	FUN_100b60f0	new: roach .. rpg
+0xb6100	6	FUN_100b6100	new: roach .. rpg
+0xb6110	7	FUN_100b6110	new: roach .. rpg
+0xb6120	6	FUN_100b6120	new: roach .. rpg
+0xb6130	36	FUN_100b6130	new: roach .. rpg
+0xb6160	376	FUN_100b6160	new: roach .. rpg
 0xb62e0	485	CSphereMine::BounceTouch	new: roach .. rpg
 0xb64d0	886	CSphereMine::PreactThink	new: roach .. rpg
 0xb6850	3060	CSphereMine::ActiveThink	new: roach .. rpg
+0xb7450	118	FUN_100b7450	new: roach .. rpg
 0xb74d0	313	FUN_100b74d0	new: roach .. rpg
 0xb7610	102	sm_project	new: roach .. rpg
+0xb7680	8	FUN_100b7680	new: roach .. rpg
 0xb7690	58	FUN_100b7690	new: roach .. rpg
 0xb76d0	302	FUN_100b76d0	new: roach .. rpg
 0xb7800	1331	CSMProjectile::HomeThink	new: roach .. rpg
 0xb7d40	712	CSMProjectile::ExplodeTouch	new: roach .. rpg
 0xb8010	118	rocket_mine	new: roach .. rpg
+0xb8090	8	FUN_100b8090	new: roach .. rpg
+0xb80a0	6	FUN_100b80a0	new: roach .. rpg
+0xb80b0	7	FUN_100b80b0	new: roach .. rpg
+0xb80c0	36	FUN_100b80c0	new: roach .. rpg
+0xb80f0	325	FUN_100b80f0	new: roach .. rpg
 0xb8240	64	CRocketMine::FlyingThink	new: roach .. rpg
 0xb8280	95	CRocketMine::ActivateTouch	new: roach .. rpg
 0xb82e0	1338	CRocketMine::ActiveThink	new: roach .. rpg
@@ -2346,16 +2703,31 @@ rva	size	name	file
 0xb8ae0	2274	CRMRocket::HomeThink	new: roach .. rpg
 0xb93d0	67	CRMRocket::BoomTouch	new: roach .. rpg
 0xb9420	105	weapon_rpg	new: roach .. rpg
+0xb9490	6	CRpg::iItemSlot	new: roach .. rpg
+0xb94a0	6	FUN_100b94a0	new: roach .. rpg
+0xb94b0	6	FUN_100b94b0	new: roach .. rpg
+0xb94c0	108	FUN_100b94c0	new: roach .. rpg
 0xb9530	78	CRpg::Spawn	rpg
 0xb9580	144	CRpg::Precache	rpg
-0xb9730	56	FUN_100b9730	new: rpg .. satchel
+0xb9610	107	CRpg::GetItemInfo	rpg
+0xb9680	84	CRpg::AddToPlayer	rpg
+0xb96e0	55	CRpg::Deploy	rpg
+0xb9720	6	CRpg::CanHolster	rpg
+0xb9730	56	CRpg::Holster	rpg
 0xb9770	106	FUN_100b9770	new: rpg .. satchel
-0xbab40	326	FUN_100bab40	new: rpg .. satchel
-0xbac90	114	FUN_100bac90	new: rpg .. satchel
+0xb97e0	1220	FUN_100b97e0	new: rpg .. satchel
+0xb9cb0	1220	FUN_100b9cb0	new: rpg .. satchel
+0xba180	1259	FUN_100ba180	new: rpg .. satchel
+0xba670	1231	FUN_100ba670	new: rpg .. satchel
+0xbab40	326	CRpg::ShouldWeaponIdle	new: rpg .. satchel
+0xbac90	114	CRpg::UseDecrement	new: rpg .. satchel
+0xbad10	185	FUN_100bad10	new: rpg .. satchel
 0xbadd0	102	ammo_rpgclip	new: rpg .. satchel
 0xbae40	41	CRpgAmmo::Spawn	new: rpg .. satchel
 0xbae70	26	CRpgAmmo::Precache	new: rpg .. satchel
+0xbae90	94	CRpgAmmo::AddAmmo	new: rpg .. satchel
 0xbaef0	118	monster_satchel	new: rpg .. satchel
+0xbaf70	8	FUN_100baf70	new: rpg .. satchel
 0xbaf80	118	roach_charge	new: rpg .. satchel
 0xbb000	26	CSatchelCharge::Precache	satchel
 0xbb020	458	CSatchelCharge::Spawn	satchel
@@ -2364,40 +2736,53 @@ rva	size	name	file
 0xbb500	1870	CRoachCharge::RoachThink	satchel
 0xbbc50	139	CRoachCharge::RoachUse	satchel
 0xbbce0	159	conc_charge	satchel
+0xbbd80	8	FUN_100bbd80	satchel
 0xbbd90	116	FUN_100bbd90	satchel
+0xbbe10	426	FUN_100bbe10	satchel
 0xbbfc0	1807	CConcCharge::AttachTouch	satchel
 0xbc6d0	71	CConcCharge::FlyingThink	satchel
 0xbc720	1054	CConcCharge::ChargeThink	satchel
 0xbcb40	2242	CConcCharge::Detonate	satchel
 0xbd410	105	weapon_satchel	satchel
+0xbd480	77	CSatchel::AddToPlayer	satchel
 0xbd4d0	88	CSatchel::Spawn	satchel
 0xbd530	99	CSatchel::Precache	satchel
-0xbd610	81	FUN_100bd610	new: satchel .. schedule
-0xbd670	81	FUN_100bd670	new: satchel .. schedule
-0xbd790	194	FUN_100bd790	new: satchel .. schedule
-0xbdf50	830	FUN_100bdf50	new: satchel .. schedule
+0xbd5a0	109	CSatchel::GetItemInfo	satchel
+0xbd610	81	FUN_100bd610	satchel
+0xbd670	81	CSatchel::CanDeploy	satchel
+0xbd6d0	180	CSatchel::Deploy	satchel
+0xbd790	194	CSatchel::Holster	satchel
+0xbd860	303	FUN_100bd860	satchel
+0xbd990	12	CSatchel::IsUseable	satchel
+0xbd9a0	723	CSatchel::PrimaryAttack	satchel
+0xbdc80	705	CSatchel::SecondaryAttack	satchel
+0xbdf50	830	FUN_100bdf50	satchel
+0xbe290	418	CSatchel::WeaponIdle	satchel
 0xbe440	228	FUN_100be440	new: satchel .. schedule
-0xbe530	36	FUN_100be530	new: satchel .. schedule
-0xbe590	21	FUN_100be590	new: satchel .. schedule
-0xbe5b0	27	FUN_100be5b0	new: satchel .. schedule
-0xbe5d0	103	FUN_100be5d0	new: satchel .. schedule
-0xbe640	47	FUN_100be640	new: satchel .. schedule
-0xbe670	23	FUN_100be670	new: satchel .. schedule
-0xbe690	33	FUN_100be690	new: satchel .. schedule
-0xbe6c0	467	FUN_100be6c0	new: satchel .. schedule
+0xbe530	36	CSatchel::UseDecrement	new: satchel .. schedule
+0xbe560	6	CSatchel::iItemSlot	new: satchel .. schedule
+0xbe570	6	FUN_100be570	new: satchel .. schedule
+0xbe590	21	CBaseMonster::ClearSchedule	schedule
+0xbe5b0	27	CBaseMonster::FScheduleDone	schedule
+0xbe5d0	103	CBaseMonster::ChangeSchedule	schedule
+0xbe640	47	CBaseMonster::NextScheduledTask	schedule
+0xbe670	23	CBaseMonster::IScheduleFlags	schedule
+0xbe690	33	CBaseMonster::FScheduleValid	schedule
+0xbe6c0	467	CBaseMonster::MaintainSchedule	schedule
 0xbe8a0	1495	CBaseMonster::RunTask	schedule
-0xbef20	97	FUN_100bef20	schedule
+0xbef20	97	CBaseMonster::SetTurnActivity	schedule
 0xbef90	4344	CBaseMonster::StartTask	schedule
-0xc01f0	30	FUN_100c01f0	schedule
+0xc01f0	30	CBaseMonster::GetTask	schedule
 0xc0210	710	CBaseMonster::GetSchedule	schedule
 0xc0500	118	monster_scientist	new: schedule .. scientist
+0xc0580	8	FUN_100c0580	new: schedule .. scientist
 0xc0590	6	CScientist::ObjectCaps	new: schedule .. scientist
 0xc05a0	7	CScientist::CoverRadius	new: schedule .. scientist
 0xc05b0	48	CScientist::Save	scientist
 0xc05e0	48	CScientist::Restore	scientist
 0xc0610	38	CScientist::ScheduleFromName	scientist
-0xc0640	69	FUN_100c0640	scientist
-0xc0690	100	FUN_100c0690	scientist
+0xc0640	69	CScientist::DeclineFollowing	scientist
+0xc0690	100	CScientist::Scream	scientist
 0xc0700	20	CScientist::GetStoppedActivity	scientist
 0xc0720	527	CScientist::StartTask	scientist
 0xc0950	830	CScientist::RunTask	scientist
@@ -2409,24 +2794,30 @@ rva	size	name	file
 0xc0f50	280	FUN_100c0f50	scientist
 0xc1070	74	CScientist::TakeDamage	scientist
 0xc10c0	6	CScientist::ISoundMask	scientist
+0xc10d0	327	CScientist::PainSound	scientist
+0xc1230	8	CScientist::DeathSound	scientist
 0xc1240	25	CScientist::Killed	scientist
 0xc1260	37	CScientist::SetActivity	scientist
 0xc1290	158	CScientist::GetScheduleOfType	scientist
 0xc13a0	619	CScientist::GetSchedule	scientist
 0xc1610	366	CScientist::GetIdealState	scientist
-0xc1780	111	FUN_100c1780	scientist
-0xc17f0	139	FUN_100c17f0	scientist
+0xc1780	111	CScientist::CanHeal	scientist
+0xc17f0	139	CScientist::Heal	scientist
+0xc1880	19	CScientist::FriendNumber	scientist
 0xc18a0	114	CDeadScientist::KeyValue	scientist
 0xc1920	105	monster_scientist_dead	scientist
 0xc1990	6	CDeadScientist::Classify	scientist
 0xc19a0	225	CDeadScientist::Spawn	scientist
 0xc1a90	117	monster_sitting_scientist	scientist
+0xc1b10	8	FUN_100c1b10	scientist
 0xc1b20	48	CSittingScientist::Save	scientist
 0xc1b50	48	CSittingScientist::Restore	scientist
 0xc1b80	397	CSittingScientist::Spawn	scientist
 0xc1d10	28	CSittingScientist::Precache	scientist
 0xc1d30	6	CSittingScientist::Classify	scientist
-0xc1d60	757	CSittingScientist::SittingThink	new: scientist .. scripted
+0xc1d40	19	CSittingScientist::FriendNumber	scientist
+0xc1d60	757	CSittingScientist::SittingThink	scientist
+0xc2060	55	CSittingScientist::SetAnswerQuestion	scientist
 0xc20a0	430	FUN_100c20a0	new: scientist .. scripted
 0xc2260	619	CCineMonster::KeyValue	scripted
 0xc24d0	48	CCineMonster::Save	scripted
@@ -2436,23 +2827,27 @@ rva	size	name	file
 0xc2620	121	CCineMonster::Spawn	scripted
 0xc26a0	17	CCineMonster::FCanOverrideState	scripted
 0xc26c0	6	CCineAI::FCanOverrideState	scripted
-0xc26d0	90	FUN_100c26d0	scripted
+0xc26d0	90	CCineMonster::Use	scripted
+0xc2730	3	CCineMonster::Blocked	scripted
+0xc2740	3	CCineMonster::Touch	scripted
 0xc2770	473	FUN_100c2770	scripted
+0xc2950	544	CCineMonster::PossessEntity	scripted
+0xc2b90	588	CCineAI::PossessEntity	scripted
 0xc2e00	153	CCineMonster::CineThink	scripted
 0xc2ea0	165	CCineMonster::StartSequence	scripted
 0xc2f50	168	CCineAI::StartSequence	scripted
 0xc3000	83	FUN_100c3000	scripted
 0xc3060	31	CCineMonster::FixScriptMonsterSchedule	scripted
 0xc3080	71	CCineAI::FixScriptMonsterSchedule	scripted
-0xc30d0	46	FUN_100c30d0	scripted
-0xc3100	25	FUN_100c3100	scripted
-0xc3120	47	FUN_100c3120	scripted
+0xc30d0	46	CBaseMonster::ExitScriptedSequence	scripted
+0xc3100	25	CCineMonster::AllowInterrupt	scripted
+0xc3120	47	CCineMonster::CanInterrupt	scripted
 0xc3150	20	CCineMonster::IgnoreConditions	scripted
-0xc3170	231	FUN_100c3170	scripted
+0xc3170	231	ScriptEntityCancel	scripted
 0xc3260	166	FUN_100c3260	scripted
 0xc3310	314	FUN_100c3310	scripted
 0xc3450	336	CCineMonster::Activate	scripted
-0xc35a0	768	FUN_100c35a0	scripted
+0xc35a0	768	CBaseMonster::CineCleanup	scripted
 0xc38a0	48	CScriptedSentence::Save	scripted
 0xc38d0	48	CScriptedSentence::Restore	scripted
 0xc3900	105	scripted_sentence	scripted
@@ -2462,9 +2857,9 @@ rva	size	name	file
 0xc3c80	167	CScriptedSentence::Spawn	scripted
 0xc3d30	119	CScriptedSentence::FindThink	scripted
 0xc3db0	51	CScriptedSentence::DelayThink	scripted
-0xc3df0	178	FUN_100c3df0	scripted
+0xc3df0	178	CScriptedSentence::AcceptableSpeaker	scripted
 0xc3eb0	309	FUN_100c3eb0	scripted
-0xc3ff0	334	FUN_100c3ff0	scripted
+0xc3ff0	334	CScriptedSentence::StartSentence	scripted
 0xc4140	105	monster_furniture	scripted
 0xc41b0	3	CFurniture::ObjectCaps	scripted
 0xc41e0	187	CFurniture::Spawn	scripted
@@ -2474,15 +2869,24 @@ rva	size	name	file
 0xc4530	119	FUN_100c4530	new: scripted .. shotgun
 0xc45b0	1832	FUN_100c45b0	new: scripted .. shotgun
 0xc4ce0	118	shotgun_forklift	new: scripted .. shotgun
+0xc4d60	8	FUN_100c4d60	new: scripted .. shotgun
+0xc4d70	26	FUN_100c4d70	new: scripted .. shotgun
+0xc4d90	399	FUN_100c4d90	new: scripted .. shotgun
 0xc4f20	446	CShotgunForklift::GenericThink	new: scripted .. shotgun
 0xc50e0	446	CShotgunForklift::OnGroundThink	new: scripted .. shotgun
 0xc52a0	1367	CShotgunForklift::DoTouch	new: scripted .. shotgun
+0xc5800	8	FUN_100c5800	new: scripted .. shotgun
 0xc5810	1594	CShotgunForklift::GoBoom	new: scripted .. shotgun
 0xc5e50	118	shotgun_hev	new: scripted .. shotgun
+0xc5ed0	37	FUN_100c5ed0	new: scripted .. shotgun
+0xc5f00	438	FUN_100c5f00	new: scripted .. shotgun
 0xc60c0	993	CShotgunHEV::AccelThink	new: scripted .. shotgun
 0xc64b0	292	CShotgunHEV::AimThink	new: scripted .. shotgun
 0xc65e0	69	CShotgunHEV::BoomTouch	new: scripted .. shotgun
 0xc6630	118	shotgun_sci	new: scripted .. shotgun
+0xc66b0	8	FUN_100c66b0	new: scripted .. shotgun
+0xc66c0	114	FUN_100c66c0	new: scripted .. shotgun
+0xc6740	421	FUN_100c6740	new: scripted .. shotgun
 0xc68f0	518	CShotgunSci::AimThink	new: scripted .. shotgun
 0xc6b00	142	CShotgunSci::BoomTouch	new: scripted .. shotgun
 0xc6b90	118	shotgun_crate	new: scripted .. shotgun
@@ -2494,14 +2898,27 @@ rva	size	name	file
 0xc7300	105	weapon_shotgun	new: scripted .. shotgun
 0xc7370	64	CShotgun::Spawn	shotgun
 0xc73b0	333	CShotgun::Precache	shotgun
+0xc7500	84	CShotgun::AddToPlayer	shotgun
+0xc7560	108	CShotgun::GetItemInfo	shotgun
+0xc75d0	36	CShotgun::Deploy	shotgun
+0xc7600	11	FUN_100c7600	new: shotgun .. singleplay_gamerules
+0xc7610	24	FUN_100c7610	new: shotgun .. singleplay_gamerules
+0xc7630	1098	FUN_100c7630	new: shotgun .. singleplay_gamerules
+0xc7a80	1177	FUN_100c7a80	new: shotgun .. singleplay_gamerules
+0xc7f20	1051	FUN_100c7f20	new: shotgun .. singleplay_gamerules
 0xc8340	432	FUN_100c8340	new: shotgun .. singleplay_gamerules
 0xc84f0	1148	FUN_100c84f0	new: shotgun .. singleplay_gamerules
+0xc8970	6	CShotgun::iItemSlot	new: shotgun .. singleplay_gamerules
+0xc8980	6	FUN_100c8980	new: shotgun .. singleplay_gamerules
 0xc8990	556	FUN_100c8990	new: shotgun .. singleplay_gamerules
 0xc8bc0	490	FUN_100c8bc0	new: shotgun .. singleplay_gamerules
+0xc8db0	224	FUN_100c8db0	new: shotgun .. singleplay_gamerules
 0xc8e90	102	ammo_buckshot	new: shotgun .. singleplay_gamerules
 0xc8f00	41	CShotgunAmmo::Spawn	new: shotgun .. singleplay_gamerules
 0xc8f30	26	CShotgunAmmo::Precache	new: shotgun .. singleplay_gamerules
+0xc8f50	94	CShotgunAmmo::AddAmmo	new: shotgun .. singleplay_gamerules
 0xc8fb0	105	shrink_timer	new: shotgun .. singleplay_gamerules
+0xc9020	94	FUN_100c9020	new: shotgun .. singleplay_gamerules
 0xc9080	103	FUN_100c9080	new: shotgun .. singleplay_gamerules
 0xc90f0	955	CShrinkTimer::ShrinkInit	new: shotgun .. singleplay_gamerules
 0xc94b0	1105	CShrinkTimer::ShrinkEnt	new: shotgun .. singleplay_gamerules
@@ -2510,13 +2927,19 @@ rva	size	name	file
 0xc9b70	634	CShrinkTimer::ShrunkThink	new: shotgun .. singleplay_gamerules
 0xc9df0	1699	CShrinkTimer::UnShrinkEnt	new: shotgun .. singleplay_gamerules
 0xca4a0	18	CHalfLifeRules::CHalfLifeRules	singleplay_gamerules
+0xca500	39	CHalfLifeRules::FShouldSwitchWeapon	singleplay_gamerules
+0xca570	31	CHalfLifeRules::FlPlayerFallDamage	singleplay_gamerules
 0xca850	89	GetSkillCvar	skill
 0xca8b0	102	snark_project	new: skill .. sound
+0xca920	8	FUN_100ca920	new: skill .. sound
 0xca930	69	FUN_100ca930	new: skill .. sound
 0xca980	314	FUN_100ca980	new: skill .. sound
 0xcaac0	755	CSnarkProjectile::HomeThink	new: skill .. sound
 0xcadc0	806	CSnarkProjectile::ExplodeTouch	new: skill .. sound
 0xcb0f0	105	snark_cam	new: skill .. sound
+0xcb160	77	FUN_100cb160	new: skill .. sound
+0xcb1b0	47	FUN_100cb1b0	new: skill .. sound
+0xcb1e0	1518	FUN_100cb1e0	new: skill .. sound
 0xcb7d0	1491	CSnarkCam::ControlThink	new: skill .. sound
 0xcbdb0	560	FUN_100cbdb0	new: skill .. sound
 0xcbfe0	338	FUN_100cbfe0	new: skill .. sound
@@ -2524,6 +2947,9 @@ rva	size	name	file
 0xcc260	42	FUN_100cc260	new: skill .. sound
 0xcc290	277	FUN_100cc290	new: skill .. sound
 0xcc3b0	226	FUN_100cc3b0	new: skill .. sound
+0xcc4a0	118	FUN_100cc4a0	new: skill .. sound
+0xcc520	8	FUN_100cc520	new: skill .. sound
+0xcc530	6	FUN_100cc530	new: skill .. sound
 0xcc540	105	ambient_generic	new: skill .. sound
 0xcc5b0	3	CAmbientGeneric::ObjectCaps	new: skill .. sound
 0xcc5c0	48	CAmbientGeneric::Save	sound
@@ -2531,14 +2957,14 @@ rva	size	name	file
 0xcc620	269	CAmbientGeneric::Spawn	sound
 0xcc730	192	CAmbientGeneric::Precache	sound
 0xcc7f0	972	CAmbientGeneric::RampThink	sound
-0xccbc0	578	FUN_100ccbc0	sound
+0xccbc0	578	CAmbientGeneric::InitModulationParms	sound
 0xcce10	583	CAmbientGeneric::ToggleUse	sound
 0xcd060	1680	CAmbientGeneric::KeyValue	sound
 0xcd6f0	102	env_sound	sound
 0xcd760	48	CEnvSound::Save	sound
 0xcd790	48	CEnvSound::Restore	sound
 0xcd7c0	165	CEnvSound::KeyValue	sound
-0xcd870	420	FUN_100cd870	sound
+0xcd870	420	FEnvSoundInRange	sound
 0xcda20	543	CEnvSound::Think	sound
 0xcdc40	37	CEnvSound::Spawn	sound
 0xcdc70	102	USENTENCEG_InitLRU	sound
@@ -2576,13 +3002,14 @@ rva	size	name	file
 0xcf650	46	CSoundEnt::Spawn	soundent
 0xcf680	184	CSoundEnt::Think	soundent
 0xcf740	1	CSoundEnt::Precache	soundent
-0xcf750	95	FUN_100cf750	soundent
-0xcf7b0	61	FUN_100cf7b0	soundent
-0xcf7f0	136	FUN_100cf7f0	soundent
-0xcf880	191	FUN_100cf880	soundent
-0xcf940	80	FUN_100cf940	soundent
-0xcf990	17	FUN_100cf990	soundent
-0xcf9d0	73	FUN_100cf9d0	soundent
+0xcf750	95	CSoundEnt::FreeSound	soundent
+0xcf7b0	61	CSoundEnt::IAllocSound	soundent
+0xcf7f0	136	CSoundEnt::InsertSound	soundent
+0xcf880	191	CSoundEnt::Initialize	soundent
+0xcf940	80	CSoundEnt::ISoundsInList	soundent
+0xcf990	17	CSoundEnt::ActiveList	soundent
+0xcf9b0	17	CSoundEnt::FreeList	soundent
+0xcf9d0	73	CSoundEnt::SoundPointerForIndex	soundent
 0xcfa20	16	CSoundEnt::ClientSoundIndex	soundent
 0xcfa30	6	CSoundEnt::ObjectCaps	new: soundent .. spectator
 0xcfa40	41	FUN_100cfa40	new: soundent .. spectator
@@ -2590,26 +3017,27 @@ rva	size	name	file
 0xcfb70	67	CBaseSpectator::SpectatorThink	spectator
 0xcfbf0	48	FUN_100cfbf0	new: spectator .. squadmonster
 0xcfc20	48	FUN_100cfc20	new: spectator .. squadmonster
-0xcfc50	152	FUN_100cfc50	new: spectator .. squadmonster
-0xcfcf0	79	FUN_100cfcf0	new: spectator .. squadmonster
+0xcfc50	152	CSquadMonster::OccupySlot	squadmonster
+0xcfcf0	79	CSquadMonster::VacateSlot	squadmonster
 0xcfd40	5	CSquadMonster::ScheduleChange	squadmonster
 0xcfd50	69	CSquadMonster::Killed	squadmonster
-0xcfda0	179	FUN_100cfda0	squadmonster
-0xcfe60	81	FUN_100cfe60	squadmonster
-0xcfec0	53	FUN_100cfec0	squadmonster
-0xcff00	53	FUN_100cff00	squadmonster
-0xcff40	257	FUN_100cff40	squadmonster
-0xd0050	88	FUN_100d0050	squadmonster
-0xd00b0	731	FUN_100d00b0	squadmonster
+0xcfda0	179	CSquadMonster::SquadRemove	squadmonster
+0xcfe60	81	CSquadMonster::SquadAdd	squadmonster
+0xcfec0	53	CSquadMonster::SquadPasteEnemyInfo	squadmonster
+0xcff00	53	CSquadMonster::SquadCopyEnemyInfo	squadmonster
+0xcff40	257	CSquadMonster::SquadMakeEnemy	squadmonster
+0xd0050	88	CSquadMonster::SquadCount	squadmonster
+0xd00b0	731	CSquadMonster::SquadRecruit	squadmonster
 0xd0390	117	CSquadMonster::CheckEnemy	squadmonster
 0xd0410	237	CSquadMonster::StartMonster	squadmonster
-0xd0500	760	FUN_100d0500	squadmonster
+0xd0500	760	CSquadMonster::NoFriendlyFire	squadmonster
 0xd0800	77	CSquadMonster::GetIdealState	squadmonster
 0xd0850	53	CSquadMonster::FValidateCover	squadmonster
-0xd0890	140	FUN_100d0890	squadmonster
-0xd0920	143	FUN_100d0920	squadmonster
+0xd0890	140	CSquadMonster::SquadEnemySplit	squadmonster
+0xd0920	143	CSquadMonster::SquadMemberInRange	squadmonster
 0xd09b0	26	CSquadMonster::GetScheduleOfType	squadmonster
 0xd09d0	145	monster_snark	new: squadmonster .. squeakgrenade
+0xd0a70	8	FUN_100d0a70	new: squadmonster .. squeakgrenade
 0xd0a80	6	CSqueakGrenade::BloodColor	new: squadmonster .. squeakgrenade
 0xd0a90	48	CSqueakGrenade::Save	squeakgrenade
 0xd0ac0	48	CSqueakGrenade::Restore	squeakgrenade
@@ -2620,17 +3048,30 @@ rva	size	name	file
 0xd0ed0	43	CSqueakGrenade::GibMonster	squeakgrenade
 0xd0f00	2039	CSqueakGrenade::HuntThink	squeakgrenade
 0xd1700	885	CSqueakGrenade::SuperBounceTouch	squeakgrenade
+0xd1a80	118	FUN_100d1a80	squeakgrenade
 0xd1b00	145	mini_grunt	squeakgrenade
+0xd1ba0	8	FUN_100d1ba0	squeakgrenade
 0xd1bb0	116	FUN_100d1bb0	squeakgrenade
+0xd1c30	418	FUN_100d1c30	squeakgrenade
 0xd1de0	2455	CMiniGrunt::AimThink	squeakgrenade
 0xd2780	195	FUN_100d2780	squeakgrenade
 0xd2860	2146	CMiniGrunt::DoTouch	squeakgrenade
+0xd30d0	9	FUN_100d30d0	squeakgrenade
 0xd30e0	105	weapon_snark	squeakgrenade
+0xd3150	6	CSqueak::iItemSlot	squeakgrenade
+0xd3160	6	FUN_100d3160	squeakgrenade
 0xd3170	119	CSqueak::Spawn	squeakgrenade
 0xd31f0	133	CSqueak::Precache	squeakgrenade
-0xd3390	166	FUN_100d3390	new: squeakgrenade .. subs
+0xd3280	109	CSqueak::GetItemInfo	squeakgrenade
+0xd32f0	150	CSqueak::Deploy	squeakgrenade
+0xd3390	166	CSqueak::Holster	squeakgrenade
+0xd3440	1131	FUN_100d3440	new: squeakgrenade .. subs
+0xd38b0	1010	FUN_100d38b0	new: squeakgrenade .. subs
+0xd3cb0	1212	FUN_100d3cb0	new: squeakgrenade .. subs
+0xd4170	209	FUN_100d4170	new: squeakgrenade .. subs
+0xd4250	286	FUN_100d4250	new: squeakgrenade .. subs
 0xd4370	310	FUN_100d4370	new: squeakgrenade .. subs
-0xd44b0	62	FUN_100d44b0	new: squeakgrenade .. subs
+0xd44b0	62	CSqueak::UseDecrement	new: squeakgrenade .. subs
 0xd44f0	14	CPointEntity::Spawn	subs
 0xd4500	18	CNullEntity::Spawn	subs
 0xd4520	102	info_null	subs
@@ -2646,7 +3087,7 @@ rva	size	name	file
 0xd48e0	1	CBaseEntity::SUB_DoNothing	subs
 0xd48f0	48	CBaseDelay::Save	subs
 0xd4920	48	CBaseDelay::Restore	subs
-0xd4950	190	FUN_100d4950	subs
+0xd4950	190	CBaseDelay::KeyValue	subs
 0xd4a10	55	CBaseEntity::SUB_UseTargets	subs
 0xd4a50	164	FUN_100d4a50	subs
 0xd4b00	102	DelayedUse	subs
@@ -2656,10 +3097,10 @@ rva	size	name	file
 0xd4ee0	48	CBaseToggle::Save	subs
 0xd4f10	48	CBaseToggle::Restore	subs
 0xd4f40	365	FUN_100d4f40	subs
-0xd50b0	243	FUN_100d50b0	subs
+0xd50b0	243	CBaseToggle::LinearMove	subs
 0xd51b0	81	CBaseToggle::LinearMoveDone	subs
-0xd5210	55	FUN_100d5210	subs
-0xd5250	243	FUN_100d5250	subs
+0xd5210	55	CBaseToggle::IsLockedByMaster	subs
+0xd5250	243	CBaseToggle::AngularMove	subs
 0xd5350	85	CBaseToggle::AngularMoveDone	subs
 0xd53b0	35	CBaseToggle::AxisValue	subs
 0xd53e0	174	CBaseToggle::AxisDir	subs
@@ -2669,42 +3110,42 @@ rva	size	name	file
 0xd55d0	48	FUN_100d55d0	new: subs .. talkmonster
 0xd5600	38	FUN_100d5600	new: subs .. talkmonster
 0xd5630	66	CTalkMonster::SetActivity	talkmonster
-0xd5680	823	FUN_100d5680	talkmonster
+0xd5680	823	CTalkMonster::StartTask	talkmonster
 0xd5a10	1032	FUN_100d5a10	talkmonster
-0xd5e40	120	FUN_100d5e40	talkmonster
-0xd5ec0	225	FUN_100d5ec0	talkmonster
-0xd5fb0	92	FUN_100d5fb0	talkmonster
-0xd6010	74	FUN_100d6010	talkmonster
-0xd6060	122	FUN_100d6060	talkmonster
-0xd60e0	113	FUN_100d60e0	talkmonster
-0xd6160	111	FUN_100d6160	talkmonster
-0xd61d0	21	FUN_100d61d0	talkmonster
+0xd5e40	120	CTalkMonster::Killed	talkmonster
+0xd5ec0	225	CTalkMonster::EnumFriends	talkmonster
+0xd5fb0	92	CTalkMonster::AlertFriends	talkmonster
+0xd6010	74	CTalkMonster::ShutUpFriends	talkmonster
+0xd6060	122	CTalkMonster::LimitFollowers	talkmonster
+0xd60e0	113	CTalkMonster::TargetDistance	talkmonster
+0xd6160	111	CTalkMonster::HandleAnimEvent	talkmonster
+0xd61d0	21	CTalkMonster::TalkInit	talkmonster
 0xd61f0	551	FUN_100d61f0	talkmonster
 0xd6420	40	FUN_100d6420	talkmonster
 0xd6450	138	CTalkMonster::Touch	talkmonster
-0xd64e0	61	FUN_100d64e0	talkmonster
+0xd64e0	61	CTalkMonster::IdleRespond	talkmonster
 0xd6520	197	FUN_100d6520	talkmonster
 0xd65f0	27	CTalkMonster::CanPlaySentence	talkmonster
-0xd6610	93	FUN_100d6610	talkmonster
+0xd6610	93	CTalkMonster::FIdleStare	talkmonster
 0xd6670	227	FUN_100d6670	talkmonster
-0xd6760	161	FUN_100d6760	talkmonster
+0xd6760	161	CTalkMonster::IdleHeadTurn	talkmonster
 0xd6810	795	FUN_100d6810	talkmonster
 0xd6b30	101	CTalkMonster::PlayScriptedSentence	talkmonster
 0xd6ba0	149	CTalkMonster::PlaySentence	talkmonster
-0xd6c40	60	FUN_100d6c40	talkmonster
-0xd6c80	43	FUN_100d6c80	talkmonster
-0xd6cb0	113	FUN_100d6cb0	talkmonster
+0xd6c40	60	CTalkMonster::Talk	talkmonster
+0xd6c80	43	CTalkMonster::SetAnswerQuestion	talkmonster
+0xd6cb0	113	CTalkMonster::TakeDamage	talkmonster
 0xd6d30	624	FUN_100d6d30	talkmonster
-0xd6ff0	29	FUN_100d6ff0	talkmonster
+0xd6ff0	29	CTalkMonster::IsTalking	talkmonster
 0xd7010	25	CTalkMonster::PrescheduleThink	talkmonster
-0xd7030	158	FUN_100d7030	talkmonster
+0xd7030	158	CTalkMonster::TrySmellTalk	talkmonster
 0xd70d0	144	CTalkMonster::IRelationship	talkmonster
-0xd7160	208	FUN_100d7160	talkmonster
+0xd7160	208	CTalkMonster::StopFollowing	talkmonster
 0xd7230	170	FUN_100d7230	talkmonster
 0xd72e0	123	FUN_100d72e0	talkmonster
 0xd7360	218	CTalkMonster::FollowerUse	talkmonster
 0xd7440	198	CTalkMonster::KeyValue	talkmonster
-0xd7510	61	FUN_100d7510	new: talkmonster .. teamplay_gamerules
+0xd7510	61	CTalkMonster::Precache	talkmonster
 0xd7550	820	FUN_100d7550	new: talkmonster .. teamplay_gamerules
 0xd7890	186	FUN_100d7890	new: talkmonster .. teamplay_gamerules
 0xd7950	1356	FUN_100d7950	new: talkmonster .. teamplay_gamerules
@@ -2730,9 +3171,13 @@ rva	size	name	file
 0xda890	226	FUN_100da890	new: talkmonster .. teamplay_gamerules
 0xda980	235	FUN_100da980	new: talkmonster .. teamplay_gamerules
 0xdaa70	102	tcontroller_tball	new: talkmonster .. teamplay_gamerules
+0xdaae0	8	FUN_100daae0	new: talkmonster .. teamplay_gamerules
+0xdaaf0	283	FUN_100daaf0	new: talkmonster .. teamplay_gamerules
 0xdac10	69	FUN_100dac10	new: talkmonster .. teamplay_gamerules
 0xdac60	1512	CTController_ThrowBall::ExplodeTouch	new: talkmonster .. teamplay_gamerules
 0xdb250	105	tcontroller_cball	new: talkmonster .. teamplay_gamerules
+0xdb2c0	8	FUN_100db2c0	new: talkmonster .. teamplay_gamerules
+0xdb2d0	360	FUN_100db2d0	new: talkmonster .. teamplay_gamerules
 0xdb440	72	FUN_100db440	new: talkmonster .. teamplay_gamerules
 0xdb490	1934	CTController_ChargeBall::LeechThink	new: talkmonster .. teamplay_gamerules
 0xdbc20	1523	CTController_ChargeBall::ExplodeTouch	new: talkmonster .. teamplay_gamerules
@@ -2755,9 +3200,15 @@ rva	size	name	file
 0xdd2e0	6	CTentacle::Classify	tentacle
 0xdd2f0	370	CTentacle::Spawn	tentacle
 0xdd470	302	CTentacle::Precache	tentacle
-0xdd5a0	29	FUN_100dd5a0	tentacle
+0xdd5a0	29	CTentacle::CTentacle	tentacle
 0xdd5c0	3	CTentacle::ObjectCaps	tentacle
 0xdd5d0	173	CTentacle::SetObjectCollisionBox	tentacle
+0xdd680	8	FUN_100dd680	tentacle
+0xdd690	8	FUN_100dd690	tentacle
+0xdd6a0	7	FUN_100dd6a0	tentacle
+0xdd6b0	7	FUN_100dd6b0	tentacle
+0xdd6c0	7	FUN_100dd6c0	tentacle
+0xdd6d0	7	FUN_100dd6d0	tentacle
 0xdd6e0	7	CTentacle::HearingSensitivity	tentacle
 0xdd6f0	6	CTentacle::GetIdealState	tentacle
 0xdd700	202	CTentacle::KeyValue	tentacle
@@ -2768,6 +3219,7 @@ rva	size	name	file
 0xdd920	2394	CTentacle::Cycle	tentacle
 0xde2d0	114	CTentacle::CommandUse	tentacle
 0xde350	363	CTentacle::DieThink	tentacle
+0xde500	1120	CTentacle::HandleAnimEvent	tentacle
 0xde990	153	CTentacle::Start	tentacle
 0xdea30	362	CTentacle::HitTouch	tentacle
 0xdeba0	62	CTentacle::TakeDamage	tentacle
@@ -2802,14 +3254,21 @@ rva	size	name	file
 0xe2070	1	FUN_100e2070	new: tentacle .. triggers
 0xe2080	52	FUN_100e2080	new: tentacle .. triggers
 0xe20c0	144	FUN_100e20c0	new: tentacle .. triggers
+0xe2150	70	FUN_100e2150	new: tentacle .. triggers
+0xe21a0	66	FUN_100e21a0	new: tentacle .. triggers
 0xe21f0	1567	FUN_100e21f0	new: tentacle .. triggers
 0xe2830	1141	FUN_100e2830	new: tentacle .. triggers
 0xe2cc0	711	FUN_100e2cc0	new: tentacle .. triggers
 0xe2f90	444	FUN_100e2f90	new: tentacle .. triggers
+0xe3150	86	FUN_100e3150	new: tentacle .. triggers
+0xe31b0	72	FUN_100e31b0	new: tentacle .. triggers
 0xe3200	509	FUN_100e3200	new: tentacle .. triggers
 0xe3400	68	FUN_100e3400	new: tentacle .. triggers
 0xe3450	763	FUN_100e3450	new: tentacle .. triggers
 0xe3750	41	FUN_100e3750	new: tentacle .. triggers
+0xe3790	23	FUN_100e3790	new: tentacle .. triggers
+0xe37b0	23	FUN_100e37b0	new: tentacle .. triggers
+0xe37d0	23	FUN_100e37d0	new: tentacle .. triggers
 0xe37f0	102	func_friction	new: tentacle .. triggers
 0xe3860	3	CFrictionModifier::ObjectCaps	new: tentacle .. triggers
 0xe3870	48	CFrictionModifier::Save	triggers
@@ -2840,7 +3299,7 @@ rva	size	name	file
 0xe3f90	112	CMultiManager::Spawn	triggers
 0xe4000	136	CMultiManager::HasTarget	triggers
 0xe4090	224	CMultiManager::ManagerThink	triggers
-0xe4170	177	FUN_100e4170	triggers
+0xe4170	177	CMultiManager::Clone	triggers
 0xe4230	109	CMultiManager::ManagerUse	triggers
 0xe42a0	102	env_render	triggers
 0xe4310	14	CRenderFxManager::Spawn	triggers
@@ -2938,10 +3397,13 @@ rva	size	name	file
 0xe7370	117	CTriggerCamera::Spawn	triggers
 0xe73f0	365	CTriggerCamera::KeyValue	triggers
 0xe7560	761	CTriggerCamera::Use	triggers
-0xe7860	727	CTriggerCamera::FollowTarget	new: triggers .. tripmine
-0xe7b40	791	FUN_100e7b40	new: triggers .. tripmine
+0xe7860	727	CTriggerCamera::FollowTarget	triggers
+0xe7b40	791	CTriggerCamera::Move	triggers
 0xe7e60	61	FUN_100e7e60	new: triggers .. tripmine
 0xe7ea0	159	monster_tripmine	new: triggers .. tripmine
+0xe7f40	8	FUN_100e7f40	new: triggers .. tripmine
+0xe7f50	7	FUN_100e7f50	new: triggers .. tripmine
+0xe7f60	91	FUN_100e7f60	new: triggers .. tripmine
 0xe7fc0	1151	CTripmineGrenade::Spawn	tripmine
 0xe8440	59	CTripmineGrenade::Precache	tripmine
 0xe8480	297	CTripmineGrenade::KillThink	tripmine
@@ -2949,24 +3411,44 @@ rva	size	name	file
 0xe8610	529	FUN_100e8610	tripmine
 0xe8830	824	CTripmineGrenade::PowerupThink	tripmine
 0xe8b70	227	CTripmineGrenade::TraceThink	tripmine
+0xe8c60	141	FUN_100e8c60	tripmine
+0xe8cf0	58	FUN_100e8cf0	tripmine
+0xe8d30	1688	FUN_100e8d30	tripmine
 0xe93d0	159	bouncy_tripmine	tripmine
+0xe9470	250	FUN_100e9470	tripmine
+0xe9570	13	FUN_100e9570	tripmine
 0xe9580	424	FUN_100e9580	tripmine
 0xe9730	241	FUN_100e9730	tripmine
+0xe9830	4137	FUN_100e9830	tripmine
 0xea860	159	punch_tripmine	tripmine
+0xea900	143	FUN_100ea900	tripmine
+0xea990	13	FUN_100ea990	tripmine
 0xea9a0	363	FUN_100ea9a0	tripmine
 0xeab10	150	FUN_100eab10	tripmine
+0xeabb0	3621	FUN_100eabb0	tripmine
 0xeb9e0	159	target_tripmine	tripmine
 0xeba80	56	FUN_100eba80	tripmine
+0xebac0	37	FUN_100ebac0	tripmine
+0xebaf0	262	FUN_100ebaf0	tripmine
 0xebc00	149	FUN_100ebc00	tripmine
+0xebca0	3526	FUN_100ebca0	tripmine
 0xeca70	105	weapon_tripmine	tripmine
+0xecae0	6	CTripmine::iItemSlot	tripmine
 0xecaf0	179	CTripmine::SetObjectCollisionBox	tripmine
+0xecbb0	6	FUN_100ecbb0	tripmine
 0xecbc0	234	CTripmine::Spawn	tripmine
 0xeccb0	90	CTripmine::Precache	tripmine
-0xecdb0	162	FUN_100ecdb0	new: tripmine .. turret
+0xecd10	109	CTripmine::GetItemInfo	tripmine
+0xecd80	40	CTripmine::Deploy	tripmine
+0xecdb0	162	CTripmine::Holster	tripmine
 0xece60	125	FUN_100ece60	new: tripmine .. turret
+0xecee0	1009	FUN_100ecee0	new: tripmine .. turret
+0xed2e0	1009	FUN_100ed2e0	new: tripmine .. turret
+0xed6e0	1009	FUN_100ed6e0	new: tripmine .. turret
+0xedae0	1009	FUN_100edae0	new: tripmine .. turret
 0xedee0	210	FUN_100edee0	new: tripmine .. turret
 0xedfc0	211	FUN_100edfc0	new: tripmine .. turret
-0xee0a0	114	FUN_100ee0a0	new: tripmine .. turret
+0xee0a0	114	CTripmine::UseDecrement	new: tripmine .. turret
 0xee120	11	CBaseTurret::SpinDownCall	new: tripmine .. turret
 0xee130	11	CBaseTurret::SpinUpCall	new: tripmine .. turret
 0xee140	48	CBaseTurret::Save	turret
@@ -2974,6 +3456,7 @@ rva	size	name	file
 0xee1a0	48	CTurret::Save	turret
 0xee1d0	48	CTurret::Restore	turret
 0xee200	145	monster_turret	turret
+0xee2a0	8	FUN_100ee2a0	turret
 0xee2b0	4	CBaseTurret::BloodColor	turret
 0xee2c0	1	CBaseTurret::GibMonster	turret
 0xee2d0	145	monster_miniturret	turret
@@ -2994,8 +3477,8 @@ rva	size	name	file
 0xef340	237	CMiniTurret::Shoot	turret
 0xef430	310	CBaseTurret::Deploy	turret
 0xef570	356	CBaseTurret::Retire	turret
-0xef6e0	304	FUN_100ef6e0	turret
-0xef810	177	FUN_100ef810	turret
+0xef6e0	304	CTurret::SpinUpCall	turret
+0xef810	177	CTurret::SpinDownCall	turret
 0xef8d0	121	CBaseTurret::SetTurretAnim	turret
 0xef950	395	CBaseTurret::SearchThink	turret
 0xefae0	185	CBaseTurret::AutoSearchThink	turret
@@ -3022,8 +3505,8 @@ rva	size	name	file
 0xf0d70	55	UTIL_GroupTrace::UTIL_GroupTrace	util
 0xf0db0	28	UTIL_GroupTrace::~UTIL_GroupTrace	util
 0xf0dd0	22	UTIL_GetNextBestWeapon	util
-0xf0df0	120	UTIL_AngleMod	util
-0xf0e70	63	FUN_100f0e70	util
+0xf0df0	120	FUN_100f0df0	util
+0xf0e70	63	UTIL_AngleDiff	util
 0xf0eb0	47	UTIL_VecToAngles	util
 0xf0ee0	57	UTIL_MoveToOrigin	util
 0xf0f20	257	UTIL_EntitiesInBox	util
@@ -3068,7 +3551,7 @@ rva	size	name	file
 0xf2210	65	UTIL_ParticleEffect	util
 0xf2260	61	UTIL_Approach	util
 0xf22a0	147	FUN_100f22a0	util
-0xf2340	48	FUN_100f2340	util
+0xf2340	48	UTIL_AngleDistance	util
 0xf2370	31	FUN_100f2370	util
 0xf2390	29	UTIL_VarArgs	util
 0xf23b0	52	UTIL_GetAimVector	util
@@ -3091,7 +3574,7 @@ rva	size	name	file
 0xf2ca0	190	UTIL_WaterLevel	util
 0xf2d60	275	UTIL_Bubbles	util
 0xf2e80	288	UTIL_BubbleTrail	util
-0xf2fa0	52	UTIL_Remove	util
+0xf2fa0	52	FUN_100f2fa0	util
 0xf2fe0	115	FUN_100f2fe0	util
 0xf3060	139	FUN_100f3060	util
 0xf30f0	174	FUN_100f30f0	util
@@ -3175,11 +3658,13 @@ rva	size	name	file
 0xf7150	168	FUN_100f7150	new: util .. game_shared_voice_gamemgr
 0xf7200	135	FUN_100f7200	new: util .. game_shared_voice_gamemgr
 0xf7290	102	virtual_hull	new: util .. game_shared_voice_gamemgr
+0xf7300	100	FUN_100f7300	new: util .. game_shared_voice_gamemgr
 0xf7370	88	FUN_100f7370	new: util .. game_shared_voice_gamemgr
 0xf73d0	26	FUN_100f73d0	new: util .. game_shared_voice_gamemgr
 0xf73f0	58	CVirtualHull::HullTouch	new: util .. game_shared_voice_gamemgr
 0xf7430	54	CVirtualHull::HullUse	new: util .. game_shared_voice_gamemgr
 0xf7470	58	CVirtualHull::HullBlocked	new: util .. game_shared_voice_gamemgr
+0xf74b0	160	FUN_100f74b0	new: util .. game_shared_voice_gamemgr
 0xf7550	161	FUN_100f7550	new: util .. game_shared_voice_gamemgr
 0xf7600	369	FUN_100f7600	new: util .. game_shared_voice_gamemgr
 0xf7780	62	FUN_100f7780	new: util .. game_shared_voice_gamemgr
@@ -3221,34 +3706,44 @@ rva	size	name	file
 0xf9f00	405	FUN_100f9f00	weapons
 0xfa100	245	FUN_100fa100	weapons
 0xfa200	173	CBasePlayerItem::SetObjectCollisionBox	weapons
-0xfa2b0	125	CBaseDelay::KeyValue	subs
-0xfa330	199	FUN_100fa330	new: subs .. weapons
+0xfa2b0	125	FUN_100fa2b0	weapons
+0xfa330	199	FUN_100fa330	weapons
 0xfa400	143	CBasePlayerItem::FallThink	weapons
 0xfa490	178	CBasePlayerItem::Materialize	weapons
 0xfa550	61	CBasePlayerItem::AttemptToMaterialize	weapons
 0xfa590	33	FUN_100fa590	weapons
+0xfa5c0	240	CBasePlayerItem::Respawn	weapons
 0xfa6b0	151	CBasePlayerItem::DefaultTouch	weapons
 0xfa750	55	CanAttack	weapons
 0xfa790	1132	CBasePlayerWeapon::ItemPostFrame	weapons
 0xfac00	31	CBasePlayerItem::DestroyItem	weapons
-0xfac20	18	FUN_100fac20	weapons
+0xfac20	18	CBasePlayerItem::AddToPlayer	weapons
 0xfac40	37	CBasePlayerItem::Drop	weapons
 0xfac70	37	CBasePlayerItem::Kill	weapons
+0xfaca0	35	CBasePlayerItem::Holster	weapons
 0xfacd0	127	CBasePlayerItem::AttachToPlayer	weapons
-0xfad90	150	FUN_100fad90	weapons
-0xfae30	248	FUN_100fae30	weapons
-0xfaf30	135	FUN_100faf30	weapons
+0xfad50	52	CBasePlayerWeapon::AddDuplicate	weapons
+0xfad90	150	CBasePlayerWeapon::AddToPlayer	weapons
+0xfae30	248	CBasePlayerWeapon::UpdateClientData	weapons
+0xfaf30	135	CBasePlayerWeapon::RC2VW2	weapons
 0xfafc0	191	FUN_100fafc0	weapons
 0xfb080	95	FUN_100fb080	weapons
-0xfb0e0	71	FUN_100fb0e0	weapons
+0xfb0e0	71	CBasePlayerWeapon::IsUseable	weapons
+0xfb130	118	CBasePlayerWeapon::CanDeploy	weapons
 0xfb1b0	219	FUN_100fb1b0	weapons
 0xfb290	151	FUN_100fb290	weapons
-0xfb330	72	FUN_100fb330	weapons
-0xfb3b0	41	FUN_100fb3b0	weapons
+0xfb330	72	CBasePlayerWeapon::PlayEmptySound	weapons
+0xfb380	11	CBasePlayerWeapon::RC2VW1	weapons
+0xfb390	7	CBasePlayerWeapon::PrimaryAmmoIndex	weapons
+0xfb3a0	4	CBasePlayerWeapon::SecondaryAmmoIndex	weapons
+0xfb3b0	41	CBasePlayerWeapon::Holster	weapons
 0xfb3e0	170	FUN_100fb3e0	weapons
+0xfb490	102	CBasePlayerAmmo::Respawn	weapons
 0xfb500	142	CBasePlayerAmmo::Materialize	weapons
 0xfb590	182	CBasePlayerAmmo::DefaultTouch	weapons
-0xfb650	152	FUN_100fb650	weapons
+0xfb650	152	CBasePlayerWeapon::ExtractAmmo	weapons
+0xfb6f0	69	CBasePlayerWeapon::ExtractClipAmmo	weapons
+0xfb740	54	CBasePlayerWeapon::RetireWeapon	weapons
 0xfb780	3	FUN_100fb780	weapons
 0xfb790	4	FUN_100fb790	weapons
 0xfb7b0	7	FUN_100fb7b0	weapons
@@ -3260,12 +3755,13 @@ rva	size	name	file
 0xfb910	79	CWeaponBox::Spawn	weapons
 0xfb960	77	CWeaponBox::Kill	weapons
 0xfb9b0	290	CWeaponBox::Touch	weapons
-0xfbae0	206	FUN_100fbae0	weapons
+0xfbae0	206	CWeaponBox::PackWeapon	weapons
 0xfbbb0	92	FUN_100fbbb0	weapons
-0xfbc10	217	FUN_100fbc10	weapons
-0xfbcf0	132	FUN_100fbcf0	weapons
+0xfbc10	217	CWeaponBox::GiveAmmo	weapons
+0xfbcf0	132	CWeaponBox::HasWeapon	weapons
+0xfbd80	50	CWeaponBox::IsEmpty	weapons
 0xfbdc0	173	CWeaponBox::SetObjectCollisionBox	weapons
-0xfbe70	98	FUN_100fbe70	weapons
+0xfbe70	98	CBasePlayerWeapon::PrintState	weapons
 0xfbee0	48	CShotgun::Save	weapons
 0xfbf10	48	CShotgun::Restore	weapons
 0xfbf40	48	CSatchel::Save	weapons
@@ -3300,7 +3796,7 @@ rva	size	name	file
 0xfcf50	967	CWorld::KeyValue	world
 0xfd320	48	CActAnimating::Save	xen
 0xfd350	48	CActAnimating::Restore	xen
-0xfd380	59	FUN_100fd380	xen
+0xfd380	59	CActAnimating::SetActivity	xen
 0xfd3c0	105	xen_plantlight	xen
 0xfd430	3	CActAnimating::ObjectCaps	xen
 0xfd440	48	CXenPLight::Save	xen
@@ -3309,14 +3805,14 @@ rva	size	name	file
 0xfd6a0	26	CXenPLight::Precache	xen
 0xfd6c0	141	CXenPLight::Think	xen
 0xfd750	71	CXenPLight::Touch	xen
-0xfd7a0	42	FUN_100fd7a0	xen
-0xfd7d0	42	FUN_100fd7d0	xen
+0xfd7a0	42	CXenPLight::LightOn	xen
+0xfd7d0	42	CXenPLight::LightOff	xen
 0xfd800	105	xen_hair	xen
 0xfd870	250	CXenHair::Spawn	xen
 0xfd970	36	CXenHair::Think	xen
 0xfd9a0	13	CXenHair::Precache	xen
 0xfd9b0	102	xen_ttrigger	xen
-0xfda20	158	FUN_100fda20	xen
+0xfda20	158	CXenTreeTrigger::TriggerCreate	xen
 0xfdac0	71	CXenTreeTrigger::Touch	xen
 0xfdb10	105	xen_tree	xen
 0xfdb80	10	CXenTree::TakeDamage	xen
@@ -3326,9 +3822,10 @@ rva	size	name	file
 0xfdc00	449	CXenTree::Spawn	xen
 0xfddd0	84	CXenTree::Precache	xen
 0xfde30	111	CXenTree::Touch	xen
-0xfdea0	113	FUN_100fdea0	xen
+0xfdea0	113	CXenTree::Attack	xen
+0xfdf20	376	CXenTree::HandleAnimEvent	xen
 0xfe0a0	108	CXenTree::Think	xen
-0xfe110	308	FUN_100fe110	xen
+0xfe110	308	CXenHull::CreateHull	xen
 0xfe250	6	CXenHull::Classify	xen
 0xfe260	105	xen_spore_small	xen
 0xfe2d0	5	CXenSpore::TakeDamage	xen
@@ -3343,6 +3840,7 @@ rva	size	name	file
 0xfe860	3	CXenSpore::Touch	xen
 0xfe870	36	CXenSpore::Think	xen
 0xfe8a0	105	monster_zombie	new: xen .. zombie
+0xfe910	8	FUN_100fe910	new: xen .. zombie
 0xfe920	5	CZombie::CheckRangeAttack1	new: xen .. zombie
 0xfe930	5	CZombie::CheckRangeAttack2	new: xen .. zombie
 0xfe940	6	CZombie::Classify	zombie
@@ -3574,7 +4072,7 @@ rva	size	name	file
 0x104d55	20	__check_overflow_exit	libcmt:common
 0x104d69	163	__check_range_exit	libcmt:common
 0x104e0c	304	__powhlp	libcmt:powhlp
-0x104f3c	101	__d_inttype	libcmt:powhlp
+0x104f3c	101	FUN_10104f3c	new: libcmt:powhlp .. libcmt:_open
 0x104fa1	368	__openfile	libcmt:_open
 0x105111	200	__getstream	libcmt:stream
 0x1051d9	141	__stbuf	libcmt:_sftbuf
@@ -3791,7 +4289,7 @@ rva	size	name	file
 0x10e0d5	293	__chsize_lk	libcmt:chsize
 0x10e1fa	46	___tzset	libcmt:tzset
 0x10e228	22	__tzset	libcmt:tzset
-0x10e23e	647	__tzset_lk	libcmt:tzset
+0x10e23e	647	FUN_1010e23e	libcmt:tzset
 0x10e4c5	33	__isindst	libcmt:tzset
 0x10e4e6	428	__isindst_lk	libcmt:tzset
 0x10e692	320	_cvtdate	libcmt:tzset

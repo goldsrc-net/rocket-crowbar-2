@@ -27,17 +27,42 @@ rva	size	name	demangled	ref_object
 0x4a20	0	?IsNetClient@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::IsNetClient(void)	vtable
 0x4a30	0	?TeamID@CBaseEntity@@UAEPBDXZ	public: virtual char const * __thiscall CBaseEntity::TeamID(void)	vtable
 0x4a40	0	?Think@CBaseEntity@@UAEXXZ	public: virtual void __thiscall CBaseEntity::Think(void)	vtable
+0x4ab0	0	?RC2V47@CBaseEntity@@UAEPAV1@XZ	public: virtual class CBaseEntity * __thiscall CBaseEntity::RC2V47(void)	vtable
+0x4ac0	0	?Respawn@CBaseEntity@@UAEPAV1@XZ	public: virtual class CBaseEntity * __thiscall CBaseEntity::Respawn(void)	vtable
+0x4ad0	0	?UpdateOwner@CBaseEntity@@UAEXXZ	public: virtual void __thiscall CBaseEntity::UpdateOwner(void)	vtable
+0x4ae0	0	?FBecomeProne@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::FBecomeProne(void)	vtable
 0x4b60	0	?EyePosition@CBaseEntity@@UAE?AVVector@@XZ	public: virtual class Vector __thiscall CBaseEntity::EyePosition(void)	vtable
 0x4ba0	0	?EarPosition@CBaseEntity@@UAE?AVVector@@XZ	public: virtual class Vector __thiscall CBaseEntity::EarPosition(void)	vtable
+0x4be0	0	?BodyTarget@CBaseEntity@@UAE?AVVector@@ABV2@@Z	public: virtual class Vector __thiscall CBaseEntity::BodyTarget(class Vector const &)	vtable
+0x4c10	0	?Illumination@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::Illumination(void)	vtable
+0x4c30	0	?RC2V58@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V58(void)	vtable
+0x4c40	0	?RC2V59@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V59(void)	vtable
+0x4c50	0	?RC2V61@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V61(void)	vtable
+0x4c60	0	?RC2V62@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V62(void)	vtable
+0x4c70	0	?RC2V63@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V63(void)	vtable
+0x4c80	0	?RC2V64@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V64(void)	vtable
+0x4c90	0	?RC2V65@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V65(void)	vtable
+0x4ca0	0	?RC2V66@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V66(void)	vtable
+0x4cb0	0	?RC2V67@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V67(void)	vtable
+0x4cc0	0	?RC2V68@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V68(void)	vtable
+0x4cd0	0	?RC2V69@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V69(void)	vtable
+0x4ce0	0	?RC2V70@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V70(void)	vtable
+0x4cf0	0	?RC2V71@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V71(void)	vtable
+0x4d00	0	?RC2V72@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V72(void)	vtable
+0x4d40	0	?RC2V73@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V73(void)	vtable
+0x4d60	0	?RC2V75@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V75(void)	vtable
+0x4d70	0	?RC2V76@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V76(void)	vtable
+0x4d80	0	?RC2V78@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V78(void)	vtable
 0x52e0	0	?Spawn@CBaseEntity@@UAEXXZ	public: virtual void __thiscall CBaseEntity::Spawn(void)	vtable
 0x5450	0	?Save@CFlockingFlyerFlock@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFlockingFlyerFlock::Save(class CSave &)	vtable
 0x5480	0	?Restore@CFlockingFlyerFlock@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFlockingFlyerFlock::Restore(class CRestore &)	vtable
 0x5590	0	?Save@CFlockingFlyer@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFlockingFlyer::Save(class CSave &)	vtable
 0x55c0	0	?Restore@CFlockingFlyer@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFlockingFlyer::Restore(class CRestore &)	vtable
-0x55f0	0	?KeyValue@CFlockingFlyerFlock@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFlockingFlyerFlock::KeyValue(struct KeyValueData_s *)	vtable
 0x56e0	0	?Precache@CFlockingFlyerFlock@@UAEXXZ	public: virtual void __thiscall CFlockingFlyerFlock::Precache(void)	vtable
+0x5940	0	?Spawn@CFlockingFlyer@@UAEXXZ	public: virtual void __thiscall CFlockingFlyer::Spawn(void)	vtable
 0x5980	0	?Precache@CFlockingFlyer@@UAEXXZ	public: virtual void __thiscall CFlockingFlyer::Precache(void)	vtable
 0x5a80	0	?Killed@CFlockingFlyer@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CFlockingFlyer::Killed(struct entvars_s *, int)	vtable
+0x72b0	0	?HandleAnimEvent@CBaseAnimating@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CBaseAnimating::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x72c0	0	?GetToggleState@CBaseToggle@@UAEHXZ	public: virtual int __thiscall CBaseToggle::GetToggleState(void)	vtable
 0x72d0	0	?GetDelay@CBaseToggle@@UAEMXZ	public: virtual float __thiscall CBaseToggle::GetDelay(void)	vtable
 0x72e0	0	?BloodColor@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::BloodColor(void)	vtable
@@ -54,25 +79,29 @@ rva	size	name	demangled	ref_object
 0x73c0	0	?PrescheduleThink@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::PrescheduleThink(void)	vtable
 0x7470	0	?IsMoving@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::IsMoving(void)	vtable
 0x7480	0	?DeathSound@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::DeathSound(void)	vtable
+0x7490	0	?AlertSound@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::AlertSound(void)	vtable
+0x74a0	0	?IdleSound@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::IdleSound(void)	vtable
+0x74b0	0	?PainSound@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::PainSound(void)	vtable
+0x74c0	0	?StopFollowing@CBaseMonster@@UAEXH@Z	public: virtual void __thiscall CBaseMonster::StopFollowing(int)	vtable
+0x74d0	0	?RC2V147@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::RC2V147(void)	vtable
+0x7550	0	?RC2V74@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V74(void)	vtable
 0x75e0	0	?MySquadMonsterPointer@CSquadMonster@@UAEPAV1@XZ	public: virtual class CSquadMonster * __thiscall CSquadMonster::MySquadMonsterPointer(void)	vtable
 0x7610	0	?SetObjectCollisionBox@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::SetObjectCollisionBox(void)	vtable
 0x76c0	0	?Save@CAGrunt@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CAGrunt::Save(class CSave &)	vtable
 0x76f0	0	?Restore@CAGrunt@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CAGrunt::Restore(class CRestore &)	vtable
+0x7720	0	?IRelationship@CAGrunt@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CAGrunt::IRelationship(class CBaseEntity *)	vtable
 0x77f0	0	?ISoundMask@CAGrunt@@UAEHXZ	public: virtual int __thiscall CAGrunt::ISoundMask(void)	vtable
 0x7aa0	0	?PrescheduleThink@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::PrescheduleThink(void)	vtable
+0x7b60	0	?DeathSound@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::DeathSound(void)	vtable
+0x7bb0	0	?AlertSound@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::AlertSound(void)	vtable
+0x7c50	0	?PainSound@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::PainSound(void)	vtable
 0x7cd0	0	?Classify@CAGrunt@@UAEHXZ	public: virtual int __thiscall CAGrunt::Classify(void)	vtable
-0x7ce0	0	?SetYawSpeed@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::SetYawSpeed(void)	vtable
-0x84a0	0	?Spawn@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::Spawn(void)	vtable
+0x7d10	0	?HandleAnimEvent@CAGrunt@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CAGrunt::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x8700	0	?FCanCheckAttacks@CAGrunt@@UAEHXZ	public: virtual int __thiscall CAGrunt::FCanCheckAttacks(void)	vtable
-0x8710	0	?CheckMeleeAttack1@CAGrunt@@UAEHMM@Z	public: virtual int __thiscall CAGrunt::CheckMeleeAttack1(float, float)	vtable
 0x8760	0	?CheckRangeAttack1@CAGrunt@@UAEHMM@Z	public: virtual int __thiscall CAGrunt::CheckRangeAttack1(float, float)	vtable
-0x88d0	0	?StartTask@CAGrunt@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CAGrunt::StartTask(struct Task_t *)	vtable
-0x8e20	0	?GetSchedule@CAGrunt@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CAGrunt::GetSchedule(void)	vtable
-0x8f10	0	?GetScheduleOfType@CAGrunt@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CAGrunt::GetScheduleOfType(int)	vtable
 0x9050	0	?BloodColor@CAirtank@@EAEHXZ	private: virtual int __thiscall CAirtank::BloodColor(void)	vtable
 0x9060	0	?Save@CAirtank@@EAEHAAVCSave@@@Z	private: virtual int __thiscall CAirtank::Save(class CSave &)	vtable
 0x9090	0	?Restore@CAirtank@@EAEHAAVCRestore@@@Z	private: virtual int __thiscall CAirtank::Restore(class CRestore &)	vtable
-0x90c0	0	?Spawn@CAirtank@@EAEXXZ	private: virtual void __thiscall CAirtank::Spawn(void)	vtable
 0x91b0	0	?Precache@CAirtank@@EAEXXZ	private: virtual void __thiscall CAirtank::Precache(void)	vtable
 0xab80	0	?Classify@CApache@@EAEHXZ	private: virtual int __thiscall CApache::Classify(void)	vtable
 0xab90	0	?BloodColor@CApache@@EAEHXZ	private: virtual int __thiscall CApache::BloodColor(void)	vtable
@@ -80,10 +109,8 @@ rva	size	name	demangled	ref_object
 0xac60	0	?Save@CApache@@EAEHAAVCSave@@@Z	private: virtual int __thiscall CApache::Save(class CSave &)	vtable
 0xac90	0	?Restore@CApache@@EAEHAAVCRestore@@@Z	private: virtual int __thiscall CApache::Restore(class CRestore &)	vtable
 0xacc0	0	?Spawn@CApache@@EAEXXZ	private: virtual void __thiscall CApache::Spawn(void)	vtable
-0xae20	0	?Precache@CApache@@EAEXXZ	private: virtual void __thiscall CApache::Precache(void)	vtable
 0xaf20	0	?Killed@CApache@@EAEXPAUentvars_s@@H@Z	private: virtual void __thiscall CApache::Killed(struct entvars_s *, int)	vtable
 0xb950	0	?GibMonster@CApache@@EAEXXZ	private: virtual void __thiscall CApache::GibMonster(void)	vtable
-0xd670	0	?TraceAttack@CApache@@EAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	private: virtual void __thiscall CApache::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0xd780	0	?Save@CApacheHVR@@EAEHAAVCSave@@@Z	private: virtual int __thiscall CApacheHVR::Save(class CSave &)	vtable
 0xd7b0	0	?Restore@CApacheHVR@@EAEHAAVCRestore@@@Z	private: virtual int __thiscall CApacheHVR::Restore(class CRestore &)	vtable
 0xd7e0	0	?Spawn@CApacheHVR@@EAEXXZ	private: virtual void __thiscall CApacheHVR::Spawn(void)	vtable
@@ -92,7 +119,6 @@ rva	size	name	demangled	ref_object
 0xdc00	0	?Save@CBarnacle@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBarnacle::Save(class CSave &)	vtable
 0xdc30	0	?Restore@CBarnacle@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBarnacle::Restore(class CRestore &)	vtable
 0xdc60	0	?Classify@CBarnacle@@UAEHXZ	public: virtual int __thiscall CBarnacle::Classify(void)	vtable
-0xdca0	0	?Spawn@CBarnacle@@UAEXXZ	public: virtual void __thiscall CBarnacle::Spawn(void)	vtable
 0xe410	0	?Killed@CBarnacle@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CBarnacle::Killed(struct entvars_s *, int)	vtable
 0xe5a0	0	?Precache@CBarnacle@@UAEXXZ	public: virtual void __thiscall CBarnacle::Precache(void)	vtable
 0xe800	0	?ObjectCaps@CBarney@@UAEHXZ	public: virtual int __thiscall CBarney::ObjectCaps(void)	vtable
@@ -103,20 +129,16 @@ rva	size	name	demangled	ref_object
 0xe8b0	0	?RunTask@CBarney@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CBarney::RunTask(struct Task_t *)	vtable
 0xe910	0	?ISoundMask@CBarney@@UAEHXZ	public: virtual int __thiscall CBarney::ISoundMask(void)	vtable
 0xe920	0	?Classify@CBarney@@UAEHXZ	public: virtual int __thiscall CBarney::Classify(void)	vtable
-0xe990	0	?SetYawSpeed@CBarney@@UAEXXZ	public: virtual void __thiscall CBarney::SetYawSpeed(void)	vtable
-0xe9d0	0	?CheckRangeAttack1@CBarney@@UAEHMM@Z	public: virtual int __thiscall CBarney::CheckRangeAttack1(float, float)	vtable
 0xed20	0	?Spawn@CBarney@@UAEXXZ	public: virtual void __thiscall CBarney::Spawn(void)	vtable
 0xef90	0	?TakeDamage@CBarney@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBarney::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0xf4b0	0	?GetScheduleOfType@CBarney@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CBarney::GetScheduleOfType(int)	vtable
 0xf570	0	?GetSchedule@CBarney@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CBarney::GetSchedule(void)	vtable
 0xf720	0	?GetIdealState@CBarney@@UAE?AW4MONSTERSTATE@@XZ	public: virtual enum MONSTERSTATE __thiscall CBarney::GetIdealState(void)	vtable
 0xf750	0	?KeyValue@CDeadBarney@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CDeadBarney::KeyValue(struct KeyValueData_s *)	vtable
 0xf840	0	?Classify@CDeadBarney@@UAEHXZ	public: virtual int __thiscall CDeadBarney::Classify(void)	vtable
-0xf850	0	?Spawn@CDeadBarney@@UAEXXZ	public: virtual void __thiscall CDeadBarney::Spawn(void)	vtable
+0xf900	0	?FriendNumber@CTalkMonster@@UAEHH@Z	public: virtual int __thiscall CTalkMonster::FriendNumber(int)	vtable
 0xf980	0	?Save@CInfoBM@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CInfoBM::Save(class CSave &)	vtable
 0xf9b0	0	?Restore@CInfoBM@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CInfoBM::Restore(class CRestore &)	vtable
 0xf9e0	0	?Spawn@CInfoBM@@UAEXXZ	public: virtual void __thiscall CInfoBM::Spawn(void)	vtable
-0xf9f0	0	?KeyValue@CInfoBM@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CInfoBM::KeyValue(struct KeyValueData_s *)	vtable
 0xfc30	0	?Save@CBMortar@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBMortar::Save(class CSave &)	vtable
 0xfc60	0	?Restore@CBMortar@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBMortar::Restore(class CRestore &)	vtable
 0xfd20	0	?OverrideReset@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::OverrideReset(void)	vtable
@@ -125,28 +147,19 @@ rva	size	name	demangled	ref_object
 0xfe10	0	?Restore@CBigMomma@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBigMomma::Restore(class CRestore &)	vtable
 0xfe40	0	?KeyValue@CBigMomma@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBigMomma::KeyValue(struct KeyValueData_s *)	vtable
 0xfe50	0	?Classify@CBigMomma@@UAEHXZ	public: virtual int __thiscall CBigMomma::Classify(void)	vtable
-0xfe60	0	?SetYawSpeed@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::SetYawSpeed(void)	vtable
+0xfe90	0	?HandleAnimEvent@CBigMomma@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CBigMomma::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x109e0	0	?TraceAttack@CBigMomma@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CBigMomma::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
-0x10b10	0	?TakeDamage@CBigMomma@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBigMomma::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x10ce0	0	?DeathNotice@CBigMomma@@UAEXPAUentvars_s@@@Z	public: virtual void __thiscall CBigMomma::DeathNotice(struct entvars_s *)	vtable
-0x10e50	0	?Spawn@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::Spawn(void)	vtable
 0x10f50	0	?Precache@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::Precache(void)	vtable
-0x110b0	0	?Activate@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::Activate(void)	vtable
 0x11260	0	?CheckMeleeAttack1@CBigMomma@@UAEHMM@Z	public: virtual int __thiscall CBigMomma::CheckMeleeAttack1(float, float)	vtable
-0x11290	0	?CheckMeleeAttack2@CBigMomma@@UAEHMM@Z	public: virtual int __thiscall CBigMomma::CheckMeleeAttack2(float, float)	vtable
-0x11370	0	?CheckRangeAttack1@CBigMomma@@UAEHMM@Z	public: virtual int __thiscall CBigMomma::CheckRangeAttack1(float, float)	vtable
 0x11490	0	?ScheduleFromName@CBigMomma@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CBigMomma::ScheduleFromName(char const *)	vtable
-0x11520	0	?GetSchedule@CBigMomma@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CBigMomma::GetSchedule(void)	vtable
-0x11550	0	?StartTask@CBigMomma@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CBigMomma::StartTask(struct Task_t *)	vtable
-0x11a40	0	?RunTask@CBigMomma@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CBigMomma::RunTask(struct Task_t *)	vtable
 0x11be0	0	?ObjectCaps@CPointEntity@@UAEHXZ	public: virtual int __thiscall CPointEntity::ObjectCaps(void)	vtable
-0x11ed0	0	?Spawn@CBMortar@@UAEXXZ	public: virtual void __thiscall CBMortar::Spawn(void)	vtable
 0x12510	0	?CheckRangeAttack1@CBloater@@UAEHMM@Z	public: virtual int __thiscall CBloater::CheckRangeAttack1(float, float)	vtable
 0x12520	0	?CheckRangeAttack2@CBloater@@UAEHMM@Z	public: virtual int __thiscall CBloater::CheckRangeAttack2(float, float)	vtable
 0x12530	0	?Classify@CBloater@@UAEHXZ	public: virtual int __thiscall CBloater::Classify(void)	vtable
 0x12540	0	?SetYawSpeed@CBloater@@UAEXXZ	public: virtual void __thiscall CBloater::SetYawSpeed(void)	vtable
-0x12550	0	?TakeDamage@CBloater@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBloater::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x125e0	0	?Spawn@CBloater@@UAEXXZ	public: virtual void __thiscall CBloater::Spawn(void)	vtable
+0x12580	0	?PainSound@CBloater@@UAEXXZ	public: virtual void __thiscall CBloater::PainSound(void)	vtable
+0x12590	0	?AlertSound@CBloater@@UAEXXZ	public: virtual void __thiscall CBloater::AlertSound(void)	vtable
+0x125a0	0	?IdleSound@CBloater@@UAEXXZ	public: virtual void __thiscall CBloater::IdleSound(void)	vtable
 0x126e0	0	?Precache@CBloater@@UAEXXZ	public: virtual void __thiscall CBloater::Precache(void)	vtable
 0x127d0	0	?ObjectCaps@CFuncWall@@UAEHXZ	public: virtual int __thiscall CFuncWall::ObjectCaps(void)	vtable
 0x12850	0	?Spawn@CFuncWall@@UAEXXZ	public: virtual void __thiscall CFuncWall::Spawn(void)	vtable
@@ -157,84 +170,54 @@ rva	size	name	demangled	ref_object
 0x12ec0	0	?Save@CFuncRotating@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncRotating::Save(class CSave &)	vtable
 0x12ef0	0	?Restore@CFuncRotating@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncRotating::Restore(class CRestore &)	vtable
 0x12f90	0	?ObjectCaps@CFuncRotating@@UAEHXZ	public: virtual int __thiscall CFuncRotating::ObjectCaps(void)	vtable
-0x12fa0	0	?KeyValue@CFuncRotating@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncRotating::KeyValue(struct KeyValueData_s *)	vtable
-0x131b0	0	?Spawn@CFuncRotating@@UAEXXZ	public: virtual void __thiscall CFuncRotating::Spawn(void)	vtable
-0x133f0	0	?Precache@CFuncRotating@@UAEXXZ	public: virtual void __thiscall CFuncRotating::Precache(void)	vtable
+0x13d20	0	?Blocked@CFuncRotating@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CFuncRotating::Blocked(class CBaseEntity *)	vtable
 0x13e60	0	?ObjectCaps@CPendulum@@UAEHXZ	public: virtual int __thiscall CPendulum::ObjectCaps(void)	vtable
 0x13e70	0	?Save@CPendulum@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CPendulum::Save(class CSave &)	vtable
 0x13ea0	0	?Restore@CPendulum@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CPendulum::Restore(class CRestore &)	vtable
-0x13ed0	0	?KeyValue@CPendulum@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CPendulum::KeyValue(struct KeyValueData_s *)	vtable
 0x13fa0	0	?Spawn@CPendulum@@UAEXXZ	public: virtual void __thiscall CPendulum::Spawn(void)	vtable
+0x142c0	0	?Blocked@CPendulum@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CPendulum::Blocked(class CBaseEntity *)	vtable
 0x14560	0	?Touch@CPendulum@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CPendulum::Touch(class CBaseEntity *)	vtable
 0x147d0	0	?Save@CSquidSpit@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CSquidSpit::Save(class CSave &)	vtable
 0x14800	0	?Restore@CSquidSpit@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CSquidSpit::Restore(class CRestore &)	vtable
-0x14830	0	?Spawn@CSquidSpit@@UAEXXZ	public: virtual void __thiscall CSquidSpit::Spawn(void)	vtable
 0x14a40	0	?Touch@CSquidSpit@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CSquidSpit::Touch(class CBaseEntity *)	vtable
 0x14ce0	0	?Save@CBullsquid@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBullsquid::Save(class CSave &)	vtable
 0x14d10	0	?Restore@CBullsquid@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBullsquid::Restore(class CRestore &)	vtable
-0x14d40	0	?IgnoreConditions@CBullsquid@@UAEHXZ	public: virtual int __thiscall CBullsquid::IgnoreConditions(void)	vtable
-0x14e60	0	?TakeDamage@CBullsquid@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBullsquid::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x15000	0	?CheckRangeAttack1@CBullsquid@@UAEHMM@Z	public: virtual int __thiscall CBullsquid::CheckRangeAttack1(float, float)	vtable
-0x15100	0	?CheckMeleeAttack1@CBullsquid@@UAEHMM@Z	public: virtual int __thiscall CBullsquid::CheckMeleeAttack1(float, float)	vtable
-0x15150	0	?CheckMeleeAttack2@CBullsquid@@UAEHMM@Z	public: virtual int __thiscall CBullsquid::CheckMeleeAttack2(float, float)	vtable
 0x15190	0	?FValidateHintType@CBullsquid@@UAEHF@Z	public: virtual int __thiscall CBullsquid::FValidateHintType(short)	vtable
 0x151d0	0	?ISoundMask@CBullsquid@@UAEHXZ	public: virtual int __thiscall CBullsquid::ISoundMask(void)	vtable
 0x151e0	0	?Classify@CBullsquid@@UAEHXZ	public: virtual int __thiscall CBullsquid::Classify(void)	vtable
 0x151f0	0	?IdleSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::IdleSound(void)	vtable
-0x15430	0	?SetYawSpeed@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::SetYawSpeed(void)	vtable
-0x15e20	0	?Spawn@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::Spawn(void)	vtable
+0x15460	0	?HandleAnimEvent@CBullsquid@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CBullsquid::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x16030	0	?DeathSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::DeathSound(void)	vtable
-0x16210	0	?GetSchedule@CBullsquid@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CBullsquid::GetSchedule(void)	vtable
-0x16470	0	?StartTask@CBullsquid@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CBullsquid::StartTask(struct Task_t *)	vtable
-0x165d0	0	?RunTask@CBullsquid@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CBullsquid::RunTask(struct Task_t *)	vtable
-0x16650	0	?GetIdealState@CBullsquid@@UAE?AW4MONSTERSTATE@@XZ	public: virtual enum MONSTERSTATE __thiscall CBullsquid::GetIdealState(void)	vtable
 0x16700	0	?Save@CEnvGlobal@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CEnvGlobal::Save(class CSave &)	vtable
 0x16730	0	?Restore@CEnvGlobal@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CEnvGlobal::Restore(class CRestore &)	vtable
-0x167d0	0	?KeyValue@CEnvGlobal@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvGlobal::KeyValue(struct KeyValueData_s *)	vtable
-0x168e0	0	?Spawn@CEnvGlobal@@UAEXXZ	public: virtual void __thiscall CEnvGlobal::Spawn(void)	vtable
-0x16940	0	?Use@CEnvGlobal@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CEnvGlobal::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x169c0	0	?Save@CMultiSource@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CMultiSource::Save(class CSave &)	vtable
 0x169f0	0	?Restore@CMultiSource@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CMultiSource::Restore(class CRestore &)	vtable
-0x16a90	0	?KeyValue@CMultiSource@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMultiSource::KeyValue(struct KeyValueData_s *)	vtable
-0x16ca0	0	?Use@CMultiSource@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CMultiSource::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x16d80	0	?IsTriggered@CMultiSource@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CMultiSource::IsTriggered(class CBaseEntity *)	vtable
+0x16c50	0	?Spawn@CMultiSource@@UAEXXZ	public: virtual void __thiscall CMultiSource::Spawn(void)	vtable
 0x16f10	0	?Save@CBaseButton@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseButton::Save(class CSave &)	vtable
 0x16f40	0	?Restore@CBaseButton@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseButton::Restore(class CRestore &)	vtable
-0x16f70	0	?Precache@CBaseButton@@UAEXXZ	public: virtual void __thiscall CBaseButton::Precache(void)	vtable
-0x17230	0	?KeyValue@CBaseButton@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseButton::KeyValue(struct KeyValueData_s *)	vtable
-0x17460	0	?TakeDamage@CBaseButton@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBaseButton::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
 0x175a0	0	?Spawn@CBaseButton@@UAEXXZ	public: virtual void __thiscall CBaseButton::Spawn(void)	vtable
 0x180f0	0	?Spawn@CRotButton@@UAEXXZ	public: virtual void __thiscall CRotButton::Spawn(void)	vtable
 0x18320	0	?Save@CMomentaryRotButton@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CMomentaryRotButton::Save(class CSave &)	vtable
 0x18350	0	?Restore@CMomentaryRotButton@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CMomentaryRotButton::Restore(class CRestore &)	vtable
-0x18410	0	?Spawn@CMomentaryRotButton@@UAEXXZ	public: virtual void __thiscall CMomentaryRotButton::Spawn(void)	vtable
-0x18620	0	?KeyValue@CMomentaryRotButton@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMomentaryRotButton::KeyValue(struct KeyValueData_s *)	vtable
 0x18730	0	?Use@CMomentaryRotButton@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CMomentaryRotButton::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x18870	0	?ObjectCaps@CMultiSource@@UAEHXZ	public: virtual int __thiscall CMultiSource::ObjectCaps(void)	vtable
 0x18c30	0	?Save@CEnvSpark@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CEnvSpark::Save(class CSave &)	vtable
 0x18c60	0	?Restore@CEnvSpark@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CEnvSpark::Restore(class CRestore &)	vtable
 0x18d70	0	?Spawn@CEnvSpark@@UAEXXZ	public: virtual void __thiscall CEnvSpark::Spawn(void)	vtable
 0x18e00	0	?Precache@CEnvSpark@@UAEXXZ	public: virtual void __thiscall CEnvSpark::Precache(void)	vtable
-0x18e50	0	?KeyValue@CEnvSpark@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvSpark::KeyValue(struct KeyValueData_s *)	vtable
 0x19dc0	0	?TakeDamage@CBaseEntity@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBaseEntity::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
 0x1a1d0	0	?GetNextTarget@CBaseEntity@@UAEPAV1@XZ	public: virtual class CBaseEntity * __thiscall CBaseEntity::GetNextTarget(void)	vtable
-0x1a220	0	?Save@CBaseEntity@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseEntity::Save(class CSave &)	vtable
 0x1a520	0	?SetObjectCollisionBox@CBaseEntity@@UAEXXZ	public: virtual void __thiscall CBaseEntity::SetObjectCollisionBox(void)	vtable
 0x1a630	0	?IsInWorld@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::IsInWorld(void)	vtable
-0x1acc0	0	?StartSneaking@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::StartSneaking(void)	vtable
-0x1ace0	0	?StopSneaking@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::StopSneaking(void)	vtable
-0x1ad00	0	?IsSneaking@CBasePlayer@@UAEHXZ	public: virtual int __thiscall CBasePlayer::IsSneaking(void)	vtable
+0x1a7e0	0	?RC2V77@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V77(void)	vtable
 0x1ad20	0	?IsAlive@CBasePlayer@@UAEHXZ	public: virtual int __thiscall CBasePlayer::IsAlive(void)	vtable
+0x1ad50	0	?ShouldFadeOnDeath@CBasePlayer@@UAEHXZ	public: virtual int __thiscall CBasePlayer::ShouldFadeOnDeath(void)	vtable
 0x1ad60	0	?IsPlayer@CBasePlayer@@UAEHXZ	public: virtual int __thiscall CBasePlayer::IsPlayer(void)	vtable
 0x1ad70	0	?IsNetClient@CBasePlayer@@UAEHXZ	public: virtual int __thiscall CBasePlayer::IsNetClient(void)	vtable
 0x1ad80	0	?ObjectCaps@CBasePlayer@@UAEHXZ	public: virtual int __thiscall CBasePlayer::ObjectCaps(void)	vtable
 0x20270	0	?GibMonster@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::GibMonster(void)	vtable
-0x20380	0	?GetDeathActivity@CBaseMonster@@UAE?AW4Activity@@XZ	public: virtual enum Activity __thiscall CBaseMonster::GetDeathActivity(void)	vtable
 0x207b0	0	?Killed@CBaseMonster@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CBaseMonster::Killed(struct entvars_s *, int)	vtable
-0x20f10	0	?TakeHealth@CBaseMonster@@UAEHMH@Z	public: virtual int __thiscall CBaseMonster::TakeHealth(float, int)	vtable
 0x20f60	0	?TakeDamage@CBaseMonster@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBaseMonster::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x221f0	0	?FInViewCone@CBaseMonster@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CBaseMonster::FInViewCone(class CBaseEntity *)	vtable
-0x222d0	0	?FInViewCone@CBaseMonster@@UAEHPAVVector@@@Z	public: virtual int __thiscall CBaseMonster::FInViewCone(class Vector *)	vtable
 0x22550	0	?TraceAttack@CBaseEntity@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CBaseEntity::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0x22680	0	?TraceAttack@CBaseMonster@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CBaseMonster::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0x23d80	0	?Save@CController@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CController::Save(class CSave &)	vtable
@@ -242,18 +225,13 @@ rva	size	name	demangled	ref_object
 0x23de0	0	?Classify@CController@@UAEHXZ	public: virtual int __thiscall CController::Classify(void)	vtable
 0x23df0	0	?SetYawSpeed@CController@@UAEXXZ	public: virtual void __thiscall CController::SetYawSpeed(void)	vtable
 0x23e00	0	?TakeDamage@CController@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CController::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x23e40	0	?Killed@CController@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CController::Killed(struct entvars_s *, int)	vtable
-0x23e90	0	?GibMonster@CController@@UAEXXZ	public: virtual void __thiscall CController::GibMonster(void)	vtable
 0x23f40	0	?AlertSound@CController@@UAEXXZ	public: virtual void __thiscall CController::AlertSound(void)	vtable
-0x24400	0	?Spawn@CController@@UAEXXZ	public: virtual void __thiscall CController::Spawn(void)	vtable
 0x245d0	0	?ScheduleFromName@CController@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CController::ScheduleFromName(char const *)	vtable
 0x24600	0	?StartTask@CController@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CController::StartTask(struct Task_t *)	vtable
-0x24b60	0	?RunTask@CController@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CController::RunTask(struct Task_t *)	vtable
-0x25150	0	?GetSchedule@CController@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CController::GetSchedule(void)	vtable
 0x25260	0	?CheckRangeAttack1@CController@@UAEHMM@Z	public: virtual int __thiscall CController::CheckRangeAttack1(float, float)	vtable
 0x252a0	0	?CheckRangeAttack2@CController@@UAEHMM@Z	public: virtual int __thiscall CController::CheckRangeAttack2(float, float)	vtable
 0x252e0	0	?CheckMeleeAttack1@CController@@UAEHMM@Z	public: virtual int __thiscall CController::CheckMeleeAttack1(float, float)	vtable
-0x252f0	0	?SetActivity@CController@@UAEXW4Activity@@@Z	public: virtual void __thiscall CController::SetActivity(enum Activity)	vtable
+0x25320	0	?RunAI@CController@@UAEXXZ	public: virtual void __thiscall CController::RunAI(void)	vtable
 0x25560	0	?Stop@CController@@UAEXXZ	public: virtual void __thiscall CController::Stop(void)	vtable
 0x25580	0	?Move@CController@@UAEXM@Z	public: virtual void __thiscall CController::Move(float)	vtable
 0x25ac0	0	?ShouldAdvanceRoute@CController@@UAEHM@Z	public: virtual int __thiscall CController::ShouldAdvanceRoute(float)	vtable
@@ -263,48 +241,49 @@ rva	size	name	demangled	ref_object
 0x26bb0	0	?Spawn@CControllerZapBall@@EAEXXZ	private: virtual void __thiscall CControllerZapBall::Spawn(void)	vtable
 0x26cf0	0	?Precache@CControllerZapBall@@EAEXXZ	private: virtual void __thiscall CControllerZapBall::Precache(void)	vtable
 0x2ada0	0	?ItemPreFrame@CBasePlayerItem@@UAEXXZ	public: virtual void __thiscall CBasePlayerItem::ItemPreFrame(void)	vtable
+0x2adb0	0	?AddWeapon@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::AddWeapon(void)	vtable
 0x2adc0	0	?UpdateItemInfo@CBasePlayerWeapon@@UAEXXZ	public: virtual void __thiscall CBasePlayerWeapon::UpdateItemInfo(void)	vtable
+0x2add0	0	?RC2VW3@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::RC2VW3(void)	vtable
+0x2ade0	0	?GetWeaponPtr@CBasePlayerWeapon@@UAEPAVCBasePlayerItem@@XZ	public: virtual class CBasePlayerItem * __thiscall CBasePlayerWeapon::GetWeaponPtr(void)	vtable
+0x2adf0	0	?iItemSlot@CCrossbow@@UAEHXZ	public: virtual int __thiscall CCrossbow::iItemSlot(void)	vtable
 0x2ae10	0	?Spawn@CCrossbow@@UAEXXZ	public: virtual void __thiscall CCrossbow::Spawn(void)	vtable
+0x2ae70	0	?AddToPlayer@CCrossbow@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CCrossbow::AddToPlayer(class CBasePlayer *)	vtable
 0x2aed0	0	?Precache@CCrossbow@@UAEXXZ	public: virtual void __thiscall CCrossbow::Precache(void)	vtable
+0x2aff0	0	?GetItemInfo@CCrossbow@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CCrossbow::GetItemInfo(struct ItemInfo *)	vtable
+0x2b080	0	?Deploy@CCrossbow@@UAEHXZ	public: virtual int __thiscall CCrossbow::Deploy(void)	vtable
+0x2b0c0	0	?Holster@CCrossbow@@UAEXH@Z	public: virtual void __thiscall CCrossbow::Holster(int)	vtable
+0x2d040	0	?UseDecrement@CCrossbow@@UAEHXZ	public: virtual int __thiscall CCrossbow::UseDecrement(void)	vtable
 0x2d0f0	0	?Spawn@CCrossbowAmmo@@EAEXXZ	private: virtual void __thiscall CCrossbowAmmo::Spawn(void)	vtable
 0x2d120	0	?Precache@CCrossbowAmmo@@EAEXXZ	private: virtual void __thiscall CCrossbowAmmo::Precache(void)	vtable
+0x2d140	0	?AddAmmo@CCrossbowAmmo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CCrossbowAmmo::AddAmmo(class CBaseEntity *)	vtable
+0x30450	0	?CanHolster@CBasePlayerItem@@UAEHXZ	public: virtual int __thiscall CBasePlayerItem::CanHolster(void)	vtable
+0x30480	0	?iItemSlot@CCrowbar@@UAEHXZ	public: virtual int __thiscall CCrowbar::iItemSlot(void)	vtable
 0x305d0	0	?Spawn@CCrowbar@@UAEXXZ	public: virtual void __thiscall CCrowbar::Spawn(void)	vtable
 0x30660	0	?Precache@CCrowbar@@UAEXXZ	public: virtual void __thiscall CCrowbar::Precache(void)	vtable
+0x30740	0	?GetItemInfo@CCrowbar@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CCrowbar::GetItemInfo(struct ItemInfo *)	vtable
+0x30780	0	?Deploy@CCrowbar@@UAEHXZ	public: virtual int __thiscall CCrowbar::Deploy(void)	vtable
+0x307c0	0	?Holster@CCrowbar@@UAEXH@Z	public: virtual void __thiscall CCrowbar::Holster(int)	vtable
+0x31b60	0	?UseDecrement@CCrowbar@@UAEHXZ	public: virtual int __thiscall CCrowbar::UseDecrement(void)	vtable
 0x32630	0	?GetScheduleOfType@CBaseMonster@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CBaseMonster::GetScheduleOfType(int)	vtable
 0x349a0	0	?Save@CBaseDoor@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseDoor::Save(class CSave &)	vtable
 0x349d0	0	?Restore@CBaseDoor@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseDoor::Restore(class CRestore &)	vtable
 0x34c20	0	?KeyValue@CBaseDoor@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseDoor::KeyValue(struct KeyValueData_s *)	vtable
-0x35060	0	?Spawn@CBaseDoor@@UAEXXZ	public: virtual void __thiscall CBaseDoor::Spawn(void)	vtable
-0x35250	0	?SetToggleState@CBaseDoor@@UAEXH@Z	public: virtual void __thiscall CBaseDoor::SetToggleState(int)	vtable
-0x35290	0	?Precache@CBaseDoor@@UAEXXZ	public: virtual void __thiscall CBaseDoor::Precache(void)	vtable
-0x36300	0	?Spawn@CRotDoor@@UAEXXZ	public: virtual void __thiscall CRotDoor::Spawn(void)	vtable
-0x36560	0	?SetToggleState@CRotDoor@@UAEXH@Z	public: virtual void __thiscall CRotDoor::SetToggleState(int)	vtable
+0x35ef0	0	?Blocked@CBaseDoor@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CBaseDoor::Blocked(class CBaseEntity *)	vtable
 0x36640	0	?ObjectCaps@CMomentaryDoor@@UAEHXZ	public: virtual int __thiscall CMomentaryDoor::ObjectCaps(void)	vtable
 0x36650	0	?Save@CMomentaryDoor@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CMomentaryDoor::Save(class CSave &)	vtable
 0x36680	0	?Restore@CMomentaryDoor@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CMomentaryDoor::Restore(class CRestore &)	vtable
-0x366b0	0	?Spawn@CMomentaryDoor@@UAEXXZ	public: virtual void __thiscall CMomentaryDoor::Spawn(void)	vtable
-0x36860	0	?Precache@CMomentaryDoor@@UAEXXZ	public: virtual void __thiscall CMomentaryDoor::Precache(void)	vtable
-0x369c0	0	?KeyValue@CMomentaryDoor@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMomentaryDoor::KeyValue(struct KeyValueData_s *)	vtable
-0x36ac0	0	?Use@CMomentaryDoor@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CMomentaryDoor::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x36d90	0	?ObjectCaps@CBubbling@@UAEHXZ	public: virtual int __thiscall CBubbling::ObjectCaps(void)	vtable
 0x36da0	0	?Save@CBubbling@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBubbling::Save(class CSave &)	vtable
 0x36dd0	0	?Restore@CBubbling@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBubbling::Restore(class CRestore &)	vtable
 0x36e00	0	?Spawn@CBubbling@@UAEXXZ	public: virtual void __thiscall CBubbling::Spawn(void)	vtable
 0x36f10	0	?Precache@CBubbling@@UAEXXZ	public: virtual void __thiscall CBubbling::Precache(void)	vtable
 0x36f30	0	?Use@CBubbling@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CBubbling::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x36f90	0	?KeyValue@CBubbling@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBubbling::KeyValue(struct KeyValueData_s *)	vtable
 0x371d0	0	?ObjectCaps@CBeam@@UAEHXZ	public: virtual int __thiscall CBeam::ObjectCaps(void)	vtable
 0x37ab0	0	?Save@CLightning@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CLightning::Save(class CSave &)	vtable
 0x37ae0	0	?Restore@CLightning@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CLightning::Restore(class CRestore &)	vtable
 0x37b10	0	?Spawn@CLightning@@UAEXXZ	public: virtual void __thiscall CLightning::Spawn(void)	vtable
-0x37c30	0	?Precache@CLightning@@UAEXXZ	public: virtual void __thiscall CLightning::Precache(void)	vtable
-0x37c60	0	?Activate@CLightning@@UAEXXZ	public: virtual void __thiscall CLightning::Activate(void)	vtable
-0x37c90	0	?KeyValue@CLightning@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CLightning::KeyValue(struct KeyValueData_s *)	vtable
 0x39220	0	?Save@CLaser@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CLaser::Save(class CSave &)	vtable
 0x39250	0	?Restore@CLaser@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CLaser::Restore(class CRestore &)	vtable
-0x39280	0	?Spawn@CLaser@@UAEXXZ	public: virtual void __thiscall CLaser::Spawn(void)	vtable
-0x393e0	0	?Precache@CLaser@@UAEXXZ	public: virtual void __thiscall CLaser::Precache(void)	vtable
-0x39430	0	?KeyValue@CLaser@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CLaser::KeyValue(struct KeyValueData_s *)	vtable
 0x397c0	0	?Use@CLaser@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CLaser::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x39960	0	?Save@CGlow@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CGlow::Save(class CSave &)	vtable
 0x39990	0	?Restore@CGlow@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CGlow::Restore(class CRestore &)	vtable
@@ -313,47 +292,41 @@ rva	size	name	demangled	ref_object
 0x39bb0	0	?ObjectCaps@CSprite@@UAEHXZ	public: virtual int __thiscall CSprite::ObjectCaps(void)	vtable
 0x39bd0	0	?Save@CSprite@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CSprite::Save(class CSave &)	vtable
 0x39c00	0	?Restore@CSprite@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CSprite::Restore(class CRestore &)	vtable
-0x39c30	0	?Spawn@CSprite@@UAEXXZ	public: virtual void __thiscall CSprite::Spawn(void)	vtable
 0x3a130	0	?Save@CGibShooter@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CGibShooter::Save(class CSave &)	vtable
 0x3a160	0	?Restore@CGibShooter@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CGibShooter::Restore(class CRestore &)	vtable
-0x3a200	0	?Precache@CGibShooter@@UAEXXZ	public: virtual void __thiscall CGibShooter::Precache(void)	vtable
 0x3a240	0	?KeyValue@CGibShooter@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGibShooter::KeyValue(struct KeyValueData_s *)	vtable
 0x3a3b0	0	?Use@CGibShooter@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGibShooter::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x3a3d0	0	?Spawn@CGibShooter@@UAEXXZ	public: virtual void __thiscall CGibShooter::Spawn(void)	vtable
-0x3a960	0	?KeyValue@CEnvShooter@@EAEXPAUKeyValueData_s@@@Z	private: virtual void __thiscall CEnvShooter::KeyValue(struct KeyValueData_s *)	vtable
-0x3aab0	0	?Precache@CEnvShooter@@EAEXXZ	private: virtual void __thiscall CEnvShooter::Precache(void)	vtable
 0x3ac90	0	?Spawn@CTestEffect@@UAEXXZ	public: virtual void __thiscall CTestEffect::Spawn(void)	vtable
 0x3aca0	0	?Precache@CTestEffect@@UAEXXZ	public: virtual void __thiscall CTestEffect::Precache(void)	vtable
 0x3af70	0	?Use@CTestEffect@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTestEffect::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x3bc60	0	?Precache@CEnvFunnel@@UAEXXZ	public: virtual void __thiscall CEnvFunnel::Precache(void)	vtable
-0x3bcf0	0	?Use@CEnvFunnel@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CEnvFunnel::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x3bdb0	0	?Precache@CEnvBeverage@@UAEXXZ	public: virtual void __thiscall CEnvBeverage::Precache(void)	vtable
 0x3bf50	0	?Precache@CItemSoda@@UAEXXZ	public: virtual void __thiscall CItemSoda::Precache(void)	vtable
+0x3d300	0	?iItemSlot@CEgon@@UAEHXZ	public: virtual int __thiscall CEgon::iItemSlot(void)	vtable
 0x3d320	0	?Spawn@CEgon@@UAEXXZ	public: virtual void __thiscall CEgon::Spawn(void)	vtable
 0x3d390	0	?Precache@CEgon@@UAEXXZ	public: virtual void __thiscall CEgon::Precache(void)	vtable
+0x3d4c0	0	?Deploy@CEgon@@UAEHXZ	public: virtual int __thiscall CEgon::Deploy(void)	vtable
+0x3d530	0	?AddToPlayer@CEgon@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CEgon::AddToPlayer(class CBasePlayer *)	vtable
+0x3d590	0	?Holster@CEgon@@UAEXH@Z	public: virtual void __thiscall CEgon::Holster(int)	vtable
+0x3d6b0	0	?GetItemInfo@CEgon@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CEgon::GetItemInfo(struct ItemInfo *)	vtable
+0x3f6c0	0	?UseDecrement@CEgon@@UAEHXZ	public: virtual int __thiscall CEgon::UseDecrement(void)	vtable
 0x3fef0	0	?Spawn@CEgonAmmo@@EAEXXZ	private: virtual void __thiscall CEgonAmmo::Spawn(void)	vtable
 0x3ff20	0	?Precache@CEgonAmmo@@EAEXXZ	private: virtual void __thiscall CEgonAmmo::Precache(void)	vtable
+0x3ff40	0	?AddAmmo@CEgonAmmo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CEgonAmmo::AddAmmo(class CBaseEntity *)	vtable
 0x40010	0	?ObjectCaps@CShower@@EAEHXZ	private: virtual int __thiscall CShower::ObjectCaps(void)	vtable
+0x40020	0	?Spawn@CShower@@EAEXXZ	private: virtual void __thiscall CShower::Spawn(void)	vtable
+0x401a0	0	?Think@CShower@@EAEXXZ	private: virtual void __thiscall CShower::Think(void)	vtable
 0x40310	0	?Save@CEnvExplosion@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CEnvExplosion::Save(class CSave &)	vtable
 0x40340	0	?Restore@CEnvExplosion@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CEnvExplosion::Restore(class CRestore &)	vtable
-0x403e0	0	?KeyValue@CEnvExplosion@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvExplosion::KeyValue(struct KeyValueData_s *)	vtable
-0x40460	0	?Spawn@CEnvExplosion@@UAEXXZ	public: virtual void __thiscall CEnvExplosion::Spawn(void)	vtable
 0x404c0	0	?Use@CEnvExplosion@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CEnvExplosion::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x41100	0	?ShouldAdvanceRoute@CFlyingMonster@@UAEHM@Z	public: virtual int __thiscall CFlyingMonster::ShouldAdvanceRoute(float)	vtable
 0x41ed0	0	?KeyValue@CBreakable@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBreakable::KeyValue(struct KeyValueData_s *)	vtable
 0x42270	0	?ObjectCaps@CBreakable@@UAEHXZ	public: virtual int __thiscall CBreakable::ObjectCaps(void)	vtable
 0x42280	0	?Save@CBreakable@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBreakable::Save(class CSave &)	vtable
 0x422b0	0	?Restore@CBreakable@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBreakable::Restore(class CRestore &)	vtable
-0x422e0	0	?Spawn@CBreakable@@UAEXXZ	public: virtual void __thiscall CBreakable::Spawn(void)	vtable
-0x42510	0	?Precache@CBreakable@@UAEXXZ	public: virtual void __thiscall CBreakable::Precache(void)	vtable
-0x42970	0	?Use@CBreakable@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CBreakable::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x429d0	0	?TraceAttack@CBreakable@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CBreakable::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0x42ac0	0	?TakeDamage@CBreakable@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBreakable::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x43310	0	?DamageDecal@CBreakable@@UAEHH@Z	public: virtual int __thiscall CBreakable::DamageDecal(int)	vtable
 0x43350	0	?Save@CPushable@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CPushable::Save(class CSave &)	vtable
 0x43380	0	?Restore@CPushable@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CPushable::Restore(class CRestore &)	vtable
 0x43430	0	?ObjectCaps@CPushable@@UAEHXZ	public: virtual int __thiscall CPushable::ObjectCaps(void)	vtable
-0x43440	0	?Spawn@CPushable@@UAEXXZ	public: virtual void __thiscall CPushable::Spawn(void)	vtable
 0x437d0	0	?Use@CPushable@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CPushable::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x43b40	0	?Save@CFuncTank@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncTank::Save(class CSave &)	vtable
 0x43b70	0	?Restore@CFuncTank@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncTank::Restore(class CRestore &)	vtable
@@ -363,19 +336,22 @@ rva	size	name	demangled	ref_object
 0x44650	0	?OnControls@CFuncTank@@UAEHPAUentvars_s@@@Z	public: virtual int __thiscall CFuncTank::OnControls(struct entvars_s *)	vtable
 0x44a60	0	?Use@CFuncTank@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncTank::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x45b40	0	?ObjectCaps@CFuncTank@@UAEHXZ	public: virtual int __thiscall CFuncTank::ObjectCaps(void)	vtable
+0x45b50	0	?Fire@CFuncTankGun@@UAEXABVVector@@0PAUentvars_s@@@Z	public: virtual void __thiscall CFuncTankGun::Fire(class Vector const &, class Vector const &, struct entvars_s *)	vtable
 0x45cf0	0	?Save@CFuncTankLaser@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncTankLaser::Save(class CSave &)	vtable
 0x45d20	0	?Restore@CFuncTankLaser@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncTankLaser::Restore(class CRestore &)	vtable
 0x45d50	0	?Activate@CFuncTankLaser@@UAEXXZ	public: virtual void __thiscall CFuncTankLaser::Activate(void)	vtable
 0x45d90	0	?KeyValue@CFuncTankLaser@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTankLaser::KeyValue(struct KeyValueData_s *)	vtable
 0x45f00	0	?Think@CFuncTankLaser@@UAEXXZ	public: virtual void __thiscall CFuncTankLaser::Think(void)	vtable
+0x45f30	0	?Fire@CFuncTankLaser@@UAEXABVVector@@0PAUentvars_s@@@Z	public: virtual void __thiscall CFuncTankLaser::Fire(class Vector const &, class Vector const &, struct entvars_s *)	vtable
 0x460f0	0	?Save@CRpgRocket@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CRpgRocket::Save(class CSave &)	vtable
 0x46120	0	?Restore@CRpgRocket@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CRpgRocket::Restore(class CRestore &)	vtable
 0x46150	0	?Spawn@CRpgRocket@@UAEXXZ	public: virtual void __thiscall CRpgRocket::Spawn(void)	vtable
 0x46310	0	?Precache@CRpgRocket@@UAEXXZ	public: virtual void __thiscall CRpgRocket::Precache(void)	vtable
+0x46b60	0	?Fire@CFuncTankRocket@@UAEXABVVector@@0PAUentvars_s@@@Z	public: virtual void __thiscall CFuncTankRocket::Fire(class Vector const &, class Vector const &, struct entvars_s *)	vtable
+0x46cf0	0	?Fire@CFuncTankMortar@@UAEXABVVector@@0PAUentvars_s@@@Z	public: virtual void __thiscall CFuncTankMortar::Fire(class Vector const &, class Vector const &, struct entvars_s *)	vtable
 0x46eb0	0	?Save@CFuncTankControls@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncTankControls::Save(class CSave &)	vtable
 0x46ee0	0	?Restore@CFuncTankControls@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncTankControls::Restore(class CRestore &)	vtable
 0x46f10	0	?ObjectCaps@CFuncTankControls@@UAEHXZ	public: virtual int __thiscall CFuncTankControls::ObjectCaps(void)	vtable
-0x46f20	0	?Use@CFuncTankControls@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncTankControls::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x46f50	0	?Think@CFuncTankControls@@UAEXXZ	public: virtual void __thiscall CFuncTankControls::Think(void)	vtable
 0x48640	0	?ObjectCaps@CSpiral@@UAEHXZ	public: virtual int __thiscall CSpiral::ObjectCaps(void)	vtable
 0x488b0	0	?Think@CStomp@@UAEXXZ	public: virtual void __thiscall CStomp::Think(void)	vtable
@@ -383,46 +359,44 @@ rva	size	name	demangled	ref_object
 0x48fc0	0	?Save@CGargantua@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CGargantua::Save(class CSave &)	vtable
 0x48ff0	0	?Restore@CGargantua@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CGargantua::Restore(class CRestore &)	vtable
 0x49020	0	?ScheduleFromName@CGargantua@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CGargantua::ScheduleFromName(char const *)	vtable
-0x4a0e0	0	?PrescheduleThink@CGargantua@@UAEXXZ	public: virtual void __thiscall CGargantua::PrescheduleThink(void)	vtable
 0x4a130	0	?Classify@CGargantua@@UAEHXZ	public: virtual int __thiscall CGargantua::Classify(void)	vtable
-0x4a140	0	?SetYawSpeed@CGargantua@@UAEXXZ	public: virtual void __thiscall CGargantua::SetYawSpeed(void)	vtable
-0x4a1b0	0	?Spawn@CGargantua@@UAEXXZ	public: virtual void __thiscall CGargantua::Spawn(void)	vtable
 0x4a4e0	0	?TraceAttack@CGargantua@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CGargantua::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
-0x4a650	0	?TakeDamage@CGargantua@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CGargantua::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x4a840	0	?Killed@CGargantua@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CGargantua::Killed(struct entvars_s *, int)	vtable
 0x4a880	0	?CheckMeleeAttack1@CGargantua@@UAEHMM@Z	public: virtual int __thiscall CGargantua::CheckMeleeAttack1(float, float)	vtable
-0x4a8b0	0	?CheckMeleeAttack2@CGargantua@@UAEHMM@Z	public: virtual int __thiscall CGargantua::CheckMeleeAttack2(float, float)	vtable
-0x4a910	0	?CheckRangeAttack1@CGargantua@@UAEHMM@Z	public: virtual int __thiscall CGargantua::CheckRangeAttack1(float, float)	vtable
-0x4ae60	0	?GetScheduleOfType@CGargantua@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CGargantua::GetScheduleOfType(int)	vtable
-0x4aea0	0	?StartTask@CGargantua@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CGargantua::StartTask(struct Task_t *)	vtable
-0x4af90	0	?RunTask@CGargantua@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CGargantua::RunTask(struct Task_t *)	vtable
 0x4b470	0	?Spawn@CSmoker@@UAEXXZ	public: virtual void __thiscall CSmoker::Spawn(void)	vtable
 0x4b640	0	?Spawn@CSpiral@@UAEXXZ	public: virtual void __thiscall CSpiral::Spawn(void)	vtable
+0x4b7a0	0	?Think@CSpiral@@UAEXXZ	public: virtual void __thiscall CSpiral::Think(void)	vtable
 0x4cae0	0	?Spawn@CGauss@@UAEXXZ	public: virtual void __thiscall CGauss::Spawn(void)	vtable
 0x4cb40	0	?Precache@CGauss@@UAEXXZ	public: virtual void __thiscall CGauss::Precache(void)	vtable
+0x4d310	0	?AddToPlayer@CGauss@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CGauss::AddToPlayer(class CBasePlayer *)	vtable
+0x4d370	0	?GetItemInfo@CGauss@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CGauss::GetItemInfo(struct ItemInfo *)	vtable
+0x4d3e0	0	?Deploy@CGauss@@UAEHXZ	public: virtual int __thiscall CGauss::Deploy(void)	vtable
+0x4d410	0	?Holster@CGauss@@UAEXH@Z	public: virtual void __thiscall CGauss::Holster(int)	vtable
+0x4fc80	0	?iItemSlot@CGauss@@UAEHXZ	public: virtual int __thiscall CGauss::iItemSlot(void)	vtable
+0x50330	0	?UseDecrement@CGauss@@UAEHXZ	public: virtual int __thiscall CGauss::UseDecrement(void)	vtable
 0x505e0	0	?Spawn@CGaussAmmo@@EAEXXZ	private: virtual void __thiscall CGaussAmmo::Spawn(void)	vtable
 0x50610	0	?Precache@CGaussAmmo@@EAEXXZ	private: virtual void __thiscall CGaussAmmo::Precache(void)	vtable
+0x50630	0	?AddAmmo@CGaussAmmo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CGaussAmmo::AddAmmo(class CBaseEntity *)	vtable
 0x50700	0	?Classify@CGenericMonster@@UAEHXZ	public: virtual int __thiscall CGenericMonster::Classify(void)	vtable
 0x50710	0	?SetYawSpeed@CGenericMonster@@UAEXXZ	public: virtual void __thiscall CGenericMonster::SetYawSpeed(void)	vtable
+0x50720	0	?HandleAnimEvent@CGenericMonster@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CGenericMonster::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x50730	0	?ISoundMask@CGenericMonster@@UAEHXZ	public: virtual int __thiscall CGenericMonster::ISoundMask(void)	vtable
-0x50740	0	?Spawn@CGenericMonster@@UAEXXZ	public: virtual void __thiscall CGenericMonster::Spawn(void)	vtable
 0x51070	0	?Killed@CGrenade@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CGrenade::Killed(struct entvars_s *, int)	vtable
-0x51ff0	0	?Spawn@CGrenade@@UAEXXZ	public: virtual void __thiscall CGrenade::Spawn(void)	vtable
+0x54c80	0	?iItemSlot@CGlock@@UAEHXZ	public: virtual int __thiscall CGlock::iItemSlot(void)	vtable
 0x54d20	0	?Spawn@CGlock@@UAEXXZ	public: virtual void __thiscall CGlock::Spawn(void)	vtable
 0x54d90	0	?Precache@CGlock@@UAEXXZ	public: virtual void __thiscall CGlock::Precache(void)	vtable
+0x54eb0	0	?GetItemInfo@CGlock@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CGlock::GetItemInfo(struct ItemInfo *)	vtable
+0x54f20	0	?Deploy@CGlock@@UAEHXZ	public: virtual int __thiscall CGlock::Deploy(void)	vtable
 0x561d0	0	?Spawn@CGlockAmmo@@EAEXXZ	private: virtual void __thiscall CGlockAmmo::Spawn(void)	vtable
 0x56200	0	?Precache@CGlockAmmo@@EAEXXZ	private: virtual void __thiscall CGlockAmmo::Precache(void)	vtable
+0x56220	0	?AddAmmo@CGlockAmmo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CGlockAmmo::AddAmmo(class CBaseEntity *)	vtable
 0x56380	0	?Save@CGMan@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CGMan::Save(class CSave &)	vtable
 0x563b0	0	?Restore@CGMan@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CGMan::Restore(class CRestore &)	vtable
 0x563e0	0	?Classify@CGMan@@UAEHXZ	public: virtual int __thiscall CGMan::Classify(void)	vtable
 0x563f0	0	?SetYawSpeed@CGMan@@UAEXXZ	public: virtual void __thiscall CGMan::SetYawSpeed(void)	vtable
+0x56400	0	?HandleAnimEvent@CGMan@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CGMan::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x56410	0	?ISoundMask@CGMan@@UAEHXZ	public: virtual int __thiscall CGMan::ISoundMask(void)	vtable
-0x56420	0	?Spawn@CGMan@@UAEXXZ	public: virtual void __thiscall CGMan::Spawn(void)	vtable
 0x564e0	0	?Precache@CGMan@@UAEXXZ	public: virtual void __thiscall CGMan::Precache(void)	vtable
-0x564f0	0	?StartTask@CGMan@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CGMan::StartTask(struct Task_t *)	vtable
 0x56540	0	?RunTask@CGMan@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CGMan::RunTask(struct Task_t *)	vtable
-0x566d0	0	?TakeDamage@CGMan@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CGMan::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x56770	0	?PlayScriptedSentence@CGMan@@UAEXPBDMMMHPAVCBaseEntity@@@Z	public: virtual void __thiscall CGMan::PlayScriptedSentence(char const *, float, float, float, int, class CBaseEntity *)	vtable
 0x57120	0	?Save@CRecharge@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CRecharge::Save(class CSave &)	vtable
 0x57150	0	?Restore@CRecharge@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CRecharge::Restore(class CRestore &)	vtable
 0x571f0	0	?ObjectCaps@CRecharge@@UAEHXZ	public: virtual int __thiscall CRecharge::ObjectCaps(void)	vtable
@@ -438,57 +412,56 @@ rva	size	name	demangled	ref_object
 0x57b30	0	?Spawn@CCine2Slave@@UAEXXZ	public: virtual void __thiscall CCine2Slave::Spawn(void)	vtable
 0x57bc0	0	?Spawn@CCine3Scientist@@UAEXXZ	public: virtual void __thiscall CCine3Scientist::Spawn(void)	vtable
 0x57c50	0	?Spawn@CCine3Barney@@UAEXXZ	public: virtual void __thiscall CCine3Barney::Spawn(void)	vtable
+0x581d0	0	?Spawn@CCineBlood@@UAEXXZ	public: virtual void __thiscall CCineBlood::Spawn(void)	vtable
 0x58200	0	?Save@CCycler@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CCycler::Save(class CSave &)	vtable
 0x58230	0	?Restore@CCycler@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CCycler::Restore(class CRestore &)	vtable
 0x582e0	0	?ObjectCaps@CCycler@@UAEHXZ	public: virtual int __thiscall CCycler::ObjectCaps(void)	vtable
 0x582f0	0	?IsAlive@CCycler@@UAEHXZ	public: virtual int __thiscall CCycler::IsAlive(void)	vtable
 0x58630	0	?Think@CCycler@@UAEXXZ	public: virtual void __thiscall CCycler::Think(void)	vtable
-0x586d0	0	?Use@CCycler@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CCycler::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x58710	0	?TakeDamage@CCycler@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CCycler::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
 0x58830	0	?ObjectCaps@CCyclerSprite@@UAEHXZ	public: virtual int __thiscall CCyclerSprite::ObjectCaps(void)	vtable
 0x58840	0	?Save@CCyclerSprite@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CCyclerSprite::Save(class CSave &)	vtable
 0x58870	0	?Restore@CCyclerSprite@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CCyclerSprite::Restore(class CRestore &)	vtable
 0x588a0	0	?Spawn@CCyclerSprite@@UAEXXZ	public: virtual void __thiscall CCyclerSprite::Spawn(void)	vtable
 0x58970	0	?Think@CCyclerSprite@@UAEXXZ	public: virtual void __thiscall CCyclerSprite::Think(void)	vtable
-0x589d0	0	?Use@CCyclerSprite@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CCyclerSprite::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x58a10	0	?TakeDamage@CCyclerSprite@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CCyclerSprite::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
+0x58b10	0	?RC2VW4@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::RC2VW4(void)	vtable
+0x58b20	0	?ShouldWeaponIdle@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::ShouldWeaponIdle(void)	vtable
+0x58b30	0	?iItemSlot@CWeaponCycler@@UAEHXZ	public: virtual int __thiscall CWeaponCycler::iItemSlot(void)	vtable
+0x58b40	0	?GetItemInfo@CWeaponCycler@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CWeaponCycler::GetItemInfo(struct ItemInfo *)	vtable
 0x58b50	0	?Spawn@CWeaponCycler@@UAEXXZ	public: virtual void __thiscall CWeaponCycler::Spawn(void)	vtable
+0x58c30	0	?Deploy@CWeaponCycler@@UAEHXZ	public: virtual int __thiscall CWeaponCycler::Deploy(void)	vtable
 0x58d80	0	?Save@CWreckage@@EAEHAAVCSave@@@Z	private: virtual int __thiscall CWreckage::Save(class CSave &)	vtable
 0x58db0	0	?Restore@CWreckage@@EAEHAAVCRestore@@@Z	private: virtual int __thiscall CWreckage::Restore(class CRestore &)	vtable
 0x58e50	0	?Spawn@CWreckage@@EAEXXZ	private: virtual void __thiscall CWreckage::Spawn(void)	vtable
-0x58f30	0	?Think@CWreckage@@EAEXXZ	private: virtual void __thiscall CWreckage::Think(void)	vtable
+0x5be40	0	?iItemSlot@CHandGrenade@@UAEHXZ	public: virtual int __thiscall CHandGrenade::iItemSlot(void)	vtable
 0x5be60	0	?Spawn@CHandGrenade@@UAEXXZ	public: virtual void __thiscall CHandGrenade::Spawn(void)	vtable
 0x5bed0	0	?Precache@CHandGrenade@@UAEXXZ	public: virtual void __thiscall CHandGrenade::Precache(void)	vtable
+0x5bf20	0	?GetItemInfo@CHandGrenade@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CHandGrenade::GetItemInfo(struct ItemInfo *)	vtable
+0x5bf90	0	?Deploy@CHandGrenade@@UAEHXZ	public: virtual int __thiscall CHandGrenade::Deploy(void)	vtable
 0x5bff0	0	?Holster@CHandGrenade@@UAEXH@Z	public: virtual void __thiscall CHandGrenade::Holster(int)	vtable
+0x5c3a0	0	?UseDecrement@CHandGrenade@@UAEHXZ	public: virtual int __thiscall CHandGrenade::UseDecrement(void)	vtable
 0x5cdc0	0	?Save@CHAssassin@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CHAssassin::Save(class CSave &)	vtable
 0x5cdf0	0	?Restore@CHAssassin@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CHAssassin::Restore(class CRestore &)	vtable
+0x5ce20	0	?DeathSound@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::DeathSound(void)	vtable
+0x5ce30	0	?IdleSound@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::IdleSound(void)	vtable
 0x5ce40	0	?ISoundMask@CHAssassin@@UAEHXZ	public: virtual int __thiscall CHAssassin::ISoundMask(void)	vtable
 0x5ce50	0	?Classify@CHAssassin@@UAEHXZ	public: virtual int __thiscall CHAssassin::Classify(void)	vtable
-0x5ce60	0	?SetYawSpeed@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::SetYawSpeed(void)	vtable
-0x5d450	0	?Spawn@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::Spawn(void)	vtable
-0x5d580	0	?Precache@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::Precache(void)	vtable
-0x5d600	0	?CheckMeleeAttack1@CHAssassin@@UAEHMM@Z	public: virtual int __thiscall CHAssassin::CheckMeleeAttack1(float, float)	vtable
-0x5d810	0	?CheckRangeAttack1@CHAssassin@@UAEHMM@Z	public: virtual int __thiscall CHAssassin::CheckRangeAttack1(float, float)	vtable
-0x5d900	0	?CheckRangeAttack2@CHAssassin@@UAEHMM@Z	public: virtual int __thiscall CHAssassin::CheckRangeAttack2(float, float)	vtable
-0x5dc80	0	?StartTask@CHAssassin@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHAssassin::StartTask(struct Task_t *)	vtable
-0x5dcc0	0	?RunTask@CHAssassin@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHAssassin::RunTask(struct Task_t *)	vtable
-0x5dde0	0	?GetSchedule@CHAssassin@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CHAssassin::GetSchedule(void)	vtable
-0x5df90	0	?GetScheduleOfType@CHAssassin@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CHAssassin::GetScheduleOfType(int)	vtable
+0x5e140	0	?GetDamageAmount@CHeadCrab@@UAEMXZ	public: virtual float __thiscall CHeadCrab::GetDamageAmount(void)	vtable
+0x5e150	0	?GetVoicePitch@CHeadCrab@@UAEHXZ	public: virtual int __thiscall CHeadCrab::GetVoicePitch(void)	vtable
+0x5e160	0	?GetSoundVolue@CHeadCrab@@UAEMXZ	public: virtual float __thiscall CHeadCrab::GetSoundVolue(void)	vtable
 0x5e170	0	?ScheduleFromName@CHeadCrab@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CHeadCrab::ScheduleFromName(char const *)	vtable
 0x5e1a0	0	?Classify@CHeadCrab@@UAEHXZ	public: virtual int __thiscall CHeadCrab::Classify(void)	vtable
-0x5e220	0	?SetYawSpeed@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::SetYawSpeed(void)	vtable
-0x5e5d0	0	?Spawn@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::Spawn(void)	vtable
+0x5e1f0	0	?BodyTarget@CHeadCrab@@UAE?AVVector@@ABV2@@Z	public: virtual class Vector __thiscall CHeadCrab::BodyTarget(class Vector const &)	vtable
 0x5e6d0	0	?Precache@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::Precache(void)	vtable
-0x5e770	0	?RunTask@CHeadCrab@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHeadCrab::RunTask(struct Task_t *)	vtable
-0x5e9b0	0	?PrescheduleThink@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::PrescheduleThink(void)	vtable
-0x5e9f0	0	?StartTask@CHeadCrab@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHeadCrab::StartTask(struct Task_t *)	vtable
 0x5eab0	0	?CheckRangeAttack2@CHeadCrab@@UAEHMM@Z	public: virtual int __thiscall CHeadCrab::CheckRangeAttack2(float, float)	vtable
+0x5eaf0	0	?IdleSound@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::IdleSound(void)	vtable
+0x5eb90	0	?PainSound@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::PainSound(void)	vtable
+0x5ecd0	0	?GetDamageAmount@CBabyCrab@@UAEMXZ	public: virtual float __thiscall CBabyCrab::GetDamageAmount(void)	vtable
 0x5ed00	0	?GetSoundVolue@CBabyCrab@@UAEMXZ	public: virtual float __thiscall CBabyCrab::GetSoundVolue(void)	vtable
 0x5edb0	0	?Precache@CBabyCrab@@UAEXXZ	public: virtual void __thiscall CBabyCrab::Precache(void)	vtable
 0x5edd0	0	?SetYawSpeed@CBabyCrab@@UAEXXZ	public: virtual void __thiscall CBabyCrab::SetYawSpeed(void)	vtable
-0x5ee40	0	?GetScheduleOfType@CBabyCrab@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CBabyCrab::GetScheduleOfType(int)	vtable
 0x5eef0	0	?Spawn@CHealthKit@@EAEXXZ	private: virtual void __thiscall CHealthKit::Spawn(void)	vtable
 0x5ef20	0	?Precache@CHealthKit@@EAEXXZ	private: virtual void __thiscall CHealthKit::Precache(void)	vtable
+0x5ef40	0	?MyTouch@CHealthKit@@EAEHPAVCBasePlayer@@@Z	private: virtual int __thiscall CHealthKit::MyTouch(class CBasePlayer *)	vtable
 0x5f140	0	?Save@CWallHealth@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CWallHealth::Save(class CSave &)	vtable
 0x5f170	0	?Restore@CWallHealth@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CWallHealth::Restore(class CRestore &)	vtable
 0x5f210	0	?ObjectCaps@CWallHealth@@UAEHXZ	public: virtual int __thiscall CWallHealth::ObjectCaps(void)	vtable
@@ -498,48 +471,45 @@ rva	size	name	demangled	ref_object
 0x5f460	0	?Use@CWallHealth@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CWallHealth::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x5f840	0	?Save@CHGrunt@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CHGrunt::Save(class CSave &)	vtable
 0x5f870	0	?Restore@CHGrunt@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CHGrunt::Restore(class CRestore &)	vtable
+0x5f900	0	?IRelationship@CHGrunt@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CHGrunt::IRelationship(class CBaseEntity *)	vtable
+0x5fa00	0	?GibMonster@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::GibMonster(void)	vtable
 0x5fc00	0	?ISoundMask@CHGrunt@@UAEHXZ	public: virtual int __thiscall CHGrunt::ISoundMask(void)	vtable
-0x5fc80	0	?PrescheduleThink@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::PrescheduleThink(void)	vtable
 0x5fd10	0	?FCanCheckAttacks@CHGrunt@@UAEHXZ	public: virtual int __thiscall CHGrunt::FCanCheckAttacks(void)	vtable
-0x5fd20	0	?CheckMeleeAttack1@CHGrunt@@UAEHMM@Z	public: virtual int __thiscall CHGrunt::CheckMeleeAttack1(float, float)	vtable
 0x5fda0	0	?CheckRangeAttack1@CHGrunt@@UAEHMM@Z	public: virtual int __thiscall CHGrunt::CheckRangeAttack1(float, float)	vtable
-0x5fea0	0	?CheckRangeAttack2@CHGrunt@@UAEHMM@Z	public: virtual int __thiscall CHGrunt::CheckRangeAttack2(float, float)	vtable
-0x60460	0	?TakeDamage@CHGrunt@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CHGrunt::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x60490	0	?SetYawSpeed@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::SetYawSpeed(void)	vtable
-0x606e0	0	?CheckAmmo@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::CheckAmmo(void)	vtable
+0x60570	0	?IdleSound@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::IdleSound(void)	vtable
 0x60700	0	?Classify@CHGrunt@@UAEHXZ	public: virtual int __thiscall CHGrunt::Classify(void)	vtable
-0x607f0	0	?GetGunPosition@CHGrunt@@UAE?AVVector@@XZ	public: virtual class Vector __thiscall CHGrunt::GetGunPosition(void)	vtable
-0x613c0	0	?Spawn@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::Spawn(void)	vtable
-0x615b0	0	?Precache@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::Precache(void)	vtable
-0x616c0	0	?StartTask@CHGrunt@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHGrunt::StartTask(struct Task_t *)	vtable
-0x617d0	0	?RunTask@CHGrunt@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHGrunt::RunTask(struct Task_t *)	vtable
+0x60ea0	0	?HandleAnimEvent@CHGrunt@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CHGrunt::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x61a50	0	?SetActivity@CHGrunt@@UAEXW4Activity@@@Z	public: virtual void __thiscall CHGrunt::SetActivity(enum Activity)	vtable
 0x61c10	0	?GetSchedule@CHGrunt@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CHGrunt::GetSchedule(void)	vtable
 0x620c0	0	?GetScheduleOfType@CHGrunt@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CHGrunt::GetScheduleOfType(int)	vtable
-0x62460	0	?Precache@CHGruntRepel@@UAEXXZ	public: virtual void __thiscall CHGruntRepel::Precache(void)	vtable
-0x62650	0	?KeyValue@CDeadHGrunt@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CDeadHGrunt::KeyValue(struct KeyValueData_s *)	vtable
 0x62740	0	?Classify@CDeadHGrunt@@UAEHXZ	public: virtual int __thiscall CDeadHGrunt::Classify(void)	vtable
-0x62750	0	?Spawn@CDeadHGrunt@@UAEXXZ	public: virtual void __thiscall CDeadHGrunt::Spawn(void)	vtable
 0x62900	0	?Save@CHornet@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CHornet::Save(class CSave &)	vtable
 0x62930	0	?Restore@CHornet@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CHornet::Restore(class CRestore &)	vtable
 0x62990	0	?Spawn@CHornet@@UAEXXZ	public: virtual void __thiscall CHornet::Spawn(void)	vtable
+0x65020	0	?ResetEmptySound@CBasePlayerWeapon@@UAEXXZ	public: virtual void __thiscall CBasePlayerWeapon::ResetEmptySound(void)	vtable
 0x65030	0	?Spawn@CHgun@@UAEXXZ	public: virtual void __thiscall CHgun::Spawn(void)	vtable
 0x65070	0	?Precache@CHgun@@UAEXXZ	public: virtual void __thiscall CHgun::Precache(void)	vtable
+0x65110	0	?AddToPlayer@CHgun@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CHgun::AddToPlayer(class CBasePlayer *)	vtable
+0x65190	0	?GetItemInfo@CHgun@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CHgun::GetItemInfo(struct ItemInfo *)	vtable
+0x65200	0	?Deploy@CHgun@@UAEHXZ	public: virtual int __thiscall CHgun::Deploy(void)	vtable
+0x652a0	0	?Holster@CHgun@@UAEXH@Z	public: virtual void __thiscall CHgun::Holster(int)	vtable
+0x65380	0	?SendWeaponAnim@CBasePlayerWeapon@@UAEXHHH@Z	public: virtual void __thiscall CBasePlayerWeapon::SendWeaponAnim(int, int, int)	vtable
+0x656b0	0	?IsUseable@CHgun@@UAEHXZ	public: virtual int __thiscall CHgun::IsUseable(void)	vtable
+0x657d0	0	?PrimaryAttack@CHgun@@UAEXXZ	public: virtual void __thiscall CHgun::PrimaryAttack(void)	vtable
+0x65aa0	0	?SecondaryAttack@CHgun@@UAEXXZ	public: virtual void __thiscall CHgun::SecondaryAttack(void)	vtable
+0x66100	0	?WeaponIdle@CHgun@@UAEXXZ	public: virtual void __thiscall CHgun::WeaponIdle(void)	vtable
+0x66380	0	?iItemSlot@CHgun@@UAEHXZ	public: virtual int __thiscall CHgun::iItemSlot(void)	vtable
 0x66460	0	?Save@CHoundeye@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CHoundeye::Save(class CSave &)	vtable
 0x66490	0	?Restore@CHoundeye@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CHoundeye::Restore(class CRestore &)	vtable
 0x664c0	0	?Classify@CHoundeye@@UAEHXZ	public: virtual int __thiscall CHoundeye::Classify(void)	vtable
 0x664d0	0	?FValidateHintType@CHoundeye@@UAEHF@Z	public: virtual int __thiscall CHoundeye::FValidateHintType(short)	vtable
-0x66510	0	?FCanActiveIdle@CHoundeye@@UAEHXZ	public: virtual int __thiscall CHoundeye::FCanActiveIdle(void)	vtable
-0x665b0	0	?SetYawSpeed@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::SetYawSpeed(void)	vtable
-0x66640	0	?SetActivity@CHoundeye@@UAEXW4Activity@@@Z	public: virtual void __thiscall CHoundeye::SetActivity(enum Activity)	vtable
-0x66840	0	?Spawn@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::Spawn(void)	vtable
-0x66930	0	?Precache@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::Precache(void)	vtable
-0x67320	0	?StartTask@CHoundeye@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHoundeye::StartTask(struct Task_t *)	vtable
+0x666d0	0	?HandleAnimEvent@CHoundeye@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CHoundeye::HandleAnimEvent(struct MonsterEvent_t *)	vtable
+0x66a40	0	?IdleSound@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::IdleSound(void)	vtable
+0x66cb0	0	?DeathSound@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::DeathSound(void)	vtable
+0x66d50	0	?PainSound@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::PainSound(void)	vtable
 0x67470	0	?RunTask@CHoundeye@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHoundeye::RunTask(struct Task_t *)	vtable
-0x676c0	0	?PrescheduleThink@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::PrescheduleThink(void)	vtable
 0x67840	0	?ScheduleFromName@CHoundeye@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CHoundeye::ScheduleFromName(char const *)	vtable
 0x67870	0	?GetScheduleOfType@CHoundeye@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CHoundeye::GetScheduleOfType(int)	vtable
-0x67a40	0	?GetSchedule@CHoundeye@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CHoundeye::GetSchedule(void)	vtable
 0x67c50	0	?Save@CIchthyosaur@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CIchthyosaur::Save(class CSave &)	vtable
 0x67c80	0	?Restore@CIchthyosaur@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CIchthyosaur::Restore(class CRestore &)	vtable
 0x67d00	0	?AlertSound@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::AlertSound(void)	vtable
@@ -549,6 +519,7 @@ rva	size	name	demangled	ref_object
 0x67ed0	0	?CheckMeleeAttack1@CIchthyosaur@@UAEHMM@Z	public: virtual int __thiscall CIchthyosaur::CheckMeleeAttack1(float, float)	vtable
 0x67f80	0	?CheckRangeAttack1@CIchthyosaur@@UAEHMM@Z	public: virtual int __thiscall CIchthyosaur::CheckRangeAttack1(float, float)	vtable
 0x67fd0	0	?SetYawSpeed@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::SetYawSpeed(void)	vtable
+0x68060	0	?HandleAnimEvent@CIchthyosaur@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CIchthyosaur::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x68430	0	?Spawn@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::Spawn(void)	vtable
 0x68690	0	?Precache@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::Precache(void)	vtable
 0x68750	0	?GetSchedule@CIchthyosaur@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CIchthyosaur::GetSchedule(void)	vtable
@@ -556,126 +527,99 @@ rva	size	name	demangled	ref_object
 0x68970	0	?RunTask@CIchthyosaur@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CIchthyosaur::RunTask(struct Task_t *)	vtable
 0x692d0	0	?Move@CIchthyosaur@@UAEXM@Z	public: virtual void __thiscall CIchthyosaur::Move(float)	vtable
 0x694c0	0	?MoveExecute@CIchthyosaur@@UAEXPAVCBaseEntity@@ABVVector@@M@Z	public: virtual void __thiscall CIchthyosaur::MoveExecute(class CBaseEntity *, class Vector const &, float)	vtable
+0x69520	0	?MonsterThink@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::MonsterThink(void)	vtable
 0x695e0	0	?Stop@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::Stop(void)	vtable
 0x6a8f0	0	?Save@CISlave@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CISlave::Save(class CSave &)	vtable
 0x6a920	0	?Restore@CISlave@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CISlave::Restore(class CRestore &)	vtable
 0x6a950	0	?Classify@CISlave@@UAEHXZ	public: virtual int __thiscall CISlave::Classify(void)	vtable
+0x6aa90	0	?AlertSound@CISlave@@UAEXXZ	public: virtual void __thiscall CISlave::AlertSound(void)	vtable
+0x6ab00	0	?IdleSound@CISlave@@UAEXXZ	public: virtual void __thiscall CISlave::IdleSound(void)	vtable
 0x6abf0	0	?ISoundMask@CISlave@@UAEHXZ	public: virtual int __thiscall CISlave::ISoundMask(void)	vtable
-0x6ac20	0	?SetYawSpeed@CISlave@@UAEXXZ	public: virtual void __thiscall CISlave::SetYawSpeed(void)	vtable
-0x6b1d0	0	?CheckRangeAttack1@CISlave@@UAEHMM@Z	public: virtual int __thiscall CISlave::CheckRangeAttack1(float, float)	vtable
 0x6b200	0	?CheckRangeAttack2@CISlave@@UAEHMM@Z	public: virtual int __thiscall CISlave::CheckRangeAttack2(float, float)	vtable
-0x6b230	0	?Spawn@CISlave@@UAEXXZ	public: virtual void __thiscall CISlave::Spawn(void)	vtable
-0x6b430	0	?TakeDamage@CISlave@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CISlave::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x6b520	0	?GetSchedule@CISlave@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CISlave::GetSchedule(void)	vtable
-0x6b5f0	0	?GetScheduleOfType@CISlave@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CISlave::GetScheduleOfType(int)	vtable
 0x6c2c0	0	?KeyValue@CWorldItem@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CWorldItem::KeyValue(struct KeyValueData_s *)	vtable
 0x6c330	0	?Spawn@CWorldItem@@UAEXXZ	public: virtual void __thiscall CWorldItem::Spawn(void)	vtable
+0x6c560	0	?Respawn@CItem@@UAEPAVCBaseEntity@@XZ	public: virtual class CBaseEntity * __thiscall CItem::Respawn(void)	vtable
 0x6c6d0	0	?Spawn@CItemSuit@@EAEXXZ	private: virtual void __thiscall CItemSuit::Spawn(void)	vtable
 0x6c700	0	?Precache@CItemSuit@@EAEXXZ	private: virtual void __thiscall CItemSuit::Precache(void)	vtable
+0x6c710	0	?MyTouch@CItemSuit@@EAEHPAVCBasePlayer@@@Z	private: virtual int __thiscall CItemSuit::MyTouch(class CBasePlayer *)	vtable
 0x6c800	0	?Spawn@CItemBattery@@EAEXXZ	private: virtual void __thiscall CItemBattery::Spawn(void)	vtable
 0x6c830	0	?Precache@CItemBattery@@EAEXXZ	private: virtual void __thiscall CItemBattery::Precache(void)	vtable
+0x6c850	0	?MyTouch@CItemBattery@@EAEHPAVCBasePlayer@@@Z	private: virtual int __thiscall CItemBattery::MyTouch(class CBasePlayer *)	vtable
 0x6cab0	0	?Spawn@CItemAntidote@@EAEXXZ	private: virtual void __thiscall CItemAntidote::Spawn(void)	vtable
 0x6cae0	0	?Precache@CItemAntidote@@EAEXXZ	private: virtual void __thiscall CItemAntidote::Precache(void)	vtable
+0x6caf0	0	?MyTouch@CItemAntidote@@EAEHPAVCBasePlayer@@@Z	private: virtual int __thiscall CItemAntidote::MyTouch(class CBasePlayer *)	vtable
 0x6cba0	0	?Spawn@CItemSecurity@@EAEXXZ	private: virtual void __thiscall CItemSecurity::Spawn(void)	vtable
 0x6cbd0	0	?Precache@CItemSecurity@@EAEXXZ	private: virtual void __thiscall CItemSecurity::Precache(void)	vtable
 0x6cc70	0	?Spawn@CItemLongJump@@EAEXXZ	private: virtual void __thiscall CItemLongJump::Spawn(void)	vtable
 0x6cca0	0	?Precache@CItemLongJump@@EAEXXZ	private: virtual void __thiscall CItemLongJump::Precache(void)	vtable
+0x6ccb0	0	?MyTouch@CItemLongJump@@EAEHPAVCBasePlayer@@@Z	private: virtual int __thiscall CItemLongJump::MyTouch(class CBasePlayer *)	vtable
 0x6e5e0	0	?Touch@CLeech@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CLeech::Touch(class CBaseEntity *)	vtable
 0x6e640	0	?SetObjectCollisionBox@CLeech@@UAEXXZ	public: virtual void __thiscall CLeech::SetObjectCollisionBox(void)	vtable
 0x6e6f0	0	?BloodColor@CLeech@@UAEHXZ	public: virtual int __thiscall CLeech::BloodColor(void)	vtable
 0x6e700	0	?Classify@CLeech@@UAEHXZ	public: virtual int __thiscall CLeech::Classify(void)	vtable
 0x6e710	0	?Save@CLeech@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CLeech::Save(class CSave &)	vtable
 0x6e740	0	?Restore@CLeech@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CLeech::Restore(class CRestore &)	vtable
-0x6e770	0	?Spawn@CLeech@@UAEXXZ	public: virtual void __thiscall CLeech::Spawn(void)	vtable
 0x6e8b0	0	?Activate@CLeech@@UAEXXZ	public: virtual void __thiscall CLeech::Activate(void)	vtable
-0x6fdc0	0	?Killed@CLeech@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CLeech::Killed(struct entvars_s *, int)	vtable
+0x6eac0	0	?IRelationship@CLeech@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CLeech::IRelationship(class CBaseEntity *)	vtable
 0x6ff50	0	?Save@CLight@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CLight::Save(class CSave &)	vtable
 0x6ff80	0	?Restore@CLight@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CLight::Restore(class CRestore &)	vtable
-0x6ffb0	0	?KeyValue@CLight@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CLight::KeyValue(struct KeyValueData_s *)	vtable
-0x700d0	0	?Spawn@CLight@@UAEXXZ	public: virtual void __thiscall CLight::Spawn(void)	vtable
-0x70150	0	?Use@CLight@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CLight::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x702e0	0	?KeyValue@CEnvLight@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvLight::KeyValue(struct KeyValueData_s *)	vtable
 0x70550	0	?Save@CRuleEntity@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CRuleEntity::Save(class CSave &)	vtable
 0x70580	0	?Restore@CRuleEntity@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CRuleEntity::Restore(class CRestore &)	vtable
 0x705e0	0	?KeyValue@CRuleEntity@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CRuleEntity::KeyValue(struct KeyValueData_s *)	vtable
 0x70750	0	?Spawn@CGameScore@@UAEXXZ	public: virtual void __thiscall CGameScore::Spawn(void)	vtable
-0x707e0	0	?Use@CGameScore@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameScore::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x708c0	0	?Use@CGameEnd@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameEnd::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x70950	0	?Save@CGameText@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CGameText::Save(class CSave &)	vtable
 0x70980	0	?Restore@CGameText@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CGameText::Restore(class CRestore &)	vtable
 0x709b0	0	?KeyValue@CGameText@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGameText::KeyValue(struct KeyValueData_s *)	vtable
-0x70d90	0	?Use@CGameText@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameText::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x70e80	0	?ObjectCaps@CGameTeamMaster@@UAEHXZ	public: virtual int __thiscall CGameTeamMaster::ObjectCaps(void)	vtable
-0x70e90	0	?KeyValue@CGameTeamMaster@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGameTeamMaster::KeyValue(struct KeyValueData_s *)	vtable
 0x70f80	0	?Use@CGameTeamMaster@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameTeamMaster::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x71020	0	?IsTriggered@CGameTeamMaster@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CGameTeamMaster::IsTriggered(class CBaseEntity *)	vtable
 0x71030	0	?TeamID@CGameTeamMaster@@UAEPBDXZ	public: virtual char const * __thiscall CGameTeamMaster::TeamID(void)	vtable
 0x711d0	0	?Save@CGamePlayerZone@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CGamePlayerZone::Save(class CSave &)	vtable
 0x71200	0	?Restore@CGamePlayerZone@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CGamePlayerZone::Restore(class CRestore &)	vtable
 0x71230	0	?KeyValue@CGamePlayerZone@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGamePlayerZone::KeyValue(struct KeyValueData_s *)	vtable
-0x713a0	0	?Use@CGamePlayerZone@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGamePlayerZone::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x718b0	0	?KeyValue@CGamePlayerEquip@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGamePlayerEquip::KeyValue(struct KeyValueData_s *)	vtable
 0x719f0	0	?Use@CGamePlayerEquip@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGamePlayerEquip::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x71b00	0	?Use@CGamePlayerTeam@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGamePlayerTeam::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x74190	0	?Save@CMonsterMaker@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CMonsterMaker::Save(class CSave &)	vtable
 0x741c0	0	?Restore@CMonsterMaker@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CMonsterMaker::Restore(class CRestore &)	vtable
-0x741f0	0	?KeyValue@CMonsterMaker@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMonsterMaker::KeyValue(struct KeyValueData_s *)	vtable
-0x74310	0	?Spawn@CMonsterMaker@@UAEXXZ	public: virtual void __thiscall CMonsterMaker::Spawn(void)	vtable
-0x743c0	0	?Precache@CMonsterMaker@@UAEXXZ	public: virtual void __thiscall CMonsterMaker::Precache(void)	vtable
-0x74700	0	?DeathNotice@CMonsterMaker@@UAEXPAUentvars_s@@@Z	public: virtual void __thiscall CMonsterMaker::DeathNotice(struct entvars_s *)	vtable
-0x74760	0	?Restore@CBaseMonster@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseMonster::Restore(class CRestore &)	vtable
-0x74810	0	?BarnacleVictimBitten@CBaseMonster@@UAEXPAUentvars_s@@@Z	public: virtual void __thiscall CBaseMonster::BarnacleVictimBitten(struct entvars_s *)	vtable
-0x74830	0	?BarnacleVictimReleased@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::BarnacleVictimReleased(void)	vtable
 0x749f0	0	?FValidateHintType@CBaseMonster@@UAEHF@Z	public: virtual int __thiscall CBaseMonster::FValidateHintType(short)	vtable
 0x74a00	0	?Look@CBaseMonster@@UAEXH@Z	public: virtual void __thiscall CBaseMonster::Look(int)	vtable
 0x74cc0	0	?ISoundMask@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::ISoundMask(void)	vtable
-0x74cd0	0	?PBestSound@CBaseMonster@@UAEPAVCSound@@XZ	public: virtual class CSound * __thiscall CBaseMonster::PBestSound(void)	vtable
-0x74db0	0	?PBestScent@CBaseMonster@@UAEPAVCSound@@XZ	public: virtual class CSound * __thiscall CBaseMonster::PBestScent(void)	vtable
 0x74e60	0	?MonsterThink@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::MonsterThink(void)	vtable
-0x74f50	0	?IgnoreConditions@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::IgnoreConditions(void)	vtable
 0x75750	0	?CheckRangeAttack1@CBaseMonster@@UAEHMM@Z	public: virtual int __thiscall CBaseMonster::CheckRangeAttack1(float, float)	vtable
 0x75790	0	?CheckRangeAttack2@CBaseMonster@@UAEHMM@Z	public: virtual int __thiscall CBaseMonster::CheckRangeAttack2(float, float)	vtable
-0x757d0	0	?CheckMeleeAttack1@CBaseMonster@@UAEHMM@Z	public: virtual int __thiscall CBaseMonster::CheckMeleeAttack1(float, float)	vtable
 0x75830	0	?CheckMeleeAttack2@CBaseMonster@@UAEHMM@Z	public: virtual int __thiscall CBaseMonster::CheckMeleeAttack2(float, float)	vtable
-0x75a10	0	?FCanCheckAttacks@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::FCanCheckAttacks(void)	vtable
-0x75a30	0	?CheckEnemy@CBaseMonster@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CBaseMonster::CheckEnemy(class CBaseEntity *)	vtable
-0x75f40	0	?SetActivity@CBaseMonster@@UAEXW4Activity@@@Z	public: virtual void __thiscall CBaseMonster::SetActivity(enum Activity)	vtable
-0x76750	0	?FTriangulate@CBaseMonster@@UAEHABVVector@@0MPAVCBaseEntity@@PAV2@@Z	public: virtual int __thiscall CBaseMonster::FTriangulate(class Vector const &, class Vector const &, float, class CBaseEntity *, class Vector *)	vtable
 0x771a0	0	?Move@CBaseMonster@@UAEXM@Z	public: virtual void __thiscall CBaseMonster::Move(float)	vtable
 0x77680	0	?ShouldAdvanceRoute@CBaseMonster@@UAEHM@Z	public: virtual int __thiscall CBaseMonster::ShouldAdvanceRoute(float)	vtable
-0x776a0	0	?MoveExecute@CBaseMonster@@UAEXPAVCBaseEntity@@ABVVector@@M@Z	public: virtual void __thiscall CBaseMonster::MoveExecute(class CBaseEntity *, class Vector const &, float)	vtable
 0x77750	0	?MonsterInit@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::MonsterInit(void)	vtable
 0x77860	0	?StartMonster@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::StartMonster(void)	vtable
 0x77b30	0	?IRelationship@CBaseMonster@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CBaseMonster::IRelationship(class CBaseEntity *)	vtable
-0x77bf0	0	?FindCover@CBaseMonster@@UAEHVVector@@0MM@Z	public: virtual int __thiscall CBaseMonster::FindCover(class Vector, class Vector, float, float)	vtable
-0x77ef0	0	?BuildNearestRoute@CBaseMonster@@UAEHVVector@@0MM@Z	public: virtual int __thiscall CBaseMonster::BuildNearestRoute(class Vector, class Vector, float, float)	vtable
-0x78170	0	?BestVisibleEnemy@CBaseMonster@@UAEPAVCBaseEntity@@XZ	public: virtual class CBaseEntity * __thiscall CBaseMonster::BestVisibleEnemy(void)	vtable
-0x783e0	0	?ChangeYaw@CBaseMonster@@UAEMH@Z	public: virtual float __thiscall CBaseMonster::ChangeYaw(int)	vtable
-0x78930	0	?GetGunPosition@CBaseMonster@@UAE?AVVector@@XZ	public: virtual class Vector __thiscall CBaseMonster::GetGunPosition(void)	vtable
+0x78650	0	?HandleAnimEvent@CBaseMonster@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CBaseMonster::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0x78d20	0	?ReportAIState@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::ReportAIState(void)	vtable
-0x78fc0	0	?KeyValue@CBaseMonster@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseMonster::KeyValue(struct KeyValueData_s *)	vtable
-0x79230	0	?CanPlaySequence@CBaseMonster@@UAEHHH@Z	public: virtual int __thiscall CBaseMonster::CanPlaySequence(int, int)	vtable
 0x79760	0	?FCanActiveIdle@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::FCanActiveIdle(void)	vtable
 0x79770	0	?PlaySentence@CBaseMonster@@UAEXPBDMMM@Z	public: virtual void __thiscall CBaseMonster::PlaySentence(char const *, float, float, float)	vtable
-0x797e0	0	?PlayScriptedSentence@CBaseMonster@@UAEXPBDMMMHPAVCBaseEntity@@@Z	public: virtual void __thiscall CBaseMonster::PlayScriptedSentence(char const *, float, float, float, int, class CBaseEntity *)	vtable
-0x79880	0	?MonsterInitDead@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::MonsterInitDead(void)	vtable
 0x79e90	0	?ShouldFadeOnDeath@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::ShouldFadeOnDeath(void)	vtable
-0x79f20	0	?RunAI@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::RunAI(void)	vtable
 0x7a050	0	?GetIdealState@CBaseMonster@@UAE?AW4MONSTERSTATE@@XZ	public: virtual enum MONSTERSTATE __thiscall CBaseMonster::GetIdealState(void)	vtable
 0x7a2a0	0	?ObjectCaps@CFuncMortarField@@UAEHXZ	public: virtual int __thiscall CFuncMortarField::ObjectCaps(void)	vtable
 0x7a2b0	0	?Save@CFuncMortarField@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncMortarField::Save(class CSave &)	vtable
 0x7a2e0	0	?Restore@CFuncMortarField@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncMortarField::Restore(class CRestore &)	vtable
-0x7a310	0	?KeyValue@CFuncMortarField@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncMortarField::KeyValue(struct KeyValueData_s *)	vtable
 0x7a540	0	?Precache@CFuncMortarField@@UAEXXZ	public: virtual void __thiscall CFuncMortarField::Precache(void)	vtable
-0x7a8d0	0	?Precache@CMortar@@UAEXXZ	public: virtual void __thiscall CMortar::Precache(void)	vtable
+0x7bf20	0	?SecondaryAmmoIndex@CMP5@@UAEHXZ	public: virtual int __thiscall CMP5::SecondaryAmmoIndex(void)	vtable
 0x7bf30	0	?Spawn@CMP5@@UAEXXZ	public: virtual void __thiscall CMP5::Spawn(void)	vtable
 0x7bfc0	0	?Precache@CMP5@@UAEXXZ	public: virtual void __thiscall CMP5::Precache(void)	vtable
+0x7c130	0	?GetItemInfo@CMP5@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CMP5::GetItemInfo(struct ItemInfo *)	vtable
+0x7c1b0	0	?AddToPlayer@CMP5@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CMP5::AddToPlayer(class CBasePlayer *)	vtable
+0x7c210	0	?Deploy@CMP5@@UAEHXZ	public: virtual int __thiscall CMP5::Deploy(void)	vtable
+0x7da00	0	?UseDecrement@CMP5@@UAEHXZ	public: virtual int __thiscall CMP5::UseDecrement(void)	vtable
 0x7dac0	0	?Spawn@CMP5AmmoClip@@EAEXXZ	private: virtual void __thiscall CMP5AmmoClip::Spawn(void)	vtable
 0x7daf0	0	?Precache@CMP5AmmoClip@@EAEXXZ	private: virtual void __thiscall CMP5AmmoClip::Precache(void)	vtable
+0x7db10	0	?AddAmmo@CMP5AmmoClip@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CMP5AmmoClip::AddAmmo(class CBaseEntity *)	vtable
 0x7dc50	0	?Spawn@CMP5Chainammo@@EAEXXZ	private: virtual void __thiscall CMP5Chainammo::Spawn(void)	vtable
 0x7dc80	0	?Precache@CMP5Chainammo@@EAEXXZ	private: virtual void __thiscall CMP5Chainammo::Precache(void)	vtable
+0x7dca0	0	?AddAmmo@CMP5Chainammo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CMP5Chainammo::AddAmmo(class CBaseEntity *)	vtable
 0x7dd70	0	?Spawn@CMP5AmmoGrenade@@EAEXXZ	private: virtual void __thiscall CMP5AmmoGrenade::Spawn(void)	vtable
 0x7dda0	0	?Precache@CMP5AmmoGrenade@@EAEXXZ	private: virtual void __thiscall CMP5AmmoGrenade::Precache(void)	vtable
+0x7de90	0	?iItemSlot@CMP5@@UAEHXZ	public: virtual int __thiscall CMP5::iItemSlot(void)	vtable
 0x806c0	0	?Classify@CNihilanth@@UAEHXZ	public: virtual int __thiscall CNihilanth::Classify(void)	vtable
 0x806d0	0	?BloodColor@CNihilanth@@UAEHXZ	public: virtual int __thiscall CNihilanth::BloodColor(void)	vtable
 0x806e0	0	?SetObjectCollisionBox@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::SetObjectCollisionBox(void)	vtable
@@ -685,166 +629,172 @@ rva	size	name	demangled	ref_object
 0x808a0	0	?Restore@CNihilanthHVR@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CNihilanthHVR::Restore(class CRestore &)	vtable
 0x808d0	0	?Spawn@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::Spawn(void)	vtable
 0x80bb0	0	?Precache@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::Precache(void)	vtable
+0x80ca0	0	?PainSound@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::PainSound(void)	vtable
 0x80eb0	0	?Killed@CNihilanth@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CNihilanth::Killed(struct entvars_s *, int)	vtable
 0x817c0	0	?GibMonster@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::GibMonster(void)	vtable
-0x838b0	0	?TakeDamage@CNihilanth@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CNihilanth::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
 0x83920	0	?TraceAttack@CNihilanth@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CNihilanth::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0x83b20	0	?Precache@CNihilanthHVR@@UAEXXZ	public: virtual void __thiscall CNihilanthHVR::Precache(void)	vtable
+0x85390	0	?Crawl@CNihilanthHVR@@UAEXXZ	public: virtual void __thiscall CNihilanthHVR::Crawl(void)	vtable
 0x87730	0	?ObjectCaps@CTestHull@@UAEHXZ	public: virtual int __thiscall CTestHull::ObjectCaps(void)	vtable
-0x87890	0	?KeyValue@CNodeEnt@@EAEXPAUKeyValueData_s@@@Z	private: virtual void __thiscall CNodeEnt::KeyValue(struct KeyValueData_s *)	vtable
-0x87950	0	?Spawn@CNodeEnt@@EAEXXZ	private: virtual void __thiscall CNodeEnt::Spawn(void)	vtable
 0x88c30	0	?ObjectCaps@CNodeEnt@@EAEHXZ	private: virtual int __thiscall CNodeEnt::ObjectCaps(void)	vtable
-0x8ae20	0	?Spawn@CNodeViewer@@UAEXXZ	public: virtual void __thiscall CNodeViewer::Spawn(void)	vtable
 0x8c6e0	0	?ObjectCaps@COsprey@@UAEHXZ	public: virtual int __thiscall COsprey::ObjectCaps(void)	vtable
 0x8c6f0	0	?Classify@COsprey@@UAEHXZ	public: virtual int __thiscall COsprey::Classify(void)	vtable
 0x8c700	0	?BloodColor@COsprey@@UAEHXZ	public: virtual int __thiscall COsprey::BloodColor(void)	vtable
 0x8c710	0	?Save@COsprey@@UAEHAAVCSave@@@Z	public: virtual int __thiscall COsprey::Save(class CSave &)	vtable
 0x8c740	0	?Restore@COsprey@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall COsprey::Restore(class CRestore &)	vtable
-0x8c770	0	?Spawn@COsprey@@UAEXXZ	public: virtual void __thiscall COsprey::Spawn(void)	vtable
-0x8c900	0	?Precache@COsprey@@UAEXXZ	public: virtual void __thiscall COsprey::Precache(void)	vtable
 0x8dc00	0	?Killed@COsprey@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall COsprey::Killed(struct entvars_s *, int)	vtable
-0x8e780	0	?TraceAttack@COsprey@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall COsprey::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0x8e8e0	0	?GetDelay@CPathCorner@@UAEMXZ	public: virtual float __thiscall CPathCorner::GetDelay(void)	vtable
 0x8e8f0	0	?Save@CPathCorner@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CPathCorner::Save(class CSave &)	vtable
 0x8e920	0	?Restore@CPathCorner@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CPathCorner::Restore(class CRestore &)	vtable
-0x8e950	0	?KeyValue@CPathCorner@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CPathCorner::KeyValue(struct KeyValueData_s *)	vtable
 0x8e9c0	0	?Spawn@CPathCorner@@UAEXXZ	public: virtual void __thiscall CPathCorner::Spawn(void)	vtable
 0x8e9d0	0	?Save@CPathTrack@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CPathTrack::Save(class CSave &)	vtable
 0x8ea00	0	?Restore@CPathTrack@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CPathTrack::Restore(class CRestore &)	vtable
-0x8eaa0	0	?KeyValue@CPathTrack@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CPathTrack::KeyValue(struct KeyValueData_s *)	vtable
-0x8eb10	0	?Use@CPathTrack@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CPathTrack::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0x8ec90	0	?Spawn@CPathTrack@@UAEXXZ	public: virtual void __thiscall CPathTrack::Spawn(void)	vtable
 0x8f530	0	?Save@CBasePlatTrain@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBasePlatTrain::Save(class CSave &)	vtable
 0x8f560	0	?Restore@CBasePlatTrain@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBasePlatTrain::Restore(class CRestore &)	vtable
 0x8f590	0	?KeyValue@CBasePlatTrain@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBasePlatTrain::KeyValue(struct KeyValueData_s *)	vtable
 0x8fb50	0	?ObjectCaps@CBasePlatTrain@@UAEHXZ	public: virtual int __thiscall CBasePlatTrain::ObjectCaps(void)	vtable
-0x8fce0	0	?Precache@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::Precache(void)	vtable
-0x8fd10	0	?Spawn@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::Spawn(void)	vtable
+0x8fb60	0	?IsTogglePlat@CBasePlatTrain@@UAEHXZ	public: virtual int __thiscall CBasePlatTrain::IsTogglePlat(void)	vtable
+0x90060	0	?GoDown@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::GoDown(void)	vtable
+0x90170	0	?GoUp@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::GoUp(void)	vtable
 0x903d0	0	?Save@CFuncPlatRot@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncPlatRot::Save(class CSave &)	vtable
 0x90400	0	?Restore@CFuncPlatRot@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncPlatRot::Restore(class CRestore &)	vtable
 0x907b0	0	?Save@CFuncTrain@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncTrain::Save(class CSave &)	vtable
 0x907e0	0	?Restore@CFuncTrain@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncTrain::Restore(class CRestore &)	vtable
-0x90810	0	?KeyValue@CFuncTrain@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTrain::KeyValue(struct KeyValueData_s *)	vtable
+0x90890	0	?Blocked@CFuncTrain@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CFuncTrain::Blocked(class CBaseEntity *)	vtable
 0x90ec0	0	?Activate@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::Activate(void)	vtable
-0x90ff0	0	?Spawn@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::Spawn(void)	vtable
 0x91100	0	?Precache@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::Precache(void)	vtable
+0x91110	0	?OverrideReset@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::OverrideReset(void)	vtable
 0x911c0	0	?Save@CFuncTrackTrain@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncTrackTrain::Save(class CSave &)	vtable
 0x911f0	0	?Restore@CFuncTrackTrain@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncTrackTrain::Restore(class CRestore &)	vtable
 0x91290	0	?KeyValue@CFuncTrackTrain@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTrackTrain::KeyValue(struct KeyValueData_s *)	vtable
+0x914f0	0	?Blocked@CFuncTrackTrain@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CFuncTrackTrain::Blocked(class CBaseEntity *)	vtable
 0x92130	0	?ObjectCaps@CFuncTrackTrain@@UAEHXZ	public: virtual int __thiscall CFuncTrackTrain::ObjectCaps(void)	vtable
-0x92340	0	?OnControls@CFuncTrackTrain@@UAEHPAUentvars_s@@@Z	public: virtual int __thiscall CFuncTrackTrain::OnControls(struct entvars_s *)	vtable
+0x92840	0	?OverrideReset@CFuncTrackTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrackTrain::OverrideReset(void)	vtable
 0x928e0	0	?Spawn@CFuncTrackTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrackTrain::Spawn(void)	vtable
-0x92aa0	0	?Precache@CFuncTrackTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrackTrain::Precache(void)	vtable
 0x92c30	0	?ObjectCaps@CFuncTrainControls@@UAEHXZ	public: virtual int __thiscall CFuncTrainControls::ObjectCaps(void)	vtable
+0x92e30	0	?IsTogglePlat@CFuncTrackChange@@UAEHXZ	public: virtual int __thiscall CFuncTrackChange::IsTogglePlat(void)	vtable
 0x92e40	0	?Save@CFuncTrackChange@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFuncTrackChange::Save(class CSave &)	vtable
 0x92e70	0	?Restore@CFuncTrackChange@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFuncTrackChange::Restore(class CRestore &)	vtable
 0x92ea0	0	?Spawn@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::Spawn(void)	vtable
 0x92f90	0	?Precache@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::Precache(void)	vtable
-0x92fc0	0	?KeyValue@CFuncTrackChange@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTrackChange::KeyValue(struct KeyValueData_s *)	vtable
-0x937f0	0	?UpdateAutoTargets@CFuncTrackChange@@UAEXH@Z	public: virtual void __thiscall CFuncTrackChange::UpdateAutoTargets(int)	vtable
-0x93920	0	?HitBottom@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::HitBottom(void)	vtable
-0x939a0	0	?HitTop@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::HitTop(void)	vtable
-0x93aa0	0	?UpdateAutoTargets@CFuncTrackAuto@@UAEXH@Z	public: virtual void __thiscall CFuncTrackAuto::UpdateAutoTargets(int)	vtable
+0x92fb0	0	?Touch@CFuncTrackChange@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CFuncTrackChange::Touch(class CBaseEntity *)	vtable
 0x93d10	0	?BloodColor@CGunTarget@@UAEHXZ	public: virtual int __thiscall CGunTarget::BloodColor(void)	vtable
 0x93d20	0	?Classify@CGunTarget@@UAEHXZ	public: virtual int __thiscall CGunTarget::Classify(void)	vtable
 0x93d50	0	?ObjectCaps@CGunTarget@@UAEHXZ	public: virtual int __thiscall CGunTarget::ObjectCaps(void)	vtable
 0x93d60	0	?Save@CGunTarget@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CGunTarget::Save(class CSave &)	vtable
 0x93d90	0	?Restore@CGunTarget@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CGunTarget::Restore(class CRestore &)	vtable
-0x93dc0	0	?Spawn@CGunTarget@@UAEXXZ	public: virtual void __thiscall CGunTarget::Spawn(void)	vtable
-0x93e90	0	?Activate@CGunTarget@@UAEXXZ	public: virtual void __thiscall CGunTarget::Activate(void)	vtable
-0x94110	0	?TakeDamage@CGunTarget@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CGunTarget::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0x941a0	0	?Use@CGunTarget@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGunTarget::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
+0x94860	0	?DeathSound@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::DeathSound(void)	vtable
 0x94880	0	?TakeHealth@CBasePlayer@@UAEHMH@Z	public: virtual int __thiscall CBasePlayer::TakeHealth(float, int)	vtable
+0x948a0	0	?GetGunPosition@CBasePlayer@@UAE?AVVector@@XZ	public: virtual class Vector __thiscall CBasePlayer::GetGunPosition(void)	vtable
 0x948e0	0	?TraceAttack@CBasePlayer@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CBasePlayer::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0x949b0	0	?TakeDamage@CBasePlayer@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBasePlayer::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
 0x96020	0	?Killed@CBasePlayer@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CBasePlayer::Killed(struct entvars_s *, int)	vtable
 0x97ef0	0	?Classify@CBasePlayer@@UAEHXZ	public: virtual int __thiscall CBasePlayer::Classify(void)	vtable
 0x97f20	0	?AddPoints@CBasePlayer@@UAEXHH@Z	public: virtual void __thiscall CBasePlayer::AddPoints(int, int)	vtable
 0x98000	0	?AddPointsToTeam@CBasePlayer@@UAEXHH@Z	public: virtual void __thiscall CBasePlayer::AddPointsToTeam(int, int)	vtable
+0x98a20	0	?PreThink@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::PreThink(void)	vtable
+0x99dd0	0	?PostThink@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::PostThink(void)	vtable
 0x9a880	0	?Spawn@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::Spawn(void)	vtable
 0x9bd10	0	?Precache@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::Precache(void)	vtable
 0x9be60	0	?Restore@CBasePlayer@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBasePlayer::Restore(class CRestore &)	vtable
-0x9c370	0	?TeamID@CBasePlayer@@UAEPBDXZ	public: virtual char const * __thiscall CBasePlayer::TeamID(void)	vtable
+0x9caa0	0	?ImpulseCommands@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::ImpulseCommands(void)	vtable
 0x9d150	0	?AddPlayerItem@CBasePlayer@@UAEHPAVCBasePlayerItem@@@Z	public: virtual int __thiscall CBasePlayer::AddPlayerItem(class CBasePlayerItem *)	vtable
-0x9d300	0	?RemovePlayerItem@CBasePlayer@@UAEHPAVCBasePlayerItem@@@Z	public: virtual int __thiscall CBasePlayer::RemovePlayerItem(class CBasePlayerItem *)	vtable
 0x9d4c0	0	?GiveAmmo@CBasePlayer@@UAEHHPADH@Z	public: virtual int __thiscall CBasePlayer::GiveAmmo(int, char *, int)	vtable
+0x9d860	0	?UpdateClientData@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::UpdateClientData(void)	vtable
 0x9e0d0	0	?BarnacleVictimReleased@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::BarnacleVictimReleased(void)	vtable
 0x9eb30	0	?KeyValue@CDeadHEV@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CDeadHEV::KeyValue(struct KeyValueData_s *)	vtable
 0x9ec20	0	?Classify@CDeadHEV@@UAEHXZ	public: virtual int __thiscall CDeadHEV::Classify(void)	vtable
-0x9ec30	0	?Spawn@CDeadHEV@@UAEXXZ	public: virtual void __thiscall CDeadHEV::Spawn(void)	vtable
 0x9ee50	0	?Save@CRevertSaved@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CRevertSaved::Save(class CSave &)	vtable
 0x9ee80	0	?Restore@CRevertSaved@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CRevertSaved::Restore(class CRestore &)	vtable
-0x9eeb0	0	?KeyValue@CRevertSaved@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CRevertSaved::KeyValue(struct KeyValueData_s *)	vtable
-0x9f020	0	?Use@CRevertSaved@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CRevertSaved::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0x9f180	0	?Think@CInfoIntermission@@EAEXXZ	private: virtual void __thiscall CInfoIntermission::Think(void)	vtable
+0xa9ba0	0	?RC2V60@CBaseEntity@@UAEHXZ	public: virtual int __thiscall CBaseEntity::RC2V60(void)	vtable
+0xaba10	0	?GetItemInfo@CPython@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CPython::GetItemInfo(struct ItemInfo *)	vtable
+0xaba80	0	?AddToPlayer@CPython@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CPython::AddToPlayer(class CBasePlayer *)	vtable
 0xabae0	0	?Spawn@CPython@@UAEXXZ	public: virtual void __thiscall CPython::Spawn(void)	vtable
 0xabb40	0	?Precache@CPython@@UAEXXZ	public: virtual void __thiscall CPython::Precache(void)	vtable
+0xabc20	0	?Deploy@CPython@@UAEHXZ	public: virtual int __thiscall CPython::Deploy(void)	vtable
+0xabc90	0	?Holster@CPython@@UAEXH@Z	public: virtual void __thiscall CPython::Holster(int)	vtable
 0xad9f0	0	?Spawn@CPythonAmmo@@EAEXXZ	private: virtual void __thiscall CPythonAmmo::Spawn(void)	vtable
 0xada20	0	?Precache@CPythonAmmo@@EAEXXZ	private: virtual void __thiscall CPythonAmmo::Precache(void)	vtable
+0xada40	0	?AddAmmo@CPythonAmmo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CPythonAmmo::AddAmmo(class CBaseEntity *)	vtable
+0xadaa0	0	?iItemSlot@CPython@@UAEHXZ	public: virtual int __thiscall CPython::iItemSlot(void)	vtable
 0xae940	0	?Classify@CRat@@UAEHXZ	public: virtual int __thiscall CRat::Classify(void)	vtable
 0xae950	0	?SetYawSpeed@CRat@@UAEXXZ	public: virtual void __thiscall CRat::SetYawSpeed(void)	vtable
-0xae960	0	?Spawn@CRat@@UAEXXZ	public: virtual void __thiscall CRat::Spawn(void)	vtable
 0xaea50	0	?Precache@CRat@@UAEXXZ	public: virtual void __thiscall CRat::Precache(void)	vtable
 0xb29a0	0	?ISoundMask@CRoach@@UAEHXZ	public: virtual int __thiscall CRoach::ISoundMask(void)	vtable
 0xb29b0	0	?Classify@CRoach@@UAEHXZ	public: virtual int __thiscall CRoach::Classify(void)	vtable
 0xb2b10	0	?SetYawSpeed@CRoach@@UAEXXZ	public: virtual void __thiscall CRoach::SetYawSpeed(void)	vtable
-0xb2b20	0	?Spawn@CRoach@@UAEXXZ	public: virtual void __thiscall CRoach::Spawn(void)	vtable
 0xb2c50	0	?Precache@CRoach@@UAEXXZ	public: virtual void __thiscall CRoach::Precache(void)	vtable
-0xb3200	0	?Move@CRoach@@UAEXM@Z	public: virtual void __thiscall CRoach::Move(float)	vtable
+0xb3380	0	?Look@CRoach@@UAEXH@Z	public: virtual void __thiscall CRoach::Look(int)	vtable
+0xb9490	0	?iItemSlot@CRpg@@UAEHXZ	public: virtual int __thiscall CRpg::iItemSlot(void)	vtable
 0xb9530	0	?Spawn@CRpg@@UAEXXZ	public: virtual void __thiscall CRpg::Spawn(void)	vtable
 0xb9580	0	?Precache@CRpg@@UAEXXZ	public: virtual void __thiscall CRpg::Precache(void)	vtable
+0xb9610	0	?GetItemInfo@CRpg@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CRpg::GetItemInfo(struct ItemInfo *)	vtable
+0xb9680	0	?AddToPlayer@CRpg@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CRpg::AddToPlayer(class CBasePlayer *)	vtable
+0xb9720	0	?CanHolster@CRpg@@UAEHXZ	public: virtual int __thiscall CRpg::CanHolster(void)	vtable
+0xb9730	0	?Holster@CRpg@@UAEXH@Z	public: virtual void __thiscall CRpg::Holster(int)	vtable
+0xbab40	0	?ShouldWeaponIdle@CRpg@@UAEHXZ	public: virtual int __thiscall CRpg::ShouldWeaponIdle(void)	vtable
+0xbac90	0	?UseDecrement@CRpg@@UAEHXZ	public: virtual int __thiscall CRpg::UseDecrement(void)	vtable
 0xbae40	0	?Spawn@CRpgAmmo@@EAEXXZ	private: virtual void __thiscall CRpgAmmo::Spawn(void)	vtable
 0xbae70	0	?Precache@CRpgAmmo@@EAEXXZ	private: virtual void __thiscall CRpgAmmo::Precache(void)	vtable
+0xbae90	0	?AddAmmo@CRpgAmmo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CRpgAmmo::AddAmmo(class CBaseEntity *)	vtable
 0xbb000	0	?Precache@CSatchelCharge@@EAEXXZ	private: virtual void __thiscall CSatchelCharge::Precache(void)	vtable
 0xbb020	0	?Spawn@CSatchelCharge@@EAEXXZ	private: virtual void __thiscall CSatchelCharge::Spawn(void)	vtable
 0xbd4d0	0	?Spawn@CSatchel@@UAEXXZ	public: virtual void __thiscall CSatchel::Spawn(void)	vtable
 0xbd530	0	?Precache@CSatchel@@UAEXXZ	public: virtual void __thiscall CSatchel::Precache(void)	vtable
+0xbd5a0	0	?GetItemInfo@CSatchel@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CSatchel::GetItemInfo(struct ItemInfo *)	vtable
+0xbd670	0	?CanDeploy@CSatchel@@UAEHXZ	public: virtual int __thiscall CSatchel::CanDeploy(void)	vtable
+0xbd6d0	0	?Deploy@CSatchel@@UAEHXZ	public: virtual int __thiscall CSatchel::Deploy(void)	vtable
+0xbd790	0	?Holster@CSatchel@@UAEXH@Z	public: virtual void __thiscall CSatchel::Holster(int)	vtable
+0xbd990	0	?IsUseable@CSatchel@@UAEHXZ	public: virtual int __thiscall CSatchel::IsUseable(void)	vtable
+0xbd9a0	0	?PrimaryAttack@CSatchel@@UAEXXZ	public: virtual void __thiscall CSatchel::PrimaryAttack(void)	vtable
+0xbdc80	0	?SecondaryAttack@CSatchel@@UAEXXZ	public: virtual void __thiscall CSatchel::SecondaryAttack(void)	vtable
+0xbe290	0	?WeaponIdle@CSatchel@@UAEXXZ	public: virtual void __thiscall CSatchel::WeaponIdle(void)	vtable
+0xbe530	0	?UseDecrement@CSatchel@@UAEHXZ	public: virtual int __thiscall CSatchel::UseDecrement(void)	vtable
+0xbe560	0	?iItemSlot@CSatchel@@UAEHXZ	public: virtual int __thiscall CSatchel::iItemSlot(void)	vtable
 0xbe8a0	0	?RunTask@CBaseMonster@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CBaseMonster::RunTask(struct Task_t *)	vtable
 0xbef90	0	?StartTask@CBaseMonster@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CBaseMonster::StartTask(struct Task_t *)	vtable
-0xc0210	0	?GetSchedule@CBaseMonster@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CBaseMonster::GetSchedule(void)	vtable
 0xc0590	0	?ObjectCaps@CScientist@@UAEHXZ	public: virtual int __thiscall CScientist::ObjectCaps(void)	vtable
 0xc05a0	0	?CoverRadius@CScientist@@UAEMXZ	public: virtual float __thiscall CScientist::CoverRadius(void)	vtable
 0xc05b0	0	?Save@CScientist@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CScientist::Save(class CSave &)	vtable
 0xc05e0	0	?Restore@CScientist@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CScientist::Restore(class CRestore &)	vtable
-0xc0700	0	?GetStoppedActivity@CScientist@@UAE?AW4Activity@@XZ	public: virtual enum Activity __thiscall CScientist::GetStoppedActivity(void)	vtable
 0xc0720	0	?StartTask@CScientist@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CScientist::StartTask(struct Task_t *)	vtable
-0xc0950	0	?RunTask@CScientist@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CScientist::RunTask(struct Task_t *)	vtable
 0xc0c90	0	?Classify@CScientist@@UAEHXZ	public: virtual int __thiscall CScientist::Classify(void)	vtable
-0xc0ca0	0	?SetYawSpeed@CScientist@@UAEXXZ	public: virtual void __thiscall CScientist::SetYawSpeed(void)	vtable
 0xc0d90	0	?Spawn@CScientist@@UAEXXZ	public: virtual void __thiscall CScientist::Spawn(void)	vtable
-0xc1070	0	?TakeDamage@CScientist@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CScientist::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
 0xc10c0	0	?ISoundMask@CScientist@@UAEHXZ	public: virtual int __thiscall CScientist::ISoundMask(void)	vtable
+0xc1230	0	?DeathSound@CScientist@@UAEXXZ	public: virtual void __thiscall CScientist::DeathSound(void)	vtable
 0xc13a0	0	?GetSchedule@CScientist@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CScientist::GetSchedule(void)	vtable
 0xc1610	0	?GetIdealState@CScientist@@UAE?AW4MONSTERSTATE@@XZ	public: virtual enum MONSTERSTATE __thiscall CScientist::GetIdealState(void)	vtable
+0xc1880	0	?FriendNumber@CScientist@@UAEHH@Z	public: virtual int __thiscall CScientist::FriendNumber(int)	vtable
 0xc18a0	0	?KeyValue@CDeadScientist@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CDeadScientist::KeyValue(struct KeyValueData_s *)	vtable
 0xc1990	0	?Classify@CDeadScientist@@UAEHXZ	public: virtual int __thiscall CDeadScientist::Classify(void)	vtable
-0xc19a0	0	?Spawn@CDeadScientist@@UAEXXZ	public: virtual void __thiscall CDeadScientist::Spawn(void)	vtable
 0xc1b20	0	?Save@CSittingScientist@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CSittingScientist::Save(class CSave &)	vtable
 0xc1b50	0	?Restore@CSittingScientist@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CSittingScientist::Restore(class CRestore &)	vtable
 0xc1b80	0	?Spawn@CSittingScientist@@UAEXXZ	public: virtual void __thiscall CSittingScientist::Spawn(void)	vtable
 0xc1d30	0	?Classify@CSittingScientist@@UAEHXZ	public: virtual int __thiscall CSittingScientist::Classify(void)	vtable
-0xc2260	0	?KeyValue@CCineMonster@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CCineMonster::KeyValue(struct KeyValueData_s *)	vtable
+0xc1d40	0	?FriendNumber@CSittingScientist@@UAEHH@Z	public: virtual int __thiscall CSittingScientist::FriendNumber(int)	vtable
 0xc24d0	0	?Save@CCineMonster@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CCineMonster::Save(class CSave &)	vtable
 0xc2500	0	?Restore@CCineMonster@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CCineMonster::Restore(class CRestore &)	vtable
-0xc2620	0	?Spawn@CCineMonster@@UAEXXZ	public: virtual void __thiscall CCineMonster::Spawn(void)	vtable
 0xc26c0	0	?FCanOverrideState@CCineAI@@EAEHXZ	private: virtual int __thiscall CCineAI::FCanOverrideState(void)	vtable
-0xc3060	0	?FixScriptMonsterSchedule@CCineMonster@@UAEXPAVCBaseMonster@@@Z	public: virtual void __thiscall CCineMonster::FixScriptMonsterSchedule(class CBaseMonster *)	vtable
-0xc3080	0	?FixScriptMonsterSchedule@CCineAI@@EAEXPAVCBaseMonster@@@Z	private: virtual void __thiscall CCineAI::FixScriptMonsterSchedule(class CBaseMonster *)	vtable
+0xc2730	0	?Blocked@CCineMonster@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CCineMonster::Blocked(class CBaseEntity *)	vtable
+0xc2740	0	?Touch@CCineMonster@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CCineMonster::Touch(class CBaseEntity *)	vtable
 0xc3450	0	?Activate@CCineMonster@@UAEXXZ	public: virtual void __thiscall CCineMonster::Activate(void)	vtable
 0xc38a0	0	?Save@CScriptedSentence@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CScriptedSentence::Save(class CSave &)	vtable
 0xc38d0	0	?Restore@CScriptedSentence@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CScriptedSentence::Restore(class CRestore &)	vtable
 0xc3970	0	?ObjectCaps@CScriptedSentence@@UAEHXZ	public: virtual int __thiscall CScriptedSentence::ObjectCaps(void)	vtable
 0xc3980	0	?KeyValue@CScriptedSentence@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CScriptedSentence::KeyValue(struct KeyValueData_s *)	vtable
-0xc3c50	0	?Use@CScriptedSentence@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CScriptedSentence::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0xc3c80	0	?Spawn@CScriptedSentence@@UAEXXZ	public: virtual void __thiscall CScriptedSentence::Spawn(void)	vtable
 0xc41b0	0	?ObjectCaps@CFurniture@@UAEHXZ	public: virtual int __thiscall CFurniture::ObjectCaps(void)	vtable
-0xc41e0	0	?Spawn@CFurniture@@UAEXXZ	public: virtual void __thiscall CFurniture::Spawn(void)	vtable
 0xc42a0	0	?Classify@CFurniture@@UAEHXZ	public: virtual int __thiscall CFurniture::Classify(void)	vtable
 0xc42b0	0	?ObjectCaps@CCineMonster@@UAEHXZ	public: virtual int __thiscall CCineMonster::ObjectCaps(void)	vtable
 0xc7370	0	?Spawn@CShotgun@@UAEXXZ	public: virtual void __thiscall CShotgun::Spawn(void)	vtable
 0xc73b0	0	?Precache@CShotgun@@UAEXXZ	public: virtual void __thiscall CShotgun::Precache(void)	vtable
+0xc7500	0	?AddToPlayer@CShotgun@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CShotgun::AddToPlayer(class CBasePlayer *)	vtable
+0xc7560	0	?GetItemInfo@CShotgun@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CShotgun::GetItemInfo(struct ItemInfo *)	vtable
+0xc75d0	0	?Deploy@CShotgun@@UAEHXZ	public: virtual int __thiscall CShotgun::Deploy(void)	vtable
+0xc8970	0	?iItemSlot@CShotgun@@UAEHXZ	public: virtual int __thiscall CShotgun::iItemSlot(void)	vtable
 0xc8f00	0	?Spawn@CShotgunAmmo@@EAEXXZ	private: virtual void __thiscall CShotgunAmmo::Spawn(void)	vtable
 0xc8f30	0	?Precache@CShotgunAmmo@@EAEXXZ	private: virtual void __thiscall CShotgunAmmo::Precache(void)	vtable
+0xc8f50	0	?AddAmmo@CShotgunAmmo@@EAEHPAVCBaseEntity@@@Z	private: virtual int __thiscall CShotgunAmmo::AddAmmo(class CBaseEntity *)	vtable
 0xcc5b0	0	?ObjectCaps@CAmbientGeneric@@UAEHXZ	public: virtual int __thiscall CAmbientGeneric::ObjectCaps(void)	vtable
 0xcc5c0	0	?Save@CAmbientGeneric@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CAmbientGeneric::Save(class CSave &)	vtable
 0xcc5f0	0	?Restore@CAmbientGeneric@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CAmbientGeneric::Restore(class CRestore &)	vtable
@@ -853,99 +803,76 @@ rva	size	name	demangled	ref_object
 0xcd060	0	?KeyValue@CAmbientGeneric@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CAmbientGeneric::KeyValue(struct KeyValueData_s *)	vtable
 0xcd760	0	?Save@CEnvSound@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CEnvSound::Save(class CSave &)	vtable
 0xcd790	0	?Restore@CEnvSound@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CEnvSound::Restore(class CRestore &)	vtable
-0xcd7c0	0	?KeyValue@CEnvSound@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvSound::KeyValue(struct KeyValueData_s *)	vtable
 0xcda20	0	?Think@CEnvSound@@UAEXXZ	public: virtual void __thiscall CEnvSound::Think(void)	vtable
 0xcf130	0	?ObjectCaps@CSpeaker@@UAEHXZ	public: virtual int __thiscall CSpeaker::ObjectCaps(void)	vtable
 0xcf140	0	?Save@CSpeaker@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CSpeaker::Save(class CSave &)	vtable
 0xcf170	0	?Restore@CSpeaker@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CSpeaker::Restore(class CRestore &)	vtable
 0xcf1a0	0	?Spawn@CSpeaker@@UAEXXZ	public: virtual void __thiscall CSpeaker::Spawn(void)	vtable
 0xcf4e0	0	?KeyValue@CSpeaker@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CSpeaker::KeyValue(struct KeyValueData_s *)	vtable
-0xcf680	0	?Think@CSoundEnt@@UAEXXZ	public: virtual void __thiscall CSoundEnt::Think(void)	vtable
 0xcf740	0	?Precache@CSoundEnt@@UAEXXZ	public: virtual void __thiscall CSoundEnt::Precache(void)	vtable
 0xcfa30	0	?ObjectCaps@CSoundEnt@@UAEHXZ	public: virtual int __thiscall CSoundEnt::ObjectCaps(void)	vtable
 0xcfd40	0	?ScheduleChange@CSquadMonster@@UAEXXZ	public: virtual void __thiscall CSquadMonster::ScheduleChange(void)	vtable
-0xcfd50	0	?Killed@CSquadMonster@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CSquadMonster::Killed(struct entvars_s *, int)	vtable
-0xd0390	0	?CheckEnemy@CSquadMonster@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CSquadMonster::CheckEnemy(class CBaseEntity *)	vtable
-0xd0410	0	?StartMonster@CSquadMonster@@UAEXXZ	public: virtual void __thiscall CSquadMonster::StartMonster(void)	vtable
-0xd0800	0	?GetIdealState@CSquadMonster@@UAE?AW4MONSTERSTATE@@XZ	public: virtual enum MONSTERSTATE __thiscall CSquadMonster::GetIdealState(void)	vtable
-0xd0850	0	?FValidateCover@CSquadMonster@@UAEHABVVector@@@Z	public: virtual int __thiscall CSquadMonster::FValidateCover(class Vector const &)	vtable
 0xd0a80	0	?BloodColor@CSqueakGrenade@@EAEHXZ	private: virtual int __thiscall CSqueakGrenade::BloodColor(void)	vtable
 0xd0a90	0	?Save@CSqueakGrenade@@EAEHAAVCSave@@@Z	private: virtual int __thiscall CSqueakGrenade::Save(class CSave &)	vtable
 0xd0ac0	0	?Restore@CSqueakGrenade@@EAEHAAVCRestore@@@Z	private: virtual int __thiscall CSqueakGrenade::Restore(class CRestore &)	vtable
-0xd0af0	0	?Classify@CSqueakGrenade@@EAEHXZ	private: virtual int __thiscall CSqueakGrenade::Classify(void)	vtable
 0xd0b60	0	?Spawn@CSqueakGrenade@@EAEXXZ	private: virtual void __thiscall CSqueakGrenade::Spawn(void)	vtable
 0xd0d30	0	?Precache@CSqueakGrenade@@EAEXXZ	private: virtual void __thiscall CSqueakGrenade::Precache(void)	vtable
 0xd0db0	0	?Killed@CSqueakGrenade@@EAEXPAUentvars_s@@H@Z	private: virtual void __thiscall CSqueakGrenade::Killed(struct entvars_s *, int)	vtable
+0xd3150	0	?iItemSlot@CSqueak@@UAEHXZ	public: virtual int __thiscall CSqueak::iItemSlot(void)	vtable
 0xd3170	0	?Spawn@CSqueak@@UAEXXZ	public: virtual void __thiscall CSqueak::Spawn(void)	vtable
 0xd31f0	0	?Precache@CSqueak@@UAEXXZ	public: virtual void __thiscall CSqueak::Precache(void)	vtable
+0xd3280	0	?GetItemInfo@CSqueak@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CSqueak::GetItemInfo(struct ItemInfo *)	vtable
+0xd32f0	0	?Deploy@CSqueak@@UAEHXZ	public: virtual int __thiscall CSqueak::Deploy(void)	vtable
+0xd3390	0	?Holster@CSqueak@@UAEXH@Z	public: virtual void __thiscall CSqueak::Holster(int)	vtable
+0xd44b0	0	?UseDecrement@CSqueak@@UAEHXZ	public: virtual int __thiscall CSqueak::UseDecrement(void)	vtable
 0xd44f0	0	?Spawn@CPointEntity@@UAEXXZ	public: virtual void __thiscall CPointEntity::Spawn(void)	vtable
 0xd48f0	0	?Save@CBaseDelay@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseDelay::Save(class CSave &)	vtable
 0xd4920	0	?Restore@CBaseDelay@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseDelay::Restore(class CRestore &)	vtable
 0xd4ee0	0	?Save@CBaseToggle@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseToggle::Save(class CSave &)	vtable
 0xd4f10	0	?Restore@CBaseToggle@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseToggle::Restore(class CRestore &)	vtable
 0xd6450	0	?Touch@CTalkMonster@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CTalkMonster::Touch(class CBaseEntity *)	vtable
-0xd6b30	0	?PlayScriptedSentence@CTalkMonster@@UAEXPBDMMMHPAVCBaseEntity@@@Z	public: virtual void __thiscall CTalkMonster::PlayScriptedSentence(char const *, float, float, float, int, class CBaseEntity *)	vtable
 0xd6ba0	0	?PlaySentence@CTalkMonster@@UAEXPBDMMM@Z	public: virtual void __thiscall CTalkMonster::PlaySentence(char const *, float, float, float)	vtable
-0xd7010	0	?PrescheduleThink@CTalkMonster@@UAEXXZ	public: virtual void __thiscall CTalkMonster::PrescheduleThink(void)	vtable
 0xd70d0	0	?IRelationship@CTalkMonster@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CTalkMonster::IRelationship(class CBaseEntity *)	vtable
-0xd7440	0	?KeyValue@CTalkMonster@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTalkMonster::KeyValue(struct KeyValueData_s *)	vtable
+0xd7160	0	?StopFollowing@CTalkMonster@@UAEXH@Z	public: virtual void __thiscall CTalkMonster::StopFollowing(int)	vtable
 0xdd280	0	?Save@CTentacle@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CTentacle::Save(class CSave &)	vtable
 0xdd2b0	0	?Restore@CTentacle@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CTentacle::Restore(class CRestore &)	vtable
 0xdd2e0	0	?Classify@CTentacle@@UAEHXZ	public: virtual int __thiscall CTentacle::Classify(void)	vtable
-0xdd2f0	0	?Spawn@CTentacle@@UAEXXZ	public: virtual void __thiscall CTentacle::Spawn(void)	vtable
 0xdd5c0	0	?ObjectCaps@CTentacle@@UAEHXZ	public: virtual int __thiscall CTentacle::ObjectCaps(void)	vtable
 0xdd5d0	0	?SetObjectCollisionBox@CTentacle@@UAEXXZ	public: virtual void __thiscall CTentacle::SetObjectCollisionBox(void)	vtable
 0xdd6e0	0	?HearingSensitivity@CTentacle@@UAEMXZ	public: virtual float __thiscall CTentacle::HearingSensitivity(void)	vtable
 0xdd6f0	0	?GetIdealState@CTentacle@@UAE?AW4MONSTERSTATE@@XZ	public: virtual enum MONSTERSTATE __thiscall CTentacle::GetIdealState(void)	vtable
-0xdd700	0	?KeyValue@CTentacle@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTentacle::KeyValue(struct KeyValueData_s *)	vtable
+0xde500	0	?HandleAnimEvent@CTentacle@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CTentacle::HandleAnimEvent(struct MonsterEvent_t *)	vtable
 0xdebe0	0	?Killed@CTentacle@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CTentacle::Killed(struct entvars_s *, int)	vtable
 0xded20	0	?Precache@CTentacleMaw@@UAEXXZ	public: virtual void __thiscall CTentacleMaw::Precache(void)	vtable
 0xe3860	0	?ObjectCaps@CFrictionModifier@@UAEHXZ	public: virtual int __thiscall CFrictionModifier::ObjectCaps(void)	vtable
 0xe3870	0	?Save@CFrictionModifier@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CFrictionModifier::Save(class CSave &)	vtable
 0xe38a0	0	?Restore@CFrictionModifier@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CFrictionModifier::Restore(class CRestore &)	vtable
-0xe3950	0	?KeyValue@CFrictionModifier@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFrictionModifier::KeyValue(struct KeyValueData_s *)	vtable
 0xe3a40	0	?ObjectCaps@CAutoTrigger@@UAEHXZ	public: virtual int __thiscall CAutoTrigger::ObjectCaps(void)	vtable
 0xe3a50	0	?Save@CAutoTrigger@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CAutoTrigger::Save(class CSave &)	vtable
 0xe3a80	0	?Restore@CAutoTrigger@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CAutoTrigger::Restore(class CRestore &)	vtable
-0xe3ab0	0	?KeyValue@CAutoTrigger@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CAutoTrigger::KeyValue(struct KeyValueData_s *)	vtable
 0xe3ba0	0	?Spawn@CAutoTrigger@@UAEXXZ	public: virtual void __thiscall CAutoTrigger::Spawn(void)	vtable
 0xe3bb0	0	?Precache@CAutoTrigger@@UAEXXZ	public: virtual void __thiscall CAutoTrigger::Precache(void)	vtable
-0xe3bd0	0	?Think@CAutoTrigger@@UAEXXZ	public: virtual void __thiscall CAutoTrigger::Think(void)	vtable
 0xe3c80	0	?ObjectCaps@CTriggerRelay@@UAEHXZ	public: virtual int __thiscall CTriggerRelay::ObjectCaps(void)	vtable
 0xe3c90	0	?Save@CTriggerRelay@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CTriggerRelay::Save(class CSave &)	vtable
 0xe3cc0	0	?Restore@CTriggerRelay@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CTriggerRelay::Restore(class CRestore &)	vtable
-0xe3cf0	0	?KeyValue@CTriggerRelay@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTriggerRelay::KeyValue(struct KeyValueData_s *)	vtable
 0xe3d90	0	?Spawn@CTriggerRelay@@UAEXXZ	public: virtual void __thiscall CTriggerRelay::Spawn(void)	vtable
-0xe3da0	0	?Use@CTriggerRelay@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTriggerRelay::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0xe3e40	0	?ObjectCaps@CMultiManager@@UAEHXZ	public: virtual int __thiscall CMultiManager::ObjectCaps(void)	vtable
 0xe3e50	0	?Save@CMultiManager@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CMultiManager::Save(class CSave &)	vtable
 0xe3e80	0	?Restore@CMultiManager@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CMultiManager::Restore(class CRestore &)	vtable
-0xe3eb0	0	?KeyValue@CMultiManager@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMultiManager::KeyValue(struct KeyValueData_s *)	vtable
 0xe3f90	0	?Spawn@CMultiManager@@UAEXXZ	public: virtual void __thiscall CMultiManager::Spawn(void)	vtable
-0xe4000	0	?HasTarget@CMultiManager@@UAEHH@Z	public: virtual int __thiscall CMultiManager::HasTarget(int)	vtable
 0xe4310	0	?Spawn@CRenderFxManager@@UAEXXZ	public: virtual void __thiscall CRenderFxManager::Spawn(void)	vtable
 0xe4320	0	?Use@CRenderFxManager@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CRenderFxManager::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0xe4470	0	?ObjectCaps@CBaseTrigger@@UAEHXZ	public: virtual int __thiscall CBaseTrigger::ObjectCaps(void)	vtable
-0xe4530	0	?KeyValue@CBaseTrigger@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseTrigger::KeyValue(struct KeyValueData_s *)	vtable
-0xe4730	0	?Spawn@CTriggerMonsterJump@@UAEXXZ	public: virtual void __thiscall CTriggerMonsterJump::Spawn(void)	vtable
-0xe47d0	0	?Touch@CTriggerMonsterJump@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CTriggerMonsterJump::Touch(class CBaseEntity *)	vtable
 0xe48f0	0	?Touch@CTriggerCDAudio@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CTriggerCDAudio::Touch(class CBaseEntity *)	vtable
 0xe4910	0	?Spawn@CTriggerCDAudio@@UAEXXZ	public: virtual void __thiscall CTriggerCDAudio::Spawn(void)	vtable
 0xe4920	0	?Use@CTriggerCDAudio@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTriggerCDAudio::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0xe4b10	0	?Use@CTargetCDAudio@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTargetCDAudio::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
-0xe4bd0	0	?Spawn@CTriggerHurt@@UAEXXZ	public: virtual void __thiscall CTriggerHurt::Spawn(void)	vtable
-0xe5270	0	?Spawn@CTriggerMultiple@@UAEXXZ	public: virtual void __thiscall CTriggerMultiple::Spawn(void)	vtable
 0xe5320	0	?Spawn@CTriggerOnce@@UAEXXZ	public: virtual void __thiscall CTriggerOnce::Spawn(void)	vtable
-0xe5700	0	?Spawn@CTriggerCounter@@UAEXXZ	public: virtual void __thiscall CTriggerCounter::Spawn(void)	vtable
 0xe5870	0	?ObjectCaps@CFireAndDie@@UAEHXZ	public: virtual int __thiscall CFireAndDie::ObjectCaps(void)	vtable
-0xe58a0	0	?Precache@CFireAndDie@@UAEXXZ	public: virtual void __thiscall CFireAndDie::Precache(void)	vtable
 0xe5950	0	?Save@CChangeLevel@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CChangeLevel::Save(class CSave &)	vtable
 0xe5980	0	?Restore@CChangeLevel@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CChangeLevel::Restore(class CRestore &)	vtable
-0xe59b0	0	?KeyValue@CChangeLevel@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CChangeLevel::KeyValue(struct KeyValueData_s *)	vtable
-0xe5b90	0	?Spawn@CChangeLevel@@UAEXXZ	public: virtual void __thiscall CChangeLevel::Spawn(void)	vtable
 0xe66f0	0	?KeyValue@CLadder@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CLadder::KeyValue(struct KeyValueData_s *)	vtable
 0xe6830	0	?KeyValue@CTriggerPush@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTriggerPush::KeyValue(struct KeyValueData_s *)	vtable
-0xe6840	0	?Spawn@CTriggerPush@@UAEXXZ	public: virtual void __thiscall CTriggerPush::Spawn(void)	vtable
 0xe68e0	0	?Touch@CTriggerPush@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CTriggerPush::Touch(class CBaseEntity *)	vtable
 0xe6cb0	0	?Spawn@CTriggerTeleport@@UAEXXZ	public: virtual void __thiscall CTriggerTeleport::Spawn(void)	vtable
 0xe6fa0	0	?KeyValue@CTriggerEndSection@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTriggerEndSection::KeyValue(struct KeyValueData_s *)	vtable
@@ -953,49 +880,51 @@ rva	size	name	demangled	ref_object
 0xe7150	0	?ObjectCaps@CTriggerChangeTarget@@UAEHXZ	public: virtual int __thiscall CTriggerChangeTarget::ObjectCaps(void)	vtable
 0xe7160	0	?Save@CTriggerChangeTarget@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CTriggerChangeTarget::Save(class CSave &)	vtable
 0xe7190	0	?Restore@CTriggerChangeTarget@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CTriggerChangeTarget::Restore(class CRestore &)	vtable
-0xe71c0	0	?KeyValue@CTriggerChangeTarget@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTriggerChangeTarget::KeyValue(struct KeyValueData_s *)	vtable
 0xe7230	0	?Spawn@CTriggerChangeTarget@@UAEXXZ	public: virtual void __thiscall CTriggerChangeTarget::Spawn(void)	vtable
-0xe7240	0	?Use@CTriggerChangeTarget@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTriggerChangeTarget::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0xe7300	0	?ObjectCaps@CTriggerCamera@@UAEHXZ	public: virtual int __thiscall CTriggerCamera::ObjectCaps(void)	vtable
 0xe7310	0	?Save@CTriggerCamera@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CTriggerCamera::Save(class CSave &)	vtable
 0xe7340	0	?Restore@CTriggerCamera@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CTriggerCamera::Restore(class CRestore &)	vtable
-0xe7370	0	?Spawn@CTriggerCamera@@UAEXXZ	public: virtual void __thiscall CTriggerCamera::Spawn(void)	vtable
-0xe73f0	0	?KeyValue@CTriggerCamera@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTriggerCamera::KeyValue(struct KeyValueData_s *)	vtable
 0xe7560	0	?Use@CTriggerCamera@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTriggerCamera::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	vtable
 0xe7fc0	0	?Spawn@CTripmineGrenade@@EAEXXZ	private: virtual void __thiscall CTripmineGrenade::Spawn(void)	vtable
 0xe8440	0	?Precache@CTripmineGrenade@@EAEXXZ	private: virtual void __thiscall CTripmineGrenade::Precache(void)	vtable
 0xe85b0	0	?Killed@CTripmineGrenade@@EAEXPAUentvars_s@@H@Z	private: virtual void __thiscall CTripmineGrenade::Killed(struct entvars_s *, int)	vtable
+0xecae0	0	?iItemSlot@CTripmine@@UAEHXZ	public: virtual int __thiscall CTripmine::iItemSlot(void)	vtable
 0xecaf0	0	?SetObjectCollisionBox@CTripmine@@UAEXXZ	public: virtual void __thiscall CTripmine::SetObjectCollisionBox(void)	vtable
 0xecbc0	0	?Spawn@CTripmine@@UAEXXZ	public: virtual void __thiscall CTripmine::Spawn(void)	vtable
 0xeccb0	0	?Precache@CTripmine@@UAEXXZ	public: virtual void __thiscall CTripmine::Precache(void)	vtable
+0xecd10	0	?GetItemInfo@CTripmine@@UAEHPAUItemInfo@@@Z	public: virtual int __thiscall CTripmine::GetItemInfo(struct ItemInfo *)	vtable
+0xecd80	0	?Deploy@CTripmine@@UAEHXZ	public: virtual int __thiscall CTripmine::Deploy(void)	vtable
+0xecdb0	0	?Holster@CTripmine@@UAEXH@Z	public: virtual void __thiscall CTripmine::Holster(int)	vtable
+0xee0a0	0	?UseDecrement@CTripmine@@UAEHXZ	public: virtual int __thiscall CTripmine::UseDecrement(void)	vtable
 0xee140	0	?Save@CBaseTurret@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseTurret::Save(class CSave &)	vtable
 0xee170	0	?Restore@CBaseTurret@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseTurret::Restore(class CRestore &)	vtable
 0xee1a0	0	?Save@CTurret@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CTurret::Save(class CSave &)	vtable
 0xee1d0	0	?Restore@CTurret@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CTurret::Restore(class CRestore &)	vtable
 0xee2b0	0	?BloodColor@CBaseTurret@@UAEHXZ	public: virtual int __thiscall CBaseTurret::BloodColor(void)	vtable
 0xee2c0	0	?GibMonster@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::GibMonster(void)	vtable
-0xee370	0	?KeyValue@CBaseTurret@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseTurret::KeyValue(struct KeyValueData_s *)	vtable
-0xee750	0	?Spawn@CTurret@@UAEXXZ	public: virtual void __thiscall CTurret::Spawn(void)	vtable
-0xee930	0	?Spawn@CMiniTurret@@UAEXXZ	public: virtual void __thiscall CMiniTurret::Spawn(void)	vtable
-0xeec50	0	?Ping@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::Ping(void)	vtable
-0xeecf0	0	?EyeOn@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::EyeOn(void)	vtable
-0xeed30	0	?EyeOff@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::EyeOff(void)	vtable
+0xef6e0	0	?SpinUpCall@CTurret@@UAEXXZ	public: virtual void __thiscall CTurret::SpinUpCall(void)	vtable
 0xeff50	0	?TraceAttack@CBaseTurret@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CBaseTurret::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	vtable
 0xf0010	0	?TakeDamage@CBaseTurret@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBaseTurret::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0xf03a0	0	?Classify@CBaseTurret@@UAEHXZ	public: virtual int __thiscall CBaseTurret::Classify(void)	vtable
-0xf0480	0	?Spawn@CSentry@@UAEXXZ	public: virtual void __thiscall CSentry::Spawn(void)	vtable
 0xf0690	0	?TakeDamage@CSentry@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CSentry::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
 0xf9650	0	?Save@CBasePlayerWeapon@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBasePlayerWeapon::Save(class CSave &)	vtable
 0xf9680	0	?Restore@CBasePlayerWeapon@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBasePlayerWeapon::Restore(class CRestore &)	vtable
 0xfa200	0	?SetObjectCollisionBox@CBasePlayerItem@@UAEXXZ	public: virtual void __thiscall CBasePlayerItem::SetObjectCollisionBox(void)	vtable
-0xfa2b0	0	?KeyValue@CBaseDelay@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseDelay::KeyValue(struct KeyValueData_s *)	vtable
+0xfa5c0	0	?Respawn@CBasePlayerItem@@UAEPAVCBaseEntity@@XZ	public: virtual class CBaseEntity * __thiscall CBasePlayerItem::Respawn(void)	vtable
 0xfa790	0	?ItemPostFrame@CBasePlayerWeapon@@UAEXXZ	public: virtual void __thiscall CBasePlayerWeapon::ItemPostFrame(void)	vtable
 0xfac40	0	?Drop@CBasePlayerItem@@UAEXXZ	public: virtual void __thiscall CBasePlayerItem::Drop(void)	vtable
 0xfac70	0	?Kill@CBasePlayerItem@@UAEXXZ	public: virtual void __thiscall CBasePlayerItem::Kill(void)	vtable
+0xfacd0	0	?AttachToPlayer@CBasePlayerItem@@UAEXPAVCBasePlayer@@@Z	public: virtual void __thiscall CBasePlayerItem::AttachToPlayer(class CBasePlayer *)	vtable
+0xfad50	0	?AddDuplicate@CBasePlayerWeapon@@UAEHPAVCBasePlayerItem@@@Z	public: virtual int __thiscall CBasePlayerWeapon::AddDuplicate(class CBasePlayerItem *)	vtable
+0xfaf30	0	?RC2VW2@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::RC2VW2(void)	vtable
+0xfb380	0	?RC2VW1@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::RC2VW1(void)	vtable
+0xfb390	0	?PrimaryAmmoIndex@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::PrimaryAmmoIndex(void)	vtable
+0xfb3a0	0	?SecondaryAmmoIndex@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::SecondaryAmmoIndex(void)	vtable
+0xfb490	0	?Respawn@CBasePlayerAmmo@@UAEPAVCBaseEntity@@XZ	public: virtual class CBaseEntity * __thiscall CBasePlayerAmmo::Respawn(void)	vtable
+0xfb650	0	?ExtractAmmo@CBasePlayerWeapon@@UAEHPAV1@@Z	public: virtual int __thiscall CBasePlayerWeapon::ExtractAmmo(class CBasePlayerWeapon *)	vtable
+0xfb6f0	0	?ExtractClipAmmo@CBasePlayerWeapon@@UAEHPAV1@@Z	public: virtual int __thiscall CBasePlayerWeapon::ExtractClipAmmo(class CBasePlayerWeapon *)	vtable
 0xfb830	0	?Save@CWeaponBox@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CWeaponBox::Save(class CSave &)	vtable
 0xfb860	0	?Restore@CWeaponBox@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CWeaponBox::Restore(class CRestore &)	vtable
 0xfb890	0	?Precache@CWeaponBox@@EAEXXZ	private: virtual void __thiscall CWeaponBox::Precache(void)	vtable
-0xfb8a0	0	?KeyValue@CWeaponBox@@EAEXPAUKeyValueData_s@@@Z	private: virtual void __thiscall CWeaponBox::KeyValue(struct KeyValueData_s *)	vtable
 0xfb9b0	0	?Touch@CWeaponBox@@EAEXPAVCBaseEntity@@@Z	private: virtual void __thiscall CWeaponBox::Touch(class CBaseEntity *)	vtable
 0xfbdc0	0	?SetObjectCollisionBox@CWeaponBox@@EAEXXZ	private: virtual void __thiscall CWeaponBox::SetObjectCollisionBox(void)	vtable
 0xfbee0	0	?Save@CShotgun@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CShotgun::Save(class CSave &)	vtable
@@ -1032,7 +961,4 @@ rva	size	name	demangled	ref_object
 0xfe940	0	?Classify@CZombie@@UAEHXZ	public: virtual int __thiscall CZombie::Classify(void)	vtable
 0xfe950	0	?SetYawSpeed@CZombie@@UAEXXZ	public: virtual void __thiscall CZombie::SetYawSpeed(void)	vtable
 0xfe960	0	?TakeDamage@CZombie@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CZombie::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	vtable
-0xfebe0	0	?IdleSound@CZombie@@UAEXXZ	public: virtual void __thiscall CZombie::IdleSound(void)	vtable
-0xff090	0	?Spawn@CZombie@@UAEXXZ	public: virtual void __thiscall CZombie::Spawn(void)	vtable
 0xff190	0	?Precache@CZombie@@UAEXXZ	public: virtual void __thiscall CZombie::Precache(void)	vtable
-0xff250	0	?IgnoreConditions@CZombie@@UAEHXZ	public: virtual int __thiscall CZombie::IgnoreConditions(void)	vtable
