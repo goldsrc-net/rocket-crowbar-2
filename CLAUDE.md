@@ -47,9 +47,11 @@ Original content: Steven's install at `/media/Data3/Projects/mods/rc2/` (beta 1.
   the 14 of them that differ from halflife-updated, all deliberate returns to SDK 2.3. No TEMP STUBs
   are left. Builds on i386 and amd64; on the rig it boots and loads rc_sandcrab with a clean
   console. Booted only, not played.
-- **Client (client.dll):** 1,682 functions to reconstruct, in five packages c1-c5,
-  running. It was linked incrementally: 1,398 jump thunks start `.text` and every vtable slot goes
-  through one (`check_coverage --lib client` skips them).
+- **Client (client.dll):** 1,466 functions to reconstruct (incremental-link and import thunks
+  skipped). c2-c5 are merged: 786 have a counterpart (53%); c1 (weapons, events, ammo) is
+  running. The packages named each other's code differently, so many stubs still stand in for
+  real code under another name (c2's effect dispatcher reaches none of c3's effects, nothing in
+  CLTE draws). w3-reconcile is unifying them by original address (`scripts/merge/stub_addrs.py`).
 - Not yet: playing ours against the original, ORIGINAL_BUGS.md from the dossiers, the server
   docs (as mod-rockcrowbar's docs/), the amd64 client (no 64-bit VGUI).
 - Merging packages: the shared headers collect each package's names for the same members;
