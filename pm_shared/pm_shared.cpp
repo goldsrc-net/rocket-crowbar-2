@@ -5144,10 +5144,6 @@ transforms' (PM_GetPlayerMode, PM_GetBatPerch, the headcrab leap) in cl_dll/rc2/
 The client's move doesn't call the hide/restore hooks, PM_BatUnperch, PM_HeadcrabLeapHit or the
 jetboost's energy and effect.
 */
-// TEMP STUB (c4-P): real ones belong in the client's player-state code (client 0x4f480-0x4f5c0,
-// not this package). Weak, so the real ones replace them; each answers as for "no such player".
-__attribute__((weak)) float PM_GetAttributeScale(int iWhich, int iEnt) { return 1.0f; }
-__attribute__((weak)) int PM_GetAbilityFlags(int iEnt) { return 0; }
-__attribute__((weak)) void PM_SetPlayerTimer(int iEnt, int iSlot, int iMsec) {}
-__attribute__((weak)) int PM_GetPlayerTimer(int iEnt, int iSlot) { return 0; }
+// PM_GetAttributeScale, PM_GetAbilityFlags, PM_Set/GetPlayerTimer, PM_GetEnergy and PM_UseEnergy:
+// cl_dll/rc2/attributes.cpp (client 0x4f480-0x4f6c0).
 #endif

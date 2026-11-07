@@ -9,16 +9,8 @@
 
 #include "c3_needs.h"
 
-// TEMP STUB (c3): real one belongs in c2's CLTE file (the effect table, orig .bss 0x101ee07c)
-CClientTent* g_pClientTents[MAX_CLIENT_TENTS];
-
 // TEMP STUB (c3): real one belongs in c2's HUD_Frame part (orig .data 0x101a9598)
 int g_iClDetail = 0;
-
-// TEMP STUB (c3): real ones belong in c2's CLTE file (orig .bss 0x101f3948, 0x101f69e8, 0x101ee9e0)
-Vector g_vecTentForward;
-Vector g_vecTentRight;
-Vector g_vecTentUp;
 
 // TEMP STUB (c3): real one belongs in "new: entity .. ev_common" (orig 0x9e9a0)
 cl_entity_t* RC2_GetEntity(int iEntIndex)
@@ -85,7 +77,6 @@ byte g_bEntityFrozen[0x400];
 int g_iLocalPlayerFrozen = 0;
 int g_iRC2LocalAntiFriction = 0;
 int g_bLocalTransforming = 0;
-int g_iMaxPlayerEnt = 0;
 
 // TEMP STUB (c3): real one belongs in in_camera.cpp (orig 0xa9fd0)
 bool CAM_IsThirdPerson()
