@@ -25,7 +25,13 @@ is `rc_sandcrab`; `run.sh <which> <map>` takes another.
 - `~/.local/share/Steam/steamapps/common/Half-Life/rc2/`: the client's mod folder, a copy of the
   content with RC2's own `config.cfg` (60 binds) and our `client.so`. The Linux client can't
   load RC2's Windows `client.dll`, so it plays both servers with ours.
-- Servers run with `+sv_cheats 1` and `+sv_lan 1`.
+- `~/Containers/hlds/hlds-linux32-rc2/adminprim.cfg`: the Steam accounts logged in on this machine
+  (`~/.local/share/Steam/config/loginusers.vdf`) as super admins (level 2) on ours, in both the
+  `STEAM_0` and `STEAM_1` form; `ADMINS="STEAM_0:1:2 ..."` adds others. Rewritten on every run.
+- Servers run with `+sv_cheats 1`. The original keeps `+sv_lan 1` (its admin file takes WON ids,
+  which no engine issues now). Ours runs `+sv_lan 0 -nomaster`: players carry their Steam IDs, so
+  the admin file works, and it still doesn't list itself on Valve's master servers. In that mode
+  it doesn't answer server browser queries, so it won't show in the LAN tab: join with `connect`.
 
 ## Smoke test
 

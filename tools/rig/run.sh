@@ -33,7 +33,9 @@ case "${1:-}" in
 		wait_port 27032
 		cd "${RIG2:-$HOME/Containers/hlds/hlds-linux32-rc2}"
 		export LD_LIBRARY_PATH=".:${LD_LIBRARY_PATH:-}"
-		exec ./hlds_linux -nobreakpad -game rc2 +developer 1 +sv_cheats 1 +maxplayers 8 +sv_lan 1 \
+		# sv_lan 0 so players carry their Steam IDs (admin levels, tools/rig/setup.sh's adminprim.cfg);
+		# -nomaster keeps it off Valve's master server list all the same
+		exec ./hlds_linux -nobreakpad -nomaster -game rc2 +developer 1 +sv_cheats 1 +maxplayers 8 +sv_lan 0 \
 			-port 27032 +map "$MAP" ;;
 	*) sed -n '2,8p' "$0"; exit 2 ;;
 esac

@@ -75,5 +75,21 @@ if [ ! -d "$CLIENT/rc2" ]; then
 fi
 put_lib "$OURS_CL" "$CLIENT/rc2/cl_dlls/client.so"
 
+# The Steam accounts logged in on this machine are super admins on ours (adminprim.cfg, read from
+# the server's working directory, which is $RIG2). The engine reports STEAM_0 or STEAM_1 for the
+# same account, so both are listed. Rewritten each run; ADMINS="STEAM_0:1:2 ..." adds others.
+LOGINS="$HOME/.local/share/Steam/config/loginusers.vdf"
+{
+	echo "# written by tools/rig/setup.sh: <steamid> <level>, 2 = super admin"
+	if [ -f "$LOGINS" ]; then
+		grep -oE '"7656[0-9]{13}"' "$LOGINS" | tr -d '"' | while read -r id64; do
+			a=$((id64 - 76561197960265728))
+			echo "STEAM_0:$((a & 1)):$((a >> 1)) 2"
+			echo "STEAM_1:$((a & 1)):$((a >> 1)) 2"
+		done
+	fi
+	for id in ${ADMINS:-}; do echo "$id 2"; done
+} > "$RIG2/adminprim.cfg"
+
 echo "original: $(md5sum "$HLDS_WIN/rc2/dlls/rc2.dll" | cut -c1-12)  ours: $(md5sum "$RIG2/rc2/dlls/hl.so" | cut -c1-12)  client: $(md5sum "$CLIENT/rc2/cl_dlls/client.so" | cut -c1-12)"
 echo "run: tools/rig/run.sh original | ours"
