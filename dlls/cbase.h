@@ -417,6 +417,16 @@ public:
 	int m_fInAttack;
 
 	int m_fireState;
+
+	// Rocket Crowbar 2: the 28 bytes RC2 appended to CBaseEntity (orig +0x54..+0x6f, after
+	// SDK 2.3's m_fireState; every stock member of CBaseDelay and below sits 0x1c further on in
+	// the original). Not saved, so their names are ours: packages say in their dossiers what
+	// their code does with each, and they get real names at merge.
+	int m_iRC2Base54;	   // orig +0x54. VERIFY: unread so far
+	Vector m_vecRC2Base58; // orig +0x58. Reset to g_vecZero in CBasePlayer::Spawn
+	int m_iRC2Base64;	   // orig +0x64. VERIFY: unread so far
+	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
+	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

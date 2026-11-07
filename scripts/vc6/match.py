@@ -12,6 +12,7 @@ Writes reference/names-<lib>.tsv: rva, size, mangled name, demangled name, refer
 Usage:
   scripts/vc6/match.py build-vc6/hl/hl.map build-vc6/hl/hl.dll reference/rc2.dll
   scripts/vc6/match.py build-vc6/client/cl_dll.map build-vc6/client/cl_dll.dll reference/client.dll
+  --out <file> writes there instead (to compare reference builds)
 """
 import collections, os, re, struct, subprocess, sys
 
@@ -72,9 +73,15 @@ def demangle(names):
 
 
 def main():
-    if len(sys.argv) != 4:
+    args = sys.argv[1:]
+    out = None
+    if "--out" in args:
+        i = args.index("--out")
+        out = args[i + 1]
+        del args[i:i + 2]
+    if len(args) != 3:
         sys.exit(__doc__)
-    ref_map, ref_dll, target = sys.argv[1:]
+    ref_map, ref_dll, target = args
     rbase, _, rtext = text_section(ref_dll)
     tbase, tva, ttext = text_section(target)
     funcs = map_functions(ref_map)
@@ -103,7 +110,7 @@ def main():
     found.sort()
     dm = demangle([f[2] for f in found if f[2].startswith("?")])
     lib = os.path.splitext(os.path.basename(target))[0]
-    out = os.path.join(ROOT, "reference", "names-%s.tsv" % lib)
+    out = out or os.path.join(ROOT, "reference", "names-%s.tsv" % lib)
     with open(out, "w") as f:
         f.write("rva\tsize\tname\tdemangled\tref_object\n")
         for rva, size, name, obj in found:

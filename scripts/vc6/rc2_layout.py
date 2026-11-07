@@ -11,13 +11,15 @@ the pristine singleplayer tree and adds placeholders of RC2's sizes at RC2's pla
                      28 bytes of members (where: --entity-pad, see below)
   CBaseMonster       one virtual after StopFollowing (slot 147), 4 bytes after m_pCine
   CTalkMonster       4 bytes before m_useTime
-  CBasePlayerItem    four virtuals after AttachToPlayer (slots 93-96)
-  CBasePlayerWeapon  8 bytes before m_flTimeWeaponIdle
+  CBasePlayerWeapon  two virtuals after PlayEmptySound, two after RetireWeapon,
+                     8 bytes before m_flTimeWeaponIdle
   CBasePlayer        2576 bytes after its last member
 
 The placeholders' bodies don't matter (stock code never calls them); their slots and sizes do.
 --entity-pad a puts CBaseEntity's 28 bytes right after m_pfnBlocked, b at the end of the class,
-since the save tables only bound them between m_pfnBlocked and CBaseDelay.
+since the save tables only bound them between m_pfnBlocked and CBaseDelay. b is right: only
+with b do CHandGrenade::CanHolster and CBasePlayer::TabulateAmmo, which use CBaseEntity's
+stock m_flStartThrow and ammo_* members, match.
 
 Usage: scripts/vc6/rc2_layout.py <pristine singleplayer dir> <out dir> --entity-pad a|b
 """
@@ -32,8 +34,10 @@ EDITS = [
      "\n\tvirtual int RC2V147( void ) { return 0; }", "after"),
     ("dlls/basemonster.h", "\tCCineMonster\t\t*m_pCine;", "\n\tint m_rc2MonsterPad;", "after"),
     ("dlls/talkmonster.h", "\tfloat\t\tm_useTime;", "\tint m_rc2TalkPad;\n", "before"),
-    ("dlls/weapons.h", "\tvirtual void AttachToPlayer ( CBasePlayer *pPlayer );",
-     "".join("\n\tvirtual int RC2V%d( void ) { return 0; }" % k for k in range(93, 97)), "after"),
+    ("dlls/weapons.h", "\tvirtual BOOL PlayEmptySound( void );",
+     "\n\tvirtual int RC2VW1( void ) { return 0; }\n\tvirtual int RC2VW2( void ) { return 0; }", "after"),
+    ("dlls/weapons.h", "\tvirtual void RetireWeapon( void );",
+     "\n\tvirtual int RC2VW3( void ) { return 0; }\n\tvirtual int RC2VW4( void ) { return 0; }", "after"),
     ("dlls/weapons.h", "\tfloat\tm_flTimeWeaponIdle;", "\tint m_rc2WeaponPad[2];\n", "before"),
     ("dlls/player.h", "\tfloat m_flNextChatTime;\n", "\tchar m_rc2PlayerPad[2576];\n", "after"),
 ]
