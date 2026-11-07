@@ -437,14 +437,8 @@ After moving, set origin to exact final destination, call "move done" function
 */
 void CBaseToggle::LinearMoveDone()
 {
-	Vector delta = m_vecFinalDest - pev->origin;
-	float error = delta.Length();
-	if (error > 0.03125)
-	{
-		LinearMove(m_vecFinalDest, 100);
-		return;
-	}
-
+	// SDK 2.3's (stock in RC2); halflife-updated (from the 2013 SDK) moved on again at speed 100 when
+	// the mover was more than 1/32 unit short of its destination, instead of putting it there
 	UTIL_SetOrigin(pev, m_vecFinalDest);
 	pev->velocity = g_vecZero;
 	pev->nextthink = -1;

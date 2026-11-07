@@ -1164,7 +1164,9 @@ void CFuncTrackTrain::UpdateSound()
 	if (FStringNull(pev->noise))
 		return;
 
-	flpitch = TRAIN_STARTPITCH + (fabs(pev->speed) * (TRAIN_MAXPITCH - TRAIN_STARTPITCH) / TRAIN_MAXSPEED);
+	// SDK 2.3's (stock in RC2); halflife-updated used fabs(): SDK 2.3's abs() takes the speed as an int,
+	// so the pitch is worked out in whole numbers
+	flpitch = TRAIN_STARTPITCH + (abs(static_cast<int>(pev->speed)) * (TRAIN_MAXPITCH - TRAIN_STARTPITCH) / TRAIN_MAXSPEED);
 
 	if (!m_soundPlaying)
 	{
