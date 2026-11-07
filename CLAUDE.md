@@ -43,8 +43,8 @@ then stock virtuals by vtable position); client.dll: 2,450 of 4,276. Tables in `
 `vtables-rc2.tsv` (292 entity classes, size, vtable), `savefields-rc2.tsv` (57 save tables, all
 stock), `cvars-rc2.tsv` (278, 11 RC2's own; `mp_allowmonsters` and `mp_falldamage` gone).
 
-RC2 added virtuals to the SDK bases, which come first, as in mod-rockcrowbar: one between
-`CBaseEntity::Respawn` and `UpdateOwner` and 21 at the end of `CBaseEntity`, one at the end
+RC2 added virtuals to the SDK bases, which come first, as in mod-rockcrowbar: one just before
+`CBaseEntity::Respawn` and 21 at the end of `CBaseEntity`, one at the end
 of `CBaseMonster`, four after `CBasePlayerItem::AttachToPlayer`. Each factory also calls
 RC 1.9's `AddToPrecachedList`, so code is shared with RC 1.9 beyond `CCrowbarRocket`.
 
