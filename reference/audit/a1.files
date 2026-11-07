@@ -1,0 +1,15 @@
+dlls/aflock.cpp
+dlls/doors.cpp
+dlls/explode.cpp
+dlls/hassassin.cpp
+dlls/leech.cpp
+dlls/maprules.cpp
+dlls/nodes.cpp
+dlls/pathcorner.cpp
+dlls/rc2/gaussbecon.cpp
+dlls/rc2/suckmine.cpp
+dlls/scientist.cpp
+dlls/tentacle.cpp
+dlls/weapons_shared.cpp
+dlls/xen.cpp
+dlls/zombie.cpp

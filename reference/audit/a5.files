@@ -1,0 +1,14 @@
+dlls/bigmomma.cpp
+dlls/bmodels.cpp
+dlls/buttons.cpp
+dlls/effects.cpp
+dlls/flyingmonster.cpp
+dlls/func_break.cpp
+dlls/gamerules.cpp
+dlls/h_cycler.cpp
+dlls/hgrunt.cpp
+dlls/monstermaker.cpp
+dlls/multiplay_gamerules.cpp
+dlls/satchel.cpp
+dlls/soundent.cpp
+dlls/spectator.cpp

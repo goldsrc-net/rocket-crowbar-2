@@ -1,0 +1,14 @@
+dlls/agrunt.cpp
+dlls/houndeye.cpp
+dlls/ichthyosaur.cpp
+dlls/monsterstate.cpp
+dlls/mortar.cpp
+dlls/nihilanth.cpp
+dlls/osprey.cpp
+dlls/player.cpp
+dlls/singleplay_gamerules.cpp
+dlls/squadmonster.cpp
+dlls/teamplay_gamerules.cpp
+dlls/triggers.cpp
+dlls/weapons.cpp
+dlls/world.cpp

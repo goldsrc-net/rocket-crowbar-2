@@ -1,0 +1,14 @@
+dlls/apache.cpp
+dlls/bullsquid.cpp
+dlls/client.cpp
+dlls/crowbar.cpp
+dlls/gargantua.cpp
+dlls/ggrenade.cpp
+dlls/h_cine.cpp
+dlls/monsters.cpp
+dlls/plats.cpp
+dlls/roach.cpp
+dlls/rpg.cpp
+dlls/schedule.cpp
+dlls/subs.cpp
+dlls/talkmonster.cpp

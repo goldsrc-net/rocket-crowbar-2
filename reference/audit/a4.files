@@ -1,0 +1,14 @@
+dlls/animating.cpp
+dlls/animation.cpp
+dlls/cbase.cpp
+dlls/combat.cpp
+dlls/func_tank.cpp
+dlls/hornet.cpp
+dlls/islave.cpp
+dlls/lights.cpp
+dlls/scripted.cpp
+dlls/skill.cpp
+dlls/sound.cpp
+dlls/turret.cpp
+dlls/util.cpp
+game_shared/voice_gamemgr.cpp
