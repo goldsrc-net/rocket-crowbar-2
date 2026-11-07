@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_coverage.py - which of rc2.dll's functions our source reconstructs.
+"""check_coverage.py - which of rc2.dll's (or client.dll's) functions our source reconstructs.
 
 Every function the VC6 SDK 2.3 build doesn't match (reference/names-rc2*.tsv) is RC2's to
 reconstruct, and a reconstructed one carries its address in a comment, "// orig 0x<rva>"
@@ -7,9 +7,13 @@ reconstruct, and a reconstructed one carries its address in a comment, "// orig 
 the same). This lists, per source file of the original (reference/files-rc2.tsv), how many
 there are and how many have a counterpart in dlls/, pm_shared/, game_shared/, common/ and public/.
 
+client.dll (--lib client) works the same from reference/*-client.tsv, with its own tag,
+"// orig client 0x<rva>", since files compiled into both libraries (the weapons, pm_shared)
+would otherwise be ambiguous; it scans cl_dll/ as well.
+
 Usage:
-  scripts/check_coverage.py                    summary per file, worst first
-  scripts/check_coverage.py <file> --missing   the missing ones in files whose name contains <file>
+  scripts/check_coverage.py [--lib client]                    summary per file, worst first
+  scripts/check_coverage.py [--lib client] <file> --missing   the missing ones in files whose name contains <file>
 """
 import collections, os, re, sys
 
@@ -22,26 +26,46 @@ def load(p):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    missing_only = "--missing" in sys.argv
+    argv = sys.argv[1:]
+    lib = "rc2"
+    if "--lib" in argv:
+        i = argv.index("--lib")
+        lib = argv[i + 1]
+        del argv[i:i + 2]
+    args = [a for a in argv if not a.startswith("--")]
+    missing_only = "--missing" in argv
+    tag = re.compile(r"orig client (0x[0-9a-fA-F]+)" if lib == "client" else r"orig (0x[0-9a-fA-F]+)")
+    dirs = ("dlls", "pm_shared", "game_shared", "common", "public") + (("cl_dll",) if lib == "client" else ())
     ref = os.path.join(ROOT, "reference")
-    matched = set()
     # only byte-for-byte matches are stock; a function named by its vtable slot
-    # (names-rc2-slots.tsv) has the stock name but didn't match, so its body is RC2's
-    matched = {int(r[0], 16) for r in load(os.path.join(ref, "names-rc2.tsv"))}
+    # (names-<lib>-slots.tsv) has the stock name but didn't match, so its body is RC2's
+    matched = {int(r[0], 16) for r in load(os.path.join(ref, "names-%s.tsv" % lib))}
     covered = collections.defaultdict(list)
-    for d in ("dlls", "pm_shared", "game_shared", "common", "public"):
+    for d in dirs:
         for dp, _, fs in os.walk(os.path.join(ROOT, d)):
             for f in fs:
                 if f.endswith((".cpp", ".h", ".c")):
                     path = os.path.join(dp, f)
                     for n, line in enumerate(open(path, encoding="latin-1"), 1):
-                        for m in re.finditer(r"orig (0x[0-9a-fA-F]+)", line):
+                        for m in tag.finditer(line):
                             a = int(m.group(1), 16)
                             covered[a - BASE if a >= BASE else a].append("%s:%d" % (os.path.relpath(path, ROOT), n))
+    # an incremental link's thunks (client.dll was linked that way: 1398 five-byte "jmp rel32" at
+    # the start of .text) are the linker's, not code to reconstruct
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from pe import PE
+    pe = PE(os.path.join(ref, "%s.dll" % lib))
+
+    def is_thunk(rva, size):
+        # only client.dll was linked incrementally; in rc2.dll a lone jmp is a real function
+        # that tail-calls another
+        return lib == "client" and size == 5 and (pe.read(rva, 1) or b"") == b"\xe9"
+
     per = collections.OrderedDict()
-    for rva, size, name, fl in load(os.path.join(ref, "files-rc2.tsv")):
+    for rva, size, name, fl in load(os.path.join(ref, "files-%s.tsv" % lib)):
         rva = int(rva, 16)
+        if is_thunk(rva, int(size)):
+            continue
         # the C runtime, and the stretches between two of its objects, aren't RC2's code
         if fl.startswith("libcmt") or (fl.startswith("new: libcmt:") and (" .. libcmt:" in fl or fl.endswith(" .. end"))) or rva in matched:
             continue
@@ -53,10 +77,10 @@ def main():
             e[2].append((rva, int(size), name))
     # code Ghidra's function list misses (scripts/gaps.py): counted under the file of the function
     # before it, as "+gap" entries
-    gtsv = os.path.join(ref, "gaps-rc2.tsv")
+    gtsv = os.path.join(ref, "gaps-%s.tsv" % lib)
     if os.path.exists(gtsv):
         before = {}
-        for rva, size, name, fl in load(os.path.join(ref, "files-rc2.tsv")):
+        for rva, size, name, fl in load(os.path.join(ref, "files-%s.tsv" % lib)):
             before[name] = fl
         for rva, size, kind, refname, after in load(gtsv):
             if kind != "code":
@@ -80,7 +104,7 @@ def main():
         return
     tn = sum(v[0] for v in per.values())
     tc = sum(v[1] for v in per.values())
-    print("rc2.dll: %d of %d functions to reconstruct have a counterpart (%d%%)" % (tc, tn, 100 * tc // max(tn, 1)))
+    print("%s.dll: %d of %d functions to reconstruct have a counterpart (%d%%)" % (lib, tc, tn, 100 * tc // max(tn, 1)))
     for fl, (n, c, _) in sorted(per.items(), key=lambda kv: kv[1][1] - kv[1][0])[:40]:
         print("  %-44s %4d of %4d" % (fl, c, n))
 
