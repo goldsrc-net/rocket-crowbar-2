@@ -4973,12 +4973,8 @@ client predicts zero for every rc2.ini speed and height (reference/dossiers/p6.m
 */
 rc2prefvalue_t g_rc2PrefValues[RC2P_COUNT];
 
-float PM_GetAttributeScale(int iWhich, int iEnt) { return 1.0f; }
-int PM_GetAbilityFlags(int iEnt) { return 0; }
-void PM_SetPlayerTimer(int iEnt, int iSlot, int iMsec) {}
-int PM_GetPlayerTimer(int iEnt, int iSlot) { return 0; }
-float PM_GetEnergy(int iEnt) { return 100.0f; }
-void PM_UseEnergy(int iEnt, float flAmount, float flRechargeDelay) {}
+// c2: PM_GetAttributeScale, PM_GetAbilityFlags, PM_Set/GetPlayerTimer, PM_GetEnergy and
+// PM_UseEnergy are client.dll's own now (0x4f480-0x4f6c0, cl_dll/rc2/attributes.cpp)
 void PM_JetboostEffect(int iEnt, int iFlag, float* vecDir, float* vecVelocity) {}
 void PM_HideViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
 void PM_RestoreViewers(int iEnt, PM_SETENTFUNC pfnSet) {}

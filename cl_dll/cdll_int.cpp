@@ -39,6 +39,29 @@
 #include "filesystem_utils.h"
 
 cl_enginefunc_t gEngfuncs;
+
+// RC2: cl_detail as an int, refreshed every HUD_Frame (orig .bss 0x101a9598, right after
+// gEngfuncs). 0 without the cvar. name ours
+int g_iClientDetail = 0;
+
+// gHUD's construction and destruction are compiler-generated: orig client 0x4fcf0 (the dynamic
+// initializer, calling orig client 0x4fd10, which runs the constructor, and orig client 0x4fd30,
+// which registers orig client 0x4fd50 with atexit to run ~CHud), orig client 0x50090 (CHud::CHud
+// itself: m_pHudList and m_iSpriteCount zeroed, the HUD elements constructed). RC2's CHud holds,
+// in this order, Ammo, Health, Geiger, Battery, Energy, EIcons, Train, Flash, Message, StatusBar,
+// DeathNotice, SayText, Menu, AmmoSecondary, TextMessage, StatusIcons and Spectator (moved last;
+// its 64 Vectors at +0x427 dwords are the constructor's vector iterator). The elements' inline
+// CHudBase destructors and their scalar deleting destructors, in that order:
+// orig client 0x501f0, orig client 0x50210, orig client 0x50230, orig client 0x50250,
+// orig client 0x50270, orig client 0x50290, orig client 0x502b0, orig client 0x502d0,
+// orig client 0x502f0, orig client 0x50310, orig client 0x50330, orig client 0x50350,
+// orig client 0x50370, orig client 0x50390, orig client 0x503b0, orig client 0x503d0,
+// orig client 0x50720 (the destructors), orig client 0x503f0, orig client 0x50420,
+// orig client 0x50450, orig client 0x50480, orig client 0x504b0, orig client 0x504e0,
+// orig client 0x50510, orig client 0x50540, orig client 0x50570, orig client 0x505a0,
+// orig client 0x505d0, orig client 0x50600, orig client 0x50630, orig client 0x50660,
+// orig client 0x50690, orig client 0x506c0, orig client 0x506f0 (the deleting destructors).
+// VERIFY: the Energy and EIcons elements and the member order are hud.h's (another package's).
 CHud gHUD;
 TeamFortressViewport* gViewPort = NULL;
 
@@ -53,6 +76,29 @@ void InitInput();
 void EV_HookEvents();
 void IN_Commands();
 
+// RC2 (client.dll's own code elsewhere; names ours)
+void CLTE_Reset();				// cl_dll/rc2/clte.cpp
+void RC2_ResetEntityTables();	// orig client 0xbd0e0: three 64-entry tables at .bss 0x10210170-0x10210474
+void RC2_ResetViewportFlags();	// orig client 0xd9150: .bss 0x102223c0 = 0, 0x102223c4 = 1
+void RC2_ResetPendingMenu();	// orig client 0xcfe90: .bss 0x101755e0 = -1, 0x10221ab0 = 0
+void RC2_LoadCrosshairs();		// orig client 0xcb1c0: the crosshair sprites from sprites/weapon_crossbow.txt
+void RC2Prefs_ResetToDefaults(); // orig client 0xbe3c0: the client's copy of rc2.ini back to its defaults
+void RC2_ViewportFrame(float flTime); // orig client 0xd8980
+void RC2_RunPendingMenu();		// orig client 0xcfe10
+extern cvar_t* cl_detail;		// "cl_detail", registered by CHud::Init (orig .bss 0x1020bb30)
+extern int g_iMaxPlayerEnt;		// 1 + the highest player entity HUD_AddEntity has seen (orig .bss 0x10206918)
+extern unsigned int g_iClientFrame; // cl_dll/rc2/clte.cpp
+
+// orig client 0x4fe80. RC2: what HUD_Init, HUD_VidInit and HUD_Reset all clear. name ours
+static void RC2_ResetClientState()
+{
+	CLTE_Reset();
+	RC2_ResetEntityTables();
+	g_iMaxPlayerEnt = 0;
+	RC2_ResetViewportFlags();
+	RC2_ResetPendingMenu();
+}
+
 /*
 ================================
 HUD_GetHullBounds
@@ -60,6 +106,8 @@ HUD_GetHullBounds
   Engine calls this to enumerate player collision hulls, for prediction.  Return 0 if the hullnumber doesn't exist.
 ================================
 */
+// SDK 2.3's (orig client 0x4fd70) assigned the hull to its local pointers and so returned 1 for
+// hulls 0-2 with mins and maxs untouched; halflife-updated's fix kept
 int DLLEXPORT HUD_GetHullBounds(int hullnumber, float* mins, float* maxs)
 {
 	return static_cast<int>(PM_GetHullBounds(hullnumber, mins, maxs));
@@ -73,6 +121,7 @@ HUD_ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
+// orig client 0x4fda0 (stock)
 int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s* net_from, const char* args, char* response_buffer, int* response_buffer_size)
 {
 	//	RecClConnectionlessPacket(net_from, args, response_buffer, response_buffer_size);
@@ -89,6 +138,7 @@ int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s* net_from, const ch
 	return 0;
 }
 
+// orig client 0x4fdc0 (stock)
 void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
 {
 	//	RecClClientMoveInit(ppmove);
@@ -96,6 +146,7 @@ void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
 	PM_Init(ppmove);
 }
 
+// orig client 0x4fde0 (stock)
 char DLLEXPORT HUD_PlayerMoveTexture(char* name)
 {
 	//	RecClClientTextureType(name);
@@ -166,12 +217,16 @@ so the HUD can reinitialize itself.
 ==========================
 */
 
+// orig client 0x4feb0. RC2: its own state cleared and the crosshairs loaded
 int DLLEXPORT HUD_VidInit()
 {
 	//	RecClHudVidInit();
 	gHUD.VidInit();
 
 	VGui_Startup();
+
+	RC2_ResetClientState();
+	RC2_LoadCrosshairs();
 
 	return 1;
 }
@@ -186,12 +241,15 @@ the hud variables.
 ==========================
 */
 
+// orig client 0x4fee0. RC2: its own state cleared and rc2.ini back to its defaults
 void DLLEXPORT HUD_Init()
 {
 	//	RecClHudInit();
 	InitInput();
 	gHUD.Init();
 	Scheme_Init();
+	RC2_ResetClientState();
+	RC2Prefs_ResetToDefaults();
 }
 
 
@@ -244,11 +302,13 @@ Called at start and end of demos to restore to "non"HUD state.
 ==========================
 */
 
+// orig client 0x4ff70. RC2: its own state cleared too
 void DLLEXPORT HUD_Reset()
 {
 	//	RecClHudReset();
 
 	gHUD.VidInit();
+	RC2_ResetClientState();
 }
 
 /*
@@ -259,11 +319,22 @@ Called by engine every frame that client .dll is loaded
 ==========================
 */
 
+// orig client 0x4ff90. RC2 adds its viewport and menu work, refreshes cl_detail and counts
+// frames for the client effects' origin cache. SDK 2.3's ServersThink(time) came first; halflife-
+// updated has no server browser
 void DLLEXPORT HUD_Frame(double time)
 {
 	//	RecClHudFrame(time);
 
 	GetClientVoiceMgr()->Frame(time);
+	RC2_ViewportFrame((float)time);
+	RC2_RunPendingMenu();
+
+	if (cl_detail)
+		g_iClientDetail = (int)cl_detail->value;
+	else
+		g_iClientDetail = 0;
+	g_iClientFrame++;
 }
 
 
@@ -290,6 +361,7 @@ Called when a director event message was received
 ==========================
 */
 
+// orig client 0x50060 (stock)
 void DLLEXPORT HUD_DirectorMessage(int iSize, void* pbuf)
 {
 	//	RecClDirectorMessage(iSize, pbuf);
@@ -411,3 +483,15 @@ public:
 };
 
 EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION);
+
+// TEMP STUB (c2): real ones belong in input.cpp/hud.cpp/entity.cpp and RC2's own client files
+// at the addresses given with their declarations above (other client packages)
+void RC2_ResetEntityTables() {}
+void RC2_ResetViewportFlags() {}
+void RC2_ResetPendingMenu() {}
+void RC2_LoadCrosshairs() {}
+void RC2Prefs_ResetToDefaults() {}
+void RC2_ViewportFrame(float flTime) {}
+void RC2_RunPendingMenu() {}
+cvar_t* cl_detail = nullptr;
+int g_iMaxPlayerEnt = 0;

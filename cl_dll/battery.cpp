@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 
-DECLARE_MESSAGE(m_Battery, Battery)
+DECLARE_MESSAGE(m_Battery, Battery) // orig client 0x4f840 (__MsgFunc_Battery)
 
 bool CHudBattery::Init()
 {
@@ -54,12 +54,17 @@ bool CHudBattery::VidInit()
 	return true;
 }
 
+// orig client 0x4f940. RC2: the armor is clamped to 0..999
 bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
 {
 	m_iFlags |= HUD_ACTIVE;
 
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT();
+	if (x < 0)
+		x = 0;
+	else if (x > 999)
+		x = 999;
 
 	if (x != m_iBat)
 	{
@@ -71,9 +76,14 @@ bool CHudBattery::MsgFunc_Battery(const char* pszName, int iSize, void* pbuf)
 }
 
 
+// orig client 0x4f9b0. RC2: nothing while the player is transformed (playerclass is the
+// transform mode, pm_rc2.h PM_MODE_*)
 bool CHudBattery::Draw(float flTime)
 {
 	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) != 0)
+		return true;
+
+	if (g_iPlayerClass != 0)
 		return true;
 
 	int r, g, b, x, y, a;
