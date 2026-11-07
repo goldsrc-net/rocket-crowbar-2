@@ -7,13 +7,15 @@ flags of its own project files gives byte-identical copies of every stock functi
 change, and that is how those functions get their names in the originals. These builds are
 for reading the originals only; nothing built here ships.
 
-Measured 2026-11-07, a function counted only when its whole body matches with relocations
-masked:
+Measured 2026-11-07 with `match.py`: a function counts when its whole body occurs once in the
+original, with the dwords the reference's `.reloc` table fixes up and call/jmp displacements
+masked. The RC2-layout build (`hl-rc2`, below) has RC2's extra virtuals and members in place, so
+code that only differs by those offsets matches too.
 
 ```
-library      SDK 2.3 functions   found in RC2's library
-rc2.dll      3058 (hl.dsp)       1391 (45%)
-client.dll   1542 (cl_dll.dsp)    775 (50%)
+reference build          rc2.dll named              client.dll named
+plain SDK 2.3            1167 (761 SDK, 406 CRT)    605 (495 SDK, 110 CRT)
+RC2 layout (hl-rc2)      1982 (1576 SDK, 406 CRT)   (no client layout: it matched less)
 ```
 
 ## Setting up the compiler

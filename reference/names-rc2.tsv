@@ -12,9 +12,14 @@ rva	size	name	demangled	ref_object
 0x55f0	181	?KeyValue@CFlockingFlyerFlock@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFlockingFlyerFlock::KeyValue(struct KeyValueData_s *)	__aflock.obj
 0x56b0	36	?Spawn@CFlockingFlyerFlock@@UAEXXZ	public: virtual void __thiscall CFlockingFlyerFlock::Spawn(void)	__aflock.obj
 0x5730	520	?SpawnFlock@CFlockingFlyerFlock@@QAEXXZ	public: void __thiscall CFlockingFlyerFlock::SpawnFlock(void)	__aflock.obj
+0x5940	60	?Spawn@CFlockingFlyer@@UAEXXZ	public: virtual void __thiscall CFlockingFlyer::Spawn(void)	__aflock.obj
 0x59a0	209	?MakeSound@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::MakeSound(void)	__aflock.obj
+0x5a80	220	?Killed@CFlockingFlyer@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CFlockingFlyer::Killed(struct entvars_s *, int)	__aflock.obj
+0x5b60	188	?FallHack@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::FallHack(void)	__aflock.obj
 0x5c20	203	?SpawnCommonCode@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::SpawnCommonCode(void)	__aflock.obj
 0x5cf0	163	?BoidAdvanceFrame@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::BoidAdvanceFrame(void)	__aflock.obj
+0x5da0	93	?IdleThink@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::IdleThink(void)	__aflock.obj
+0x5e00	90	?Start@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::Start(void)	__aflock.obj
 0x5e60	247	?FormFlock@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::FormFlock(void)	__aflock.obj
 0x5f60	677	?SpreadFlock@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::SpreadFlock(void)	__aflock.obj
 0x6210	324	?SpreadFlock2@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::SpreadFlock2(void)	__aflock.obj
@@ -22,6 +27,8 @@ rva	size	name	demangled	ref_object
 0x67c0	51	??HVector@@QBE?AV0@ABV0@@Z	public: class Vector __thiscall Vector::operator+(class Vector const &) const	__aflock.obj
 0x6800	51	??GVector@@QBE?AV0@ABV0@@Z	public: class Vector __thiscall Vector::operator-(class Vector const &) const	__aflock.obj
 0x6840	51	??DVector@@QBE?AV0@M@Z	public: class Vector __thiscall Vector::operator*(float) const	__aflock.obj
+0x6880	1220	?FlockLeaderThink@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::FlockLeaderThink(void)	__aflock.obj
+0x6d50	1010	?FlockFollowerThink@CFlockingFlyer@@QAEXXZ	public: void __thiscall CFlockingFlyer::FlockFollowerThink(void)	__aflock.obj
 0x7160	31	?SquadAdd@CFlockingFlyer@@QAEXPAV1@@Z	public: void __thiscall CFlockingFlyer::SquadAdd(class CFlockingFlyer *)	__aflock.obj
 0x7180	146	?SquadRemove@CFlockingFlyer@@QAEXPAV1@@Z	public: void __thiscall CFlockingFlyer::SquadRemove(class CFlockingFlyer *)	__aflock.obj
 0x7220	24	?SquadCount@CFlockingFlyer@@QAEHXZ	public: int __thiscall CFlockingFlyer::SquadCount(void)	__aflock.obj
@@ -37,6 +44,7 @@ rva	size	name	demangled	ref_object
 0x85d0	253	?Precache@CAGrunt@@UAEXXZ	public: virtual void __thiscall CAGrunt::Precache(void)	__agrunt.obj
 0x86d0	38	?ScheduleFromName@CAGrunt@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CAGrunt::ScheduleFromName(char const *)	__agrunt.obj
 0x8710	71	?CheckMeleeAttack1@CAGrunt@@UAEHMM@Z	public: virtual int __thiscall CAGrunt::CheckMeleeAttack1(float, float)	__agrunt.obj
+0x8760	365	?CheckRangeAttack1@CAGrunt@@UAEHMM@Z	public: virtual int __thiscall CAGrunt::CheckRangeAttack1(float, float)	__agrunt.obj
 0x88d0	1354	?StartTask@CAGrunt@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CAGrunt::StartTask(struct Task_t *)	__agrunt.obj
 0x8e20	228	?GetSchedule@CAGrunt@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CAGrunt::GetSchedule(void)	__agrunt.obj
 0x8f10	191	?GetScheduleOfType@CAGrunt@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CAGrunt::GetScheduleOfType(int)	__agrunt.obj
@@ -66,18 +74,27 @@ rva	size	name	demangled	ref_object
 0xa2d0	261	?FindTransition@@YAHPAXHHPAH@Z	int __cdecl FindTransition(void *, int, int, int *)	__animation.obj
 0xa3e0	93	?SetBodygroup@@YAXPAXPAUentvars_s@@HH@Z	void __cdecl SetBodygroup(void *, struct entvars_s *, int, int)	__animation.obj
 0xa440	81	?GetBodygroup@@YAHPAXPAUentvars_s@@H@Z	int __cdecl GetBodygroup(void *, struct entvars_s *, int)	__animation.obj
+0xacc0	340	?Spawn@CApache@@EAEXXZ	private: virtual void __thiscall CApache::Spawn(void)	__apache.obj
 0xae20	157	?Precache@CApache@@EAEXXZ	private: virtual void __thiscall CApache::Precache(void)	__apache.obj
+0xaef0	46	?StartupUse@CApache@@AAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	private: void __thiscall CApache::StartupUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__apache.obj
+0xaf20	260	?Killed@CApache@@EAEXPAUentvars_s@@H@Z	private: virtual void __thiscall CApache::Killed(struct entvars_s *, int)	__apache.obj
+0xb030	2041	?DyingThink@CApache@@AAEXXZ	private: void __thiscall CApache::DyingThink(void)	__apache.obj
 0xb830	209	?FlyTouch@CApache@@AAEXPAVCBaseEntity@@@Z	private: void __thiscall CApache::FlyTouch(class CBaseEntity *)	__apache.obj
 0xb910	56	?CrashTouch@CApache@@AAEXPAVCBaseEntity@@@Z	private: void __thiscall CApache::CrashTouch(class CBaseEntity *)	__apache.obj
+0xb960	2844	?HuntThink@CApache@@AAEXXZ	private: void __thiscall CApache::HuntThink(void)	__apache.obj
 0xc480	33	?Length@Vector@@QBEMXZ	public: float __thiscall Vector::Length(void) const	__apache.obj
 0xcbf0	1260	?FireRocket@CApache@@AAEXXZ	private: void __thiscall CApache::FireRocket(void)	__apache.obj
 0xd0e0	1124	?FireGun@CApache@@AAEHXZ	private: int __thiscall CApache::FireGun(void)	__apache.obj
 0xd550	203	?ShowDamage@CApache@@AAEXXZ	private: void __thiscall CApache::ShowDamage(void)	__apache.obj
 0xd620	71	?TakeDamage@CApache@@EAEHPAUentvars_s@@0MH@Z	private: virtual int __thiscall CApache::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__apache.obj
 0xd670	129	?TraceAttack@CApache@@EAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	private: virtual void __thiscall CApache::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	__apache.obj
+0xd7e0	251	?Spawn@CApacheHVR@@EAEXXZ	private: virtual void __thiscall CApacheHVR::Spawn(void)	__apache.obj
+0xd910	219	?IgniteThink@CApacheHVR@@AAEXXZ	private: void __thiscall CApacheHVR::IgniteThink(void)	__apache.obj
+0xd9f0	370	?AccelerateThink@CApacheHVR@@AAEXXZ	private: void __thiscall CApacheHVR::AccelerateThink(void)	__apache.obj
 0xdc70	39	?HandleAnimEvent@CBarnacle@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CBarnacle::HandleAnimEvent(struct MonsterEvent_t *)	__barnacle.obj
 0xdca0	289	?Spawn@CBarnacle@@UAEXXZ	public: virtual void __thiscall CBarnacle::Spawn(void)	__barnacle.obj
 0xddd0	45	?TakeDamage@CBarnacle@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBarnacle::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__barnacle.obj
+0xe410	241	?Killed@CBarnacle@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CBarnacle::Killed(struct entvars_s *, int)	__barnacle.obj
 0xe930	81	?AlertSound@CBarney@@UAEXXZ	public: virtual void __thiscall CBarney::AlertSound(void)	__barney.obj
 0xe990	49	?SetYawSpeed@CBarney@@UAEXXZ	public: virtual void __thiscall CBarney::SetYawSpeed(void)	__barney.obj
 0xe9d0	389	?CheckRangeAttack1@CBarney@@UAEHMM@Z	public: virtual int __thiscall CBarney::CheckRangeAttack1(float, float)	__barney.obj
@@ -98,7 +115,9 @@ rva	size	name	demangled	ref_object
 0x10ce0	105	?DeathNotice@CBigMomma@@UAEXPAUentvars_s@@@Z	public: virtual void __thiscall CBigMomma::DeathNotice(struct entvars_s *)	__bigmomma.obj
 0x10d50	255	?LaunchMortar@CBigMomma@@QAEXXZ	public: void __thiscall CBigMomma::LaunchMortar(void)	__bigmomma.obj
 0x10e50	246	?Spawn@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::Spawn(void)	__bigmomma.obj
+0x10f50	346	?Precache@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::Precache(void)	__bigmomma.obj
 0x110b0	30	?Activate@CBigMomma@@UAEXXZ	public: virtual void __thiscall CBigMomma::Activate(void)	__bigmomma.obj
+0x110d0	154	?NodeStart@CBigMomma@@QAEXH@Z	public: void __thiscall CBigMomma::NodeStart(int)	__bigmomma.obj
 0x11170	225	?NodeReach@CBigMomma@@QAEXXZ	public: void __thiscall CBigMomma::NodeReach(void)	__bigmomma.obj
 0x11290	214	?CheckMeleeAttack2@CBigMomma@@UAEHMM@Z	public: virtual int __thiscall CBigMomma::CheckMeleeAttack2(float, float)	__bigmomma.obj
 0x11370	281	?CheckRangeAttack1@CBigMomma@@UAEHMM@Z	public: virtual int __thiscall CBigMomma::CheckRangeAttack1(float, float)	__bigmomma.obj
@@ -110,6 +129,8 @@ rva	size	name	demangled	ref_object
 0x11bf0	592	?VecCheckSplatToss@@YA?AVVector@@PAUentvars_s@@ABV1@V1@M@Z	class Vector __cdecl VecCheckSplatToss(struct entvars_s *, class Vector const &, class Vector, float)	__bigmomma.obj
 0x11e40	140	?MortarSpray@@YAXABVVector@@0HH@Z	void __cdecl MortarSpray(class Vector const &, class Vector const &, int, int)	__bigmomma.obj
 0x11ed0	265	?Spawn@CBMortar@@UAEXXZ	public: virtual void __thiscall CBMortar::Spawn(void)	__bigmomma.obj
+0x11fe0	332	?Animate@CBMortar@@QAEXXZ	public: void __thiscall CBMortar::Animate(void)	__bigmomma.obj
+0x12130	180	?Shoot@CBMortar@@SAPAV1@PAUedict_s@@VVector@@1@Z	public: static class CBMortar * __cdecl CBMortar::Shoot(struct edict_s *, class Vector, class Vector)	__bigmomma.obj
 0x121f0	678	?Touch@CBMortar@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CBMortar::Touch(class CBaseEntity *)	__bigmomma.obj
 0x12550	42	?TakeDamage@CBloater@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBloater::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__bloater.obj
 0x125c0	26	?HandleAnimEvent@CBloater@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CBloater::HandleAnimEvent(struct MonsterEvent_t *)	__bloater.obj
@@ -123,22 +144,32 @@ rva	size	name	demangled	ref_object
 0x12b70	121	?Spawn@CFuncConveyor@@UAEXXZ	public: virtual void __thiscall CFuncConveyor::Spawn(void)	__bmodels.obj
 0x12bf0	116	?UpdateSpeed@CFuncConveyor@@QAEXM@Z	public: void __thiscall CFuncConveyor::UpdateSpeed(float)	__bmodels.obj
 0x12c70	35	?Use@CFuncConveyor@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncConveyor::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__bmodels.obj
+0x12d20	122	?KeyValue@CFuncIllusionary@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncIllusionary::KeyValue(struct KeyValueData_s *)	__bmodels.obj
 0x12da0	91	?Spawn@CFuncIllusionary@@UAEXXZ	public: virtual void __thiscall CFuncIllusionary::Spawn(void)	__bmodels.obj
 0x12e80	63	?Spawn@CFuncMonsterClip@@UAEXXZ	public: virtual void __thiscall CFuncMonsterClip::Spawn(void)	__bmodels.obj
 0x12fa0	517	?KeyValue@CFuncRotating@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncRotating::KeyValue(struct KeyValueData_s *)	__bmodels.obj
 0x131b0	568	?Spawn@CFuncRotating@@UAEXXZ	public: virtual void __thiscall CFuncRotating::Spawn(void)	__bmodels.obj
 0x133f0	392	?Precache@CFuncRotating@@UAEXXZ	public: virtual void __thiscall CFuncRotating::Precache(void)	__bmodels.obj
 0x136f0	255	?RampPitchVol@CFuncRotating@@QAEXH@Z	public: void __thiscall CFuncRotating::RampPitchVol(int)	__bmodels.obj
+0x137f0	443	?SpinUp@CFuncRotating@@QAEXXZ	public: void __thiscall CFuncRotating::SpinUp(void)	__bmodels.obj
+0x139b0	460	?SpinDown@CFuncRotating@@QAEXXZ	public: void __thiscall CFuncRotating::SpinDown(void)	__bmodels.obj
 0x13b80	22	?Rotate@CFuncRotating@@QAEXXZ	public: void __thiscall CFuncRotating::Rotate(void)	__bmodels.obj
+0x13ba0	373	?RotatingUse@CFuncRotating@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CFuncRotating::RotatingUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__bmodels.obj
 0x13ed0	195	?KeyValue@CPendulum@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CPendulum::KeyValue(struct KeyValueData_s *)	__bmodels.obj
+0x13fa0	424	?Spawn@CPendulum@@UAEXXZ	public: virtual void __thiscall CPendulum::Spawn(void)	__bmodels.obj
+0x14150	279	?PendulumUse@CPendulum@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CPendulum::PendulumUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__bmodels.obj
 0x14270	77	?Stop@CPendulum@@QAEXXZ	public: void __thiscall CPendulum::Stop(void)	__bmodels.obj
+0x14370	482	?Swing@CPendulum@@QAEXXZ	public: void __thiscall CPendulum::Swing(void)	__bmodels.obj
 0x14830	242	?Spawn@CSquidSpit@@UAEXXZ	public: virtual void __thiscall CSquidSpit::Spawn(void)	__bullsquid.obj
+0x14930	92	?Animate@CSquidSpit@@QAEXXZ	public: void __thiscall CSquidSpit::Animate(void)	__bullsquid.obj
+0x14990	171	?Shoot@CSquidSpit@@SAXPAUentvars_s@@VVector@@1@Z	public: static void __cdecl CSquidSpit::Shoot(struct entvars_s *, class Vector, class Vector)	__bullsquid.obj
 0x14d40	151	?IgnoreConditions@CBullsquid@@UAEHXZ	public: virtual int __thiscall CBullsquid::IgnoreConditions(void)	__bullsquid.obj
 0x14de0	124	?IRelationship@CBullsquid@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CBullsquid::IRelationship(class CBaseEntity *)	__bullsquid.obj
 0x14e60	412	?TakeDamage@CBullsquid@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBullsquid::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__bullsquid.obj
 0x15000	249	?CheckRangeAttack1@CBullsquid@@UAEHMM@Z	public: virtual int __thiscall CBullsquid::CheckRangeAttack1(float, float)	__bullsquid.obj
 0x15100	80	?CheckMeleeAttack1@CBullsquid@@UAEHMM@Z	public: virtual int __thiscall CBullsquid::CheckMeleeAttack1(float, float)	__bullsquid.obj
 0x15150	58	?CheckMeleeAttack2@CBullsquid@@UAEHMM@Z	public: virtual int __thiscall CBullsquid::CheckMeleeAttack2(float, float)	__bullsquid.obj
+0x151f0	240	?IdleSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::IdleSound(void)	__bullsquid.obj
 0x152e0	204	?PainSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::PainSound(void)	__bullsquid.obj
 0x153b0	125	?AlertSound@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::AlertSound(void)	__bullsquid.obj
 0x15430	40	?SetYawSpeed@CBullsquid@@UAEXXZ	public: virtual void __thiscall CBullsquid::SetYawSpeed(void)	__bullsquid.obj
@@ -156,23 +187,39 @@ rva	size	name	demangled	ref_object
 0x168e0	88	?Spawn@CEnvGlobal@@UAEXXZ	public: virtual void __thiscall CEnvGlobal::Spawn(void)	__buttons.obj
 0x16940	128	?Use@CEnvGlobal@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CEnvGlobal::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__buttons.obj
 0x16a90	440	?KeyValue@CMultiSource@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMultiSource::KeyValue(struct KeyValueData_s *)	__buttons.obj
+0x16c50	68	?Spawn@CMultiSource@@UAEXXZ	public: virtual void __thiscall CMultiSource::Spawn(void)	__buttons.obj
 0x16ca0	216	?Use@CMultiSource@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CMultiSource::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__buttons.obj
 0x16d80	88	?IsTriggered@CMultiSource@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CMultiSource::IsTriggered(class CBaseEntity *)	__buttons.obj
+0x16de0	297	?Register@CMultiSource@@QAEXXZ	public: void __thiscall CMultiSource::Register(void)	__buttons.obj
 0x16f70	696	?Precache@CBaseButton@@UAEXXZ	public: virtual void __thiscall CBaseButton::Precache(void)	__buttons.obj
 0x17230	553	?KeyValue@CBaseButton@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseButton::KeyValue(struct KeyValueData_s *)	__buttons.obj
 0x17460	208	?TakeDamage@CBaseButton@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBaseButton::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__buttons.obj
+0x175a0	638	?Spawn@CBaseButton@@UAEXXZ	public: virtual void __thiscall CBaseButton::Spawn(void)	__buttons.obj
 0x17820	240	?ButtonSound@@YAPADH@Z	char * __cdecl ButtonSound(int)	__buttons.obj
 0x17910	476	?DoSpark@@YAXPAUentvars_s@@ABVVector@@@Z	void __cdecl DoSpark(struct entvars_s *, class Vector const &)	__buttons.obj
+0x17af0	66	?ButtonSpark@CBaseButton@@QAEXXZ	public: void __thiscall CBaseButton::ButtonSpark(void)	__buttons.obj
 0x17b40	143	?ButtonUse@CBaseButton@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CBaseButton::ButtonUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__buttons.obj
 0x17bd0	87	?ButtonResponseToTouch@CBaseButton@@QAE?AW4BUTTON_CODE@1@XZ	public: enum CBaseButton::BUTTON_CODE __thiscall CBaseButton::ButtonResponseToTouch(void)	__buttons.obj
+0x17d10	231	?ButtonActivate@CBaseButton@@QAEXXZ	public: void __thiscall CBaseButton::ButtonActivate(void)	__buttons.obj
 0x17e00	154	?TriggerAndWait@CBaseButton@@QAEXXZ	public: void __thiscall CBaseButton::TriggerAndWait(void)	__buttons.obj
+0x17ea0	131	?ButtonReturn@CBaseButton@@QAEXXZ	public: void __thiscall CBaseButton::ButtonReturn(void)	__buttons.obj
+0x17f30	324	?ButtonBackHome@CBaseButton@@QAEXXZ	public: void __thiscall CBaseButton::ButtonBackHome(void)	__buttons.obj
+0x180f0	547	?Spawn@CRotButton@@UAEXXZ	public: virtual void __thiscall CRotButton::Spawn(void)	__buttons.obj
 0x183f0	21	?ObjectCaps@CMomentaryRotButton@@UAEHXZ	public: virtual int __thiscall CMomentaryRotButton::ObjectCaps(void)	__buttons.obj
 0x18410	525	?Spawn@CMomentaryRotButton@@UAEXXZ	public: virtual void __thiscall CMomentaryRotButton::Spawn(void)	__buttons.obj
 0x18620	196	?KeyValue@CMomentaryRotButton@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMomentaryRotButton::KeyValue(struct KeyValueData_s *)	__buttons.obj
 0x186f0	58	?PlaySound@CMomentaryRotButton@@QAEXXZ	public: void __thiscall CMomentaryRotButton::PlaySound(void)	__buttons.obj
+0x187b0	187	?UpdateAllButtons@CMomentaryRotButton@@QAEXMH@Z	public: void __thiscall CMomentaryRotButton::UpdateAllButtons(float, int)	__buttons.obj
+0x18880	375	?UpdateSelf@CMomentaryRotButton@@QAEXM@Z	public: void __thiscall CMomentaryRotButton::UpdateSelf(float)	__buttons.obj
+0x18a00	111	?UpdateTarget@CMomentaryRotButton@@QAEXM@Z	public: void __thiscall CMomentaryRotButton::UpdateTarget(float)	__buttons.obj
+0x18a70	117	?Off@CMomentaryRotButton@@QAEXXZ	public: void __thiscall CMomentaryRotButton::Off(void)	__buttons.obj
 0x18af0	87	?Return@CMomentaryRotButton@@QAEXXZ	public: void __thiscall CMomentaryRotButton::Return(void)	__buttons.obj
+0x18b50	212	?UpdateSelfReturn@CMomentaryRotButton@@QAEXM@Z	public: void __thiscall CMomentaryRotButton::UpdateSelfReturn(float)	__buttons.obj
+0x18d70	130	?Spawn@CEnvSpark@@UAEXXZ	public: virtual void __thiscall CEnvSpark::Spawn(void)	__buttons.obj
 0x18e50	436	?KeyValue@CEnvSpark@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvSpark::KeyValue(struct KeyValueData_s *)	__buttons.obj
 0x19010	31	?ObjectCaps@CBaseButton@@UAEHXZ	public: virtual int __thiscall CBaseButton::ObjectCaps(void)	__buttons.obj
+0x19030	56	?SparkThink@CEnvSpark@@QAEXXZ	public: void __thiscall CEnvSpark::SparkThink(void)	__buttons.obj
+0x19070	59	?SparkStart@CEnvSpark@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CEnvSpark::SparkStart(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__buttons.obj
 0x190b0	17	?SparkStop@CEnvSpark@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CEnvSpark::SparkStop(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__buttons.obj
 0x19140	101	?Spawn@CButtonTarget@@UAEXXZ	public: virtual void __thiscall CButtonTarget::Spawn(void)	__buttons.obj
 0x191b0	115	?Use@CButtonTarget@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CButtonTarget::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__buttons.obj
@@ -184,6 +231,7 @@ rva	size	name	demangled	ref_object
 0x194b0	62	?DispatchKeyValue@@YAXPAUedict_s@@PAUKeyValueData_s@@@Z	void __cdecl DispatchKeyValue(struct edict_s *, struct KeyValueData_s *)	__cbase.obj
 0x19670	76	?DispatchThink@@YAXPAUedict_s@@@Z	void __cdecl DispatchThink(struct edict_s *)	__cbase.obj
 0x19710	201	?DispatchSave@@YAXPAUedict_s@@PAUsaverestore_s@@@Z	void __cdecl DispatchSave(struct edict_s *, struct saverestore_s *)	__cbase.obj
+0x197e0	172	?FindGlobalEntity@@YAPAVCBaseEntity@@HH@Z	class CBaseEntity * __cdecl FindGlobalEntity(int, int)	__cbase.obj
 0x19890	833	?DispatchRestore@@YAHPAUedict_s@@PAUsaverestore_s@@H@Z	int __cdecl DispatchRestore(struct edict_s *, struct saverestore_s *, int)	__cbase.obj
 0x19be0	33	?DispatchObjectCollsionBox@@YAXPAUedict_s@@@Z	void __cdecl DispatchObjectCollsionBox(struct edict_s *)	__cbase.obj
 0x19c10	52	?SaveWriteFields@@YAXPAUsaverestore_s@@PBDPAXPAUTYPEDESCRIPTION@@H@Z	void __cdecl SaveWriteFields(struct saverestore_s *, char const *, void *, struct TYPEDESCRIPTION *, int)	__cbase.obj
@@ -193,6 +241,7 @@ rva	size	name	demangled	ref_object
 0x19d00	48	??4EHANDLE@@QAEPAVCBaseEntity@@PAV1@@Z	public: class CBaseEntity * __thiscall EHANDLE::operator=(class CBaseEntity *)	__cbase.obj
 0x19d50	109	?TakeHealth@CBaseEntity@@UAEHMH@Z	public: virtual int __thiscall CBaseEntity::TakeHealth(float, int)	__cbase.obj
 0x1a1a0	36	?Killed@CBaseEntity@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CBaseEntity::Killed(struct entvars_s *, int)	__cbase.obj
+0x1a1d0	78	?GetNextTarget@CBaseEntity@@UAEPAV1@XZ	public: virtual class CBaseEntity * __thiscall CBaseEntity::GetNextTarget(void)	__cbase.obj
 0x1a220	60	?Save@CBaseEntity@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBaseEntity::Save(class CSave &)	__cbase.obj
 0x1a260	238	?Restore@CBaseEntity@@UAEHAAVCRestore@@@Z	public: virtual int __thiscall CBaseEntity::Restore(class CRestore &)	__cbase.obj
 0x1a350	456	?SetObjectCollisionBox@@YAXPAUentvars_s@@@Z	void __cdecl SetObjectCollisionBox(struct entvars_s *)	__cbase.obj
@@ -211,7 +260,9 @@ rva	size	name	demangled	ref_object
 0x1dd00	104	?PlayerCustomization@@YAXPAUedict_s@@PAUcustomization_s@@@Z	void __cdecl PlayerCustomization(struct edict_s *, struct customization_s *)	__client.obj
 0x1ddd0	255	?SetupVisibility@@YAXPAUedict_s@@0PAPAE1@Z	void __cdecl SetupVisibility(struct edict_s *, struct edict_s *, unsigned char **, unsigned char **)	__client.obj
 0x1e8f0	112	?Entity_FieldInit@@YAXPAUdelta_s@@@Z	void __cdecl Entity_FieldInit(struct delta_s *)	__client.obj
+0x1e960	347	?Entity_Encode@@YAXPAUdelta_s@@PBE1@Z	void __cdecl Entity_Encode(struct delta_s *, unsigned char const *, unsigned char const *)	__client.obj
 0x1eac0	61	?Player_FieldInit@@YAXPAUdelta_s@@@Z	void __cdecl Player_FieldInit(struct delta_s *)	__client.obj
+0x1eb00	224	?Player_Encode@@YAXPAUdelta_s@@PBE1@Z	void __cdecl Player_Encode(struct delta_s *, unsigned char const *, unsigned char const *)	__client.obj
 0x1ebe0	166	?Custom_Entity_FieldInit@@YAXPAUdelta_s@@@Z	void __cdecl Custom_Entity_FieldInit(struct delta_s *)	__client.obj
 0x1ec90	226	?Custom_Encode@@YAXPAUdelta_s@@PBE1@Z	void __cdecl Custom_Encode(struct delta_s *, unsigned char const *, unsigned char const *)	__client.obj
 0x1ed80	52	?RegisterEncoders@@YAXXZ	void __cdecl RegisterEncoders(void)	__client.obj
@@ -220,6 +271,9 @@ rva	size	name	demangled	ref_object
 0x1f350	22	?GetHullBounds@@YAHHPAM0@Z	int __cdecl GetHullBounds(int, float *, float *)	__client.obj
 0x1f380	59	?InconsistentFile@@YAHPBUedict_s@@PBDPAD@Z	int __cdecl InconsistentFile(struct edict_s const *, char const *, char *)	__client.obj
 0x1f3e0	251	?LimitVelocity@CGib@@QAEXXZ	public: void __thiscall CGib::LimitVelocity(void)	__combat.obj
+0x1f4e0	1046	?SpawnStickyGibs@CGib@@SAXPAUentvars_s@@VVector@@H@Z	public: static void __cdecl CGib::SpawnStickyGibs(struct entvars_s *, class Vector, int)	__combat.obj
+0x1f910	1089	?SpawnHeadGib@CGib@@SAXPAUentvars_s@@@Z	public: static void __cdecl CGib::SpawnHeadGib(struct entvars_s *)	__combat.obj
+0x1fd60	1069	?SpawnRandomGibs@CGib@@SAXPAUentvars_s@@HH@Z	public: static void __cdecl CGib::SpawnRandomGibs(struct entvars_s *, int, int)	__combat.obj
 0x20190	34	?HasHumanGibs@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::HasHumanGibs(void)	__combat.obj
 0x201c0	44	?HasAlienGibs@CBaseMonster@@UAEHXZ	public: virtual int __thiscall CBaseMonster::HasAlienGibs(void)	__combat.obj
 0x201f0	119	?FadeMonster@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::FadeMonster(void)	__combat.obj
@@ -227,11 +281,14 @@ rva	size	name	demangled	ref_object
 0x20640	136	?GetSmallFlinchActivity@CBaseMonster@@QAE?AW4Activity@@XZ	public: enum Activity __thiscall CBaseMonster::GetSmallFlinchActivity(void)	__combat.obj
 0x206d0	61	?BecomeDead@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::BecomeDead(void)	__combat.obj
 0x20710	48	?ShouldGibMonster@CBaseMonster@@QAEHH@Z	public: int __thiscall CBaseMonster::ShouldGibMonster(int)	__combat.obj
+0x208e0	111	?SUB_StartFadeOut@CBaseEntity@@QAEXXZ	public: void __thiscall CBaseEntity::SUB_StartFadeOut(void)	__combat.obj
+0x20950	104	?SUB_FadeOut@CBaseEntity@@QAEXXZ	public: void __thiscall CBaseEntity::SUB_FadeOut(void)	__combat.obj
 0x209c0	158	?WaitTillLand@CGib@@QAEXXZ	public: void __thiscall CGib::WaitTillLand(void)	__combat.obj
 0x20a60	435	?BounceGibTouch@CGib@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CGib::BounceGibTouch(class CBaseEntity *)	__combat.obj
 0x20c20	470	?StickyGibTouch@CGib@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CGib::StickyGibTouch(class CBaseEntity *)	__combat.obj
 0x20e00	258	?Spawn@CGib@@QAEXPBD@Z	public: void __thiscall CGib::Spawn(char const *)	__combat.obj
 0x20f10	71	?TakeHealth@CBaseMonster@@UAEHMH@Z	public: virtual int __thiscall CBaseMonster::TakeHealth(float, int)	__combat.obj
+0x21870	529	?DeadTakeDamage@CBaseMonster@@QAEHPAUentvars_s@@0MH@Z	public: int __thiscall CBaseMonster::DeadTakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__combat.obj
 0x21f40	134	?Normalize@Vector@@QBE?AV1@XZ	public: class Vector __thiscall Vector::Normalize(void) const	__combat.obj
 0x21fd0	67	?RadiusDamage@CBaseMonster@@QAEXPAUentvars_s@@0MHH@Z	public: void __thiscall CBaseMonster::RadiusDamage(struct entvars_s *, struct entvars_s *, float, int, int)	__combat.obj
 0x22020	65	?RadiusDamage@CBaseMonster@@QAEXVVector@@PAUentvars_s@@1MHH@Z	public: void __thiscall CBaseMonster::RadiusDamage(class Vector, struct entvars_s *, struct entvars_s *, float, int, int)	__combat.obj
@@ -249,25 +306,39 @@ rva	size	name	demangled	ref_object
 0x24080	892	?HandleAnimEvent@CController@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CController::HandleAnimEvent(struct MonsterEvent_t *)	__controller.obj
 0x24400	258	?Spawn@CController@@UAEXXZ	public: virtual void __thiscall CController::Spawn(void)	__controller.obj
 0x24510	191	?Precache@CController@@UAEXXZ	public: virtual void __thiscall CController::Precache(void)	__controller.obj
+0x24600	408	?StartTask@CController@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CController::StartTask(struct Task_t *)	__controller.obj
+0x247a0	541	?Intersect@@YA?AVVector@@V1@00M@Z	class Vector __cdecl Intersect(class Vector, class Vector, class Vector, float)	__controller.obj
 0x249c0	409	?LookupFloat@CController@@QAEHXZ	public: int __thiscall CController::LookupFloat(void)	__controller.obj
 0x24b60	1517	?RunTask@CController@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CController::RunTask(struct Task_t *)	__controller.obj
 0x25150	143	?GetSchedule@CController@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CController::GetSchedule(void)	__controller.obj
 0x251e0	126	?GetScheduleOfType@CController@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CController::GetScheduleOfType(int)	__controller.obj
 0x252f0	33	?SetActivity@CController@@UAEXW4Activity@@@Z	public: virtual void __thiscall CController::SetActivity(enum Activity)	__controller.obj
+0x25320	570	?RunAI@CController@@UAEXXZ	public: virtual void __thiscall CController::RunAI(void)	__controller.obj
 0x25ae0	330	?CheckLocalMove@CController@@UAEHABVVector@@0PAVCBaseEntity@@PAM@Z	public: virtual int __thiscall CController::CheckLocalMove(class Vector const &, class Vector const &, class CBaseEntity *, float *)	__controller.obj
+0x25c30	343	?MoveExecute@CController@@UAEXPAVCBaseEntity@@ABVVector@@M@Z	public: virtual void __thiscall CController::MoveExecute(class CBaseEntity *, class Vector const &, float)	__controller.obj
+0x25e00	363	?Spawn@CControllerHeadBall@@EAEXXZ	private: virtual void __thiscall CControllerHeadBall::Spawn(void)	__controller.obj
+0x25fa0	1099	?HuntThink@CControllerHeadBall@@AAEXXZ	private: void __thiscall CControllerHeadBall::HuntThink(void)	__controller.obj
 0x26400	641	?MovetoTarget@CControllerHeadBall@@AAEXVVector@@@Z	private: void __thiscall CControllerHeadBall::MovetoTarget(class Vector)	__controller.obj
+0x26690	595	?Crawl@CControllerHeadBall@@AAEXXZ	private: void __thiscall CControllerHeadBall::Crawl(void)	__controller.obj
 0x268f0	586	?BounceTouch@CControllerHeadBall@@AAEXPAVCBaseEntity@@@Z	private: void __thiscall CControllerHeadBall::BounceTouch(class CBaseEntity *)	__controller.obj
+0x26bb0	312	?Spawn@CControllerZapBall@@EAEXXZ	private: virtual void __thiscall CControllerZapBall::Spawn(void)	__controller.obj
+0x26d00	160	?AnimateThink@CControllerZapBall@@AAEXXZ	private: void __thiscall CControllerZapBall::AnimateThink(void)	__controller.obj
+0x26da0	317	?ExplodeTouch@CControllerZapBall@@AAEXPAVCBaseEntity@@@Z	private: void __thiscall CControllerZapBall::ExplodeTouch(class CBaseEntity *)	__controller.obj
 0x30810	573	?FindHullIntersection@@YAXABVVector@@AAUTraceResult@@PAM2PAUedict_s@@@Z	void __cdecl FindHullIntersection(class Vector const &, struct TraceResult &, float *, float *, struct edict_s *)	__crowbar.obj
 0x32580	20	?ScheduleFromName@CBaseMonster@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CBaseMonster::ScheduleFromName(char const *)	__defaultai.obj
 0x325a0	143	?ScheduleInList@CBaseMonster@@QAEPAUSchedule_t@@PBDPAPAU2@H@Z	public: struct Schedule_t * __thiscall CBaseMonster::ScheduleInList(char const *, struct Schedule_t **, int)	__defaultai.obj
+0x32630	688	?GetScheduleOfType@CBaseMonster@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CBaseMonster::GetScheduleOfType(int)	__defaultai.obj
 0x33f30	53	??D@YA?AVVector@@MABV0@@Z	class Vector __cdecl operator*(float, class Vector const &)	__ichthyosaur.obj
 0x34a00	534	?PlayLockSounds@@YAXPAUentvars_s@@PAUlocksounds@@HH@Z	void __cdecl PlayLockSounds(struct entvars_s *, struct locksounds *, int, int)	__doors.obj
+0x34c20	836	?KeyValue@CBaseDoor@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseDoor::KeyValue(struct KeyValueData_s *)	__doors.obj
 0x34fe0	16	?ObjectCaps@CBaseDoor@@UAEHXZ	public: virtual int __thiscall CBaseDoor::ObjectCaps(void)	__doors.obj
 0x35060	482	?Spawn@CBaseDoor@@UAEXXZ	public: virtual void __thiscall CBaseDoor::Spawn(void)	__doors.obj
 0x35250	52	?SetToggleState@CBaseDoor@@UAEXH@Z	public: virtual void __thiscall CBaseDoor::SetToggleState(int)	__doors.obj
 0x35290	1316	?Precache@CBaseDoor@@UAEXXZ	public: virtual void __thiscall CBaseDoor::Precache(void)	__doors.obj
 0x35850	57	?Use@CBaseDoor@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CBaseDoor::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__doors.obj
+0x35950	631	?DoorGoUp@CBaseDoor@@QAEXXZ	public: void __thiscall CBaseDoor::DoorGoUp(void)	__doors.obj
 0x35bd0	300	?DoorHitTop@CBaseDoor@@QAEXXZ	public: void __thiscall CBaseDoor::DoorHitTop(void)	__doors.obj
+0x35d00	232	?DoorGoDown@CBaseDoor@@QAEXXZ	public: void __thiscall CBaseDoor::DoorGoDown(void)	__doors.obj
 0x35df0	251	?DoorHitBottom@CBaseDoor@@QAEXXZ	public: void __thiscall CBaseDoor::DoorHitBottom(void)	__doors.obj
 0x36300	606	?Spawn@CRotDoor@@UAEXXZ	public: virtual void __thiscall CRotDoor::Spawn(void)	__doors.obj
 0x36560	105	?SetToggleState@CRotDoor@@UAEXH@Z	public: virtual void __thiscall CRotDoor::SetToggleState(int)	__doors.obj
@@ -275,7 +346,10 @@ rva	size	name	demangled	ref_object
 0x36860	352	?Precache@CMomentaryDoor@@UAEXXZ	public: virtual void __thiscall CMomentaryDoor::Precache(void)	__doors.obj
 0x369c0	249	?KeyValue@CMomentaryDoor@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMomentaryDoor::KeyValue(struct KeyValueData_s *)	__doors.obj
 0x36ac0	491	?Use@CMomentaryDoor@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CMomentaryDoor::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__doors.obj
+0x36e00	258	?Spawn@CBubbling@@UAEXXZ	public: virtual void __thiscall CBubbling::Spawn(void)	__effects.obj
+0x36f30	92	?Use@CBubbling@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CBubbling::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__effects.obj
 0x36f90	284	?KeyValue@CBubbling@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBubbling::KeyValue(struct KeyValueData_s *)	__effects.obj
+0x370b0	176	?FizzThink@CBubbling@@QAEXXZ	public: void __thiscall CBubbling::FizzThink(void)	__effects.obj
 0x371f0	101	?Center@CBeam@@UAE?AVVector@@XZ	public: virtual class Vector __thiscall CBeam::Center(void)	__effects.obj
 0x37260	18	?Spawn@CBeam@@UAEXXZ	public: virtual void __thiscall CBeam::Spawn(void)	__effects.obj
 0x37280	67	?Precache@CBeam@@UAEXXZ	public: virtual void __thiscall CBeam::Precache(void)	__effects.obj
@@ -283,6 +357,7 @@ rva	size	name	demangled	ref_object
 0x37320	66	?SetEndEntity@CBeam@@QAEXH@Z	public: void __thiscall CBeam::SetEndEntity(int)	__effects.obj
 0x37370	49	?GetStartPos@CBeam@@QAEABVVector@@XZ	public: class Vector const & __thiscall CBeam::GetStartPos(void)	__effects.obj
 0x373b0	67	?GetEndPos@CBeam@@QAEABVVector@@XZ	public: class Vector const & __thiscall CBeam::GetEndPos(void)	__effects.obj
+0x37400	116	?BeamCreate@CBeam@@SAPAV1@PBDH@Z	public: static class CBeam * __cdecl CBeam::BeamCreate(char const *, int)	__effects.obj
 0x37480	190	?BeamInit@CBeam@@QAEXPBDH@Z	public: void __thiscall CBeam::BeamInit(char const *, int)	__effects.obj
 0x37540	114	?PointsInit@CBeam@@QAEXABVVector@@0@Z	public: void __thiscall CBeam::PointsInit(class Vector const &, class Vector const &)	__effects.obj
 0x375c0	117	?HoseInit@CBeam@@QAEXABVVector@@0@Z	public: void __thiscall CBeam::HoseInit(class Vector const &, class Vector const &)	__effects.obj
@@ -291,13 +366,19 @@ rva	size	name	demangled	ref_object
 0x37730	410	?RelinkBeam@CBeam@@QAEXXZ	public: void __thiscall CBeam::RelinkBeam(void)	__effects.obj
 0x378d0	92	?TriggerTouch@CBeam@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CBeam::TriggerTouch(class CBaseEntity *)	__effects.obj
 0x37990	62	?DoSparks@CBeam@@QAEXABVVector@@0@Z	public: void __thiscall CBeam::DoSparks(class Vector const &, class Vector const &)	__effects.obj
+0x37b10	278	?Spawn@CLightning@@UAEXXZ	public: virtual void __thiscall CLightning::Spawn(void)	__effects.obj
 0x37c30	45	?Precache@CLightning@@UAEXXZ	public: virtual void __thiscall CLightning::Precache(void)	__effects.obj
 0x37c60	34	?Activate@CLightning@@UAEXXZ	public: virtual void __thiscall CLightning::Activate(void)	__effects.obj
 0x37c90	948	?KeyValue@CLightning@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CLightning::KeyValue(struct KeyValueData_s *)	__effects.obj
 0x38050	174	?ToggleUse@CLightning@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CLightning::ToggleUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__effects.obj
+0x38100	89	?StrikeUse@CLightning@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CLightning::StrikeUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__effects.obj
 0x38160	224	?IsPointEntity@@YAHPAVCBaseEntity@@@Z	int __cdecl IsPointEntity(class CBaseEntity *)	__effects.obj
 0x38240	980	?StrikeThink@CLightning@@QAEXXZ	public: void __thiscall CLightning::StrikeThink(void)	__effects.obj
+0x387c0	78	?DamageThink@CLightning@@QAEXXZ	public: void __thiscall CLightning::DamageThink(void)	__effects.obj
 0x38810	311	?Zap@CLightning@@QAEXABVVector@@0@Z	public: void __thiscall CLightning::Zap(class Vector const &, class Vector const &)	__effects.obj
+0x38950	1095	?RandomArea@CLightning@@QAEXXZ	public: void __thiscall CLightning::RandomArea(void)	__effects.obj
+0x38da0	485	?RandomPoint@CLightning@@QAEXAAVVector@@@Z	public: void __thiscall CLightning::RandomPoint(class Vector &)	__effects.obj
+0x38f90	541	?BeamUpdateVars@CLightning@@QAEXXZ	public: void __thiscall CLightning::BeamUpdateVars(void)	__effects.obj
 0x39280	347	?Spawn@CLaser@@UAEXXZ	public: virtual void __thiscall CLaser::Spawn(void)	__effects.obj
 0x393e0	76	?Precache@CLaser@@UAEXXZ	public: virtual void __thiscall CLaser::Precache(void)	__effects.obj
 0x39430	749	?KeyValue@CLaser@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CLaser::KeyValue(struct KeyValueData_s *)	__effects.obj
@@ -305,6 +386,8 @@ rva	size	name	demangled	ref_object
 0x39740	44	?TurnOff@CLaser@@QAEXXZ	public: void __thiscall CLaser::TurnOff(void)	__effects.obj
 0x39770	69	?TurnOn@CLaser@@QAEXXZ	public: void __thiscall CLaser::TurnOn(void)	__effects.obj
 0x39800	86	?FireAtPoint@CLaser@@QAEXAAUTraceResult@@@Z	public: void __thiscall CLaser::FireAtPoint(struct TraceResult &)	__effects.obj
+0x39860	134	?StrikeThink@CLaser@@QAEXXZ	public: void __thiscall CLaser::StrikeThink(void)	__effects.obj
+0x399c0	244	?Spawn@CGlow@@UAEXXZ	public: virtual void __thiscall CGlow::Spawn(void)	__effects.obj
 0x39b10	48	?Animate@CGlow@@QAEXM@Z	public: void __thiscall CGlow::Animate(float)	__effects.obj
 0x39c30	212	?Spawn@CSprite@@UAEXXZ	public: virtual void __thiscall CSprite::Spawn(void)	__effects.obj
 0x39d10	130	?Precache@CSprite@@UAEXXZ	public: virtual void __thiscall CSprite::Precache(void)	__effects.obj
@@ -312,17 +395,21 @@ rva	size	name	demangled	ref_object
 0x39de0	156	?SpriteCreate@CSprite@@SAPAV1@PBDABVVector@@H@Z	public: static class CSprite * __cdecl CSprite::SpriteCreate(char const *, class Vector const &, int)	__effects.obj
 0x39ed0	63	?AnimateUntilDead@CSprite@@QAEXXZ	public: void __thiscall CSprite::AnimateUntilDead(void)	__effects.obj
 0x39f10	63	?Expand@CSprite@@QAEXMM@Z	public: void __thiscall CSprite::Expand(float, float)	__effects.obj
+0x39f50	127	?ExpandThink@CSprite@@QAEXXZ	public: void __thiscall CSprite::ExpandThink(void)	__effects.obj
 0x39fd0	97	?Animate@CSprite@@QAEXM@Z	public: void __thiscall CSprite::Animate(float)	__effects.obj
 0x3a040	27	?TurnOff@CSprite@@QAEXXZ	public: void __thiscall CSprite::TurnOff(void)	__effects.obj
 0x3a060	119	?TurnOn@CSprite@@QAEXXZ	public: void __thiscall CSprite::TurnOn(void)	__effects.obj
 0x3a0e0	69	?Use@CSprite@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CSprite::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__effects.obj
 0x3a200	57	?Precache@CGibShooter@@UAEXXZ	public: virtual void __thiscall CGibShooter::Precache(void)	__effects.obj
+0x3a240	364	?KeyValue@CGibShooter@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGibShooter::KeyValue(struct KeyValueData_s *)	__effects.obj
 0x3a3d0	122	?Spawn@CGibShooter@@UAEXXZ	public: virtual void __thiscall CGibShooter::Spawn(void)	__effects.obj
 0x3a450	191	?CreateGib@CGibShooter@@UAEPAVCGib@@XZ	public: virtual class CGib * __thiscall CGibShooter::CreateGib(void)	__effects.obj
 0x3a510	979	?ShootThink@CGibShooter@@QAEXXZ	public: void __thiscall CGibShooter::ShootThink(void)	__effects.obj
 0x3a960	324	?KeyValue@CEnvShooter@@EAEXPAUKeyValueData_s@@@Z	private: virtual void __thiscall CEnvShooter::KeyValue(struct KeyValueData_s *)	__effects.obj
 0x3aab0	56	?Precache@CEnvShooter@@EAEXXZ	private: virtual void __thiscall CEnvShooter::Precache(void)	__effects.obj
 0x3aaf0	290	?CreateGib@CEnvShooter@@EAEPAVCGib@@XZ	private: virtual class CGib * __thiscall CEnvShooter::CreateGib(void)	__effects.obj
+0x3acb0	701	?TestThink@CTestEffect@@QAEXXZ	public: void __thiscall CTestEffect::TestThink(void)	__effects.obj
+0x3af70	45	?Use@CTestEffect@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTestEffect::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__effects.obj
 0x3b010	49	?Spawn@CBlood@@UAEXXZ	public: virtual void __thiscall CBlood::Spawn(void)	__effects.obj
 0x3b050	235	?KeyValue@CBlood@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBlood::KeyValue(struct KeyValueData_s *)	__effects.obj
 0x3b140	83	?Direction@CBlood@@QAE?AVVector@@XZ	public: class Vector __thiscall CBlood::Direction(void)	__effects.obj
@@ -345,6 +432,8 @@ rva	size	name	demangled	ref_object
 0x3bfe0	163	?Spawn@CItemSoda@@UAEXXZ	public: virtual void __thiscall CItemSoda::Spawn(void)	__effects.obj
 0x3c090	144	?CanThink@CItemSoda@@QAEXXZ	public: void __thiscall CItemSoda::CanThink(void)	__effects.obj
 0x3c120	144	?CanTouch@CItemSoda@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CItemSoda::CanTouch(class CBaseEntity *)	__effects.obj
+0x40020	373	?Spawn@CShower@@EAEXXZ	private: virtual void __thiscall CShower::Spawn(void)	__explode.obj
+0x401a0	130	?Think@CShower@@EAEXXZ	private: virtual void __thiscall CShower::Think(void)	__explode.obj
 0x40230	224	?Touch@CShower@@EAEXPAVCBaseEntity@@@Z	private: virtual void __thiscall CShower::Touch(class CBaseEntity *)	__explode.obj
 0x403e0	113	?KeyValue@CEnvExplosion@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvExplosion::KeyValue(struct KeyValueData_s *)	__explode.obj
 0x40460	95	?Spawn@CEnvExplosion@@UAEXXZ	public: virtual void __thiscall CEnvExplosion::Spawn(void)	__explode.obj
@@ -359,8 +448,11 @@ rva	size	name	demangled	ref_object
 0x41070	84	?HandleAnimEvent@CFlyingMonster@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CFlyingMonster::HandleAnimEvent(struct MonsterEvent_t *)	__flyingmonster.obj
 0x410d0	34	?Move@CFlyingMonster@@UAEXM@Z	public: virtual void __thiscall CFlyingMonster::Move(float)	__flyingmonster.obj
 0x41100	128	?ShouldAdvanceRoute@CFlyingMonster@@UAEHM@Z	public: virtual int __thiscall CFlyingMonster::ShouldAdvanceRoute(float)	__flyingmonster.obj
+0x41180	969	?MoveExecute@CFlyingMonster@@UAEXPAVCBaseEntity@@ABVVector@@M@Z	public: virtual void __thiscall CFlyingMonster::MoveExecute(class CBaseEntity *, class Vector const &, float)	__flyingmonster.obj
+0x41550	143	?CeilingZ@CFlyingMonster@@QAEMABVVector@@@Z	public: float __thiscall CFlyingMonster::CeilingZ(class Vector const &)	__flyingmonster.obj
 0x415e0	584	?ProbeZ@CFlyingMonster@@QAEHABVVector@@0PAM@Z	public: int __thiscall CFlyingMonster::ProbeZ(class Vector const &, class Vector const &, float *)	__flyingmonster.obj
 0x41830	93	?FloorZ@CFlyingMonster@@QAEMABVVector@@@Z	public: float __thiscall CFlyingMonster::FloorZ(class Vector const &)	__flyingmonster.obj
+0x41ed0	798	?KeyValue@CBreakable@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBreakable::KeyValue(struct KeyValueData_s *)	__func_break.obj
 0x422e0	211	?Spawn@CBreakable@@UAEXXZ	public: virtual void __thiscall CBreakable::Spawn(void)	__func_break.obj
 0x423c0	148	?MaterialSoundList@CBreakable@@SAPAPBDW4Materials@@AAH@Z	public: static char const ** __cdecl CBreakable::MaterialSoundList(enum Materials, int &)	__func_break.obj
 0x42460	65	?MaterialSoundPrecache@CBreakable@@SAXW4Materials@@@Z	public: static void __cdecl CBreakable::MaterialSoundPrecache(enum Materials)	__func_break.obj
@@ -369,6 +461,7 @@ rva	size	name	demangled	ref_object
 0x426b0	408	?DamageSound@CBreakable@@QAEXXZ	public: void __thiscall CBreakable::DamageSound(void)	__func_break.obj
 0x42970	83	?Use@CBreakable@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CBreakable::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__func_break.obj
 0x429d0	234	?TraceAttack@CBreakable@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CBreakable::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	__func_break.obj
+0x42d40	1464	?Die@CBreakable@@QAEXXZ	public: void __thiscall CBreakable::Die(void)	__func_break.obj
 0x43310	51	?DamageDecal@CBreakable@@UAEHH@Z	public: virtual int __thiscall CBreakable::DamageDecal(int)	__func_break.obj
 0x43440	276	?Spawn@CPushable@@UAEXXZ	public: virtual void __thiscall CPushable::Spawn(void)	__func_break.obj
 0x43560	54	?Precache@CPushable@@UAEXXZ	public: virtual void __thiscall CPushable::Precache(void)	__func_break.obj
@@ -381,9 +474,12 @@ rva	size	name	demangled	ref_object
 0x459d0	91	?StartRotSound@CFuncTank@@QAEXXZ	public: void __thiscall CFuncTank::StartRotSound(void)	__func_tank.obj
 0x45a30	85	?StopRotSound@CFuncTank@@QAEXXZ	public: void __thiscall CFuncTank::StopRotSound(void)	__func_tank.obj
 0x45b00	57	?UpdateTargetPosition@CFuncTank@@UAE?AVVector@@PAVCBaseEntity@@@Z	public: virtual class Vector __thiscall CFuncTank::UpdateTargetPosition(class CBaseEntity *)	__func_tank.obj
+0x46340	246	?IgniteThink@CRpgRocket@@QAEXXZ	public: void __thiscall CRpgRocket::IgniteThink(void)	__rpg.obj
+0x46440	1678	?FollowThink@CRpgRocket@@QAEXXZ	public: void __thiscall CRpgRocket::FollowThink(void)	__rpg.obj
 0x46b40	25	?Precache@CFuncTankRocket@@UAEXXZ	public: virtual void __thiscall CFuncTankRocket::Precache(void)	__func_tank.obj
 0x46c70	117	?KeyValue@CFuncTankMortar@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTankMortar::KeyValue(struct KeyValueData_s *)	__func_tank.obj
 0x46f20	38	?Use@CFuncTankControls@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncTankControls::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__func_tank.obj
+0x46f50	173	?Think@CFuncTankControls@@UAEXXZ	public: virtual void __thiscall CFuncTankControls::Think(void)	__func_tank.obj
 0x47000	146	?Spawn@CFuncTankControls@@UAEXXZ	public: virtual void __thiscall CFuncTankControls::Spawn(void)	__func_tank.obj
 0x47d00	51	?CanHaveAmmo@CGameRules@@UAEHPAVCBasePlayer@@PBDH@Z	public: virtual int __thiscall CGameRules::CanHaveAmmo(class CBasePlayer *, char const *, int)	__gamerules.obj
 0x47d40	257	?GetPlayerSpawnSpot@CGameRules@@UAEPAUedict_s@@PAVCBasePlayer@@@Z	public: virtual struct edict_s * __thiscall CGameRules::GetPlayerSpawnSpot(class CBasePlayer *)	__gamerules.obj
@@ -413,6 +509,7 @@ rva	size	name	demangled	ref_object
 0x4af90	1125	?RunTask@CGargantua@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CGargantua::RunTask(struct Task_t *)	__gargantua.obj
 0x4b4f0	322	?Think@CSmoker@@UAEXXZ	public: virtual void __thiscall CSmoker::Think(void)	__gargantua.obj
 0x4b6c0	224	?Create@CSpiral@@SAPAV1@ABVVector@@MMM@Z	public: static class CSpiral * __cdecl CSpiral::Create(class Vector const &, float, float, float)	__gargantua.obj
+0x4b7a0	596	?Think@CSpiral@@UAEXXZ	public: virtual void __thiscall CSpiral::Think(void)	__gargantua.obj
 0x4ba00	220	?SpawnExplosion@@YAXVVector@@MMH@Z	void __cdecl SpawnExplosion(class Vector, float, float, int)	__gargantua.obj
 0x50740	419	?Spawn@CGenericMonster@@UAEXXZ	public: virtual void __thiscall CGenericMonster::Spawn(void)	__genericmonster.obj
 0x508f0	32	?Precache@CGenericMonster@@UAEXXZ	public: virtual void __thiscall CGenericMonster::Precache(void)	__genericmonster.obj
@@ -425,37 +522,49 @@ rva	size	name	demangled	ref_object
 0x51a80	739	?BounceTouch@CGrenade@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CGrenade::BounceTouch(class CBaseEntity *)	__ggrenade.obj
 0x51d70	140	?SlideTouch@CGrenade@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CGrenade::SlideTouch(class CBaseEntity *)	__ggrenade.obj
 0x51e00	150	?BounceSound@CGrenade@@UAEXXZ	public: virtual void __thiscall CGrenade::BounceSound(void)	__ggrenade.obj
+0x51ea0	334	?TumbleThink@CGrenade@@QAEXXZ	public: void __thiscall CGrenade::TumbleThink(void)	__ggrenade.obj
 0x51ff0	175	?Spawn@CGrenade@@UAEXXZ	public: virtual void __thiscall CGrenade::Spawn(void)	__ggrenade.obj
 0x520a0	265	?ShootContact@CGrenade@@SAPAV1@PAUentvars_s@@VVector@@1@Z	public: static class CGrenade * __cdecl CGrenade::ShootContact(struct entvars_s *, class Vector, class Vector)	__ggrenade.obj
+0x521b0	468	?ShootTimed@CGrenade@@SAPAV1@PAUentvars_s@@VVector@@1M@Z	public: static class CGrenade * __cdecl CGrenade::ShootTimed(struct entvars_s *, class Vector, class Vector, float)	__ggrenade.obj
 0x52390	402	?ShootSatchelCharge@CGrenade@@SAPAV1@PAUentvars_s@@VVector@@1@Z	public: static class CGrenade * __cdecl CGrenade::ShootSatchelCharge(struct entvars_s *, class Vector, class Vector)	__ggrenade.obj
+0x52530	185	?UseSatchelCharges@CGrenade@@SAXPAUentvars_s@@W4SATCHELCODE@1@@Z	public: static void __cdecl CGrenade::UseSatchelCharges(struct entvars_s *, enum CGrenade::SATCHELCODE)	__ggrenade.obj
 0x52620	31	_$E13	_$E13	__globals.obj
 0x56420	186	?Spawn@CGMan@@UAEXXZ	public: virtual void __thiscall CGMan::Spawn(void)	__gman.obj
 0x564f0	67	?StartTask@CGMan@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CGMan::StartTask(struct Task_t *)	__gman.obj
+0x56540	400	?RunTask@CGMan@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CGMan::RunTask(struct Task_t *)	__gman.obj
 0x566d0	93	?TakeDamage@CGMan@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CGMan::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__gman.obj
 0x56730	49	?TraceAttack@CGMan@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CGMan::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	__gman.obj
 0x56770	76	?PlayScriptedSentence@CGMan@@UAEXPBDMMMHPAVCBaseEntity@@@Z	public: virtual void __thiscall CGMan::PlayScriptedSentence(char const *, float, float, float, int, class CBaseEntity *)	__gman.obj
 0x567c0	371	?FBoxVisible@@YAHPAUentvars_s@@0AAVVector@@M@Z	int __cdecl FBoxVisible(struct entvars_s *, struct entvars_s *, class Vector &, float)	__h_ai.obj
+0x56940	1361	?VecCheckToss@@YA?AVVector@@PAUentvars_s@@ABV1@V1@M@Z	class Vector __cdecl VecCheckToss(struct entvars_s *, class Vector const &, class Vector, float)	__h_ai.obj
 0x56ea0	628	?VecCheckThrow@@YA?AVVector@@PAUentvars_s@@ABV1@V1@MM@Z	class Vector __cdecl VecCheckThrow(struct entvars_s *, class Vector const &, class Vector, float, float)	__h_ai.obj
 0x57720	42	?Recharge@CRecharge@@QAEXXZ	public: void __thiscall CRecharge::Recharge(void)	__h_battery.obj
 0x57c60	253	?CineSpawn@CLegacyCineMonster@@QAEXPAD@Z	public: void __thiscall CLegacyCineMonster::CineSpawn(char *)	__h_cine.obj
 0x57d60	40	?Use@CLegacyCineMonster@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CLegacyCineMonster::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__h_cine.obj
 0x57da0	40	?Pain@CLegacyCineMonster@@QAEXXZ	public: void __thiscall CLegacyCineMonster::Pain(void)	__h_cine.obj
 0x57dd0	98	?CineThink@CLegacyCineMonster@@QAEXXZ	public: void __thiscall CLegacyCineMonster::CineThink(void)	__h_cine.obj
+0x57eb0	767	?BloodGush@CCineBlood@@QAEXXZ	public: void __thiscall CCineBlood::BloodGush(void)	__h_cine.obj
+0x581d0	34	?Spawn@CCineBlood@@UAEXXZ	public: virtual void __thiscall CCineBlood::Spawn(void)	__h_cine.obj
 0x58300	118	?Spawn@CGenericCycler@@UAEXXZ	public: virtual void __thiscall CGenericCycler::Spawn(void)	__h_cycler.obj
 0x58400	171	?Spawn@CCyclerProbe@@UAEXXZ	public: virtual void __thiscall CCyclerProbe::Spawn(void)	__h_cycler.obj
 0x584b0	170	?GenericCyclerSpawn@CCycler@@QAEXPADVVector@@1@Z	public: void __thiscall CCycler::GenericCyclerSpawn(char *, class Vector, class Vector)	__h_cycler.obj
 0x58560	206	?Spawn@CCycler@@UAEXXZ	public: virtual void __thiscall CCycler::Spawn(void)	__h_cycler.obj
+0x58630	156	?Think@CCycler@@UAEXXZ	public: virtual void __thiscall CCycler::Think(void)	__h_cycler.obj
 0x586d0	55	?Use@CCycler@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CCycler::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__h_cycler.obj
 0x58710	175	?TakeDamage@CCycler@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CCycler::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__h_cycler.obj
+0x588a0	207	?Spawn@CCyclerSprite@@UAEXXZ	public: virtual void __thiscall CCyclerSprite::Spawn(void)	__h_cycler.obj
+0x58970	92	?Think@CCyclerSprite@@UAEXXZ	public: virtual void __thiscall CCyclerSprite::Think(void)	__h_cycler.obj
 0x589d0	53	?Use@CCyclerSprite@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CCyclerSprite::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__h_cycler.obj
 0x58a10	34	?TakeDamage@CCyclerSprite@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CCyclerSprite::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__h_cycler.obj
 0x58a40	63	?Animate@CCyclerSprite@@QAEXM@Z	public: void __thiscall CCyclerSprite::Animate(float)	__h_cycler.obj
 0x58c80	30	?Holster@CWeaponCycler@@UAEXH@Z	public: virtual void __thiscall CWeaponCycler::Holster(int)	__h_cycler.obj
+0x58e50	170	?Spawn@CWreckage@@EAEXXZ	private: virtual void __thiscall CWreckage::Spawn(void)	__h_cycler.obj
 0x58f00	36	?Precache@CWreckage@@EAEXXZ	private: virtual void __thiscall CWreckage::Precache(void)	__h_cycler.obj
 0x58f30	358	?Think@CWreckage@@EAEXXZ	private: virtual void __thiscall CWreckage::Think(void)	__h_cycler.obj
 0x590b0	32	?GiveFnptrsToDll@@YGXPAUenginefuncs_s@@PAUglobalvars_t@@@Z	void __stdcall GiveFnptrsToDll(struct enginefuncs_s *, struct globalvars_t *)	__h_export.obj
 0x5bfd0	25	?CanHolster@CHandGrenade@@UAEHXZ	public: virtual int __thiscall CHandGrenade::CanHolster(void)	__handgrenade.obj
 0x5ce60	26	?SetYawSpeed@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::SetYawSpeed(void)	__hassassin.obj
+0x5ce80	1142	?Shoot@CHAssassin@@QAEXXZ	public: void __thiscall CHAssassin::Shoot(void)	__hassassin.obj
 0x5d300	323	?HandleAnimEvent@CHAssassin@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CHAssassin::HandleAnimEvent(struct MonsterEvent_t *)	__hassassin.obj
 0x5d450	304	?Spawn@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::Spawn(void)	__hassassin.obj
 0x5d580	69	?Precache@CHAssassin@@UAEXXZ	public: virtual void __thiscall CHAssassin::Precache(void)	__hassassin.obj
@@ -472,6 +581,7 @@ rva	size	name	demangled	ref_object
 0x5e220	144	?SetYawSpeed@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::SetYawSpeed(void)	__headcrab.obj
 0x5e2b0	797	?HandleAnimEvent@CHeadCrab@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CHeadCrab::HandleAnimEvent(struct MonsterEvent_t *)	__headcrab.obj
 0x5e5d0	247	?Spawn@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::Spawn(void)	__headcrab.obj
+0x5e6d0	158	?Precache@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::Precache(void)	__headcrab.obj
 0x5e770	77	?RunTask@CHeadCrab@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHeadCrab::RunTask(struct Task_t *)	__headcrab.obj
 0x5e9b0	53	?PrescheduleThink@CHeadCrab@@UAEXXZ	public: virtual void __thiscall CHeadCrab::PrescheduleThink(void)	__headcrab.obj
 0x5e9f0	118	?StartTask@CHeadCrab@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHeadCrab::StartTask(struct Task_t *)	__headcrab.obj
@@ -486,6 +596,7 @@ rva	size	name	demangled	ref_object
 0x5ee40	56	?GetScheduleOfType@CBabyCrab@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CBabyCrab::GetScheduleOfType(int)	__headcrab.obj
 0x5f6c0	81	?Recharge@CWallHealth@@QAEXXZ	public: void __thiscall CWallHealth::Recharge(void)	__healthkit.obj
 0x5f720	138	?Off@CRecharge@@QAEXXZ	public: void __thiscall CRecharge::Off(void)	__h_battery.obj
+0x5fa00	498	?GibMonster@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::GibMonster(void)	__hgrunt.obj
 0x5fc10	56	?FOkToSpeak@CHGrunt@@QAEHXZ	public: int __thiscall CHGrunt::FOkToSpeak(void)	__hgrunt.obj
 0x5fc50	47	?JustSpoke@CHGrunt@@QAEXXZ	public: void __thiscall CHGrunt::JustSpoke(void)	__hgrunt.obj
 0x5fc80	140	?PrescheduleThink@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::PrescheduleThink(void)	__hgrunt.obj
@@ -506,29 +617,37 @@ rva	size	name	demangled	ref_object
 0x61870	260	?PainSound@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::PainSound(void)	__hgrunt.obj
 0x61980	150	?DeathSound@CHGrunt@@UAEXXZ	public: virtual void __thiscall CHGrunt::DeathSound(void)	__hgrunt.obj
 0x61a20	38	?ScheduleFromName@CHGrunt@@UAEPAUSchedule_t@@PBD@Z	public: virtual struct Schedule_t * __thiscall CHGrunt::ScheduleFromName(char const *)	__hgrunt.obj
+0x61a50	445	?SetActivity@CHGrunt@@UAEXW4Activity@@@Z	public: virtual void __thiscall CHGrunt::SetActivity(enum Activity)	__hgrunt.obj
 0x62440	30	?Spawn@CHGruntRepel@@UAEXXZ	public: virtual void __thiscall CHGruntRepel::Spawn(void)	__hgrunt.obj
 0x62460	35	?Precache@CHGruntRepel@@UAEXXZ	public: virtual void __thiscall CHGruntRepel::Precache(void)	__hgrunt.obj
+0x62490	445	?RepelUse@CHGruntRepel@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CHGruntRepel::RepelUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__hgrunt.obj
 0x62650	114	?KeyValue@CDeadHGrunt@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CDeadHGrunt::KeyValue(struct KeyValueData_s *)	__hgrunt.obj
 0x62750	316	?Spawn@CDeadHGrunt@@UAEXXZ	public: virtual void __thiscall CDeadHGrunt::Spawn(void)	__hgrunt.obj
 0x62960	34	?TakeDamage@CHornet@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CHornet::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__hornet.obj
+0x62990	413	?Spawn@CHornet@@UAEXXZ	public: virtual void __thiscall CHornet::Spawn(void)	__hornet.obj
 0x62b30	146	?Precache@CHornet@@UAEXXZ	public: virtual void __thiscall CHornet::Precache(void)	__hornet.obj
 0x62bd0	44	?IRelationship@CHornet@@UAEHPAVCBaseEntity@@@Z	public: virtual int __thiscall CHornet::IRelationship(class CBaseEntity *)	__hornet.obj
 0x62c00	35	?Classify@CHornet@@UAEHXZ	public: virtual int __thiscall CHornet::Classify(void)	__hornet.obj
+0x62c30	46	?StartTrack@CHornet@@QAEXXZ	public: void __thiscall CHornet::StartTrack(void)	__hornet.obj
 0x62c60	46	?StartDart@CHornet@@QAEXXZ	public: void __thiscall CHornet::StartDart(void)	__hornet.obj
 0x62c90	172	?IgniteTrail@CHornet@@QAEXXZ	public: void __thiscall CHornet::IgniteTrail(void)	__hornet.obj
+0x62d40	2075	?TrackTarget@CHornet@@QAEXXZ	public: void __thiscall CHornet::TrackTarget(void)	__hornet.obj
 0x63560	475	?TrackTouch@CHornet@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CHornet::TrackTouch(class CBaseEntity *)	__hornet.obj
 0x63750	271	?DieTouch@CHornet@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CHornet::DieTouch(class CBaseEntity *)	__hornet.obj
 0x66510	105	?FCanActiveIdle@CHoundeye@@UAEHXZ	public: virtual int __thiscall CHoundeye::FCanActiveIdle(void)	__houndeye.obj
 0x66580	47	?CheckRangeAttack1@CHoundeye@@UAEHMM@Z	public: virtual int __thiscall CHoundeye::CheckRangeAttack1(float, float)	__houndeye.obj
 0x665b0	142	?SetYawSpeed@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::SetYawSpeed(void)	__houndeye.obj
 0x66640	132	?SetActivity@CHoundeye@@UAEXW4Activity@@@Z	public: virtual void __thiscall CHoundeye::SetActivity(enum Activity)	__houndeye.obj
+0x666d0	360	?HandleAnimEvent@CHoundeye@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CHoundeye::HandleAnimEvent(struct MonsterEvent_t *)	__houndeye.obj
 0x66840	234	?Spawn@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::Spawn(void)	__houndeye.obj
 0x66930	270	?Precache@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::Precache(void)	__houndeye.obj
 0x66ae0	106	?WarmUpSound@CHoundeye@@QAEXXZ	public: void __thiscall CHoundeye::WarmUpSound(void)	__houndeye.obj
 0x66bf0	186	?AlertSound@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::AlertSound(void)	__houndeye.obj
 0x66df0	174	?WriteBeamColor@CHoundeye@@QAEXXZ	public: void __thiscall CHoundeye::WriteBeamColor(void)	__houndeye.obj
 0x67320	327	?StartTask@CHoundeye@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHoundeye::StartTask(struct Task_t *)	__houndeye.obj
+0x67470	577	?RunTask@CHoundeye@@UAEXPAUTask_t@@@Z	public: virtual void __thiscall CHoundeye::RunTask(struct Task_t *)	__houndeye.obj
 0x676c0	369	?PrescheduleThink@CHoundeye@@UAEXXZ	public: virtual void __thiscall CHoundeye::PrescheduleThink(void)	__houndeye.obj
+0x67870	460	?GetScheduleOfType@CHoundeye@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CHoundeye::GetScheduleOfType(int)	__houndeye.obj
 0x67a40	331	?GetSchedule@CHoundeye@@UAEPAUSchedule_t@@XZ	public: virtual struct Schedule_t * __thiscall CHoundeye::GetSchedule(void)	__houndeye.obj
 0x67cb0	70	?IdleSound@CIchthyosaur@@UAEXXZ	public: virtual void __thiscall CIchthyosaur::IdleSound(void)	__ichthyosaur.obj
 0x67da0	70	?BiteSound@CIchthyosaur@@QAEXXZ	public: void __thiscall CIchthyosaur::BiteSound(void)	__ichthyosaur.obj
@@ -563,6 +682,7 @@ rva	size	name	demangled	ref_object
 0x6c180	103	?ClearBeams@CISlave@@QAEXXZ	public: void __thiscall CISlave::ClearBeams(void)	__islave.obj
 0x6c1f0	36	?SetEndAttachment@CBeam@@QAEXH@Z	public: void __thiscall CBeam::SetEndAttachment(int)	__islave.obj
 0x6c220	42	?SetColor@CBeam@@QAEXHHH@Z	public: void __thiscall CBeam::SetColor(int, int, int)	__islave.obj
+0x6c330	224	?Spawn@CWorldItem@@UAEXXZ	public: virtual void __thiscall CWorldItem::Spawn(void)	__items.obj
 0x6cbe0	25	?MyTouch@CItemSecurity@@EAEHPAVCBasePlayer@@@Z	private: virtual int __thiscall CItemSecurity::MyTouch(class CBasePlayer *)	__items.obj
 0x6e770	311	?Spawn@CLeech@@UAEXXZ	public: virtual void __thiscall CLeech::Spawn(void)	__leech.obj
 0x6e8c0	291	?RecalculateWaterlevel@CLeech@@QAEXXZ	public: void __thiscall CLeech::RecalculateWaterlevel(void)	__leech.obj
@@ -574,7 +694,9 @@ rva	size	name	demangled	ref_object
 0x6ed20	490	?HandleAnimEvent@CLeech@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CLeech::HandleAnimEvent(struct MonsterEvent_t *)	__leech.obj
 0x6ef10	54	?MakeVectors@CLeech@@QAEXXZ	public: void __thiscall CLeech::MakeVectors(void)	__leech.obj
 0x6ef50	1056	?ObstacleDistance@CLeech@@QAEMPAVCBaseEntity@@@Z	public: float __thiscall CLeech::ObstacleDistance(class CBaseEntity *)	__leech.obj
+0x6f370	292	?DeadThink@CLeech@@QAEXXZ	public: void __thiscall CLeech::DeadThink(void)	__leech.obj
 0x6f4a0	610	?UpdateMotion@CLeech@@QAEXXZ	public: void __thiscall CLeech::UpdateMotion(void)	__leech.obj
+0x6f710	1708	?SwimThink@CLeech@@QAEXXZ	public: void __thiscall CLeech::SwimThink(void)	__leech.obj
 0x6fdc0	276	?Killed@CLeech@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CLeech::Killed(struct entvars_s *, int)	__leech.obj
 0x6ffb0	274	?KeyValue@CLight@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CLight::KeyValue(struct KeyValueData_s *)	__lights.obj
 0x700d0	115	?Spawn@CLight@@UAEXXZ	public: virtual void __thiscall CLight::Spawn(void)	__lights.obj
@@ -587,10 +709,12 @@ rva	size	name	demangled	ref_object
 0x706a0	54	?Spawn@CRuleBrushEntity@@UAEXXZ	public: virtual void __thiscall CRuleBrushEntity::Spawn(void)	__maprules.obj
 0x70760	125	?KeyValue@CGameScore@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGameScore::KeyValue(struct KeyValueData_s *)	__maprules.obj
 0x707e0	99	?Use@CGameScore@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameScore::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
+0x709b0	977	?KeyValue@CGameText@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGameText::KeyValue(struct KeyValueData_s *)	__maprules.obj
 0x70d90	122	?Use@CGameText@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameText::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
 0x70e90	235	?KeyValue@CGameTeamMaster@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGameTeamMaster::KeyValue(struct KeyValueData_s *)	__maprules.obj
 0x71050	75	?TeamMatch@CGameTeamMaster@@AAEHPAVCBaseEntity@@@Z	private: int __thiscall CGameTeamMaster::TeamMatch(class CBaseEntity *)	__maprules.obj
 0x71110	75	?Use@CGameTeamSet@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGameTeamSet::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
+0x71230	359	?KeyValue@CGamePlayerZone@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CGamePlayerZone::KeyValue(struct KeyValueData_s *)	__maprules.obj
 0x713a0	357	?Use@CGamePlayerZone@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGamePlayerZone::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
 0x71580	141	?Use@CGamePlayerHurt@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGamePlayerHurt::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__maprules.obj
 0x71680	44	?Spawn@CGameCounter@@UAEXXZ	public: virtual void __thiscall CGameCounter::Spawn(void)	__maprules.obj
@@ -637,6 +761,7 @@ rva	size	name	demangled	ref_object
 0x75f40	186	?SetActivity@CBaseMonster@@UAEXW4Activity@@@Z	public: virtual void __thiscall CBaseMonster::SetActivity(enum Activity)	__monsters.obj
 0x76000	136	?SetSequenceByName@CBaseMonster@@QAEXPAD@Z	public: void __thiscall CBaseMonster::SetSequenceByName(char *)	__monsters.obj
 0x76090	472	?CheckLocalMove@CBaseMonster@@UAEHABVVector@@0PAVCBaseEntity@@PAM@Z	public: virtual int __thiscall CBaseMonster::CheckLocalMove(class Vector const &, class Vector const &, class CBaseEntity *, float *)	__monsters.obj
+0x76270	312	?OpenDoorAndWait@CBaseMonster@@QAEMPAUentvars_s@@@Z	public: float __thiscall CBaseMonster::OpenDoorAndWait(struct entvars_s *)	__monsters.obj
 0x763b0	336	?AdvanceRoute@CBaseMonster@@QAEXM@Z	public: void __thiscall CBaseMonster::AdvanceRoute(float)	__monsters.obj
 0x76500	71	?RouteClassify@CBaseMonster@@QAEHH@Z	public: int __thiscall CBaseMonster::RouteClassify(int)	__monsters.obj
 0x76550	360	?BuildRoute@CBaseMonster@@QAEHABVVector@@HPAVCBaseEntity@@@Z	public: int __thiscall CBaseMonster::BuildRoute(class Vector const &, int, class CBaseEntity *)	__monsters.obj
@@ -655,6 +780,8 @@ rva	size	name	demangled	ref_object
 0x785a0	163	?SetEyePosition@CBaseMonster@@QAEXXZ	public: void __thiscall CBaseMonster::SetEyePosition(void)	__monsters.obj
 0x78930	317	?GetGunPosition@CBaseMonster@@UAE?AVVector@@XZ	public: virtual class Vector __thiscall CBaseMonster::GetGunPosition(void)	__monsters.obj
 0x78a70	303	?FGetNodeRoute@CBaseMonster@@QAEHVVector@@@Z	public: int __thiscall CBaseMonster::FGetNodeRoute(class Vector)	__monsters.obj
+0x78ba0	381	?FindHintNode@CBaseMonster@@QAEHXZ	public: int __thiscall CBaseMonster::FindHintNode(void)	__monsters.obj
+0x78d20	661	?ReportAIState@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::ReportAIState(void)	__monsters.obj
 0x78fc0	197	?KeyValue@CBaseMonster@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseMonster::KeyValue(struct KeyValueData_s *)	__monsters.obj
 0x79230	82	?CanPlaySequence@CBaseMonster@@UAEHHH@Z	public: virtual int __thiscall CBaseMonster::CanPlaySequence(int, int)	__monsters.obj
 0x79290	856	?FindLateralCover@CBaseMonster@@QAEHABVVector@@0@Z	public: int __thiscall CBaseMonster::FindLateralCover(class Vector const &, class Vector const &)	__monsters.obj
@@ -662,10 +789,13 @@ rva	size	name	demangled	ref_object
 0x79740	29	?FacingIdeal@CBaseMonster@@QAEHXZ	public: int __thiscall CBaseMonster::FacingIdeal(void)	__monsters.obj
 0x797e0	31	?PlayScriptedSentence@CBaseMonster@@UAEXPBDMMMHPAVCBaseEntity@@@Z	public: virtual void __thiscall CBaseMonster::PlayScriptedSentence(char const *, float, float, float, int, class CBaseEntity *)	__monsters.obj
 0x79800	40	?SentenceStop@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::SentenceStop(void)	__monsters.obj
+0x79830	71	?CorpseFallThink@CBaseMonster@@QAEXXZ	public: void __thiscall CBaseMonster::CorpseFallThink(void)	__monsters.obj
 0x79880	171	?MonsterInitDead@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::MonsterInitDead(void)	__monsters.obj
 0x79930	824	?BBoxFlat@CBaseMonster@@QAEHXZ	public: int __thiscall CBaseMonster::BBoxFlat(void)	__monsters.obj
+0x79c70	327	?GetEnemy@CBaseMonster@@QAEHXZ	public: int __thiscall CBaseMonster::GetEnemy(void)	__monsters.obj
 0x79ed0	74	?SetState@CBaseMonster@@QAEXW4MONSTERSTATE@@@Z	public: void __thiscall CBaseMonster::SetState(enum MONSTERSTATE)	__monsterstate.obj
 0x79f20	291	?RunAI@CBaseMonster@@UAEXXZ	public: virtual void __thiscall CBaseMonster::RunAI(void)	__monsterstate.obj
+0x7a050	472	?GetIdealState@CBaseMonster@@UAE?AW4MONSTERSTATE@@XZ	public: virtual enum MONSTERSTATE __thiscall CBaseMonster::GetIdealState(void)	__monsterstate.obj
 0x7a310	435	?KeyValue@CFuncMortarField@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncMortarField::KeyValue(struct KeyValueData_s *)	__mortar.obj
 0x7a4d0	101	?Spawn@CFuncMortarField@@UAEXXZ	public: virtual void __thiscall CFuncMortarField::Spawn(void)	__mortar.obj
 0x7a570	666	?FieldUse@CFuncMortarField@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CFuncMortarField::FieldUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__mortar.obj
@@ -691,42 +821,66 @@ rva	size	name	demangled	ref_object
 0x7fbe0	67	?COM_TokenWaiting@@YAHPAD@Z	int __cdecl COM_TokenWaiting(char *)	__multiplay_gamerules.obj
 0x7fc30	712	?ReloadMapCycleFile@@YAHPADPAUmapcycle_s@@@Z	int __cdecl ReloadMapCycleFile(char *, struct mapcycle_s *)	__multiplay_gamerules.obj
 0x7ff00	58	?CountPlayers@@YAHXZ	int __cdecl CountPlayers(void)	__multiplay_gamerules.obj
+0x7ff40	293	?ExtractCommandString@@YAXPAD0@Z	void __cdecl ExtractCommandString(char *, char *)	__multiplay_gamerules.obj
 0x80370	317	?SendMOTDToClient@CHalfLifeMultiplay@@IAEXPAUedict_s@@@Z	protected: void __thiscall CHalfLifeMultiplay::SendMOTDToClient(struct edict_s *)	__multiplay_gamerules.obj
+0x808d0	732	?Spawn@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::Spawn(void)	__nihilanth.obj
+0x80bb0	225	?Precache@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::Precache(void)	__nihilanth.obj
+0x80ca0	173	?PainSound@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::PainSound(void)	__nihilanth.obj
 0x80d50	55	?DeathSound@CNihilanth@@UAEXXZ	public: virtual void __thiscall CNihilanth::DeathSound(void)	__nihilanth.obj
+0x80dc0	39	?StartupUse@CNihilanth@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CNihilanth::StartupUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__nihilanth.obj
+0x80df0	190	?StartupThink@CNihilanth@@QAEXXZ	public: void __thiscall CNihilanth::StartupThink(void)	__nihilanth.obj
+0x80ed0	2236	?DyingThink@CNihilanth@@QAEXXZ	public: void __thiscall CNihilanth::DyingThink(void)	__nihilanth.obj
 0x81790	43	?CrashTouch@CNihilanth@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanth::CrashTouch(class CBaseEntity *)	__nihilanth.obj
 0x817d0	224	?FloatSequence@CNihilanth@@QAEXXZ	public: void __thiscall CNihilanth::FloatSequence(void)	__nihilanth.obj
+0x818b0	1389	?ShootBalls@CNihilanth@@QAEXXZ	public: void __thiscall CNihilanth::ShootBalls(void)	__nihilanth.obj
 0x81e20	604	?MakeFriend@CNihilanth@@QAEXVVector@@@Z	public: void __thiscall CNihilanth::MakeFriend(class Vector)	__nihilanth.obj
+0x82080	1857	?NextActivity@CNihilanth@@QAEXXZ	public: void __thiscall CNihilanth::NextActivity(void)	__nihilanth.obj
+0x827d0	743	?HuntThink@CNihilanth@@QAEXXZ	public: void __thiscall CNihilanth::HuntThink(void)	__nihilanth.obj
+0x82ac0	1100	?Flight@CNihilanth@@QAEXXZ	public: void __thiscall CNihilanth::Flight(void)	__nihilanth.obj
 0x82f10	89	?AbsorbSphere@CNihilanth@@QAEHXZ	public: int __thiscall CNihilanth::AbsorbSphere(void)	__nihilanth.obj
 0x82f70	259	?EmitSphere@CNihilanth@@QAEHXZ	public: int __thiscall CNihilanth::EmitSphere(void)	__nihilanth.obj
 0x83080	334	?TargetSphere@CNihilanth@@QAEXW4USE_TYPE@@M@Z	public: void __thiscall CNihilanth::TargetSphere(enum USE_TYPE, float)	__nihilanth.obj
 0x831d0	1636	?HandleAnimEvent@CNihilanth@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CNihilanth::HandleAnimEvent(struct MonsterEvent_t *)	__nihilanth.obj
 0x83840	106	?CommandUse@CNihilanth@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CNihilanth::CommandUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__nihilanth.obj
 0x838b0	97	?TakeDamage@CNihilanth@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CNihilanth::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__nihilanth.obj
+0x83920	338	?TraceAttack@CNihilanth@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall CNihilanth::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	__nihilanth.obj
 0x83ae0	49	?Spawn@CNihilanthHVR@@UAEXXZ	public: virtual void __thiscall CNihilanthHVR::Spawn(void)	__nihilanth.obj
+0x83ba0	267	?CircleInit@CNihilanthHVR@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanthHVR::CircleInit(class CBaseEntity *)	__nihilanth.obj
+0x83d10	182	?HoverThink@CNihilanthHVR@@QAEXXZ	public: void __thiscall CNihilanthHVR::HoverThink(void)	__nihilanth.obj
+0x83dd0	435	?ZapInit@CNihilanthHVR@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanthHVR::ZapInit(class CBaseEntity *)	__nihilanth.obj
 0x843e0	181	?ZapTouch@CNihilanthHVR@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanthHVR::ZapTouch(class CBaseEntity *)	__nihilanth.obj
+0x844a0	237	?TeleportInit@CNihilanthHVR@@QAEXPAVCNihilanth@@PAVCBaseEntity@@11@Z	public: void __thiscall CNihilanthHVR::TeleportInit(class CNihilanth *, class CBaseEntity *, class CBaseEntity *, class CBaseEntity *)	__nihilanth.obj
 0x84590	107	?GreenBallInit@CNihilanthHVR@@QAEXXZ	public: void __thiscall CNihilanthHVR::GreenBallInit(void)	__nihilanth.obj
+0x84600	732	?TeleportThink@CNihilanthHVR@@QAEXXZ	public: void __thiscall CNihilanthHVR::TeleportThink(void)	__nihilanth.obj
 0x848e0	224	?AbsorbInit@CNihilanthHVR@@QAEXXZ	public: void __thiscall CNihilanthHVR::AbsorbInit(void)	__nihilanth.obj
 0x849c0	200	?TeleportTouch@CNihilanthHVR@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanthHVR::TeleportTouch(class CBaseEntity *)	__nihilanth.obj
+0x84a90	361	?DissipateThink@CNihilanthHVR@@QAEXXZ	public: void __thiscall CNihilanthHVR::DissipateThink(void)	__nihilanth.obj
+0x84c00	1284	?CircleTarget@CNihilanthHVR@@QAEHVVector@@@Z	public: int __thiscall CNihilanthHVR::CircleTarget(class Vector)	__nihilanth.obj
 0x85110	640	?MovetoTarget@CNihilanthHVR@@QAEXVVector@@@Z	public: void __thiscall CNihilanthHVR::MovetoTarget(class Vector)	__nihilanth.obj
+0x85390	592	?Crawl@CNihilanthHVR@@UAEXXZ	public: virtual void __thiscall CNihilanthHVR::Crawl(void)	__nihilanth.obj
 0x855e0	46	?RemoveTouch@CNihilanthHVR@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanthHVR::RemoveTouch(class CBaseEntity *)	__nihilanth.obj
 0x85610	586	?BounceTouch@CNihilanthHVR@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CNihilanthHVR::BounceTouch(class CBaseEntity *)	__nihilanth.obj
 0x85960	139	?InitGraph@CGraph@@QAEXXZ	public: void __thiscall CGraph::InitGraph(void)	__nodes.obj
 0x859f0	55	?AllocNodes@CGraph@@QAEHXZ	public: int __thiscall CGraph::AllocNodes(void)	__nodes.obj
+0x85a30	517	?LinkEntForLink@CGraph@@QAEPAUentvars_s@@PAVCLink@@PAVCNode@@@Z	public: struct entvars_s * __thiscall CGraph::LinkEntForLink(class CLink *, class CNode *)	__nodes.obj
 0x85c40	502	?HandleLinkEnt@CGraph@@QAEHHPAUentvars_s@@HW4NODEQUERY@1@@Z	public: int __thiscall CGraph::HandleLinkEnt(int, struct entvars_s *, int, enum CGraph::NODEQUERY)	__nodes.obj
 0x85e40	168	?HullIndex@CGraph@@QAEHPBVCBaseEntity@@@Z	public: int __thiscall CGraph::HullIndex(class CBaseEntity const *)	__nodes.obj
 0x85ef0	43	?NodeType@CGraph@@QAEHPBVCBaseEntity@@@Z	public: int __thiscall CGraph::NodeType(class CBaseEntity const *)	__nodes.obj
 0x85f20	214	?PathLength@CGraph@@QAEMHHHH@Z	public: float __thiscall CGraph::PathLength(int, int, int, int)	__nodes.obj
 0x86000	137	?NextNodeInRoute@CGraph@@QAEHHHHH@Z	public: int __thiscall CGraph::NextNodeInRoute(int, int, int, int)	__nodes.obj
+0x86090	880	?FindShortestPath@CGraph@@QAEHPAHHHHH@Z	public: int __thiscall CGraph::FindShortestPath(int *, int, int, int, int)	__nodes.obj
 0x86400	886	?CheckNode@CGraph@@QAEXVVector@@H@Z	public: void __thiscall CGraph::CheckNode(class Vector, int)	__nodes.obj
 0x86780	65	?CalcBounds@@YAXAAH0HH@Z	void __cdecl CalcBounds(int &, int &, int, int)	__nodes.obj
 0x867d0	30	?FindNearestNode@CGraph@@QAEHABVVector@@PAVCBaseEntity@@@Z	public: int __thiscall CGraph::FindNearestNode(class Vector const &, class CBaseEntity *)	__nodes.obj
 0x867f0	1547	?FindNearestNode@CGraph@@QAEHABVVector@@H@Z	public: int __thiscall CGraph::FindNearestNode(class Vector const &, int)	__nodes.obj
 0x86e00	358	?ShowNodeConnections@CGraph@@QAEXH@Z	public: void __thiscall CGraph::ShowNodeConnections(int)	__nodes.obj
+0x86f70	1091	?LinkVisibleNodes@CGraph@@QAEHPAVCLink@@PAU_iobuf@@PAH@Z	public: int __thiscall CGraph::LinkVisibleNodes(class CLink *, struct _iobuf *, int *)	__nodes.obj
 0x873c0	760	?RejectInlineLinks@CGraph@@QAEHPAVCLink@@PAU_iobuf@@@Z	public: int __thiscall CGraph::RejectInlineLinks(class CLink *, struct _iobuf *)	__nodes.obj
 0x87740	255	?Spawn@CTestHull@@QAEXPAUentvars_s@@@Z	public: void __thiscall CTestHull::Spawn(struct entvars_s *)	__nodes.obj
 0x87840	73	?DropDelay@CTestHull@@QAEXXZ	public: void __thiscall CTestHull::DropDelay(void)	__nodes.obj
 0x87890	180	?KeyValue@CNodeEnt@@EAEXPAUKeyValueData_s@@@Z	private: virtual void __thiscall CNodeEnt::KeyValue(struct KeyValueData_s *)	__nodes.obj
 0x87950	505	?Spawn@CNodeEnt@@EAEXXZ	private: virtual void __thiscall CNodeEnt::Spawn(void)	__nodes.obj
+0x87b50	583	?ShowBadNode@CTestHull@@QAEXXZ	public: void __thiscall CTestHull::ShowBadNode(void)	__nodes.obj
 0x87da0	26	?CallBuildNodeGraph@CTestHull@@QAEXXZ	public: void __thiscall CTestHull::CallBuildNodeGraph(void)	__nodes.obj
 0x88c40	301	?PathFind@CTestHull@@QAEXXZ	public: void __thiscall CTestHull::PathFind(void)	__nodes.obj
 0x88d80	50	?Push@CStack@@QAEXH@Z	public: void __thiscall CStack::Push(int)	__nodes.obj
@@ -739,6 +893,9 @@ rva	size	name	demangled	ref_object
 0x88f30	47	?Remove@CQueuePriority@@QAEHAAM@Z	public: int __thiscall CQueuePriority::Remove(float &)	__nodes.obj
 0x88f60	119	?Heap_SiftDown@CQueuePriority@@AAEXH@Z	private: void __thiscall CQueuePriority::Heap_SiftDown(int)	__nodes.obj
 0x88fe0	75	?Heap_SiftUp@CQueuePriority@@AAEXXZ	private: void __thiscall CQueuePriority::Heap_SiftUp(void)	__nodes.obj
+0x89030	1046	?FLoadGraph@CGraph@@QAEHPAD@Z	public: int __thiscall CGraph::FLoadGraph(char *)	__nodes.obj
+0x89450	579	?FSaveGraph@CGraph@@QAEHPAD@Z	public: int __thiscall CGraph::FSaveGraph(char *)	__nodes.obj
+0x896a0	218	?FSetGraphPointers@CGraph@@QAEHXZ	public: int __thiscall CGraph::FSetGraphPointers(void)	__nodes.obj
 0x89780	364	?CheckNODFile@CGraph@@QAEHPAD@Z	public: int __thiscall CGraph::CheckNODFile(char *)	__nodes.obj
 0x898f0	171	?HashInsert@CGraph@@QAEXHHH@Z	public: void __thiscall CGraph::HashInsert(int, int, int)	__nodes.obj
 0x899a0	243	?HashSearch@CGraph@@QAEXHHAAH@Z	public: void __thiscall CGraph::HashSearch(int, int, int &)	__nodes.obj
@@ -747,20 +904,30 @@ rva	size	name	demangled	ref_object
 0x89db0	159	?BuildLinkLookups@CGraph@@QAEXXZ	public: void __thiscall CGraph::BuildLinkLookups(void)	__nodes.obj
 0x89e50	1167	?BuildRegionTables@CGraph@@QAEXXZ	public: void __thiscall CGraph::BuildRegionTables(void)	__nodes.obj
 0x8a2e0	1509	?ComputeStaticRoutingTables@CGraph@@QAEXXZ	public: void __thiscall CGraph::ComputeStaticRoutingTables(void)	__nodes.obj
+0x8a8d0	897	?TestRoutingTables@CGraph@@QAEXXZ	public: void __thiscall CGraph::TestRoutingTables(void)	__nodes.obj
 0x8ae20	670	?Spawn@CNodeViewer@@UAEXXZ	public: virtual void __thiscall CNodeViewer::Spawn(void)	__nodes.obj
 0x8b0c0	143	?FindNodeConnections@CNodeViewer@@QAEXH@Z	public: void __thiscall CNodeViewer::FindNodeConnections(int)	__nodes.obj
 0x8b150	97	?AddNode@CNodeViewer@@QAEXHH@Z	public: void __thiscall CNodeViewer::AddNode(int, int)	__nodes.obj
 0x8b1c0	435	?DrawThink@CNodeViewer@@QAEXXZ	public: void __thiscall CNodeViewer::DrawThink(void)	__nodes.obj
 0x8c770	397	?Spawn@COsprey@@UAEXXZ	public: virtual void __thiscall COsprey::Spawn(void)	__osprey.obj
 0x8c900	147	?Precache@COsprey@@UAEXXZ	public: virtual void __thiscall COsprey::Precache(void)	__osprey.obj
+0x8c9a0	25	?CommandUse@COsprey@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall COsprey::CommandUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__osprey.obj
+0x8c9c0	206	?FindAllThink@COsprey@@QAEXXZ	public: void __thiscall COsprey::FindAllThink(void)	__osprey.obj
+0x8ca90	1439	?DeployThink@COsprey@@QAEXXZ	public: void __thiscall COsprey::DeployThink(void)	__osprey.obj
 0x8d030	127	?HasDead@COsprey@@QAEHXZ	public: int __thiscall COsprey::HasDead(void)	__osprey.obj
+0x8d0b0	621	?MakeGrunt@COsprey@@QAEPAVCBaseMonster@@VVector@@@Z	public: class CBaseMonster * __thiscall COsprey::MakeGrunt(class Vector)	__osprey.obj
+0x8d320	158	?HoverThink@COsprey@@QAEXXZ	public: void __thiscall COsprey::HoverThink(void)	__osprey.obj
 0x8d3c0	592	?UpdateGoal@COsprey@@QAEXXZ	public: void __thiscall COsprey::UpdateGoal(void)	__osprey.obj
+0x8d610	324	?FlyThink@COsprey@@QAEXXZ	public: void __thiscall COsprey::FlyThink(void)	__osprey.obj
+0x8dc00	331	?Killed@COsprey@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall COsprey::Killed(struct entvars_s *, int)	__osprey.obj
 0x8dd50	84	?CrashTouch@COsprey@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall COsprey::CrashTouch(class CBaseEntity *)	__osprey.obj
+0x8ddb0	1916	?DyingThink@COsprey@@QAEXXZ	public: void __thiscall COsprey::DyingThink(void)	__osprey.obj
 0x8e530	584	?ShowDamage@COsprey@@QAEXXZ	public: void __thiscall COsprey::ShowDamage(void)	__osprey.obj
 0x8e780	229	?TraceAttack@COsprey@@UAEXPAUentvars_s@@MVVector@@PAUTraceResult@@H@Z	public: virtual void __thiscall COsprey::TraceAttack(struct entvars_s *, float, class Vector, struct TraceResult *, int)	__osprey.obj
 0x8e950	110	?KeyValue@CPathCorner@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CPathCorner::KeyValue(struct KeyValueData_s *)	__pathcorner.obj
 0x8eaa0	111	?KeyValue@CPathTrack@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CPathTrack::KeyValue(struct KeyValueData_s *)	__pathcorner.obj
 0x8eb10	159	?Use@CPathTrack@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CPathTrack::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__pathcorner.obj
+0x8ebb0	221	?Link@CPathTrack@@QAEXXZ	public: void __thiscall CPathTrack::Link(void)	__pathcorner.obj
 0x8ec90	102	?Spawn@CPathTrack@@UAEXXZ	public: virtual void __thiscall CPathTrack::Spawn(void)	__pathcorner.obj
 0x8ed00	19	?Activate@CPathTrack@@UAEXXZ	public: virtual void __thiscall CPathTrack::Activate(void)	__pathcorner.obj
 0x8ed20	33	?ValidPath@CPathTrack@@QAEPAV1@PAV1@H@Z	public: class CPathTrack * __thiscall CPathTrack::ValidPath(class CPathTrack *, int)	__pathcorner.obj
@@ -772,13 +939,17 @@ rva	size	name	demangled	ref_object
 0x8f350	209	?Nearest@CPathTrack@@QAEPAV1@VVector@@@Z	public: class CPathTrack * __thiscall CPathTrack::Nearest(class Vector)	__pathcorner.obj
 0x8f4b0	61	?InitializePlane@CPlane@@QAEXABVVector@@0@Z	public: void __thiscall CPlane::InitializePlane(class Vector const &, class Vector const &)	__plane.obj
 0x8f4f0	60	?PointInFront@CPlane@@QAEHABVVector@@@Z	public: int __thiscall CPlane::PointInFront(class Vector const &)	__plane.obj
+0x8f590	626	?KeyValue@CBasePlatTrain@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBasePlatTrain::KeyValue(struct KeyValueData_s *)	__plats.obj
+0x8f810	672	?Precache@CBasePlatTrain@@UAEXXZ	public: virtual void __thiscall CBasePlatTrain::Precache(void)	__plats.obj
 0x8fb70	363	?Setup@CFuncPlat@@QAEXXZ	public: void __thiscall CFuncPlat::Setup(void)	__plats.obj
 0x8fce0	36	?Precache@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::Precache(void)	__plats.obj
 0x8fd10	91	?Spawn@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::Spawn(void)	__plats.obj
 0x8fd70	164	?PlatSpawnInsideTrigger@@YAXPAUentvars_s@@@Z	void __cdecl PlatSpawnInsideTrigger(struct entvars_s *)	__plats.obj
 0x8fe30	346	?SpawnInsideTrigger@CPlatTrigger@@QAEXPAVCFuncPlat@@@Z	public: void __thiscall CPlatTrigger::SpawnInsideTrigger(class CFuncPlat *)	__plats.obj
 0x8fff0	106	?PlatUse@CFuncPlat@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CFuncPlat::PlatUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__plats.obj
+0x90060	123	?GoDown@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::GoDown(void)	__plats.obj
 0x900e0	132	?HitBottom@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::HitBottom(void)	__plats.obj
+0x90170	123	?GoUp@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::GoUp(void)	__plats.obj
 0x901f0	174	?HitTop@CFuncPlat@@UAEXXZ	public: virtual void __thiscall CFuncPlat::HitTop(void)	__plats.obj
 0x902a0	169	?Blocked@CFuncPlat@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CFuncPlat::Blocked(class CBaseEntity *)	__plats.obj
 0x90430	283	?SetupRotation@CFuncPlatRot@@QAEXXZ	public: void __thiscall CFuncPlatRot::SetupRotation(void)	__plats.obj
@@ -787,24 +958,40 @@ rva	size	name	demangled	ref_object
 0x905a0	70	?HitBottom@CFuncPlatRot@@UAEXXZ	public: virtual void __thiscall CFuncPlatRot::HitBottom(void)	__plats.obj
 0x905f0	43	?GoUp@CFuncPlatRot@@UAEXXZ	public: virtual void __thiscall CFuncPlatRot::GoUp(void)	__plats.obj
 0x90620	70	?HitTop@CFuncPlatRot@@UAEXXZ	public: virtual void __thiscall CFuncPlatRot::HitTop(void)	__plats.obj
+0x90670	199	?RotMove@CFuncPlatRot@@QAEXAAVVector@@M@Z	public: void __thiscall CFuncPlatRot::RotMove(class Vector &, float)	__plats.obj
 0x90810	114	?KeyValue@CFuncTrain@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTrain::KeyValue(struct KeyValueData_s *)	__plats.obj
 0x90960	171	?Use@CFuncTrain@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncTrain::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__plats.obj
 0x90a10	436	?Wait@CFuncTrain@@QAEXXZ	public: void __thiscall CFuncTrain::Wait(void)	__plats.obj
+0x90bd0	744	?Next@CFuncTrain@@QAEXXZ	public: void __thiscall CFuncTrain::Next(void)	__plats.obj
+0x90ec0	300	?Activate@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::Activate(void)	__plats.obj
 0x90ff0	267	?Spawn@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::Spawn(void)	__plats.obj
+0x91110	175	?OverrideReset@CFuncTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrain::OverrideReset(void)	__plats.obj
+0x91290	539	?KeyValue@CFuncTrackTrain@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTrackTrain::KeyValue(struct KeyValueData_s *)	__plats.obj
 0x914b0	53	?NextThink@CFuncTrackTrain@@QAEXMH@Z	public: void __thiscall CFuncTrackTrain::NextThink(float, int)	__plats.obj
 0x91740	403	?Use@CFuncTrackTrain@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncTrackTrain::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__plats.obj
 0x918e0	143	?StopSound@CFuncTrackTrain@@QAEXXZ	public: void __thiscall CFuncTrackTrain::StopSound(void)	__plats.obj
+0x91970	328	?UpdateSound@CFuncTrackTrain@@QAEXXZ	public: void __thiscall CFuncTrackTrain::UpdateSound(void)	__plats.obj
+0x91ac0	1513	?Next@CFuncTrackTrain@@QAEXXZ	public: void __thiscall CFuncTrackTrain::Next(void)	__plats.obj
 0x920b0	44	?FixupAngles@@YAXAAVVector@@@Z	void __cdecl FixupAngles(class Vector &)	__plats.obj
 0x920e0	69	?Fix@@YAMM@Z	float __cdecl Fix(float)	__plats.obj
 0x92140	290	?DeadEnd@CFuncTrackTrain@@QAEXXZ	public: void __thiscall CFuncTrackTrain::DeadEnd(void)	__plats.obj
 0x92270	208	?SetControls@CFuncTrackTrain@@QAEXPAUentvars_s@@@Z	public: void __thiscall CFuncTrackTrain::SetControls(struct entvars_s *)	__plats.obj
 0x92340	285	?OnControls@CFuncTrackTrain@@UAEHPAUentvars_s@@@Z	public: virtual int __thiscall CFuncTrackTrain::OnControls(struct entvars_s *)	__plats.obj
+0x92460	437	?Find@CFuncTrackTrain@@QAEXXZ	public: void __thiscall CFuncTrackTrain::Find(void)	__plats.obj
+0x92620	541	?NearestPath@CFuncTrackTrain@@QAEXXZ	public: void __thiscall CFuncTrackTrain::NearestPath(void)	__plats.obj
+0x92840	38	?OverrideReset@CFuncTrackTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrackTrain::OverrideReset(void)	__plats.obj
+0x928e0	442	?Spawn@CFuncTrackTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrackTrain::Spawn(void)	__plats.obj
 0x92aa0	288	?Precache@CFuncTrackTrain@@UAEXXZ	public: virtual void __thiscall CFuncTrackTrain::Precache(void)	__plats.obj
+0x92c40	230	?Find@CFuncTrainControls@@QAEXXZ	public: void __thiscall CFuncTrainControls::Find(void)	__plats.obj
 0x92d30	122	?Spawn@CFuncTrainControls@@UAEXXZ	public: virtual void __thiscall CFuncTrainControls::Spawn(void)	__plats.obj
+0x92ea0	225	?Spawn@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::Spawn(void)	__plats.obj
 0x92fc0	283	?KeyValue@CFuncTrackChange@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CFuncTrackChange::KeyValue(struct KeyValueData_s *)	__plats.obj
 0x930e0	29	?OverrideReset@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::OverrideReset(void)	__plats.obj
+0x93100	673	?Find@CFuncTrackChange@@QAEXXZ	public: void __thiscall CFuncTrackChange::Find(void)	__plats.obj
 0x933b0	183	?EvaluateTrain@CFuncTrackChange@@QAE?AW4TRAIN_CODE@@PAVCPathTrack@@@Z	public: enum TRAIN_CODE __thiscall CFuncTrackChange::EvaluateTrain(class CPathTrack *)	__plats.obj
 0x93470	542	?UpdateTrain@CFuncTrackChange@@QAEXAAVVector@@@Z	public: void __thiscall CFuncTrackChange::UpdateTrain(class Vector &)	__plats.obj
+0x93690	175	?GoDown@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::GoDown(void)	__plats.obj
+0x93740	175	?GoUp@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::GoUp(void)	__plats.obj
 0x937f0	101	?UpdateAutoTargets@CFuncTrackChange@@UAEXH@Z	public: virtual void __thiscall CFuncTrackChange::UpdateAutoTargets(int)	__plats.obj
 0x93860	185	?Use@CFuncTrackChange@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CFuncTrackChange::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__plats.obj
 0x93920	117	?HitBottom@CFuncTrackChange@@UAEXXZ	public: virtual void __thiscall CFuncTrackChange::HitBottom(void)	__plats.obj
@@ -814,22 +1001,31 @@ rva	size	name	demangled	ref_object
 0x93d30	29	?BodyTarget@CGunTarget@@UAE?AVVector@@ABV2@@Z	public: virtual class Vector __thiscall CGunTarget::BodyTarget(class Vector const &)	__plats.obj
 0x93dc0	205	?Spawn@CGunTarget@@UAEXXZ	public: virtual void __thiscall CGunTarget::Spawn(void)	__plats.obj
 0x93e90	188	?Activate@CGunTarget@@UAEXXZ	public: virtual void __thiscall CGunTarget::Activate(void)	__plats.obj
+0x93f60	166	?Next@CGunTarget@@QAEXXZ	public: void __thiscall CGunTarget::Next(void)	__plats.obj
 0x94010	189	?Wait@CGunTarget@@QAEXXZ	public: void __thiscall CGunTarget::Wait(void)	__plats.obj
 0x940d0	53	?Stop@CGunTarget@@UAEXXZ	public: virtual void __thiscall CGunTarget::Stop(void)	__plats.obj
 0x94110	131	?TakeDamage@CGunTarget@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CGunTarget::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__plats.obj
 0x941a0	126	?Use@CGunTarget@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CGunTarget::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__plats.obj
+0x946b0	329	?VecVelocityForDamage@@YA?AVVector@@M@Z	class Vector __cdecl VecVelocityForDamage(float)	__player.obj
 0x94800	87	?TrainSpeed@@YAHHH@Z	int __cdecl TrainSpeed(int, int)	__player.obj
 0x96bf0	197	?TabulateAmmo@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::TabulateAmmo(void)	__player.obj
 0x97270	18	?IsOnLadder@CBasePlayer@@QAEHXZ	public: int __thiscall CBasePlayer::IsOnLadder(void)	__player.obj
+0x97720	387	?StartDeathCam@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::StartDeathCam(void)	__player.obj
 0x97d60	286	?Jump@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::Jump(void)	__player.obj
 0x97e80	77	?FixPlayerCrouchStuck@@YAXPAUedict_s@@@Z	void __cdecl FixPlayerCrouchStuck(struct edict_s *)	__player.obj
 0x97ed0	29	?Duck@CBasePlayer@@UAEXXZ	public: virtual void __thiscall CBasePlayer::Duck(void)	__player.obj
+0x99710	400	?CheckTimeBasedDamage@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::CheckTimeBasedDamage(void)	__player.obj
 0x998a0	165	?UpdateGeigerCounter@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::UpdateGeigerCounter(void)	__player.obj
 0x99950	307	?CheckSuitUpdate@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::CheckSuitUpdate(void)	__player.obj
+0x99a90	377	?SetSuitUpdate@CBasePlayer@@QAEXPADHH@Z	public: void __thiscall CBasePlayer::SetSuitUpdate(char *, int, int)	__player.obj
 0x9be20	48	?Save@CBasePlayer@@UAEHAAVCSave@@@Z	public: virtual int __thiscall CBasePlayer::Save(class CSave &)	__player.obj
 0x9c2d0	110	?SelectLastItem@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::SelectLastItem(void)	__player.obj
 0x9c340	31	?HasWeapons@CBasePlayer@@QAEHXZ	public: int __thiscall CBasePlayer::HasWeapons(void)	__player.obj
 0x9c370	19	?TeamID@CBasePlayer@@UAEPBDXZ	public: virtual char const * __thiscall CBasePlayer::TeamID(void)	__player.obj
+0x9c390	200	?Spawn@CSprayCan@@QAEXPAUentvars_s@@@Z	public: void __thiscall CSprayCan::Spawn(struct entvars_s *)	__player.obj
+0x9c460	332	?Think@CSprayCan@@UAEXXZ	public: virtual void __thiscall CSprayCan::Think(void)	__player.obj
+0x9c5b0	156	?Spawn@CBloodSplat@@QAEXPAUentvars_s@@@Z	public: void __thiscall CBloodSplat::Spawn(struct entvars_s *)	__player.obj
+0x9c650	200	?Spray@CBloodSplat@@QAEXXZ	public: void __thiscall CBloodSplat::Spray(void)	__player.obj
 0x9c720	147	?GiveNamedItem@CBasePlayer@@QAEXPBD@Z	public: void __thiscall CBasePlayer::GiveNamedItem(char const *)	__player.obj
 0x9c7c0	307	?FindEntityForward@@YAPAVCBaseEntity@@PAV1@@Z	class CBaseEntity * __cdecl FindEntityForward(class CBaseEntity *)	__player.obj
 0x9c910	166	?FlashlightTurnOn@CBasePlayer@@QAEXXZ	public: void __thiscall CBasePlayer::FlashlightTurnOn(void)	__player.obj
@@ -853,6 +1049,7 @@ rva	size	name	demangled	ref_object
 0x9f080	88	?MessageThink@CRevertSaved@@QAEXXZ	public: void __thiscall CRevertSaved::MessageThink(void)	__player.obj
 0x9f0e0	34	?LoadThink@CRevertSaved@@QAEXXZ	public: void __thiscall CRevertSaved::LoadThink(void)	__player.obj
 0x9f110	100	?Spawn@CInfoIntermission@@EAEXXZ	private: virtual void __thiscall CInfoIntermission::Spawn(void)	__player.obj
+0x9f180	290	?Think@CInfoIntermission@@EAEXXZ	private: virtual void __thiscall CInfoIntermission::Think(void)	__player.obj
 0x9f350	199	_PM_ParticleLine	_PM_ParticleLine	___pm_shared_pm_debug.obj
 0x9f420	84	_PM_DrawRectangle	_PM_DrawRectangle	___pm_shared_pm_debug.obj
 0x9f480	701	_PM_DrawPhysEntBBox	_PM_DrawPhysEntBBox	___pm_shared_pm_debug.obj
@@ -889,6 +1086,7 @@ rva	size	name	demangled	ref_object
 0xa1080	250	_PM_CatagorizeTextureType	_PM_CatagorizeTextureType	___pm_shared_pm_shared.obj
 0xa1570	160	_PM_AddToTouched	_PM_AddToTouched	___pm_shared_pm_shared.obj
 0xa1610	235	_PM_CheckVelocity	_PM_CheckVelocity	___pm_shared_pm_shared.obj
+0xa1700	159	_PM_ClipVelocity	_PM_ClipVelocity	___pm_shared_pm_shared.obj
 0xa24a0	157	_PM_Accelerate	_PM_Accelerate	___pm_shared_pm_shared.obj
 0xa47f0	19	_PM_InWater	_PM_InWater	___pm_shared_pm_shared.obj
 0xa4810	445	_PM_CheckWater	_PM_CheckWater	___pm_shared_pm_shared.obj
@@ -901,16 +1099,20 @@ rva	size	name	demangled	ref_object
 0xa5d60	179	_PM_WaterJump	_PM_WaterJump	___pm_shared_pm_shared.obj
 0xa5e20	95	_PM_AddGravity	_PM_AddGravity	___pm_shared_pm_shared.obj
 0xa5e80	203	_PM_PushEntity	_PM_PushEntity	___pm_shared_pm_shared.obj
+0xa5f50	779	_PM_Physics_Toss	_PM_Physics_Toss	___pm_shared_pm_shared.obj
 0xa6260	174	_PM_NoClip	_PM_NoClip	___pm_shared_pm_shared.obj
 0xa6310	97	_PM_PreventMegaBunnyJumping	_PM_PreventMegaBunnyJumping	___pm_shared_pm_shared.obj
 0xa6cc0	610	_PM_CheckWaterJump	_PM_CheckWaterJump	___pm_shared_pm_shared.obj
 0xa75d0	240	_PM_PlayWaterSounds	_PM_PlayWaterSounds	___pm_shared_pm_shared.obj
 0xa76c0	151	_PM_CalcRoll	_PM_CalcRoll	___pm_shared_pm_shared.obj
+0xa7760	75	_PM_DropPunchAngle	_PM_DropPunchAngle	___pm_shared_pm_shared.obj
+0xa8af0	539	_PM_CreateStuckTable	_PM_CreateStuckTable	___pm_shared_pm_shared.obj
 0xa9120	46	_PM_GetVisEntInfo	_PM_GetVisEntInfo	___pm_shared_pm_shared.obj
 0xa9150	30	_PM_Init	_PM_Init	___pm_shared_pm_shared.obj
 0xae960	238	?Spawn@CRat@@UAEXXZ	public: virtual void __thiscall CRat::Spawn(void)	__rat.obj
 0xb2b20	297	?Spawn@CRoach@@UAEXXZ	public: virtual void __thiscall CRoach::Spawn(void)	__roach.obj
 0xb2c80	216	?Killed@CRoach@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CRoach::Killed(struct entvars_s *, int)	__roach.obj
+0xb2d60	708	?MonsterThink@CRoach@@UAEXXZ	public: virtual void __thiscall CRoach::MonsterThink(void)	__roach.obj
 0xb3030	450	?PickNewDest@CRoach@@QAEXH@Z	public: void __thiscall CRoach::PickNewDest(int)	__roach.obj
 0xb3200	380	?Move@CRoach@@UAEXM@Z	public: virtual void __thiscall CRoach::Move(float)	__roach.obj
 0xb96e0	55	?Deploy@CRpg@@UAEHXZ	public: virtual int __thiscall CRpg::Deploy(void)	__rpg.obj
@@ -933,6 +1135,7 @@ rva	size	name	demangled	ref_object
 0xc0ca0	140	?SetYawSpeed@CScientist@@UAEXXZ	public: virtual void __thiscall CScientist::SetYawSpeed(void)	__scientist.obj
 0xc0d30	96	?HandleAnimEvent@CScientist@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CScientist::HandleAnimEvent(struct MonsterEvent_t *)	__scientist.obj
 0xc0ef0	88	?Precache@CScientist@@UAEXXZ	public: virtual void __thiscall CScientist::Precache(void)	__scientist.obj
+0xc0f50	280	?TalkInit@CScientist@@QAEXXZ	public: void __thiscall CScientist::TalkInit(void)	__scientist.obj
 0xc1070	74	?TakeDamage@CScientist@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CScientist::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__scientist.obj
 0xc10d0	348	?PainSound@CScientist@@UAEXXZ	public: virtual void __thiscall CScientist::PainSound(void)	__scientist.obj
 0xc1240	25	?Killed@CScientist@@UAEXPAUentvars_s@@H@Z	public: virtual void __thiscall CScientist::Killed(struct entvars_s *, int)	__scientist.obj
@@ -942,16 +1145,19 @@ rva	size	name	demangled	ref_object
 0xc17f0	139	?Heal@CScientist@@QAEXXZ	public: void __thiscall CScientist::Heal(void)	__scientist.obj
 0xc19a0	225	?Spawn@CDeadScientist@@UAEXXZ	public: virtual void __thiscall CDeadScientist::Spawn(void)	__scientist.obj
 0xc1d10	28	?Precache@CSittingScientist@@UAEXXZ	public: virtual void __thiscall CSittingScientist::Precache(void)	__scientist.obj
+0xc1d60	757	?SittingThink@CSittingScientist@@QAEXXZ	public: void __thiscall CSittingScientist::SittingThink(void)	__scientist.obj
 0xc2060	55	?SetAnswerQuestion@CSittingScientist@@UAEXPAVCTalkMonster@@@Z	public: virtual void __thiscall CSittingScientist::SetAnswerQuestion(class CTalkMonster *)	__scientist.obj
 0xc2260	619	?KeyValue@CCineMonster@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CCineMonster::KeyValue(struct KeyValueData_s *)	__scripted.obj
 0xc2620	121	?Spawn@CCineMonster@@UAEXXZ	public: virtual void __thiscall CCineMonster::Spawn(void)	__scripted.obj
 0xc26a0	17	?FCanOverrideState@CCineMonster@@UAEHXZ	public: virtual int __thiscall CCineMonster::FCanOverrideState(void)	__scripted.obj
 0xc26d0	90	?Use@CCineMonster@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CCineMonster::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__scripted.obj
+0xc2770	473	?FindEntity@CCineMonster@@QAEHXZ	public: int __thiscall CCineMonster::FindEntity(void)	__scripted.obj
 0xc2950	564	?PossessEntity@CCineMonster@@UAEXXZ	public: virtual void __thiscall CCineMonster::PossessEntity(void)	__scripted.obj
 0xc2b90	612	?PossessEntity@CCineAI@@EAEXXZ	private: virtual void __thiscall CCineAI::PossessEntity(void)	__scripted.obj
 0xc2e00	153	?CineThink@CCineMonster@@QAEXXZ	public: void __thiscall CCineMonster::CineThink(void)	__scripted.obj
 0xc2ea0	165	?StartSequence@CCineMonster@@UAEHPAVCBaseMonster@@HH@Z	public: virtual int __thiscall CCineMonster::StartSequence(class CBaseMonster *, int, int)	__scripted.obj
 0xc2f50	168	?StartSequence@CCineAI@@EAEHPAVCBaseMonster@@HH@Z	private: virtual int __thiscall CCineAI::StartSequence(class CBaseMonster *, int, int)	__scripted.obj
+0xc3000	83	?SequenceDone@CCineMonster@@QAEXPAVCBaseMonster@@@Z	public: void __thiscall CCineMonster::SequenceDone(class CBaseMonster *)	__scripted.obj
 0xc3060	31	?FixScriptMonsterSchedule@CCineMonster@@UAEXPAVCBaseMonster@@@Z	public: virtual void __thiscall CCineMonster::FixScriptMonsterSchedule(class CBaseMonster *)	__scripted.obj
 0xc3080	71	?FixScriptMonsterSchedule@CCineAI@@EAEXPAVCBaseMonster@@@Z	private: virtual void __thiscall CCineAI::FixScriptMonsterSchedule(class CBaseMonster *)	__scripted.obj
 0xc30d0	46	?ExitScriptedSequence@CBaseMonster@@QAEHXZ	public: int __thiscall CBaseMonster::ExitScriptedSequence(void)	__scripted.obj
@@ -959,19 +1165,29 @@ rva	size	name	demangled	ref_object
 0xc3120	47	?CanInterrupt@CCineMonster@@QAEHXZ	public: int __thiscall CCineMonster::CanInterrupt(void)	__scripted.obj
 0xc3150	20	?IgnoreConditions@CCineMonster@@UAEHXZ	public: virtual int __thiscall CCineMonster::IgnoreConditions(void)	__scripted.obj
 0xc3170	231	?ScriptEntityCancel@@YAXPAUedict_s@@@Z	void __cdecl ScriptEntityCancel(struct edict_s *)	__scripted.obj
+0xc3260	166	?CancelScript@CCineMonster@@QAEXXZ	public: void __thiscall CCineMonster::CancelScript(void)	__scripted.obj
+0xc3310	314	?DelayStart@CCineMonster@@QAEXH@Z	public: void __thiscall CCineMonster::DelayStart(int)	__scripted.obj
+0xc3450	336	?Activate@CCineMonster@@UAEXXZ	public: virtual void __thiscall CCineMonster::Activate(void)	__scripted.obj
 0xc35a0	768	?CineCleanup@CBaseMonster@@QAEHXZ	public: int __thiscall CBaseMonster::CineCleanup(void)	__scripted.obj
+0xc3980	712	?KeyValue@CScriptedSentence@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CScriptedSentence::KeyValue(struct KeyValueData_s *)	__scripted.obj
 0xc3c50	37	?Use@CScriptedSentence@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CScriptedSentence::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__scripted.obj
 0xc3c80	167	?Spawn@CScriptedSentence@@UAEXXZ	public: virtual void __thiscall CScriptedSentence::Spawn(void)	__scripted.obj
 0xc3d30	119	?FindThink@CScriptedSentence@@QAEXXZ	public: void __thiscall CScriptedSentence::FindThink(void)	__scripted.obj
+0xc3db0	51	?DelayThink@CScriptedSentence@@QAEXXZ	public: void __thiscall CScriptedSentence::DelayThink(void)	__scripted.obj
 0xc3df0	178	?AcceptableSpeaker@CScriptedSentence@@QAEHPAVCBaseMonster@@@Z	public: int __thiscall CScriptedSentence::AcceptableSpeaker(class CBaseMonster *)	__scripted.obj
+0xc3eb0	309	?FindEntity@CScriptedSentence@@QAEPAVCBaseMonster@@XZ	public: class CBaseMonster * __thiscall CScriptedSentence::FindEntity(void)	__scripted.obj
 0xc3ff0	334	?StartSentence@CScriptedSentence@@QAEHPAVCBaseMonster@@@Z	public: int __thiscall CScriptedSentence::StartSentence(class CBaseMonster *)	__scripted.obj
 0xc41e0	187	?Spawn@CFurniture@@UAEXXZ	public: virtual void __thiscall CFurniture::Spawn(void)	__scripted.obj
 0xca4a0	18	??0CHalfLifeRules@@QAE@XZ	public: __thiscall CHalfLifeRules::CHalfLifeRules(void)	__singleplay_gamerules.obj
 0xca500	39	?FShouldSwitchWeapon@CHalfLifeRules@@UAEHPAVCBasePlayer@@PAVCBasePlayerItem@@@Z	public: virtual int __thiscall CHalfLifeRules::FShouldSwitchWeapon(class CBasePlayer *, class CBasePlayerItem *)	__singleplay_gamerules.obj
 0xca570	31	?FlPlayerFallDamage@CHalfLifeRules@@UAEMPAVCBasePlayer@@@Z	public: virtual float __thiscall CHalfLifeRules::FlPlayerFallDamage(class CBasePlayer *)	__singleplay_gamerules.obj
 0xca850	89	?GetSkillCvar@@YAMPAD@Z	float __cdecl GetSkillCvar(char *)	__skill.obj
+0xcc620	269	?Spawn@CAmbientGeneric@@UAEXXZ	public: virtual void __thiscall CAmbientGeneric::Spawn(void)	__sound.obj
+0xcc730	192	?Precache@CAmbientGeneric@@UAEXXZ	public: virtual void __thiscall CAmbientGeneric::Precache(void)	__sound.obj
 0xcc7f0	972	?RampThink@CAmbientGeneric@@QAEXXZ	public: void __thiscall CAmbientGeneric::RampThink(void)	__sound.obj
 0xccbc0	578	?InitModulationParms@CAmbientGeneric@@QAEXXZ	public: void __thiscall CAmbientGeneric::InitModulationParms(void)	__sound.obj
+0xcce10	583	?ToggleUse@CAmbientGeneric@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CAmbientGeneric::ToggleUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__sound.obj
+0xcd060	1680	?KeyValue@CAmbientGeneric@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CAmbientGeneric::KeyValue(struct KeyValueData_s *)	__sound.obj
 0xcd7c0	165	?KeyValue@CEnvSound@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CEnvSound::KeyValue(struct KeyValueData_s *)	__sound.obj
 0xcd870	420	?FEnvSoundInRange@@YAHPAUentvars_s@@0PAM@Z	int __cdecl FEnvSoundInRange(struct entvars_s *, struct entvars_s *, float *)	__sound.obj
 0xcdc40	37	?Spawn@CEnvSound@@UAEXXZ	public: virtual void __thiscall CEnvSound::Spawn(void)	__sound.obj
@@ -988,7 +1204,9 @@ rva	size	name	demangled	ref_object
 0xce8a0	145	?memfgets@@YAPADPAEHAAHPADH@Z	char * __cdecl memfgets(unsigned char *, int, int &, char *, int)	__sound.obj
 0xce940	471	?TEXTURETYPE_Init@@YAXXZ	void __cdecl TEXTURETYPE_Init(void)	__sound.obj
 0xceb20	68	?TEXTURETYPE_Find@@YADPAD@Z	char __cdecl TEXTURETYPE_Find(char *)	__sound.obj
+0xcf1a0	191	?Spawn@CSpeaker@@UAEXXZ	public: virtual void __thiscall CSpeaker::Spawn(void)	__sound.obj
 0xcf260	53	?Precache@CSpeaker@@UAEXXZ	public: virtual void __thiscall CSpeaker::Precache(void)	__sound.obj
+0xcf450	135	?ToggleUse@CSpeaker@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CSpeaker::ToggleUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__sound.obj
 0xcf5c0	50	?Clear@CSound@@QAEXXZ	public: void __thiscall CSound::Clear(void)	__soundent.obj
 0xcf600	44	?Reset@CSound@@QAEXXZ	public: void __thiscall CSound::Reset(void)	__soundent.obj
 0xcf650	46	?Spawn@CSoundEnt@@UAEXXZ	public: virtual void __thiscall CSoundEnt::Spawn(void)	__soundent.obj
@@ -1002,6 +1220,7 @@ rva	size	name	demangled	ref_object
 0xcf9b0	17	?FreeList@CSoundEnt@@SAHXZ	public: static int __cdecl CSoundEnt::FreeList(void)	__soundent.obj
 0xcf9d0	73	?SoundPointerForIndex@CSoundEnt@@SAPAVCSound@@H@Z	public: static class CSound * __cdecl CSoundEnt::SoundPointerForIndex(int)	__soundent.obj
 0xcfa20	16	?ClientSoundIndex@CSoundEnt@@SAHPAUedict_s@@@Z	public: static int __cdecl CSoundEnt::ClientSoundIndex(struct edict_s *)	__soundent.obj
+0xcfa80	226	?SpectatorImpulseCommand@CBaseSpectator@@AAEXXZ	private: void __thiscall CBaseSpectator::SpectatorImpulseCommand(void)	__spectator.obj
 0xcfb70	67	?SpectatorThink@CBaseSpectator@@QAEXXZ	public: void __thiscall CBaseSpectator::SpectatorThink(void)	__spectator.obj
 0xcfc50	152	?OccupySlot@CSquadMonster@@QAEHH@Z	public: int __thiscall CSquadMonster::OccupySlot(int)	__squadmonster.obj
 0xcfcf0	79	?VacateSlot@CSquadMonster@@QAEXXZ	public: void __thiscall CSquadMonster::VacateSlot(void)	__squadmonster.obj
@@ -1022,6 +1241,7 @@ rva	size	name	demangled	ref_object
 0xd0920	143	?SquadMemberInRange@CSquadMonster@@QAEHABVVector@@M@Z	public: int __thiscall CSquadMonster::SquadMemberInRange(class Vector const &, float)	__squadmonster.obj
 0xd09b0	26	?GetScheduleOfType@CSquadMonster@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CSquadMonster::GetScheduleOfType(int)	__squadmonster.obj
 0xd0af0	101	?Classify@CSqueakGrenade@@EAEHXZ	private: virtual int __thiscall CSqueakGrenade::Classify(void)	__squeakgrenade.obj
+0xd0db0	286	?Killed@CSqueakGrenade@@EAEXPAUentvars_s@@H@Z	private: virtual void __thiscall CSqueakGrenade::Killed(struct entvars_s *, int)	__squeakgrenade.obj
 0xd0ed0	43	?GibMonster@CSqueakGrenade@@EAEXXZ	private: virtual void __thiscall CSqueakGrenade::GibMonster(void)	__squeakgrenade.obj
 0xd4500	18	?Spawn@CNullEntity@@UAEXXZ	public: virtual void __thiscall CNullEntity::Spawn(void)	__subs.obj
 0xd4770	117	?KeyValue@CBaseDMStart@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseDMStart::KeyValue(struct KeyValueData_s *)	__subs.obj
@@ -1029,8 +1249,11 @@ rva	size	name	demangled	ref_object
 0xd4890	77	?SUB_Remove@CBaseEntity@@QAEXXZ	public: void __thiscall CBaseEntity::SUB_Remove(void)	__subs.obj
 0xd4950	190	?KeyValue@CBaseDelay@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseDelay::KeyValue(struct KeyValueData_s *)	__subs.obj
 0xd4a10	55	?SUB_UseTargets@CBaseEntity@@QAEXPAV1@W4USE_TYPE@@M@Z	public: void __thiscall CBaseEntity::SUB_UseTargets(class CBaseEntity *, enum USE_TYPE, float)	__subs.obj
+0xd4a50	164	?FireTargets@@YAXPBDPAVCBaseEntity@@1W4USE_TYPE@@M@Z	void __cdecl FireTargets(char const *, class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__subs.obj
+0xd4b70	503	?SUB_UseTargets@CBaseDelay@@QAEXPAVCBaseEntity@@W4USE_TYPE@@M@Z	public: void __thiscall CBaseDelay::SUB_UseTargets(class CBaseEntity *, enum USE_TYPE, float)	__subs.obj
 0xd4d70	258	?SetMovedir@@YAXPAUentvars_s@@@Z	void __cdecl SetMovedir(struct entvars_s *)	__subs.obj
 0xd4e80	84	?DelayThink@CBaseDelay@@QAEXXZ	public: void __thiscall CBaseDelay::DelayThink(void)	__subs.obj
+0xd4f40	365	?KeyValue@CBaseToggle@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseToggle::KeyValue(struct KeyValueData_s *)	__subs.obj
 0xd50b0	243	?LinearMove@CBaseToggle@@QAEXVVector@@M@Z	public: void __thiscall CBaseToggle::LinearMove(class Vector, float)	__subs.obj
 0xd51b0	81	?LinearMoveDone@CBaseToggle@@QAEXXZ	public: void __thiscall CBaseToggle::LinearMoveDone(void)	__subs.obj
 0xd5210	55	?IsLockedByMaster@CBaseToggle@@QAEHXZ	public: int __thiscall CBaseToggle::IsLockedByMaster(void)	__subs.obj
@@ -1058,6 +1281,7 @@ rva	size	name	demangled	ref_object
 0xd6c40	60	?Talk@CTalkMonster@@QAEXM@Z	public: void __thiscall CTalkMonster::Talk(float)	__talkmonster.obj
 0xd6c80	43	?SetAnswerQuestion@CTalkMonster@@UAEXPAV1@@Z	public: virtual void __thiscall CTalkMonster::SetAnswerQuestion(class CTalkMonster *)	__talkmonster.obj
 0xd6cb0	113	?TakeDamage@CTalkMonster@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CTalkMonster::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__talkmonster.obj
+0xd6d30	694	?GetScheduleOfType@CTalkMonster@@UAEPAUSchedule_t@@H@Z	public: virtual struct Schedule_t * __thiscall CTalkMonster::GetScheduleOfType(int)	__talkmonster.obj
 0xd6ff0	29	?IsTalking@CTalkMonster@@QAEHXZ	public: int __thiscall CTalkMonster::IsTalking(void)	__talkmonster.obj
 0xd7010	25	?PrescheduleThink@CTalkMonster@@UAEXXZ	public: virtual void __thiscall CTalkMonster::PrescheduleThink(void)	__talkmonster.obj
 0xd7030	158	?TrySmellTalk@CTalkMonster@@QAEXXZ	public: void __thiscall CTalkMonster::TrySmellTalk(void)	__talkmonster.obj
@@ -1077,7 +1301,11 @@ rva	size	name	demangled	ref_object
 0xdd7d0	77	?Level@CTentacle@@QAEHM@Z	public: int __thiscall CTentacle::Level(float)	__tentacle.obj
 0xdd820	42	?MyHeight@CTentacle@@QAEMXZ	public: float __thiscall CTentacle::MyHeight(void)	__tentacle.obj
 0xdd850	119	?MyLevel@CTentacle@@QAEHXZ	public: int __thiscall CTentacle::MyLevel(void)	__tentacle.obj
+0xdd8d0	65	?Test@CTentacle@@QAEXXZ	public: void __thiscall CTentacle::Test(void)	__tentacle.obj
+0xdd920	2475	?Cycle@CTentacle@@QAEXXZ	public: void __thiscall CTentacle::Cycle(void)	__tentacle.obj
 0xde2d0	114	?CommandUse@CTentacle@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CTentacle::CommandUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__tentacle.obj
+0xde350	429	?DieThink@CTentacle@@QAEXXZ	public: void __thiscall CTentacle::DieThink(void)	__tentacle.obj
+0xde990	153	?Start@CTentacle@@QAEXXZ	public: void __thiscall CTentacle::Start(void)	__tentacle.obj
 0xdeba0	62	?TakeDamage@CTentacle@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CTentacle::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__tentacle.obj
 0xdec60	185	?Spawn@CTentacleMaw@@UAEXXZ	public: virtual void __thiscall CTentacleMaw::Spawn(void)	__tentacle.obj
 0xe38d0	76	?Spawn@CFrictionModifier@@UAEXXZ	public: virtual void __thiscall CFrictionModifier::Spawn(void)	__triggers.obj
@@ -1088,10 +1316,12 @@ rva	size	name	demangled	ref_object
 0xe3cf0	156	?KeyValue@CTriggerRelay@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTriggerRelay::KeyValue(struct KeyValueData_s *)	__triggers.obj
 0xe3da0	40	?Use@CTriggerRelay@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTriggerRelay::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__triggers.obj
 0xe3eb0	214	?KeyValue@CMultiManager@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CMultiManager::KeyValue(struct KeyValueData_s *)	__triggers.obj
+0xe3f90	112	?Spawn@CMultiManager@@UAEXXZ	public: virtual void __thiscall CMultiManager::Spawn(void)	__triggers.obj
 0xe4000	136	?HasTarget@CMultiManager@@UAEHH@Z	public: virtual int __thiscall CMultiManager::HasTarget(int)	__triggers.obj
 0xe4090	224	?ManagerThink@CMultiManager@@QAEXXZ	public: void __thiscall CMultiManager::ManagerThink(void)	__triggers.obj
 0xe4170	177	?Clone@CMultiManager@@AAEPAV1@XZ	private: class CMultiManager * __thiscall CMultiManager::Clone(void)	__triggers.obj
 0xe4230	109	?ManagerUse@CMultiManager@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CMultiManager::ManagerUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__triggers.obj
+0xe4320	211	?Use@CRenderFxManager@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CRenderFxManager::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__triggers.obj
 0xe4480	170	?InitTrigger@CBaseTrigger@@QAEXXZ	public: void __thiscall CBaseTrigger::InitTrigger(void)	__triggers.obj
 0xe4530	288	?KeyValue@CBaseTrigger@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseTrigger::KeyValue(struct KeyValueData_s *)	__triggers.obj
 0xe4730	98	?Spawn@CTriggerMonsterJump@@UAEXXZ	public: virtual void __thiscall CTriggerMonsterJump::Spawn(void)	__triggers.obj
@@ -1115,7 +1345,11 @@ rva	size	name	demangled	ref_object
 0xe59b0	475	?KeyValue@CChangeLevel@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CChangeLevel::KeyValue(struct KeyValueData_s *)	__triggers.obj
 0xe5b90	212	?Spawn@CChangeLevel@@UAEXXZ	public: virtual void __thiscall CChangeLevel::Spawn(void)	__triggers.obj
 0xe5c70	59	?ExecuteChangeLevel@CChangeLevel@@QAEXXZ	public: void __thiscall CChangeLevel::ExecuteChangeLevel(void)	__triggers.obj
+0xe5cb0	158	?FindLandmark@CChangeLevel@@SAPAUedict_s@@PBD@Z	public: static struct edict_s * __cdecl CChangeLevel::FindLandmark(char const *)	__triggers.obj
 0xe6070	259	?AddTransitionToList@CChangeLevel@@SAHPAULEVELLIST@@HPBD1PAUedict_s@@@Z	public: static int __cdecl CChangeLevel::AddTransitionToList(struct LEVELLIST *, int, char const *, char const *, struct edict_s *)	__triggers.obj
+0xe61a0	250	?InTransitionVolume@CChangeLevel@@SAHPAVCBaseEntity@@PAD@Z	public: static int __cdecl CChangeLevel::InTransitionVolume(class CBaseEntity *, char *)	__triggers.obj
+0xe62a0	623	?ChangeList@CChangeLevel@@SAHPAULEVELLIST@@H@Z	public: static int __cdecl CChangeLevel::ChangeList(struct LEVELLIST *, int)	__triggers.obj
+0xe6510	366	?NextLevel@@YAXXZ	void __cdecl NextLevel(void)	__triggers.obj
 0xe6700	101	?Precache@CLadder@@UAEXXZ	public: virtual void __thiscall CLadder::Precache(void)	__triggers.obj
 0xe6770	65	?Spawn@CLadder@@UAEXXZ	public: virtual void __thiscall CLadder::Spawn(void)	__triggers.obj
 0xe6840	147	?Spawn@CTriggerPush@@UAEXXZ	public: virtual void __thiscall CTriggerPush::Spawn(void)	__triggers.obj
@@ -1127,26 +1361,38 @@ rva	size	name	demangled	ref_object
 0xe7240	80	?Use@CTriggerChangeTarget@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTriggerChangeTarget::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__triggers.obj
 0xe7370	117	?Spawn@CTriggerCamera@@UAEXXZ	public: virtual void __thiscall CTriggerCamera::Spawn(void)	__triggers.obj
 0xe73f0	365	?KeyValue@CTriggerCamera@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CTriggerCamera::KeyValue(struct KeyValueData_s *)	__triggers.obj
+0xe7560	761	?Use@CTriggerCamera@@UAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: virtual void __thiscall CTriggerCamera::Use(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__triggers.obj
 0xe7860	727	?FollowTarget@CTriggerCamera@@QAEXXZ	public: void __thiscall CTriggerCamera::FollowTarget(void)	__triggers.obj
 0xe7b40	791	?Move@CTriggerCamera@@QAEXXZ	public: void __thiscall CTriggerCamera::Move(void)	__triggers.obj
 0xee370	644	?KeyValue@CBaseTurret@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CBaseTurret::KeyValue(struct KeyValueData_s *)	__turret.obj
+0xee600	193	?Spawn@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::Spawn(void)	__turret.obj
 0xee6d0	125	?Precache@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::Precache(void)	__turret.obj
 0xee750	442	?Spawn@CTurret@@UAEXXZ	public: virtual void __thiscall CTurret::Spawn(void)	__turret.obj
 0xee910	31	?Precache@CTurret@@UAEXXZ	public: virtual void __thiscall CTurret::Precache(void)	__turret.obj
 0xee930	265	?Spawn@CMiniTurret@@UAEXXZ	public: virtual void __thiscall CMiniTurret::Spawn(void)	__turret.obj
 0xeea40	53	?Precache@CMiniTurret@@UAEXXZ	public: virtual void __thiscall CMiniTurret::Precache(void)	__turret.obj
+0xeea80	291	?Initialize@CBaseTurret@@QAEXXZ	public: void __thiscall CBaseTurret::Initialize(void)	__turret.obj
+0xeebb0	149	?TurretUse@CBaseTurret@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CBaseTurret::TurretUse(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__turret.obj
 0xeec50	151	?Ping@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::Ping(void)	__turret.obj
 0xeecf0	49	?EyeOn@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::EyeOn(void)	__turret.obj
 0xeed30	61	?EyeOff@CBaseTurret@@UAEXXZ	public: virtual void __thiscall CBaseTurret::EyeOff(void)	__turret.obj
+0xeed70	1327	?ActiveThink@CBaseTurret@@QAEXXZ	public: void __thiscall CBaseTurret::ActiveThink(void)	__turret.obj
 0xef2a0	147	?Shoot@CTurret@@UAEXAAVVector@@0@Z	public: virtual void __thiscall CTurret::Shoot(class Vector &, class Vector &)	__turret.obj
 0xef340	237	?Shoot@CMiniTurret@@UAEXAAVVector@@0@Z	public: virtual void __thiscall CMiniTurret::Shoot(class Vector &, class Vector &)	__turret.obj
+0xef430	310	?Deploy@CBaseTurret@@QAEXXZ	public: void __thiscall CBaseTurret::Deploy(void)	__turret.obj
+0xef570	356	?Retire@CBaseTurret@@QAEXXZ	public: void __thiscall CBaseTurret::Retire(void)	__turret.obj
+0xef6e0	304	?SpinUpCall@CTurret@@UAEXXZ	public: virtual void __thiscall CTurret::SpinUpCall(void)	__turret.obj
 0xef810	177	?SpinDownCall@CTurret@@UAEXXZ	public: virtual void __thiscall CTurret::SpinDownCall(void)	__turret.obj
 0xef8d0	121	?SetTurretAnim@CBaseTurret@@QAEXW4TURRET_ANIM@@@Z	public: void __thiscall CBaseTurret::SetTurretAnim(enum TURRET_ANIM)	__turret.obj
+0xef950	395	?SearchThink@CBaseTurret@@QAEXXZ	public: void __thiscall CBaseTurret::SearchThink(void)	__turret.obj
 0xefae0	185	?AutoSearchThink@CBaseTurret@@QAEXXZ	public: void __thiscall CBaseTurret::AutoSearchThink(void)	__turret.obj
+0xf0010	249	?TakeDamage@CBaseTurret@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CBaseTurret::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__turret.obj
+0xf0110	646	?MoveTurret@CBaseTurret@@QAEHXZ	public: int __thiscall CBaseTurret::MoveTurret(void)	__turret.obj
 0xf03a0	29	?Classify@CBaseTurret@@UAEHXZ	public: virtual int __thiscall CBaseTurret::Classify(void)	__turret.obj
 0xf0460	18	?Precache@CSentry@@UAEXXZ	public: virtual void __thiscall CSentry::Precache(void)	__turret.obj
 0xf0480	276	?Spawn@CSentry@@UAEXXZ	public: virtual void __thiscall CSentry::Spawn(void)	__turret.obj
 0xf05a0	237	?Shoot@CSentry@@UAEXAAVVector@@0@Z	public: virtual void __thiscall CSentry::Shoot(class Vector &, class Vector &)	__turret.obj
+0xf0690	222	?TakeDamage@CSentry@@UAEHPAUentvars_s@@0MH@Z	public: virtual int __thiscall CSentry::TakeDamage(struct entvars_s *, struct entvars_s *, float, int)	__turret.obj
 0xf0aa0	53	?U_Random@@YAIXZ	unsigned int __cdecl U_Random(void)	__util.obj
 0xf0ae0	23	?U_Srand@@YAXI@Z	void __cdecl U_Srand(unsigned int)	__util.obj
 0xf0b00	58	?UTIL_SharedRandomLong@@YAHIHH@Z	int __cdecl UTIL_SharedRandomLong(unsigned int, int, int)	__util.obj
@@ -1157,6 +1403,7 @@ rva	size	name	demangled	ref_object
 0xf0d70	55	??0UTIL_GroupTrace@@QAE@HH@Z	public: __thiscall UTIL_GroupTrace::UTIL_GroupTrace(int, int)	__util.obj
 0xf0db0	28	??1UTIL_GroupTrace@@QAE@XZ	public: __thiscall UTIL_GroupTrace::~UTIL_GroupTrace(void)	__util.obj
 0xf0dd0	22	?UTIL_GetNextBestWeapon@@YAHPAVCBasePlayer@@PAVCBasePlayerItem@@@Z	int __cdecl UTIL_GetNextBestWeapon(class CBasePlayer *, class CBasePlayerItem *)	__util.obj
+0xf0df0	120	?UTIL_AngleMod@@YAMM@Z	float __cdecl UTIL_AngleMod(float)	__util.obj
 0xf0e70	63	?UTIL_AngleDiff@@YAMMM@Z	float __cdecl UTIL_AngleDiff(float, float)	__util.obj
 0xf0eb0	47	?UTIL_VecToAngles@@YA?AVVector@@ABV1@@Z	class Vector __cdecl UTIL_VecToAngles(class Vector const &)	__util.obj
 0xf0ee0	57	?UTIL_MoveToOrigin@@YAXPAUedict_s@@ABVVector@@MH@Z	void __cdecl UTIL_MoveToOrigin(struct edict_s *, class Vector const &, float, int)	__util.obj
@@ -1190,6 +1437,7 @@ rva	size	name	demangled	ref_object
 0xf2340	48	?UTIL_AngleDistance@@YAMMM@Z	float __cdecl UTIL_AngleDistance(float, float)	__util.obj
 0xf2390	29	?UTIL_VarArgs@@YAPADPADZZ	char * __cdecl UTIL_VarArgs(char *, ...)	__util.obj
 0xf23b0	52	?UTIL_GetAimVector@@YA?AVVector@@PAUedict_s@@M@Z	class Vector __cdecl UTIL_GetAimVector(struct edict_s *, float)	__util.obj
+0xf23f0	114	?UTIL_IsMasterTriggered@@YAHHPAVCBaseEntity@@@Z	int __cdecl UTIL_IsMasterTriggered(int, class CBaseEntity *)	__util.obj
 0xf2490	174	?UTIL_BloodStream@@YAXABVVector@@0HH@Z	void __cdecl UTIL_BloodStream(class Vector const &, class Vector const &, int, int)	__util.obj
 0xf2630	80	?UTIL_RandomBloodVector@@YA?AVVector@@XZ	class Vector __cdecl UTIL_RandomBloodVector(void)	__util.obj
 0xf2680	80	?UTIL_BloodDecalTrace@@YAXPAUTraceResult@@H@Z	void __cdecl UTIL_BloodDecalTrace(struct TraceResult *, int)	__util.obj
@@ -1205,6 +1453,7 @@ rva	size	name	demangled	ref_object
 0xf2ca0	190	?UTIL_WaterLevel@@YAMABVVector@@MM@Z	float __cdecl UTIL_WaterLevel(class Vector const &, float, float)	__util.obj
 0xf2d60	275	?UTIL_Bubbles@@YAXVVector@@0H@Z	void __cdecl UTIL_Bubbles(class Vector, class Vector, int)	__util.obj
 0xf2e80	288	?UTIL_BubbleTrail@@YAXVVector@@0H@Z	void __cdecl UTIL_BubbleTrail(class Vector, class Vector, int)	__util.obj
+0xf2fa0	52	?UTIL_Remove@@YAXPAVCBaseEntity@@@Z	void __cdecl UTIL_Remove(class CBaseEntity *)	__util.obj
 0xf5390	42	?UTIL_LogPrintf@@YAXPADZZ	void __cdecl UTIL_LogPrintf(char *, ...)	__util.obj
 0xf53c0	157	?UTIL_DotPoints@@YAMABVVector@@00@Z	float __cdecl UTIL_DotPoints(class Vector const &, class Vector const &, class Vector const &)	__util.obj
 0xf5460	59	?UTIL_StripToken@@YAXPBDPAD@Z	void __cdecl UTIL_StripToken(char const *, char *)	__util.obj
@@ -1233,6 +1482,7 @@ rva	size	name	demangled	ref_object
 0xf6830	37	?BufferField@CSave@@AAEXPBDH0@Z	private: void __thiscall CSave::BufferField(char const *, int, char const *)	__util.obj
 0xf6860	76	?BufferHeader@CSave@@AAEXPBDH@Z	private: void __thiscall CSave::BufferHeader(char const *, int)	__util.obj
 0xf68b0	100	?BufferData@CSave@@AAEXPBDH@Z	private: void __thiscall CSave::BufferData(char const *, int)	__util.obj
+0xf6920	848	?ReadField@CRestore@@QAEHPAXPAUTYPEDESCRIPTION@@HHHPAD0@Z	public: int __thiscall CRestore::ReadField(void *, struct TYPEDESCRIPTION *, int, int, int, char *, void *)	__util.obj
 0xf6c90	299	?ReadFields@CRestore@@QAEHPBDPAXPAUTYPEDESCRIPTION@@H@Z	public: int __thiscall CRestore::ReadFields(char const *, void *, struct TYPEDESCRIPTION *, int)	__util.obj
 0xf6dc0	55	?BufferReadHeader@CRestore@@AAEXPAUHEADER@@@Z	private: void __thiscall CRestore::BufferReadHeader(struct HEADER *)	__util.obj
 0xf6e00	28	?ReadShort@CRestore@@QAEFXZ	public: short __thiscall CRestore::ReadShort(void)	__util.obj
@@ -1248,18 +1498,23 @@ rva	size	name	demangled	ref_object
 0xf7980	31	?Update@CVoiceGameMgr@@QAEXN@Z	public: void __thiscall CVoiceGameMgr::Update(double)	___game_shared_voice_gamemgr.obj
 0xf79a0	144	?ClientConnected@CVoiceGameMgr@@QAEXPAUedict_s@@@Z	public: void __thiscall CVoiceGameMgr::ClientConnected(struct edict_s *)	___game_shared_voice_gamemgr.obj
 0xf7c00	88	?VoiceServerDebug@@YAXPBDZZ	void __cdecl VoiceServerDebug(char const *, ...)	___game_shared_voice_gamemgr.obj
+0xf7c60	575	?UpdateMasks@CVoiceGameMgr@@AAEXXZ	private: void __thiscall CVoiceGameMgr::UpdateMasks(void)	___game_shared_voice_gamemgr.obj
 0xf7ea0	44	??8?$CBitVec@$0CA@@@QAE_NABV0@@Z	public: bool __thiscall CBitVec<32>::operator==(class CBitVec<32> const &)	___game_shared_voice_gamemgr.obj
 0xf8ec0	251	?MaxAmmoCarry@@YAHH@Z	int __cdecl MaxAmmoCarry(int)	__weapons.obj
 0xf8fe0	40	?ApplyMultiDamage@@YAXPAUentvars_s@@0@Z	void __cdecl ApplyMultiDamage(struct entvars_s *, struct entvars_s *)	__weapons.obj
 0xf9010	92	?AddMultiDamage@@YAXPAUentvars_s@@PAVCBaseEntity@@MH@Z	void __cdecl AddMultiDamage(struct entvars_s *, class CBaseEntity *, float, int)	__weapons.obj
 0xf9070	34	?SpawnBlood@@YAXVVector@@HM@Z	void __cdecl SpawnBlood(class Vector, int, float)	__weapons.obj
 0xf90a0	32	?DamageDecal@@YAHPAVCBaseEntity@@H@Z	int __cdecl DamageDecal(class CBaseEntity *, int)	__weapons.obj
+0xf90c0	182	?DecalGunshot@@YAXPAUTraceResult@@H@Z	void __cdecl DecalGunshot(struct TraceResult *, int)	__weapons.obj
 0xf9180	140	?EjectBrass@@YAXABVVector@@0MHH@Z	void __cdecl EjectBrass(class Vector const &, class Vector const &, float, int, int)	__weapons.obj
 0xf9210	82	?AddAmmoNameToAmmoRegistry@@YAXPBD@Z	void __cdecl AddAmmoNameToAmmoRegistry(char const *)	__weapons.obj
+0xf9270	233	?UTIL_PrecacheOtherWeapon@@YAXPBD@Z	void __cdecl UTIL_PrecacheOtherWeapon(char const *)	__weapons.obj
+0xfa400	143	?FallThink@CBasePlayerItem@@QAEXXZ	public: void __thiscall CBasePlayerItem::FallThink(void)	__weapons.obj
 0xfa750	55	?CanAttack@@YAHMMH@Z	int __cdecl CanAttack(float, float, int)	__weapons.obj
 0xfac00	31	?DestroyItem@CBasePlayerItem@@QAEXXZ	public: void __thiscall CBasePlayerItem::DestroyItem(void)	__weapons.obj
 0xfac20	18	?AddToPlayer@CBasePlayerItem@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CBasePlayerItem::AddToPlayer(class CBasePlayer *)	__weapons.obj
 0xfaca0	35	?Holster@CBasePlayerItem@@UAEXH@Z	public: virtual void __thiscall CBasePlayerItem::Holster(int)	__weapons.obj
+0xfacd0	127	?AttachToPlayer@CBasePlayerItem@@UAEXPAVCBasePlayer@@@Z	public: virtual void __thiscall CBasePlayerItem::AttachToPlayer(class CBasePlayer *)	__weapons.obj
 0xfad90	150	?AddToPlayer@CBasePlayerWeapon@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CBasePlayerWeapon::AddToPlayer(class CBasePlayer *)	__weapons.obj
 0xfae30	248	?UpdateClientData@CBasePlayerWeapon@@UAEHPAVCBasePlayer@@@Z	public: virtual int __thiscall CBasePlayerWeapon::UpdateClientData(class CBasePlayer *)	__weapons.obj
 0xfb0e0	71	?IsUseable@CBasePlayerWeapon@@UAEHXZ	public: virtual int __thiscall CBasePlayerWeapon::IsUseable(void)	__weapons.obj
@@ -1269,12 +1524,14 @@ rva	size	name	demangled	ref_object
 0xfb740	54	?RetireWeapon@CBasePlayerWeapon@@UAEXXZ	public: virtual void __thiscall CBasePlayerWeapon::RetireWeapon(void)	__weapons.obj
 0xfb8a0	98	?KeyValue@CWeaponBox@@EAEXPAUKeyValueData_s@@@Z	private: virtual void __thiscall CWeaponBox::KeyValue(struct KeyValueData_s *)	__weapons.obj
 0xfb910	79	?Spawn@CWeaponBox@@EAEXXZ	private: virtual void __thiscall CWeaponBox::Spawn(void)	__weapons.obj
+0xfb960	77	?Kill@CWeaponBox@@QAEXXZ	public: void __thiscall CWeaponBox::Kill(void)	__weapons.obj
 0xfbae0	206	?PackWeapon@CWeaponBox@@QAEHPAVCBasePlayerItem@@@Z	public: int __thiscall CWeaponBox::PackWeapon(class CBasePlayerItem *)	__weapons.obj
 0xfbc10	217	?GiveAmmo@CWeaponBox@@AAEHHPADHPAH@Z	private: int __thiscall CWeaponBox::GiveAmmo(int, char *, int, int *)	__weapons.obj
 0xfbcf0	132	?HasWeapon@CWeaponBox@@QAEHPAVCBasePlayerItem@@@Z	public: int __thiscall CWeaponBox::HasWeapon(class CBasePlayerItem *)	__weapons.obj
 0xfbd80	50	?IsEmpty@CWeaponBox@@AAEHXZ	private: int __thiscall CWeaponBox::IsEmpty(void)	__weapons.obj
 0xfbe70	98	?PrintState@CBasePlayerWeapon@@QAEXXZ	public: void __thiscall CBasePlayerWeapon::PrintState(void)	__weapons.obj
 0xfc030	107	?Spawn@CDecal@@UAEXXZ	public: virtual void __thiscall CDecal::Spawn(void)	__world.obj
+0xfc0a0	330	?TriggerDecal@CDecal@@QAEXPAVCBaseEntity@@0W4USE_TYPE@@M@Z	public: void __thiscall CDecal::TriggerDecal(class CBaseEntity *, class CBaseEntity *, enum USE_TYPE, float)	__world.obj
 0xfc1f0	237	?StaticDecal@CDecal@@QAEXXZ	public: void __thiscall CDecal::StaticDecal(void)	__world.obj
 0xfc2e0	143	?KeyValue@CDecal@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CDecal::KeyValue(struct KeyValueData_s *)	__world.obj
 0xfc590	104	?Find@CGlobalState@@AAEPAUglobalentity_s@@H@Z	private: struct globalentity_s * __thiscall CGlobalState::Find(int)	__world.obj
@@ -1292,17 +1549,22 @@ rva	size	name	demangled	ref_object
 0xfcee0	104	?InitBodyQue@@YAXXZ	void __cdecl InitBodyQue(void)	__world.obj
 0xfcf50	967	?KeyValue@CWorld@@UAEXPAUKeyValueData_s@@@Z	public: virtual void __thiscall CWorld::KeyValue(struct KeyValueData_s *)	__world.obj
 0xfd380	59	?SetActivity@CActAnimating@@QAEXW4Activity@@@Z	public: void __thiscall CActAnimating::SetActivity(enum Activity)	__xen.obj
+0xfd4a0	497	?Spawn@CXenPLight@@UAEXXZ	public: virtual void __thiscall CXenPLight::Spawn(void)	__xen.obj
+0xfd6c0	141	?Think@CXenPLight@@UAEXXZ	public: virtual void __thiscall CXenPLight::Think(void)	__xen.obj
 0xfd7a0	42	?LightOn@CXenPLight@@QAEXXZ	public: void __thiscall CXenPLight::LightOn(void)	__xen.obj
 0xfd7d0	42	?LightOff@CXenPLight@@QAEXXZ	public: void __thiscall CXenPLight::LightOff(void)	__xen.obj
 0xfd870	250	?Spawn@CXenHair@@UAEXXZ	public: virtual void __thiscall CXenHair::Spawn(void)	__xen.obj
 0xfda20	158	?TriggerCreate@CXenTreeTrigger@@SAPAV1@PAUedict_s@@ABVVector@@@Z	public: static class CXenTreeTrigger * __cdecl CXenTreeTrigger::TriggerCreate(struct edict_s *, class Vector const &)	__xen.obj
 0xfdac0	71	?Touch@CXenTreeTrigger@@UAEXPAVCBaseEntity@@@Z	public: virtual void __thiscall CXenTreeTrigger::Touch(class CBaseEntity *)	__xen.obj
+0xfdc00	449	?Spawn@CXenTree@@UAEXXZ	public: virtual void __thiscall CXenTree::Spawn(void)	__xen.obj
 0xfddd0	84	?Precache@CXenTree@@UAEXXZ	public: virtual void __thiscall CXenTree::Precache(void)	__xen.obj
 0xfdea0	113	?Attack@CXenTree@@QAEXXZ	public: void __thiscall CXenTree::Attack(void)	__xen.obj
 0xfdf20	376	?HandleAnimEvent@CXenTree@@UAEXPAUMonsterEvent_t@@@Z	public: virtual void __thiscall CXenTree::HandleAnimEvent(struct MonsterEvent_t *)	__xen.obj
+0xfe0a0	108	?Think@CXenTree@@UAEXXZ	public: virtual void __thiscall CXenTree::Think(void)	__xen.obj
 0xfe110	308	?CreateHull@CXenHull@@SAPAV1@PAVCBaseEntity@@ABVVector@@11@Z	public: static class CXenHull * __cdecl CXenHull::CreateHull(class CBaseEntity *, class Vector const &, class Vector const &, class Vector const &)	__xen.obj
 0xfe430	99	?Spawn@CXenSporeSmall@@EAEXXZ	private: virtual void __thiscall CXenSporeSmall::Spawn(void)	__xen.obj
 0xfe4a0	99	?Spawn@CXenSporeMed@@EAEXXZ	private: virtual void __thiscall CXenSporeMed::Spawn(void)	__xen.obj
+0xfe520	151	_$E19	_$E19	__xen.obj
 0xfe5c0	438	?Spawn@CXenSporeLarge@@EAEXXZ	private: virtual void __thiscall CXenSporeLarge::Spawn(void)	__xen.obj
 0xfe780	178	?Spawn@CXenSpore@@UAEXXZ	public: virtual void __thiscall CXenSpore::Spawn(void)	__xen.obj
 0xfe840	25	?Precache@CXenSpore@@UAEXXZ	public: virtual void __thiscall CXenSpore::Precache(void)	__xen.obj
@@ -1319,10 +1581,12 @@ rva	size	name	demangled	ref_object
 0xff3db	139	_atol	_atol	LIBCMT:atox.obj
 0xff471	186	__atoi64	__atoi64	LIBCMT:atox.obj
 0xff52b	164	_strtok	_strtok	LIBCMT:strtok.obj
+0xff5d7	111	_tolower	_tolower	LIBCMT:tolower.obj
 0xff646	203	__tolower_lk	__tolower_lk	LIBCMT:tolower.obj
 0xff711	23	__fpmath	__fpmath	LIBCMT:fpinit.obj
 0xff729	56	__cfltcvt_init	__cfltcvt_init	LIBCMT:fpinit.obj
 0xff761	16	___setfflag	___setfflag	LIBCMT:fpinit.obj
+0xff771	87	_atof	_atof	LIBCMT:atof.obj
 0xff7d0	254	_strncpy	_strncpy	LIBCMT:strncpy.obj
 0xff8d0	58	_strpbrk	_strpbrk	LIBCMT:strpbrk.obj
 0xff90c	39	__ftol	__ftol	LIBCMT:ftol.obj
@@ -1334,6 +1598,7 @@ rva	size	name	demangled	ref_object
 0xffa90	40	_isdigit	_isdigit	LIBCMT:_ctype.obj
 0xffab8	45	_isxdigit	_isxdigit	LIBCMT:_ctype.obj
 0xffae5	40	_isspace	_isspace	LIBCMT:_ctype.obj
+0xffb0d	40	_ispunct	_ispunct	LIBCMT:_ctype.obj
 0xffb35	46	_isalnum	_isalnum	LIBCMT:_ctype.obj
 0xffb63	46	_isprint	_isprint	LIBCMT:_ctype.obj
 0xffb91	46	_isgraph	_isgraph	LIBCMT:_ctype.obj
@@ -1359,6 +1624,7 @@ rva	size	name	demangled	ref_object
 0x1004ec	47	_fwrite	_fwrite	LIBCMT:fwrite.obj
 0x10051b	266	__fwrite_lk	__fwrite_lk	LIBCMT:fwrite.obj
 0x100630	20	__CIacos	__CIacos	LIBCMT:acos.obj
+0x100703	111	_toupper	_toupper	LIBCMT:toupper.obj
 0x100772	204	__toupper_lk	__toupper_lk	LIBCMT:toupper.obj
 0x10083e	117	__isctype	__isctype	LIBCMT:isctype.obj
 0x100982	47	_fflush	_fflush	LIBCMT:fflush.obj
@@ -1366,6 +1632,7 @@ rva	size	name	demangled	ref_object
 0x1009df	92	__flush	__flush	LIBCMT:fflush.obj
 0x100a44	164	_flsall	_flsall	LIBCMT:fflush.obj
 0x100bc0	47	__chkstk	__chkstk	LIBCMT:chkstk.obj
+0x100bef	81	_vsprintf	_vsprintf	LIBCMT:vsprintf.obj
 0x100cf3	80	__vsnprintf	__vsnprintf	LIBCMT:vsnprint.obj
 0x100d43	217	__CRT_INIT@12	__CRT_INIT@12	LIBCMT:dllcrt0.obj
 0x100e1c	157	__DllMainCRTStartup@12	__DllMainCRTStartup@12	LIBCMT:dllcrt0.obj
@@ -1424,12 +1691,15 @@ rva	size	name	demangled	ref_object
 0x103820	16	_get_int64_arg	_get_int64_arg	LIBCMT:output.obj
 0x103840	62	__cintrindisp2	__cintrindisp2	LIBCMT:87cdisp.obj
 0x10387e	61	__cintrindisp1	__cintrindisp1	LIBCMT:87cdisp.obj
+0x1038bb	384	__ctrandisp2	__ctrandisp2	LIBCMT:87cdisp.obj
 0x103a3b	51	__ctrandisp1	__ctrandisp1	LIBCMT:87cdisp.obj
 0x103a6e	60	__fload	__fload	LIBCMT:87cdisp.obj
 0x103ab0	103	__trandisp1	__trandisp1	LIBCMT:87disp.obj
 0x103b17	140	__trandisp2	__trandisp2	LIBCMT:87disp.obj
 0x103bc2	43	__tosnan1	__tosnan1	LIBCMT:87disp.obj
 0x103c17	63	__nan2	__nan2	LIBCMT:87disp.obj
+0x103c58	17	__rtindfnpop	__rtindfnpop	LIBCMT:87disp.obj
+0x103c80	279	_fdiv_main_routine	_fdiv_main_routine	LIBCMT:adj_fdiv.obj
 0x103dd2	28	label8	label8	LIBCMT:adj_fdiv.obj
 0x103df3	22	label10	label10	LIBCMT:adj_fdiv.obj
 0x103e0e	28	label12	label12	LIBCMT:adj_fdiv.obj
@@ -1482,6 +1752,7 @@ rva	size	name	demangled	ref_object
 0x10468c	178	__adj_fprem	__adj_fprem	LIBCMT:adj_fdiv.obj
 0x10473e	518	__fprem1_common	__fprem1_common	LIBCMT:adj_fdiv.obj
 0x104944	181	__adj_fprem1	__adj_fprem1	LIBCMT:adj_fdiv.obj
+0x104a21	103	fFEXP	fFEXP	LIBCMT:87tran.obj
 0x104a8a	16	__rtinfnpopse	__rtinfnpopse	LIBCMT:87tran.obj
 0x104a9a	181	__fFLN	__fFLN	LIBCMT:87tran.obj
 0x104b51	16	__rtinfnpop	__rtinfnpop	LIBCMT:87tran.obj
@@ -1497,6 +1768,7 @@ rva	size	name	demangled	ref_object
 0x104d55	20	__check_overflow_exit	__check_overflow_exit	LIBCMT:common.obj
 0x104d69	163	__check_range_exit	__check_range_exit	LIBCMT:common.obj
 0x104e0c	304	__powhlp	__powhlp	LIBCMT:powhlp.obj
+0x104f3c	101	__d_inttype	__d_inttype	LIBCMT:powhlp.obj
 0x104fa1	368	__openfile	__openfile	LIBCMT:_open.obj
 0x105111	200	__getstream	__getstream	LIBCMT:stream.obj
 0x1051d9	141	__stbuf	__stbuf	LIBCMT:_sftbuf.obj
@@ -1504,10 +1776,14 @@ rva	size	name	demangled	ref_object
 0x105290	60	__heap_init	__heap_init	LIBCMT:heapinit.obj
 0x1052cc	117	__heap_term	__heap_term	LIBCMT:heapinit.obj
 0x105347	23	__set_sbh_threshold	__set_sbh_threshold	LIBCMT:sbheap.obj
+0x10535e	62	___sbh_heap_init	___sbh_heap_init	LIBCMT:sbheap.obj
 0x10539c	43	___sbh_find_block	___sbh_find_block	LIBCMT:sbheap.obj
+0x1053c7	811	___sbh_free_block	___sbh_free_block	LIBCMT:sbheap.obj
+0x1056f2	777	___sbh_alloc_block	___sbh_alloc_block	LIBCMT:sbheap.obj
 0x1059fb	177	___sbh_alloc_new_region	___sbh_alloc_new_region	LIBCMT:sbheap.obj
 0x105aac	251	___sbh_alloc_new_group	___sbh_alloc_new_group	LIBCMT:sbheap.obj
 0x105ba7	758	___sbh_resize_block	___sbh_resize_block	LIBCMT:sbheap.obj
+0x105e9d	209	___sbh_heapmin	___sbh_heapmin	LIBCMT:sbheap.obj
 0x105f6e	815	___sbh_heap_check	___sbh_heap_check	LIBCMT:sbheap.obj
 0x10629d	36	?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z	int (__cdecl * __cdecl _set_new_handler(int (__cdecl *)(unsigned int)))(unsigned int)	LIBCMT:handler.obj
 0x1062c7	27	__callnewh	__callnewh	LIBCMT:handler.obj
@@ -1516,6 +1792,7 @@ rva	size	name	demangled	ref_object
 0x106382	17	__exit	__exit	LIBCMT:crt0dat.obj
 0x1063b1	165	_doexit	_doexit	LIBCMT:crt0dat.obj
 0x106468	26	__initterm	__initterm	LIBCMT:crt0dat.obj
+0x106482	312	_realloc	_realloc	LIBCMT:realloc.obj
 0x1065ba	69	__msize	__msize	LIBCMT:msize.obj
 0x106600	88	_memset	_memset	LIBCMT:memset.obj
 0x106658	101	__lseek	__lseek	LIBCMT:lseek.obj
@@ -1560,17 +1837,21 @@ rva	size	name	demangled	ref_object
 0x108343	167	__open_osfhandle	__open_osfhandle	LIBCMT:osfinfo.obj
 0x1083ea	95	__lock_fhandle	__lock_fhandle	LIBCMT:osfinfo.obj
 0x108449	34	__unlock_fhandle	__unlock_fhandle	LIBCMT:osfinfo.obj
+0x10846b	93	_mbtowc	_mbtowc	LIBCMT:mbtowc.obj
 0x1084c8	201	__mbtowc_lk	__mbtowc_lk	LIBCMT:mbtowc.obj
 0x1085a0	31	__allshl	__allshl	LIBCMT:llshl.obj
 0x1085bf	41	_ungetc	_ungetc	LIBCMT:ungetc.obj
 0x1085e8	110	__ungetc_lk	__ungetc_lk	LIBCMT:ungetc.obj
+0x1086bb	473	__read_lk	__read_lk	LIBCMT:read.obj
 0x108894	68	__getbuf	__getbuf	LIBCMT:_getbuf.obj
 0x1088d8	318	__XcptFilter	__XcptFilter	LIBCMT:winxfltr.obj
 0x108a16	58	_xcptlookup	_xcptlookup	LIBCMT:winxfltr.obj
 0x108a50	145	___init_time	___init_time	LIBCMT:inittime.obj
 0x108ae1	846	__get_lc_time	__get_lc_time	LIBCMT:inittime.obj
 0x108e2f	400	__free_lc_time	__free_lc_time	LIBCMT:inittime.obj
+0x108fbf	469	___init_numeric	___init_numeric	LIBCMT:initnum.obj
 0x1091cb	203	___init_monetary	___init_monetary	LIBCMT:initmon.obj
+0x109296	290	__get_lc_lconv	__get_lc_lconv	LIBCMT:initmon.obj
 0x1093ef	78	__free_lc_lconv	__free_lc_lconv	LIBCMT:initmon.obj
 0x10943d	581	___init_ctype	___init_ctype	LIBCMT:initctyp.obj
 0x109690	132	_strcmp	_strcmp	LIBCMT:strcmp.obj
@@ -1625,6 +1906,7 @@ rva	size	name	demangled	ref_object
 0x10b2ef	60	___STRINGTOLD	___STRINGTOLD	LIBCMT:strgtold.obj
 0x10b390	115	__lseek_lk	__lseek_lk	LIBCMT:lseek.obj
 0x10b403	41	__isatty	__isatty	LIBCMT:isatty.obj
+0x10b42c	89	_wctomb	_wctomb	LIBCMT:wctomb.obj
 0x10b485	105	__wctomb_lk	__wctomb_lk	LIBCMT:wctomb.obj
 0x10b4f0	117	__aullrem	__aullrem	LIBCMT:ullrem.obj
 0x10b565	208	__87except	__87except	LIBCMT:87except.obj
@@ -1649,7 +1931,9 @@ rva	size	name	demangled	ref_object
 0x10c393	137	___crtMessageBoxA	___crtMessageBoxA	LIBCMT:crtmbox.obj
 0x10c41c	143	__Getdays	__Getdays	LIBCMT:strftime.obj
 0x10c4ab	149	__Getmonths	__Getmonths	LIBCMT:strftime.obj
+0x10c540	562	__Gettnames	__Gettnames	LIBCMT:strftime.obj
 0x10c772	27	_strftime	_strftime	LIBCMT:strftime.obj
+0x10c78d	250	__Strftime	__Strftime	LIBCMT:strftime.obj
 0x10c887	1007	__expandtime	__expandtime	LIBCMT:strftime.obj
 0x10cc76	39	__store_str	__store_str	LIBCMT:strftime.obj
 0x10cc9d	111	__store_num	__store_num	LIBCMT:strftime.obj
@@ -1680,6 +1964,7 @@ rva	size	name	demangled	ref_object
 0x10e0d5	293	__chsize_lk	__chsize_lk	LIBCMT:chsize.obj
 0x10e1fa	46	___tzset	___tzset	LIBCMT:tzset.obj
 0x10e228	22	__tzset	__tzset	LIBCMT:tzset.obj
+0x10e23e	647	__tzset_lk	__tzset_lk	LIBCMT:tzset.obj
 0x10e4c5	33	__isindst	__isindst	LIBCMT:tzset.obj
 0x10e4e6	428	__isindst_lk	__isindst_lk	LIBCMT:tzset.obj
 0x10e692	320	_cvtdate	_cvtdate	LIBCMT:tzset.obj

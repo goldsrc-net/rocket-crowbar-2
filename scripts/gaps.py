@@ -111,11 +111,12 @@ def main():
 
     pats = []
     if os.path.exists(os.path.join(REF, "hl.map")):
-        rb, _, rt = match.text_section(os.path.join(REF, "hl.dll"))
+        rb, rva, rt = match.text_section(os.path.join(REF, "hl.dll"))
+        rel = match.relocs(os.path.join(REF, "hl.dll"))
         funcs = match.map_functions(os.path.join(REF, "hl.map"))
         for i, (off, name, obj) in enumerate(funcs):
             end = funcs[i + 1][0] if i + 1 < len(funcs) else len(rt)
-            p = match.pattern(rt[off:end], rb)
+            p = match.pattern(rt[off:end], rb, rva + off, rel)
             if p:
                 pats.append((re.compile(p, re.S), name))
     else:

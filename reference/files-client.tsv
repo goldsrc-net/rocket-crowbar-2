@@ -2767,7 +2767,7 @@ rva	size	name	file
 0xaddd0	537	IN_Init	inputw32
 0xae0b0	47	CHudMenu::Init	menu
 0xae2c0	81	CHudMenu::SelectMenuItem	menu
-0xae340	340	FUN_100ae340	new: menu .. message
+0xae340	340	FUN_100ae340	menu
 0xae560	63	CHudMessage::Init	message
 0xae5b0	52	CHudMessage::VidInit	message
 0xae600	39	CHudMessage::Reset	message
@@ -3876,8 +3876,8 @@ rva	size	name	file
 0xfc670	17	FUN_100fc670	new: libcmt:lowhelpr .. libcmt:strlen
 0xfc690	190	FUN_100fc690	new: libcmt:lowhelpr .. libcmt:strlen
 0xfc750	123	_strlen	libcmt:strlen
-0xfc7d0	62	__cintrindisp2	new: libcmt:strlen .. libcmt:87cdisp
-0xfc80e	61	__cintrindisp1	new: libcmt:strlen .. libcmt:87cdisp
+0xfc7d0	62	__cintrindisp2	libcmt:87cdisp
+0xfc80e	61	__cintrindisp1	libcmt:87cdisp
 0xfc84b	72	__ctrandisp2	libcmt:87cdisp
 0xfc893	7	FUN_100fc893	libcmt:87cdisp
 0xfc89a	305	FUN_100fc89a	libcmt:87cdisp
@@ -3889,7 +3889,7 @@ rva	size	name	file
 0xfcba7	63	__nan2	libcmt:87disp
 0xfcbe6	2	FUN_100fcbe6	libcmt:87disp
 0xfcbe8	27	__rtindfnpop	libcmt:87disp
-0xfcc10	279	FUN_100fcc10	new: libcmt:87disp .. libcmt:adj_fdiv
+0xfcc10	279	FUN_100fcc10	libcmt:adj_fdiv
 0xfcd62	28	label8	libcmt:adj_fdiv
 0xfcd83	22	label10	libcmt:adj_fdiv
 0xfcd9e	28	label12	libcmt:adj_fdiv

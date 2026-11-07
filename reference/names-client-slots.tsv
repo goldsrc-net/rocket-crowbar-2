@@ -23,7 +23,6 @@ rva	size	name	demangled	ref_object
 0x388c0	0	?DefaultTouch@CBasePlayerAmmo@@QAEXPAVCBaseEntity@@@Z	public: void __thiscall CBasePlayerAmmo::DefaultTouch(class CBaseEntity *)	vtable
 0x45b40	0	?Spawn@CTripmine@@UAEXXZ	public: virtual void __thiscall CTripmine::Spawn(void)	vtable
 0x45c70	0	?Precache@CTripmine@@UAEXXZ	public: virtual void __thiscall CTripmine::Precache(void)	vtable
-0x4a160	0	?Init@CHudAmmo@@UAEHXZ	public: virtual int __thiscall CHudAmmo::Init(void)	vtable
 0x4b340	0	?Draw@CHudAmmo@@UAEHM@Z	public: virtual int __thiscall CHudAmmo::Draw(float)	vtable
 0x505d0	0	??_GCHudDeathNotice@@UAEPAXI@Z	public: virtual void * __thiscall CHudDeathNotice::`scalar deleting dtor'(unsigned int)	vtable
 0x9ba30	0	?Draw@CHudDeathNotice@@UAEHM@Z	public: virtual int __thiscall CHudDeathNotice::Draw(float)	vtable

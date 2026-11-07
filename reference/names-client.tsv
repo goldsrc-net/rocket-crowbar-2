@@ -33,6 +33,7 @@ rva	size	name	demangled	ref_object
 0x15060	51	??DVector@@QBE?AV0@M@Z	public: class Vector __thiscall Vector::operator*(float) const	___dlls_mp5.obj
 0x1b7f0	194	_EV_Crowbar	_EV_Crowbar	__ev_hldm.obj
 0x1cd20	153	_EV_FireRpg	_EV_FireRpg	__ev_hldm.obj
+0x282c0	388	_EV_TrainPitchAdjust	_EV_TrainPitchAdjust	__ev_hldm.obj
 0x29000	120	??0?$Dar@D@vgui@@QAE@XZ	public: __thiscall vgui::Dar<char>::Dar<char>(void)	__ev_hldm.obj
 0x290a0	133	??0?$Dar@D@vgui@@QAE@H@Z	public: __thiscall vgui::Dar<char>::Dar<char>(int)	__ev_hldm.obj
 0x29160	128	?ensureCapacity@?$Dar@D@vgui@@QAEXH@Z	public: void __thiscall vgui::Dar<char>::ensureCapacity(int)	__ev_hldm.obj
@@ -57,6 +58,7 @@ rva	size	name	demangled	ref_object
 0x46cf0	22	?HashPlayerID@@YAEQBD@Z	unsigned char __cdecl HashPlayerID(char const *const)	___game_shared_voice_banmgr.obj
 0x46d60	211	?Init@CVoiceBanMgr@@QAE_NPBD@Z	public: bool __thiscall CVoiceBanMgr::Init(char const *)	___game_shared_voice_banmgr.obj
 0x46e80	56	?Term@CVoiceBanMgr@@QAEXXZ	public: void __thiscall CVoiceBanMgr::Term(void)	___game_shared_voice_banmgr.obj
+0x46ed0	157	?SaveState@CVoiceBanMgr@@QAEXPBD@Z	public: void __thiscall CVoiceBanMgr::SaveState(char const *)	___game_shared_voice_banmgr.obj
 0x46fa0	19	?GetPlayerBan@CVoiceBanMgr@@QAE_NQBD@Z	public: bool __thiscall CVoiceBanMgr::GetPlayerBan(char const *const)	___game_shared_voice_banmgr.obj
 0x46fd0	87	?SetPlayerBan@CVoiceBanMgr@@QAEXQBD_N@Z	public: void __thiscall CVoiceBanMgr::SetPlayerBan(char const *const, bool)	___game_shared_voice_banmgr.obj
 0x47050	48	?ForEachBannedPlayer@CVoiceBanMgr@@QAEXP6AXQAD@Z@Z	public: void __thiscall CVoiceBanMgr::ForEachBannedPlayer(void (__cdecl *)(char *const))	___game_shared_voice_banmgr.obj
@@ -83,6 +85,7 @@ rva	size	name	demangled	ref_object
 0x49710	1323	?LoadWeaponSprites@WeaponsResource@@QAEXPAUWEAPON@@@Z	public: void __thiscall WeaponsResource::LoadWeaponSprites(struct WEAPON *)	__ammo.obj
 0x49d90	80	?GetFirstPos@WeaponsResource@@QAEPAUWEAPON@@H@Z	public: struct WEAPON * __thiscall WeaponsResource::GetFirstPos(int)	__ammo.obj
 0x49e00	75	?GetNextActivePos@WeaponsResource@@QAEPAUWEAPON@@HH@Z	public: struct WEAPON * __thiscall WeaponsResource::GetNextActivePos(int, int)	__ammo.obj
+0x4a160	461	?Init@CHudAmmo@@UAEHXZ	public: virtual int __thiscall CHudAmmo::Init(void)	__ammo.obj
 0x4a3b0	68	?Reset@CHudAmmo@@UAEXXZ	public: virtual void __thiscall CHudAmmo::Reset(void)	__ammo.obj
 0x4a420	229	?VidInit@CHudAmmo@@UAEHXZ	public: virtual int __thiscall CHudAmmo::VidInit(void)	__ammo.obj
 0x4a550	212	?Think@CHudAmmo@@UAEXXZ	public: virtual void __thiscall CHudAmmo::Think(void)	__ammo.obj
@@ -157,6 +160,7 @@ rva	size	name	demangled	ref_object
 0x9f790	111	?Init@CHudHealth@@UAEHXZ	public: virtual int __thiscall CHudHealth::Init(void)	__health.obj
 0x9f820	37	?Reset@CHudHealth@@UAEXXZ	public: virtual void __thiscall CHudHealth::Reset(void)	__health.obj
 0x9f860	105	?VidInit@CHudHealth@@UAEHXZ	public: virtual int __thiscall CHudHealth::VidInit(void)	__health.obj
+0x9f970	151	?MsgFunc_Damage@CHudHealth@@QAEHPBDHPAX@Z	public: int __thiscall CHudHealth::MsgFunc_Damage(char const *, int, void *)	__health.obj
 0x9fa4f	70	?GetPainColor@CHudHealth@@QAEXAAH00@Z	public: void __thiscall CHudHealth::GetPainColor(int &, int &, int &)	__health.obj
 0x9fe20	653	?CalcDamageDirection@CHudHealth@@AAEXVVector@@@Z	private: void __thiscall CHudHealth::CalcDamageDirection(class Vector)	__health.obj
 0xa0160	1091	?DrawPain@CHudHealth@@AAEHM@Z	private: int __thiscall CHudHealth::DrawPain(float)	__health.obj
@@ -198,6 +202,7 @@ rva	size	name	demangled	ref_object
 0xa5670	32	?GetServer@CHudServers@@AAEPAUserver_s@1@H@Z	private: struct CHudServers::server_s * __thiscall CHudServers::GetServer(int)	__hud_servers.obj
 0xa56a0	25	?GetServerInfo@CHudServers@@QAEPADH@Z	public: char * __thiscall CHudServers::GetServerInfo(int)	__hud_servers.obj
 0xa56d0	32	?CancelRequest@CHudServers@@QAEXXZ	public: void __thiscall CHudServers::CancelRequest(void)	__hud_servers.obj
+0xa5700	814	?LoadMasterAddresses@CHudServers@@QAEHHPAHPAUnetadr_s@@@Z	public: int __thiscall CHudServers::LoadMasterAddresses(int, int *, struct netadr_s *)	__hud_servers.obj
 0xa5b00	221	?RequestList@CHudServers@@QAEXXZ	public: void __thiscall CHudServers::RequestList(void)	__hud_servers.obj
 0xa5c20	278	?RequestBroadcastList@CHudServers@@QAEXH@Z	public: void __thiscall CHudServers::RequestBroadcastList(int)	__hud_servers.obj
 0xa5f20	89	??0CHudServers@@QAE@XZ	public: __thiscall CHudServers::CHudServers(void)	__hud_servers.obj
@@ -209,6 +214,7 @@ rva	size	name	demangled	ref_object
 0xa6410	152	?UTIL_StringToVector@@YAXPAMPBD@Z	void __cdecl UTIL_StringToVector(float *, char const *)	__hud_spectator.obj
 0xa7460	67	?IsActivePlayer@CHudSpectator@@QAE_NPAUcl_entity_s@@@Z	public: bool __thiscall CHudSpectator::IsActivePlayer(struct cl_entity_s *)	__hud_spectator.obj
 0xa8ee0	210	?MoveToward@@YAMMMM@Z	float __cdecl MoveToward(float, float, float)	__in_camera.obj
+0xa9000	1489	_CAM_Think	_CAM_Think	__in_camera.obj
 0xa9960	27	?CAM_ToFirstPerson@@YAXXZ	void __cdecl CAM_ToFirstPerson(void)	__in_camera.obj
 0xa9990	48	?CAM_ToggleSnapto@@YAXXZ	void __cdecl CAM_ToggleSnapto(void)	__in_camera.obj
 0xa9e10	146	?CAM_StartMouseMove@@YAXXZ	void __cdecl CAM_StartMouseMove(void)	__in_camera.obj
@@ -245,7 +251,9 @@ rva	size	name	demangled	ref_object
 0xadd80	51	?IN_Move@@YAXMPAUusercmd_s@@@Z	void __cdecl IN_Move(float, struct usercmd_s *)	__inputw32.obj
 0xaddd0	537	?IN_Init@@YAXXZ	void __cdecl IN_Init(void)	__inputw32.obj
 0xae0b0	47	?Init@CHudMenu@@UAEHXZ	public: virtual int __thiscall CHudMenu::Init(void)	__menu.obj
+0xae161	257	?Draw@CHudMenu@@UAEHM@Z	public: virtual int __thiscall CHudMenu::Draw(float)	__menu.obj
 0xae2c0	81	?SelectMenuItem@CHudMenu@@QAEXH@Z	public: void __thiscall CHudMenu::SelectMenuItem(int)	__menu.obj
+0xae340	340	?MsgFunc_ShowMenu@CHudMenu@@QAEHPBDHPAX@Z	public: int __thiscall CHudMenu::MsgFunc_ShowMenu(char const *, int, void *)	__menu.obj
 0xae560	63	?Init@CHudMessage@@UAEHXZ	public: virtual int __thiscall CHudMessage::Init(void)	__message.obj
 0xae5b0	52	?VidInit@CHudMessage@@UAEHXZ	public: virtual int __thiscall CHudMessage::VidInit(void)	__message.obj
 0xae600	39	?Reset@CHudMessage@@UAEXXZ	public: virtual void __thiscall CHudMessage::Reset(void)	__message.obj
@@ -298,6 +306,7 @@ rva	size	name	demangled	ref_object
 0xb9860	610	_PM_CheckWaterJump	_PM_CheckWaterJump	___pm_shared_pm_shared.obj
 0xba3d0	240	_PM_PlayWaterSounds	_PM_PlayWaterSounds	___pm_shared_pm_shared.obj
 0xba500	151	_PM_CalcRoll	_PM_CalcRoll	___pm_shared_pm_shared.obj
+0xba5d0	75	_PM_DropPunchAngle	_PM_DropPunchAngle	___pm_shared_pm_shared.obj
 0xbbe90	539	_PM_CreateStuckTable	_PM_CreateStuckTable	___pm_shared_pm_shared.obj
 0xbc650	30	_PM_Init	_PM_Init	___pm_shared_pm_shared.obj
 0xbebb0	111	?ScrollTextUp@@YAHXZ	int __cdecl ScrollTextUp(void)	__saytext.obj
@@ -483,6 +492,7 @@ rva	size	name	demangled	ref_object
 0xe9720	382	?V_DriftPitch@@YAXPAUref_params_s@@@Z	void __cdecl V_DriftPitch(struct ref_params_s *)	__view.obj
 0xe9900	246	?V_CalcGunAngle@@YAXPAUref_params_s@@@Z	void __cdecl V_CalcGunAngle(struct ref_params_s *)	__view.obj
 0xe9a40	92	?V_AddIdle@@YAXPAUref_params_s@@@Z	void __cdecl V_AddIdle(struct ref_params_s *)	__view.obj
+0xecb90	71	?V_DropPunchAngle@@YAXMPAM@Z	void __cdecl V_DropPunchAngle(float, float *)	__view.obj
 0xecc00	16	?V_PunchAxis@@YAXHM@Z	void __cdecl V_PunchAxis(int, float)	__view.obj
 0xee57c	39	__ftol	__ftol	LIBCMT:ftol.obj
 0xf1f50	24	__global_unwind2	__global_unwind2	LIBCMT:exsup.obj
@@ -505,6 +515,8 @@ rva	size	name	demangled	ref_object
 0xfc250	39	__CallSettingFrame@12	__CallSettingFrame@12	LIBCMT:lowhelpr.obj
 0xfc277	37	__NLG_Return	__NLG_Return	LIBCMT:lowhelpr.obj
 0xfc750	123	_strlen	_strlen	LIBCMT:strlen.obj
+0xfc7d0	62	__cintrindisp2	__cintrindisp2	LIBCMT:87cdisp.obj
+0xfc80e	61	__cintrindisp1	__cintrindisp1	LIBCMT:87cdisp.obj
 0xfc84b	384	__ctrandisp2	__ctrandisp2	LIBCMT:87cdisp.obj
 0xfc9cb	51	__ctrandisp1	__ctrandisp1	LIBCMT:87cdisp.obj
 0xfc9fe	60	__fload	__fload	LIBCMT:87cdisp.obj
@@ -513,6 +525,7 @@ rva	size	name	demangled	ref_object
 0xfcb52	43	__tosnan1	__tosnan1	LIBCMT:87disp.obj
 0xfcba7	63	__nan2	__nan2	LIBCMT:87disp.obj
 0xfcbe8	17	__rtindfnpop	__rtindfnpop	LIBCMT:87disp.obj
+0xfcc10	279	_fdiv_main_routine	_fdiv_main_routine	LIBCMT:adj_fdiv.obj
 0xfcd62	28	label8	label8	LIBCMT:adj_fdiv.obj
 0xfcd83	22	label10	label10	LIBCMT:adj_fdiv.obj
 0xfcd9e	28	label12	label12	LIBCMT:adj_fdiv.obj
@@ -567,6 +580,7 @@ rva	size	name	demangled	ref_object
 0xfd8d4	181	__adj_fprem1	__adj_fprem1	LIBCMT:adj_fdiv.obj
 0xfd9a4	189	__except_handler3	__except_handler3	LIBCMT:exsup3.obj
 0xfda61	27	__seh_longjmp_unwind@4	__seh_longjmp_unwind@4	LIBCMT:exsup3.obj
+0xfda91	103	fFEXP	fFEXP	LIBCMT:87tran.obj
 0xfdafa	16	__rtinfnpopse	__rtinfnpopse	LIBCMT:87tran.obj
 0xfdb0a	181	__fFLN	__fFLN	LIBCMT:87tran.obj
 0xfdbc1	16	__rtinfnpop	__rtinfnpop	LIBCMT:87tran.obj

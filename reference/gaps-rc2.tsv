@@ -44,30 +44,30 @@ rva	size	kind	reference	after
 0x1dd90	21	stock	?SpectatorConnect@@YAXPAUedict_s@@@Z	PlayerCustomization
 0x1ddb0	21	stock	?SpectatorConnect@@YAXPAUedict_s@@@Z	PlayerCustomization
 0x1ded0	2159	code		SetupVisibility
-0x1e960	347	code		Entity_FieldInit
-0x1eb00	224	code		Player_FieldInit
+0x1e960	347	stock	?Entity_Encode@@YAXPAUdelta_s@@PBE1@Z	Entity_FieldInit
+0x1eb00	224	stock	?Player_Encode@@YAXPAUdelta_s@@PBE1@Z	Player_FieldInit
 0x1edc0	561	code		RegisterEncoders
 0x1f000	676	code		RegisterEncoders
 0x1f340	13	code		CmdEnd
 0x1f370	1	code		GetHullBounds
 0x1f3c0	6	code		InconsistentFile
-0x1f4e0	1046	code		CGib::LimitVelocity
+0x1f4e0	1046	stock	?SpawnStickyGibs@CGib@@SAXPAUentvars_s@@VVector@@H@Z	CGib::LimitVelocity
 0x1f900	6	code		CGib::LimitVelocity
-0x1f910	1089	code		CGib::LimitVelocity
+0x1f910	1089	stock	?SpawnHeadGib@CGib@@SAXPAUentvars_s@@@Z	CGib::LimitVelocity
 0x206ac	28	jumptable		CBaseMonster::GetSmallFlinchActivity
 0x22754	28	jumptable		CBaseMonster::TraceAttack
 0x23180	1982	code		FUN_10022770
 0x2393e	22	jumptable		FUN_10022770
 0x243e6	22	jumptable		CController::HandleAnimEvent
 0x2522a	52	jumptable		CController::GetScheduleOfType
-0x26690	595	code		CControllerHeadBall::MovetoTarget
+0x26690	595	stock	?Crawl@CControllerHeadBall@@AAEXXZ	CControllerHeadBall::MovetoTarget
 0x32508	44	jumptable		FUN_10032120
 0x32824	188	jumptable		CBaseMonster::GetScheduleOfType
 0x35720	148	jumptable		CBaseDoor::Precache
 0x3699a	38	jumptable		CMomentaryDoor::Precache
 0x3aa8e	22	jumptable		CEnvShooter::KeyValue
-0x41180	969	code		CFlyingMonster::ShouldAdvanceRoute
-0x41550	143	code		CFlyingMonster::ShouldAdvanceRoute
+0x41180	969	stock	?MoveExecute@CFlyingMonster@@UAEXPAVCBaseEntity@@ABVVector@@M@Z	CFlyingMonster::ShouldAdvanceRoute
+0x41550	143	stock	?CeilingZ@CFlyingMonster@@QAEMABVVector@@@Z	CFlyingMonster::ShouldAdvanceRoute
 0x4242d	39	jumptable		CBreakable::MaterialSoundList
 0x42680	36	jumptable		CBreakable::Precache
 0x4276b	182	tail		CBreakable::DamageSound
@@ -78,7 +78,7 @@ rva	size	kind	reference	after
 0x47e50	115	code		CGameRules::GetPlayerSpawnSpot
 0x4a18a	30	jumptable		CGargantua::SetYawSpeed
 0x4abf0	24	jumptable		CGargantua::HandleAnimEvent
-0x52530	185	code		CGrenade::ShootSatchelCharge
+0x52530	185	stock	?UseSatchelCharges@CGrenade@@SAXPAUentvars_s@@W4SATCHELCODE@1@@Z	CGrenade::ShootSatchelCharge
 0x525f0	5	code		CGrenade::ShootSatchelCharge
 0x52600	1	code		CGrenade::ShootSatchelCharge
 0x52610	5	code		CGrenade::ShootSatchelCharge
@@ -169,17 +169,17 @@ rva	size	kind	reference	after
 0x83cb0	82	stock	?RandomTargetname@CBeam@@QAEPAVCBaseEntity@@PBD@Z	FUN_10083ba0
 0x85860	5	code		CNihilanthHVR::BounceTouch
 0x85870	1	code		CNihilanthHVR::BounceTouch
-0x85a30	517	code		CGraph::AllocNodes
+0x85a30	517	stock	?LinkEntForLink@CGraph@@QAEPAUentvars_s@@PAVCLink@@PAVCNode@@@Z	CGraph::AllocNodes
 0x863ed	19	jumptable		FUN_10086090
 0x88c14	16	jumptable		FUN_10087dc0
 0x88d70	13	code		CTestHull::PathFind
 0x88de0	11	code		CStack::Pop
-0x8a8d0	897	code		CGraph::ComputeStaticRoutingTables
+0x8a8d0	897	stock	?TestRoutingTables@CGraph@@QAEXXZ	CGraph::ComputeStaticRoutingTables
 0x8fa51	95	jumptable		FUN_1008f810
 0x8fe20	6	code		PlatSpawnInsideTrigger
 0x92ba8	24	jumptable		CFuncTrackTrain::Precache
 0x946a0	1	code		player
-0x946b0	329	code		player
+0x946b0	329	stock	?VecVelocityForDamage@@YA?AVVector@@M@Z	player
 0x9498a	30	jumptable		CBasePlayer::TraceAttack
 0x95730	33	code		FUN_10095710
 0x95760	36	code		FUN_10095710
@@ -191,9 +191,9 @@ rva	size	kind	reference	after
 0x9b28d	43	jumptable		FUN_1009b0b0
 0x9b965	43	jumptable		FUN_1009b940
 0x9c360	3	code		CBasePlayer::HasWeapons
-0x9c460	332	code		FUN_1009c390
-0x9c5b0	156	code		FUN_1009c390
-0x9c650	200	code		FUN_1009c390
+0x9c460	332	stock	?Think@CSprayCan@@UAEXXZ	FUN_1009c390
+0x9c5b0	156	stock	?Spawn@CBloodSplat@@QAEXPAUentvars_s@@@Z	FUN_1009c390
+0x9c650	200	stock	?Spray@CBloodSplat@@QAEXXZ	FUN_1009c390
 0x9cd9c	126	jumptable		CBasePlayer::ImpulseCommands
 0x9ce20	6	code		CBasePlayer::ImpulseCommands
 0x9f340	1	code		FUN_1009f320
@@ -309,7 +309,7 @@ rva	size	kind	reference	after
 0xe2810	20	jumptable		FUN_100e21f0
 0xe2ca5	23	jumptable		FUN_100e2830
 0xe3779	23	jumptable		FUN_100e3750
-0xe6510	366	code		FUN_100e62a0
+0xe6510	366	stock	?NextLevel@@YAXXZ	FUN_100e62a0
 0xe6a8e	23	jumptable		CTriggerPush::Touch
 0xf1c50	29	stock	?UTIL_dtos1@@YAPADH@Z	FUN_100f1c30
 0xf1c70	29	stock	?UTIL_dtos1@@YAPADH@Z	FUN_100f1c30
@@ -338,5 +338,5 @@ rva	size	kind	reference	after
 0xfbfa0	5	code		CSatchel::Restore
 0xfbfb0	10	code		CSatchel::Restore
 0xfe510	5	code		CXenSporeMed::Spawn
-0xfe520	151	code		CXenSporeMed::Spawn
+0xfe520	151	stock	_$E19	CXenSporeMed::Spawn
 0xff2b0	24	thunk		CZombie::IgnoreConditions

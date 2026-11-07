@@ -268,8 +268,8 @@ rva	size	name	file
 0xd7b0	48	CApacheHVR::Restore	apache
 0xd7e0	251	CApacheHVR::Spawn	apache
 0xd8e0	47	CApacheHVR::Precache	apache
-0xd910	219	CApacheHVR::IgniteThink	new: apache .. barnacle
-0xd9f0	370	CApacheHVR::AccelerateThink	new: apache .. barnacle
+0xd910	219	CApacheHVR::IgniteThink	apache
+0xd9f0	370	CApacheHVR::AccelerateThink	apache
 0xdb70	4	CGrenade::BloodColor	new: apache .. barnacle
 0xdb80	105	monster_barnacle	new: apache .. barnacle
 0xdbf0	8	FUN_1000dbf0	new: apache .. barnacle
@@ -684,8 +684,8 @@ rva	size	name	file
 0x26b40	105	controller_energy_ball	controller
 0x26bb0	312	CControllerZapBall::Spawn	controller
 0x26cf0	13	CControllerZapBall::Precache	controller
-0x26d00	160	CControllerZapBall::AnimateThink	new: controller .. crossbow
-0x26da0	317	CControllerZapBall::ExplodeTouch	new: controller .. crossbow
+0x26d00	160	CControllerZapBall::AnimateThink	controller
+0x26da0	317	CControllerZapBall::ExplodeTouch	controller
 0x26ee0	145	impailer	new: controller .. crossbow
 0x26f80	8	FUN_10026f80	new: controller .. crossbow
 0x26f90	70	FUN_10026f90	new: controller .. crossbow
@@ -1106,8 +1106,8 @@ rva	size	name	file
 0x46150	362	CRpgRocket::Spawn	rpg
 0x462c0	71	CRpgRocket::RocketTouch	rpg
 0x46310	47	CRpgRocket::Precache	rpg
-0x46340	246	CRpgRocket::IgniteThink	new: rpg .. func_tank
-0x46440	1678	CRpgRocket::FollowThink	new: rpg .. func_tank
+0x46340	246	CRpgRocket::IgniteThink	rpg
+0x46440	1678	CRpgRocket::FollowThink	rpg
 0x46ad0	105	func_tankrocket	new: rpg .. func_tank
 0x46b40	25	CFuncTankRocket::Precache	func_tank
 0x46b60	160	CFuncTankRocket::Fire	func_tank
@@ -3013,7 +3013,7 @@ rva	size	name	file
 0xcfa20	16	CSoundEnt::ClientSoundIndex	soundent
 0xcfa30	6	CSoundEnt::ObjectCaps	new: soundent .. spectator
 0xcfa40	41	FUN_100cfa40	new: soundent .. spectator
-0xcfa80	226	FUN_100cfa80	new: soundent .. spectator
+0xcfa80	226	FUN_100cfa80	spectator
 0xcfb70	67	CBaseSpectator::SpectatorThink	spectator
 0xcfbf0	48	FUN_100cfbf0	new: spectator .. squadmonster
 0xcfc20	48	FUN_100cfc20	new: spectator .. squadmonster
@@ -3676,7 +3676,7 @@ rva	size	name	file
 0xf79a0	144	CVoiceGameMgr::ClientConnected	game_shared_voice_gamemgr
 0xf7a30	459	FUN_100f7a30	game_shared_voice_gamemgr
 0xf7c00	88	VoiceServerDebug	game_shared_voice_gamemgr
-0xf7c60	575	FUN_100f7c60	new: game_shared_voice_gamemgr .. weapons
+0xf7c60	575	FUN_100f7c60	game_shared_voice_gamemgr
 0xf7ea0	44	CBitVec<32>::operator==	new: game_shared_voice_gamemgr .. weapons
 0xf7ed0	76	FUN_100f7ed0	new: game_shared_voice_gamemgr .. weapons
 0xf7f20	66	FUN_100f7f20	new: game_shared_voice_gamemgr .. weapons
@@ -3862,12 +3862,12 @@ rva	size	name	file
 0xff466	11	FUN_100ff466	libcmt:atox
 0xff471	186	__atoi64	libcmt:atox
 0xff52b	164	_strtok	libcmt:strtok
-0xff5d7	111	FUN_100ff5d7	new: libcmt:strtok .. libcmt:tolower
+0xff5d7	111	FUN_100ff5d7	libcmt:tolower
 0xff646	203	__tolower_lk	libcmt:tolower
 0xff711	23	__fpmath	libcmt:fpinit
 0xff729	56	__cfltcvt_init	libcmt:fpinit
 0xff761	16	___setfflag	libcmt:fpinit
-0xff771	87	FUN_100ff771	new: libcmt:fpinit .. libcmt:strncpy
+0xff771	87	FUN_100ff771	libcmt:atof
 0xff7d0	254	_strncpy	libcmt:strncpy
 0xff8d0	58	_strpbrk	libcmt:strpbrk
 0xff90c	39	__ftol	libcmt:ftol
@@ -3912,7 +3912,7 @@ rva	size	name	file
 0x10051b	266	__fwrite_lk	libcmt:fwrite
 0x100630	20	__CIacos	libcmt:acos
 0x10064d	174	FUN_1010064d	new: libcmt:acos .. libcmt:toupper
-0x100703	111	FUN_10100703	new: libcmt:acos .. libcmt:toupper
+0x100703	111	FUN_10100703	libcmt:toupper
 0x100772	204	__toupper_lk	libcmt:toupper
 0x10083e	117	__isctype	libcmt:isctype
 0x1008b3	207	FUN_101008b3	new: libcmt:isctype .. libcmt:fflush
@@ -3923,9 +3923,9 @@ rva	size	name	file
 0x100a44	164	_flsall	libcmt:fflush
 0x100ae8	207	FUN_10100ae8	new: libcmt:fflush .. libcmt:chkstk
 0x100bc0	47	__chkstk	libcmt:chkstk
-0x100bef	81	FUN_10100bef	new: libcmt:chkstk .. libcmt:vsnprint
-0x100c7b	67	FUN_10100c7b	new: libcmt:chkstk .. libcmt:vsnprint
-0x100cbe	53	FUN_10100cbe	new: libcmt:chkstk .. libcmt:vsnprint
+0x100bef	81	FUN_10100bef	libcmt:vsprintf
+0x100c7b	67	FUN_10100c7b	new: libcmt:vsprintf .. libcmt:vsnprint
+0x100cbe	53	FUN_10100cbe	new: libcmt:vsprintf .. libcmt:vsnprint
 0x100cf3	80	__vsnprintf	libcmt:vsnprint
 0x100d43	217	__CRT_INIT@12	libcmt:dllcrt0
 0x100e1c	157	entry	libcmt:dllcrt0
@@ -4003,7 +4003,7 @@ rva	size	name	file
 0x103bc2	43	__tosnan1	libcmt:87disp
 0x103c17	63	__nan2	libcmt:87disp
 0x103c56	29	FUN_10103c56	new: libcmt:87disp .. libcmt:adj_fdiv
-0x103c80	279	FUN_10103c80	new: libcmt:87disp .. libcmt:adj_fdiv
+0x103c80	279	FUN_10103c80	libcmt:adj_fdiv
 0x103dd2	28	label8	libcmt:adj_fdiv
 0x103df3	22	label10	libcmt:adj_fdiv
 0x103e0e	28	label12	libcmt:adj_fdiv
@@ -4072,7 +4072,7 @@ rva	size	name	file
 0x104d55	20	__check_overflow_exit	libcmt:common
 0x104d69	163	__check_range_exit	libcmt:common
 0x104e0c	304	__powhlp	libcmt:powhlp
-0x104f3c	101	FUN_10104f3c	new: libcmt:powhlp .. libcmt:_open
+0x104f3c	101	FUN_10104f3c	libcmt:powhlp
 0x104fa1	368	__openfile	libcmt:_open
 0x105111	200	__getstream	libcmt:stream
 0x1051d9	141	__stbuf	libcmt:_sftbuf
@@ -4099,7 +4099,7 @@ rva	size	name	file
 0x106456	9	FUN_10106456	libcmt:crt0dat
 0x10645f	9	FUN_1010645f	libcmt:crt0dat
 0x106468	26	__initterm	libcmt:crt0dat
-0x106482	312	FUN_10106482	new: libcmt:crt0dat .. libcmt:msize
+0x106482	312	FUN_10106482	libcmt:realloc
 0x1065ba	69	__msize	libcmt:msize
 0x106600	88	_memset	libcmt:memset
 0x106658	101	__lseek	libcmt:lseek
@@ -4149,13 +4149,13 @@ rva	size	name	file
 0x108343	167	__open_osfhandle	libcmt:osfinfo
 0x1083ea	95	__lock_fhandle	libcmt:osfinfo
 0x108449	34	__unlock_fhandle	libcmt:osfinfo
-0x10846b	93	FUN_1010846b	new: libcmt:osfinfo .. libcmt:mbtowc
+0x10846b	93	FUN_1010846b	libcmt:mbtowc
 0x1084c8	201	__mbtowc_lk	libcmt:mbtowc
 0x1085a0	31	__allshl	libcmt:llshl
 0x1085bf	41	_ungetc	libcmt:ungetc
 0x1085e8	110	__ungetc_lk	libcmt:ungetc
-0x108656	101	FUN_10108656	new: libcmt:ungetc .. libcmt:_getbuf
-0x1086bb	473	FUN_101086bb	new: libcmt:ungetc .. libcmt:_getbuf
+0x108656	101	FUN_10108656	new: libcmt:ungetc .. libcmt:read
+0x1086bb	473	FUN_101086bb	libcmt:read
 0x108894	68	__getbuf	libcmt:_getbuf
 0x1088d8	318	__XcptFilter	libcmt:winxfltr
 0x108a16	58	_xcptlookup	libcmt:winxfltr
@@ -4228,7 +4228,7 @@ rva	size	name	file
 0x10b32b	101	FUN_1010b32b	new: libcmt:strgtold .. libcmt:lseek
 0x10b390	115	__lseek_lk	libcmt:lseek
 0x10b403	41	__isatty	libcmt:isatty
-0x10b42c	89	FUN_1010b42c	new: libcmt:isatty .. libcmt:wctomb
+0x10b42c	89	FUN_1010b42c	libcmt:wctomb
 0x10b485	105	__wctomb_lk	libcmt:wctomb
 0x10b4f0	117	__aullrem	libcmt:ullrem
 0x10b565	208	__87except	libcmt:87except
