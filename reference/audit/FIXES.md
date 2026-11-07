@@ -195,6 +195,149 @@ row) gets fabs back and keeps RC's 0-255 clamp.
 
 Counts: fix 28 (27 rows and UpdateSound), design 12, unclear 4.
 
+### mod-rockcrowbar wave 2 (review of 2026-11-07, applied)
+
+RC 1.9's wave-2 packages (the SDK files RC changed, `reference/dossiers/w2-*.md`) were rebuilt
+before Steven's rule, under a brief that put the original's behavior back wherever it differed.
+Each place they replaced halflife-updated's code in a stock function, read against SDK 2.1 (a
+difference SDK 2.1 already has is RC's own, not a revert) and the wave-2 merge commits 8e0edbe,
+1b8034e, e29e0c5 and 8aa67cf. "-" is a table or member, not a function.
+
+```
+rva        file                     function                           what halflife-updated changed                                verdict  reason
+0x239e50   weapons.cpp              CBasePlayerItem::FallThink         think stops once a player holds it (e0ba8ce, HL25)           fix      as ad50584: could run while attached and give twice
+0x23a730   weapons.cpp              CBasePlayerItem::AttachToPlayer    SetThink(NULL) (ad50584)                                     fix      double pickup removed the weapon and crashed
+0x239fc0   weapons.cpp              CBasePlayerItem::AttemptToMaterialize  nextthink is FlWeaponTryRespawn's absolute time (f14827a) fix      the original added the time twice: respawn far off
+0x23ac50   weapons.cpp              CBasePlayerWeapon::IsUseable       as mod-rc2                                                   fix      as mod-rc2
+0x23af90   weapons.cpp              CBasePlayerWeapon::SecondaryAmmoIndex  m_iSecondaryAmmoType, not -1 (34ce0e3, halflife#3029)    fix      a secondary-ammo weapon read m_rgAmmo[-1] (the mp5's
+                                                                                                                                         override stays)
+0x23b250   weapons.cpp              CBasePlayerWeapon::ExtractAmmo     |= the secondary result (d42b905, halflife#3027)             fix      the weapon was left behind when its ammo was taken
+0x23b370   weapons.cpp              CBasePlayerWeapon::RetireWeapon    as mod-rc2                                                   fix      as mod-rc2
+0x23af00   weapons.cpp              CBasePlayerWeapon::PlayEmptySound  as mod-rc2                                                   unclear  see the list below
+0x23a250   weapons_shared.cpp       CBasePlayerWeapon::ItemPostFrame   TabulateAmmo, m_flLastFireTime (SDK 2.2+)                    design   prediction bookkeeping; nothing reads it here
+0x19c7d0   ggrenade.cpp             CGrenade::Explode                  source 1 unit lower against RadiusDamage's + 1 (d6accf1,     fix      damage through the brush a grenade hit from below
+                                                                       halflife#3244)                                                            (RC's own pull-out distance stays)
+0x19d500   ggrenade.cpp             CGrenade::BounceTouch              as mod-rc2                                                   fix      as mod-rc2
+0x19dc60   ggrenade.cpp             CGrenade::ShootTimed               as mod-rc2                                                   fix      as mod-rc2 (after RC's later SET_MODEL)
+0x1c4e00   monsters.cpp             CBaseMonster::MonsterUse           no MONSTERSTATE_ALERT (08975b8, halflife#3061)               fix      resurrected a dying monster (mod-rc2 keeps it)
+0x1c6080   monsters.cpp             CBaseMonster::SetActivity          as mod-rc2                                                   fix      as mod-rc2 (Steven's oldActivity = m_Activity)
+0x1c7e30   monsters.cpp             CBaseMonster::IRelationship        HUMANPASSIVE fears as R_HT (75bf517)                         fix      R_FR does nothing (mod-rc2 keeps it); RC's PLAYER
+                                                                                                                                         row stays
+0x1c8730   monsters.cpp             CBaseMonster::ChangeYaw            as mod-rc2                                                   fix      as mod-rc2
+0x1c9570   monsters.cpp             CBaseMonster::KeyValue, DropItem   allow_item_dropping (b624a61)                                design   a new keyvalue
+0x1cab20   basemonster.h            CBaseMonster::CanPlaySentence,     no speaking while dying unless scripted (85467c5 #171,       fix      dying monsters spoke scripted sentences; RC's
+           monsters.cpp, talk-      IsAllowedToSpeak, PlaySentence     5ee9711 #180)                                                             sentence code stays in CBaseMonster
+           monster.cpp              (0x1c9e00), CTalkMonster::
+                                    PlaySentence (0x21fae0)
+-          (same)                   sentences in CBaseToggle, CCycler  HL25 sentence rework (3d8b933)                               design   restructure and a cycler that speaks
+                                    IsAllowedToSpeak
+0x21e5e0   talkmonster.cpp          CTalkMonster::RunTask              player looked up once, task fails without one (55a1e89,      fix      stare read an unset player; free slot 1 (as
+                                                                       halflife#3177; f2c8e23)                                                   BloodPosition)
+0x21fcd0   talkmonster.cpp          CTalkMonster::GetScheduleOfType    UTIL_GetLocalPlayer (f2c8e23)                                fix      watched a free slot 1's stale origin (as BloodPosition)
+0x21f190   talkmonster.cpp          CTalkMonster::Touch                push only when the schedule allows it (d667a24)              fix      turned a talker away from a scripted facing
+0x21fc30   talkmonster.cpp          CTalkMonster::TakeDamage           as mod-rc2                                                   fix      as mod-rc2
+0x2203f0   talkmonster.cpp          CTalkMonster::CanFollow            ideal state SCRIPT too (3f68a77, #200)                       fix      +use broke a scripted_sequence
+0x2069c0.. scientist.cpp            CScientist::Scream, StartTask      as mod-rc2 (Marphy)                                          design   as mod-rc2
+           (0x206a90), RunTask
+           (0x206d30)
+0x207ba0   scientist.cpp            CScientist::GetSchedule,           Marphy disregard-enemy changes                               design   Marphy content, mod-rc2 has SDK 2.3's too
+                                    GetIdealState
+0x207490   scientist.cpp            CScientist::TalkInit               % NUM_SCIENTIST_HEADS (4, HL25's head)                       design   mod-rc2 keeps % 3 too
+0x2076d0   scientist.cpp            CScientist::ISoundMask             smells meat, carcass, garbage (SDK 2.2+)                     unclear  see the list below
+0x2073f0.. scientist.cpp            CScientist::Precache, Spawn,       _sv_override_scientist_mdl                                   unclear  see the list below
+                                    CDeadScientist, CSittingScientist
+-          houndeye.cpp             HOUNDEYE_EYE_FRAMES 3, not 4       (e5f9c39, Marphy)                                            fix      houndeye.mdl has 3 skin families: skin 3 isn't
+                                                                                                                                         there (mod-rc2 keeps 3)
+0x1b6870   houndeye.cpp             CHoundeye::GetScheduleOfType,      as mod-rc2 (leaderlook, c718785)                             design   as mod-rc2
+                                    tlHoundGuardPack
+0x1ad4b0   hgrunt.cpp               CHGrunt::HandleAnimEvent           drop only while holding a gun (bc7d6e3)                      fix      dropped it again after a save and load
+-          hgrunt.cpp               tlGruntVictoryDance                TASK_SET_ACTIVITY ACT_IDLE first (ff37029)                   fix      kept firing after the last enemy died
+0x10b590   controller.cpp           CController::RunTask               faces only with an enemy (271d503)                           fix      turned to a stale spot out of combat
+0x1947b0   gargantua.cpp            CStomp::Think (+ save table)       time since the last think (cb09dc7, halflife#2876)           fix      the stomp followed the server's frame rate
+0x1ba8e0.. islave.cpp               CISlave::ArmBeam, WackBeam         SF_BEAM_TEMPORARY (ac808a8, halflife#3104)                   fix      beams stayed forever over a level change
+           (0x1badf0), ZapBeam
+           (0x1bafa0)
+0x242750   zombie.cpp               CZombie::IdleSound, AttackSound    as mod-rc2                                                   fix      as mod-rc2
+           (0x2427e0)
+0x1b7a90   ichthyosaur.cpp          CIchthyosaur::GetScheduleOfType    as mod-rc2 (with slFloat, StartTask 0x1b7bb0, SetActivity)   fix      as mod-rc2 (RC's corpse fade stays)
+0x1b85c0   ichthyosaur.cpp          CIchthyosaur::ChangePitch,         as mod-rc2                                                   fix      as mod-rc2
+                                    ChangeYaw (0x1b8670)
+0x1898b0   flyingmonster.cpp        CFlyingMonster::ChangeYaw          as mod-rc2                                                   fix      as mod-rc2 (343bbb2's 220 * delta)
+0x1e2570   osprey.cpp               COsprey::TraceAttack               as mod-rc2                                                   fix      as mod-rc2
+0x1e10b0   osprey.cpp               COsprey::Flight                    no move while m_dTime is 0 (2e0607e, halflife#3260)          fix      flew to a NaN origin with no target
+0x1dfd00.. osprey.cpp               COsprey Spawn max_health, Hover-   as mod-rc2 (765c1f5)                                         design   as mod-rc2
+                                    Think, FlyThink, Killed, DyingThink
+0x0e8900.. apache.cpp               CApache (398591d)                  as mod-rc2                                                   design   as mod-rc2
+0x1dae90   nodes.cpp                CTestHull::DropDelay               as mod-rc2                                                   design   as mod-rc2
+0x20b670   scripted.cpp             CScriptedSentence::AcceptableSpeaker  as mod-rc2                                                design   as mod-rc2
+0x0e3770   aflock.cpp               CFlockingFlyer::SpawnCommonCode    flocks take damage, health 10 (ab037f6)                      design   whether flyers can be shot
+0x0e56d0   agrunt.cpp               CAGrunt::HandleAnimEvent,          ag_fire moved from the hornet to the agrunt (SDK 2.2+)       design   one sound per hornet either way (moved for the
+           hornet.cpp               CHornet::Spawn (0x1af5d0)                                                                                    predicted hivehand)
+-          h_cycler.cpp             CWreckage::m_flStartTime           float, not int (cb51706)                                     fix      a time kept in an int (type bug)
+0x1ab180   healthkit.cpp            CHealthKit::MyTouch                no kit for a dead player (SDK 2.2+)                          fix      as HurtTouch: the dead took health (rc.ini amount
+                                                                                                                                         stays)
+0x1ec5b0   player.cpp               CBasePlayer::PlayerDeathThink      4 s, not 120 think frames (ac6b664, HL25)                    fix      the frames followed the client's command rate
+0x1ec5b0   player.cpp               CBasePlayer::PlayerDeathThink      grounded corpse MOVETYPE_NONE (SDK 2.2+)                     fix      the body went to a player's head walking over it
+0x1ec5b0   player.cpp               CBasePlayer::PlayerDeathThink      body copied at once in multiplayer (ac6b664, with            design   HL25's corpses (RC fades its own)
+                                                                       CopyToBodyQue's modelindex test)
+0x1ef420   player.cpp               CBasePlayer::PreThink              m_bResetViewEntity (5fd0acb, halflife#3031)                  fix      a camera's view lost on a save load (singleplayer)
+0x1f44a0   player.cpp               CBasePlayer::UpdateClientData      health held to a short (5a0c6c1, #2149), 0-1 sent as 1       fix      wrap past 32767; a live player's HUD read 0
+                                                                       (SDK 2.2+)
+0x1eb6a0   player.cpp               CBasePlayer::Killed                holsters the active weapon (SDK 2.2+)                        unclear  see the list below
+0x1eb6a0   player.cpp               CBasePlayer::Killed                pev->modelindex = player model, "don't use eyes" (SDK 2.2+)  unclear  see the list below
+0x0fd490   client.cpp               ClientDisconnect                   lets go of a func_tank (de2751c, halflife#2594)              fix      as RemoveAllItems' tank release
+0x102cc0   client.cpp               ClientUserInfoChanged              % in a new name becomes a space (SDK 2.2+)                   fix      a name worked as a format string where printed
+0x0fd7e0   client.cpp               Host_Say, ClientPutInServer,       chat flood timer, spectator, voice mute, log lines           design   features (spectator mode, logs)
+                                    ClientCommand
+-          multiplay_gamerules.cpp  Think, GoToIntermission, FShould-  mp_chattime, cl_autowepswitch, func_vehicle credit, log      design   features
+                                    SwitchWeapon, PlayerKilled, ...    lines, motdfile and ServerName
+0x1cf840   multiplay_gamerules.cpp  CHalfLifeMultiplay::DeathNotice    HLTV director event (SDK 2.2+)                               unclear  see the list below
+0x220d90.. teamplay_gamerules.cpp   CHalfLifeTeamplay::InitHUD,        TeamNames, ScoreInfo on a team change, TeamInfo resend       unclear  see the list below
+                                    ChangePlayerTeam (0x221020),       (SDK 2.2+)
+                                    RecountTeams (0x221b70)
+0x1a7810   handgrenade.cpp          CHandGrenade::Holster              clears m_flStartThrow (70dd419, halflife#3251)               fix      a primed grenade was thrown on the next deploy
+0x21b280   squeakgrenade.cpp        CSqueak::Deploy                    first idle at 1.7 s (33385ad, halflife#2495)                 fix      cut the deploy animation short
+0x2036e0   satchel.cpp              CSatchel::Deploy                   first idle at 2 s (33385ad)                                  fix      same commit (RC's own models and rc.ini delay stay)
+0x2010c0   rpg.cpp                  CRpg::WeaponIdle                   fidget idle 6.1 s, not 3 (33385ad)                           fix      cut the fidget short
+0x210150   shotgun.cpp              CShotgun::PrimaryAttack, Weapon-   pump on the last shell too, played from an ItemPostFrame     fix      no pump while holding attack or on the last shell
+                                    Idle (0x2118f0), ItemPostFrame     override (a65846e, halflife#617)
+-          satchel, rpg, squeak-    HL25 satchel controls and live     (1c202f5, fd97136, 2353ca4, e9986c0)                         design   features and balance
+           grenade                  limit, RPG NOAUTOSWITCHTO, snark
+                                    throw and world-brush test
+-          crossbow, hornetgun      CCrossbow::Reload's ammo_bolts,    (SDK 2.2+, f347954)                                          design   prediction mirrors
+                                    CHgun::ReloadAmmo's TabulateAmmo
+```
+
+Not reverts (RC 1.9's own, since SDK 2.1 already has halflife-updated's code there):
+`CBasePlayerWeapon::UpdateClientData` and `SendWeaponAnim` (SDK 2.1 resends only the old and new
+weapon and sets weaponanim; the original does neither), `CHalfLifeMultiplay::ChangeLevel` (SDK
+2.1 has the mapcycle_t code), and the weapon bodies RC rewrote whole (the gauss, tripmine laser,
+egon, crowbar, python, mp5, glock fire code), whose halflife-updated fixes are for code RC
+dropped.
+
+Counts (rows above, a multi-function row once): fix 45, design 18, unclear 7.
+
+Unclear, for Steven (kept as the original until decided):
+- `CBasePlayerWeapon::PlayEmptySound`: mod-rc2's verdict is fix, but EMIT_SOUND_PREDICTED skips a
+  client with cl_lw 1 on the assumption that it predicts the sound. This server has no
+  CLIENT_WEAPONS and sends no weapon data, so such a client may hear nothing. Settle with an HL25
+  client, cl_lw 1, dry-firing an empty weapon against our build.
+- `CBasePlayer::Killed`'s Holster of the active weapon (SDK 2.2+, "to allow it to cleanup"): no
+  stated bug, and RC's Holster bodies have side effects (snark cam, zoom). Settle by reading what
+  each RC Holster would do on a death, or keep.
+- `CBasePlayer::Killed`'s modelindex reset to the player model ("don't use eyes", SDK 2.2+): no
+  stated bug; matters only for a player whose model index was changed (RC's observer or drive
+  states). Settle with RC's observer and drive deaths in an engine run.
+- `CScientist::ISoundMask`'s scents (SDK 2.2+): Valve's AI change with no stated reason, as the
+  roach's height was.
+- `_sv_override_scientist_mdl` (four scientist functions): a feature by the rule, but Steven kept
+  it in mod-rc2 (its DEVIATIONS.md). Parity or the original.
+- `CHalfLifeMultiplay::DeathNotice`'s HLTV director event: a feature, but r7 kept the same message
+  in `CBasePlayer::TakeDamage`.
+- teamplay's TeamNames message, ScoreInfo on a team change and TeamInfo resend (InitHUD,
+  ChangePlayerTeam, RecountTeams): today's client's scoreboard may want them, as it wanted the
+  9-byte ScoreInfo. Settle with mp_teamplay 1 on an HL25 client.
+
 ## Unclear, decided by Steven 2026-11-07 (each line says how)
 
 - (decided, Steven 2026-11-07: restored in both, with the AddToFullPack side) `CTentacle::Spawn`, `CNihilanth::Spawn`, `COsprey::Spawn` (mod-rc2): halflife-updated's interpolation
