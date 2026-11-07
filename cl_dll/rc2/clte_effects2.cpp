@@ -310,9 +310,7 @@ CClientTent* CLTE_CreateTransphasic(CClientTent* pCopy)
 	return p;
 }
 
-// orig client 0x62780. short latency in ms, coord x3 start, short x3 direction (32767ths). Original
-// bug kept: the flare, the lights and the shockwave are left unset when what precedes them fails
-// (no gib model, cl_detail below 0), and Update uses them
+// orig client 0x62780. short latency in ms, coord x3 start, short x3 direction (32767ths)
 CTentTransphasic::CTentTransphasic()
 {
 	m_flHeadStart = (float)READ_SHORT() * 0.001;
@@ -329,6 +327,13 @@ CTentTransphasic::CTentTransphasic()
 	m_flSolidDist = 0;
 	m_flNextTrace = 0;
 	m_pGib = NULL;
+	// Original bug (crash), guarded: the original leaves the flare, the lights and the
+	// shockwave unset when what precedes them fails (no gib model or tempent, cl_detail below
+	// 0), and Update and DrawTransparent use them past their NULL tests
+	m_pFlare = NULL;
+	m_pLight = NULL;
+	m_pElight = NULL;
+	m_pShockwave = NULL;
 
 	Vector vecAngles;
 	VectorAngles(m_vecDir, vecAngles);

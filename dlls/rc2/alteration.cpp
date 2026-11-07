@@ -47,7 +47,10 @@ void ALT_StripSpaces(char* psz)
 		{
 			for (int j = i; j < iLen - 1; j++)
 				psz[j] = psz[j + 1];
-			psz[iLen - 2] = '\0';
+			// Original bug (crash), guarded: a one-character whitespace string writes psz[-1],
+			// the heap header in front of ALT_Copy's block
+			if (iLen >= 2)
+				psz[iLen - 2] = '\0';
 			iLen--;
 		}
 	}

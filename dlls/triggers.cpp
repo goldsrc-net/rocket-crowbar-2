@@ -1237,8 +1237,10 @@ void CBaseTrigger::CounterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE
 	if (m_cTriggersLeft < 0)
 		return;
 
+	// Original bug (crash), guarded: no NULL test on pActivator in the original (a breakable's
+	// Die fires its targets with none)
 	bool fTellActivator =
-		pActivator->IsActivePlayer() && // original bug: no NULL test on pActivator
+		pActivator && pActivator->IsActivePlayer() &&
 		!FBitSet(pev->spawnflags, SPAWNFLAG_NOMESSAGE);
 	if (m_cTriggersLeft != 0)
 	{

@@ -1134,10 +1134,13 @@ static void RC2_ApplyWeaponSync(CBasePlayerWeapon* pWeapon)
 	}
 }
 
-// orig client 0x3b900. Original bug, kept: no bound on iSize (the server sends a few bytes).
-// Its HOOK_MESSAGE is in the HUD's init (orig client 0xa148c, c2's).
+// orig client 0x3b900. Its HOOK_MESSAGE is in the HUD's init (orig client 0xa148c, c2's).
 int __MsgFunc_WeaponSync(const char* pszName, int iSize, void* pbuf)
 {
+	// Original bug (crash), guarded: the original copies iSize bytes into its 256-byte buffer
+	// with no bound (the server sends a few)
+	if (iSize > (int)sizeof(g_rgucRC2WeaponSync))
+		iSize = sizeof(g_rgucRC2WeaponSync);
 	memcpy(g_rgucRC2WeaponSync, pbuf, iSize);
 	g_iRC2WeaponSyncSize = iSize;
 	return 1;

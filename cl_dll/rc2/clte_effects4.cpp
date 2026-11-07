@@ -1168,6 +1168,10 @@ CClientTent* CLTE_CreateBoltArmed(CClientTent* pCopy)
 
 	CTentBoltArmed* p = new CTentBoltArmed;
 	p->m_iEntity = READ_SHORT();
+	// Original bug (crash), guarded: the original allocates the lights only with cl_detail not
+	// negative and leaves them unset otherwise; Update and KillEntity write through them
+	p->m_pDLight = NULL;
+	p->m_pELight = NULL;
 	if (0 != p->m_iEntity)
 	{
 		p->m_flTimeLeft = RC2Pref(RC2P_Crossbow_ExplodeBoltDetonateDelay).f;
@@ -1212,9 +1216,7 @@ CClientTent* CLTE_CreateBoltArmed(CClientTent* pCopy)
 }
 
 // orig client 0x6d950. It never ends by itself: the bolt's removal ends it. Original bug kept: the
-// entity light's radius is written to the dynamic light, so it never grows. VERIFY: the lights are
-// allocated only with cl_detail not negative but used unchecked if allocation never happened
-// (their members are not initialized then)
+// entity light's radius is written to the dynamic light, so it never grows
 bool CTentBoltArmed::Update(float flFrametime)
 {
 	if (0 == m_iEntity)

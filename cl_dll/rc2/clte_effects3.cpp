@@ -208,8 +208,10 @@ bool CTentChargeGlow::Update(float flFrametime)
 		const float flLen = gEngfuncs.pfnRandomFloat(flCharge * 6 + 4, flCharge * 8 + 6);
 		m_vecBeamEnd[i] = vecDir * flLen;
 
-		// Original bug kept: no NULL check (a crash if plasma.spr failed to load at Create)
-		Beam_Kill(m_pBeams[i]);
+		// Original bug (crash), guarded: no NULL check in the original; the slot is NULL when
+		// the beam wasn't made (plasma.spr missing, or the engine's beam list full)
+		if (m_pBeams[i])
+			Beam_Kill(m_pBeams[i]);
 		m_pBeams[i] = NULL;
 
 		int iModel;
@@ -385,11 +387,17 @@ public:
 	model_s* m_pRingModel;	 // +0x5c: sprites/shockwave.spr
 };
 
-// orig client 0x64c50. short ball. Original bug kept: with cl_detail negative the lights, and
-// without blflare.spr the big flare, are left unset and later read
+// orig client 0x64c50. short ball
 CTentBallLightning::CTentBallLightning()
 {
 	m_iEntity = READ_SHORT();
+	// Original bug (crash), guarded: the original leaves the lights unset with cl_detail
+	// negative, and the big flare and ring sprite when the small flare fails (blflare.spr, or no
+	// free tempent); Update, KillEntity and DrawTransparent use them past their NULL tests
+	m_pLight = NULL;
+	m_pELight = NULL;
+	m_pBigFlare = NULL;
+	m_pRingModel = NULL;
 	cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(m_iEntity);
 	if (!pEnt)
 	{
@@ -921,8 +929,7 @@ public:
 	float m_flHeadStart;   // +0x7c
 };
 
-// orig client 0x66d50. Original bug kept: the flare is left unset when its entity is missing or
-// bigflare1.spr does not load, and is later read
+// orig client 0x66d50
 CTentMP5Pulse::CTentMP5Pulse()
 {
 	Bolt_Read(this);
@@ -931,6 +938,9 @@ CTentMP5Pulse::CTentMP5Pulse()
 	m_pELight = NULL;
 	m_pWhite = NULL;
 	m_pRing = NULL;
+	// Original bug (crash), guarded: the original leaves the flare unset when its entity is
+	// missing or bigflare1.spr doesn't load, and its readers' NULL tests pass the garbage
+	m_pFlare = NULL;
 	if (0 == m_iEntity)
 		return;
 
@@ -1537,7 +1547,7 @@ public:
 };
 
 // orig client 0x689b0. short suit. The copy goes through an out-of-line copy constructor (client
-// 0x99bb0). Original bug kept: with cl_detail negative the light is left unset and later read
+// 0x99bb0)
 CClientTent* CLTE_CreateHEVFlame(CClientTent* pCopy)
 {
 	const int iSlot = CLTE_FreeSlot();
@@ -1555,6 +1565,9 @@ CClientTent* CLTE_CreateHEVFlame(CClientTent* pCopy)
 	p->m_pTrails[0] = NULL;
 	p->m_pGlows[1] = NULL;
 	p->m_pGlows[0] = NULL;
+	// Original bug (crash), guarded: the original leaves the light unset with cl_detail
+	// negative, and Update and KillEntity write through it past their NULL test
+	p->m_pLight = NULL;
 
 	cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(p->m_iEntity);
 	if (!pEnt)

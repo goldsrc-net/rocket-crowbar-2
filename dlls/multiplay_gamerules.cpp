@@ -1066,14 +1066,15 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem
 			{
 				if (it->m_iId == pItem->m_iId)
 				{
-					// Original bug, kept: UTIL_PlayerByIndex's result isn't checked before the call
 					for (int j = 0; j < 2; j++)
 					{
 						if (pPlayer->m_iShoulderRider[j] == 0)
 							continue;
 
 						CBasePlayer* pLinked = (CBasePlayer*)UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[j]);
-						if (CanHavePlayerItem(pLinked, pItem))
+						// Original bug (crash), guarded: the original calls in without checking
+						// UTIL_PlayerByIndex's result, NULL for a rider slot with no player
+						if (pLinked && CanHavePlayerItem(pLinked, pItem))
 							return CGameRules::CanHavePlayerItem(pLinked, pItem);
 					}
 					return false;

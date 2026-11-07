@@ -329,7 +329,9 @@ void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s* event, const struct 
 {
 	//	RecClStudioEvent(event, entity);
 
-	if (entity->index > 0 && 0 != g_bEntityFrozen[entity->index])
+	// Original bug (crash), guarded: the original reads the 1024-byte table by any index (the
+	// table after it above 1023)
+	if (entity->index > 0 && entity->index < (int)sizeof(g_bEntityFrozen) && 0 != g_bEntityFrozen[entity->index])
 		return;
 
 	bool iMuzzleFlash = true;

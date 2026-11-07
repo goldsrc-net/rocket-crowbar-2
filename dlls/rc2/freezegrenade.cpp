@@ -187,7 +187,8 @@ void CFreezeGrenade::AttachedThink()
 	if (!m_fOnWorld)
 	{
 		// ride along with what it stuck on. The original reads the owner's entvars without a
-		// check, so it crashes if the owner's edict is gone (kept).
+		// check (kept): once that entity is removed it follows the freed or reused edict.
+		// pev->owner is never NULL here (AttachTouch sets it), so this doesn't crash.
 		entvars_t* pevOwner = VARS(pev->owner);
 		pev->angles = m_vecAttachAngles + pevOwner->angles;
 		UTIL_MakeVectors(pevOwner->angles);

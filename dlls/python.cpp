@@ -559,14 +559,17 @@ void CPython::FireChain() // orig 0xacea0, orig client 0x402f0
 	pHurter->pev->dmg = flDamage;
 
 	// One bit per entity index, but sized for maxClients only: the first target can be any
-	// entity (a monster), and its bit can land past the end, as in the original
+	// entity (a monster), and its bit can land past the end
 	const int iBytes = (int)ceil(gpGlobals->maxClients * 0.125);
 	unsigned char* pHitBits = (unsigned char*)malloc(iBytes);
 	for (int i = 0; i < (int)ceil(gpGlobals->maxClients * 0.125); i++)
 		pHitBits[i] = 0;
 
 	const int iEnt = ENTINDEX(pEntity->edict());
-	pHitBits[iEnt / 8] |= 1 << (iEnt % 8);
+	// Original bug (crash), guarded: the original sets a monster's bit past the end of the
+	// block (heap corruption); ChainTo reads only player slots' bits, so ours skips it
+	if (iEnt / 8 < iBytes)
+		pHitBits[iEnt / 8] |= 1 << (iEnt % 8);
 
 	ChainTo(8, pEntity->Center(), pEntity->edict(), pHitBits, false);
 

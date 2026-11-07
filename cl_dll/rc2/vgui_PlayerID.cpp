@@ -181,8 +181,9 @@ void PlayerID_Frame(float flFrameTime)
 	if (iBest > MAX_PLAYERS || !g_PlayerInfoList[iBest].name)
 		return;
 
-	// the name goes through setText's format, as in the original
-	gViewPort->m_pPlayerIDLabel->setText(g_PlayerInfoList[iBest].name);
+	// Original bug (crash), guarded: the original passes the name as setText's printf format,
+	// so a name with %s or %n in it reads or writes through a missing argument
+	gViewPort->m_pPlayerIDLabel->setText("%s", g_PlayerInfoList[iBest].name);
 	gViewPort->m_pPlayerIDTeamColor = GetClientColor(iBest);
 }
 

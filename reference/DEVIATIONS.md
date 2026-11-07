@@ -27,3 +27,66 @@ The original's set is `reference/cvars-rc2.tsv` (`scripts/cvars.py`).
   the `new[]` array's pointer (block + 4). MSVC6's release heap rejects that silently and the
   trails leak; glibc would abort. We leave the delete out and keep the leak
   (`cl_dll/rc2/tcontroller_tents.cpp`, `reference/dossiers/c3.md`).
+
+## Crashes in the original
+
+Each crash the original has is guarded with the smallest check that avoids it (policy since
+2026-11-07, as RC 1.9's). Where the original would crash, ours goes on; nothing else changes.
+`reference/ORIGINAL_BUGS.md` lists each with its address, and the code marks each
+`// Original bug (crash), guarded`.
+
+Server (`rc2.dll`):
+
+- **`CanHavePlayerItem` checks the rider it looks up** (`dlls/multiplay_gamerules.cpp`). With
+  `mp_weaponstay` on, a rider slot with no player crashed the original.
+- **A teather whose shooter isn't a player fails** (`dlls/rc2/crossbowbolts.cpp`). An LCS spawner's
+  `xbow_teather` has the spawner as its shooter, and the original's `AddTether` wrote player
+  members past the spawner's end.
+- **The LCS string pool and the precache list stop at their ends** (`dlls/rc2/maintainent.cpp`
+  `LCS_AllocString`, `dlls/util.cpp` `AddToPrecachedList`). A long string still runs on into the
+  next slots or rows, as in the original, but no longer past the array.
+- **`sv_tempadmins` and `say_private` are bounded** (`dlls/rc2/maintainent.cpp`,
+  `dlls/client.cpp`): the original overran its stack with a long cvar or message.
+- **`LCS_GetToken` copies at most 255 characters and stops at an unterminated quote or brace**
+  (`dlls/rc2/lcs.cpp`). The original overran its callers' 256-byte buffers with a long token in a
+  `.lcs` line, and read on past the line's end after an unterminated one.
+- **`ALT_StripSpaces` doesn't write before the string** (`dlls/rc2/alteration.cpp`) when it is a
+  single whitespace character.
+- **The damage score checks the attacker's instance** (`dlls/player.cpp` `TakeDamage`, score mode
+  1). A grenade whose thrower was removed crashed the original.
+- **The python's chain doesn't set a monster's bit past its bitset** (`dlls/python.cpp`
+  `FireChain`); only player bits are ever read.
+- **`trigger_counter` takes a NULL activator** (`dlls/triggers.cpp` `CounterUse`), as a
+  `func_breakable`'s death sends.
+- **A tripmine's far crossing counts as none** (`dlls/tripmine.cpp`, plain and punch mines). A box
+  crossing 9999 or more units away left the original with no target to read.
+- **`GetSequenceInfo` keeps halflife-updated's negative-sequence check** (`dlls/animation.cpp`); an
+  LCS `seq` token can set one.
+
+Client (`client.dll`):
+
+- **CLTE 0xfc (`nukeclte`) skips empty effect slots** (`cl_dll/rc2/clte.cpp`). The original called
+  through them and crashed whenever it was sent.
+- **`WeaponSync` copies at most its 256-byte buffer** (`cl_dll/hl/hl_weapons.cpp`).
+- **The frozen and antifriction tables are bounded** (`cl_dll/entity.cpp` `HUD_StudioEvent`,
+  `cl_dll/StudioModelRenderer.cpp`, CLTE 0x2f and 0x35). Above index 1023 the original read the
+  table after them and wrote past them; ours reads 0 and doesn't write.
+- **Effects start their pointers at NULL** (CLTE 12, 15, 17, 20, 30, 0x2a, 0x37 in
+  `cl_dll/rc2/`). The original left lights, flares and beams unset with `cl_detail` below 0 or when
+  a sprite or tempent failed, and its NULL tests passed the garbage.
+- **Beams the engine didn't make are skipped** (CLTE 13, the ultima's down beams, CLTE 0x49's
+  leech beams). `R_Beam*` returns NULL when its beam list is full or the sprite is missing.
+- **VGUI labels print their text with `"%s"`** (player ID, the spectator title and map line, the
+  vote menu and vote update, `CommandButton` text, the debug panel). The original passed player
+  names, team names and the vote text as `setText`'s printf format, so a `%s` or `%n` in a name
+  crashed every client that showed it.
+- **The vote menu is checked** (`MsgFunc_VoteBegin`): in demo playback the original had none.
+- **`CreateCommandMenu` makes no submenu for a NULL button and frees the file it loaded**
+  (`cl_dll/vgui_TeamFortressViewport.cpp`). The original passed NULL on for an unknown CUSTOM
+  button before `{`, and freed the advanced parse pointer, a bad free when `MAX_MENUS` stopped the
+  parse. At the file's end it freed NULL and leaked the file, which ours now frees.
+- **The debug panel bounds the server's strings** (`cl_dll/rc2/vgui_DebugPanel.cpp`
+  `MsgFunc_DBGEntInfo`): a map target or targetname over 127 characters overran the original's
+  buffers.
+- **`AttrMenu_LoadSlots` writes inside its slot** (`cl_dll/rc2/vgui_attributes.cpp`), and
+  **`SayTextPrint` keeps halflife-updated's bounded copy** (`cl_dll/saytext.cpp`).

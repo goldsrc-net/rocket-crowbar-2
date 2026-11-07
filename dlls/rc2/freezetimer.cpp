@@ -84,7 +84,8 @@ void CFreezeTimer::StartFreeze()
 	if (OwnerGone())
 		return;
 
-	// Original bug, kept: no check that the owner has an instance
+	// no check that the owner has an instance, as the original; OwnerGone's UTIL_IsValidEntity
+	// has ruled NULL out
 	CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
 	if (!pOwner->IsAlive() || pOwner->pev->deadflag != DEAD_NO || pOwner->pev->health <= 0)
 	{
@@ -166,7 +167,8 @@ void CFreezeTimer::EndFreeze()
 		return;
 	}
 
-	// Original bug, kept: no check that the owner has an instance
+	// no check that the owner has an instance, as the original; UTIL_IsValidEntity above has
+	// ruled NULL out
 	CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
 	SetHeld(pOwner, false);
 	if (pOwner->IsPlayer())

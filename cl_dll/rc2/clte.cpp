@@ -321,11 +321,12 @@ int __MsgFunc_CLTE(const char* pszName, int iSize, void* pbuf)
 	case 0x49: pTent = RC2_NewControllerChargeBallTent(NULL); break;
 
 	case 0xfc:
-		// every effect lets go of every player, then goes. Original bug kept: an empty slot is
-		// called through too, a crash whenever a second player has been seen (dossier)
+		// every effect lets go of every player, then goes
 		for (i = 0; i < MAX_CLIENT_TENTS; i++)
 		{
-			for (int j = 1; j < g_iHighestEntIndex; j++)
+			// Original bug (crash), guarded: the original calls KillEntity through empty slots
+			// too, a crash once g_iHighestEntIndex is past 1 (any player seen)
+			for (int j = 1; j < g_iHighestEntIndex && g_pClientTents[i]; j++)
 				g_pClientTents[i]->KillEntity(j);
 			CLTE_Delete(i);
 		}
@@ -621,7 +622,8 @@ void CLTE_SetOrigin(int iEnt, float x, float y, float z)
 
 // orig client 0x59be0. The cached origin if it was set this frame or the last and the entity moves
 // as a monster or projectile would (walk, step, fly, toss, bounce; not a BSP model); the entity's
-// own origin otherwise. Original bug kept: a valid index without an entity is read through NULL
+// own origin otherwise. No NULL test for an index in range, as the original; GetEntityByIndex
+// returns NULL only past the engine's entity list, and callers pass entity indices
 Vector CLTE_GetOrigin(int iEnt)
 {
 	cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(iEnt);

@@ -46,6 +46,14 @@ engine_studio_api_t IEngineStudio;
 static Vector g_rgvecRiderSeat[2][MAX_PLAYERS + 1];
 static unsigned int g_rgiRiderSeatFrame[MAX_PLAYERS + 1];
 
+// Original bug (crash), guarded: the original indexes the 1024-byte frozen and antifriction
+// tables by entity index unchecked, reading the table after them above 1023; ours reads 0 there.
+// Name ours, a helper, no original.
+static unsigned char RC2EntityTableByte(const unsigned char* pTable, int iIndex)
+{
+	return (iIndex >= 0 && iIndex < 1024) ? pTable[iIndex] : 0;
+}
+
 // RC2: each player's attachments as last drawn (by player index; read by client.dll 0x93710,
 // c2). VERIFY: the base, 0x10214200, is worked out from StudioCalcAttachments' writes
 // (0x10214230 + (index * 4 + i - 4) * 12) and 0x93710's read at 0x10214218.
@@ -1198,7 +1206,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
 	IEngineStudio.GetAliasScale(&m_fSoftwareXScale, &m_fSoftwareYScale);
 
-	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index);
 
 	if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)
 	{
@@ -1643,7 +1651,7 @@ bool CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = m_pCurrentEntity->index < 1 || 0 == g_bEntityFrozen[m_pCurrentEntity->index];
+	m_fDoInterp = m_pCurrentEntity->index < 1 || 0 == RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index);
 
 	// RC2: riders
 	iIndex = m_pCurrentEntity->index;
@@ -2175,7 +2183,7 @@ void CStudioModelRenderer::StudioRenderShells()
 {
 	int iIndex;
 
-	if (0 != g_bEntityFrozen[m_pCurrentEntity->index])
+	if (0 != RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index))
 	{
 		if (0 == IEngineStudio.IsHardware())
 			gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
@@ -2209,7 +2217,7 @@ void CStudioModelRenderer::StudioRenderShells()
 		m_pCurrentEntity->curstate.renderamt = renderamt;
 	}
 
-	if (0 != g_abRC2AntiFriction[m_pCurrentEntity->index])
+	if (0 != RC2EntityTableByte(g_abRC2AntiFriction, m_pCurrentEntity->index))
 	{
 		const byte g = m_pCurrentEntity->curstate.rendercolor.g;
 		const byte b = m_pCurrentEntity->curstate.rendercolor.b;
@@ -2638,7 +2646,7 @@ bool CStudioModelRenderer::StudioDrawAssassin(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index);
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);
@@ -2728,7 +2736,7 @@ bool CStudioModelRenderer::StudioDrawHoundeye(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index);
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);
@@ -2780,7 +2788,7 @@ bool CStudioModelRenderer::StudioDrawController(int flags, entity_state_t* pplay
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index);
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
@@ -2816,7 +2824,7 @@ bool CStudioModelRenderer::StudioDrawStukabat(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index);
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);
@@ -2875,7 +2883,7 @@ bool CStudioModelRenderer::StudioDrawHeadcrab(int flags, entity_state_t* pplayer
 	IEngineStudio.StudioSetHeader(m_pStudioHeader);
 	IEngineStudio.SetRenderModel(m_pRenderModel);
 
-	m_fDoInterp = 0 == g_bEntityFrozen[m_pCurrentEntity->index];
+	m_fDoInterp = 0 == RC2EntityTableByte(g_bEntityFrozen, m_pCurrentEntity->index);
 
 	m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 	StudioEstimateGait(pplayer);

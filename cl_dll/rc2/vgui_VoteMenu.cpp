@@ -52,6 +52,8 @@ CVoteMenuPanel::CVoteMenuPanel() : CMenuPanel(100, false, XRES(320) - VOTEMENU_W
 // orig client 0xe9350
 void CVoteMenuPanel::SetVoteText(const char* pszText)
 {
+	// Original bug (crash), guarded: the original passes the server's vote text (map and player
+	// names in it) as setText's printf format
 	if (m_pLabel)
-		m_pLabel->setText(pszText);
+		m_pLabel->setText("%s", pszText);
 }

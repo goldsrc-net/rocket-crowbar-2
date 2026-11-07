@@ -670,6 +670,7 @@ void TeamFortressViewport::CreateCommandMenu()
 		SetCurrentCommandMenu(NULL);
 		return;
 	}
+	char* pfileStart = pfile; // name ours
 
 	// Now start parsing the menu structure
 	m_pCurrentCommandMenu = m_pCommandMenus[0];
@@ -799,11 +800,12 @@ void TeamFortressViewport::CreateCommandMenu()
 				{
 					gEngfuncs.Con_Printf("Too many menus in commandmenu.txt past '%s'\n", szLastButtonText);
 				}
-				else
+				// Original bug (crash), guarded: RC2 doesn't check pButton here (SDK 2.1 neither);
+				// a CUSTOM button it doesn't know followed by '{' passes NULL and crashes. Ours
+				// makes no submenu for it.
+				else if (pButton)
 				{
 					// Create the menu
-					// VERIFY: RC2 doesn't check pButton here (SDK 2.1 neither); a CUSTOM button it
-					// doesn't know followed by '{' passes NULL and crashes. Kept.
 					m_pCommandMenus[m_iNumMenus] = CreateSubMenu(pButton, m_pCurrentCommandMenu);
 					m_pCurrentCommandMenu = m_pCommandMenus[m_iNumMenus];
 					m_iNumMenus++;
@@ -832,7 +834,9 @@ void TeamFortressViewport::CreateCommandMenu()
 
 	SetCurrentMenu(NULL);
 	SetCurrentCommandMenu(NULL);
-	gEngfuncs.COM_FreeFile(pfile);
+	// Original bug (crash), guarded: the original (as SDK 2.3) frees the advanced parse pointer,
+	// NULL at the file's end but inside the file when MAX_MENUS stops the loop (a bad free)
+	gEngfuncs.COM_FreeFile(pfileStart);
 
 	m_iInitialized = true;
 }
@@ -1096,8 +1100,9 @@ void TeamFortressViewport::UpdateSpectatorMenu()
 			strcpy(sz, szTemp);
 		}
 
-		// the text goes through setText's format, as in the original
-		m_pSpectatorLabel->setText(CHudTextMessage::BufferedLocaliseTextString(sz));
+		// Original bug (crash), guarded: the original passes the text, with the target's name in
+		// it, as setText's printf format
+		m_pSpectatorLabel->setText("%s", CHudTextMessage::BufferedLocaliseTextString(sz));
 		m_pSpectatorHelpLabel->setText(CHudTextMessage::BufferedLocaliseTextString(szHelp));
 	}
 	else
@@ -1219,7 +1224,9 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 
 		szText[63] = 0;
 
-		m_pSpectatorPanel->m_ExtraInfo->setText(szText);
+		// Original bug (crash), guarded: the original passes the text, the server's map name
+		// in it, as setText's printf format
+		m_pSpectatorPanel->m_ExtraInfo->setText("%s", szText);
 
 		/*
 		int timer = (int)( gHUD.m_roundTimer.m_flTimeEnd - gHUD.m_flTime );
@@ -2112,9 +2119,10 @@ bool TeamFortressViewport::MsgFunc_VoteBegin(const char* pszName, int iSize, voi
 	if (0 != iOpenMenu)
 	{
 		ShowVGUIMenu(10);
-		// the original's: in demo playback ShowVGUIMenu returns before creating the menu, and
-		// this dereferences NULL (kept)
-		m_pVoteMenu->SetVoteText(m_szVoteText);
+		// Original bug (crash), guarded: in demo playback ShowVGUIMenu returns before creating
+		// the menu, and the original dereferences NULL here
+		if (m_pVoteMenu)
+			m_pVoteMenu->SetVoteText(m_szVoteText);
 	}
 
 	return true;
@@ -2152,7 +2160,9 @@ bool TeamFortressViewport::MsgFunc_VoteUpdate(const char* pszName, int iSize, vo
 		}
 
 		m_pVotePanel->setVisible(true);
-		m_pVoteLabel->setText(szText);
+		// Original bug (crash), guarded: the original passes the text, the server's vote text in
+		// it, as setText's printf format
+		m_pVoteLabel->setText("%s", szText);
 	}
 
 	return true;

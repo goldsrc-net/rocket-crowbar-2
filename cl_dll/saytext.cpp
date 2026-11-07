@@ -169,7 +169,8 @@ bool CHudSayText::MsgFunc_SayText(const char* pszName, int iSize, void* pbuf)
 
 // orig client 0xbee40. RC2: SDK 2.2's: only to the console when the viewport says no, the scroll
 // speed read from hud_saytext_time with the first line, Y_START 45 up below 480 high and six lines
-// up. halflife-updated's copy length (SDK 2.2 copies max(iBufSize - 1, 255) bytes) stays.
+// up. Original bug (crash), guarded: SDK 2.2's copies max(iBufSize - 1, 255) bytes into a
+// 256-byte line; halflife-updated's bounded copy stays.
 void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex)
 {
 	if (gViewPort && gViewPort->AllowedToPrintText() == false)

@@ -504,7 +504,7 @@ void CTalkMonster::RunTask(Task_t* pTask)
 		if (pTask->iTask == TASK_TLK_CLIENT_STARE)
 		{
 			// fail out if the player looks away or moves away.
-			if ((pPlayer->v.origin - pev->origin).Length2D() > TLK_STARE_DIST) // original bug: pPlayer can be NULL here
+			if ((pPlayer->v.origin - pev->origin).Length2D() > TLK_STARE_DIST) // no NULL test, as the original; INDEXENT(1) never is
 			{
 				// player moved away.
 				TaskFail();

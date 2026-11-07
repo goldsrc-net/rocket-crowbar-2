@@ -427,7 +427,8 @@ bool CCrowbar::Swing(bool fFirst)
 #ifndef CLIENT_DLL
 	fDidHit = true;
 
-	// Original bug, kept: no check that the hit entity has an instance (dossier)
+	// no check that the hit entity has an instance, as the original; a trace only hits edicts
+	// that have one
 	CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit)->GetEffectedEnt();
 
 	// VERIFY: slot 75's first argument is the player here (cbase.h has an int)

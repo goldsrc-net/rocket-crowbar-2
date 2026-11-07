@@ -575,7 +575,7 @@ void SayPrivate(edict_t* pEntity)
 	if (!pTarget || !pTarget->IsNetClient())
 		return;
 
-	// VERIFY: guard, the original can overrun its stack here: it strncat's each word (up to 192
+	// Original bug (crash), guarded: the original can overrun its stack here: it strncat's each word (up to 192
 	// chars at a time) into its 256-byte buffer, then cuts it at 191. Ours builds it in a
 	// std::string and cuts it the same way. The plain text for the log is cut at 255.
 	char prefix[256];

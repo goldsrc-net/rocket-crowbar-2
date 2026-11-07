@@ -50,7 +50,10 @@ CClientTent* RC2_NewFrozenTent(const CClientTent* pCopy) // orig client 0x7bff0
 	{
 		if (gEngfuncs.pEventAPI->EV_IsLocal(pTent->m_iEntIndex - 1))
 			g_iLocalPlayerFrozen = 1;
-		g_bEntityFrozen[pTent->m_iEntIndex] = 1;
+		// Original bug (crash), guarded: the original writes the 1024-byte table at the
+		// message's index unchecked
+		if (pTent->m_iEntIndex >= 0 && pTent->m_iEntIndex < (int)sizeof(g_bEntityFrozen))
+			g_bEntityFrozen[pTent->m_iEntIndex] = 1;
 	}
 	g_pClientTents[iSlot] = pTent;
 	return pTent;
@@ -68,7 +71,9 @@ bool CFrozenTent::KillEntity(int iEntIndex) // orig client 0x7c1f0
 
 	if (gEngfuncs.pEventAPI->EV_IsLocal(m_iEntIndex - 1))
 		g_iLocalPlayerFrozen = 0;
-	g_bEntityFrozen[m_iEntIndex] = 0;
+	// Original bug (crash), guarded: as the factory's write
+	if (m_iEntIndex >= 0 && m_iEntIndex < (int)sizeof(g_bEntityFrozen))
+		g_bEntityFrozen[m_iEntIndex] = 0;
 	m_iEntIndex = 0;
 	return true;
 }

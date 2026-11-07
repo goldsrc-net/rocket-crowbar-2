@@ -453,10 +453,11 @@ bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 					flMulti = RC2Pref(RC2P_Score_DmgBased_DamageOnSelfMulti).f;
 				else
 				{
-					// VERIFY: the original calls IsPlayer through a NULL instance (crashes) when the
-					// attacker's edict has no entity
+					// Original bug (crash), guarded: the original calls IsPlayer through a NULL
+					// instance when the attacker's edict has no entity (a grenade whose thrower
+					// was removed passes the freed edict)
 					CBaseEntity* pScorer = CBaseEntity::Instance(pevAttacker);
-					if (pScorer->IsPlayer())
+					if (pScorer && pScorer->IsPlayer())
 						static_cast<CBasePlayer*>(pScorer)->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_DamageOnPlayerMulti).f * flFrac;
 					flMulti = RC2Pref(RC2P_Score_DmgBased_DamageByPlayerMulti).f;
 				}

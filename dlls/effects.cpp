@@ -750,8 +750,8 @@ void CLightning::StrikeThink()
 
 
 // orig 0x38620. RC2: the damage goes to what the hit entity stands for (GetEffectedEnt), through
-// its shield (ShieldDeflect, which also moves the trace's end to the point it takes), and the
-// call goes through the instance without SDK 2.3's null check.
+// its shield (ShieldDeflect, which also moves the trace's end to the point it takes). The
+// original tests the hit edict's private data for NULL itself, as SDK 2.3 tests the instance.
 void CBeam::BeamDamage(TraceResult* ptr)
 {
 	RelinkBeam();
