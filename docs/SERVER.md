@@ -129,8 +129,9 @@ sv_chglevel        0        with sv_noexit 0, in deathmatch: 1 lets a trigger_ch
 sv_pcstuff         1        not 0: precache seven monsters at map start (human grunt, scientist,
                             Barney, alien slave, ichthyosaur, headcrab, Gargantua), so give and
                             LCS lines can make them mid-game
-sv_tempadmins      0        WON (World Opponent Network) ids that get admin level 1, separated by
-                            space, tab, newline, comma or semicolon (see Admin rights)
+sv_tempadmins      0        Steam IDs (STEAM_x:y:z) that get admin level 1, separated by space,
+                            tab, newline, comma or semicolon (see Admin rights). RC2 took WON ids
+                            here
 rccfgfile          rc2.ini  the prefs file, in the game directory (rc2.ini, below)
 ```
 
@@ -240,19 +241,21 @@ Gives are never swapped by `mp_random`.
 
 There are two admin levels, worked out when a player connects:
 
-- **2 (super admin):** the listen server's own player; or a WON id whose highest level in
+- **2 (super admin):** the listen server's own player; or a Steam ID whose highest level in
   `adminprim.cfg` is 2.
-- **1 (admin):** level 1 in `adminprim.cfg`; a WON id listed in `sv_tempadmins` (checked at each
-  command); or promoted by a super admin.
+- **1 (admin):** level 1 in `adminprim.cfg`; a Steam ID listed in `sv_tempadmins` (checked at
+  each command); or promoted by a super admin.
 
-`adminprim.cfg` is lines of `<wonid> <level>`, `#` starting a comment line. It is opened by
-plain name, so from the server process's working directory (normally the Half-Life directory,
-not `rc2/`), and is read at connect, so an edit applies to players who join after it.
+`adminprim.cfg` is lines of `<steamid> <level>` (`STEAM_0:1:12345 2`), `#` starting a comment
+line; IDs match ignoring case. It is opened by plain name, so from the server process's working
+directory (normally the Half-Life directory, not `rc2/`), and is read at connect, so an edit
+applies to players who join after it. A player without a Steam ID (a bot, a LAN server's
+`STEAM_ID_LAN`, an ID not validated yet) gets no admin level from the file or the cvar.
 
-WON ids belong to the 2001 authentication network; current engines no longer issue real ones.
-What the engine returns for them on the rig is unverified (ReHLDS is understood to return the
-same value, 4294967295, for every player). If so, `adminprim.cfg` and `sv_tempadmins` can't
-tell players apart, and the listen server's host is the only admin that works reliably.
+RC2 keyed both on WON (World Opponent Network) ids, the 2001 authentication network's, which
+today's engines no longer issue; the rebuild uses Steam IDs instead (reference/DEVIATIONS.md).
+The log lines (chat, name and team changes) carry the Steam ID too, in Half-Life's usual
+`"name<userid><steamid>"` form.
 
 ### Admin
 
@@ -484,7 +487,7 @@ file                    read or written
 rc2.ini                 all the tuning (rccfgfile; RC_INI.md). Read at each map start; rccfg
                         save and savediff write it or another file
 maps/lcs/<map>.lcs      the map's level customization script. rcadmin lcs appends to it
-adminprim.cfg           admin levels by WON id; in the server's working directory, not the game
+adminprim.cfg           admin levels by Steam ID; in the server's working directory, not the game
                         directory. Read at connect
 game.cfg                run when the game rules are installed, at each map start (as Half-Life)
 skill.cfg               run once at startup (as Half-Life)

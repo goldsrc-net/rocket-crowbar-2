@@ -528,7 +528,7 @@ public:
 	float m_flNextImpulse;			  // orig +0x684: impulses at most every 0.1 s (204 always; p5); give, givefor and drop wait until this (p1): give, givefor and drop wait until this (0.1 s after each)
 	float m_flDmgScore;				  // orig +0x67c: the damage-based score (mp_scoremode 1); CBaseMonster::TakeDamage adds to it
 	bool m_bNotJoined;			  // orig +0x688: still in the spectator view before joining (p5); IsActivePlayer is its opposite; 0 while the player is in play (IsActivePlayer); nonzero, AddToFullPack sends it the entity iuser2 names when +0x7a4 is 1 and iuser1 is 2. VERIFY
-	int m_iClientId;			  // orig +0x66c: WON id (or entity index for a bot) of the client that last spawned here (p5); ServerDeactivate clears it (p1)
+	int m_iClientId;			  // orig +0x66c: the original's WON id, ours RC2_PlayerClientKey (or entity index for a bot) of the client that last spawned here (p5); ServerDeactivate clears it (p1)
 	float m_flAttrPending[10];		  // orig +0x6ac: the attribute values setattr asked for (jump, speed, attack, defend, health, extra health, armor, extra armor, energy regen, damage reflect)
 	unsigned int m_iAbilitiesPending; // orig +0x6d4: setattr's ability bits
 	unsigned int m_iWeaponsPending;	  // orig +0x6d8: setattr's weapon bits

@@ -343,10 +343,10 @@ void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobu
 	sprintf(text, "* %s has changed to team \'%s\'\n", STRING(pPlayer->pev->netname), mdls);
 	UTIL_SayTextAll(text, pPlayer);
 
-	UTIL_LogPrintf("\"%s<%i><%u><%s>\" joined team \"%s\"\n",
+	UTIL_LogPrintf("\"%s<%i><%s><%s>\" joined team \"%s\"\n",
 		STRING(pPlayer->pev->netname),
 		GETPLAYERUSERID(pPlayer->edict()),
-		g_engfuncs.pfnGetPlayerWONId(pPlayer->edict()),
+		GETPLAYERAUTHID(pPlayer->edict()),
 		pPlayer->m_szTeamName,
 		mdls);
 

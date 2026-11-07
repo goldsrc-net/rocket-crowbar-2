@@ -21,6 +21,19 @@ The original's set is `reference/cvars-rc2.tsv` (`scripts/cvars.py`).
   server prints `** GetSkillCVar Got a zero for sk_plr_hornet_dmg1 **` on every map load
   (`tools/rig/smoke.py` finds no other console difference).
 
+## Players' identity
+
+- **Steam IDs in place of WON ids.** RC2 identified players by WON id: the admin levels in
+  `adminprim.cfg` and `sv_tempadmins` (`dlls/rc2/maintainent.cpp` Admin_GetLevel, orig 0x1050;
+  Admin_IsTempAdmin, 0x1160), telling a new client in a slot from the same one back
+  (`CBasePlayer::InitNewClient`, 0x9b2c0: per-client state such as attributes and bans resets only
+  for a new one), and its log lines. Today's engines issue no WON ids, every player reporting the
+  same one, which would make every newcomer the previous player in that slot and no admin file
+  usable. Ours uses the Steam ID (`GETPLAYERAUTHID`, `RC2_PlayerSteamId`): the files list
+  `STEAM_x:y:z`, matched ignoring case; a player without one (a bot, `STEAM_ID_LAN`, not validated)
+  is no admin, as the original's WON id 0; InitNewClient keys on a hash of it, or the user id
+  without one; the logs print it in Half-Life's usual form. Steven, 2026-11-07.
+
 ## Entities
 
 - **`func_vehicle` and `func_vehiclecontrols` exist** (`dlls/vehicle.cpp`). halflife-updated

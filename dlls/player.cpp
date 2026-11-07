@@ -4317,7 +4317,7 @@ int AttrPoints(int iAttr, float flValue)
 	return (int)(flPoints + 0.5);
 }
 
-// orig 0x9b2c0. When a different client (by WON id, or entity index for a bot) spawns in this
+// orig 0x9b2c0. When a different client (by Steam ID, the original's WON id, or entity index for a bot) spawns in this
 // slot: reset RC2's per-client state, make the dying camera and the second helper entity,
 // default the attributes, and in multiplayer put him in the spectator view at a spawn point
 // until he joins (returns true then). Returns false for the same client, or in single player.
@@ -4328,7 +4328,7 @@ bool CBasePlayer::InitNewClient()
 
 	const bool bProxy = (pev->flags & FL_PROXY) != 0;
 
-	int iId = g_engfuncs.pfnGetPlayerWONId(edict());
+	int iId = RC2_PlayerClientKey(edict()); // the original's WON id; the Steam ID's key here (maintainent.h)
 	if ((pev->flags & FL_FAKECLIENT) != 0)
 		iId = ENTINDEX(edict());
 

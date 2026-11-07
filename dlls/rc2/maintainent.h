@@ -10,10 +10,18 @@
 class CBaseEntity;
 class CBasePlayer;
 
+// Who a player is. RC2 used the WON id, which today's engines don't issue (every player reports
+// the same value); we use the Steam ID instead (reference/DEVIATIONS.md). NULL for a bot or a LAN
+// or not yet validated id.
+const char* RC2_PlayerSteamId(edict_t* pEntity);
+// A nonzero number per player for telling a new client in a slot from the same one back
+// (CBasePlayer::InitNewClient): from the Steam ID, else the connection's user id
+int RC2_PlayerClientKey(edict_t* pEntity);
+
 // Admin rights
 bool Admin_IsListenHost(edict_t* pEntity); // the listen server's host (entity 1 on a non-dedicated server)
-int Admin_GetLevel(edict_t* pEntity);	   // the level adminprim.cfg gives the player's WON id; the listen host is 2
-bool Admin_IsTempAdmin(edict_t* pEntity);  // the player's WON id is listed in sv_tempadmins
+int Admin_GetLevel(edict_t* pEntity);	   // the level adminprim.cfg gives the player's Steam ID; the listen host is 2
+bool Admin_IsTempAdmin(edict_t* pEntity);  // the player's Steam ID is listed in sv_tempadmins
 
 // A player by index, else the first whose name contains pszName
 CBasePlayer* Admin_FindPlayer(const char* pszName);

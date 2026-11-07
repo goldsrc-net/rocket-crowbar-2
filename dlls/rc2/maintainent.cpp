@@ -42,8 +42,33 @@ bool Admin_IsListenHost(edict_t* pEntity) // name ours
 	return ENTINDEX(pEntity) == 1;
 }
 
-// orig 0x1050. The admin level adminprim.cfg gives this player's WON id: lines of
-// "<wonid> <level>" ('#' comments), the highest level that matches. The listen host is 2.
+// RC2 asked for the WON id here; today's engines give every player the same one, so we use the
+// Steam ID (STEAM_x:y:z), and no id (a bot, LAN, not validated yet) is no admin, as the original's
+// WON id 0 was. Deviation: reference/DEVIATIONS.md.
+const char* RC2_PlayerSteamId(edict_t* pEntity) // name ours
+{
+	if (!pEntity || (pEntity->v.flags & FL_FAKECLIENT) != 0)
+		return NULL;
+	const char* pszId = GETPLAYERAUTHID(pEntity);
+	if (!pszId || 0 != strncmp(pszId, "STEAM_", 6) || 0 == strncmp(pszId, "STEAM_ID_", 9))
+		return NULL;
+	return pszId;
+}
+
+int RC2_PlayerClientKey(edict_t* pEntity) // name ours
+{
+	const char* pszId = RC2_PlayerSteamId(pEntity);
+	if (!pszId)
+		return GETPLAYERUSERID(pEntity);
+	unsigned int h = 2166136261u; // FNV-1a
+	for (const char* p = pszId; *p; p++)
+		h = (h ^ (unsigned char)*p) * 16777619u;
+	return h != 0 ? (int)h : 1;
+}
+
+// orig 0x1050. The admin level adminprim.cfg gives this player: lines of "<id> <level>" ('#'
+// comments), the highest level that matches. The listen host is 2. The original's id is the WON
+// id; ours the Steam ID (RC2_PlayerSteamId).
 int Admin_GetLevel(edict_t* pEntity) // name ours
 {
 	if (Admin_IsListenHost(pEntity))
@@ -51,8 +76,8 @@ int Admin_GetLevel(edict_t* pEntity) // name ours
 	if (!pEntity)
 		return 0;
 
-	unsigned int wonid = g_engfuncs.pfnGetPlayerWONId(pEntity);
-	if (0 == wonid)
+	const char* pszId = RC2_PlayerSteamId(pEntity);
+	if (!pszId)
 		return 0;
 
 	FILE* pFile = fopen("adminprim.cfg", "r");
@@ -63,15 +88,15 @@ int Admin_GetLevel(edict_t* pEntity) // name ours
 	char szLine[256];
 	// VERIFY: the original's two sscanf targets are uninitialised stack slots, so a line that
 	// doesn't parse reuses the last line's values; ours start at 0
-	unsigned int lineWonid = 0;
+	char szLineId[64] = "";
 	int lineLevel = 0;
 	while (fgets(szLine, 255, pFile))
 	{
 		szLine[255] = '\0';
 		if (strlen(szLine) > 1 && szLine[0] != '#')
 		{
-			sscanf(szLine, "%u %i", &lineWonid, &lineLevel);
-			if (lineWonid == wonid && iLevel < lineLevel)
+			sscanf(szLine, "%63s %i", szLineId, &lineLevel);
+			if (0 == stricmp(szLineId, pszId) && iLevel < lineLevel)
 				iLevel = lineLevel;
 		}
 	}
@@ -79,11 +104,13 @@ int Admin_GetLevel(edict_t* pEntity) // name ours
 	return iLevel;
 }
 
-// orig 0x1160. True when the player's WON id is listed in sv_tempadmins (separated by
-// " \t\n\r,;").
+// orig 0x1160. True when the player's id is listed in sv_tempadmins (separated by
+// " \t\n\r,;"). The original's id is the WON id; ours the Steam ID (RC2_PlayerSteamId).
 bool Admin_IsTempAdmin(edict_t* pEntity) // name ours
 {
-	int wonid = g_engfuncs.pfnGetPlayerWONId(pEntity);
+	const char* pszId = RC2_PlayerSteamId(pEntity);
+	if (!pszId)
+		return false;
 	char szList[128];
 	// Original bug (crash), guarded: the original strcpy's the whole cvar into its 128-byte
 	// buffer (a stack overrun when the cvar is longer); ours truncates
@@ -92,7 +119,7 @@ bool Admin_IsTempAdmin(edict_t* pEntity) // name ours
 
 	for (char* pszTok = strtok(szList, " \t\n\r,;"); pszTok; pszTok = strtok(NULL, " \t\n\r,;"))
 	{
-		if (atoi(pszTok) == wonid)
+		if (0 == stricmp(pszTok, pszId))
 			return true;
 	}
 	return false;

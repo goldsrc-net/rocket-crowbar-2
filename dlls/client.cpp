@@ -476,10 +476,10 @@ void Host_Say(edict_t* pEntity, bool teamonly)
 	if (!Q_UnicodeValidate(p))
 		return;
 
-	UTIL_LogPrintf("\"%s<%i><%u>\" said: \"%s\"%s\n",
+	UTIL_LogPrintf("\"%s<%i><%s>\" said: \"%s\"%s\n",
 		STRING(pEntity->v.netname),
 		GETPLAYERUSERID(pEntity),
-		g_engfuncs.pfnGetPlayerWONId(pEntity),
+		GETPLAYERAUTHID(pEntity),
 		p,
 		teamonly ? " TEAM" : "");
 
@@ -601,10 +601,10 @@ void SayPrivate(edict_t* pEntity)
 	const char* text = strText.c_str();
 
 	edict_t* pTargetEdict = pTarget->edict();
-	UTIL_LogPrintf("\"%s<%i><%u>\" said: \"%s\" PRIVATE to \"%s<%i><%u>\"\n",
-		STRING(pEntity->v.netname), GETPLAYERUSERID(pEntity), g_engfuncs.pfnGetPlayerWONId(pEntity),
+	UTIL_LogPrintf("\"%s<%i><%s>\" said: \"%s\" PRIVATE to \"%s<%i><%s>\"\n",
+		STRING(pEntity->v.netname), GETPLAYERUSERID(pEntity), GETPLAYERAUTHID(pEntity),
 		strPlain.c_str(),
-		STRING(pTarget->pev->netname), GETPLAYERUSERID(pTargetEdict), g_engfuncs.pfnGetPlayerWONId(pTargetEdict));
+		STRING(pTarget->pev->netname), GETPLAYERUSERID(pTargetEdict), GETPLAYERAUTHID(pTargetEdict));
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, pTargetEdict);
 	WRITE_BYTE(ENTINDEX(pEntity));
@@ -1310,19 +1310,19 @@ void ClientUserInfoChanged(edict_t* pEntity, char* infobuffer)
 		// team match?
 		if (g_teamplay)
 		{
-			UTIL_LogPrintf("\"%s<%i><%u><%s>\" changed name to \"%s\"\n",
+			UTIL_LogPrintf("\"%s<%i><%s><%s>\" changed name to \"%s\"\n",
 				STRING(pEntity->v.netname),
 				GETPLAYERUSERID(pEntity),
-				g_engfuncs.pfnGetPlayerWONId(pEntity),
+				GETPLAYERAUTHID(pEntity),
 				g_engfuncs.pfnInfoKeyValue(infobuffer, "model"),
 				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 		}
 		else
 		{
-			UTIL_LogPrintf("\"%s<%i><%u><%i>\" changed name to \"%s\"\n",
+			UTIL_LogPrintf("\"%s<%i><%s><%i>\" changed name to \"%s\"\n",
 				STRING(pEntity->v.netname),
 				GETPLAYERUSERID(pEntity),
-				g_engfuncs.pfnGetPlayerWONId(pEntity),
+				GETPLAYERAUTHID(pEntity),
 				GETPLAYERUSERID(pEntity),
 				g_engfuncs.pfnInfoKeyValue(infobuffer, "name"));
 		}
