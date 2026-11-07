@@ -240,8 +240,8 @@ void CBasePlayerWeapon::ItemPostFrame()
 }
 #endif // !CLIENT_DLL
 
-// orig client 0x39e10 (the client's: halflife-updated's ResetAutoaim, UpdateItemInfo and forced
-// animations are kept; RC2's swaps and deploys the same way)
+// orig client 0x39e10 (the client's: RC2's swaps and deploys the same way). The server's is stock
+// (SDK 2.3's).
 void CBasePlayer::SelectLastItem()
 {
 	if (!m_pLastItem)
@@ -263,20 +263,8 @@ void CBasePlayer::SelectLastItem()
 	CBasePlayerItem* pTemp = m_pActiveItem;
 	m_pActiveItem = m_pLastItem;
 	m_pLastItem = pTemp;
-
-	auto weapon = m_pActiveItem->GetWeaponPtr();
-
-	if (weapon)
-	{
-		weapon->m_ForceSendAnimations = true;
-	}
-
+	// SDK 2.3's (stock in RC2); halflife-updated set m_ForceSendAnimations around Deploy so the
+	// predicting client is sent the deploy animation
 	m_pActiveItem->Deploy();
-
-	if (weapon)
-	{
-		weapon->m_ForceSendAnimations = false;
-	}
-
 	m_pActiveItem->UpdateItemInfo();
 }

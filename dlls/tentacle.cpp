@@ -268,8 +268,7 @@ void CTentacle::Spawn()
 	pev->health = 75;
 	pev->sequence = 0;
 
-	//Always interpolate tentacles since they don't actually move.
-	m_EFlags |= EFLAG_SLERP;
+	// SDK 2.3's (stock in RC2); halflife-updated set EFLAG_SLERP here so clients interpolate it
 
 	SET_MODEL(ENT(pev), "models/tentacle2.mdl");
 	UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));

@@ -178,15 +178,15 @@ void CZombie::IdleSound()
 	int pitch = 95 + RANDOM_LONG(0, 9);
 
 	// Play a random idle sound
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM, 0, pitch);
+	// SDK 2.3's (stock in RC2); halflife-updated played it at pitch 95-104, not 95-105
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
 }
 
 void CZombie::AttackSound()
 {
-	int pitch = 95 + RANDOM_LONG(0, 9);
-
 	// Play a random attack sound
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_NORM, 0, pitch);
+	// SDK 2.3's (stock in RC2); halflife-updated played it at 95-104 instead of 95-105
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
 }
 
 
