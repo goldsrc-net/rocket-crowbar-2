@@ -38,6 +38,7 @@ bool CHudStatusIcons::Init()
 	return true;
 }
 
+// orig client 0xbf350
 bool CHudStatusIcons::VidInit()
 {
 

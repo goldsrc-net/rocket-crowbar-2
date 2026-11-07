@@ -630,6 +630,21 @@ public:
 	ScorePanel		*m_pScoreBoard;
 	SpectatorPanel *		m_pSpectatorPanel;
 	char			m_szServerName[ MAX_SERVERNAME_LENGTH ];
+
+	// c4 needs: RC2's TeamFortressViewport methods hud.cpp's message and command hooks call
+	// (client.dll addresses; names ours except ToggleServerBrowser, SDK 2.3's). Package c5
+	// reconstructs them; until then cl_dll/rc2/c4_stubs.cpp has weak TEMP STUBs.
+	void ToggleServerBrowser( void );										// 0xe49b0
+	bool MsgFunc_AttrConf( const char *pszName, int iSize, void *pbuf );	// 0xe6c00
+	bool MsgFunc_VoteBegin( const char *pszName, int iSize, void *pbuf );	// 0xe69e0
+	bool MsgFunc_VoteUpdate( const char *pszName, int iSize, void *pbuf );	// 0xe6a80
+	// The debug info panel at +0xa48 ("VGUIDebugOn" shows it, "DBGCounts" and "DBGEntInfo"
+	// fill it: 0xd5e40, 0xd6040). VERIFY: hud.cpp calls the panel itself; these forward to it.
+	void SetDebugPanelVisible( bool bVisible );
+	bool MsgFunc_DBGCounts( const char *pszName, int iSize, void *pbuf );
+	bool MsgFunc_DBGEntInfo( const char *pszName, int iSize, void *pbuf );
+	// CHud::MsgFunc_InitHUD hides the panels at +0xa48 and +0xa4c (setVisible(false) on each)
+	void HideDebugPanels( void );
 };
 
 //============================================================

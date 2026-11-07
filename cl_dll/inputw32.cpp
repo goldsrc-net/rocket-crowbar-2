@@ -27,6 +27,7 @@
 #include "Exports.h"
 
 #include "PlatformHeaders.h"
+#include "rc2/transform_hud.h"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_mouse.h>
@@ -180,9 +181,14 @@ bool joy_avail = false, joy_advancedinit, joy_haspov;
 Force_CenterView_f
 ===========
 */
+// orig client 0xac780 (not in files-client.tsv: Ghidra missed it). RC2: not while the view is
+// locked or the houndeye sleeps
 void Force_CenterView_f()
 {
 	Vector viewangles;
+
+	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 != g_bHoundeyeAsleep)
+		return;
 
 	if (!iMouseInUse)
 	{
@@ -521,17 +527,26 @@ void IN_ScaleMouse(float* x, float* y)
 IN_MouseMove
 ===========
 */
+// orig client 0xacad0. RC2: nothing while the view is locked or the houndeye sleeps, the view
+// angles of view mode 3, nothing at all when dead (not even the view angles set back), and the
+// mouse turns the other way while the bat is perched. halflife-updated's SDL mouse kept.
 void IN_MouseMove(float frametime, usercmd_t* cmd)
 {
 	Point pos;
 	Vector viewangles;
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 != g_bHoundeyeAsleep)
+		return;
+
+	IN_GetInputViewAngles(viewangles);
 
 	if ((in_mlook.state & 1) != 0)
 	{
 		V_StopPitchDrift();
 	}
+
+	if (gHUD.m_Health.m_iHealth <= 0)
+		return; // VERIFY: halflife-updated's relative-mouse switch below is skipped too
 
 	//jjb - this disbles normal mouse control if the user is trying to
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
@@ -601,12 +616,17 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 		// add mouse X/Y movement to cmd
 		if ((in_strafe.state & 1) != 0 || (0 != lookstrafe->value && (in_mlook.state & 1) != 0))
 			cmd->sidemove += m_side->value * mouse_x;
+		else if (TransformViewInverted())
+			viewangles[YAW] += m_yaw->value * mouse_x;
 		else
 			viewangles[YAW] -= m_yaw->value * mouse_x;
 
 		if ((in_mlook.state & 1) != 0 && (in_strafe.state & 1) == 0)
 		{
-			viewangles[PITCH] += m_pitch->value * mouse_y;
+			if (TransformViewInverted())
+				viewangles[PITCH] -= m_pitch->value * mouse_y;
+			else
+				viewangles[PITCH] += m_pitch->value * mouse_y;
 			if (viewangles[PITCH] > cl_pitchdown->value)
 				viewangles[PITCH] = cl_pitchdown->value;
 			if (viewangles[PITCH] < -cl_pitchup->value)
@@ -941,6 +961,9 @@ bool IN_ReadJoystick()
 IN_JoyMove
 ===========
 */
+// orig client 0xad600. RC2: the look axes turn the other way while the bat is perched, and the
+// joystick works only while the houndeye sleeps (an original bug: see the dossier). halflife-updated's
+// SDL game controller kept.
 void IN_JoyMove(float frametime, usercmd_t* cmd)
 {
 	float speed, aspeed;
@@ -948,7 +971,12 @@ void IN_JoyMove(float frametime, usercmd_t* cmd)
 	int i;
 	Vector viewangles;
 
+	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 == g_bHoundeyeAsleep)
+		return;
+
 	gEngfuncs.GetViewAngles((float*)viewangles);
+
+	const float flDir = TransformViewInverted() ? -1.0f : 1.0f;
 
 
 	// complete initialization if first time in
@@ -1018,11 +1046,11 @@ void IN_JoyMove(float frametime, usercmd_t* cmd)
 					// only absolute control support here (joy_advanced is 0)
 					if (m_pitch->value < 0.0)
 					{
-						viewangles[PITCH] -= (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
+						viewangles[PITCH] -= flDir * (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
 					}
 					else
 					{
-						viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
+						viewangles[PITCH] += flDir * (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
 					}
 					V_StopPitchDrift();
 				}
@@ -1071,11 +1099,11 @@ void IN_JoyMove(float frametime, usercmd_t* cmd)
 				{
 					if (dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
-						viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * aspeed * cl_yawspeed->value;
+						viewangles[YAW] += flDir * (fAxisValue * joy_yawsensitivity->value) * aspeed * cl_yawspeed->value;
 					}
 					else
 					{
-						viewangles[YAW] += (fAxisValue * joy_yawsensitivity->value) * speed * 180.0;
+						viewangles[YAW] += flDir * (fAxisValue * joy_yawsensitivity->value) * speed * 180.0;
 					}
 				}
 			}
@@ -1089,11 +1117,11 @@ void IN_JoyMove(float frametime, usercmd_t* cmd)
 					// pitch movement detected and pitch movement desired by user
 					if (dwControlMap[i] == JOY_ABSOLUTE_AXIS)
 					{
-						viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
+						viewangles[PITCH] += flDir * (fAxisValue * joy_pitchsensitivity->value) * aspeed * cl_pitchspeed->value;
 					}
 					else
 					{
-						viewangles[PITCH] += (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0;
+						viewangles[PITCH] += flDir * (fAxisValue * joy_pitchsensitivity->value) * speed * 180.0;
 					}
 					V_StopPitchDrift();
 				}

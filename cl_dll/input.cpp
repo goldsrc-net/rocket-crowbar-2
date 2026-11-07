@@ -20,6 +20,8 @@
 
 #include "vgui_TeamFortressViewport.h"
 #include "filesystem_utils.h"
+#include "rc2prefs.h"
+#include "rc2/transform_hud.h"
 
 
 extern bool g_iAlive;
@@ -104,7 +106,8 @@ kbutton_t in_up;
 kbutton_t in_down;
 kbutton_t in_duck;
 kbutton_t in_reload;
-kbutton_t in_alt1;
+kbutton_t in_attack3; // name ours: "+attack3", RC2's, sends IN_CANCEL (SDK 2.3's in_alt1 is gone)
+kbutton_t in_attack4; // name ours: "+attack4", RC2's, sends IN_ALT1
 kbutton_t in_score;
 kbutton_t in_break;
 kbutton_t in_graph; // Display the netgraph
@@ -375,15 +378,15 @@ int DLLEXPORT HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
 
 void IN_BreakDown() { KeyDown(&in_break); }
 void IN_BreakUp() { KeyUp(&in_break); }
-void IN_KLookDown() { KeyDown(&in_klook); }
+void IN_KLookDown() { KeyDown(&in_klook); } // orig client 0xaa4d0. Reads the same as SDK 2.3's
 void IN_KLookUp() { KeyUp(&in_klook); }
 void IN_JLookDown() { KeyDown(&in_jlook); }
 void IN_JLookUp() { KeyUp(&in_jlook); }
 void IN_MLookDown() { KeyDown(&in_mlook); }
 void IN_UpDown() { KeyDown(&in_up); }
-void IN_UpUp() { KeyUp(&in_up); }
+void IN_UpUp() { KeyUp(&in_up); } // orig client 0xaa590. Reads the same as SDK 2.3's
 void IN_DownDown() { KeyDown(&in_down); }
-void IN_DownUp() { KeyUp(&in_down); }
+void IN_DownUp() { KeyUp(&in_down); } // orig client 0xaa5d0. Reads the same as SDK 2.3's
 void IN_LeftDown() { KeyDown(&in_left); }
 void IN_LeftUp() { KeyUp(&in_left); }
 void IN_RightDown() { KeyDown(&in_right); }
@@ -395,6 +398,7 @@ void IN_ForwardDown()
 	gHUD.m_Spectator.HandleButtonsDown(IN_FORWARD);
 }
 
+// orig client 0xaa6a0. Reads the same as SDK 2.3's
 void IN_ForwardUp()
 {
 	KeyUp(&in_forward);
@@ -412,7 +416,7 @@ void IN_BackUp()
 	KeyUp(&in_back);
 	gHUD.m_Spectator.HandleButtonsUp(IN_BACK);
 }
-void IN_LookupDown() { KeyDown(&in_lookup); }
+void IN_LookupDown() { KeyDown(&in_lookup); } // orig client 0xaa730. Reads the same as SDK 2.3's
 void IN_LookupUp() { KeyUp(&in_lookup); }
 void IN_LookdownDown() { KeyDown(&in_lookdown); }
 void IN_LookdownUp() { KeyUp(&in_lookdown); }
@@ -447,15 +451,36 @@ void IN_StrafeUp() { KeyUp(&in_strafe); }
 // needs capture by hud/vgui also
 extern void __CmdFunc_InputPlayerSpecial();
 
+// orig client 0xaa8f0 (not in files-client.tsv: Ghidra missed it). RC2: also the TFC "special"
+// command (the viewport's InputPlayerSpecial sends "_special")
 void IN_Attack2Down()
 {
 	KeyDown(&in_attack2);
-
-
+	__CmdFunc_InputPlayerSpecial();
 	gHUD.m_Spectator.HandleButtonsDown(IN_ATTACK2);
 }
 
 void IN_Attack2Up() { KeyUp(&in_attack2); }
+
+// orig client 0xaa950 (not in files-client.tsv: Ghidra missed it). RC2's: +attack3 is IN_CANCEL
+void IN_Attack3Down() // name ours
+{
+	KeyDown(&in_attack3);
+	__CmdFunc_InputPlayerSpecial();
+	gHUD.m_Spectator.HandleButtonsDown(IN_CANCEL);
+}
+
+void IN_Attack3Up() { KeyUp(&in_attack3); } // orig client 0xaa980 (not in files-client.tsv: Ghidra missed it), name ours
+
+// orig client 0xaa9a0 (not in files-client.tsv: Ghidra missed it). RC2's: +attack4 is IN_ALT1
+void IN_Attack4Down() // name ours
+{
+	KeyDown(&in_attack4);
+	__CmdFunc_InputPlayerSpecial();
+	gHUD.m_Spectator.HandleButtonsDown(IN_ALT1);
+}
+
+void IN_Attack4Up() { KeyUp(&in_attack4); } // orig client 0xaa9e0 (not in files-client.tsv: Ghidra missed it), name ours
 void IN_UseDown()
 {
 	KeyDown(&in_use);
@@ -476,10 +501,8 @@ void IN_DuckDown()
 void IN_DuckUp() { KeyUp(&in_duck); }
 void IN_ReloadDown() { KeyDown(&in_reload); }
 void IN_ReloadUp() { KeyUp(&in_reload); }
-void IN_Alt1Down() { KeyDown(&in_alt1); }
-void IN_Alt1Up() { KeyUp(&in_alt1); }
 void IN_GraphDown() { KeyDown(&in_graph); }
-void IN_GraphUp() { KeyUp(&in_graph); }
+void IN_GraphUp() { KeyUp(&in_graph); } // orig client 0xaab40. Reads the same as SDK 2.3's
 
 void IN_AttackDown()
 {
@@ -593,10 +616,15 @@ CL_AdjustAngles
 Moves the local angle positions
 ================
 */
+// orig client 0xaad60. RC2: nothing while the view is locked or the houndeye sleeps, the keys turn
+// the other way while the bat is perched, and no roll clamp
 void CL_AdjustAngles(float frametime, float* viewangles)
 {
 	float speed;
 	float up, down;
+
+	if (0 != g_bViewLockTent || 0 != g_bViewLockEffect || 0 != g_bHoundeyeAsleep)
+		return;
 
 	if ((in_speed.state & 1) != 0)
 	{
@@ -607,24 +635,26 @@ void CL_AdjustAngles(float frametime, float* viewangles)
 		speed = frametime;
 	}
 
+	const float flDir = TransformViewInverted() ? -1.0f : 1.0f;
+
 	if ((in_strafe.state & 1) == 0)
 	{
-		viewangles[YAW] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
-		viewangles[YAW] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
+		viewangles[YAW] -= flDir * speed * cl_yawspeed->value * CL_KeyState(&in_right);
+		viewangles[YAW] += flDir * speed * cl_yawspeed->value * CL_KeyState(&in_left);
 		viewangles[YAW] = anglemod(viewangles[YAW]);
 	}
 	if ((in_klook.state & 1) != 0)
 	{
 		V_StopPitchDrift();
-		viewangles[PITCH] -= speed * cl_pitchspeed->value * CL_KeyState(&in_forward);
-		viewangles[PITCH] += speed * cl_pitchspeed->value * CL_KeyState(&in_back);
+		viewangles[PITCH] -= flDir * speed * cl_pitchspeed->value * CL_KeyState(&in_forward);
+		viewangles[PITCH] += flDir * speed * cl_pitchspeed->value * CL_KeyState(&in_back);
 	}
 
 	up = CL_KeyState(&in_lookup);
 	down = CL_KeyState(&in_lookdown);
 
-	viewangles[PITCH] -= speed * cl_pitchspeed->value * up;
-	viewangles[PITCH] += speed * cl_pitchspeed->value * down;
+	viewangles[PITCH] -= flDir * speed * cl_pitchspeed->value * up;
+	viewangles[PITCH] += flDir * speed * cl_pitchspeed->value * down;
 
 	if (0 != up || 0 != down)
 		V_StopPitchDrift();
@@ -633,11 +663,6 @@ void CL_AdjustAngles(float frametime, float* viewangles)
 		viewangles[PITCH] = cl_pitchdown->value;
 	if (viewangles[PITCH] < -cl_pitchup->value)
 		viewangles[PITCH] = -cl_pitchup->value;
-
-	if (viewangles[ROLL] > 50)
-		viewangles[ROLL] = 50;
-	if (viewangles[ROLL] < -50)
-		viewangles[ROLL] = -50;
 }
 
 /*
@@ -649,6 +674,64 @@ if active == 1 then we are 1) not playing back demos ( where our commands are ig
 2 ) we have finished signing on to server
 ================
 */
+// Rocket Crowbar 2: a transform moves at its rc2.ini speeds (the client's copy of them, from
+// RCCFG), clipped to that speed; the controller and the flying bat climb with jump and duck.
+static void CL_TransformMove(usercmd_t* cmd, float flSpeed, float flSideSpeed, bool bClimb, bool bUpDown) // name ours: inlined in CL_CreateMove
+{
+	if ((in_strafe.state & 1) != 0)
+	{
+		cmd->sidemove += flSideSpeed * CL_KeyState(&in_right);
+		cmd->sidemove -= flSideSpeed * CL_KeyState(&in_left);
+	}
+
+	cmd->sidemove += flSideSpeed * CL_KeyState(&in_moveright);
+	cmd->sidemove -= flSideSpeed * CL_KeyState(&in_moveleft);
+
+	if (bUpDown)
+	{
+		cmd->upmove += flSpeed * CL_KeyState(&in_up);
+		cmd->upmove -= flSpeed * CL_KeyState(&in_down);
+	}
+
+	if (bClimb)
+	{
+		cmd->upmove += flSpeed * CL_KeyState(&in_jump);
+		cmd->upmove -= flSpeed * CL_KeyState(&in_duck);
+	}
+
+	if ((in_klook.state & 1) == 0)
+	{
+		cmd->forwardmove += flSpeed * CL_KeyState(&in_forward);
+		cmd->forwardmove -= flSpeed * CL_KeyState(&in_back);
+	}
+
+	const float fmov = sqrt((cmd->forwardmove * cmd->forwardmove) + (cmd->sidemove * cmd->sidemove) + (cmd->upmove * cmd->upmove));
+	if (fmov != 0 && fmov > flSpeed)
+	{
+		const float fratio = flSpeed / fmov;
+		cmd->forwardmove *= fratio;
+		cmd->sidemove *= fratio;
+		cmd->upmove *= fratio;
+	}
+}
+
+extern Vector v_angles; // view.cpp
+
+void IN_GetInputViewAngles(float* angles) // name ours
+{
+	if (g_iViewMode == 3)
+	{
+		VectorCopy(v_angles, angles);
+	}
+	else
+	{
+		gEngfuncs.GetViewAngles(angles);
+	}
+}
+
+// orig client 0xab070. RC2: the view angles of view mode 3, no turning when dead, the transforms'
+// movement (CL_TransformMove), movement cvars at 0 reset to 1000 (cl_movespeedkey to 1), and the
+// sent view angles held while the view is locked or the houndeye sleeps
 void DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 {
 	//	RecClCL_CreateMove(frametime, cmd, active);
@@ -659,56 +742,104 @@ void DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 
 	if (0 != active)
 	{
-		//memset( viewangles, 0, sizeof( Vector ) );
-		//viewangles[ 0 ] = viewangles[ 1 ] = viewangles[ 2 ] = 0.0;
-		gEngfuncs.GetViewAngles((float*)viewangles);
+		IN_GetInputViewAngles(viewangles);
 
-		CL_AdjustAngles(frametime, viewangles);
+		if (gHUD.m_Health.m_iHealth > 0)
+			CL_AdjustAngles(frametime, viewangles);
 
 		memset(cmd, 0, sizeof(*cmd));
 
 		gEngfuncs.SetViewAngles((float*)viewangles);
 
-		if ((in_strafe.state & 1) != 0)
+		const bool bSlow = (in_speed.state & 1) != 0;
+
+		switch (g_iPlayerClass)
 		{
-			cmd->sidemove += cl_sidespeed->value * CL_KeyState(&in_right);
-			cmd->sidemove -= cl_sidespeed->value * CL_KeyState(&in_left);
-		}
-
-		cmd->sidemove += cl_sidespeed->value * CL_KeyState(&in_moveright);
-		cmd->sidemove -= cl_sidespeed->value * CL_KeyState(&in_moveleft);
-
-		cmd->upmove += cl_upspeed->value * CL_KeyState(&in_up);
-		cmd->upmove -= cl_upspeed->value * CL_KeyState(&in_down);
-
-		if ((in_klook.state & 1) == 0)
-		{
-			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState(&in_forward);
-			cmd->forwardmove -= cl_backspeed->value * CL_KeyState(&in_back);
-		}
-
-		// adjust for speed key
-		if ((in_speed.state & 1) != 0)
-		{
-			cmd->forwardmove *= cl_movespeedkey->value;
-			cmd->sidemove *= cl_movespeedkey->value;
-			cmd->upmove *= cl_movespeedkey->value;
-		}
-
-		// clip to maxspeed
-		spd = gEngfuncs.GetClientMaxspeed();
-		if (spd != 0.0)
-		{
-			// scale the 3 speeds so that the total velocity is not > cl.maxspeed
-			float fmov = sqrt((cmd->forwardmove * cmd->forwardmove) + (cmd->sidemove * cmd->sidemove) + (cmd->upmove * cmd->upmove));
-
-			if (fmov > spd)
+		case 1: // assassin
+			spd = bSlow ? RC2Pref(RC2P_TransformAssassin_WalkSpeed).f : RC2Pref(RC2P_TransformAssassin_RunSpeed).f;
+			CL_TransformMove(cmd, spd, spd, false, true);
+			break;
+		case 2: // houndeye
+			spd = bSlow ? RC2Pref(RC2P_TransformHoundeye_WalkSpeed).f : RC2Pref(RC2P_TransformHoundeye_RunSpeed).f;
+			CL_TransformMove(cmd, spd, spd, false, true);
+			break;
+		case 3: // controller
+			spd = bSlow ? RC2Pref(RC2P_TransformController_WalkSpeed).f : RC2Pref(RC2P_TransformController_RunSpeed).f;
+			CL_TransformMove(cmd, spd, spd, true, true);
+			break;
+		case 4: // bat
+			if (g_iBatPerch == 1)
 			{
-				float fratio = spd / fmov;
-				cmd->forwardmove *= fratio;
-				cmd->sidemove *= fratio;
-				cmd->upmove *= fratio;
+				// walking: the ground speed, no climbing
+				spd = RC2Pref(RC2P_TransformBat_GroundSpeed).f;
+				CL_TransformMove(cmd, spd, spd, false, false);
 			}
+			else
+			{
+				// VERIFY: as the original, flying the bat strafes at WalkSpeed whatever the speed key
+				spd = bSlow ? RC2Pref(RC2P_TransformBat_WalkSpeed).f : RC2Pref(RC2P_TransformBat_RunSpeed).f;
+				CL_TransformMove(cmd, spd, RC2Pref(RC2P_TransformBat_WalkSpeed).f, true, true);
+			}
+			break;
+		case 5: // headcrab
+			spd = bSlow ? RC2Pref(RC2P_TransformHeadcrab_WalkSpeed).f : RC2Pref(RC2P_TransformHeadcrab_RunSpeed).f;
+			CL_TransformMove(cmd, spd, spd, false, true);
+			break;
+		default:
+			// RC2: a movement speed cvar at 0 goes back to 1000, the speed key's to 1
+			if (cl_sidespeed->value == 0)
+				cl_sidespeed->value = 1000;
+			if (cl_upspeed->value == 0)
+				cl_upspeed->value = 1000;
+			if (cl_forwardspeed->value == 0)
+				cl_forwardspeed->value = 1000;
+			if (cl_backspeed->value == 0)
+				cl_backspeed->value = 1000;
+			if (cl_movespeedkey->value == 0)
+				cl_movespeedkey->value = 1;
+
+			if ((in_strafe.state & 1) != 0)
+			{
+				cmd->sidemove += cl_sidespeed->value * CL_KeyState(&in_right);
+				cmd->sidemove -= cl_sidespeed->value * CL_KeyState(&in_left);
+			}
+
+			cmd->sidemove += cl_sidespeed->value * CL_KeyState(&in_moveright);
+			cmd->sidemove -= cl_sidespeed->value * CL_KeyState(&in_moveleft);
+
+			cmd->upmove += cl_upspeed->value * CL_KeyState(&in_up);
+			cmd->upmove -= cl_upspeed->value * CL_KeyState(&in_down);
+
+			if ((in_klook.state & 1) == 0)
+			{
+				cmd->forwardmove += cl_forwardspeed->value * CL_KeyState(&in_forward);
+				cmd->forwardmove -= cl_backspeed->value * CL_KeyState(&in_back);
+			}
+
+			// adjust for speed key
+			if ((in_speed.state & 1) != 0)
+			{
+				cmd->forwardmove *= cl_movespeedkey->value;
+				cmd->sidemove *= cl_movespeedkey->value;
+				cmd->upmove *= cl_movespeedkey->value;
+			}
+
+			// clip to maxspeed
+			spd = gEngfuncs.GetClientMaxspeed();
+			if (spd != 0.0)
+			{
+				// scale the 3 speeds so that the total velocity is not > cl.maxspeed
+				float fmov = sqrt((cmd->forwardmove * cmd->forwardmove) + (cmd->sidemove * cmd->sidemove) + (cmd->upmove * cmd->upmove));
+
+				if (fmov > spd)
+				{
+					float fratio = spd / fmov;
+					cmd->forwardmove *= fratio;
+					cmd->sidemove *= fratio;
+					cmd->upmove *= fratio;
+				}
+			}
+			break;
 		}
 
 		// Allow mice and other controllers to add their inputs
@@ -742,10 +873,10 @@ void DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s* cmd, int active)
 		}
 	}
 
-	gEngfuncs.GetViewAngles((float*)viewangles);
+	IN_GetInputViewAngles(viewangles);
 	// Set current view angles.
 
-	if (g_iAlive)
+	if (g_iAlive && 0 == g_bViewLockTent && 0 == g_bViewLockEffect && 0 == g_bHoundeyeAsleep)
 	{
 		VectorCopy(viewangles, cmd->viewangles);
 		VectorCopy(viewangles, oldangles);
@@ -763,6 +894,7 @@ CL_IsDead
 Returns 1 if health is <= 0
 ============
 */
+// orig client 0xabe00. Reads the same as SDK 2.3's
 bool CL_IsDead()
 {
 	return gHUD.m_Health.m_iHealth <= 0;
@@ -776,6 +908,8 @@ Returns appropriate button info for keyboard and mouse state
 Set bResetState to 1 to clear old state info
 ============
 */
+// orig client 0xabe20. RC2: +attack3 sends IN_CANCEL and +attack4 IN_ALT1, in place of SDK 2.3's
+// in_cancel (IN_Cancel still sets it, nothing reads it) and +alt1
 int CL_ButtonBits(bool bResetState)
 {
 	int bits = 0;
@@ -810,11 +944,6 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_USE;
 	}
 
-	if (in_cancel)
-	{
-		bits |= IN_CANCEL;
-	}
-
 	if ((in_left.state & 3) != 0)
 	{
 		bits |= IN_LEFT;
@@ -840,14 +969,19 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_ATTACK2;
 	}
 
+	if ((in_attack3.state & 3) != 0)
+	{
+		bits |= IN_CANCEL;
+	}
+
+	if ((in_attack4.state & 3) != 0)
+	{
+		bits |= IN_ALT1;
+	}
+
 	if ((in_reload.state & 3) != 0)
 	{
 		bits |= IN_RELOAD;
-	}
-
-	if ((in_alt1.state & 3) != 0)
-	{
-		bits |= IN_ALT1;
 	}
 
 	if ((in_score.state & 3) != 0)
@@ -874,8 +1008,9 @@ int CL_ButtonBits(bool bResetState)
 		in_moveleft.state &= ~2;
 		in_moveright.state &= ~2;
 		in_attack2.state &= ~2;
+		in_attack3.state &= ~2;
+		in_attack4.state &= ~2;
 		in_reload.state &= ~2;
-		in_alt1.state &= ~2;
 		in_score.state &= ~2;
 	}
 
@@ -913,6 +1048,7 @@ void CL_ResetButtonBits(int bits)
 InitInput
 ============
 */
+// orig client 0xac0c0. RC2: +attack3 and +attack4 in place of +alt1
 void InitInput()
 {
 	gEngfuncs.pfnAddCommand("+moveup", IN_UpDown);
@@ -943,6 +1079,10 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("-attack", IN_AttackUp);
 	gEngfuncs.pfnAddCommand("+attack2", IN_Attack2Down);
 	gEngfuncs.pfnAddCommand("-attack2", IN_Attack2Up);
+	gEngfuncs.pfnAddCommand("+attack3", IN_Attack3Down);
+	gEngfuncs.pfnAddCommand("-attack3", IN_Attack3Up);
+	gEngfuncs.pfnAddCommand("+attack4", IN_Attack4Down);
+	gEngfuncs.pfnAddCommand("-attack4", IN_Attack4Up);
 	gEngfuncs.pfnAddCommand("+use", IN_UseDown);
 	gEngfuncs.pfnAddCommand("-use", IN_UseUp);
 	gEngfuncs.pfnAddCommand("+jump", IN_JumpDown);
@@ -958,8 +1098,6 @@ void InitInput()
 	gEngfuncs.pfnAddCommand("-duck", IN_DuckUp);
 	gEngfuncs.pfnAddCommand("+reload", IN_ReloadDown);
 	gEngfuncs.pfnAddCommand("-reload", IN_ReloadUp);
-	gEngfuncs.pfnAddCommand("+alt1", IN_Alt1Down);
-	gEngfuncs.pfnAddCommand("-alt1", IN_Alt1Up);
 	gEngfuncs.pfnAddCommand("+score", IN_ScoreDown);
 	gEngfuncs.pfnAddCommand("-score", IN_ScoreUp);
 	gEngfuncs.pfnAddCommand("+showscores", IN_ScoreDown);
@@ -1004,6 +1142,7 @@ void InitInput()
 ShutdownInput
 ============
 */
+// orig client 0xac740. Reads the same as SDK 2.3's
 void ShutdownInput()
 {
 	IN_Shutdown();
@@ -1013,12 +1152,18 @@ void ShutdownInput()
 #include "interface.h"
 void CL_UnloadParticleMan();
 
+extern void VGui_ShutdownState(); // client.dll 0xd9180 (vgui_int area, package c5), name ours
+extern void ClientTents_Clear();  // client.dll 0x52370 (package c2): frees RC2's client tents, name ours
 
+// orig client 0xac760. RC2: resets a VGUI state first and frees its client tents after.
+// halflife-updated's file system and particle manager shutdown kept.
 void DLLEXPORT HUD_Shutdown()
 {
 	//	RecClShutdown();
 
+	VGui_ShutdownState();
 	ShutdownInput();
+	ClientTents_Clear();
 
 
 	FileSystem_FreeFileSystem();

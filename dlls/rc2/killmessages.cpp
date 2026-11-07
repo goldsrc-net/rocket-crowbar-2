@@ -432,7 +432,7 @@ static killmsg_t g_KillMsgs[] =
 
 #define KILLMSG_COUNT ((int)(sizeof(g_KillMsgs) / sizeof(g_KillMsgs[0])))
 
-// orig 0x31f30: line i is one for pszName, of the killer forms (bSelf 0) or the self forms
+// orig 0x31f30, orig client 0x9c1d0 (not in files-client.tsv: Ghidra missed it): line i is one for pszName, of the killer forms (bSelf 0) or the self forms
 static bool KillMsg_Matches(int i, const char* pszName, int bSelf) // name ours
 {
 	int iType = g_KillMsgs[i].iType;
@@ -449,7 +449,7 @@ static bool KillMsg_Matches(int i, const char* pszName, int bSelf) // name ours
 	return strcmp(pszName, g_KillMsgs[i].pszName) == 0;
 }
 
-// orig 0x31fe0: a weighted random line for pszName (iRandom 0..1000), following aliases; 0
+// orig 0x31fe0, orig client 0x9c2b0 (not in files-client.tsv: Ghidra missed it): a weighted random line for pszName (iRandom 0..1000), following aliases; 0
 // (the generic line) when there is none
 int KillMsg_Pick(const char* pszName, int bSelf, int iRandom) // name ours
 {
@@ -482,11 +482,13 @@ int KillMsg_Pick(const char* pszName, int bSelf, int iRandom) // name ours
 	}
 }
 
-// orig 0x320a0, orig 0x320c0, orig 0x320e0, orig 0x32100: the victim's pronouns (iGender 1 female, 2 neuter)
-static const char* KillMsg_Himself(int iGender) { return iGender == 1 ? "herself" : (iGender == 2 ? "itself" : "himself"); } // name ours
-static const char* KillMsg_His(int iGender) { return iGender == 1 ? "her" : (iGender == 2 ? "it's" : "his"); }			  // name ours
-static const char* KillMsg_Him(int iGender) { return iGender == 1 ? "her" : (iGender == 2 ? "it" : "him"); }				  // name ours
-static const char* KillMsg_He(int iGender) { return iGender == 1 ? "she" : (iGender == 2 ? "it" : "he"); }				  // name ours
+// orig 0x320a0, orig 0x320c0, orig 0x320e0, orig 0x32100: the victim's pronouns (iGender 1 female, 2 neuter).
+// client.dll has them too (orig client 0x9c3a0, orig client 0x9c3d0, orig client 0x9c400, orig client 0x9c430);
+// its death notice calls KillMsg_His, so they aren't static.
+const char* KillMsg_Himself(int iGender) { return iGender == 1 ? "herself" : (iGender == 2 ? "itself" : "himself"); } // name ours
+const char* KillMsg_His(int iGender) { return iGender == 1 ? "her" : (iGender == 2 ? "it's" : "his"); }			  // name ours
+const char* KillMsg_Him(int iGender) { return iGender == 1 ? "her" : (iGender == 2 ? "it" : "him"); }				  // name ours
+const char* KillMsg_He(int iGender) { return iGender == 1 ? "she" : (iGender == 2 ? "it" : "he"); }				  // name ours
 
 static void KillMsg_Possessive(char* pszName) // name ours
 {
@@ -497,7 +499,7 @@ static void KillMsg_Possessive(char* pszName) // name ours
 		strcat(pszName, "'s");
 }
 
-// orig 0x32120: line iMsg with the names filled in, into pszOut. The killer reads "self" for a
+// orig 0x32120, orig client 0x9c460: line iMsg with the names filled in, into pszOut. The killer reads "self" for a
 // self form, when the two names are the same, or when bSelf.
 void KillMsg_Format(int iMsg, const char* pszVictim, const char* pszKiller, const char* pszWeapon, int iGender, char* pszOut, int bSelf) // name ours
 {
@@ -569,7 +571,7 @@ void KillMsg_Format(int iMsg, const char* pszVictim, const char* pszKiller, cons
 	}
 }
 
-// orig 0x32540: KillMsg_Format into a static buffer
+// orig 0x32540, orig client 0x9c990: KillMsg_Format into a static buffer
 const char* KillMsg_Get(int iMsg, const char* pszVictim, const char* pszKiller, const char* pszWeapon, int iGender, int bSelf) // name ours
 {
 	static char szMsg[512]; // VERIFY: size; the original's static (.bss 0x18c0b4) is followed by other data

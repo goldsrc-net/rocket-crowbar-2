@@ -43,9 +43,16 @@ static int PM_boxpnt[6][4] =
 };
 
 // orig 0x9f340
+// orig client 0xafab0 (not in files-client.tsv: Ghidra missed it). Rocket Crowbar 2's client
+// has a body in release builds: the entity in view, when the functions run on the server side
+// of the move (never on the client, so it does nothing; nothing calls it either). rc2.dll's is
+// SDK 2.3's empty release one.
 void PM_ShowClipBox()
 {
-#if defined(_DEBUG)
+#if defined(CLIENT_DLL) && !defined(_DEBUG)
+	if (0 != pmove->runfuncs && 0 != pmove->server)
+		PM_ViewEntity();
+#elif defined(_DEBUG)
 	Vector org;
 	Vector offset = {0, 0, 0};
 
@@ -98,6 +105,7 @@ PM_ParticleLine(Vector start, Vector end, int color, float life)
 
 ================
 */
+// orig client 0xafae0. Not byte-identical to SDK 2.3's, but it reads the same
 void PM_ParticleLine(Vector start, Vector end, int pcolor, float life, float vert)
 {
 	float linestep = 2.0f;
@@ -129,6 +137,7 @@ PM_DrawRectangle(Vector tl, Vector br)
 
 ================
 */
+// orig client 0xafbf0 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 void PM_DrawRectangle(Vector tl, Vector bl, Vector tr, Vector br, int pcolor, float life)
 {
 	PM_ParticleLine(tl, bl, pcolor, life, 0);
@@ -143,6 +152,7 @@ PM_DrawPhysEntBBox(int num)
 
 ================
 */
+// orig client 0xafc70 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 {
 	physent_t* pe;
@@ -232,6 +242,7 @@ PM_DrawBBox(Vector mins, Vector maxs, Vector origin, int pcolor, float life)
 
 ================
 */
+// orig client 0xaffe0 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 void PM_DrawBBox(Vector mins, Vector maxs, Vector origin, int pcolor, float life)
 {
 	int j;
@@ -271,6 +282,7 @@ Shows particles at that entities bbox
 Tries to shoot a ray out by about 128 units.
 ================
 */
+// orig client 0xb0100 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 void PM_ViewEntity()
 {
 	Vector forward, right, up;

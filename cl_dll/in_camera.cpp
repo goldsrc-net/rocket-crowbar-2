@@ -70,6 +70,10 @@ bool cam_distancemove;
 extern int mouse_x, mouse_y;		  //used to determine what the current x and y values are
 int cam_old_mouse_x, cam_old_mouse_y; //holds the last ticks mouse movement
 Point cam_mouse;
+
+// Rocket Crowbar 2: set by V_CalcRefdef (view.cpp) when the third-person camera has no room
+// behind the player; CL_IsThirdPerson then answers first person (.bss 0x1020be40).
+int cam_blocked = 0; // name ours
 //-------------------------------------------------- Local Variables
 
 static kbutton_t cam_pitchup, cam_pitchdown, cam_yawleft, cam_yawright;
@@ -149,6 +153,7 @@ typedef struct
 
 extern trace_t SV_ClipMoveToEntity(edict_t* ent, Vector start, Vector mins, Vector maxs, Vector end);
 
+// orig client 0xa9000. Not byte-identical to SDK 2.3's, but it reads the same
 void DLLEXPORT CAM_Think()
 {
 	//	RecClCamThink();
@@ -412,11 +417,11 @@ void DLLEXPORT CAM_Think()
 extern void KeyDown(kbutton_t* b); // HACK
 extern void KeyUp(kbutton_t* b);   // HACK
 
-void CAM_PitchUpDown() { KeyDown(&cam_pitchup); }
+void CAM_PitchUpDown() { KeyDown(&cam_pitchup); } // orig client 0xa9760. Reads the same as SDK 2.3's
 void CAM_PitchUpUp() { KeyUp(&cam_pitchup); }
 void CAM_PitchDownDown() { KeyDown(&cam_pitchdown); }
 void CAM_PitchDownUp() { KeyUp(&cam_pitchdown); }
-void CAM_YawLeftDown() { KeyDown(&cam_yawleft); }
+void CAM_YawLeftDown() { KeyDown(&cam_yawleft); } // orig client 0xa97e0. Reads the same as SDK 2.3's
 void CAM_YawLeftUp() { KeyUp(&cam_yawleft); }
 void CAM_YawRightDown() { KeyDown(&cam_yawright); }
 void CAM_YawRightUp() { KeyUp(&cam_yawright); }
@@ -425,17 +430,10 @@ void CAM_InUp() { KeyUp(&cam_in); }
 void CAM_OutDown() { KeyDown(&cam_out); }
 void CAM_OutUp() { KeyUp(&cam_out); }
 
+// orig client 0xa98e0. RC2: thirdperson works in multiplayer too (no GetMaxClients check)
 void CAM_ToThirdPerson()
 {
 	Vector viewangles;
-
-#if !defined(_DEBUG)
-	if (gEngfuncs.GetMaxClients() > 1)
-	{
-		// no thirdperson in multiplayer.
-		return;
-	}
-#endif
 
 	gEngfuncs.GetViewAngles((float*)viewangles);
 
@@ -463,6 +461,24 @@ void CAM_ToggleSnapto()
 	cam_snapto->value = 0 != cam_snapto->value ? 0 : 1;
 }
 
+// Rocket Crowbar 2: "cam_toggle" flips between first and third person, without the
+// cam_command reset CAM_ToThirdPerson does.
+void CAM_Toggle() // orig client 0xa99d0, name ours
+{
+	Vector viewangles;
+
+	gEngfuncs.GetViewAngles((float*)viewangles);
+
+	cam_thirdperson = !cam_thirdperson;
+	if (cam_thirdperson)
+	{
+		cam_ofs[YAW] = viewangles[YAW];
+		cam_ofs[PITCH] = viewangles[PITCH];
+		cam_ofs[2] = CAM_MIN_DIST;
+	}
+}
+
+// orig client 0xa9a40. RC2: adds cam_toggle
 void CAM_Init()
 {
 	gEngfuncs.pfnAddCommand("+campitchup", CAM_PitchUpDown);
@@ -484,12 +500,13 @@ void CAM_Init()
 	gEngfuncs.pfnAddCommand("+camdistance", CAM_StartDistance);
 	gEngfuncs.pfnAddCommand("-camdistance", CAM_EndDistance);
 	gEngfuncs.pfnAddCommand("snapto", CAM_ToggleSnapto);
+	gEngfuncs.pfnAddCommand("cam_toggle", CAM_Toggle);
 
 	cam_command = gEngfuncs.pfnRegisterVariable("cam_command", "0", 0);		  // tells camera to go to thirdperson
 	cam_snapto = gEngfuncs.pfnRegisterVariable("cam_snapto", "0", 0);		  // snap to thirdperson view
-	cam_idealyaw = gEngfuncs.pfnRegisterVariable("cam_idealyaw", "90", 0);	  // thirdperson yaw
+	cam_idealyaw = gEngfuncs.pfnRegisterVariable("cam_idealyaw", "0", 0);	  // thirdperson yaw (RC2: 0, SDK 90)
 	cam_idealpitch = gEngfuncs.pfnRegisterVariable("cam_idealpitch", "0", 0); // thirperson pitch
-	cam_idealdist = gEngfuncs.pfnRegisterVariable("cam_idealdist", "64", 0);  // thirdperson distance
+	cam_idealdist = gEngfuncs.pfnRegisterVariable("cam_idealdist", "72", 0);  // thirdperson distance (RC2: 72, SDK 64)
 	cam_contain = gEngfuncs.pfnRegisterVariable("cam_contain", "0", 0);		  // contain camera to world
 
 	c_maxpitch = gEngfuncs.pfnRegisterVariable("c_maxpitch", "90.0", 0);
@@ -500,6 +517,7 @@ void CAM_Init()
 	c_mindistance = gEngfuncs.pfnRegisterVariable("c_mindistance", "30.0", 0);
 }
 
+// orig client 0xa9d50. Not byte-identical to SDK 2.3's, but it reads the same
 void CAM_ClearStates()
 {
 	Vector viewangles;
@@ -612,11 +630,16 @@ void CAM_EndDistance()
 	iMouseInUse = false;
 }
 
+// orig client 0xa9fd0. RC2: first person while the view finds the camera blocked, and no
+// third person for a spectator in chase mode on the local player (SDK 2.3's g_iUser1 test)
 int DLLEXPORT CL_IsThirdPerson()
 {
 	//	RecClCL_IsThirdPerson();
 
-	return static_cast<int>(cam_thirdperson || (0 != g_iUser1 && (g_iUser2 == gEngfuncs.GetLocalPlayer()->index)));
+	if (0 != cam_blocked)
+		return 0;
+
+	return static_cast<int>(cam_thirdperson);
 }
 
 void DLLEXPORT CL_CameraOffset(float* ofs)

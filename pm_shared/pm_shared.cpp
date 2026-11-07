@@ -142,6 +142,23 @@ static int g_iPMRideEnt;		 // .bss 0x101915a0: the player this one rides (PM_Get
 static int g_bPMRideLeft;		 // .bss 0x101915a4: on the left shoulder (bit 7)
 static float g_flPMStopSpeed;	 // .data 0x1014ddc8: friction's stop speed, set per move in PM_Move
 
+#ifdef CLIENT_DLL
+// Rocket Crowbar 2, the client's spectator and race views (client.dll; names ours).
+Vector g_vecRaceViewAngles;		// client .bss 0x1022fe30: PM_RaceMove's view angles, read by view.cpp (client 0xe9ee0)
+int g_iSpecChaseFlags;			// client .bss 0x1022fe3c: in-eye chase side (0x10) and height (0x20); VERIFY: nothing in client.dll writes it
+static int s_iAssassinCharge;	// client .bss 0x1020f6bc: PM_AssassinJump's charge, kept from the move that ran the functions
+static int s_iHeadcrabCharge;	// client .bss 0x1020f6c0: the same for PM_HeadcrabJump
+static Vector s_vecInEyeAngles; // client .bss 0x1020da78: the smoothed in-eye chase angles
+
+// view.cpp's (client 0xe9400-0xebb00, not this package)
+extern Vector v_origin, v_angles; // client 0x10227084, 0x10226848. VERIFY: taken for view.cpp's v_origin and v_angles
+extern int g_iPMSpecView;	   // client 0x10227160: 1 spectating this move; |2 angles and |4 origin follow a target. Name ours
+extern int g_bPMSetViewAngles; // client 0x102270f0: pm_shared set v_angles. Name ours
+extern int g_bPMSetViewOrigin; // client 0x10227164: pm_shared set v_origin. Name ours
+// the client's predicted origin of entity iEnt (client 0x59d50, not this package). Name ours
+void PM_SetPredictedOrigin(int iEnt, const float* vecOrigin);
+#endif
+
 void PM_AddGravity();
 
 
@@ -296,7 +313,7 @@ char PM_FindTextureType(const char* name)
 	return CHAR_TEX_CONCRETE;
 }
 
-// orig 0xa07a0. RC2: also plays in multiplayer when walking slowly in a movement mode
+// orig 0xa07a0, orig client 0xb1500. RC2: also plays in multiplayer when walking slowly in a movement mode
 void PM_PlayStepSound(int step, float fvol)
 {
 	static int iSkipStep = 0;
@@ -548,7 +565,7 @@ PM_CatagorizeTextureTypeAt
 Rocket Crowbar 2: PM_CatagorizeTextureType along any line (the wall a wallhop pushes off).
 ====================
 */
-void PM_CatagorizeTextureTypeAt(float* start, float* end) // orig 0xa0fb0, name ours
+void PM_CatagorizeTextureTypeAt(float* start, float* end) // orig 0xa0fb0, orig client 0xb1f20, name ours
 {
 	const char* pTextureName;
 
@@ -615,7 +632,7 @@ void PM_CatagorizeTextureType()
 	pmove->chtexturetype = PM_FindTextureType(pmove->sztexturename);
 }
 
-// orig 0xa1180. RC2: no steps for the controller; quieter and slower steps per movement mode
+// orig 0xa1180, orig client 0xb2170. RC2: no steps for the controller; quieter and slower steps per movement mode
 void PM_UpdateStepSound()
 {
 	float fvol;
@@ -906,7 +923,7 @@ int PM_ClipVelocity(Vector in, Vector normal, Vector& out, float overbounce)
 	return blocked;
 }
 
-// orig 0xa17a0. RC2: no gravity while PMF_HELD
+// orig 0xa17a0, orig client 0xb2930. RC2: no gravity while PMF_HELD
 void PM_AddCorrectGravity()
 {
 	float ent_gravity;
@@ -929,7 +946,7 @@ void PM_AddCorrectGravity()
 }
 
 
-// orig 0xa1830. RC2: as PM_AddCorrectGravity
+// orig 0xa1830, orig client 0xb29f0. RC2: as PM_AddCorrectGravity
 void PM_FixupGravityVelocity()
 {
 	float ent_gravity;
@@ -986,14 +1003,14 @@ static void PM_PassWrite(int* pField, int iSlot, int iValue) // name ours, a hel
 		pBase[iOffset] = iValue;
 }
 
-void PM_ResetPassThrough() // orig 0xa18a0, name ours
+void PM_ResetPassThrough() // orig 0xa18a0, orig client 0xb2a80, name ours
 {
 	s_iPassMove = 0;
 	s_iPassVis = 0;
 	s_iPassPhys = 0;
 }
 
-void PM_RestorePassThrough() // orig 0xa18c0, name ours
+void PM_RestorePassThrough() // orig 0xa18c0, orig client 0xb2ab0, name ours
 {
 	int i;
 
@@ -1022,14 +1039,24 @@ void PM_RestorePassThrough() // orig 0xa18c0, name ours
 
 // physent iPhysEnt was hit: if the game lets the leap through it, move it and its visent and
 // moveent copies away and return true
-bool PM_TryPassThrough(int iPhysEnt) // orig 0xa1b10, name ours
+bool PM_TryPassThrough(int iPhysEnt) // orig 0xa1b10, orig client 0xb2da0, name ours
 {
 	const Vector vecAway(8192, 8192, 8192);
 	physent_t* pe = &pmove->physents[iPhysEnt];
 	int i;
 
+#ifdef CLIENT_DLL
+	// the client's guess at the server's PM_HeadcrabLeapHit: anything that takes damage, when
+	// the leap's damage would reach 140
+	if (0 == pe->takedamage)
+		return false;
+	const float flDamage = (Length(pmove->velocity) - RC2Pref(RC2P_TransformHeadcrab_JumpBaseVel).f) / RC2Pref(RC2P_TransformHeadcrab_JumpMaxAddVel).f * (RC2Pref(RC2P_TransformHeadcrab_JumpMaxDamage).f - RC2Pref(RC2P_TransformHeadcrab_JumpMinDamage).f) + RC2Pref(RC2P_TransformHeadcrab_JumpMinDamage).f;
+	if (flDamage < 140)
+		return false;
+#else
 	if (0 == PM_HeadcrabLeapHit(g_iPMPlayerEnt, pe->info, Length(pmove->velocity)))
 		return false;
+#endif
 
 	if (s_iPassPhys < PM_PASS_MAX_PHYS)
 	{
@@ -1081,7 +1108,7 @@ PM_FlyMove
 The basic solid body movement clip that slides along multiple planes
 ============
 */
-// orig 0xa1dc0. RC2: the leaping headcrab passes through what PM_HeadcrabLeapHit allows;
+// orig 0xa1dc0, orig client 0xb3150. RC2: the leaping headcrab passes through what PM_HeadcrabLeapHit allows;
 // PMF_BOUNCE reflects off every plane with some noise and speeds up (the AF grenade); and the
 // reflection branch applies to every plane, as in SDK 2.3 (halflife-updated's first-plane-only
 // fix dropped)
@@ -1366,7 +1393,7 @@ PM_WalkMove
 Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
 ======================
 */
-// orig 0xa2540. RC2: the speed attribute scales the wish velocity and the cap, each movement
+// orig 0xa2540, orig client 0xb3ac0. RC2: the speed attribute scales the wish velocity and the cap, each movement
 // mode has its own ground speed, and shrunk players walk and step up at 0.2
 void PM_WalkMove()
 {
@@ -1569,7 +1596,7 @@ PM_Friction
 Handles both ground friction and water friction
 ==================
 */
-// orig 0xa2b60. RC2: none in PMF_BOUNCE, no edge friction for the bat, and the stop speed is
+// orig 0xa2b60, orig client 0xb4270. RC2: none in PMF_BOUNCE, no edge friction for the bat, and the stop speed is
 // g_flPMStopSpeed (PM_Move)
 void PM_Friction()
 {
@@ -1712,17 +1739,17 @@ static void PM_FlyStepAndMove() // a helper, no original
 	VectorSubtract(pmove->velocity, pmove->basevelocity, pmove->velocity);
 }
 
-float PM_JetpackFriction() // orig 0xa2d20, name ours
+float PM_JetpackFriction() // orig 0xa2d20, orig client 0xb44a0, name ours
 {
 	return PM_FlyFriction(RC2Pref(RC2P_Attributes_JetpackPhysFrictionScale).f);
 }
 
-void PM_JetpackAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa2e00, name ours
+void PM_JetpackAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa2e00, orig client 0xb45c0, name ours
 {
 	PM_FlyAccelerate(wishdir, wishspeed, accel, RC2Pref(RC2P_Attributes_JetpackPhysFrictionScale).f);
 }
 
-void PM_JetpackMove() // orig 0xa2eb0, name ours
+void PM_JetpackMove() // orig 0xa2eb0, orig client 0xb46a0, name ours
 {
 	Vector wishvel, wishdir;
 	float wishspeed, flMaxSpeed;
@@ -1752,19 +1779,19 @@ void PM_JetpackMove() // orig 0xa2eb0, name ours
 	PM_FlyStepAndMove();
 }
 
-float PM_ControllerFriction() // orig 0xa3110, name ours
+float PM_ControllerFriction() // orig 0xa3110, orig client 0xb49a0, name ours
 {
 	return PM_FlyFriction(RC2Pref(RC2P_TransformController_FrictionScale).f);
 }
 
-void PM_ControllerAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa31f0, name ours
+void PM_ControllerAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa31f0, orig client 0xb4ac0, name ours
 {
 	PM_FlyAccelerate(wishdir, wishspeed, accel, RC2Pref(RC2P_TransformController_FrictionScale).f);
 }
 
 bool PM_ApplyPullForces();
 
-void PM_ControllerMove() // orig 0xa32a0, name ours
+void PM_ControllerMove() // orig 0xa32a0, orig client 0xb4ba0, name ours
 {
 	Vector wishvel, wishdir;
 	float wishspeed, flMaxSpeed;
@@ -1797,17 +1824,17 @@ void PM_ControllerMove() // orig 0xa32a0, name ours
 	PM_FlyStepAndMove();
 }
 
-float PM_BatFriction() // orig 0xa3500, name ours
+float PM_BatFriction() // orig 0xa3500, orig client 0xb4ea0, name ours
 {
 	return PM_FlyFriction(RC2Pref(RC2P_TransformBat_FrictionScale).f);
 }
 
-void PM_BatAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa35e0, name ours
+void PM_BatAccelerate(const Vector& wishdir, float wishspeed, float accel) // orig 0xa35e0, orig client 0xb4fc0, name ours
 {
 	PM_FlyAccelerate(wishdir, wishspeed, accel, RC2Pref(RC2P_TransformBat_FrictionScale).f);
 }
 
-void PM_BatMove() // orig 0xa3690, name ours
+void PM_BatMove() // orig 0xa3690, orig client 0xb50a0, name ours
 {
 	Vector wishvel, wishdir;
 	float wishspeed, flMaxSpeed;
@@ -1860,7 +1887,7 @@ void PM_BatMove() // orig 0xa3690, name ours
 	PM_FlyStepAndMove();
 }
 
-// orig 0xa39a0. RC2: the air control cap depends on the movement mode
+// orig 0xa39a0, orig client 0xb5480. RC2: the air control cap depends on the movement mode
 void PM_AirAccelerate(Vector wishdir, float wishspeed, float accel)
 {
 	int i;
@@ -1920,7 +1947,7 @@ PM_WaterMove
 
 ===================
 */
-// orig 0xa3ac0. RC2: the speed attribute and the swim speed of each movement mode; shrunk
+// orig 0xa3ac0, orig client 0xb55f0. RC2: the speed attribute and the swim speed of each movement mode; shrunk
 // players step up at 0.2
 void PM_WaterMove()
 {
@@ -2046,7 +2073,7 @@ push where the player looks). Both need their ability (PM_GetAbilityFlags) as a 
 player; the assassin wallhops by nature. Names ours.
 ===================
 */
-void PM_WallhopApply(const Vector& normal) // orig 0xa3ea0, name ours
+void PM_WallhopApply(const Vector& normal) // orig 0xa3ea0, orig client 0xb5ad0, name ours
 {
 	const float flShrink = 0 != g_bPMShrunk ? 0.2 : 1.0;
 	Vector push;
@@ -2084,7 +2111,7 @@ static void PM_WallhopTrace(const Vector& vecDir, Vector& normal, Vector& vecWal
 	}
 }
 
-void PM_CheckWallhop() // orig 0xa4030, name ours
+void PM_CheckWallhop() // orig 0xa4030, orig client 0xb5cd0, name ours
 {
 	const float flShrink = 0 != g_bPMShrunk ? 0.2 : 1.0;
 	Vector normal = g_vecZero, vecWall, vecDir;
@@ -2148,8 +2175,10 @@ void PM_CheckWallhop() // orig 0xa4030, name ours
 	}
 }
 
+// orig client 0xb6330: empty in the client, the jetboost is the server's alone
 void PM_CheckJetboost() // orig 0xa4540, name ours
 {
+#ifndef CLIENT_DLL
 	Vector vecDir;
 
 	if ((PM_GetAbilityFlags(g_iPMPlayerEnt) & 4) == 0 || (pmove->cmd.buttons & IN_JUMP) == 0 || g_iPMMode != PM_MODE_NORMAL)
@@ -2175,6 +2204,7 @@ void PM_CheckJetboost() // orig 0xa4540, name ours
 	VectorMA(pmove->velocity, RC2Pref(RC2P_Attributes_JetboostVelBoost).f, vecDir, pmove->velocity);
 	PM_JetboostEffect(g_iPMPlayerEnt, 0, vecDir, pmove->velocity);
 	PM_SetPlayerTimer(g_iPMPlayerEnt, 1, (int)(RC2Pref(RC2P_Attributes_JetboostReuseDelay).f * 1000.0));
+#endif
 }
 
 
@@ -2184,7 +2214,7 @@ PM_AirMove
 
 ===================
 */
-// orig 0xa46a0. RC2: then the wallhop and the jetboost
+// orig 0xa46a0, orig client 0xb6350. RC2: then the wallhop and the jetboost
 void PM_AirMove()
 {
 	int i;
@@ -2551,7 +2581,7 @@ bool PM_CheckStuck()
 
 // Rocket Crowbar 2: where a chase camera behind physent iTarget sits: 112 units back along
 // angles from 28 above its origin, 4 off whatever the point hull hits on the way
-void PM_GetChaseOrigin(const Vector& angles, int iTarget, const Vector& offset, Vector& vecOut) // orig 0xa4ef0, name ours
+void PM_GetChaseOrigin(const Vector& angles, int iTarget, const Vector& offset, Vector& vecOut) // orig 0xa4ef0, orig client 0xb6de0, name ours
 {
 	physent_t* pe = &pmove->physents[iTarget];
 	Vector forward, start, end;
@@ -2573,7 +2603,7 @@ void PM_GetChaseOrigin(const Vector& angles, int iTarget, const Vector& offset, 
 PM_SpectatorMove
 ===============
 */
-// orig 0xa4fc0. RC2's is an older shape than SDK 2.3's: roaming also when there is no
+// orig 0xa4fc0, orig client 0xb6ef0. RC2's is an older shape than SDK 2.3's: roaming also when there is no
 // target, the stop speed is g_flPMStopSpeed, and a tracking spectator is put behind the
 // target (PM_GetChaseOrigin) instead of on it
 void PM_SpectatorMove()
@@ -2590,6 +2620,11 @@ void PM_SpectatorMove()
 	// there a two different main move types : track player or moce freely (OBS_ROAMING)
 	// doesn't need excate track position, only to generate PVS, so just copy
 	// targets position and real view position is calculated on client (saves server CPU)
+
+#ifdef CLIENT_DLL
+	if (0 != pmove->runfuncs)
+		g_iPMSpecView = 1;
+#endif
 
 	if (pmove->iuser1 == OBS_ROAMING || pmove->iuser2 == 0)
 	{
@@ -2683,6 +2718,105 @@ void PM_SpectatorMove()
 				break;
 		}
 
+#ifdef CLIENT_DLL
+		// Rocket Crowbar 2's client places the view itself (client 0xb6ef0): no target keeps
+		// the last view; in-eye looks from behind the target at the second target, smoothed
+		if (target == pmove->numphysent)
+		{
+			if (0 != pmove->runfuncs)
+			{
+				pmove->origin = v_origin;
+				pmove->angles = v_angles;
+				pmove->velocity = vec3_origin;
+				g_bPMSetViewAngles = 1;
+				g_bPMSetViewOrigin = 1;
+			}
+			return;
+		}
+
+		int target2 = 0;
+		if (pmove->iuser1 == OBS_IN_EYE && 0 != pmove->iuser3)
+		{
+			for (target2 = 0; target2 < pmove->numphysent; target2++)
+			{
+				if (pmove->physents[target2].info == pmove->iuser3)
+					break;
+			}
+			if (target2 == pmove->numphysent)
+				target2 = -1;
+		}
+
+		if (pmove->iuser1 == OBS_CHASE_LOCKED)
+		{
+			angles[0] = 0;
+			angles[1] = pmove->physents[target].angles[1];
+			angles[2] = pmove->physents[target].angles[2];
+			if (0 != pmove->runfuncs)
+				g_iPMSpecView |= 6;
+		}
+		else if (pmove->iuser1 == OBS_IN_EYE)
+		{
+			if (target2 < 1)
+			{
+				// the original has a branch each for -1 and 0, the same
+				angles = pmove->angles;
+			}
+			else
+			{
+				angles = pmove->physents[target2].origin - pmove->physents[target].origin;
+				VectorAngles(angles, angles);
+
+				if ((g_iSpecChaseFlags & 0x20) == 0)
+					angles[0] = -angles[0] + 12.5;
+				else
+					angles[0] = -angles[0] - 12.5;
+
+				if ((g_iSpecChaseFlags & 0x10) == 0)
+					angles[1] = angles[1] - 22.5;
+				else
+					angles[1] = angles[1] + 22.5;
+
+				// swing to the other side when the second target is hidden from there
+				Vector vecChase;
+				PM_GetChaseOrigin(angles, target, g_vecZero, vecChase);
+				pmtrace_t trace = *pmove->PM_TraceLine(vecChase, pmove->physents[target2].origin, PM_STUDIO_IGNORE, 2, -1);
+				if (trace.fraction != 1.0)
+				{
+					if ((g_iSpecChaseFlags & 0x10) == 0)
+						angles[1] = angles[1] + 45.0;
+					else
+						angles[1] = angles[1] - 45.0;
+				}
+			}
+
+			if (0 != pmove->runfuncs)
+			{
+				g_iPMSpecView |= 6;
+				InterpolateAngles(s_vecInEyeAngles, angles, angles, 0.1f);
+				s_vecInEyeAngles = angles;
+			}
+		}
+		else
+		{
+			angles = pmove->angles;
+		}
+
+		PM_GetChaseOrigin(angles, target, g_vecZero, vecOrigin);
+
+		pmove->origin = vecOrigin;
+		pmove->angles = angles;
+		pmove->velocity = vec3_origin;
+
+		if (0 != pmove->runfuncs)
+		{
+			v_angles = pmove->angles;
+			g_bPMSetViewAngles = 1;
+			v_origin = pmove->origin;
+			g_bPMSetViewOrigin = 1;
+		}
+	}
+}
+#else
 		if (target == pmove->numphysent)
 			return;
 
@@ -2722,6 +2856,7 @@ void PM_SpectatorMove()
 		VectorCopy(vec3_origin, pmove->velocity);
 	}
 }
+#endif
 
 /*
 ==================
@@ -2765,7 +2900,7 @@ void PM_FixPlayerCrouchStuck(int direction)
 	VectorCopy(test, pmove->origin); // Failed
 }
 
-// orig 0xa5440. RC2: a shrunk player is never ducked and stays in the point hull
+// orig 0xa5440, orig client 0xb7920. RC2: a shrunk player is never ducked and stays in the point hull
 void PM_UnDuck()
 {
 	int i;
@@ -2819,7 +2954,7 @@ void PM_UnDuck()
 	}
 }
 
-// orig 0xa55e0. RC2: no ducking when shrunk or in a movement mode
+// orig 0xa55e0, orig client 0xb7b30. RC2: no ducking when shrunk or in a movement mode
 void PM_Duck()
 {
 	int i;
@@ -2912,7 +3047,7 @@ void PM_Duck()
 	}
 }
 
-// orig 0xa5840. RC2: climb speed from the speed attribute or the movement mode, jump-off from
+// orig 0xa5840, orig client 0xb7e30. RC2: climb speed from the speed attribute or the movement mode, jump-off from
 // the jump attribute. halflife-updated's maxspeed cap and ducked climb speed dropped (SDK 2.3
 // and RC2 have neither)
 void PM_LadderMove(physent_t* pLadder)
@@ -3341,7 +3476,7 @@ void PM_PreventMegaBunnyJumping()
 PM_Jump
 =============
 */
-// orig 0xa6380. RC2: the bat doesn't jump here; heights from rc2.ini and the jump attribute
+// orig 0xa6380, orig client 0xb8c80. RC2: the bat doesn't jump here; heights from rc2.ini and the jump attribute
 // (0.2 when shrunk), the houndeye's own height, the other modes jump in PM_AssassinJump and
 // PM_HeadcrabJump; sets the wallhop and jetboost timers. No tfc sounds, and any feigning
 // player (deadflag 5) can't jump.
@@ -3533,9 +3668,18 @@ static void PM_ChargedJumpSwim(float flWater, float flSlime, float flLava) // a 
 	}
 }
 
-void PM_AssassinJump() // orig 0xa67b0, name ours
+void PM_AssassinJump() // orig 0xa67b0, orig client 0xb91c0, name ours
 {
+#ifdef CLIENT_DLL
+	// the client keeps the charge of the move that ran the functions for the replays
+	int iCharge = PM_GetPlayerTimer(g_iPMPlayerEnt, 2);
+	if (0 != pmove->runfuncs)
+		s_iAssassinCharge = iCharge;
+	else
+		iCharge = s_iAssassinCharge;
+#else
 	const int iCharge = PM_GetPlayerTimer(g_iPMPlayerEnt, 2);
+#endif
 	if (iCharge < 0)
 		return;
 
@@ -3579,9 +3723,18 @@ void PM_AssassinJump() // orig 0xa67b0, name ours
 	PM_FixupGravityVelocity();
 }
 
-void PM_HeadcrabJump() // orig 0xa6a90, name ours
+void PM_HeadcrabJump() // orig 0xa6a90, orig client 0xb9570, name ours
 {
+#ifdef CLIENT_DLL
+	// the client keeps the charge of the move that ran the functions for the replays
+	int iCharge = PM_GetPlayerTimer(g_iPMPlayerEnt, 2);
+	if (0 != pmove->runfuncs)
+		s_iHeadcrabCharge = iCharge;
+	else
+		iCharge = s_iHeadcrabCharge;
+#else
 	const int iCharge = PM_GetPlayerTimer(g_iPMPlayerEnt, 2);
+#endif
 	if (iCharge < 0)
 		return;
 
@@ -3706,7 +3859,7 @@ void PM_CheckWaterJump()
 	pmove->usehull = savehull;
 }
 
-// orig 0xa6f30. RC2: no fall pain sounds, and no screen punch for the assassin and headcrab
+// orig 0xa6f30, orig client 0xb9b70. RC2: no fall pain sounds, and no screen punch for the assassin and headcrab
 void PM_CheckFalling()
 {
 	if (pmove->onground != -1 &&
@@ -3775,7 +3928,7 @@ static void PM_PullLiftOff() // a helper, no original
 	}
 }
 
-bool PM_ApplyPullForces() // orig 0xa7080, name ours
+bool PM_ApplyPullForces() // orig 0xa7080, orig client 0xb9d20, name ours
 {
 	bool bPulled = false;
 	Vector vecPull = g_vecZero;
@@ -3945,7 +4098,7 @@ PM_DropPunchAngle
 
 =============
 */
-// orig 0xa7760. Not byte-identical to SDK 2.3's, but it reads the same
+// orig 0xa7760, orig client 0xba5d0. Not byte-identical to SDK 2.3's, but it reads the same
 void PM_DropPunchAngle(Vector& punchangle)
 {
 	float len;
@@ -3962,7 +4115,7 @@ PM_CheckParamters
 
 ==============
 */
-// orig 0xa77b0. RC2: the assassin, houndeye and headcrab run at their own speed; dead view
+// orig 0xa77b0, orig client 0xba640. RC2: the assassin, houndeye and headcrab run at their own speed; dead view
 // height set as SDK 2.3 does (z only). halflife-updated's slow-down while +use on the ground
 // is not RC2's and is dropped
 void PM_CheckParamters()
@@ -4045,7 +4198,7 @@ void PM_CheckParamters()
 	}
 }
 
-// orig 0xa7a20. RC2: a negative duck time (the transforms' refire wait) counts up to 0, and
+// orig 0xa7a20, orig client 0xba950. RC2: a negative duck time (the transforms' refire wait) counts up to 0, and
 // player timers 0 and 1 count down while jump isn't held
 void PM_ReduceTimers()
 {
@@ -4102,7 +4255,7 @@ perch (a point, or an offset in a physent's frame) until something pulls it off.
 whether the move is done. Name ours.
 =============
 */
-bool PM_BatPerchMove() // orig 0xa7c00, name ours
+bool PM_BatPerchMove() // orig 0xa7c00, orig client 0xbabb0, name ours
 {
 	int iAttach;
 	Vector vecOffset;
@@ -4122,7 +4275,9 @@ bool PM_BatPerchMove() // orig 0xa7c00, name ours
 
 	if (PM_ApplyPullForces())
 	{
-		PM_BatUnperch(g_iPMPlayerEnt);
+#ifndef CLIENT_DLL
+		PM_BatUnperch(g_iPMPlayerEnt); // the client only stops predicting the perch
+#endif
 		return false;
 	}
 
@@ -4266,7 +4421,7 @@ Numtouch and touchindex[] will be set if any of the physents
 were contacted during the move.
 =============
 */
-// orig 0xa7dd0. RC2: the race mode hands the move over; a rider is carried on the ridden
+// orig 0xa7dd0, orig client 0xbae00. RC2: the race mode hands the move over; a rider is carried on the ridden
 // player's shoulder; PMF_FROZEN stops everything; the controller and the bat have moves of
 // their own; ladders, step sounds and the jump differ per mode; pull forces; jetpack and
 // AF grenade physics. halflife-updated's "duck to get unstuck" is not RC2's and is dropped.
@@ -4296,6 +4451,16 @@ void PM_PlayerMove(qboolean server)
 
 	// Convert view angles to vectors
 	AngleVectors(pmove->angles, &pmove->forward, &pmove->right, &pmove->up);
+
+#ifdef CLIENT_DLL
+	// the spectator move sets these again (PM_SpectatorMove); view.cpp reads them
+	if (0 != pmove->runfuncs)
+	{
+		g_iPMSpecView = 0;
+		g_bPMSetViewAngles = 0;
+		g_bPMSetViewOrigin = 0;
+	}
+#endif
 
 	// PM_ShowClipBox();
 
@@ -4778,7 +4943,7 @@ and client.  This will ensure that prediction behaves appropriately.
 */
 
 // Rocket Crowbar 2: the callback PM_Move gives the game's hide/restore hooks (PM_SETENTFUNC)
-static void PM_SetEntsByInfo(int iInfo, int iSolid, float* vecOrigin) // orig 0xa8d10, name ours (not in files-rc2.tsv)
+static void PM_SetEntsByInfo(int iInfo, int iSolid, float* vecOrigin) // orig 0xa8d10, orig client 0xbc140, name ours (in neither files-rc2.tsv nor files-client.tsv: Ghidra missed it); unused by the client
 {
 	int i;
 
@@ -4817,7 +4982,7 @@ invoked by each side as appropriate.  There should be no distinction, internally
 and client.  This will ensure that prediction behaves appropriately.
 */
 
-// orig 0xa8e60 (not in files-rc2.tsv: Ghidra missed it). RC2: reads the player's index,
+// orig 0xa8e60, orig client 0xbc2f0 (not in files-rc2.tsv: Ghidra missed it). RC2: reads the player's index,
 // shrink and movement flags from physinfo and its mode and ride from the game, hides the
 // player's own entities and those it sees through, sets the stop speed, and always resets
 // friction (halflife-updated only for MOVETYPE_WALK; SDK 2.3 only in single player)
@@ -4837,8 +5002,10 @@ void PM_Move(struct playermove_s* ppmove, qboolean server)
 	g_iPMRideEnt = *pRide & 0x7f;
 	g_bPMRideLeft = (*pRide >> 7) & 1;
 
+#ifndef CLIENT_DLL
 	PM_HideOwnedEnts(g_iPMPlayerEnt, PM_SetEntsByInfo);
 	PM_HideViewers(g_iPMPlayerEnt, PM_SetEntsByInfo);
+#endif
 
 	g_flPMStopSpeed = pmove->movevars->stopspeed;
 	if (0 != g_bPMShrunk)
@@ -4895,14 +5062,19 @@ void PM_Move(struct playermove_s* ppmove, qboolean server)
 		pmove->flags &= ~FL_ONGROUND;
 	}
 
+#ifdef CLIENT_DLL
+	// the client hides nothing; it records where the move left this player
+	PM_SetPredictedOrigin(g_iPMPlayerEnt, pmove->origin);
+#else
 	PM_RestoreOwnedEnts(g_iPMPlayerEnt, PM_SetEntsByInfo);
 	PM_RestoreViewers(g_iPMPlayerEnt, PM_SetEntsByInfo);
+#endif
 
 	// Reset friction after each movement so FrictionModifier Triggers work still.
 	pmove->friction = 1.0f;
 }
 
-int PM_GetVisEntInfo(int ent)
+int PM_GetVisEntInfo(int ent) // orig client 0xbc610 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 {
 	if (ent >= 0 && ent <= pmove->numvisent)
 	{
@@ -4965,45 +5137,17 @@ bool PM_GetHullBounds(int hullnumber, float* mins, float* maxs)
 
 #ifdef CLIENT_DLL
 /*
-Rocket Crowbar 2: the client's side of the game hooks pm_rc2.h declares, and its copy of the
-rc2.ini values the movement reads. client.dll has the rc2.ini key table too (its strings are in
-it) and its own versions of these hooks; neither is reconstructed yet, so these answer as the
-server's hooks do for "no such player". VERIFY all of it against client.dll: until then the
-client predicts zero for every rc2.ini speed and height (reference/dossiers/p6.md).
+Rocket Crowbar 2: the client's side of the game hooks pm_rc2.h declares. client.dll has its own
+versions: the rider and entity box in cl_dll/rc2/pm_client.cpp, the race move and pullers in
+cl_dll/rc2/pullers_client.cpp, rc2.ini's values in cl_dll/rc2/rc2prefs_client.cpp, the
+transforms' (PM_GetPlayerMode, PM_GetBatPerch, the headcrab leap) in cl_dll/rc2/transform_hud.cpp.
+The client's move doesn't call the hide/restore hooks, PM_BatUnperch, PM_HeadcrabLeapHit or the
+jetboost's energy and effect.
 */
-rc2prefvalue_t g_rc2PrefValues[RC2P_COUNT];
-
-float PM_GetAttributeScale(int iWhich, int iEnt) { return 1.0f; }
-int PM_GetAbilityFlags(int iEnt) { return 0; }
-void PM_SetPlayerTimer(int iEnt, int iSlot, int iMsec) {}
-int PM_GetPlayerTimer(int iEnt, int iSlot) { return 0; }
-float PM_GetEnergy(int iEnt) { return 100.0f; }
-void PM_UseEnergy(int iEnt, float flAmount, float flRechargeDelay) {}
-void PM_JetboostEffect(int iEnt, int iFlag, float* vecDir, float* vecVelocity) {}
-void PM_HideViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
-void PM_RestoreViewers(int iEnt, PM_SETENTFUNC pfnSet) {}
-unsigned char* PM_GetRideInfo(int iEnt)
-{
-	static unsigned char s_ucNone = 0;
-	return &s_ucNone;
-}
-void PM_GetEntityBox(int iEntIndex, float* vecOrigin, float* vecVAngle, float* vecMins, float* vecMaxs) {}
-int PM_GetPlayerMode(int iEnt) { return 0; }
-void PM_HideOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
-void PM_RestoreOwnedEnts(int iEnt, PM_SETENTFUNC pfnSet) {}
-int PM_GetBatPerch(int iEnt, int* piAttachInfo, float* vecOffset) { return 0; }
-void PM_BatUnperch(int iEnt) {}
-void PM_SetHeadcrabLeap(int iEnt, int bLeaping) {}
-int PM_GetHeadcrabLeap(int iEnt) { return 0; }
-int PM_HeadcrabLeapHit(int iEnt, int iHitInfo, float flSpeed) { return 0; }
-void PM_RaceMove() {}
-bool PM_GetPlayerTether(int playerEnt, int slot, float* org, float* force, float* dist) { return false; }
-bool PM_GetPlayerPullVec(int playerEnt, float* vec) { return false; }
-void PM_ClearPlayerPull(int playerEnt) {}
-void PM_GetGlobalPuller(int idx, float* org, float* force, float* dist)
-{
-	org[0] = org[1] = org[2] = 0;
-	*force = 0;
-	*dist = 0;
-}
+// TEMP STUB (c4-P): real ones belong in the client's player-state code (client 0x4f480-0x4f5c0,
+// not this package). Weak, so the real ones replace them; each answers as for "no such player".
+__attribute__((weak)) float PM_GetAttributeScale(int iWhich, int iEnt) { return 1.0f; }
+__attribute__((weak)) int PM_GetAbilityFlags(int iEnt) { return 0; }
+__attribute__((weak)) void PM_SetPlayerTimer(int iEnt, int iSlot, int iMsec) {}
+__attribute__((weak)) int PM_GetPlayerTimer(int iEnt, int iSlot) { return 0; }
 #endif

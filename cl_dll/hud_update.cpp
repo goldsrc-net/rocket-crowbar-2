@@ -28,6 +28,8 @@ extern float v_idlescale;
 float in_fov;
 extern void HUD_SetCmdBits(int bits);
 
+// orig client 0xa8e00. SDK 2.3's; halflife-updated takes the weapon bits from its Weapons
+// message (RC2 copies cdata->iWeaponBits), which this tree's server sends
 bool CHud::UpdateClientData(client_data_t* cdata, float time)
 {
 	memcpy(m_vecOrigin, cdata->origin, sizeof(Vector));

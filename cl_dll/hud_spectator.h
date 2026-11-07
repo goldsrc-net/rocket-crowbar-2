@@ -151,4 +151,25 @@ private:
 	int m_lastSecondaryObject;
 
 	cameraWayPoint_t m_CamPath[MAX_CAM_WAYPOINTS];
+
+public:
+	// c4: Rocket Crowbar 2's spectator is an SDK 2.3 spectator before SDK 2.3's release: the
+	// spectator keeps its own main and inset modes (+0x14, +0x18; m_iDrawCycle follows at +0x1c),
+	// the player it tracks (+0x950) and the view angles the overview is drawn with (+0x964,
+	// view.cpp sets them). Names after SDK 2.3's SetModes arguments; the other two ours.
+	int m_iMainMode;
+	int m_iInsetMode;
+	int m_iTrackedPlayer; // name ours
+	Vector m_mapAngles;	  // name ours
 };
+
+// RC2's (SDK 2.2's) spectator modes. Names ours; VERIFY mode 1.
+#define MAIN_MODE_1 1
+#define MAIN_MODE_CHASE 2
+#define MAIN_MODE_ROAMING 3
+#define MAIN_MODE_INEYE 4
+#define MAIN_MODE_MAP 5
+#define INSET_MODE_OFF 0
+#define INSET_MODE_CHASE 1
+#define INSET_MODE_INEYE 2
+#define INSET_MODE_MAP 3

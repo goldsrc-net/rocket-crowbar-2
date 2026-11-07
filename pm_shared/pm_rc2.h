@@ -75,3 +75,12 @@ bool PM_GetPlayerTether(int playerEnt, int slot, float* org, float* force, float
 bool PM_GetPlayerPullVec(int playerEnt, float* vec);								  // rc2.dll 0xa9840
 void PM_ClearPlayerPull(int playerEnt);											  // rc2.dll 0xa98b0
 void PM_GetGlobalPuller(int idx, float* org, float* force, float* dist);			  // rc2.dll 0xa98f0
+
+#ifdef CLIENT_DLL
+// The client's own (client.dll, names ours): the pullers' reset and the user messages that
+// feed these hooks, for CHud::Init to hook
+void PM_ResetPullers();												   // client 0xbd0e0 (cl_dll/rc2/pullers_client.cpp)
+int __MsgFunc_PullerCtrl(const char* pszName, int iSize, void* pbuf); // client 0xbd1f0 (cl_dll/rc2/pullers_client.cpp)
+int __MsgFunc_PlrStat(const char* pszName, int iSize, void* pbuf);	   // client 0xaf9b0 (cl_dll/rc2/pm_client.cpp)
+int __MsgFunc_RCCFG(const char* pszName, int iSize, void* pbuf);	   // client 0xbd5c0 (cl_dll/rc2/rc2prefs_client.cpp)
+#endif

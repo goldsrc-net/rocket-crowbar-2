@@ -47,6 +47,7 @@ bool CHudFlashlight::Init()
 	return true;
 }
 
+// orig client 0x9ee50. Not byte-identical to SDK 2.3's, but it reads the same
 void CHudFlashlight::Reset()
 {
 	m_fFade = 0;

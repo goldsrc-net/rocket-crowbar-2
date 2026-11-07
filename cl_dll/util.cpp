@@ -25,6 +25,11 @@
 #include "cl_util.h"
 #include <string.h>
 
+// RC2's util.cpp also has SDK 2.3's vector helpers (and Length and VectorScale); halflife-updated
+// keeps one copy of each, in pm_shared/pm_math.cpp, which reads the same:
+// orig client 0xcbaf0 Length, orig client 0xcbb30 VectorAngles, orig client 0xcbc50 VectorNormalize,
+// orig client 0xcbcc0 VectorInverse, orig client 0xcbcf0 VectorScale, orig client 0xcbd30 VectorMA
+
 HSPRITE LoadSprite(const char* pszName)
 {
 	int iRes;

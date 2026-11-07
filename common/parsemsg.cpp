@@ -155,16 +155,19 @@ char* READ_STRING()
 	return string;
 }
 
+// orig client 0xaf8f0. Not byte-identical to SDK 2.3's, but it reads the same
 float READ_COORD()
 {
 	return (float)(READ_SHORT() * (1.0 / 8));
 }
 
+// orig client 0xaf920 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 float READ_ANGLE()
 {
 	return (float)(READ_CHAR() * (360.0 / 256));
 }
 
+// orig client 0xaf950 (not in files-client.tsv: Ghidra missed it). Not byte-identical to SDK 2.3's, but it reads the same
 float READ_HIRESANGLE()
 {
 	return (float)(READ_SHORT() * (360.0 / 65536));
