@@ -681,20 +681,10 @@ void CBasePlayer::PackDeadPlayerItems()
 				case GR_PLR_DROP_GUN_ACTIVE:
 					if (m_pActiveItem && pPlayerItem == m_pActiveItem)
 					{
-						CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)pPlayerItem;
-						int nIndex = iPW++;
-
-						// this is the active item. Pack it.
-						rgpPackWeapons[nIndex] = pWeapon;
-
-						// Reload the weapon before dropping it if we have ammo
-						int j = V_min(pWeapon->iMaxClip() - pWeapon->m_iClip, m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
-
-						// Add them to the clip
-						pWeapon->m_iClip += j;
-						m_rgAmmo[pWeapon->m_iPrimaryAmmoType] -= j;
-
-						TabulateAmmo();
+						// this is the active item. Pack it. RC2's (orig 0x95280, as SDK 2.3): halflife-updated
+						// reloaded the weapon from the player's ammo before packing it (a design change;
+						// mod-rockcrowbar's the same)
+						rgpPackWeapons[iPW++] = (CBasePlayerWeapon*)pPlayerItem;
 					}
 					break;
 
@@ -1271,7 +1261,7 @@ void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 	if (m_iTransformType != 0)
 		Transform_Killed();
 
-	m_flRespawnTimer = 0.0f;
+	m_flRespawnTimer = 0.0f; // halflife-updated's fix, kept (Steven, 2026-11-07): each death counts from 0
 
 	pev->deadflag = DEAD_DYING;
 	pev->movetype = MOVETYPE_TOSS;
@@ -6270,8 +6260,10 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 		// item we want to drop and hit a BREAK;  pWeapon is the item.
 		if (pWeapon)
 		{
-			if (!g_pGameRules->GetNextBestWeapon(this, pWeapon))
-				return; // can't drop the item they asked for, may be our last item or something we can't holster
+			// RC2's (orig 0x9e630, as SDK 2.3): drops it whatever GetNextBestWeapon says; the refusal
+			// (Valve's 2013 SDK, halflife-updated's seed) is a design change, what a player may drop
+			// (mod-rockcrowbar's the same)
+			g_pGameRules->GetNextBestWeapon(this, pWeapon);
 
 			UTIL_MakeVectors(pev->angles);
 

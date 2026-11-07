@@ -49,6 +49,8 @@ design or balance, or added a feature; halflife-updated's evident bug fixes stay
 in `reference/audit/FIXES.md`). What halflife-updated changed and we keep, besides restyling and
 the crash guards listed under "Crashes in the original":
 
+- **A death's respawn count starts from 0** (`dlls/player.cpp` Killed): halflife-updated's reset of
+  m_flRespawnTimer at each death, kept in both projects as a stale-count guard (Steven, 2026-11-07).
 - **Flying monsters' roll and monsters' activity changes are halflife-updated's fixes**
   (`dlls/flyingmonster.cpp` ChangeYaw: the roll steps by the time since the last call, 343bbb2's
   220 * delta, not its HL25 backport's 220 * 220 * delta; `dlls/monsters.cpp` SetActivity: the new

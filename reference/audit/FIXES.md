@@ -136,7 +136,7 @@ rva        file                     function                           what half
 0x1eaf20   player.cpp               CBasePlayer::RemoveAllItems        empty CurWeapon dropped (83c18d3, halflife#692)              design   the fix moved it into UpdateClientData, which this tree
                                                                                                                                          doesn't have; dropping it alone brings #692 back (mod-
                                                                                                                                          rc2 keeps the message too)
-0x1eb6a0   player.cpp               CBasePlayer::Killed                zeroes the death-frame count (ac6b664, HL25 corpses)         design   HL25's multiplayer corpse change
+0x1eb6a0   player.cpp               CBasePlayer::Killed                zeroes the death-frame count (ac6b664, HL25 corpses)         fix      HL25's multiplayer corpse change
 0x1ec080   player.cpp               CBasePlayer::WaterMove             drown damage counts health lost (3718cf2)                    fix      god mode gained health on surfacing
 0x1ec080   player.cpp               CBasePlayer::WaterMove             swim sounds only with the head under (c2902f8,               fix      breathing sounds in shallow water
                                                                        halflife#3110)
@@ -214,6 +214,15 @@ Counts: fix 28 (27 rows and UpdateSound), design 12, unclear 4.
 
 ## mod-rc2 functions outside the audits with a halflife-updated change that a mod-rockcrowbar verdict calls design
 
-Not reverts (RC2's own functions, reconstructed keeping halflife-updated's code), so not changed here:
-`CBasePlayer::PackDeadPlayerItems` (reload before packing), `CBasePlayer::Killed` (death-frame count),
-`CBasePlayer::DropPlayerItem` (refusal), `CBasePlayer::UpdatePlayerSound` (vectors commented out).
+RC2's own functions, reconstructed keeping halflife-updated's code. Checked against RC2's decompile
+afterwards (2026-11-07, same verdicts in both projects):
+- `CBasePlayer::PackDeadPlayerItems` (orig 0x95280): RC2's has no reload before packing; removed in
+  mod-rc2 (design, as mod-rockcrowbar). The empty-satchel check stays in both (fix).
+- `CBasePlayer::DropPlayerItem` (orig 0x9e630): RC2's drops whatever GetNextBestWeapon returns; the
+  refusal is Valve's 2013 SDK (halflife-updated's seed), what a player may drop: removed in mod-rc2
+  (design, as mod-rockcrowbar).
+- `CBasePlayer::Killed`: the respawn count reset at death is kept in both (fix; the SDK code it
+  replaced reset m_iRespawnFrames there too, so it guards a stale count). mod-rockcrowbar's row 139
+  was design; changed to fix and restored there.
+- `CBasePlayer::UpdatePlayerSound`: the vectors stay as they are (mod-rockcrowbar keeps the original's
+  call, decided by Steven).
