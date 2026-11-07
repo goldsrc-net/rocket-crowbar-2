@@ -73,8 +73,8 @@ def norm(t):
 
 def body(text, cls, meth):
     # a definition: at the start of a line after its return type (so a call inside an if doesn't
-    # match), parameters over any lines, then an optional const and // comments (our "// orig 0x"
-    # tags) before the brace
+    # match), parameters over any lines, then an optional const before the brace (comments are
+    # blanked first, so a trailing "// orig 0x" tag doesn't get in the way)
     pat = (r"(?m)^(?:[\w:*&<>,~]+[ \t*&]+)*" + (re.escape(cls) + r"\s*::\s*" if cls else r"(?<![\w:])")
            + re.escape(meth) + r"\s*\([^;{}]*\)\s*(?:const\s*)?(?://[^\n]*\s*)*\{")
     for m in re.finditer(pat, text):
@@ -89,18 +89,28 @@ def body(text, cls, meth):
     return None
 
 
+def blank(text):
+    """Comments and #if 0 blocks as spaces (newlines kept), so body() can't match a commented-out
+    copy of a function (mod-rockcrowbar's combat.cpp keeps an old TraceAttack in /* */)."""
+    def sp(m):
+        return re.sub(r"[^\n]", " ", m.group(0))
+    text = re.sub(r"/\*.*?\*/", sp, text, flags=re.S)
+    text = re.sub(r"//[^\n]*", sp, text)
+    return re.sub(r"(?ms)^[ \t]*#if 0\b.*?^[ \t]*#endif\b[^\n]*", sp, text)
+
+
 files = subprocess.run(["git", "-C", ROOT, "ls-files", "dlls", "pm_shared", "game_shared", "common"],
                        capture_output=True, text=True).stdout.split()
 files = [f for f in files if f.endswith((".cpp", ".h"))]
-cur = {f: open(os.path.join(ROOT, f), encoding="latin-1").read() for f in files}
+cur = {f: blank(open(os.path.join(ROOT, f), encoding="latin-1").read()) for f in files}
 old = {}
 for f in files:
     if sdk:
         p = os.path.join(sdk, f)
-        old[f] = open(p, encoding="latin-1").read() if os.path.exists(p) else None
+        old[f] = blank(open(p, encoding="latin-1").read()) if os.path.exists(p) else None
         continue
     r = subprocess.run(["git", "-C", ROOT, "show", "%s:%s" % (base, f)], capture_output=True)
-    old[f] = r.stdout.decode("latin-1") if r.returncode == 0 else None
+    old[f] = blank(r.stdout.decode("latin-1")) if r.returncode == 0 else None
 seen = set()
 for line in open(tsv).read().split("\n")[1:]:
     if not line:
