@@ -30,6 +30,7 @@
 extern bool FEntIsVisible(entvars_t* pev, entvars_t* pevTarget);
 
 // Landmark class
+// orig 0xd44f0
 void CPointEntity::Spawn()
 {
 	pev->solid = SOLID_NOT;
@@ -49,11 +50,12 @@ void CNullEntity::Spawn()
 {
 	REMOVE_ENTITY(ENT(pev));
 }
-LINK_ENTITY_TO_CLASS(info_null, CNullEntity);
+LINK_ENTITY_TO_CLASS(info_null, CNullEntity); // orig 0xd4520
 
 class CBaseDMStart : public CPointEntity
 {
 public:
+	void Spawn() override; // Rocket Crowbar 2
 	bool KeyValue(KeyValueData* pkvd) override;
 	bool IsTriggered(CBaseEntity* pEntity) override;
 
@@ -61,9 +63,19 @@ private:
 };
 
 // These are the new entry points to entities.
-LINK_ENTITY_TO_CLASS(info_player_deathmatch, CBaseDMStart);
-LINK_ENTITY_TO_CLASS(info_player_start, CPointEntity);
-LINK_ENTITY_TO_CLASS(info_landmark, CPointEntity);
+LINK_ENTITY_TO_CLASS(info_player_deathmatch, CBaseDMStart); // orig 0xd4590
+LINK_ENTITY_TO_CLASS(info_player_start, CPointEntity);		  // orig 0xd4600
+LINK_ENTITY_TO_CLASS(info_player_coop, CPointEntity);		  // orig 0xd4670, Rocket Crowbar 2
+LINK_ENTITY_TO_CLASS(info_landmark, CPointEntity);			  // orig 0xd46e0
+
+// Rocket Crowbar 2: SDK 2.3's deathmatch start had no Spawn of its own; RC2's links the
+// point into the world at its origin.
+// orig 0xd4750
+void CBaseDMStart::Spawn()
+{
+	CPointEntity::Spawn();
+	UTIL_SetOrigin(pev, pev->origin);
+}
 
 bool CBaseDMStart::KeyValue(KeyValueData* pkvd)
 {
@@ -84,6 +96,7 @@ bool CBaseDMStart::IsTriggered(CBaseEntity* pEntity)
 }
 
 // This updates global tables that need to know about entities being removed
+// orig 0xd4810
 void CBaseEntity::UpdateOnRemove()
 {
 	int i;
@@ -121,6 +134,7 @@ void CBaseEntity::SUB_Remove()
 
 
 // Convenient way to explicitly do nothing (passed to functions that require a method)
+// orig 0xd48e0
 void CBaseEntity::SUB_DoNothing()
 {
 }
@@ -133,7 +147,7 @@ TYPEDESCRIPTION CBaseDelay::m_SaveData[] =
 		DEFINE_FIELD(CBaseDelay, m_iszKillTarget, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CBaseDelay, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CBaseDelay, CBaseEntity); // orig 0xd48f0 Save, orig 0xd4920 Restore
 
 bool CBaseDelay::KeyValue(KeyValueData* pkvd)
 {
@@ -179,6 +193,7 @@ void CBaseEntity::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, floa
 }
 
 
+// orig 0xd4a50
 void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	edict_t* pentTarget = NULL;
@@ -202,9 +217,10 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 	}
 }
 
-LINK_ENTITY_TO_CLASS(DelayedUse, CBaseDelay);
+LINK_ENTITY_TO_CLASS(DelayedUse, CBaseDelay); // orig 0xd4b00
 
 
+// orig 0xd4b70
 void CBaseDelay::SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value)
 {
 	//
@@ -347,9 +363,10 @@ TYPEDESCRIPTION CBaseToggle::m_SaveData[] =
 		DEFINE_FIELD(CBaseToggle, m_sMaster, FIELD_STRING),
 		DEFINE_FIELD(CBaseToggle, m_bitsDamageInflict, FIELD_INTEGER), // damage type inflicted
 };
-IMPLEMENT_SAVERESTORE(CBaseToggle, CBaseAnimating);
+IMPLEMENT_SAVERESTORE(CBaseToggle, CBaseAnimating); // orig 0xd4ee0 Save, orig 0xd4f10 Restore
 
 
+// orig 0xd4f40
 bool CBaseToggle::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "lip"))

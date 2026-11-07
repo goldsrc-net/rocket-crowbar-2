@@ -490,6 +490,9 @@ void CSqueak::Holster()
 }
 
 
+// p8: the server's CSqueak::PrimaryAttack and SecondaryAttack are RC2's, in dlls/rc2/squeak.cpp
+// (0xd3440-0xd44ee is work package p8's); the client keeps these.
+#ifdef CLIENT_DLL
 void CSqueak::PrimaryAttack()
 {
 	if (0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
@@ -561,7 +564,11 @@ void CSqueak::SecondaryAttack()
 {
 }
 
+#endif // CLIENT_DLL (p8)
 
+
+// p8: unchanged from SDK 2.3
+// orig 0xd4250
 void CSqueak::WeaponIdle()
 {
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())

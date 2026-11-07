@@ -360,4 +360,14 @@ public:
 	*	Will return @c nullptr if item dropping is disabled for this NPC.
 	*/
 	CBaseEntity* DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng);
+
+	// p8 needs: RC2's one added CBaseMonster virtual (orig slot 147, after StopFollowing;
+	// reference/BASE_VIRTUALS.md). Its default (at 0x74d0, not p8's) turns pev->scale into a
+	// voice pitch offset; CTalkMonster::GetVoicePitch adds it. Name ours. VERIFY: its body is
+	// another package's; p8_stubs.cpp has a TEMP STUB.
+#ifdef CLIENT_DLL
+	virtual int ScalePitchShift() { return 0; }
+#else
+	virtual int ScalePitchShift();
+#endif
 };

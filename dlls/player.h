@@ -356,6 +356,129 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p8 needs: RC2's player members (orig offsets), named here from what p8's code does with them
+	int m_iDrivenEntIndex; // orig +0x69c, name ours: entity index of what the player drives or rides (cleared on death); a snark or grunt he launches gets it as owner. VERIFY: the player package's reading
+
+	// p8 needs (transforms, dlls/rc2/t*.cpp and transform.cpp): RC2's player members the transform
+	// code uses, orig offsets. Names ours. The block at +0x10f8..+0x1173 is shared by all five
+	// transforms; where a slot means something different in each, it has a neutral name and the
+	// comment lists every use.
+	bool m_fRC2Player650;			 // orig +0x650 (byte). Cleared (with physinfo bit 1 and a CLTE 4 message) when a transform starts. VERIFY: what it is (the player package's)
+	float m_flFrameInterval;		 // orig +0x668, the time a player frame took (initialized to 0.0001); scales regen and drains. VERIFY: the player package sets it
+	int m_iRC2Player68c;			 // orig +0x68c. Nonzero blocks transform attacks and regen (func_tank's controls also test it). VERIFY: what it is
+	int m_iChosenTransform;			 // orig +0x710, 0-4: the transform the player picked (assassin, houndeye, controller, bat, headcrab); m_iTransform becomes this + 1
+	float m_flEnergy;				 // orig +0x758, 0-100: the energy transforms and their powers cost
+	float m_flEnergyRegenTime;		 // orig +0x760, energy does not regenerate before this time (-1: none)
+	bool m_fShieldUp;				 // orig +0x778 (byte). Cleared when a transform starts; RC2_ShieldFilterDamage tests it. VERIFY: the HEV shield's package
+	CBaseEntity* m_pRC2Player79c;	 // orig +0x79c, an entity of the player's own, shown (EF_NODRAW cleared, m_iRC2Flags 8) while a transform is in progress and hidden again (flags 0) when it completes: the client draws the change with it (CLTE 0x40). VERIFY: what it is
+	int m_iTransform;				 // orig +0x10f8: 0 human, 1 assassin, 2 houndeye, 3 controller, 4 bat, 5 headcrab (6 is also tested: no RC caps)
+	bool m_fTransforming;			 // orig +0x10fc (byte): between StartTransform/StartUntransform and its Finish
+	float m_flTransformDoneTime;	 // orig +0x1100: when the change in progress completes
+	float m_flPreTransformHealth;	 // orig +0x1104
+	float m_flPreTransformMaxHealth; // orig +0x1108
+	Vector m_vecTransformAngles;	 // orig +0x110c: the (yaw-only) angles the change is made at
+	float m_flTransformNextAttack1;	 // orig +0x1118: refire times; each transform attack pushes all four out
+	float m_flTransformNextAttack2;	 // orig +0x111c
+	float m_flTransformNextAttack3;	 // orig +0x1120 (assassin, houndeye: cloak / locator toggle sound time)
+	float m_flTransformNextAttack4;	 // orig +0x1124 (houndeye: locator toggle time)
+	float m_flTransformLastAttack;	 // orig +0x1128, -1 none
+	float m_flTransformIdleTime;	 // orig +0x112c: assassin, when its idle animation was picked (time - 120 when a transform starts)
+	int m_iTransformIdleAnim;		 // orig +0x1130: assassin, the idle animation picked (0 or 1)
+	float m_flTransformVar1;		 // orig +0x1134: assassin gun spread; bat and controller health regen accumulator; headcrab and houndeye last yaw
+	float m_flTransformVar2;		 // orig +0x1138: assassin, headcrab and houndeye health regen accumulator
+	float m_flTransformVar3;		 // orig +0x113c: only cleared
+	float m_flTransformVar4;		 // orig +0x1140: only cleared
+	float m_flTransformTimer1;		 // orig +0x1144: assassin kick hit time; bat, controller and headcrab next pain sound; houndeye beam fire time
+	float m_flTransformTimer2;		 // orig +0x1148: bat idle animation time; controller throw / charge animation time; houndeye sonic blast time
+	float m_flTransformTimer3;		 // orig +0x114c: bat bite hit time; controller charge start time; houndeye sleep animation time
+	float m_flTransformTimer4;		 // orig +0x1150: houndeye next pain sound
+	int m_iTransformState1;			 // orig +0x1154: assassin zoom; bat roost (0 flying, 1 landed on a floor, 2 hanging from a ceiling); controller throwing; headcrab leaping; houndeye beam charging
+	int m_iTransformState2;			 // orig +0x1158: assassin cloak; bat roost entity index; controller charging; houndeye locator
+	int m_iTransformState3;			 // orig +0x115c: assassin kick phase (1, 2); houndeye sonic (the sound picked, 1 or 2)
+	int m_iTransformState4;			 // orig +0x1160: houndeye sleep (0 awake, 1 lying down, 2 asleep, 3 getting up)
+	Vector m_vecTransformVec;		 // orig +0x1164: bat, where it hangs (from an entity: in that entity's frame)
+	int m_iTransformVar5;			 // orig +0x1170: only cleared
+
+#ifndef CLIENT_DLL
+	// Overrides RC2 gave CBasePlayer in transform.cpp
+	int BloodColor() override;
+	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
+	float BeamCoreDamage() override;
+	float BeamRadialMaxDamage() override;
+	float BeamViewDamage() override;
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override;
+	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override;
+
+	// transform.cpp
+	void Transform_SetAnimation(PLAYER_ANIM playerAnim);
+	void Transform_Think();
+	void Transform_FixAngle();
+	void Transform_Killed();
+	void Transform_DeathSound();
+	void Transform_PainSound();
+	void StartTransform();
+	void FinishTransform();
+	void StartUntransform();
+	void FinishUntransform();
+
+	// tassassin.cpp
+	void TAssassin_SetAnimation(PLAYER_ANIM playerAnim);
+	void TAssassin_Jump();
+	void TAssassin_GunAttack();
+	void TAssassin_KickStart();
+	void TAssassin_KickHit();
+	void TAssassin_Think();
+
+	// tbat.cpp
+	void TBat_SetAnimation(PLAYER_ANIM playerAnim);
+	bool TBat_TryRoost(TraceResult* ptr);
+	void TBat_BiteStart();
+	void TBat_BiteHit();
+	void TBat_Think();
+	void TBat_DeathSound();
+	void TBat_PainSound();
+
+	// tcontroller.cpp
+	void TController_SetAnimation(PLAYER_ANIM playerAnim);
+	void TController_ThrowStart();
+	void TController_ChargeStart();
+	void TController_ChargeLaunch();
+	void TController_ChargeThink();
+	void TController_ThrowRelease();
+	void TController_Think();
+	void TController_DeathSound();
+	void TController_PainSound();
+
+	// theadcrab.cpp
+	void THeadcrab_SetAnimation(PLAYER_ANIM playerAnim);
+	void THeadcrab_Think();
+	void THeadcrab_FixAngle();
+	void THeadcrab_DeathSound();
+	void THeadcrab_PainSound();
+
+	// thoundeye.cpp
+	void THoundeye_SetAnimation(PLAYER_ANIM playerAnim);
+	void THoundeye_SonicStart();
+	void THoundeye_BeamStart();
+	void THoundeye_Jump();
+	void THoundeye_SonicBlast();
+	void THoundeye_BeamFire();
+	void THoundeye_SendStatus();
+	void THoundeye_Think();
+	void THoundeye_FixAngle();
+	void THoundeye_DeathSound();
+	void THoundeye_PainSound();
+	void THoundeye_HandleAnimEvent(MonsterEvent_t* pEvent);
+
+	// The player package's (TEMP STUBs in p8_stubs_transform.cpp, at 0x9a800, 0x9a820, 0x9a730,
+	// 0x9a780): bits of the move-lock mask at +0x648 (the first set / last cleared sets / clears
+	// physinfo bit 2), and the physinfo mask at +0x644 itself
+	void AddMoveLock(int bits);
+	void RemoveMoveLock(int bits);
+	void AddPhysFlags(int bits);
+	void RemovePhysFlags(int bits);
+#endif
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

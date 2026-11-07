@@ -367,6 +367,17 @@ public:
 	// hle time creep vars
 	float m_flPrevPrimaryAttack;
 	float m_flLastFireTime;
+
+	// p8 needs: RC2's two extra attacks and the weapon-sync pair (orig slots 107, 108, 114, 115;
+	// see reference/BASE_VIRTUALS.md, the weapons package owns the final names), and the two
+	// next-attack times among the 8 bytes RC2 added before m_flTimeWeaponIdle. Names ours, from
+	// rc2.ini's [<Weapon>] <Mode>RefireTertiary / RefireQuaternary keys.
+	virtual void TertiaryAttack() {}		// 107: ItemPostFrame on IN_CANCEL, gated by m_flNextTertiaryAttack
+	virtual void QuaternaryAttack() {}		// 108: ItemPostFrame, gated by m_flNextQuaternaryAttack. VERIFY: its button
+	virtual void UpdateWeaponSync() {}		// 114: first thing ItemPostFrame calls each frame; the snark sends gmsgWeaponSync from it
+	virtual void ReadWeaponSync(void* pbuf, int iSize) {} // 115: the client's reader of gmsgWeaponSync, built into the server with stub readers. VERIFY: argument types
+	float m_flNextTertiaryAttack;	// orig +0xb0
+	float m_flNextQuaternaryAttack; // orig +0xb4
 };
 
 
@@ -1161,8 +1172,9 @@ class CTripmine : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
+	int iItemSlot() override { return 5; } // orig 0xecae0
 	bool GetItemInfo(ItemInfo* p) override;
+	// orig 0xecaf0 (unchanged from SDK 2.3)
 	void SetObjectCollisionBox() override
 	{
 		//!!!BUGBUG - fix the model!
@@ -1175,6 +1187,7 @@ public:
 	void Holster() override;
 	void WeaponIdle() override;
 
+	// orig 0xecbb0 (RC2's build had CLIENT_WEAPONS)
 	bool UseDecrement() override
 	{
 #if defined(CLIENT_WEAPONS)
@@ -1186,6 +1199,16 @@ public:
 
 private:
 	unsigned short m_usTripFire;
+
+public:
+	// p8 needs: CTripmine's RC2 members (orig offsets). Spawn clears the four ints, Spawn and
+	// Deploy set the time; what reads them is p9's (CTripmine's attacks, from 0xece60 on), so
+	// the names are neutral until then.
+	int m_iTripmineDC;	  // orig +0xdc. VERIFY: p9
+	int m_iTripmineE0;	  // orig +0xe0. VERIFY: p9
+	int m_iTripmineE4;	  // orig +0xe4. VERIFY: p9
+	int m_iTripmineE8;	  // orig +0xe8. VERIFY: p9
+	float m_flDeployTime; // orig +0xec, name ours
 };
 
 enum squeak_e
@@ -1224,4 +1247,17 @@ public:
 
 private:
 	unsigned short m_usSnarkFire;
+
+public:
+	// p8 needs: CSqueak's RC2 members (orig offsets) and overrides (dlls/rc2/squeak.cpp)
+#ifndef CLIENT_DLL
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void UpdateWeaponSync() override;
+	void ReadWeaponSync(void* pbuf, int iSize) override;
+#endif
+	int m_iSnarksDeployed;		  // orig +0xe0, name ours: live monster_snarks this player owns
+	int m_iCamsDeployed;		  // orig +0xe4, name ours: snark_cams this player owns
+	float m_flNextWeaponSync;	  // orig +0xe8, name ours
+	unsigned short m_usSnarkFire2; // orig +0xee, name ours: the event the snark cam launch plays. VERIFY: set by CSqueak::Precache (p7)
 };

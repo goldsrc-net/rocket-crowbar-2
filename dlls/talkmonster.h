@@ -57,6 +57,9 @@ typedef enum
 	TLK_SMELL,
 	TLK_WOUND,
 	TLK_MORTAL,
+	// p8 needs: CTalkMonster's 4 bytes RC2 added before m_useTime (orig +0x308) are a 19th
+	// sentence group: barney's TalkInit sets it to "BA_MINE". Name ours.
+	TLK_MINE,
 
 	TLK_CGROUPS, // MUST be last entry
 } TALKGROUPNAMES;
@@ -141,7 +144,7 @@ public:
 	void Talk(float flDuration);
 	// For following
 	bool CanFollow();
-	bool IsFollowing() { return m_hTargetEnt != NULL && m_hTargetEnt->IsPlayer(); }
+	bool IsFollowing() { return m_hTargetEnt != NULL && m_hTargetEnt->IsActivePlayer(); } // Rocket Crowbar 2: IsActivePlayer (SDK 2.3: IsPlayer)
 	void StopFollowing(bool clearSchedule) override;
 	void StartFollowing(CBaseEntity* pLeader);
 	virtual void DeclineFollowing() {}

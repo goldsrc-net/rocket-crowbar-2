@@ -427,6 +427,10 @@ public:
 	int m_iRC2Base64;	   // orig +0x64. VERIFY: unread so far
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
 	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
+
+	// p8 needs: the byte at orig +0x66 (inside m_iRC2Base64 above, which the merge has to split)
+	bool m_bFrozen; // orig +0x66, name ours: set to 1 by the freeze grenade's CFreezeTimer and cleared when it thaws; frozen talkers don't speak or follow, a frozen player's weapon does nothing. VERIFY: the freeze package's reading
+	bool m_bAntiFriction; // orig +0x67 (byte, also inside m_iRC2Base64), name ours: set by the antifriction grenade's CAntiFricTimer; a transformed player on it plays the run animation. VERIFY: that package's reading
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

@@ -47,7 +47,7 @@ TYPEDESCRIPTION CTalkMonster::m_SaveData[] =
 		DEFINE_FIELD(CTalkMonster, m_hTalkTarget, FIELD_EHANDLE),
 };
 
-IMPLEMENT_SAVERESTORE(CTalkMonster, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CTalkMonster, CBaseMonster); // orig 0xd55a0 Save, orig 0xd55d0 Restore
 
 // array of friend names
 const char* CTalkMonster::m_szFriends[TLK_CFRIENDS] =
@@ -336,7 +336,7 @@ DEFINE_CUSTOM_SCHEDULES(CTalkMonster){
 	slTlkIdleEyecontact,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CTalkMonster, CBaseMonster);
+IMPLEMENT_CUSTOM_SCHEDULES(CTalkMonster, CBaseMonster); // orig 0xd5600 ScheduleFromName
 
 
 void CTalkMonster::SetActivity(Activity newActivity)
@@ -472,6 +472,10 @@ void CTalkMonster::StartTask(Task_t* pTask)
 }
 
 
+// Rocket Crowbar 2: never turns its head toward an entity whose RC caps (slot 76) have bit 8,
+// and looks for "the player" as edict 1, as SDK 2.3 did (halflife-updated's UTIL_GetLocalPlayer
+// is NULL in multiplayer).
+// orig 0xd5a10
 void CTalkMonster::RunTask(Task_t* pTask)
 {
 	switch (pTask->iTask)
@@ -479,35 +483,35 @@ void CTalkMonster::RunTask(Task_t* pTask)
 	case TASK_TLK_CLIENT_STARE:
 	case TASK_TLK_LOOK_AT_CLIENT:
 	{
-		// Get edict for one player
-		CBaseEntity* pPlayer = UTIL_GetLocalPlayer();
-
-		// track head to the client for a while.
-		if (pPlayer &&
-			m_MonsterState == MONSTERSTATE_IDLE &&
-			!IsMoving() &&
-			!IsTalking())
-		{
-			IdleHeadTurn(pPlayer->pev->origin);
-		}
-		else
+		if (m_MonsterState != MONSTERSTATE_IDLE || IsMoving() || IsTalking())
 		{
 			// started moving or talking
 			TaskFail();
 			return;
 		}
 
+		// Get edict for one player
+		edict_t* pPlayer = INDEXENT(1);
+
+		// track head to the client for a while.
+		if (UTIL_IsValidEntity(pPlayer))
+		{
+			CBaseEntity* pPlayerEnt = CBaseEntity::Instance(pPlayer);
+			if (pPlayerEnt && (pPlayerEnt->GetRCCaps2(0, this) & 8) == 0)
+				IdleHeadTurn(pPlayer->v.origin);
+		}
+
 		if (pTask->iTask == TASK_TLK_CLIENT_STARE)
 		{
 			// fail out if the player looks away or moves away.
-			if ((pPlayer->pev->origin - pev->origin).Length2D() > TLK_STARE_DIST)
+			if ((pPlayer->v.origin - pev->origin).Length2D() > TLK_STARE_DIST) // original bug: pPlayer can be NULL here
 			{
 				// player moved away.
 				TaskFail();
 			}
 
-			UTIL_MakeVectors(pPlayer->pev->angles);
-			if (UTIL_DotPoints(pPlayer->pev->origin, pev->origin, gpGlobals->v_forward) < m_flFieldOfView)
+			UTIL_MakeVectors(pPlayer->v.angles);
+			if (UTIL_DotPoints(pPlayer->v.origin, pev->origin, gpGlobals->v_forward) < m_flFieldOfView)
 			{
 				// player looked away
 				TaskFail();
@@ -524,21 +528,24 @@ void CTalkMonster::RunTask(Task_t* pTask)
 	case TASK_FACE_PLAYER:
 	{
 		// Get edict for one player
-		CBaseEntity* pPlayer = UTIL_GetLocalPlayer();
+		edict_t* pPlayer = INDEXENT(1);
 
-		if (pPlayer)
-		{
-			MakeIdealYaw(pPlayer->pev->origin);
-			ChangeYaw(pev->yaw_speed);
-			IdleHeadTurn(pPlayer->pev->origin);
-			if (gpGlobals->time > m_flWaitFinished && FlYawDiff() < 10)
-			{
-				TaskComplete();
-			}
-		}
-		else
+		if (!pPlayer)
 		{
 			TaskFail();
+			return;
+		}
+		if (!UTIL_IsValidEntity(pPlayer) || !pPlayer->pvPrivateData)
+			return;
+		if ((CBaseEntity::Instance(pPlayer)->GetRCCaps2(0, this) & 8) != 0)
+			return;
+
+		MakeIdealYaw(pPlayer->v.origin);
+		ChangeYaw(pev->yaw_speed);
+		IdleHeadTurn(pPlayer->v.origin);
+		if (gpGlobals->time > m_flWaitFinished && FlYawDiff() < 10)
+		{
+			TaskComplete();
 		}
 	}
 	break;
@@ -546,6 +553,8 @@ void CTalkMonster::RunTask(Task_t* pTask)
 	case TASK_TLK_EYECONTACT:
 		if (!IsMoving() && IsTalking() && m_hTalkTarget != NULL)
 		{
+			if ((m_hTalkTarget->GetRCCaps2(0, this) & 8) != 0)
+				return;
 			// ALERT( at_console, "waiting %f\n", m_flStopTalkTime - gpGlobals->time );
 			IdleHeadTurn(m_hTalkTarget->pev->origin);
 		}
@@ -573,7 +582,8 @@ void CTalkMonster::RunTask(Task_t* pTask)
 		if (IsTalking() && m_hTalkTarget != NULL)
 		{
 			// ALERT(at_console, "walking, talking\n");
-			IdleHeadTurn(m_hTalkTarget->pev->origin);
+			if ((m_hTalkTarget->GetRCCaps2(0, this) & 8) == 0)
+				IdleHeadTurn(m_hTalkTarget->pev->origin);
 		}
 		else
 		{
@@ -594,7 +604,8 @@ void CTalkMonster::RunTask(Task_t* pTask)
 	default:
 		if (IsTalking() && m_hTalkTarget != NULL)
 		{
-			IdleHeadTurn(m_hTalkTarget->pev->origin);
+			if ((m_hTalkTarget->GetRCCaps2(0, this) & 8) == 0)
+				IdleHeadTurn(m_hTalkTarget->pev->origin);
 		}
 		else
 		{
@@ -776,6 +787,7 @@ void CTalkMonster::TalkInit()
 // Scan for nearest, visible friend. If fPlayer is true, look for
 // nearest player
 //=========================================================
+// orig 0xd61f0
 CBaseEntity* CTalkMonster::FindNearestFriend(bool fPlayer)
 {
 	CBaseEntity* pFriend = NULL;
@@ -814,6 +826,10 @@ CBaseEntity* CTalkMonster::FindNearestFriend(bool fPlayer)
 				// don't talk to self or dead people
 				continue;
 
+			// Rocket Crowbar 2: nor to anything with RC cap bit 8
+			if ((pFriend->GetRCCaps2(0, this) & 8) != 0)
+				continue;
+
 			CBaseMonster* pMonster = pFriend->MyMonsterPointer();
 
 			// If not a monster for some reason, or in a script, or prone
@@ -844,19 +860,26 @@ CBaseEntity* CTalkMonster::FindNearestFriend(bool fPlayer)
 	return pNearest;
 }
 
+// Rocket Crowbar 2: plus the scale's pitch shift (slot 147)
+// orig 0xd6420
 int CTalkMonster::GetVoicePitch()
 {
-	return m_voicePitch + RANDOM_LONG(0, 3);
+	return m_voicePitch + ScalePitchShift() + RANDOM_LONG(0, 3);
 }
 
 
+// Rocket Crowbar 2: an active player (slot 73) of class CLASS_PLAYER
+// orig 0xd6450
 void CTalkMonster::Touch(CBaseEntity* pOther)
 {
 	// Did the player touch me?
-	if (pOther->IsPlayer())
+	if (pOther->IsActivePlayer())
 	{
 		// Ignore if pissed at player
 		if ((m_afMemory & bits_MEMORY_PROVOKED) != 0)
+			return;
+
+		if (pOther->Classify() != CLASS_PLAYER)
 			return;
 
 		// Stay put during speech
@@ -867,12 +890,9 @@ void CTalkMonster::Touch(CBaseEntity* pOther)
 		float speed = fabs(pOther->pev->velocity.x) + fabs(pOther->pev->velocity.y);
 		if (speed > 50)
 		{
-			// From https://github.com/FreeSlave/halflife-updated/wiki/Fix-potential-incorrect-facing-in-scripted-sequence
-			if (m_pSchedule != NULL && (m_pSchedule->iInterruptMask & bits_COND_CLIENT_PUSH) != 0)
-			{
-				SetConditions(bits_COND_CLIENT_PUSH);
-				MakeIdealYaw(pOther->pev->origin);
-			}
+			// Rocket Crowbar 2 (as SDK 2.3): no interrupt-mask test, unlike halflife-updated
+			SetConditions(bits_COND_CLIENT_PUSH);
+			MakeIdealYaw(pOther->pev->origin);
 		}
 	}
 }
@@ -891,8 +911,13 @@ void CTalkMonster::IdleRespond()
 	PlaySentence(m_szGrp[TLK_ANSWER], RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE);
 }
 
+// Rocket Crowbar 2: not while frozen
+// orig 0xd6520
 bool CTalkMonster::FOkToSpeak()
 {
+	if (m_bFrozen)
+		return false;
+
 	// if in the grip of a barnacle, don't speak
 	if (m_MonsterState == MONSTERSTATE_PRONE || m_IdealMonsterState == MONSTERSTATE_PRONE)
 	{
@@ -952,6 +977,7 @@ bool CTalkMonster::FIdleStare()
 // IdleHello
 // Try to greet player first time he's seen
 //=========================================================
+// orig 0xd6670
 bool CTalkMonster::FIdleHello()
 {
 	if (!FOkToSpeak())
@@ -965,7 +991,7 @@ bool CTalkMonster::FIdleHello()
 
 		if (pPlayer)
 		{
-			if (FInViewCone(pPlayer) && FVisible(pPlayer))
+			if (FInViewCone(pPlayer) && FVisible(pPlayer) && (pPlayer->GetRCCaps2(0, this) & 8) == 0) // Rocket Crowbar 2: the caps test
 			{
 				m_hTalkTarget = pPlayer;
 
@@ -1006,6 +1032,7 @@ void CTalkMonster::IdleHeadTurn(Vector& vecFriend)
 // FIdleSpeak
 // ask question of nearby friend, or make statement
 //=========================================================
+// orig 0xd6810
 bool CTalkMonster::FIdleSpeak()
 {
 	// try to start a conversation, or make statement
@@ -1040,7 +1067,7 @@ bool CTalkMonster::FIdleSpeak()
 
 	if (pTarget != NULL)
 	{
-		if (pTarget->IsPlayer())
+		if (pTarget->IsActivePlayer() && pTarget->Classify() == CLASS_PLAYER) // Rocket Crowbar 2 (SDK 2.3: IsPlayer())
 		{
 			if (pTarget->IsAlive())
 			{
@@ -1130,6 +1157,7 @@ void CTalkMonster::PlayScriptedSentence(const char* pszSentence, float duration,
 	m_hTalkTarget = pListener;
 }
 
+// orig 0xd6ba0 (the original's CTalkMonster::PlaySentence; unchanged from SDK 2.3)
 void CTalkMonster::PlaySentenceCore(const char* pszSentence, float duration, float volume, float attenuation)
 {
 	Talk(duration);
@@ -1190,6 +1218,7 @@ bool CTalkMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 }
 
 
+// orig 0xd6d30
 Schedule_t* CTalkMonster::GetScheduleOfType(int Type)
 {
 	switch (Type)
@@ -1247,14 +1276,15 @@ Schedule_t* CTalkMonster::GetScheduleOfType(int Type)
 
 		if (!IsTalking() && HasConditions(bits_COND_SEE_CLIENT) && RANDOM_LONG(0, 6) == 0)
 		{
-			CBaseEntity* pPlayer = UTIL_GetLocalPlayer();
+			// Rocket Crowbar 2 (as SDK 2.3): edict 1, not halflife-updated's UTIL_GetLocalPlayer
+			edict_t* pPlayer = INDEXENT(1);
 
 			if (pPlayer)
 			{
 				// watch the client.
-				UTIL_MakeVectors(pPlayer->pev->angles);
-				if ((pPlayer->pev->origin - pev->origin).Length2D() < TLK_STARE_DIST &&
-					UTIL_DotPoints(pPlayer->pev->origin, pev->origin, gpGlobals->v_forward) >= m_flFieldOfView)
+				UTIL_MakeVectors(pPlayer->v.angles);
+				if ((pPlayer->v.origin - pev->origin).Length2D() < TLK_STARE_DIST &&
+					UTIL_DotPoints(pPlayer->v.origin, pev->origin, gpGlobals->v_forward) >= m_flFieldOfView)
 				{
 					// go into the special STARE schedule if the player is close, and looking at me too.
 					return &slTlkIdleWatchClient[1];
@@ -1331,18 +1361,26 @@ void CTalkMonster::TrySmellTalk()
 
 
 
+// Rocket Crowbar 2: a talker shrunk below half size fears anything that isn't (scale 0 counts
+// as full size), and the provoked test asks IsActivePlayer
+// orig 0xd70d0
 int CTalkMonster::IRelationship(CBaseEntity* pTarget)
 {
-	if (pTarget->IsPlayer())
+	if (pev->scale < 0.5 && pev->scale > 0 && (pTarget->pev->scale == 0 || pTarget->pev->scale > 0.5))
+		return R_FR;
+
+	if (pTarget->IsActivePlayer())
 		if ((m_afMemory & bits_MEMORY_PROVOKED) != 0)
 			return R_HT;
 	return CBaseMonster::IRelationship(pTarget);
 }
 
 
+// Rocket Crowbar 2: not while frozen
+// orig 0xd7160
 void CTalkMonster::StopFollowing(bool clearSchedule)
 {
-	if (IsFollowing())
+	if (IsFollowing() && !m_bFrozen)
 	{
 		if ((m_afMemory & bits_MEMORY_PROVOKED) == 0)
 		{
@@ -1361,8 +1399,13 @@ void CTalkMonster::StopFollowing(bool clearSchedule)
 }
 
 
+// Rocket Crowbar 2: not while frozen
+// orig 0xd7230
 void CTalkMonster::StartFollowing(CBaseEntity* pLeader)
 {
+	if (m_bFrozen)
+		return;
+
 	if (m_pCine)
 		m_pCine->CancelScript();
 
@@ -1377,16 +1420,19 @@ void CTalkMonster::StartFollowing(CBaseEntity* pLeader)
 }
 
 
+// Rocket Crowbar 2: not while frozen. The script test is SDK 2.3's (the current state only),
+// with halflife-updated's null check on m_pCine kept.
+// orig 0xd72e0
 bool CTalkMonster::CanFollow()
 {
-	if (m_MonsterState == MONSTERSTATE_SCRIPT || m_IdealMonsterState == MONSTERSTATE_SCRIPT)
+	if (m_MonsterState == MONSTERSTATE_SCRIPT)
 	{
-		// It's possible for m_MonsterState to still be MONSTERSTATE_SCRIPT when the script has already ended.
-		// We'll treat a null pointer as an uninterruptable script and wait for the NPC to change states
-		// before allowing players to make them follow them again.
 		if (!m_pCine || !m_pCine->CanInterrupt())
 			return false;
 	}
+
+	if (m_bFrozen)
+		return false;
 
 	if (!IsAlive())
 		return false;
@@ -1395,14 +1441,19 @@ bool CTalkMonster::CanFollow()
 }
 
 
+// orig 0xd7360
 void CTalkMonster::FollowerUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	// Don't allow use during a scripted_sentence
 	if (m_useTime > gpGlobals->time)
 		return;
 
-	if (pCaller != NULL && pCaller->IsPlayer())
+	if (pCaller != NULL && pCaller->IsActivePlayer())
 	{
+		// Rocket Crowbar 2: only players, passive humans and player allies
+		if (pCaller->Classify() != CLASS_PLAYER && pCaller->Classify() != CLASS_HUMAN_PASSIVE && pCaller->Classify() != CLASS_PLAYER_ALLY)
+			return;
+
 		// Pre-disaster followers can't be used
 		if ((pev->spawnflags & SF_MONSTER_PREDISASTER) != 0)
 		{
