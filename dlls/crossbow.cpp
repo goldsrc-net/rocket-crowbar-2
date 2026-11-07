@@ -97,12 +97,16 @@ void CCrossbow::Spawn()
 	m_fInAttack = 0;
 }
 
-// orig 0x2ae70, orig client 0x83c0. RC2 sends gmsgWeapPickup here once the base has added the weapon;
-// halflife-updated sends that same message from CBasePlayer::AddPlayerItem, so it isn't
-// repeated here (one message either way).
+// orig 0x2ae70, orig client 0x83c0
 void CCrossbow::AddToPlayer(CBasePlayer* pPlayer)
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
+#ifndef CLIENT_DLL
+	// SDK 2.3's (stock in RC2); halflife-updated sent WeapPickup from CBasePlayer::AddPlayerItem
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
 }
 
 // orig 0x2aed0, orig client 0x8440

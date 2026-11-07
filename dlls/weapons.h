@@ -373,9 +373,6 @@ public:
 
 	// int		m_iIdPrimary;										// Unique Id for primary ammo
 	// int		m_iIdSecondary;										// Unique Id for secondary ammo
-
-	//Hack so deploy animations work when weapon prediction is enabled.
-	bool m_ForceSendAnimations = false;
 };
 
 
@@ -1007,6 +1004,7 @@ public:
 	void Reload() override;
 	int iItemSlot() override { return 4; }
 	bool GetItemInfo(ItemInfo* p) override;
+	void AddToPlayer(CBasePlayer* pPlayer) override;
 
 	bool Deploy() override;
 	bool CanHolster() override;

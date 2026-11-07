@@ -121,11 +121,16 @@ void CGauss::Precache()
 	m_usGaussThird = PRECACHE_EVENT(1, "events/gaussthird.sc");
 }
 
-// orig 0x4d310, orig client 0x31840. RC2 (SDK 2.3) sends WeapPickup here after the base; halflife-updated sends it
-// from CBasePlayer::AddPlayerItem, so this only calls the base (as mod-rockcrowbar does).
+// orig 0x4d310, orig client 0x31840
 void CGauss::AddToPlayer(CBasePlayer* pPlayer)
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
+#ifndef CLIENT_DLL
+	// SDK 2.3's (stock in RC2); halflife-updated sent WeapPickup from CBasePlayer::AddPlayerItem
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
 }
 
 // orig 0x4d370, orig client 0x318c0

@@ -4044,19 +4044,11 @@ void CBasePlayer::SetPhysFlag10For(float flTime)
 // orig 0x9a880. RC2: a new client in this slot first goes to the spectator view
 // (InitNewClient); the attributes chosen are applied and told to everyone (SetAttr), and set the
 // health, armor, maximum health and long jump; RC2's per-player state (riding, energy, shield,
-// phys flags, view, transform, pull, dying camera) starts over. halflife-updated's spawning flag,
-// "hl" and "bj" physinfo keys, sound room type and chat time stay.
+// phys flags, view, transform, pull, dying camera) starts over. halflife-updated's "hl" and "bj"
+// physinfo keys, sound room type and chat time stay.
 void CBasePlayer::Spawn()
 {
 	m_flStartCharge = gpGlobals->time;
-	m_bIsSpawning = true;
-
-	//Make sure this gets reset even if somebody adds an early return or throws an exception.
-	const CallOnDestroy resetIsSpawning{[this]()
-		{
-			//Done spawning; reset.
-			m_bIsSpawning = false;
-		}};
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgThisClient, NULL, edict());
 	WRITE_BYTE(ENTINDEX(edict()));
@@ -4831,11 +4823,11 @@ void CBasePlayer::SelectItem(const char* pstr)
 	m_pLastItem = m_pActiveItem;
 	m_pActiveItem = pItem;
 
+	// SDK 2.3's (stock in RC2); halflife-updated set m_ForceSendAnimations around Deploy so the
+	// predicting client is sent the deploy animation
 	if (m_pActiveItem)
 	{
-		m_pActiveItem->m_ForceSendAnimations = true;
 		m_pActiveItem->Deploy();
-		m_pActiveItem->m_ForceSendAnimations = false;
 		m_pActiveItem->UpdateItemInfo();
 	}
 }
@@ -5349,6 +5341,10 @@ bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
 	}
 
 
+	// SDK 2.3's (stock in RC2): AddToPlayer extracts the weapon's ammo and the weapons that announce
+	// themselves send WeapPickup, before the item joins the list. halflife-updated extracted the
+	// ammo here after the insert, sent the ammo counts at once and sent WeapPickup for every weapon
+	// but the exhaustible ones (so also the crowbar and glock) except while spawning
 	if (pItem->CanAddToPlayer(this))
 	{
 		pItem->AddToPlayer(this);
@@ -5356,33 +5352,8 @@ bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
 		g_pGameRules->PlayerGotWeapon(this, pItem);
 		pItem->CheckRespawn();
 
-		// Add to the list before extracting ammo so weapon ownership checks work properly.
 		pItem->m_pNext = m_rgpPlayerItems[pItem->iItemSlot()];
 		m_rgpPlayerItems[pItem->iItemSlot()] = pItem;
-
-		if (auto weapon = pItem->GetWeaponPtr(); weapon)
-		{
-			weapon->ExtractAmmo(weapon);
-
-			//Immediately update the ammo HUD so weapon pickup isn't sometimes red because the HUD doesn't know about regenerating/free ammo yet.
-			if (-1 != weapon->m_iPrimaryAmmoType)
-			{
-				SendSingleAmmoUpdate(CBasePlayer::GetAmmoIndex(weapon->pszAmmo1()));
-			}
-
-			if (-1 != weapon->m_iSecondaryAmmoType)
-			{
-				SendSingleAmmoUpdate(CBasePlayer::GetAmmoIndex(weapon->pszAmmo2()));
-			}
-
-			//Don't show weapon pickup if we're spawning or if it's an exhaustible weapon (will show ammo pickup instead).
-			if (!m_bIsSpawning && (weapon->iFlags() & ITEM_FLAG_EXHAUSTIBLE) == 0)
-			{
-				MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pev);
-				WRITE_BYTE(weapon->m_iId);
-				MESSAGE_END();
-			}
-		}
 
 		// should we switch to this item?
 		if (g_pGameRules->FShouldSwitchWeapon(this, pItem))
@@ -5650,16 +5621,6 @@ void CBasePlayer::SendAmmoUpdate()
 	{
 		InternalSendSingleAmmoUpdate(i);
 	}
-}
-
-void CBasePlayer::SendSingleAmmoUpdate(int ammoIndex)
-{
-	if (ammoIndex < 0 || ammoIndex >= MAX_AMMO_SLOTS)
-	{
-		return;
-	}
-
-	InternalSendSingleAmmoUpdate(ammoIndex);
 }
 
 void CBasePlayer::InternalSendSingleAmmoUpdate(int ammoIndex)
@@ -6404,11 +6365,12 @@ bool CBasePlayer::SwitchWeapon(CBasePlayerItem* pWeapon)
 
 	m_pActiveItem = pWeapon;
 
+	// SDK 2.3's (stock in RC2); halflife-updated set m_ForceSendAnimations around Deploy so the
+	// predicting client is sent the deploy animation. Its NULL check above is kept: the original
+	// calls CanDeploy on a NULL weapon
 	if (pWeapon)
 	{
-		pWeapon->m_ForceSendAnimations = true;
 		pWeapon->Deploy();
-		pWeapon->m_ForceSendAnimations = false;
 	}
 
 	return true;

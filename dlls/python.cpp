@@ -83,12 +83,16 @@ bool CPython::GetItemInfo(ItemInfo* p) // orig 0xaba10, orig client 0x3f350
 	return true;
 }
 
-// orig 0xaba80, orig client 0x3f3e0. RC2 sends gmsgWeapPickup here once the base has added the weapon;
-// halflife-updated sends that same message from CBasePlayer::AddPlayerItem, so it isn't
-// repeated here (one message either way).
+// orig 0xaba80, orig client 0x3f3e0
 void CPython::AddToPlayer(CBasePlayer* pPlayer)
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
+#ifndef CLIENT_DLL
+	// SDK 2.3's (stock in RC2); halflife-updated sent WeapPickup from CBasePlayer::AddPlayerItem
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
 }
 
 void CPython::Spawn() // orig 0xabae0, orig client 0x3f460

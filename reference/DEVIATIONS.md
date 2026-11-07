@@ -27,6 +27,34 @@ The original's set is `reference/cvars-rc2.tsv` (`scripts/cvars.py`).
   added them; the original has neither (`reference/entities-rc2.txt`), so a map using them gets
   nothing there on RC2.
 
+## halflife-updated changes kept in stock functions
+
+RC2's stock functions (byte for byte SDK 2.3, `reference/names-rc2.tsv` and
+`names-rc2-present.tsv`) have SDK 2.3's behavior back wherever it shows in multiplayer play
+(audit of 2026-11-07, `reference/audit/a1.md`-`a6.md`, one row per function). What halflife-updated
+changed and we keep, besides restyling and the crash guards listed under "Crashes in the original":
+
+- **Node graphs go through the engine filesystem, in the mod directory only**
+  (`maps/graphs/<map>.nod`, `.nod64` on amd64; `dlls/nodes.cpp`). The original's
+  LOAD_FILE_FOR_ME also found a graph in the fallback game directory.
+- **The dedicated server's `servercfgfile` is run by the engine, not the game rules**
+  (`dlls/multiplay_gamerules.cpp`, `CHalfLifeMultiplay` constructor). Today's engine execs it once
+  per map itself, so the original's call would run it twice. A listen server still runs
+  `lservercfgfile` from the game.
+- **The suit test and weapon bits go through `m_WeaponBits`** (`dlls/player.cpp` HasSuit,
+  `dlls/weapons.cpp` SetWeaponBit), 64 bits for today's client, mirrored into `pev->weapons`
+  below bit 32.
+- **Monsters take an `allow_item_dropping` keyvalue** (`dlls/monsters.cpp`, from Opposing Force
+  Updated). No RC2 map sets it, and unset it keeps the drops.
+- **Save/restore is halflife-updated's** (`dlls/cbase.cpp`, `dlls/util.cpp`, `dlls/world.cpp`):
+  save data held by reference and checked, bool and int64 fields, 64-bit function pointers, alien
+  slave beams not saved (`dlls/islave.cpp`), and beams keeping their attachment when their entity
+  is set again on restore (`dlls/effects.cpp` SetStartEntity, SetEndEntity). Multiplayer doesn't
+  save.
+- **Singleplayer-only paths are halflife-updated's** (`dlls/singleplay_gamerules.cpp` spserver.cfg,
+  `dlls/triggers.cpp` trigger_camera's view entity and the changelevel transition code,
+  `dlls/player.cpp` CStripWeapons' local player).
+
 ## Client
 
 - **The controller charge ball's trails (CLTE 0x49) leak without the bad delete.** The original
@@ -67,8 +95,45 @@ Server (`rc2.dll`):
   `func_breakable`'s death sends.
 - **A tripmine's far crossing counts as none** (`dlls/tripmine.cpp`, plain and punch mines). A box
   crossing 9999 or more units away left the original with no target to read.
-- **`GetSequenceInfo` keeps halflife-updated's negative-sequence check** (`dlls/animation.cpp`); an
-  LCS `seq` token can set one.
+- **`GetSequenceInfo`, `GetSequenceFlags`, `SetBlending` and `GetAnimationEvent` keep
+  halflife-updated's sequence range checks** (`dlls/animation.cpp`); an LCS `seq` token can set a
+  negative one.
+
+Server, in stock functions, halflife-updated's guards kept (not marked in the code nor in
+`ORIGINAL_BUGS.md`; the audit rows have them):
+
+- **`game_score` and `game_player_equip` take a NULL activator, and `game_player_equip`'s weapon
+  keys are cut at 127 characters** (`dlls/maprules.cpp`).
+- **Keyvalue and file parsing stay in their buffers**: `UTIL_StripToken` stops at its destination's
+  size (`dlls/util.cpp`, with its callers in `dlls/triggers.cpp` CMultiManager and
+  `dlls/maprules.cpp`), `UTIL_StringToVector` and `UTIL_StringToIntArray` copy at most 127
+  characters (`dlls/util.cpp`), `SENTENCEG_Init` stops at the last sentence slot instead of one
+  past it (`dlls/sound.cpp`), and mapcycle tokens are copied bounded
+  (`dlls/multiplay_gamerules.cpp` ReloadMapCycleFile).
+- **`TEXTURETYPE_Init` reads materials.txt from its start** (`dlls/sound.cpp`); the original left
+  the file position uninitialized.
+- **The nihilanth's target-name buffers are 128 bytes**, as its keyvalues (`dlls/nihilanth.cpp`
+  NextActivity, HandleAnimEvent).
+- **`CmdStart` and `CmdEnd` cast the player with `dynamic_cast`** (`dlls/client.cpp`), so their
+  NULL check also catches an edict that isn't a CBasePlayer.
+- **`func_plat`'s trigger holds its platform by handle** (`dlls/plats.cpp` SpawnInsideTrigger): a
+  removed platform no longer leaves the trigger reading freed memory.
+- **A hornet without an owner does no damage** (`dlls/hornet.cpp` DieTouch); the original passed
+  the missing owner to TakeDamage.
+- **`func_breakable` material 9 (`matNone`) precaches and sounds as wood** (`dlls/func_break.cpp`
+  Precache, DamageSound); the original used an uninitialized model name and sound list.
+- **`CHGrunt::CheckMeleeAttack1` fails with no enemy** (`dlls/hgrunt.cpp`) instead of reading an
+  uninitialized pointer.
+- **`CSoundEnt::ISoundsInList` counts 0 for an unknown list type** (`dlls/soundent.cpp`) instead of
+  walking an uninitialized index.
+- **`ReportAIState` names all nine monster states** (`dlls/monsters.cpp`); the original read past
+  its list for a dead monster. Nothing calls it in our tree.
+- **The osprey's flight checks its path corner** (`dlls/osprey.cpp` FlyThink, `m_pGoalEnt`).
+- **`trigger_camera` returns when there is no player 1** (`dlls/triggers.cpp` CTriggerCamera::Use).
+- **`RemovePlayerItem` also clears the last item when the active one goes** (`dlls/player.cpp`),
+  where the original left it pointing at the removed item; `SwitchWeapon` takes a NULL weapon
+  (`dlls/player.cpp`).
+- **`UTIL_SetOrigin` skips a NULL edict** (`dlls/util.cpp`).
 
 Client (`client.dll`):
 
