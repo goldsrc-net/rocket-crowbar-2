@@ -1,25 +1,74 @@
 #!/usr/bin/env python3
-"""stock_drift.py <base commit> [names-tsv] [--diff]: functions the original has byte for byte as SDK 2.3
-(reference/names-rc2.tsv) whose body in our tree differs from <base> (the halflife-updated
-commit we forked from). A stock function should be upstream's code; a difference there is either
-a halflife-updated fix kept on purpose (none expected since the base is upstream) or an edit
-made under a wrong reading that RC2 changed it. Comments and whitespace are ignored.
-Prints: rva  file  name  differs|not in base; --diff adds the unified diff of each.
-A free function is looked up by its name alone, so a static helper of the same name elsewhere
-can be reported instead; check those by hand."""
+"""stock_drift.py <base commit>|--sdk <dir> [names-tsv] [--diff]: stock functions whose body differs.
+
+A stock function is one the original has byte for byte as SDK 2.3 (reference/names-rc2.tsv).
+
+<base commit> (the halflife-updated commit we forked from): stock functions our tree changed against
+upstream. Each should be a deliberate return to SDK 2.3; anything else is an edit made under a wrong
+reading that RC2 changed it.
+
+--sdk <dir> (the pristine SDK 2.3 tree, build-vc6/singleplayer): stock functions whose body differs
+from what RC2 actually shipped. That also finds halflife-updated's own changes to them, which the git
+mode can't (they are in the base). halflife-updated restyled the SDK, so this mode normalizes
+spelling that compiles the same (void parameter lists, TRUE/FALSE, NULL/nullptr, explicit 0
+comparisons, BOOL, spacing); what is left still needs reading, and much of it is API change
+(engine calls, std::string paths) with the same behavior. --loose also folds halflife-updated's
+blanket restyles (SetThink(&C::F), ENT(pev), casts, KeyValue's bool return) and drops
+parentheses: for triage, since a changed precedence would hide.
+
+Comments and whitespace are ignored. Prints: rva  file  name  differs|not in base; --diff adds the
+unified diff of each. A free function is looked up by its name alone, so a static helper of the
+same name elsewhere can be reported instead; check those by hand."""
 import difflib, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-args = [a for a in sys.argv[1:] if a != "--diff"]
-show = "--diff" in sys.argv
-base = args[0]
-tsv = args[1] if len(args) > 1 else os.path.join(ROOT, "reference", "names-rc2.tsv")
+argv = sys.argv[1:]
+show = "--diff" in argv
+loose = "--loose" in argv
+argv = [a for a in argv if a not in ("--diff", "--loose")]
+sdk = None
+base = None
+if "--sdk" in argv:
+    i = argv.index("--sdk")
+    sdk = argv[i + 1]
+    del argv[i:i + 2]
+else:
+    base = argv.pop(0)
+tsv = argv[0] if argv else os.path.join(ROOT, "reference", "names-rc2.tsv")
 
 
 def norm(t):
     t = re.sub(r"//[^\n]*", "", t)
     t = re.sub(r"/\*.*?\*/", "", t, flags=re.S)
-    return re.sub(r"\s+", " ", t).strip()
+    t = re.sub(r"\s+", " ", t).strip()
+    if sdk is None:
+        return t
+    t = re.sub(r"\(\s*void\s*\)", "()", t)
+    t = re.sub(r"\bTRUE\b", "true", t)
+    t = re.sub(r"\bFALSE\b", "false", t)
+    t = re.sub(r"\b(NULL|nullptr)\b", "0", t)
+    t = re.sub(r"\bBOOL\b", "bool", t)
+    t = re.sub(r"\b0 != ", "", t)
+    t = re.sub(r" != 0\b", "", t)
+    t = re.sub(r"\b0 == ([\w.>\[\]-]+)", r"!\1", t)
+    t = re.sub(r"([\w.>\]-]+) == 0\b", r"!\1", t)
+    t = re.sub(r"\s*([(){}\[\];,:<>=!+*/&|-])\s*", r"\1", t)
+    if not loose:
+        return t
+    # --loose, for triage: also fold the restyles halflife-updated applied everywhere. It drops
+    # every parenthesis, so a changed precedence would hide; read what it reports, not what it drops.
+    t = re.sub(r"(Set(Think|Touch|Use|Blocked))\(&\w+::", r"\1(", t)
+    t = re.sub(r"\bENT\(pev\)", "edict()", t)
+    t = re.sub(r"static_cast<[^<>]+>", "", t)
+    t = re.sub(r"\((int|float|bool|char\*|const char\*)\)", "", t)
+    t = t.replace("pkvd->fHandled=true;", "return true;")
+    t = re.sub(r"\belse(return )?(\w+::KeyValue\(pkvd\);)", r"return \2", t)
+    t = re.sub(r"\b(void|int|bool)(?=[A-Za-z_]\w*:)", "", t)
+    t = t.replace("(", "").replace(")", "")
+    t = re.sub(r"!=0\b|\b0!=", "", t)
+    t = re.sub(r"\bfalse\b", "0", t)
+    t = re.sub(r"\btrue\b", "1", t)
+    return t
 
 
 def body(text, cls, meth):
@@ -42,6 +91,10 @@ files = [f for f in files if f.endswith((".cpp", ".h"))]
 cur = {f: open(os.path.join(ROOT, f), encoding="latin-1").read() for f in files}
 old = {}
 for f in files:
+    if sdk:
+        p = os.path.join(sdk, f)
+        old[f] = open(p, encoding="latin-1").read() if os.path.exists(p) else None
+        continue
     r = subprocess.run(["git", "-C", ROOT, "show", "%s:%s" % (base, f)], capture_output=True)
     old[f] = r.stdout.decode("latin-1") if r.returncode == 0 else None
 seen = set()
