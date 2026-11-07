@@ -1803,6 +1803,8 @@ static int gFileSizes[FIELD_TYPECOUNT] =
 
 
 // Base class includes common SAVERESTOREDATA pointer, and manages the entity table
+// orig 0xf5dc0 is SDK 2.3's default constructor (m_pdata = NULL), which nothing calls;
+// halflife-updated has none, since m_data is a reference.
 CSaveRestoreBuffer::CSaveRestoreBuffer(SAVERESTOREDATA& data) // orig 0xf5dd0
 	: m_data(data)
 {
@@ -2849,6 +2851,20 @@ CBaseEntity* UTIL_FindEntityNearestInSphere(CBaseEntity* pStart, Vector vecCente
 	return NULL;
 }
 
+// The entity a trace really hit: its hit entity's GetEffectedEnt. The hit itself when that
+// isn't a live entity or has no CBaseEntity. Nothing in rc2.dll calls it.
+edict_t* UTIL_TraceEffectedHit(TraceResult* ptr) // orig 0xf4c00, name ours
+{
+	if (!UTIL_IsValidEntity(ptr->pHit))
+		return ptr->pHit;
+
+	CBaseEntity* pEntity = CBaseEntity::Instance(ptr->pHit);
+	if (!pEntity)
+		return ptr->pHit;
+
+	return pEntity->GetEffectedEnt()->edict();
+}
+
 // The entity marks: a stack of bit sets, one bit per entity index, so that nested radius
 // effects hit each entity once. 128 levels (orig .bss 0x101af084, the level at 0x101af2ac).
 static unsigned char* g_rgpRC2EntityMarks[128];
@@ -2904,6 +2920,22 @@ bool UTIL_IsEntityMarked(int iEntIndex) // orig 0xf4dd0
 	if (!g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel])
 		return false;
 	return (g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel][iEntIndex / 8] & (1 << (iEntIndex % 8))) != 0;
+}
+
+// Marks the entity and says whether it already was (false with no set open). Nothing in rc2.dll
+// calls it.
+bool UTIL_TestAndMarkEntity(int iEntIndex) // orig 0xf4e20, name ours
+{
+	unsigned char* pBits = g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel];
+	if (!pBits)
+		return false;
+
+	unsigned char* pByte = &pBits[iEntIndex / 8];
+	if ((*pByte & (1 << (iEntIndex % 8))) != 0)
+		return true;
+
+	*pByte |= 1 << (iEntIndex % 8);
+	return false;
 }
 
 // Rocket Crowbar 2's radius damage: every entity within flRadius of vecSrc that takes damage and
@@ -3149,6 +3181,29 @@ FILE* UTIL_OpenGameDirFile(const char* szName, const char* szMode) // orig 0xf54
 	strcat(szPath, "//");
 	strcat(szPath, szName);
 	return fopen(szPath, szMode);
+}
+
+static FILE* g_pRC2DebugLog = NULL; // orig .bss 0x1af2b0, name ours
+
+// A line to debuglog.txt in the game directory (truncated the first time), after the seconds
+// since the library loaded. Nothing in rc2.dll calls it.
+void UTIL_DebugLog(const char* pszFormat, ...) // orig 0xf5530, name ours
+{
+	if (!g_pRC2DebugLog)
+	{
+		g_pRC2DebugLog = UTIL_OpenGameDirFile("debuglog.txt", "w");
+		if (!g_pRC2DebugLog)
+			return;
+	}
+
+	fprintf(g_pRC2DebugLog, "%0.3f - ", (double)clock() * 0.001f);
+
+	va_list argptr;
+	va_start(argptr, pszFormat);
+	vfprintf(g_pRC2DebugLog, pszFormat, argptr);
+	va_end(argptr);
+
+	fflush(g_pRC2DebugLog);
 }
 
 // kills the beams attached to an entity, and tells RC2's client effects (gmsgCLTE) to drop

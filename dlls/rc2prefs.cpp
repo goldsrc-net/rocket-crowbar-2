@@ -870,6 +870,213 @@ static bool RC2Prefs_ValuesEqual(int iIndex, const rc2prefvalue_t* pA, const rc2
 }
 
 
+// The three below pack the NETWORK_SYNC keys into one buffer and back: a bit per NETWORK_SYNC
+// key (set when its value isn't its default), then those values in table order, each in its
+// type's size (a SMALLFLOAT as a short of hundredths). Nothing in rc2.dll calls them; the
+// client gets the values one RCCFG message per key instead (RC2Prefs_SendToClient).
+int RC2Prefs_PackedSize(int* piCount);
+void RC2Prefs_PackValues(unsigned char** ppBuf, int* piSize);
+bool RC2Prefs_UnpackValues(const unsigned char* pBuf, int iSize);
+
+// The packed size; *piCount gets the number of NETWORK_SYNC keys.
+int RC2Prefs_PackedSize(int* piCount) // orig 0xb1260, name ours
+{
+	int iCount = 0;
+	int iSize = 0;
+	rc2prefvalue_t defaultValue;
+
+	for (int i = 0; i < RC2P_COUNT; i++)
+	{
+		if ((g_rc2Prefs[i].iFlags & RC2PF_NETWORK_SYNC) == 0)
+			continue;
+		iCount++;
+		RC2Prefs_ParseValue(i, g_rc2Prefs[i].szDefault, &defaultValue);
+		if (RC2Prefs_ValuesEqual(i, &g_rc2PrefValues[i], &defaultValue))
+			continue;
+
+		switch (g_rc2Prefs[i].iType)
+		{
+		case RC2PT_FLOAT:
+		case RC2PT_INT:
+			iSize += 4;
+			break;
+		case RC2PT_DOUBLE:
+			iSize += 8;
+			break;
+		case RC2PT_SMALLFLOAT:
+		case RC2PT_SHORT:
+		case RC2PT_USHORT:
+			iSize += 2;
+			break;
+		case RC2PT_BYTE:
+		case RC2PT_BOOL:
+			iSize += 1;
+			break;
+		}
+	}
+
+	if (piCount)
+		*piCount = iCount;
+
+	return (int)(ceil(iCount * 0.125) + iSize);
+}
+
+// A malloc'ed buffer in *ppBuf (NULL when no key differs) and its size in *piSize.
+void RC2Prefs_PackValues(unsigned char** ppBuf, int* piSize) // orig 0xb1340, name ours
+{
+	int iCount;
+
+	*ppBuf = NULL;
+	iCount = 0;
+	*piSize = 0;
+
+	const int iSize = RC2Prefs_PackedSize(&iCount);
+	if (iSize <= 0 || iCount <= 0)
+		return;
+
+	const int iBitBytes = (int)ceil(iCount * 0.125);
+	if (iBitBytes == iSize)
+		return;
+
+	unsigned char* pBuf = (unsigned char*)malloc(iSize);
+	if (!pBuf)
+		return;
+	memset(pBuf, 0, iSize);
+
+	unsigned char* p = pBuf + iBitBytes;
+	int iBit = 0;
+	rc2prefvalue_t defaultValue;
+
+	for (int i = 0; i < RC2P_COUNT; i++)
+	{
+		if (p - pBuf >= iSize)
+			break;
+
+		if ((g_rc2Prefs[i].iFlags & RC2PF_NETWORK_SYNC) == 0)
+			continue;
+
+		RC2Prefs_ParseValue(i, g_rc2Prefs[i].szDefault, &defaultValue);
+		if (RC2Prefs_ValuesEqual(i, &g_rc2PrefValues[i], &defaultValue))
+		{
+			iBit++;
+			continue;
+		}
+
+		pBuf[iBit / 8] |= 1 << (iBit % 8);
+		iBit++;
+
+		const rc2prefvalue_t& value = g_rc2PrefValues[i];
+		switch (g_rc2Prefs[i].iType)
+		{
+		case RC2PT_FLOAT:
+		case RC2PT_INT:
+			memcpy(p, &value.i, 4);
+			p += 4;
+			break;
+		case RC2PT_SMALLFLOAT:
+		{
+			const short sValue = (short)(int)(value.f * 100.0);
+			memcpy(p, &sValue, 2);
+			p += 2;
+			break;
+		}
+		case RC2PT_DOUBLE:
+			memcpy(p, &value.d, 8);
+			p += 8;
+			break;
+		case RC2PT_SHORT:
+		case RC2PT_USHORT:
+			memcpy(p, &value.s, 2);
+			p += 2;
+			break;
+		case RC2PT_BYTE:
+			*p++ = value.uc;
+			break;
+		case RC2PT_BOOL:
+			*p++ = value.c != 0 ? 1 : 0;
+			break;
+		}
+	}
+
+	*ppBuf = pBuf;
+	*piSize = iSize;
+}
+
+// Every key back to its default, then the packed values over them. False when the buffer is
+// too short for the bits or ends before the last value.
+bool RC2Prefs_UnpackValues(const unsigned char* pBuf, int iSize) // orig 0xb1520, name ours
+{
+	RC2Prefs_ResetToDefaults();
+
+	int iCount = 0;
+	for (int i = 0; i < RC2P_COUNT; i++)
+	{
+		if ((g_rc2Prefs[i].iFlags & RC2PF_NETWORK_SYNC) != 0)
+			iCount++;
+	}
+
+	const int iBitBytes = (int)ceil(iCount * 0.125);
+	if (iCount <= 0 || iSize < iBitBytes)
+		return false;
+	if (iSize == iBitBytes)
+		return true;
+
+	const unsigned char* p = pBuf + iBitBytes;
+	int iBit = 0;
+
+	for (int i = 0; i < RC2P_COUNT; i++)
+	{
+		if (p - pBuf >= iSize)
+			return false;
+
+		if ((g_rc2Prefs[i].iFlags & RC2PF_NETWORK_SYNC) == 0)
+			continue;
+
+		if ((pBuf[iBit / 8] & (1 << (iBit % 8))) == 0)
+		{
+			iBit++;
+			continue;
+		}
+		iBit++;
+
+		rc2prefvalue_t& value = g_rc2PrefValues[i];
+		switch (g_rc2Prefs[i].iType)
+		{
+		case RC2PT_FLOAT:
+		case RC2PT_INT:
+			memcpy(&value.i, p, 4);
+			p += 4;
+			break;
+		case RC2PT_SMALLFLOAT:
+		{
+			unsigned short usValue;
+			memcpy(&usValue, p, 2);
+			// Original bug, kept: multiplies by 100 again where it should divide
+			value.f = (float)usValue * 100.0f;
+			p += 2;
+			break;
+		}
+		case RC2PT_DOUBLE:
+			memcpy(&value.d, p, 8);
+			p += 8;
+			break;
+		case RC2PT_SHORT:
+		case RC2PT_USHORT:
+			memcpy(&value.s, p, 2);
+			p += 2;
+			break;
+		case RC2PT_BYTE:
+			value.uc = *p++;
+			break;
+		case RC2PT_BOOL:
+			value.uc = *p++ != 0 ? 1 : 0;
+			break;
+		}
+	}
+
+	return true;
+}
+
 // gmsgRCCFG: UserMessages.h (p5)
 
 // TEMP STUB (p6): real one belongs in the run before aflock (orig 0x1160): whether the

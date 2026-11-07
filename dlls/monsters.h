@@ -70,6 +70,7 @@
 #define MOVE_NORMAL 0 // normal move in the direction monster is facing
 #define MOVE_STRAFE 1 // moves in direction specified, no matter which way monster is facing
 
+// globals.cpp in the original: orig 0x525f0, its compiler-generated initializer (empty: orig 0x52600)
 inline DLL_GLOBAL Vector g_vecAttackDir;
 
 /**

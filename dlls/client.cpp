@@ -1453,6 +1453,7 @@ void PlayerPostThink(edict_t* pEntity)
 
 
 
+// orig 0x1d790
 void ParmsNewLevel()
 {
 }
@@ -2853,6 +2854,7 @@ Create pseudo-baselines for items that aren't placed in the map at spawn time, b
 to be created during play ( e.g., grenades, ammo packs, projectiles, corpses, etc. )
 ================================
 */
+// orig 0x1f370
 void CreateInstancedBaselines()
 {
 	int iret = 0;

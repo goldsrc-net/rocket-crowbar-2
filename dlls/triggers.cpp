@@ -1771,6 +1771,7 @@ int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 go to the next level for deathmatch
 only called if a time or frag limit has expired
 */
+// orig 0xe6510
 void NextLevel()
 {
 	edict_t* pent;

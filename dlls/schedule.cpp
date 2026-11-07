@@ -31,6 +31,7 @@
 // FHaveSchedule - Returns true if monster's m_pSchedule
 // is anything other than NULL.
 //=========================================================
+// orig 0xbe580
 bool CBaseMonster::FHaveSchedule()
 {
 	if (m_pSchedule == NULL)

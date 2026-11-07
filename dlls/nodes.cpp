@@ -39,6 +39,8 @@
 
 Vector VecBModelOrigin(entvars_t* pevBModel);
 
+// orig 0x85860 and orig 0x85870: the compiler-generated initializer for WorldGraph (empty, as in
+// the reference build)
 CGraph WorldGraph;
 
 LINK_ENTITY_TO_CLASS(info_node, CNodeEnt); // orig 0x85880
@@ -137,6 +139,7 @@ bool CGraph::AllocNodes()
 // pNode is the node the monster will be standing on when it
 // will need to stop and trigger the ent.
 //=========================================================
+// orig 0x85a30
 entvars_t* CGraph::LinkEntForLink(CLink* pLink, CNode* pNode)
 {
 	edict_t* pentSearch;
@@ -2123,6 +2126,7 @@ void CTestHull::PathFind()
 //=========================================================
 // CStack Constructor
 //=========================================================
+// orig 0x88d70
 CStack::CStack()
 {
 	m_level = 0;
@@ -2157,6 +2161,7 @@ int CStack::Pop()
 //=========================================================
 // returns the value on the top of the stack
 //=========================================================
+// orig 0x88de0
 int CStack::Top()
 {
 	return m_stack[m_level - 1];
@@ -3341,6 +3346,7 @@ void CGraph::ComputeStaticRoutingTables()
 
 // Test those routing tables. Doesn't really work, yet.
 //
+// orig 0x8a8d0
 void CGraph::TestRoutingTables()
 {
 	int* pMyPath = new int[m_cNodes];

@@ -147,7 +147,7 @@ public:
 	bool IsFollowing() { return m_hTargetEnt != NULL && m_hTargetEnt->IsActivePlayer(); } // Rocket Crowbar 2: IsActivePlayer (SDK 2.3: IsPlayer)
 	void StopFollowing(bool clearSchedule) override;
 	void StartFollowing(CBaseEntity* pLeader);
-	virtual void DeclineFollowing() {}
+	virtual void DeclineFollowing() {} // orig 0xc2250
 	void LimitFollowers(CBaseEntity* pPlayer, int maxFollowers);
 
 	void EXPORT FollowerUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);

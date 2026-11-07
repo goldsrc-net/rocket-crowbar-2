@@ -512,6 +512,7 @@ void CXenSporeMed::Spawn()
 
 
 // I just eyeballed these -- fill in hulls for the legs
+// orig 0xfe510 and orig 0xfe520: the compiler-generated initializer that fills this table
 const Vector CXenSporeLarge::m_hullSizes[] =
 	{
 		Vector(90, -25, 0),

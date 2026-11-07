@@ -72,20 +72,20 @@ public:
 	// Functions to verify the single/multiplayer status of a game
 	virtual bool IsMultiplayer() = 0;								 // is this a multiplayer game? (either coop or deathmatch)
 	virtual bool IsDeathmatch() = 0;								 //is this a deathmatch game?
-	virtual bool IsTeamplay() { return false; }						 // is this deathmatch game being played with team rules?
+	virtual bool IsTeamplay() { return false; }						 // is this deathmatch game being played with team rules? // orig 0x80510
 	virtual bool IsCoOp() = 0;										 // is this a coop game?
-	virtual const char* GetGameDescription() { return "Half-Life"; } // this is the game name that gets seen in the server browser
+	virtual const char* GetGameDescription() { return "Half-Life"; } // this is the game name that gets seen in the server browser // orig 0x80520
 
 	// Client connection/disconnection
 	virtual bool ClientConnected(edict_t* pEntity, const char* pszName, const char* pszAddress, char szRejectReason[128]) = 0; // a client just connected to the server (player hasn't spawned yet)
 	virtual void InitHUD(CBasePlayer* pl) = 0;																				   // the client dll is ready for updating
 	virtual void ClientDisconnected(edict_t* pClient) = 0;																	   // a client just disconnected from the server
-	virtual void UpdateGameMode(CBasePlayer* pPlayer) {}																	   // the client needs to be informed of the current game mode
+	virtual void UpdateGameMode(CBasePlayer* pPlayer) {}																	   // the client needs to be informed of the current game mode // orig 0xca7b0
 
 	// Client damage rules
 	virtual float FlPlayerFallDamage(CBasePlayer* pPlayer) = 0;										 // this client just hit the ground after a fall. How much damage?
-	virtual bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker) { return true; } // can this player take damage from this attacker?
-	virtual bool ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target) { return true; }
+	virtual bool FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker) { return true; } // can this player take damage from this attacker? // orig 0xca7c0
+	virtual bool ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target) { return true; } // orig 0x80530
 
 	// Client spawn/respawn control
 	virtual void PlayerSpawn(CBasePlayer* pPlayer) = 0;		   // called by CBasePlayer::Spawn just before releasing player into the game
@@ -95,8 +95,8 @@ public:
 	virtual edict_t* GetPlayerSpawnSpot(CBasePlayer* pPlayer); // Place this player on their spawnspot and face them the proper direction.
 
 	virtual bool AllowAutoTargetCrosshair() { return true; }
-	virtual bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; } // handles the user commands;  returns true if command handled properly
-	virtual void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) {}		 // the player has changed userinfo;  can change it now
+	virtual bool ClientCommand(CBasePlayer* pPlayer, const char* pcmd) { return false; } // handles the user commands;  returns true if command handled properly // orig 0xca7d0
+	virtual void ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer) {}		 // the player has changed userinfo;  can change it now // orig 0x80540
 
 	// Client kills/scoring
 	virtual int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) = 0;					// how many points do I award whoever kills this player?
@@ -136,7 +136,7 @@ public:
 
 	// Healthcharger respawn control
 	virtual float FlHealthChargerRechargeTime() = 0;	   // how long until a depleted HealthCharger recharges itself?
-	virtual float FlHEVChargerRechargeTime() { return 0; } // how long until a depleted HealthCharger recharges itself?
+	virtual float FlHEVChargerRechargeTime() { return 0; } // how long until a depleted HealthCharger recharges itself? // orig 0xca7e0
 
 	// What happens to a dead player's weapons
 	virtual int DeadPlayerWeapons(CBasePlayer* pPlayer) = 0; // what do I do with a player's weapons when he's killed?
@@ -147,33 +147,33 @@ public:
 	// Teamplay stuff
 	virtual const char* GetTeamID(CBaseEntity* pEntity) = 0;						// what team is this entity on?
 	virtual int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) = 0; // What is the player's relationship with this entity?
-	virtual int GetTeamIndex(const char* pTeamName) { return -1; }
-	virtual const char* GetIndexedTeamName(int teamIndex) { return ""; }
-	virtual bool IsValidTeam(const char* pTeamName) { return true; }
-	virtual void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) {}
-	virtual const char* SetDefaultPlayerTeam(CBasePlayer* pPlayer) { return ""; }
+	virtual int GetTeamIndex(const char* pTeamName) { return -1; } // orig 0x80550
+	virtual const char* GetIndexedTeamName(int teamIndex) { return ""; } // orig 0x80560
+	virtual bool IsValidTeam(const char* pTeamName) { return true; } // orig 0x80570
+	virtual void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) {} // orig 0x80580
+	virtual const char* SetDefaultPlayerTeam(CBasePlayer* pPlayer) { return ""; } // orig 0x80590
 
 	// Sounds
-	virtual bool PlayTextureSounds() { return true; }
-	virtual bool PlayFootstepSounds(CBasePlayer* pl, float fvol) { return true; }
+	virtual bool PlayTextureSounds() { return true; } // orig 0xca800
+	virtual bool PlayFootstepSounds(CBasePlayer* pl, float fvol) { return true; } // orig 0xca810
 
 	// Monsters
 	virtual bool FAllowMonsters() = 0; //are monsters allowed
 
 	// Immediately end a multiplayer game
-	virtual void EndMultiplayerGame() {}
+	virtual void EndMultiplayerGame() {} // orig 0xca820
 
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
 
 public:
 	// p6 needs: RC2's gamerules slot 57 (+0xe4), name ours. CBasePlayer::StartRiding asks it
-	// whether pRider may climb on pRidden. VERIFY: CGameRules' own default, not read
+	// whether pRider may climb on pRidden. The default, which the single player rules use: orig 0xca7f0
 	virtual bool PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider) { return false; }
 
 	// p6 needs (fork B): RC2's gamerules slot 58 (+0xe8), name ours. Asked before a player's
 	// mine or grenade acts on pTarget (the suck mine's lock, the grenades' pulls); false stops
-	// it. VERIFY: name, and the default (CGameRules' and the multiplayer rules' bodies not read)
+	// it. VERIFY: name. The default, which the single and multiplayer rules use: orig 0x805a0
 	virtual bool PlayerCanAffect(CBaseEntity* pPlayer, CBaseEntity* pTarget) { return true; }
 };
 
@@ -192,7 +192,7 @@ public:
 	// GR_Think
 	void Think() override;
 	bool IsAllowedToSpawn(CBaseEntity* pEntity) override;
-	bool FAllowFlashlight() override { return true; }
+	bool FAllowFlashlight() override { return true; } // orig 0xca830
 
 	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon) override;
 	bool GetNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon, bool alwaysSearch = false) override;
@@ -262,7 +262,7 @@ public:
 	bool FAllowMonsters() override;
 
 	// Teamplay stuff
-	const char* GetTeamID(CBaseEntity* pEntity) override { return ""; }
+	const char* GetTeamID(CBaseEntity* pEntity) override { return ""; } // orig 0xca840
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
 };
 
@@ -355,17 +355,17 @@ public:
 	int DeadPlayerAmmo(CBasePlayer* pPlayer) override;
 
 	// Teamplay stuff
-	const char* GetTeamID(CBaseEntity* pEntity) override { return ""; }
+	const char* GetTeamID(CBaseEntity* pEntity) override { return ""; } // orig 0x805b0
 	int PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
 
-	bool PlayTextureSounds() override { return false; }
+	bool PlayTextureSounds() override { return false; } // orig 0x805c0
 	bool PlayFootstepSounds(CBasePlayer* pl, float fvol) override;
 
 	// Monsters
 	bool FAllowMonsters() override;
 
 	// Immediately end a multiplayer game
-	void EndMultiplayerGame() override { GoToIntermission(); }
+	void EndMultiplayerGame() override { GoToIntermission(); } // orig 0x805d0
 
 protected:
 	virtual void ChangeLevel();

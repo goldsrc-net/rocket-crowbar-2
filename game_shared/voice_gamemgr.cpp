@@ -19,6 +19,10 @@
 
 
 // These are stored off as CVoiceGameMgr is created and deleted.
+// The globals below are stock; the original's compiler-generated initializers for them, a jump
+// and a body each: orig 0xf77c0 and orig 0xf77d0 (g_PlayerModEnable), orig 0xf77e0 (g_BanMasks; its
+// body 0xf77f0 matches the reference build), orig 0xf7810 (g_SentGameRulesMasks), orig 0xf7840
+// (g_SentBanMasks), orig 0xf7870 and orig 0xf7880 (g_bWantModEnable)
 CPlayerBitVec g_PlayerModEnable; // Set to 1 for each player if the player wants to use voice in this mod.
 								 // (If it's zero, then the server reports that the game rules are saying the
 								 // player can't hear anyone).
@@ -115,6 +119,7 @@ bool CVoiceGameMgr::Init(
 }
 
 
+// orig 0xf7970
 void CVoiceGameMgr::SetHelper(IVoiceGameMgrHelper* pHelper)
 {
 	m_pHelper = pHelper;

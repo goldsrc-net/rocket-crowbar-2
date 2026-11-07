@@ -40,6 +40,7 @@ typedef int fixed16_t;
 struct mplane_s;
 
 constexpr Vector vec3_origin(0, 0, 0);
+// globals.cpp in the original: orig 0x52610, its compiler-generated initializer (the body is stock)
 constexpr Vector g_vecZero(0, 0, 0);
 extern int nanmask;
 

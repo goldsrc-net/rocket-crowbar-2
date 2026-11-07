@@ -69,6 +69,7 @@ CHalfLifeTeamplay::CHalfLifeTeamplay()
 #include "voice_gamemgr.h"
 extern CVoiceGameMgr g_VoiceGameMgr;
 
+// orig 0xdc310
 void CHalfLifeTeamplay::Think()
 {
 	///// Check game rules /////
@@ -201,6 +202,7 @@ const char* CHalfLifeTeamplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 //=========================================================
 // InitHUD
 //=========================================================
+// orig 0xdc650
 void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 {
 	int i;
@@ -304,6 +306,7 @@ void CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeam
 //=========================================================
 // ClientUserInfoChanged
 //=========================================================
+// orig 0xdc9a0. As SDK 2.3: the log line has the WON id, not halflife-updated's auth id.
 void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobuffer)
 {
 	char text[1024];
@@ -340,10 +343,10 @@ void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobu
 	sprintf(text, "* %s has changed to team \'%s\'\n", STRING(pPlayer->pev->netname), mdls);
 	UTIL_SayTextAll(text, pPlayer);
 
-	UTIL_LogPrintf("\"%s<%i><%s><%s>\" joined team \"%s\"\n",
+	UTIL_LogPrintf("\"%s<%i><%u><%s>\" joined team \"%s\"\n",
 		STRING(pPlayer->pev->netname),
 		GETPLAYERUSERID(pPlayer->edict()),
-		GETPLAYERAUTHID(pPlayer->edict()),
+		g_engfuncs.pfnGetPlayerWONId(pPlayer->edict()),
 		pPlayer->m_szTeamName,
 		mdls);
 
@@ -355,28 +358,12 @@ void CHalfLifeTeamplay::ClientUserInfoChanged(CBasePlayer* pPlayer, char* infobu
 //=========================================================
 // Deathnotice.
 //=========================================================
+// orig 0xdcbc0. Rocket Crowbar 2: no "teammate" death message of its own; a teammate kill goes
+// through the multiplayer rules' DeathNotice like any other.
 void CHalfLifeTeamplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor)
 {
 	if (m_DisableDeathMessages)
 		return;
-
-	if (pVictim && pKiller && (pKiller->flags & FL_CLIENT) != 0)
-	{
-		CBasePlayer* pk = (CBasePlayer*)CBaseEntity::Instance(pKiller);
-
-		if (pk)
-		{
-			if ((pk != pVictim) && (PlayerRelationship(pVictim, pk) == GR_TEAMMATE))
-			{
-				MESSAGE_BEGIN(MSG_ALL, gmsgDeathMsg);
-				WRITE_BYTE(ENTINDEX(ENT(pKiller)));		// the killer
-				WRITE_BYTE(ENTINDEX(pVictim->edict())); // the victim
-				WRITE_STRING("teammate");				// flag this as a teammate kill
-				MESSAGE_END();
-				return;
-			}
-		}
-	}
 
 	CHalfLifeMultiplay::DeathNotice(pVictim, pKiller, pevInflictor);
 }
@@ -396,6 +383,7 @@ void CHalfLifeTeamplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, e
 //=========================================================
 // IsTeamplay
 //=========================================================
+// orig 0xdcc10
 bool CHalfLifeTeamplay::IsTeamplay()
 {
 	return true;
@@ -437,6 +425,7 @@ int CHalfLifeTeamplay::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTa
 
 //=========================================================
 //=========================================================
+// orig 0xdccf0
 bool CHalfLifeTeamplay::ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target)
 {
 	// always autoaim, unless target is a teammate
@@ -452,6 +441,7 @@ bool CHalfLifeTeamplay::ShouldAutoAim(CBasePlayer* pPlayer, edict_t* target)
 
 //=========================================================
 //=========================================================
+// orig 0xdcd50
 int CHalfLifeTeamplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled)
 {
 	if (!pKilled)
@@ -503,6 +493,7 @@ const char* CHalfLifeTeamplay::GetIndexedTeamName(int teamIndex)
 }
 
 
+// orig 0xdce40
 bool CHalfLifeTeamplay::IsValidTeam(const char* pTeamName)
 {
 	if (!m_teamLimit) // Any team is valid if the teamlist isn't set
@@ -623,4 +614,39 @@ void CHalfLifeTeamplay::RecountTeams(bool bResendInfo)
 			}
 		}
 	}
+}
+
+// orig 0xdd130 (RC2's gamerules slot 57): in teamplay only a teammate may ride, and only when
+// mp_riding is on and the ridden player's userinfo allowriding isn't 0. Unlike the multiplayer
+// rules, a missing infobuffer or key allows it.
+bool CHalfLifeTeamplay::PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider)
+{
+	if ((int)mp_riding.value == 0)
+		return false;
+
+	if (PlayerRelationship(pRider, pRidden) != GR_TEAMMATE)
+		return false;
+
+	char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(pRidden->edict());
+	if (!infobuffer)
+		return true;
+
+	const char* pszAllow = g_engfuncs.pfnInfoKeyValue(infobuffer, "allowriding");
+	if (!pszAllow)
+		return true;
+
+	return atoi(pszAllow) != 0;
+}
+
+// orig 0xdd1b0 (RC2's gamerules slot 58): with mp_teamannoy off a player's weapons don't act on
+// his teammates, though they still act on himself.
+bool CHalfLifeTeamplay::PlayerCanAffect(CBaseEntity* pPlayer, CBaseEntity* pTarget)
+{
+	if ((int)mp_teamannoy.value != 0)
+		return true;
+
+	if (pPlayer->edict() == pTarget->edict())
+		return true;
+
+	return PlayerRelationship(pPlayer, pTarget) != GR_TEAMMATE;
 }

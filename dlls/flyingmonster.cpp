@@ -169,6 +169,7 @@ bool CFlyingMonster::ShouldAdvanceRoute(float flWaypointDist)
 }
 
 
+// orig 0x41180
 void CFlyingMonster::MoveExecute(CBaseEntity* pTargetEnt, const Vector& vecDir, float flInterval)
 {
 	if (pev->movetype == MOVETYPE_FLY)
@@ -210,6 +211,7 @@ void CFlyingMonster::MoveExecute(CBaseEntity* pTargetEnt, const Vector& vecDir, 
 }
 
 
+// orig 0x41550
 float CFlyingMonster::CeilingZ(const Vector& position)
 {
 	TraceResult tr;
