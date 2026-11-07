@@ -20,7 +20,7 @@
 #include "gamerules.h"
 
 // Precaches the ammo and queues the ammo info for sending to clients
-void AddAmmoNameToAmmoRegistry(const char* szAmmoname, const char* weaponName)
+void AddAmmoNameToAmmoRegistry(const char* szAmmoname) // SDK 2.3's: no weapon name (halflife-updated's, read by nothing since GiveAmmo is the original's)
 {
 	// make sure it's not already in the registry
 	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
@@ -42,7 +42,6 @@ void AddAmmoNameToAmmoRegistry(const char* szAmmoname, const char* weaponName)
 
 	ammoType.pszName = szAmmoname;
 	ammoType.iId = giAmmoIndex; // yes, this info is redundant
-	ammoType.WeaponName = weaponName;
 }
 
 // orig client 0x39690 (the client's, as SDK 2.3)

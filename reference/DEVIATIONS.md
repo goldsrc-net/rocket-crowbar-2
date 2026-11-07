@@ -54,6 +54,16 @@ changed and we keep, besides restyling and the crash guards listed under "Crashe
 - **Singleplayer-only paths are halflife-updated's** (`dlls/singleplay_gamerules.cpp` spserver.cfg,
   `dlls/triggers.cpp` trigger_camera's view entity and the changelevel transition code,
   `dlls/player.cpp` CStripWeapons' local player).
+- **Scientists take their model from `_sv_override_scientist_mdl` when it is set**
+  (`dlls/scientist.cpp`, four places). Nothing in our build registers that cvar, so they use
+  `models/scientist.mdl`, as the original's hardcoded name. Kept by Steven, 2026-11-07.
+- **`CanAttack` rounds to the millisecond** (`dlls/weapons_shared.cpp`, server and client):
+  a weapon may fire when its next attack is under 1 ms away, halflife issue #1621, so the server
+  agrees with the client's prediction. SDK 2.3 tests `<= 0`. Kept by Steven, 2026-11-07.
+- **A held weapon stops its fall think** (`dlls/weapons.cpp` FallThink's `m_pPlayer` branch,
+  AttachToPlayer's `SetThink(NULL)`). SDK 2.3 lets it run, so if the engine set FL_ONGROUND on a
+  held (MOVETYPE_FOLLOW) item the weapon would turn back into a pickup and could be removed from
+  the inventory. Kept as a guard by Steven, 2026-11-07.
 
 ## Client
 

@@ -138,16 +138,15 @@ void HUD_PrepEntity(CBaseEntity* pEntity, CBasePlayer* pWeaponOwner)
 
 		CBasePlayerItem::ItemInfoArray[info.iId] = info;
 
-		const char* weaponName = ((info.iFlags & ITEM_FLAG_EXHAUSTIBLE) != 0) ? STRING(pEntity->pev->classname) : nullptr;
 
 		if (info.pszAmmo1 && '\0' != *info.pszAmmo1)
 		{
-			AddAmmoNameToAmmoRegistry(info.pszAmmo1, weaponName);
+			AddAmmoNameToAmmoRegistry(info.pszAmmo1);
 		}
 
 		if (info.pszAmmo2 && '\0' != *info.pszAmmo2)
 		{
-			AddAmmoNameToAmmoRegistry(info.pszAmmo2, weaponName);
+			AddAmmoNameToAmmoRegistry(info.pszAmmo2);
 		}
 
 		g_pWpns[info.iId] = (CBasePlayerWeapon*)pEntity;

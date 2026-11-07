@@ -247,16 +247,15 @@ void UTIL_PrecacheOtherWeapon(const char* szClassname)
 		{
 			CBasePlayerItem::ItemInfoArray[II.iId] = II;
 
-			const char* weaponName = ((II.iFlags & ITEM_FLAG_EXHAUSTIBLE) != 0) ? STRING(pEntity->pev->classname) : nullptr;
 
 			if (II.pszAmmo1 && '\0' != *II.pszAmmo1)
 			{
-				AddAmmoNameToAmmoRegistry(II.pszAmmo1, weaponName);
+				AddAmmoNameToAmmoRegistry(II.pszAmmo1);
 			}
 
 			if (II.pszAmmo2 && '\0' != *II.pszAmmo2)
 			{
-				AddAmmoNameToAmmoRegistry(II.pszAmmo2, weaponName);
+				AddAmmoNameToAmmoRegistry(II.pszAmmo2);
 			}
 
 			memset(&II, 0, sizeof II);
