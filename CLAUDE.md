@@ -41,12 +41,12 @@ Original content: Steven's install at `/media/Data3/Projects/mods/rc2/` (beta 1.
 
 ## Status (2026-11-07)
 
-- **Server (rc2.dll):** wave 1 (p1-p9) and the TEMP STUB pass (w2-stubs) are merged: 2,567 of
-  2,610 functions to reconstruct have a counterpart, counting the code Ghidra's function list
-  misses (`reference/gaps-rc2.tsv`), and no TEMP STUBs are left. Builds on i386 and amd64; on the
-  rig it boots and loads rc_sandcrab with a clean console. The code the stubs stood in for (the
-  shield, rc2.ini loading, admin, LCS, votes, transforms) is only booted so far, not played. The
-  last 43 functions (w2-gaps) are in progress.
+- **Server (rc2.dll):** waves 1 and 2 are merged: all 2,730 functions to reconstruct have a
+  counterpart, counting the code Ghidra's function list misses (`scripts/gaps.py` now splits
+  those stretches into functions, jump tables and tails). No TEMP STUBs are left. Builds on i386
+  and amd64; on the rig it boots and loads rc_sandcrab with a clean console. Booted only, not
+  played. Known tool gap: `scripts/vc6/match.py` `pattern()` can mask the wrong 4 bytes and miss
+  stock functions (w2-gaps found six), so `names-rc2.tsv` is likely short a few names.
 - **Client (client.dll):** 1,690 functions (468 KB) to reconstruct, in five packages c1-c5,
   running. It was linked incrementally: 1,398 jump thunks start `.text` and every vtable slot goes
   through one (`check_coverage --lib client` skips them).
