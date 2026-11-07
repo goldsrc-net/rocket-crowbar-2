@@ -1,0 +1,3813 @@
+rva	size	name	file
+0x1000	67	FUN_10001000	new: start .. aflock
+0x1050	271	FUN_10001050	new: start .. aflock
+0x1160	157	FUN_10001160	new: start .. aflock
+0x1200	108	FUN_10001200	new: start .. aflock
+0x1270	110	FUN_10001270	new: start .. aflock
+0x12e0	100	FUN_100012e0	new: start .. aflock
+0x1350	88	FUN_10001350	new: start .. aflock
+0x13b0	152	FUN_100013b0	new: start .. aflock
+0x1450	39	FUN_10001450	new: start .. aflock
+0x1480	63	FUN_10001480	new: start .. aflock
+0x1580	238	FUN_10001580	new: start .. aflock
+0x25e0	122	FUN_100025e0	new: start .. aflock
+0x2660	539	FUN_10002660	new: start .. aflock
+0x2880	25	Vector::Vector	new: start .. aflock
+0x2af0	25	Vector::Vector	new: start .. aflock
+0x2b10	345	FUN_10002b10	new: start .. aflock
+0x2de0	6374	FUN_10002de0	new: start .. aflock
+0x46d0	15	CBaseEntity::SUB_CallUseToggle	new: start .. aflock
+0x46e0	8	CBaseMonster::CallMonsterThink	new: start .. aflock
+0x46f0	105	maintainer_ent	new: start .. aflock
+0x4760	1	CBaseEntity::Precache	new: start .. aflock
+0x4770	14	CBaseEntity::KeyValue	new: start .. aflock
+0x4780	6	CBaseEntity::ObjectCaps	new: start .. aflock
+0x4790	1	CBaseEntity::Activate	new: start .. aflock
+0x47a0	3	CBaseEntity::Classify	new: start .. aflock
+0x47b0	3	CBaseEntity::DeathNotice	new: start .. aflock
+0x47c0	4	CBaseEntity::BloodColor	new: start .. aflock
+0x47d0	8	CBaseEntity::IsTriggered	new: start .. aflock
+0x47e0	3	CBaseEntity::MyMonsterPointer	new: start .. aflock
+0x47f0	3	CBaseEntity::MySquadMonsterPointer	new: start .. aflock
+0x4800	3	CBaseEntity::GetToggleState	new: start .. aflock
+0x4810	3	CBaseEntity::AddPoints	new: start .. aflock
+0x4820	3	CBaseEntity::AddPointsToTeam	new: start .. aflock
+0x4830	5	CBaseEntity::AddPlayerItem	new: start .. aflock
+0x4840	5	CBaseEntity::RemovePlayerItem	new: start .. aflock
+0x4850	6	CBaseEntity::GiveAmmo	new: start .. aflock
+0x4860	7	CBaseEntity::GetDelay	new: start .. aflock
+0x4870	80	CBaseEntity::IsMoving	new: start .. aflock
+0x48c0	1	CBaseEntity::OverrideReset	new: start .. aflock
+0x48d0	3	CBaseEntity::SetToggleState	new: start .. aflock
+0x48e0	1	CBaseEntity::StartSneaking	new: start .. aflock
+0x48f0	1	CBaseEntity::StopSneaking	new: start .. aflock
+0x4900	5	CBaseEntity::OnControls	new: start .. aflock
+0x4910	3	CBaseEntity::IsSneaking	new: start .. aflock
+0x4920	41	CBaseEntity::IsAlive	new: start .. aflock
+0x4950	30	CBaseEntity::IsBSPModel	new: start .. aflock
+0x4970	48	CBaseEntity::ReflectGauss	new: start .. aflock
+0x49a0	102	CBaseEntity::HasTarget	new: start .. aflock
+0x4a10	3	CBaseEntity::IsPlayer	new: start .. aflock
+0x4a20	3	CBaseEntity::IsNetClient	new: start .. aflock
+0x4a30	6	CBaseEntity::TeamID	new: start .. aflock
+0x4a40	10	CBaseEntity::Think	new: start .. aflock
+0x4a50	17	CBaseEntity::Touch	new: start .. aflock
+0x4a70	32	CBaseEntity::Use	new: start .. aflock
+0x4a90	17	CBaseEntity::Blocked	new: start .. aflock
+0x4af0	104	CBaseEntity::Center	new: start .. aflock
+0x4b60	61	CBaseEntity::EyePosition	new: start .. aflock
+0x4ba0	61	CBaseEntity::EarPosition	new: start .. aflock
+0x4df0	187	CMaintainEnt::MaintainThink	new: start .. aflock
+0x4eb0	71	FUN_10004eb0	new: start .. aflock
+0x4f00	310	FUN_10004f00	new: start .. aflock
+0x5040	92	FUN_10005040	new: start .. aflock
+0x50a0	72	FUN_100050a0	new: start .. aflock
+0x50f0	492	FUN_100050f0	new: start .. aflock
+0x52e0	1	CBaseEntity::Spawn	new: start .. aflock
+0x52f0	192	FUN_100052f0	new: start .. aflock
+0x53b0	69	FUN_100053b0	new: start .. aflock
+0x5400	79	FUN_10005400	new: start .. aflock
+0x5450	48	CFlockingFlyerFlock::Save	aflock
+0x5480	48	CFlockingFlyerFlock::Restore	aflock
+0x54b0	105	monster_flyer	aflock
+0x5520	105	monster_flyer_flock	aflock
+0x5590	48	CFlockingFlyer::Save	aflock
+0x55c0	48	CFlockingFlyer::Restore	aflock
+0x55f0	181	CFlockingFlyerFlock::KeyValue	aflock
+0x56b0	36	CFlockingFlyerFlock::Spawn	aflock
+0x56e0	67	CFlockingFlyerFlock::Precache	aflock
+0x5730	520	FUN_10005730	aflock
+0x5940	60	CFlockingFlyer::Spawn	aflock
+0x5980	19	CFlockingFlyer::Precache	aflock
+0x59a0	209	FUN_100059a0	aflock
+0x5a80	220	CFlockingFlyer::Killed	aflock
+0x5b60	188	CFlockingFlyer::FallHack	aflock
+0x5c20	203	FUN_10005c20	aflock
+0x5cf0	163	CFlockingFlyer::BoidAdvanceFrame	aflock
+0x5da0	93	CFlockingFlyer::IdleThink	aflock
+0x5e00	90	CFlockingFlyer::Start	new: aflock .. agrunt
+0x5e60	247	CFlockingFlyer::FormFlock	new: aflock .. agrunt
+0x5f60	677	FUN_10005f60	new: aflock .. agrunt
+0x6210	324	FUN_10006210	new: aflock .. agrunt
+0x6360	1107	FUN_10006360	new: aflock .. agrunt
+0x67c0	51	Vector::operator+	new: aflock .. agrunt
+0x6800	51	Vector::operator-	new: aflock .. agrunt
+0x6840	51	Vector::operator*	new: aflock .. agrunt
+0x6880	1220	CFlockingFlyer::FlockLeaderThink	new: aflock .. agrunt
+0x6d50	1010	CFlockingFlyer::FlockFollowerThink	new: aflock .. agrunt
+0x7150	15	FUN_10007150	new: aflock .. agrunt
+0x7160	31	FUN_10007160	new: aflock .. agrunt
+0x7180	146	FUN_10007180	new: aflock .. agrunt
+0x7220	24	FUN_10007220	new: aflock .. agrunt
+0x7240	30	FUN_10007240	new: aflock .. agrunt
+0x7260	9	FUN_10007260	new: aflock .. agrunt
+0x7270	42	`vector_constructor_iterator'	new: aflock .. agrunt
+0x72c0	7	CBaseToggle::GetToggleState	new: aflock .. agrunt
+0x72d0	7	CBaseToggle::GetDelay	new: aflock .. agrunt
+0x72e0	7	CBaseMonster::BloodColor	new: aflock .. agrunt
+0x72f0	3	CBaseMonster::MyMonsterPointer	new: aflock .. agrunt
+0x7300	18	CBaseMonster::IsAlive	new: aflock .. agrunt
+0x7320	6	CBaseMonster::GetStoppedActivity	new: aflock .. agrunt
+0x7330	19	CBaseMonster::Stop	new: aflock .. agrunt
+0x7350	1	CBaseMonster::ScheduleChange	new: aflock .. agrunt
+0x7360	11	CBaseMonster::CanPlaySentence	new: aflock .. agrunt
+0x7370	1	CBaseMonster::SetYawSpeed	new: aflock .. agrunt
+0x7380	8	CBaseMonster::FValidateCover	new: aflock .. agrunt
+0x7390	7	CBaseMonster::CoverRadius	new: aflock .. agrunt
+0x73a0	1	CBaseMonster::CheckAmmo	new: aflock .. agrunt
+0x73b0	7	CBaseMonster::HearingSensitivity	new: aflock .. agrunt
+0x73c0	1	CBaseMonster::PrescheduleThink	new: aflock .. agrunt
+0x7470	14	CBaseMonster::IsMoving	new: aflock .. agrunt
+0x7480	1	CBaseMonster::DeathSound	new: aflock .. agrunt
+0x7560	118	monster_alien_grunt	new: aflock .. agrunt
+0x75e0	3	CSquadMonster::MySquadMonsterPointer	new: aflock .. agrunt
+0x75f0	3	FUN_100075f0	new: aflock .. agrunt
+0x7610	173	CAGrunt::SetObjectCollisionBox	new: aflock .. agrunt
+0x76c0	48	CAGrunt::Save	agrunt
+0x76f0	48	CAGrunt::Restore	agrunt
+0x77f0	6	CAGrunt::ISoundMask	agrunt
+0x7800	515	CAGrunt::TraceAttack	agrunt
+0x7a10	53	FUN_10007a10	agrunt
+0x7a50	75	FUN_10007a50	agrunt
+0x7aa0	188	CAGrunt::PrescheduleThink	agrunt
+0x7b60	79	FUN_10007b60	agrunt
+0x7bb0	79	FUN_10007bb0	agrunt
+0x7c00	79	FUN_10007c00	agrunt
+0x7c50	116	FUN_10007c50	agrunt
+0x7cd0	6	CAGrunt::Classify	agrunt
+0x7ce0	48	CAGrunt::SetYawSpeed	agrunt
+0x84a0	297	CAGrunt::Spawn	agrunt
+0x85d0	253	CAGrunt::Precache	agrunt
+0x86d0	38	CAGrunt::ScheduleFromName	agrunt
+0x8700	14	CAGrunt::FCanCheckAttacks	agrunt
+0x8710	71	CAGrunt::CheckMeleeAttack1	agrunt
+0x8760	365	CAGrunt::CheckRangeAttack1	agrunt
+0x88d0	1354	CAGrunt::StartTask	agrunt
+0x8e20	228	CAGrunt::GetSchedule	agrunt
+0x8f10	125	CAGrunt::GetScheduleOfType	agrunt
+0x8fd0	118	item_airtank	new: agrunt .. airtank
+0x9050	4	CAirtank::BloodColor	new: agrunt .. airtank
+0x9060	48	CAirtank::Save	airtank
+0x9090	48	CAirtank::Restore	airtank
+0x90c0	227	CAirtank::Spawn	airtank
+0x91b0	26	CAirtank::Precache	airtank
+0x91d0	95	CAirtank::Killed	airtank
+0x9230	21	CAirtank::TankThink	new: airtank .. animating
+0x9250	194	CAirtank::TankTouch	new: airtank .. animating
+0x9320	48	FUN_10009320	new: airtank .. animating
+0x9350	48	FUN_10009350	new: airtank .. animating
+0x9380	325	FUN_10009380	new: airtank .. animating
+0x94d0	41	FUN_100094d0	new: airtank .. animating
+0x9500	41	FUN_10009500	new: airtank .. animating
+0x9530	33	CBaseAnimating::LookupSequence	animating
+0x9560	110	FUN_10009560	animating
+0x95d0	34	CBaseAnimating::GetSequenceFlags	animating
+0x9600	280	FUN_10009600	animating
+0x9720	46	FUN_10009720	animating
+0x9750	92	CBaseAnimating::InitBoneControllers	animating
+0x97b0	46	FUN_100097b0	animating
+0x97e0	37	FUN_100097e0	animating
+0x9810	37	FUN_10009810	animating
+0x9840	89	CBaseAnimating::FindTransition	animating
+0x98b0	42	CBaseAnimating::SetBodygroup	animating
+0x98e0	37	CBaseAnimating::GetBodygroup	animating
+0x9910	46	CBaseAnimating::ExtractBbox	animating
+0x9940	447	CBaseAnimating::SetSequenceBox	animating
+0x9b00	82	ExtractBbox	animation
+0x9b60	115	LookupActivity	animation
+0x9be0	79	LookupActivityHeaviest	animation
+0x9c30	47	GetEyePosition	animation
+0x9c60	91	LookupSequence	animation
+0x9cc0	27	IsSoundEvent	animation
+0x9ce0	193	FUN_10009ce0	animation
+0x9db0	224	FUN_10009db0	animation
+0x9e90	53	GetSequenceFlags	animation
+0x9ed0	329	GetAnimationEvent	animation
+0xa020	366	FUN_1000a020	animation
+0xa190	319	FUN_1000a190	animation
+0xa2d0	261	FindTransition	animation
+0xa3e0	93	SetBodygroup	animation
+0xa440	81	GetBodygroup	animation
+0xa600	102	antifric_timer	new: animation .. apache
+0xa680	97	FUN_1000a680	new: animation .. apache
+0xa6f0	42	FUN_1000a6f0	new: animation .. apache
+0xa720	321	CAntiFricTimer::StartFriction	new: animation .. apache
+0xa870	120	CAntiFricTimer::EntFrozen	new: animation .. apache
+0xa8f0	330	FUN_1000a8f0	new: animation .. apache
+0xaa40	70	FUN_1000aa40	new: animation .. apache
+0xaa90	138	monster_apache	new: animation .. apache
+0xab80	6	CApache::Classify	new: animation .. apache
+0xab90	4	CApache::BloodColor	new: animation .. apache
+0xaba0	179	CApache::SetObjectCollisionBox	new: animation .. apache
+0xac60	48	CApache::Save	apache
+0xac90	48	CApache::Restore	apache
+0xacc0	340	CApache::Spawn	apache
+0xae20	157	CApache::Precache	apache
+0xaec0	36	CApache::NullThink	apache
+0xaef0	46	CApache::StartupUse	apache
+0xaf20	260	CApache::Killed	apache
+0xb030	2041	CApache::DyingThink	apache
+0xb830	209	CApache::FlyTouch	apache
+0xb910	56	CApache::CrashTouch	apache
+0xb950	1	CApache::GibMonster	apache
+0xb960	2844	CApache::HuntThink	apache
+0xc480	33	Vector::Length	apache
+0xc4b0	1856	FUN_1000c4b0	apache
+0xcbf0	1242	FUN_1000cbf0	apache
+0xd0e0	1124	FUN_1000d0e0	apache
+0xd550	203	FUN_1000d550	apache
+0xd620	71	CApache::TakeDamage	apache
+0xd670	129	CApache::TraceAttack	apache
+0xd700	118	hvr_rocket	apache
+0xd780	48	CApacheHVR::Save	apache
+0xd7b0	48	CApacheHVR::Restore	apache
+0xd7e0	251	CApacheHVR::Spawn	apache
+0xd8e0	47	CApacheHVR::Precache	apache
+0xd910	219	CApacheHVR::IgniteThink	new: apache .. barnacle
+0xd9f0	370	CApacheHVR::AccelerateThink	new: apache .. barnacle
+0xdb70	4	CGrenade::BloodColor	new: apache .. barnacle
+0xdb80	105	monster_barnacle	new: apache .. barnacle
+0xdc00	48	CBarnacle::Save	barnacle
+0xdc30	48	CBarnacle::Restore	barnacle
+0xdc60	6	CBarnacle::Classify	barnacle
+0xdc70	39	CBarnacle::HandleAnimEvent	barnacle
+0xdca0	289	CBarnacle::Spawn	barnacle
+0xddd0	45	CBarnacle::TakeDamage	barnacle
+0xde00	1541	CBarnacle::BarnacleThink	barnacle
+0xe410	241	CBarnacle::Killed	barnacle
+0xe510	130	CBarnacle::WaitTillDead	barnacle
+0xe5a0	92	CBarnacle::Precache	barnacle
+0xe600	363	FUN_1000e600	new: barnacle .. barney
+0xe770	118	monster_barney	new: barnacle .. barney
+0xe800	6	CBarney::ObjectCaps	new: barnacle .. barney
+0xe810	48	CBarney::Save	barney
+0xe840	48	CBarney::Restore	barney
+0xe870	38	CBarney::ScheduleFromName	barney
+0xe8a0	13	CBarney::StartTask	barney
+0xe8b0	90	CBarney::RunTask	barney
+0xe910	6	CBarney::ISoundMask	barney
+0xe920	6	CBarney::Classify	barney
+0xe930	81	FUN_1000e930	barney
+0xe990	49	CBarney::SetYawSpeed	barney
+0xe9d0	389	CBarney::CheckRangeAttack1	barney
+0xeb60	368	FUN_1000eb60	barney
+0xed20	277	CBarney::Spawn	barney
+0xee40	121	CBarney::Precache	barney
+0xeec0	204	FUN_1000eec0	barney
+0xef90	367	CBarney::TakeDamage	barney
+0xf100	244	FUN_1000f100	barney
+0xf2f0	176	CBarney::DeathSound	barney
+0xf3a0	156	CBarney::TraceAttack	barney
+0xf440	100	CBarney::Killed	barney
+0xf4b0	129	CBarney::GetScheduleOfType	barney
+0xf570	428	CBarney::GetSchedule	barney
+0xf720	5	CBarney::GetIdealState	barney
+0xf750	114	CDeadBarney::KeyValue	barney
+0xf7d0	105	monster_barney_dead	barney
+0xf840	6	CDeadBarney::Classify	barney
+0xf850	164	CDeadBarney::Spawn	barney
+0xf910	102	info_bigmomma	new: barney .. bigmomma
+0xf980	48	CInfoBM::Save	bigmomma
+0xf9b0	48	CInfoBM::Restore	bigmomma
+0xf9e0	1	CInfoBM::Spawn	bigmomma
+0xf9f0	459	CInfoBM::KeyValue	bigmomma
+0xfbc0	102	bmortar	bigmomma
+0xfc30	48	CBMortar::Save	bigmomma
+0xfc60	48	CBMortar::Restore	bigmomma
+0xfc90	105	monster_bigmomma	bigmomma
+0xfd20	11	CBigMomma::OverrideReset	bigmomma
+0xfd30	173	CBigMomma::SetObjectCollisionBox	bigmomma
+0xfde0	48	CBigMomma::Save	bigmomma
+0xfe10	48	CBigMomma::Restore	bigmomma
+0xfe40	13	CBigMomma::KeyValue	bigmomma
+0xfe50	6	CBigMomma::Classify	bigmomma
+0xfe60	41	CBigMomma::SetYawSpeed	bigmomma
+0x109e0	297	CBigMomma::TraceAttack	bigmomma
+0x10b10	123	CBigMomma::TakeDamage	bigmomma
+0x10b90	336	FUN_10010b90	bigmomma
+0x10ce0	105	CBigMomma::DeathNotice	bigmomma
+0x10d50	255	FUN_10010d50	bigmomma
+0x10e50	246	CBigMomma::Spawn	bigmomma
+0x10f50	346	CBigMomma::Precache	bigmomma
+0x110b0	30	CBigMomma::Activate	bigmomma
+0x110d0	154	FUN_100110d0	bigmomma
+0x11170	225	FUN_10011170	bigmomma
+0x11260	47	CBigMomma::CheckMeleeAttack1	bigmomma
+0x11290	214	CBigMomma::CheckMeleeAttack2	bigmomma
+0x11370	281	CBigMomma::CheckRangeAttack1	bigmomma
+0x11490	38	CBigMomma::ScheduleFromName	bigmomma
+0x114c0	39	CBigMomma::GetScheduleOfType	bigmomma
+0x114f0	41	FUN_100114f0	bigmomma
+0x11520	35	CBigMomma::GetSchedule	bigmomma
+0x11550	1136	CBigMomma::StartTask	bigmomma
+0x11a30	10	FUN_10011a30	bigmomma
+0x11a40	381	CBigMomma::RunTask	bigmomma
+0x11be0	3	CPointEntity::ObjectCaps	bigmomma
+0x11bf0	592	VecCheckSplatToss	bigmomma
+0x11e40	140	MortarSpray	bigmomma
+0x11ed0	265	CBMortar::Spawn	bigmomma
+0x11fe0	332	CBMortar::Animate	bigmomma
+0x12130	180	FUN_10012130	bigmomma
+0x121f0	678	CBMortar::Touch	bigmomma
+0x124a0	105	monster_bloater	new: bigmomma .. bloater
+0x12510	5	CBloater::CheckRangeAttack1	new: bigmomma .. bloater
+0x12520	5	CBloater::CheckRangeAttack2	new: bigmomma .. bloater
+0x12530	6	CBloater::Classify	bloater
+0x12540	14	CBloater::SetYawSpeed	bloater
+0x12550	42	CBloater::TakeDamage	bloater
+0x125b0	1	FUN_100125b0	bloater
+0x125c0	26	CBloater::HandleAnimEvent	bloater
+0x125e0	256	CBloater::Spawn	bloater
+0x126e0	13	CBloater::Precache	bloater
+0x126f0	103	VecBModelOrigin	bmodels
+0x12760	102	func_wall	bmodels
+0x127d0	3	CFuncWall::ObjectCaps	bmodels
+0x127e0	111	FUN_100127e0	bmodels
+0x12850	171	CFuncWall::Spawn	bmodels
+0x12900	111	FUN_10012900	bmodels
+0x12970	59	CFuncWall::Use	bmodels
+0x129b0	102	func_wall_toggle	bmodels
+0x12a20	29	CFuncWallToggle::Spawn	bmodels
+0x12a40	48	CFuncWallToggle::TurnOff	bmodels
+0x12a70	48	CFuncWallToggle::TurnOn	bmodels
+0x12aa0	19	CFuncWallToggle::IsOn	bmodels
+0x12ac0	54	CFuncWallToggle::Use	bmodels
+0x12b00	102	func_conveyor	bmodels
+0x12b70	121	CFuncConveyor::Spawn	bmodels
+0x12bf0	116	CFuncConveyor::UpdateSpeed	bmodels
+0x12c70	35	CFuncConveyor::Use	bmodels
+0x12ca0	105	func_illusionary	bmodels
+0x12d10	3	CFuncIllusionary::ObjectCaps	bmodels
+0x12d20	122	CFuncIllusionary::KeyValue	bmodels
+0x12da0	91	CFuncIllusionary::Spawn	bmodels
+0x12e00	102	func_monsterclip	bmodels
+0x12e70	3	CFuncMonsterClip::Use	bmodels
+0x12e80	63	CFuncMonsterClip::Spawn	bmodels
+0x12ec0	48	CFuncRotating::Save	bmodels
+0x12ef0	48	CFuncRotating::Restore	bmodels
+0x12f20	105	func_rotating	bmodels
+0x12f90	3	CFuncRotating::ObjectCaps	bmodels
+0x12fa0	517	CFuncRotating::KeyValue	bmodels
+0x131b0	568	CFuncRotating::Spawn	bmodels
+0x133f0	372	CFuncRotating::Precache	bmodels
+0x13580	367	CFuncRotating::HurtTouch	bmodels
+0x136f0	255	FUN_100136f0	bmodels
+0x137f0	443	CFuncRotating::SpinUp	bmodels
+0x139b0	460	CFuncRotating::SpinDown	bmodels
+0x13b80	22	CFuncRotating::Rotate	bmodels
+0x13ba0	373	CFuncRotating::RotatingUse	bmodels
+0x13df0	105	func_pendulum	bmodels
+0x13e60	3	CPendulum::ObjectCaps	bmodels
+0x13e70	48	CPendulum::Save	bmodels
+0x13ea0	48	CPendulum::Restore	bmodels
+0x13ed0	195	CPendulum::KeyValue	bmodels
+0x13fa0	424	CPendulum::Spawn	bmodels
+0x14150	279	CPendulum::PendulumUse	bmodels
+0x14270	77	CPendulum::Stop	bmodels
+0x14370	482	CPendulum::Swing	bmodels
+0x14560	377	CPendulum::Touch	bmodels
+0x146e0	123	CPendulum::RopeTouch	new: bmodels .. bullsquid
+0x14760	102	squidspit	new: bmodels .. bullsquid
+0x147d0	48	CSquidSpit::Save	bullsquid
+0x14800	48	CSquidSpit::Restore	bullsquid
+0x14830	242	CSquidSpit::Spawn	bullsquid
+0x14930	92	CSquidSpit::Animate	bullsquid
+0x14990	171	FUN_10014990	bullsquid
+0x14a40	535	CSquidSpit::Touch	bullsquid
+0x14c60	105	monster_bullchicken	bullsquid
+0x14ce0	48	CBullsquid::Save	bullsquid
+0x14d10	48	CBullsquid::Restore	bullsquid
+0x14d40	151	CBullsquid::IgnoreConditions	bullsquid
+0x14e60	412	CBullsquid::TakeDamage	bullsquid
+0x15000	249	CBullsquid::CheckRangeAttack1	bullsquid
+0x15100	80	CBullsquid::CheckMeleeAttack1	bullsquid
+0x15150	58	CBullsquid::CheckMeleeAttack2	bullsquid
+0x15190	54	CBullsquid::FValidateHintType	bullsquid
+0x151d0	6	CBullsquid::ISoundMask	bullsquid
+0x151e0	6	CBullsquid::Classify	bullsquid
+0x151f0	217	CBullsquid::IdleSound	bullsquid
+0x152e0	188	CBullsquid::PainSound	bullsquid
+0x153b0	125	CBullsquid::AlertSound	bullsquid
+0x15430	40	CBullsquid::SetYawSpeed	bullsquid
+0x15e20	218	CBullsquid::Spawn	bullsquid
+0x15f00	298	CBullsquid::Precache	bullsquid
+0x16030	150	CBullsquid::DeathSound	bullsquid
+0x160d0	106	CBullsquid::AttackSound	bullsquid
+0x16140	159	FUN_10016140	bullsquid
+0x161e0	38	CBullsquid::ScheduleFromName	bullsquid
+0x16210	428	CBullsquid::GetSchedule	bullsquid
+0x163c0	101	CBullsquid::GetScheduleOfType	bullsquid
+0x16470	341	CBullsquid::StartTask	bullsquid
+0x165d0	116	CBullsquid::RunTask	bullsquid
+0x16650	165	CBullsquid::GetIdealState	bullsquid
+0x16700	48	CEnvGlobal::Save	buttons
+0x16730	48	CEnvGlobal::Restore	buttons
+0x16760	102	env_global	buttons
+0x167d0	257	CEnvGlobal::KeyValue	buttons
+0x168e0	88	CEnvGlobal::Spawn	buttons
+0x16940	128	CEnvGlobal::Use	buttons
+0x169c0	48	CMultiSource::Save	buttons
+0x169f0	48	CMultiSource::Restore	buttons
+0x16a20	105	multisource	buttons
+0x16a90	440	CMultiSource::KeyValue	buttons
+0x16c50	68	CMultiSource::Spawn	buttons
+0x16ca0	216	CMultiSource::Use	buttons
+0x16d80	88	CMultiSource::IsTriggered	buttons
+0x16de0	297	CMultiSource::Register	buttons
+0x16f10	48	CBaseButton::Save	buttons
+0x16f40	48	CBaseButton::Restore	buttons
+0x16f70	625	CBaseButton::Precache	buttons
+0x17230	553	CBaseButton::KeyValue	buttons
+0x17460	208	CBaseButton::TakeDamage	buttons
+0x17530	105	func_button	buttons
+0x175a0	638	CBaseButton::Spawn	buttons
+0x17820	136	ButtonSound	buttons
+0x17910	449	DoSpark	buttons
+0x17af0	66	CBaseButton::ButtonSpark	buttons
+0x17b40	143	CBaseButton::ButtonUse	buttons
+0x17bd0	87	FUN_10017bd0	buttons
+0x17c30	223	CBaseButton::ButtonTouch	buttons
+0x17d10	231	FUN_10017d10	buttons
+0x17e00	154	CBaseButton::TriggerAndWait	buttons
+0x17ea0	131	CBaseButton::ButtonReturn	buttons
+0x17f30	324	CBaseButton::ButtonBackHome	buttons
+0x18080	105	func_rot_button	buttons
+0x180f0	547	CRotButton::Spawn	buttons
+0x18320	48	CMomentaryRotButton::Save	buttons
+0x18350	48	CMomentaryRotButton::Restore	buttons
+0x18380	105	momentary_rot_button	buttons
+0x183f0	21	CMomentaryRotButton::ObjectCaps	buttons
+0x18410	525	CMomentaryRotButton::Spawn	buttons
+0x18620	196	CMomentaryRotButton::KeyValue	buttons
+0x186f0	58	CMomentaryRotButton::PlaySound	buttons
+0x18730	117	CMomentaryRotButton::Use	buttons
+0x187b0	187	FUN_100187b0	buttons
+0x18870	6	CMultiSource::ObjectCaps	buttons
+0x18880	375	FUN_10018880	buttons
+0x18a00	111	FUN_10018a00	buttons
+0x18a70	117	CMomentaryRotButton::Off	buttons
+0x18af0	87	CMomentaryRotButton::Return	buttons
+0x18b50	212	FUN_10018b50	buttons
+0x18c30	48	CEnvSpark::Save	buttons
+0x18c60	48	CEnvSpark::Restore	buttons
+0x18c90	102	env_spark	buttons
+0x18d00	102	env_debris	buttons
+0x18d70	130	CEnvSpark::Spawn	buttons
+0x18e00	70	CEnvSpark::Precache	buttons
+0x18e50	436	CEnvSpark::KeyValue	buttons
+0x19010	31	CBaseButton::ObjectCaps	buttons
+0x19030	56	CEnvSpark::SparkThink	buttons
+0x19070	59	CEnvSpark::SparkStart	buttons
+0x190b0	17	CEnvSpark::SparkStop	buttons
+0x190d0	102	button_target	buttons
+0x19140	101	CButtonTarget::Spawn	buttons
+0x191b0	115	CButtonTarget::Use	buttons
+0x19230	17	CButtonTarget::ObjectCaps	buttons
+0x19250	63	CButtonTarget::TakeDamage	buttons
+0x19290	44	GetEntityAPI	cbase
+0x192c0	52	GetEntityAPI2	cbase
+0x19300	431	DispatchSpawn	cbase
+0x194b0	62	DispatchKeyValue	cbase
+0x194f0	272	FUN_100194f0	cbase
+0x19670	76	DispatchThink	cbase
+0x196c0	72	FUN_100196c0	cbase
+0x19710	201	DispatchSave	cbase
+0x197e0	172	FUN_100197e0	cbase
+0x19890	833	DispatchRestore	cbase
+0x19be0	33	DispatchObjectCollsionBox	cbase
+0x19c10	52	SaveWriteFields	cbase
+0x19c50	75	SaveReadFields	cbase
+0x19ca0	28	EHANDLE::Get	cbase
+0x19cc0	19	EHANDLE::Set	cbase
+0x19ce0	16	FUN_10019ce0	cbase
+0x19cf0	16	FUN_10019cf0	cbase
+0x19d00	48	EHANDLE::operator=	cbase
+0x19d30	12	FUN_10019d30	cbase
+0x19d40	16	FUN_10019d40	cbase
+0x19d50	109	CBaseEntity::TakeHealth	cbase
+0x19dc0	984	CBaseEntity::TakeDamage	cbase
+0x1a1a0	36	CBaseEntity::Killed	cbase
+0x1a1d0	78	CBaseEntity::GetNextTarget	cbase
+0x1a220	60	CBaseEntity::Save	cbase
+0x1a260	238	CBaseEntity::Restore	cbase
+0x1a350	456	SetObjectCollisionBox	cbase
+0x1a520	11	CBaseEntity::SetObjectCollisionBox	cbase
+0x1a530	137	CBaseEntity::Intersects	cbase
+0x1a5c0	90	CBaseEntity::MakeDormant	cbase
+0x1a620	15	FUN_1001a620	cbase
+0x1a630	123	CBaseEntity::IsInWorld	cbase
+0x1a6b0	44	CBaseEntity::ShouldToggle	cbase
+0x1a6e0	48	CBaseEntity::DamageDecal	cbase
+0x1a710	195	FUN_1001a710	new: cbase .. client
+0x1a7e0	141	FUN_1001a7e0	new: cbase .. client
+0x1a870	118	set_suicide_frame	client
+0x1a8f0	74	FUN_1001a8f0	client
+0x1ab80	192	FUN_1001ab80	client
+0x1acc0	20	CBasePlayer::StartSneaking	client
+0x1ace0	20	CBasePlayer::StopSneaking	client
+0x1ad00	29	CBasePlayer::IsSneaking	client
+0x1ad20	41	CBasePlayer::IsAlive	client
+0x1ad60	6	CBasePlayer::IsPlayer	client
+0x1ad70	6	CBasePlayer::IsNetClient	client
+0x1ad80	3	CBasePlayer::ObjectCaps	client
+0x1aec0	821	FUN_1001aec0	client
+0x1b200	841	FUN_1001b200	client
+0x1cd50	477	FUN_1001cd50	client
+0x1cf60	229	FUN_1001cf60	client
+0x1d070	165	FUN_1001d070	client
+0x1d140	47	FUN_1001d140	client
+0x1d170	173	FUN_1001d170	client
+0x1d220	47	FUN_1001d220	client
+0x1d250	155	FUN_1001d250	client
+0x1d2f0	83	FUN_1001d2f0	client
+0x1d360	37	FUN_1001d360	client
+0x1d6b0	159	FUN_1001d6b0	client
+0x1d7a0	35	ParmsChangeLevel	client
+0x1d820	1207	FUN_1001d820	client
+0x1dd00	104	PlayerCustomization	client
+0x1ddd0	255	SetupVisibility	client
+0x1e740	427	FUN_1001e740	client
+0x1e8f0	112	Entity_FieldInit	client
+0x1eac0	61	Player_FieldInit	client
+0x1ebe0	166	Custom_Entity_FieldInit	client
+0x1ec90	226	Custom_Encode	client
+0x1ed80	52	RegisterEncoders	client
+0x1f300	54	CmdEnd	client
+0x1f350	22	GetHullBounds	client
+0x1f380	59	InconsistentFile	client
+0x1f3d0	9	FUN_1001f3d0	new: client .. combat
+0x1f3e0	251	CGib::LimitVelocity	combat
+0x1fd60	1069	FUN_1001fd60	combat
+0x20190	34	CBaseMonster::HasHumanGibs	combat
+0x201c0	44	CBaseMonster::HasAlienGibs	combat
+0x201f0	119	CBaseMonster::FadeMonster	combat
+0x20270	266	CBaseMonster::GibMonster	combat
+0x20380	703	CBaseMonster::GetDeathActivity	combat
+0x20640	108	FUN_10020640	combat
+0x206d0	61	CBaseMonster::BecomeDead	combat
+0x20710	48	CBaseMonster::ShouldGibMonster	combat
+0x20740	106	FUN_10020740	combat
+0x207b0	297	CBaseMonster::Killed	combat
+0x208e0	111	CBaseEntity::SUB_StartFadeOut	combat
+0x20950	104	CBaseEntity::SUB_FadeOut	combat
+0x209c0	158	CGib::WaitTillLand	combat
+0x20a60	435	CGib::BounceGibTouch	combat
+0x20c20	470	CGib::StickyGibTouch	combat
+0x20e00	258	FUN_10020e00	combat
+0x20f10	71	CBaseMonster::TakeHealth	combat
+0x20f60	2053	CBaseMonster::TakeDamage	combat
+0x21770	244	FUN_10021770	combat
+0x21870	529	FUN_10021870	combat
+0x21a90	157	FUN_10021a90	combat
+0x21b30	1032	FUN_10021b30	combat
+0x21f40	134	Vector::Normalize	combat
+0x21fd0	67	CBaseMonster::RadiusDamage	combat
+0x22020	65	CBaseMonster::RadiusDamage	combat
+0x22070	372	FUN_10022070	combat
+0x221f0	216	CBaseMonster::FInViewCone	combat
+0x222d0	210	CBaseMonster::FInViewCone	combat
+0x22550	299	CBaseEntity::TraceAttack	combat
+0x22680	212	CBaseMonster::TraceAttack	combat
+0x22770	2575	FUN_10022770	combat
+0x23960	505	CBaseEntity::TraceBleed	combat
+0x23b60	368	CBaseMonster::MakeDamageBloodDecal	combat
+0x23cd0	145	monster_alien_controller	new: combat .. controller
+0x23d80	48	CController::Save	controller
+0x23db0	48	CController::Restore	controller
+0x23de0	6	CController::Classify	controller
+0x23df0	14	CController::SetYawSpeed	controller
+0x23e00	63	CController::TakeDamage	controller
+0x23e40	74	CController::Killed	controller
+0x23e90	70	CController::GibMonster	controller
+0x23ee0	90	CController::PainSound	controller
+0x23f40	70	CController::AlertSound	controller
+0x23f90	70	CController::IdleSound	controller
+0x23fe0	70	FUN_10023fe0	controller
+0x24030	70	CController::DeathSound	controller
+0x24400	258	CController::Spawn	controller
+0x24510	191	CController::Precache	controller
+0x245d0	38	CController::ScheduleFromName	controller
+0x24600	408	CController::StartTask	controller
+0x247a0	541	FUN_100247a0	controller
+0x249c0	409	FUN_100249c0	controller
+0x24b60	1517	CController::RunTask	controller
+0x25150	143	CController::GetSchedule	controller
+0x251e0	74	CController::GetScheduleOfType	controller
+0x25260	64	CController::CheckRangeAttack1	controller
+0x252a0	64	CController::CheckRangeAttack2	controller
+0x252e0	5	CController::CheckMeleeAttack1	controller
+0x252f0	33	CController::SetActivity	controller
+0x25560	19	CController::Stop	controller
+0x25580	1338	CController::Move	controller
+0x25ac0	30	CController::ShouldAdvanceRoute	controller
+0x25ae0	330	CController::CheckLocalMove	controller
+0x25c30	343	CController::MoveExecute	controller
+0x25d90	105	controller_head_ball	controller
+0x25e00	363	CControllerHeadBall::Spawn	controller
+0x25f70	37	CControllerHeadBall::Precache	controller
+0x25fa0	1099	CControllerHeadBall::HuntThink	controller
+0x263f0	8	CControllerHeadBall::DieThink	controller
+0x26400	641	FUN_10026400	controller
+0x26690	595	CControllerHeadBall::Crawl	controller
+0x268f0	586	CControllerHeadBall::BounceTouch	controller
+0x26b40	105	controller_energy_ball	controller
+0x26bb0	312	CControllerZapBall::Spawn	controller
+0x26cf0	13	CControllerZapBall::Precache	controller
+0x26d00	160	CControllerZapBall::AnimateThink	controller
+0x26da0	317	CControllerZapBall::ExplodeTouch	new: controller .. crossbow
+0x26ee0	145	impailer	new: controller .. crossbow
+0x271a0	2786	CImpailer::AttachTouch	new: controller .. crossbow
+0x27c90	45	FUN_10027c90	new: controller .. crossbow
+0x27cc0	20	FUN_10027cc0	new: controller .. crossbow
+0x27ce0	1048	CImpailer::PullingThink	new: controller .. crossbow
+0x28110	885	CImpailer::DieThink	new: controller .. crossbow
+0x28490	112	FUN_10028490	new: controller .. crossbow
+0x28500	68	FUN_10028500	new: controller .. crossbow
+0x28550	145	xbow_teather	new: controller .. crossbow
+0x288d0	3569	CXBowTeather::AttachTouch	new: controller .. crossbow
+0x296d0	972	CXBowTeather::PullingThink	new: controller .. crossbow
+0x29aa0	473	CXBowTeather::DieThink	new: controller .. crossbow
+0x29c90	379	FUN_10029c90	new: controller .. crossbow
+0x29e10	145	explode_bolt	new: controller .. crossbow
+0x29ef0	316	FUN_10029ef0	new: controller .. crossbow
+0x2a030	2161	CExplodeBolt::EmbedTouch	new: controller .. crossbow
+0x2a8b0	962	CExplodeBolt::ArmingThink	new: controller .. crossbow
+0x2ac80	88	CExplodeBolt::RemoveThink	new: controller .. crossbow
+0x2ace0	73	CExplodeBolt::FlyThink	new: controller .. crossbow
+0x2ad30	105	weapon_crossbow	new: controller .. crossbow
+0x2ada0	1	CBasePlayerItem::ItemPreFrame	new: controller .. crossbow
+0x2adc0	1	CBasePlayerWeapon::UpdateItemInfo	new: controller .. crossbow
+0x2ae10	89	CCrossbow::Spawn	crossbow
+0x2aed0	278	CCrossbow::Precache	crossbow
+0x2b0c0	121	FUN_1002b0c0	new: crossbow .. crowbar
+0x2b150	929	CCrossbow::DelayedHurt	new: crossbow .. crowbar
+0x2bce0	478	FUN_1002bce0	new: crossbow .. crowbar
+0x2c250	256	FUN_1002c250	new: crossbow .. crowbar
+0x2c350	814	FUN_1002c350	new: crossbow .. crowbar
+0x2c680	814	FUN_1002c680	new: crossbow .. crowbar
+0x2c9b0	498	FUN_1002c9b0	new: crossbow .. crowbar
+0x2cbb0	113	FUN_1002cbb0	new: crossbow .. crowbar
+0x2cc30	180	FUN_1002cc30	new: crossbow .. crowbar
+0x2d040	52	FUN_1002d040	new: crossbow .. crowbar
+0x2d080	102	ammo_crossbow	new: crossbow .. crowbar
+0x2d0f0	41	CCrossbowAmmo::Spawn	new: crossbow .. crowbar
+0x2d120	26	CCrossbowAmmo::Precache	new: crossbow .. crowbar
+0x2d1a0	105	crowbarang	new: crossbow .. crowbar
+0x2d460	3757	CCrowbarang::CrowbarangFlyingThink	new: crossbow .. crowbar
+0x2e310	3485	CCrowbarang::CrowbarangFlyingTouch	new: crossbow .. crowbar
+0x2f0b0	1740	FUN_1002f0b0	new: crossbow .. crowbar
+0x2f780	287	CCrowbarang::CrowbarangPickupTouch	new: crossbow .. crowbar
+0x2f8a0	797	CCrowbarang::CrowbarangEmbededThink	new: crossbow .. crowbar
+0x2fbc0	885	FUN_1002fbc0	new: crossbow .. crowbar
+0x2ff40	118	crowbar_rocket	new: crossbow .. crowbar
+0x301a0	475	CCrowbarRocket::DrunkenThink	new: crossbow .. crowbar
+0x30380	82	CCrowbarRocket::DrunkenTouch	new: crossbow .. crowbar
+0x303e0	105	weapon_crowbar	new: crossbow .. crowbar
+0x304a0	120	FUN_100304a0	new: crossbow .. crowbar
+0x30520	170	FUN_10030520	new: crossbow .. crowbar
+0x305d0	129	CCrowbar::Spawn	crowbar
+0x30660	212	CCrowbar::Precache	crowbar
+0x30780	53	FUN_10030780	crowbar
+0x307c0	66	FUN_100307c0	crowbar
+0x30810	573	FindHullIntersection	crowbar
+0x30a50	45	FUN_10030a50	new: crowbar .. defaultai
+0x31170	18	CCrowbar::Smack	new: crowbar .. defaultai
+0x31190	8	CCrowbar::SwingAgain	new: crowbar .. defaultai
+0x311a0	2487	FUN_100311a0	new: crowbar .. defaultai
+0x31b60	31	FUN_10031b60	new: crowbar .. defaultai
+0x31f30	169	FUN_10031f30	new: crowbar .. defaultai
+0x31fe0	188	FUN_10031fe0	new: crowbar .. defaultai
+0x320a0	31	FUN_100320a0	new: crowbar .. defaultai
+0x320c0	31	FUN_100320c0	new: crowbar .. defaultai
+0x320e0	31	FUN_100320e0	new: crowbar .. defaultai
+0x32100	31	FUN_10032100	new: crowbar .. defaultai
+0x32120	999	FUN_10032120	new: crowbar .. defaultai
+0x32540	49	FUN_10032540	new: crowbar .. defaultai
+0x32580	20	CBaseMonster::ScheduleFromName	defaultai
+0x325a0	143	CBaseMonster::ScheduleInList	defaultai
+0x32630	499	CBaseMonster::GetScheduleOfType	defaultai
+0x328e0	118	control_forklift	new: defaultai .. doors
+0x32c40	3055	CControlForklift::ControlThink	new: defaultai .. doors
+0x33830	1786	FUN_10033830	new: defaultai .. doors
+0x33f30	53	operator*	new: defaultai .. doors
+0x33f70	29	FUN_10033f70	new: defaultai .. doors
+0x33f90	151	FUN_10033f90	new: defaultai .. doors
+0x34030	415	CControlForklift::DoTouch	new: defaultai .. doors
+0x341e0	1972	CControlForklift::GoBoom	new: defaultai .. doors
+0x349a0	48	CBaseDoor::Save	doors
+0x349d0	48	CBaseDoor::Restore	doors
+0x34a00	534	PlayLockSounds	doors
+0x34c20	836	CBaseDoor::KeyValue	doors
+0x34f70	105	func_door	doors
+0x34fe0	16	CBaseDoor::ObjectCaps	doors
+0x34ff0	105	func_water	doors
+0x35060	482	CBaseDoor::Spawn	doors
+0x35250	52	CBaseDoor::SetToggleState	doors
+0x35290	1167	CBaseDoor::Precache	doors
+0x357c0	141	CBaseDoor::DoorTouch	doors
+0x35890	187	FUN_10035890	doors
+0x35950	631	CBaseDoor::DoorGoUp	doors
+0x35bd0	300	CBaseDoor::DoorHitTop	doors
+0x35d00	232	CBaseDoor::DoorGoDown	doors
+0x35df0	251	CBaseDoor::DoorHitBottom	doors
+0x36290	105	func_door_rotating	doors
+0x36300	606	CRotDoor::Spawn	doors
+0x36560	105	CRotDoor::SetToggleState	doors
+0x365d0	105	momentary_door	doors
+0x36640	3	CMomentaryDoor::ObjectCaps	doors
+0x36650	48	CMomentaryDoor::Save	doors
+0x36680	48	CMomentaryDoor::Restore	doors
+0x366b0	429	CMomentaryDoor::Spawn	doors
+0x36860	314	CMomentaryDoor::Precache	doors
+0x369c0	249	CMomentaryDoor::KeyValue	doors
+0x36ac0	491	CMomentaryDoor::Use	doors
+0x36cb0	102	info_target	new: doors .. effects
+0x36d20	105	env_bubbles	new: doors .. effects
+0x36d90	3	CBubbling::ObjectCaps	new: doors .. effects
+0x36da0	48	CBubbling::Save	effects
+0x36dd0	48	CBubbling::Restore	effects
+0x36e00	258	CBubbling::Spawn	effects
+0x36f10	22	CBubbling::Precache	effects
+0x36f30	92	CBubbling::Use	effects
+0x36f90	284	CBubbling::KeyValue	effects
+0x370b0	176	CBubbling::FizzThink	effects
+0x37160	102	beam	effects
+0x371d0	22	CBeam::ObjectCaps	effects
+0x371f0	101	CBeam::Center	effects
+0x37260	18	CBeam::Spawn	effects
+0x37280	67	CBeam::Precache	effects
+0x372d0	66	CBeam::SetStartEntity	effects
+0x37320	66	CBeam::SetEndEntity	effects
+0x37370	49	CBeam::GetStartPos	effects
+0x373b0	67	CBeam::GetEndPos	effects
+0x37400	116	FUN_10037400	effects
+0x37480	190	CBeam::BeamInit	effects
+0x37540	114	CBeam::PointsInit	effects
+0x375c0	117	CBeam::HoseInit	effects
+0x37640	115	CBeam::PointEntInit	effects
+0x376c0	101	CBeam::EntsInit	effects
+0x37730	410	CBeam::RelinkBeam	effects
+0x378d0	92	CBeam::TriggerTouch	effects
+0x37930	82	FUN_10037930	effects
+0x37990	62	CBeam::DoSparks	effects
+0x379d0	105	env_lightning	effects
+0x37a40	105	env_beam	effects
+0x37ab0	48	CLightning::Save	effects
+0x37ae0	48	CLightning::Restore	effects
+0x37b10	278	CLightning::Spawn	effects
+0x37c30	45	CLightning::Precache	effects
+0x37c60	34	CLightning::Activate	effects
+0x37c90	948	CLightning::KeyValue	effects
+0x38050	174	CLightning::ToggleUse	effects
+0x38100	89	CLightning::StrikeUse	effects
+0x38160	224	IsPointEntity	effects
+0x38240	980	CLightning::StrikeThink	effects
+0x38620	408	FUN_10038620	effects
+0x387c0	78	CLightning::DamageThink	effects
+0x38810	311	FUN_10038810	effects
+0x38950	1095	FUN_10038950	effects
+0x38da0	485	FUN_10038da0	effects
+0x38f90	541	FUN_10038f90	effects
+0x391b0	105	env_laser	effects
+0x39220	48	CLaser::Save	effects
+0x39250	48	CLaser::Restore	effects
+0x39280	347	CLaser::Spawn	effects
+0x393e0	76	CLaser::Precache	effects
+0x39430	749	CLaser::KeyValue	effects
+0x39720	17	CLaser::IsOn	effects
+0x39740	44	FUN_10039740	effects
+0x39770	69	FUN_10039770	effects
+0x397c0	54	CLaser::Use	effects
+0x39800	86	FUN_10039800	effects
+0x39860	134	CLaser::StrikeThink	effects
+0x398f0	102	env_glow	effects
+0x39960	48	CGlow::Save	effects
+0x39990	48	CGlow::Restore	effects
+0x399c0	244	CGlow::Spawn	effects
+0x39ac0	69	CGlow::Think	effects
+0x39b10	48	FUN_10039b10	effects
+0x39b40	102	env_sprite	effects
+0x39bb0	22	CSprite::ObjectCaps	effects
+0x39bd0	48	CSprite::Save	effects
+0x39c00	48	CSprite::Restore	effects
+0x39c30	212	CSprite::Spawn	effects
+0x39d10	130	CSprite::Precache	effects
+0x39da0	62	CSprite::SpriteInit	effects
+0x39de0	156	FUN_10039de0	effects
+0x39e80	69	CSprite::AnimateThink	effects
+0x39ed0	63	CSprite::AnimateUntilDead	effects
+0x39f50	127	CSprite::ExpandThink	effects
+0x39fd0	97	FUN_10039fd0	effects
+0x3a040	27	CSprite::TurnOff	effects
+0x3a060	119	FUN_1003a060	effects
+0x3a0e0	69	CSprite::Use	effects
+0x3a130	48	CGibShooter::Save	effects
+0x3a160	48	CGibShooter::Restore	effects
+0x3a190	105	gibshooter	effects
+0x3a200	57	CGibShooter::Precache	effects
+0x3a240	364	CGibShooter::KeyValue	effects
+0x3a3b0	27	CGibShooter::Use	effects
+0x3a3d0	122	CGibShooter::Spawn	effects
+0x3a510	979	CGibShooter::ShootThink	effects
+0x3a8f0	105	env_shooter	effects
+0x3a960	302	CEnvShooter::KeyValue	effects
+0x3aab0	56	CEnvShooter::Precache	effects
+0x3aaf0	290	FUN_1003aaf0	effects
+0x3ac20	105	test_effect	effects
+0x3ac90	5	CTestEffect::Spawn	effects
+0x3aca0	13	CTestEffect::Precache	effects
+0x3acb0	701	CTestEffect::TestThink	effects
+0x3af70	45	CTestEffect::Use	effects
+0x3afa0	102	env_blood	effects
+0x3b010	49	CBlood::Spawn	effects
+0x3b050	235	CBlood::KeyValue	effects
+0x3b140	83	CBlood::Direction	effects
+0x3b1a0	262	CBlood::BloodPosition	effects
+0x3b2b0	410	CBlood::Use	effects
+0x3b450	102	env_shake	effects
+0x3b4c0	57	CShake::Spawn	effects
+0x3b500	375	CShake::KeyValue	effects
+0x3b680	58	CShake::Use	effects
+0x3b6c0	102	env_fade	effects
+0x3b730	39	CFade::Spawn	effects
+0x3b760	201	CFade::KeyValue	effects
+0x3b830	194	CFade::Use	effects
+0x3b900	102	env_message	effects
+0x3b970	131	CMessage::Spawn	effects
+0x3ba00	36	CMessage::Precache	effects
+0x3ba30	295	CMessage::KeyValue	effects
+0x3bb60	249	CMessage::Use	effects
+0x3bc60	22	CEnvFunnel::Precache	effects
+0x3bc80	102	env_funnel	effects
+0x3bcf0	137	CEnvFunnel::Use	effects
+0x3bd80	36	CEnvFunnel::Spawn	effects
+0x3bdb0	36	CEnvBeverage::Precache	effects
+0x3bde0	102	env_beverage	effects
+0x3be50	165	CEnvBeverage::Use	effects
+0x3bf00	75	CEnvBeverage::Spawn	effects
+0x3bf50	26	CItemSoda::Precache	effects
+0x3bf70	102	item_sodacan	effects
+0x3bfe0	163	CItemSoda::Spawn	effects
+0x3c090	144	CItemSoda::CanThink	effects
+0x3c120	144	CItemSoda::CanTouch	effects
+0x3c1b0	102	shrinker_project	new: effects .. egon
+0x3c350	79	FUN_1003c350	new: effects .. egon
+0x3c3a0	1190	CShrinkerProject::ShrinkTouch	new: effects .. egon
+0x3c850	105	implode_timer	new: effects .. egon
+0x3c8c0	198	FUN_1003c8c0	new: effects .. egon
+0x3c9c0	103	FUN_1003c9c0	new: effects .. egon
+0x3ca30	757	CImplodeTimer::PreImplodeThink	new: effects .. egon
+0x3cd30	394	CImplodeTimer::BeginImplode	new: effects .. egon
+0x3cec0	974	CImplodeTimer::ImplodeEnt	new: effects .. egon
+0x3d290	105	weapon_egon	new: effects .. egon
+0x3d320	106	CEgon::Spawn	egon
+0x3d390	293	CEgon::Precache	egon
+0x3d4c0	101	FUN_1003d4c0	new: egon .. explode
+0x3d590	269	FUN_1003d590	new: egon .. explode
+0x3e1e0	544	FUN_1003e1e0	new: egon .. explode
+0x3eb40	259	FUN_1003eb40	new: egon .. explode
+0x3ec50	1821	FUN_1003ec50	new: egon .. explode
+0x3f370	680	FUN_1003f370	new: egon .. explode
+0x3fe80	102	ammo_egonclip	new: egon .. explode
+0x3fef0	41	CEgonAmmo::Spawn	new: egon .. explode
+0x3ff20	26	CEgonAmmo::Precache	new: egon .. explode
+0x3ffa0	102	spark_shower	new: egon .. explode
+0x40010	6	CShower::ObjectCaps	new: egon .. explode
+0x40020	373	CShower::Spawn	explode
+0x401a0	130	CShower::Think	explode
+0x40230	224	CShower::Touch	explode
+0x40310	48	CEnvExplosion::Save	explode
+0x40340	48	CEnvExplosion::Restore	explode
+0x40370	105	env_explosion	explode
+0x403e0	113	CEnvExplosion::KeyValue	explode
+0x40460	95	CEnvExplosion::Spawn	explode
+0x404c0	1176	CEnvExplosion::Use	explode
+0x40960	3	FUN_10040960	explode
+0x40970	147	CEnvExplosion::Smoke	explode
+0x40a10	150	ExplosionCreate	explode
+0x40ab0	686	FUN_10040ab0	new: explode .. flyingmonster
+0x40d60	366	CFlyingMonster::CheckLocalMove	flyingmonster
+0x40ed0	33	CFlyingMonster::FTriangulate	flyingmonster
+0x40f00	22	CFlyingMonster::GetStoppedActivity	flyingmonster
+0x40f20	83	FUN_10040f20	flyingmonster
+0x40f80	174	FUN_10040f80	flyingmonster
+0x41030	63	CFlyingMonster::Killed	flyingmonster
+0x41070	84	FUN_10041070	flyingmonster
+0x410d0	34	FUN_100410d0	flyingmonster
+0x41100	128	CFlyingMonster::ShouldAdvanceRoute	flyingmonster
+0x415e0	584	CFlyingMonster::ProbeZ	flyingmonster
+0x41830	93	CFlyingMonster::FloorZ	flyingmonster
+0x41890	102	freeze_timer	new: flyingmonster .. func_break
+0x41960	42	FUN_10041960	new: flyingmonster .. func_break
+0x41990	686	CFreezeTimer::StartFreeze	new: flyingmonster .. func_break
+0x41c40	120	CFreezeTimer::EntFrozen	new: flyingmonster .. func_break
+0x41cc0	444	FUN_10041cc0	new: flyingmonster .. func_break
+0x41e80	70	FUN_10041e80	new: flyingmonster .. func_break
+0x41ed0	798	CBreakable::KeyValue	func_break
+0x421f0	105	func_breakable	func_break
+0x42270	3	CBreakable::ObjectCaps	func_break
+0x42280	48	CBreakable::Save	func_break
+0x422b0	48	CBreakable::Restore	func_break
+0x422e0	211	CBreakable::Spawn	func_break
+0x423c0	109	CBreakable::MaterialSoundList	func_break
+0x42460	65	CBreakable::MaterialSoundPrecache	func_break
+0x424b0	84	CBreakable::MaterialSoundRandom	func_break
+0x42510	368	CBreakable::Precache	func_break
+0x426b0	187	FUN_100426b0	func_break
+0x42850	279	CBreakable::BreakTouch	func_break
+0x42970	83	CBreakable::Use	func_break
+0x429d0	234	CBreakable::TraceAttack	func_break
+0x42ac0	625	CBreakable::TakeDamage	func_break
+0x42d40	1426	CBreakable::Die	func_break
+0x43300	12	FUN_10043300	func_break
+0x43310	51	CBreakable::DamageDecal	func_break
+0x43350	48	CPushable::Save	func_break
+0x43380	48	CPushable::Restore	func_break
+0x433b0	105	func_pushable	func_break
+0x43430	6	CPushable::ObjectCaps	func_break
+0x43440	276	CPushable::Spawn	func_break
+0x43560	54	CPushable::Precache	func_break
+0x435a0	559	CPushable::KeyValue	func_break
+0x437d0	134	CPushable::Use	func_break
+0x43860	100	CPushable::Touch	func_break
+0x438d0	575	FUN_100438d0	func_break
+0x43b10	48	CPushable::TakeDamage	func_break
+0x43b40	48	CFuncTank::Save	func_tank
+0x43b70	48	CFuncTank::Restore	func_tank
+0x43bb0	151	_$E25	world
+0x43c50	630	CFuncTank::Spawn	func_tank
+0x43ed0	108	CFuncTank::Precache	func_tank
+0x43f40	1798	CFuncTank::KeyValue	func_tank
+0x44650	90	CFuncTank::OnControls	func_tank
+0x446b0	222	FUN_100446b0	func_tank
+0x44790	124	FUN_10044790	func_tank
+0x44810	587	FUN_10044810	func_tank
+0x44a60	292	CFuncTank::Use	func_tank
+0x44b90	7	FUN_10044b90	func_tank
+0x44ba0	71	FUN_10044ba0	func_tank
+0x44bf0	99	CFuncTank::Think	func_tank
+0x44c60	2130	FUN_10044c60	func_tank
+0x454c0	175	FUN_100454c0	func_tank
+0x45570	575	FUN_10045570	func_tank
+0x457b0	537	CFuncTank::TankTrace	func_tank
+0x459d0	91	CFuncTank::StartRotSound	func_tank
+0x45a30	85	CFuncTank::StopRotSound	func_tank
+0x45a90	105	func_tank	func_tank
+0x45b40	3	CFuncTank::ObjectCaps	func_tank
+0x45b50	299	FUN_10045b50	func_tank
+0x45c80	105	func_tanklaser	func_tank
+0x45cf0	48	CFuncTankLaser::Save	func_tank
+0x45d20	48	CFuncTankLaser::Restore	func_tank
+0x45d50	49	CFuncTankLaser::Activate	func_tank
+0x45d90	118	CFuncTankLaser::KeyValue	func_tank
+0x45e10	230	FUN_10045e10	func_tank
+0x45f00	47	CFuncTankLaser::Think	func_tank
+0x46070	118	rpg_rocket	new: func_tank .. weapons
+0x460f0	48	CRpgRocket::Save	weapons
+0x46120	48	CRpgRocket::Restore	weapons
+0x46150	362	CRpgRocket::Spawn	rpg
+0x462c0	71	CRpgRocket::RocketTouch	rpg
+0x46310	47	CRpgRocket::Precache	rpg
+0x46340	246	CRpgRocket::IgniteThink	new: rpg .. func_tank
+0x46440	1678	CRpgRocket::FollowThink	new: rpg .. func_tank
+0x46ad0	105	func_tankrocket	new: rpg .. func_tank
+0x46b40	25	CFuncTankRocket::Precache	func_tank
+0x46b60	160	FUN_10046b60	func_tank
+0x46c00	105	func_tankmortar	func_tank
+0x46c70	117	CFuncTankMortar::KeyValue	func_tank
+0x46e40	102	func_tankcontrols	func_tank
+0x46eb0	48	CFuncTankControls::Save	func_tank
+0x46ee0	48	CFuncTankControls::Restore	func_tank
+0x46f10	6	CFuncTankControls::ObjectCaps	func_tank
+0x46f20	38	CFuncTankControls::Use	func_tank
+0x46f50	173	CFuncTankControls::Think	func_tank
+0x47000	146	CFuncTankControls::Spawn	func_tank
+0x47d00	51	CGameRules::CanHaveAmmo	gamerules
+0x47d40	257	CGameRules::GetPlayerSpawnSpot	gamerules
+0x47ed0	147	FUN_10047ed0	gamerules
+0x47f70	1422	CGameRules::RefreshSkillData	gamerules
+0x48500	196	InstallGameRules	gamerules
+0x485d0	102	streak_spiral	new: gamerules .. gargantua
+0x48640	6	CSpiral::ObjectCaps	new: gamerules .. gargantua
+0x48650	102	garg_stomp	new: gamerules .. gargantua
+0x486c0	310	FUN_100486c0	new: gamerules .. gargantua
+0x48800	166	CStomp::Spawn	gargantua
+0x488b0	1254	CStomp::Think	gargantua
+0x48da0	143	StreakSplash	gargantua
+0x48e30	105	monster_gargantua	gargantua
+0x48f10	173	CGargantua::SetObjectCollisionBox	gargantua
+0x48fc0	48	CGargantua::Save	gargantua
+0x48ff0	48	CGargantua::Restore	gargantua
+0x49020	38	CGargantua::ScheduleFromName	gargantua
+0x49050	13	FUN_10049050	gargantua
+0x49060	11	FUN_10049060	gargantua
+0x49070	134	FUN_10049070	gargantua
+0x49100	629	CGargantua::StompAttack	gargantua
+0x49380	607	FUN_10049380	gargantua
+0x495e0	212	FUN_100495e0	gargantua
+0x496c0	975	FUN_100496c0	gargantua
+0x49a90	1511	FUN_10049a90	gargantua
+0x4a080	85	FUN_1004a080	gargantua
+0x4a0e0	66	CGargantua::PrescheduleThink	gargantua
+0x4a130	6	CGargantua::Classify	gargantua
+0x4a140	74	CGargantua::SetYawSpeed	gargantua
+0x4a1b0	406	CGargantua::Spawn	gargantua
+0x4a350	388	CGargantua::Precache	gargantua
+0x4a4e0	356	CGargantua::TraceAttack	gargantua
+0x4a650	104	CGargantua::TakeDamage	gargantua
+0x4a6c0	374	CGargantua::DeathEffect	gargantua
+0x4a840	51	CGargantua::Killed	gargantua
+0x4a880	47	CGargantua::CheckMeleeAttack1	gargantua
+0x4a8b0	84	CGargantua::CheckMeleeAttack2	gargantua
+0x4a910	67	CGargantua::CheckRangeAttack1	gargantua
+0x4ac10	592	FUN_1004ac10	gargantua
+0x4ae60	62	CGargantua::GetScheduleOfType	gargantua
+0x4aea0	237	CGargantua::StartTask	gargantua
+0x4af90	1125	CGargantua::RunTask	gargantua
+0x4b400	102	env_smoker	gargantua
+0x4b470	113	CSmoker::Spawn	gargantua
+0x4b4f0	322	CSmoker::Think	gargantua
+0x4b640	113	CSpiral::Spawn	gargantua
+0x4b6c0	224	FUN_1004b6c0	gargantua
+0x4b7a0	596	CSpiral::Think	gargantua
+0x4ba00	220	SpawnExplosion	gargantua
+0x4bae0	105	gauss_becon	new: gargantua .. gauss
+0x4bd00	434	CGaussBecon::FlyingThink	new: gargantua .. gauss
+0x4bec0	1723	CGaussBecon::AttachTouch	new: gargantua .. gauss
+0x4c580	1023	CGaussBecon::AttachedThink	new: gargantua .. gauss
+0x4c980	232	FUN_1004c980	new: gargantua .. gauss
+0x4ca70	105	weapon_gauss	new: gargantua .. gauss
+0x4cae0	95	CGauss::Spawn	gauss
+0x4cb40	306	CGauss::Precache	gauss
+0x4cc80	749	FUN_1004cc80	new: gauss .. genericmonster
+0x4cf70	483	FUN_1004cf70	new: gauss .. genericmonster
+0x4d160	417	FUN_1004d160	new: gauss .. genericmonster
+0x4d410	63	FUN_1004d410	new: gauss .. genericmonster
+0x4d460	74	FUN_1004d460	new: gauss .. genericmonster
+0x4d4b0	12	FUN_1004d4b0	new: gauss .. genericmonster
+0x4d4c0	351	FUN_1004d4c0	new: gauss .. genericmonster
+0x4d620	437	FUN_1004d620	new: gauss .. genericmonster
+0x4d7e0	69	FUN_1004d7e0	new: gauss .. genericmonster
+0x4d830	84	FUN_1004d830	new: gauss .. genericmonster
+0x4e540	1287	FUN_1004e540	new: gauss .. genericmonster
+0x4ea50	1065	FUN_1004ea50	new: gauss .. genericmonster
+0x4f4e0	1946	FUN_1004f4e0	new: gauss .. genericmonster
+0x4fca0	1459	FUN_1004fca0	new: gauss .. genericmonster
+0x50330	36	FUN_10050330	new: gauss .. genericmonster
+0x50360	513	FUN_10050360	new: gauss .. genericmonster
+0x50570	102	ammo_gaussclip	new: gauss .. genericmonster
+0x505e0	41	CGaussAmmo::Spawn	new: gauss .. genericmonster
+0x50610	26	CGaussAmmo::Precache	new: gauss .. genericmonster
+0x50690	105	monster_generic	new: gauss .. genericmonster
+0x50700	6	CGenericMonster::Classify	genericmonster
+0x50710	14	CGenericMonster::SetYawSpeed	genericmonster
+0x50730	3	CGenericMonster::ISoundMask	genericmonster
+0x50740	419	CGenericMonster::Spawn	genericmonster
+0x508f0	32	CGenericMonster::Precache	genericmonster
+0x50910	105	grenade	new: genericmonster .. ggrenade
+0x50980	103	CGrenade::Explode	ggrenade
+0x509f0	713	FUN_100509f0	ggrenade
+0x50cc0	637	FUN_10050cc0	ggrenade
+0x50f40	302	CGrenade::Smoke	ggrenade
+0x51070	8	CGrenade::Killed	ggrenade
+0x51080	27	CGrenade::DetonateUse	ggrenade
+0x510a0	62	CGrenade::PreDetonate	ggrenade
+0x510e0	167	CGrenade::Detonate	ggrenade
+0x51190	812	CGrenade::Detonate2	ggrenade
+0x514c0	578	CGrenade::ExplodeTouch	ggrenade
+0x51710	576	CGrenade::ExplodeTouch2	ggrenade
+0x51950	293	CGrenade::DangerSoundThink	ggrenade
+0x51a80	739	CGrenade::BounceTouch	ggrenade
+0x51d70	140	CGrenade::SlideTouch	ggrenade
+0x51e00	150	CGrenade::BounceSound	ggrenade
+0x51ea0	334	CGrenade::TumbleThink	ggrenade
+0x51ff0	175	CGrenade::Spawn	ggrenade
+0x520a0	265	FUN_100520a0	new: ggrenade .. globals
+0x521b0	468	FUN_100521b0	new: ggrenade .. globals
+0x52620	31	_$E13	globals
+0x52640	102	transphasic_gib	new: globals .. wpn_shared_hl_wpn_glock
+0x526b0	189	FUN_100526b0	new: globals .. wpn_shared_hl_wpn_glock
+0x527c0	1830	FUN_100527c0	new: globals .. wpn_shared_hl_wpn_glock
+0x52ef0	504	CTransphasicGib::TGibThink	new: globals .. wpn_shared_hl_wpn_glock
+0x530f0	105	glock_stickygib	new: globals .. wpn_shared_hl_wpn_glock
+0x53360	81	FUN_10053360	new: globals .. wpn_shared_hl_wpn_glock
+0x533c0	1353	CGlockStickyGib::AttachedThink	new: globals .. wpn_shared_hl_wpn_glock
+0x53910	2598	CGlockStickyGib::AttachTouch	new: globals .. wpn_shared_hl_wpn_glock
+0x54340	737	FUN_10054340	new: globals .. wpn_shared_hl_wpn_glock
+0x54630	102	glock_gib	new: globals .. wpn_shared_hl_wpn_glock
+0x54890	69	FUN_10054890	new: globals .. wpn_shared_hl_wpn_glock
+0x548e0	790	CGlockGib::BounceTouch	new: globals .. wpn_shared_hl_wpn_glock
+0x54c00	105	weapon_glock	new: globals .. wpn_shared_hl_wpn_glock
+0x54cb0	105	weapon_9mmhandgun	new: globals .. wpn_shared_hl_wpn_glock
+0x54d20	97	CGlock::Spawn	wpn_shared_hl_wpn_glock
+0x54d90	281	CGlock::Precache	wpn_shared_hl_wpn_glock
+0x54f50	119	FUN_10054f50	new: wpn_shared_hl_wpn_glock .. gman
+0x55b80	858	FUN_10055b80	new: wpn_shared_hl_wpn_glock .. gman
+0x56160	102	ammo_glockclip	new: wpn_shared_hl_wpn_glock .. gman
+0x561d0	41	CGlockAmmo::Spawn	new: wpn_shared_hl_wpn_glock .. gman
+0x56200	26	CGlockAmmo::Precache	new: wpn_shared_hl_wpn_glock .. gman
+0x56280	102	ammo_9mmclip	new: wpn_shared_hl_wpn_glock .. gman
+0x562f0	105	monster_gman	new: wpn_shared_hl_wpn_glock .. gman
+0x56380	48	CGMan::Save	gman
+0x563b0	48	CGMan::Restore	gman
+0x563e0	3	CGMan::Classify	gman
+0x563f0	14	CGMan::SetYawSpeed	gman
+0x56410	3	CGMan::ISoundMask	gman
+0x56420	186	CGMan::Spawn	gman
+0x564e0	13	CGMan::Precache	gman
+0x564f0	67	CGMan::StartTask	gman
+0x56540	400	CGMan::RunTask	gman
+0x566d0	93	CGMan::TakeDamage	gman
+0x56730	49	CGMan::TraceAttack	gman
+0x56770	76	CGMan::PlayScriptedSentence	gman
+0x567c0	371	FBoxVisible	h_ai
+0x56940	1361	VecCheckToss	h_ai
+0x56ea0	628	VecCheckThrow	h_ai
+0x57120	48	CRecharge::Save	h_battery
+0x57150	48	CRecharge::Restore	h_battery
+0x57180	105	func_recharge	h_battery
+0x571f0	6	CRecharge::ObjectCaps	h_battery
+0x57200	384	CRecharge::KeyValue	h_battery
+0x57380	144	CRecharge::Spawn	h_battery
+0x57410	37	CRecharge::Precache	h_battery
+0x57440	734	CRecharge::Use	h_battery
+0x57720	42	CRecharge::Recharge	new: h_battery .. h_cine
+0x57750	138	CRecharge::Off	new: h_battery .. h_cine
+0x577e0	118	monster_cine_scientist	new: h_battery .. h_cine
+0x57860	11	CCineScientist::Spawn	new: h_battery .. h_cine
+0x57870	118	monster_cine_panther	new: h_battery .. h_cine
+0x578f0	11	CCinePanther::Spawn	new: h_battery .. h_cine
+0x57900	118	monster_cine_barney	new: h_battery .. h_cine
+0x57980	11	CCineBarney::Spawn	new: h_battery .. h_cine
+0x57990	118	monster_cine2_scientist	new: h_battery .. h_cine
+0x57a10	11	CCine2Scientist::Spawn	new: h_battery .. h_cine
+0x57a20	118	monster_cine2_hvyweapons	new: h_battery .. h_cine
+0x57aa0	11	CCine2HeavyWeapons::Spawn	new: h_battery .. h_cine
+0x57ab0	118	monster_cine2_slave	new: h_battery .. h_cine
+0x57b30	11	CCine2Slave::Spawn	new: h_battery .. h_cine
+0x57b40	118	monster_cine3_scientist	new: h_battery .. h_cine
+0x57bc0	11	CCine3Scientist::Spawn	new: h_battery .. h_cine
+0x57bd0	118	monster_cine3_barney	new: h_battery .. h_cine
+0x57c50	11	CCine3Barney::Spawn	new: h_battery .. h_cine
+0x57c60	253	FUN_10057c60	new: h_battery .. h_cine
+0x57d60	40	CLegacyCineMonster::Use	h_cine
+0x57d90	8	FUN_10057d90	h_cine
+0x57da0	40	CLegacyCineMonster::Pain	h_cine
+0x57dd0	98	CLegacyCineMonster::CineThink	h_cine
+0x57e40	102	cine_blood	h_cine
+0x57eb0	767	CCineBlood::BloodGush	h_cine
+0x581b0	27	CCineBlood::BloodStart	h_cine
+0x581d0	34	CCineBlood::Spawn	h_cine
+0x58200	48	CCycler::Save	h_cycler
+0x58230	48	CCycler::Restore	h_cycler
+0x58260	118	cycler	h_cycler
+0x582e0	6	CCycler::ObjectCaps	h_cycler
+0x582f0	3	CCycler::IsAlive	h_cycler
+0x58300	118	CGenericCycler::Spawn	h_cycler
+0x58380	118	cycler_prdroid	h_cycler
+0x58400	171	CCyclerProbe::Spawn	h_cycler
+0x584b0	170	CCycler::GenericCyclerSpawn	h_cycler
+0x58560	206	FUN_10058560	h_cycler
+0x58630	156	CCycler::Think	h_cycler
+0x586d0	55	CCycler::Use	h_cycler
+0x58710	175	CCycler::TakeDamage	h_cycler
+0x587c0	102	cycler_sprite	h_cycler
+0x58830	6	CCyclerSprite::ObjectCaps	h_cycler
+0x58840	48	CCyclerSprite::Save	h_cycler
+0x58870	48	CCyclerSprite::Restore	h_cycler
+0x588a0	207	CCyclerSprite::Spawn	h_cycler
+0x58970	92	CCyclerSprite::Think	h_cycler
+0x589d0	53	CCyclerSprite::Use	h_cycler
+0x58a10	34	CCyclerSprite::TakeDamage	h_cycler
+0x58a40	63	FUN_10058a40	h_cycler
+0x58a80	105	cycler_weapon	h_cycler
+0x58b50	219	CWeaponCycler::Spawn	h_cycler
+0x58c30	80	FUN_10058c30	h_cycler
+0x58c80	30	FUN_10058c80	h_cycler
+0x58ca0	48	FUN_10058ca0	h_cycler
+0x58d80	48	CWreckage::Save	h_cycler
+0x58db0	48	CWreckage::Restore	h_cycler
+0x58de0	105	cycler_wreckage	h_cycler
+0x58e50	170	CWreckage::Spawn	h_cycler
+0x58f00	36	CWreckage::Precache	h_cycler
+0x58f30	358	CWreckage::Think	h_cycler
+0x590a0	8	FUN_100590a0	new: h_cycler .. h_export
+0x590b0	32	GiveFnptrsToDll	h_export
+0x590d0	118	gravity_grenade	new: h_export .. handgrenade
+0x59170	158	FUN_10059170	new: h_export .. handgrenade
+0x59210	265	FUN_10059210	new: h_export .. handgrenade
+0x59320	535	CGravGrenade::PreDetonate	new: h_export .. handgrenade
+0x59540	426	FUN_10059540	new: h_export .. handgrenade
+0x596f0	302	CGravGrenade::Detonating	new: h_export .. handgrenade
+0x59820	192	CGravGrenade::EndDetonate	new: h_export .. handgrenade
+0x598e0	83	CGravGrenade::KillTouch	new: h_export .. handgrenade
+0x59940	118	suck_grenade	new: h_export .. handgrenade
+0x59ba0	535	CSuckGrenade::PreDetonate	new: h_export .. handgrenade
+0x59dc0	289	FUN_10059dc0	new: h_export .. handgrenade
+0x59ef0	52	CSuckGrenade::Detonating	new: h_export .. handgrenade
+0x59f30	107	CSuckGrenade::EndDetonate	new: h_export .. handgrenade
+0x59fa0	118	antifriction_grenade	new: h_export .. handgrenade
+0x5a020	82	FUN_1005a020	new: h_export .. handgrenade
+0x5a1e0	312	CAFGrenade::PreDetonate	new: h_export .. handgrenade
+0x5a320	1078	CAFGrenade::Detonate	new: h_export .. handgrenade
+0x5a760	1186	FUN_1005a760	new: h_export .. handgrenade
+0x5ac10	118	ultima_grenade	new: h_export .. handgrenade
+0x5acc0	127	FUN_1005acc0	new: h_export .. handgrenade
+0x5aeb0	535	CUltimaGrenade::PreDetonate	new: h_export .. handgrenade
+0x5b0d0	1160	FUN_1005b0d0	new: h_export .. handgrenade
+0x5b560	426	FUN_1005b560	new: h_export .. handgrenade
+0x5b730	193	CUltimaGrenade::KillTouch	new: h_export .. handgrenade
+0x5b800	52	CUltimaGrenade::DetonateWarmup	new: h_export .. handgrenade
+0x5b840	554	FUN_1005b840	new: h_export .. handgrenade
+0x5ba70	698	FUN_1005ba70	new: h_export .. handgrenade
+0x5bd30	153	CUltimaGrenade::DetonateExplode	new: h_export .. handgrenade
+0x5bdd0	105	weapon_handgrenade	new: h_export .. handgrenade
+0x5be60	106	CHandGrenade::Spawn	handgrenade
+0x5bed0	77	CHandGrenade::Precache	handgrenade
+0x5bfd0	25	CHandGrenade::CanHolster	handgrenade
+0x5bff0	163	CHandGrenade::Holster	handgrenade
+0x5c0a0	115	FUN_1005c0a0	new: handgrenade .. hassassin
+0x5c120	136	FUN_1005c120	new: handgrenade .. hassassin
+0x5c1b0	136	FUN_1005c1b0	new: handgrenade .. hassassin
+0x5c330	106	FUN_1005c330	new: handgrenade .. hassassin
+0x5c3a0	62	FUN_1005c3a0	new: handgrenade .. hassassin
+0x5cd40	105	monster_human_assassin	new: handgrenade .. hassassin
+0x5cdc0	48	CHAssassin::Save	hassassin
+0x5cdf0	48	CHAssassin::Restore	hassassin
+0x5ce40	6	CHAssassin::ISoundMask	hassassin
+0x5ce50	6	CHAssassin::Classify	hassassin
+0x5ce60	26	CHAssassin::SetYawSpeed	hassassin
+0x5ce80	1142	FUN_1005ce80	hassassin
+0x5d450	304	CHAssassin::Spawn	hassassin
+0x5d580	69	CHAssassin::Precache	hassassin
+0x5d5d0	38	CHAssassin::ScheduleFromName	hassassin
+0x5d600	517	CHAssassin::CheckMeleeAttack1	hassassin
+0x5d810	227	CHAssassin::CheckRangeAttack1	hassassin
+0x5d900	322	CHAssassin::CheckRangeAttack2	hassassin
+0x5dc80	60	CHAssassin::StartTask	hassassin
+0x5dcc0	278	CHAssassin::RunTask	hassassin
+0x5dde0	418	CHAssassin::GetSchedule	hassassin
+0x5df90	215	CHAssassin::GetScheduleOfType	hassassin
+0x5e0c0	105	monster_headcrab	new: hassassin .. headcrab
+0x5e170	38	CHeadCrab::ScheduleFromName	headcrab
+0x5e1a0	6	CHeadCrab::Classify	headcrab
+0x5e1b0	49	CHeadCrab::Center	headcrab
+0x5e220	97	CHeadCrab::SetYawSpeed	headcrab
+0x5e5d0	247	CHeadCrab::Spawn	headcrab
+0x5e6d0	158	CHeadCrab::Precache	headcrab
+0x5e770	77	CHeadCrab::RunTask	headcrab
+0x5e7c0	489	CHeadCrab::LeapTouch	headcrab
+0x5e9b0	53	CHeadCrab::PrescheduleThink	headcrab
+0x5e9f0	118	CHeadCrab::StartTask	headcrab
+0x5ea70	61	CHeadCrab::CheckRangeAttack1	headcrab
+0x5eab0	5	CHeadCrab::CheckRangeAttack2	headcrab
+0x5eac0	43	CHeadCrab::TakeDamage	headcrab
+0x5eaf0	78	FUN_1005eaf0	headcrab
+0x5eb40	78	FUN_1005eb40	headcrab
+0x5eb90	78	FUN_1005eb90	headcrab
+0x5ebe0	78	FUN_1005ebe0	headcrab
+0x5ec30	26	CHeadCrab::GetScheduleOfType	headcrab
+0x5ec50	118	monster_babycrab	headcrab
+0x5ece0	17	CBabyCrab::GetVoicePitch	headcrab
+0x5ed00	7	CBabyCrab::GetSoundVolue	headcrab
+0x5ed10	154	CBabyCrab::Spawn	headcrab
+0x5edb0	26	CBabyCrab::Precache	headcrab
+0x5edd0	14	CBabyCrab::SetYawSpeed	headcrab
+0x5ede0	88	CBabyCrab::CheckRangeAttack1	headcrab
+0x5ee40	56	CBabyCrab::GetScheduleOfType	headcrab
+0x5ee80	102	item_healthkit	new: headcrab .. healthkit
+0x5eef0	41	CHealthKit::Spawn	healthkit
+0x5ef20	26	CHealthKit::Precache	healthkit
+0x5f140	48	CWallHealth::Save	healthkit
+0x5f170	48	CWallHealth::Restore	healthkit
+0x5f1a0	105	func_healthcharger	healthkit
+0x5f210	6	CWallHealth::ObjectCaps	healthkit
+0x5f220	384	CWallHealth::KeyValue	healthkit
+0x5f3a0	144	CWallHealth::Spawn	healthkit
+0x5f430	37	CWallHealth::Precache	healthkit
+0x5f460	593	CWallHealth::Use	healthkit
+0x5f6c0	81	CWallHealth::Recharge	new: healthkit .. hgrunt
+0x5f720	138	CWallHealth::Off	new: healthkit .. hgrunt
+0x5f7b0	118	monster_human_grunt	new: healthkit .. hgrunt
+0x5f840	48	CHGrunt::Save	hgrunt
+0x5f870	48	CHGrunt::Restore	hgrunt
+0x5f8a0	83	FUN_1005f8a0	hgrunt
+0x5fa00	498	CHGrunt::GibMonster	hgrunt
+0x5fc00	6	CHGrunt::ISoundMask	hgrunt
+0x5fc10	56	FUN_1005fc10	hgrunt
+0x5fc50	47	FUN_1005fc50	hgrunt
+0x5fc80	140	CHGrunt::PrescheduleThink	hgrunt
+0x5fd10	14	CHGrunt::FCanCheckAttacks	hgrunt
+0x5fd20	115	CHGrunt::CheckMeleeAttack1	hgrunt
+0x5fda0	254	CHGrunt::CheckRangeAttack1	hgrunt
+0x5fea0	1315	CHGrunt::CheckRangeAttack2	hgrunt
+0x603d0	134	CHGrunt::TraceAttack	hgrunt
+0x60460	42	CHGrunt::TakeDamage	hgrunt
+0x60490	143	CHGrunt::SetYawSpeed	hgrunt
+0x60570	365	FUN_10060570	hgrunt
+0x606e0	25	CHGrunt::CheckAmmo	hgrunt
+0x60700	6	CHGrunt::Classify	hgrunt
+0x60710	210	CHGrunt::Kick	hgrunt
+0x607f0	108	CHGrunt::GetGunPosition	hgrunt
+0x60860	787	FUN_10060860	hgrunt
+0x60b80	797	FUN_10060b80	hgrunt
+0x613c0	481	CHGrunt::Spawn	hgrunt
+0x615b0	258	CHGrunt::Precache	hgrunt
+0x616c0	165	CHGrunt::StartTask	hgrunt
+0x617d0	156	CHGrunt::RunTask	hgrunt
+0x61980	150	CHGrunt::DeathSound	hgrunt
+0x61a20	38	CHGrunt::ScheduleFromName	hgrunt
+0x61a50	389	CHGrunt::SetActivity	hgrunt
+0x61c10	1196	CHGrunt::GetSchedule	hgrunt
+0x620c0	655	CHGrunt::GetScheduleOfType	hgrunt
+0x623d0	105	monster_grunt_repel	hgrunt
+0x62440	30	CHGruntRepel::Spawn	hgrunt
+0x62460	35	CHGruntRepel::Precache	hgrunt
+0x62490	445	CHGruntRepel::RepelUse	hgrunt
+0x62650	114	CDeadHGrunt::KeyValue	hgrunt
+0x626d0	105	monster_hgrunt_dead	hgrunt
+0x62740	6	CDeadHGrunt::Classify	hgrunt
+0x62750	299	CDeadHGrunt::Spawn	hgrunt
+0x62890	105	hornet	new: hgrunt .. hornet
+0x62900	48	CHornet::Save	hornet
+0x62930	48	CHornet::Restore	hornet
+0x62960	34	CHornet::TakeDamage	hornet
+0x62990	413	CHornet::Spawn	hornet
+0x62b30	146	CHornet::Precache	hornet
+0x62bd0	44	CHornet::IRelationship	hornet
+0x62c00	35	CHornet::Classify	hornet
+0x62c30	46	CHornet::StartTrack	hornet
+0x62c60	46	CHornet::StartDart	hornet
+0x62c90	172	FUN_10062c90	hornet
+0x62d40	2075	CHornet::TrackTarget	hornet
+0x63560	475	CHornet::TrackTouch	hornet
+0x63740	13	CHornet::DartTouch	hornet
+0x63750	271	CHornet::DieTouch	hornet
+0x63860	145	freeze_grenade	new: hornet .. hornetgun
+0x63910	105	FUN_10063910	new: hornet .. hornetgun
+0x63af0	299	CFreezeGrenade::FlyingThink	new: hornet .. hornetgun
+0x63c20	1775	CFreezeGrenade::AttachTouch	new: hornet .. hornetgun
+0x64310	1137	CFreezeGrenade::AttachedThink	new: hornet .. hornetgun
+0x64790	1096	CFreezeGrenade::Detonate	new: hornet .. hornetgun
+0x64be0	185	FUN_10064be0	new: hornet .. hornetgun
+0x64ca0	772	FUN_10064ca0	new: hornet .. hornetgun
+0x64fb0	105	weapon_hornetgun	new: hornet .. hornetgun
+0x65030	64	CHgun::Spawn	hornetgun
+0x65070	156	CHgun::Precache	hornetgun
+0x65200	149	FUN_10065200	new: hornetgun .. houndeye
+0x652a0	216	FUN_100652a0	new: hornetgun .. houndeye
+0x65bd0	1186	FUN_10065bd0	new: hornetgun .. houndeye
+0x66080	113	FUN_10066080	new: hornetgun .. houndeye
+0x66100	155	FUN_10066100	new: hornetgun .. houndeye
+0x663a0	118	monster_houndeye	new: hornetgun .. houndeye
+0x66460	48	CHoundeye::Save	houndeye
+0x66490	48	CHoundeye::Restore	houndeye
+0x664c0	6	CHoundeye::Classify	houndeye
+0x664d0	54	CHoundeye::FValidateHintType	houndeye
+0x66510	105	CHoundeye::FCanActiveIdle	houndeye
+0x66580	47	CHoundeye::CheckRangeAttack1	houndeye
+0x665b0	106	CHoundeye::SetYawSpeed	houndeye
+0x66640	132	CHoundeye::SetActivity	houndeye
+0x66840	234	CHoundeye::Spawn	houndeye
+0x66930	270	CHoundeye::Precache	houndeye
+0x66ae0	106	CHoundeye::WarmUpSound	houndeye
+0x66b50	150	FUN_10066b50	houndeye
+0x66bf0	186	FUN_10066bf0	houndeye
+0x66df0	174	FUN_10066df0	houndeye
+0x66ea0	1142	FUN_10066ea0	houndeye
+0x67320	223	CHoundeye::StartTask	houndeye
+0x67470	501	CHoundeye::RunTask	houndeye
+0x676c0	369	CHoundeye::PrescheduleThink	houndeye
+0x67840	38	CHoundeye::ScheduleFromName	houndeye
+0x67870	382	CHoundeye::GetScheduleOfType	houndeye
+0x67a40	331	CHoundeye::GetSchedule	houndeye
+0x67b90	166	monster_ichthyosaur	new: houndeye .. ichthyosaur
+0x67c50	48	CIchthyosaur::Save	ichthyosaur
+0x67c80	48	CIchthyosaur::Restore	ichthyosaur
+0x67cb0	70	CIchthyosaur::IdleSound	ichthyosaur
+0x67d00	70	CIchthyosaur::AlertSound	ichthyosaur
+0x67d50	70	FUN_10067d50	ichthyosaur
+0x67da0	70	CIchthyosaur::BiteSound	ichthyosaur
+0x67df0	70	CIchthyosaur::DeathSound	ichthyosaur
+0x67e40	70	CIchthyosaur::PainSound	ichthyosaur
+0x67e90	38	CIchthyosaur::ScheduleFromName	ichthyosaur
+0x67ec0	6	CIchthyosaur::Classify	ichthyosaur
+0x67ed0	58	CIchthyosaur::CheckMeleeAttack1	ichthyosaur
+0x67f10	47	CIchthyosaur::BiteTouch	ichthyosaur
+0x67f40	49	CIchthyosaur::CombatUse	ichthyosaur
+0x67f80	76	CIchthyosaur::CheckRangeAttack1	ichthyosaur
+0x67fd0	14	CIchthyosaur::SetYawSpeed	ichthyosaur
+0x67fe0	80	CIchthyosaur::Killed	ichthyosaur
+0x68030	48	CIchthyosaur::BecomeDead	ichthyosaur
+0x68430	595	CIchthyosaur::Spawn	ichthyosaur
+0x68690	185	CIchthyosaur::Precache	ichthyosaur
+0x68750	175	CIchthyosaur::GetSchedule	ichthyosaur
+0x68800	91	CIchthyosaur::GetScheduleOfType	ichthyosaur
+0x688a0	123	CIchthyosaur::StartTask	ichthyosaur
+0x68970	2234	CIchthyosaur::RunTask	ichthyosaur
+0x69260	111	CIchthyosaur::VectorToPitch	ichthyosaur
+0x692d0	13	CIchthyosaur::Move	ichthyosaur
+0x694a0	22	CIchthyosaur::GetStoppedActivity	ichthyosaur
+0x694c0	87	CIchthyosaur::MoveExecute	ichthyosaur
+0x69520	191	FUN_10069520	ichthyosaur
+0x695e0	21	CIchthyosaur::Stop	ichthyosaur
+0x69600	3425	FUN_10069600	new: ichthyosaur .. islave
+0x6a370	893	FUN_1006a370	new: ichthyosaur .. islave
+0x6a710	121	CreateInterface	new: ichthyosaur .. islave
+0x6a7e0	118	monster_alien_slave	new: ichthyosaur .. islave
+0x6a870	118	monster_vortigaunt	new: ichthyosaur .. islave
+0x6a8f0	48	CISlave::Save	islave
+0x6a920	48	CISlave::Restore	islave
+0x6a950	6	CISlave::Classify	islave
+0x6a9a0	230	FUN_1006a9a0	islave
+0x6aa90	99	FUN_1006aa90	islave
+0x6abf0	6	CISlave::ISoundMask	islave
+0x6ac00	29	CISlave::Killed	islave
+0x6ac20	87	CISlave::SetYawSpeed	islave
+0x6b1d0	43	CISlave::CheckRangeAttack1	islave
+0x6b200	5	CISlave::CheckRangeAttack2	islave
+0x6b210	24	CISlave::StartTask	islave
+0x6b230	260	CISlave::Spawn	islave
+0x6b340	230	CISlave::Precache	islave
+0x6b430	117	CISlave::TakeDamage	islave
+0x6b4b0	54	CISlave::TraceAttack	islave
+0x6b4f0	38	CISlave::ScheduleFromName	islave
+0x6b520	199	CISlave::GetSchedule	islave
+0x6b5f0	57	CISlave::GetScheduleOfType	islave
+0x6b630	1220	FUN_1006b630	new: islave .. items
+0x6bb00	102	FUN_1006bb00	new: islave .. items
+0x6bb70	311	FUN_1006bb70	new: islave .. items
+0x6bcb0	1229	FUN_1006bcb0	new: islave .. items
+0x6c180	103	FUN_1006c180	new: islave .. items
+0x6c1f0	36	CBeam::SetEndAttachment	new: islave .. items
+0x6c220	42	CBeam::SetColor	new: islave .. items
+0x6c250	102	world_items	new: islave .. items
+0x6c2c0	110	CWorldItem::KeyValue	items
+0x6c330	208	CWorldItem::Spawn	items
+0x6c410	170	FUN_1006c410	new: items .. leech
+0x6c4c0	150	CItem::ItemTouch	new: items .. leech
+0x6c5d0	142	CItem::Materialize	new: items .. leech
+0x6c660	102	item_suit	new: items .. leech
+0x6c6d0	41	CItemSuit::Spawn	new: items .. leech
+0x6c700	13	CItemSuit::Precache	new: items .. leech
+0x6c710	118	FUN_1006c710	new: items .. leech
+0x6c790	102	item_battery	new: items .. leech
+0x6c800	41	CItemBattery::Spawn	new: items .. leech
+0x6c830	26	CItemBattery::Precache	new: items .. leech
+0x6ca40	102	item_antidote	new: items .. leech
+0x6cab0	41	CItemAntidote::Spawn	new: items .. leech
+0x6cae0	13	CItemAntidote::Precache	new: items .. leech
+0x6caf0	59	FUN_1006caf0	new: items .. leech
+0x6cb30	102	item_security	new: items .. leech
+0x6cba0	41	CItemSecurity::Spawn	new: items .. leech
+0x6cbd0	13	CItemSecurity::Precache	new: items .. leech
+0x6cc00	102	item_longjump	new: items .. leech
+0x6cc70	41	CItemLongJump::Spawn	new: items .. leech
+0x6cca0	13	CItemLongJump::Precache	new: items .. leech
+0x6ccb0	181	FUN_1006ccb0	new: items .. leech
+0x6cd70	105	lcs_spawner	new: items .. leech
+0x6cde0	102	FUN_1006cde0	new: items .. leech
+0x6ce50	250	CLCSSpawner::CreateThink	new: items .. leech
+0x6cf70	297	FUN_1006cf70	new: items .. leech
+0x6d170	165	FUN_1006d170	new: items .. leech
+0x6d220	47	FUN_1006d220	new: items .. leech
+0x6d250	119	FUN_1006d250	new: items .. leech
+0x6d2d0	187	FUN_1006d2d0	new: items .. leech
+0x6d390	305	FUN_1006d390	new: items .. leech
+0x6d4d0	1449	FUN_1006d4d0	new: items .. leech
+0x6da80	121	FUN_1006da80	new: items .. leech
+0x6db00	2671	FUN_1006db00	new: items .. leech
+0x6e570	105	monster_leech	new: items .. leech
+0x6e5e0	89	CLeech::Touch	new: items .. leech
+0x6e640	173	CLeech::SetObjectCollisionBox	new: items .. leech
+0x6e6f0	4	CLeech::BloodColor	new: items .. leech
+0x6e700	6	CLeech::Classify	new: items .. leech
+0x6e710	48	CLeech::Save	leech
+0x6e740	48	CLeech::Restore	leech
+0x6e770	311	CLeech::Spawn	leech
+0x6e8b0	5	CLeech::Activate	leech
+0x6e8c0	291	FUN_1006e8c0	leech
+0x6e9f0	195	FUN_1006e9f0	leech
+0x6eac0	45	FUN_1006eac0	leech
+0x6eaf0	101	FUN_1006eaf0	leech
+0x6eb60	58	CLeech::AlertSound	leech
+0x6eba0	73	CLeech::Precache	leech
+0x6ebf0	297	CLeech::TakeDamage	leech
+0x6ef10	54	CLeech::MakeVectors	leech
+0x6ef50	1056	FUN_1006ef50	leech
+0x6f370	292	CLeech::DeadThink	leech
+0x6f4a0	610	FUN_1006f4a0	leech
+0x6f710	1708	CLeech::SwimThink	leech
+0x6fdc0	276	CLeech::Killed	leech
+0x6fee0	102	light	new: leech .. lights
+0x6ff50	48	CLight::Save	lights
+0x6ff80	48	CLight::Restore	lights
+0x6ffb0	274	CLight::KeyValue	lights
+0x700d0	115	CLight::Spawn	lights
+0x70150	162	CLight::Use	lights
+0x70200	102	light_spot	lights
+0x70270	102	light_environment	lights
+0x702e0	444	CEnvLight::KeyValue	lights
+0x704a0	169	CEnvLight::Spawn	lights
+0x70550	48	CRuleEntity::Save	maprules
+0x70580	48	CRuleEntity::Restore	maprules
+0x705b0	34	CRuleEntity::Spawn	maprules
+0x705e0	111	CRuleEntity::KeyValue	maprules
+0x70650	38	FUN_10070650	maprules
+0x70680	30	CRulePointEntity::Spawn	maprules
+0x706a0	54	CRuleBrushEntity::Spawn	maprules
+0x706e0	102	game_score	maprules
+0x70750	5	CGameScore::Spawn	maprules
+0x70760	125	CGameScore::KeyValue	maprules
+0x707e0	99	CGameScore::Use	maprules
+0x70850	102	game_end	maprules
+0x708c0	31	CGameEnd::Use	maprules
+0x708e0	105	game_text	maprules
+0x70950	48	CGameText::Save	maprules
+0x70980	48	CGameText::Restore	maprules
+0x709b0	977	CGameText::KeyValue	maprules
+0x70d90	122	CGameText::Use	maprules
+0x70e10	102	game_team_master	maprules
+0x70e80	6	CGameTeamMaster::ObjectCaps	maprules
+0x70e90	235	CGameTeamMaster::KeyValue	maprules
+0x70f80	149	CGameTeamMaster::Use	maprules
+0x71020	13	CGameTeamMaster::IsTriggered	maprules
+0x71030	29	CGameTeamMaster::TeamID	maprules
+0x71050	75	FUN_10071050	maprules
+0x710a0	102	game_team_set	maprules
+0x71110	75	CGameTeamSet::Use	maprules
+0x71160	105	game_zone_player	maprules
+0x711d0	48	CGamePlayerZone::Save	maprules
+0x71200	48	CGamePlayerZone::Restore	maprules
+0x71230	359	CGamePlayerZone::KeyValue	maprules
+0x713a0	357	CGamePlayerZone::Use	maprules
+0x71510	102	game_player_hurt	maprules
+0x71580	141	CGamePlayerHurt::Use	maprules
+0x71610	102	game_counter	maprules
+0x71680	44	CGameCounter::Spawn	maprules
+0x716b0	195	CGameCounter::Use	maprules
+0x71790	102	game_counter_set	maprules
+0x71800	64	CGameCounterSet::Use	maprules
+0x71840	105	game_player_equip	maprules
+0x718b0	146	CGamePlayerEquip::KeyValue	maprules
+0x71950	43	CGamePlayerEquip::Touch	maprules
+0x71980	100	FUN_10071980	maprules
+0x719f0	13	CGamePlayerEquip::Use	maprules
+0x71a00	102	game_player_team	maprules
+0x71a70	140	CGamePlayerTeam::TargetTeamName	maprules
+0x71b00	136	CGamePlayerTeam::Use	maprules
+0x71b90	106	FUN_10071b90	new: maprules .. monstermaker
+0x71c00	83	FUN_10071c00	new: maprules .. monstermaker
+0x71c60	3529	FUN_10071c60	new: maprules .. monstermaker
+0x72a90	5304	FUN_10072a90	new: maprules .. monstermaker
+0x73fb0	366	FUN_10073fb0	new: maprules .. monstermaker
+0x74120	105	monstermaker	new: maprules .. monstermaker
+0x74190	48	CMonsterMaker::Save	monstermaker
+0x741c0	48	CMonsterMaker::Restore	monstermaker
+0x741f0	281	CMonsterMaker::KeyValue	monstermaker
+0x74310	165	CMonsterMaker::Spawn	monstermaker
+0x743c0	26	CMonsterMaker::Precache	monstermaker
+0x743e0	636	FUN_100743e0	monstermaker
+0x74660	8	CMonsterMaker::CyclicUse	monstermaker
+0x74670	104	CMonsterMaker::ToggleUse	monstermaker
+0x746e0	24	CMonsterMaker::MakerThink	monstermaker
+0x74700	40	CMonsterMaker::DeathNotice	monstermaker
+0x74730	48	CBaseMonster::Save	monsters
+0x74760	102	CBaseMonster::Restore	monsters
+0x747d0	20	FUN_100747d0	monsters
+0x747f0	29	FUN_100747f0	monsters
+0x74810	29	CBaseMonster::BarnacleVictimBitten	monsters
+0x74830	56	CBaseMonster::BarnacleVictimReleased	monsters
+0x74870	320	FUN_10074870	monsters
+0x749b0	60	CBaseMonster::FLSoundVolume	monsters
+0x749f0	5	CBaseMonster::FValidateHintType	monsters
+0x74a00	680	CBaseMonster::Look	monsters
+0x74cc0	6	CBaseMonster::ISoundMask	monsters
+0x74cd0	209	CBaseMonster::PBestSound	monsters
+0x74db0	171	CBaseMonster::PBestScent	monsters
+0x74e60	219	CBaseMonster::MonsterThink	monsters
+0x74f40	13	CBaseMonster::MonsterUse	monsters
+0x74f50	54	CBaseMonster::IgnoreConditions	monsters
+0x74f90	44	FUN_10074f90	monsters
+0x74fc0	15	FUN_10074fc0	monsters
+0x74fd0	39	FUN_10074fd0	monsters
+0x75000	292	FUN_10075000	monsters
+0x751b0	70	FUN_100751b0	monsters
+0x75200	38	FUN_10075200	monsters
+0x75280	25	ShouldSimplify	monsters
+0x752a0	1150	FUN_100752a0	monsters
+0x75750	64	CBaseMonster::CheckRangeAttack1	monsters
+0x75790	64	CBaseMonster::CheckRangeAttack2	monsters
+0x757d0	88	CBaseMonster::CheckMeleeAttack1	monsters
+0x75830	47	CBaseMonster::CheckMeleeAttack2	monsters
+0x75860	427	FUN_10075860	monsters
+0x75a10	23	CBaseMonster::FCanCheckAttacks	monsters
+0x75a30	1022	CBaseMonster::CheckEnemy	monsters
+0x75e30	115	FUN_10075e30	monsters
+0x75eb0	137	FUN_10075eb0	monsters
+0x75f40	186	CBaseMonster::SetActivity	monsters
+0x76000	136	FUN_10076000	monsters
+0x76090	472	CBaseMonster::CheckLocalMove	monsters
+0x76270	312	FUN_10076270	monsters
+0x763b0	336	FUN_100763b0	monsters
+0x76500	71	CBaseMonster::RouteClassify	monsters
+0x76550	360	FUN_10076550	monsters
+0x766c0	134	FUN_100766c0	monsters
+0x76750	2634	CBaseMonster::FTriangulate	monsters
+0x771a0	1245	CBaseMonster::Move	monsters
+0x77680	30	CBaseMonster::ShouldAdvanceRoute	monsters
+0x776a0	164	CBaseMonster::MoveExecute	monsters
+0x77750	245	CBaseMonster::MonsterInit	monsters
+0x77850	8	CBaseMonster::MonsterInitThink	monsters
+0x77860	550	CBaseMonster::StartMonster	monsters
+0x77a90	105	FUN_10077a90	monsters
+0x77b10	25	FUN_10077b10	monsters
+0x77b30	182	CBaseMonster::IRelationship	monsters
+0x77bf0	753	CBaseMonster::FindCover	monsters
+0x77ef0	630	CBaseMonster::BuildNearestRoute	monsters
+0x78170	254	CBaseMonster::BestVisibleEnemy	monsters
+0x78270	272	FUN_10078270	monsters
+0x78380	82	CBaseMonster::FlYawDiff	monsters
+0x783e0	353	CBaseMonster::ChangeYaw	monsters
+0x78550	74	CBaseMonster::VecToYaw	monsters
+0x785a0	163	CBaseMonster::SetEyePosition	monsters
+0x78650	677	FUN_10078650	monsters
+0x78930	317	CBaseMonster::GetGunPosition	monsters
+0x78a70	303	FUN_10078a70	monsters
+0x78ba0	381	FUN_10078ba0	monsters
+0x78d20	661	CBaseMonster::ReportAIState	monsters
+0x78fc0	197	CBaseMonster::KeyValue	monsters
+0x79090	371	FUN_10079090	monsters
+0x79230	82	CBaseMonster::CanPlaySequence	monsters
+0x79290	856	FUN_10079290	monsters
+0x795f0	333	FUN_100795f0	monsters
+0x79740	29	CBaseMonster::FacingIdeal	monsters
+0x79760	3	CBaseMonster::FCanActiveIdle	monsters
+0x79770	109	CBaseMonster::PlaySentence	monsters
+0x797e0	31	CBaseMonster::PlayScriptedSentence	monsters
+0x79800	40	CBaseMonster::SentenceStop	monsters
+0x79830	71	CBaseMonster::CorpseFallThink	monsters
+0x79880	171	CBaseMonster::MonsterInitDead	monsters
+0x79930	824	CBaseMonster::BBoxFlat	monsters
+0x79c70	327	FUN_10079c70	monsters
+0x79dc0	205	FUN_10079dc0	monsters
+0x79e90	62	CBaseMonster::ShouldFadeOnDeath	monsters
+0x79ed0	74	FUN_10079ed0	new: monsters .. monsterstate
+0x79f20	291	CBaseMonster::RunAI	monsterstate
+0x7a050	439	CBaseMonster::GetIdealState	monsterstate
+0x7a230	105	func_mortar_field	new: monsterstate .. mortar
+0x7a2a0	3	CFuncMortarField::ObjectCaps	new: monsterstate .. mortar
+0x7a2b0	48	CFuncMortarField::Save	mortar
+0x7a2e0	48	CFuncMortarField::Restore	mortar
+0x7a310	435	CFuncMortarField::KeyValue	mortar
+0x7a4d0	101	CFuncMortarField::Spawn	mortar
+0x7a540	37	CFuncMortarField::Precache	mortar
+0x7a570	666	CFuncMortarField::FieldUse	mortar
+0x7a810	118	monster_mortar	mortar
+0x7a890	54	CMortar::Spawn	mortar
+0x7a8d0	25	CMortar::Precache	mortar
+0x7a8f0	401	CMortar::MortarExplode	new: mortar .. mp5
+0x7aa90	102	bouncy_bolt	new: mortar .. mp5
+0x7ab00	191	FUN_1007ab00	new: mortar .. mp5
+0x7abc0	47	FUN_1007abc0	new: mortar .. mp5
+0x7abf0	1257	FUN_1007abf0	new: mortar .. mp5
+0x7b0e0	260	CMP5BouncyBolt::BBThink	new: mortar .. mp5
+0x7b1f0	102	phase_pulse	new: mortar .. mp5
+0x7b260	176	FUN_1007b260	new: mortar .. mp5
+0x7b310	58	FUN_1007b310	new: mortar .. mp5
+0x7b350	585	FUN_1007b350	new: mortar .. mp5
+0x7b5a0	761	CMP5Pulse::BBThink	new: mortar .. mp5
+0x7b8a0	102	blaster_bolt	new: mortar .. mp5
+0x7b910	176	FUN_1007b910	new: mortar .. mp5
+0x7b9c0	47	FUN_1007b9c0	new: mortar .. mp5
+0x7b9f0	1100	CMP5BlasterBolt::BBThink	new: mortar .. mp5
+0x7be40	105	weapon_mp5	new: mortar .. mp5
+0x7beb0	105	weapon_9mmAR	new: mortar .. mp5
+0x7bf30	140	CMP5::Spawn	mp5
+0x7bfc0	367	CMP5::Precache	mp5
+0x7c210	161	FUN_1007c210	new: mp5 .. multiplay_gamerules
+0x7d420	911	FUN_1007d420	new: mp5 .. multiplay_gamerules
+0x7da00	76	FUN_1007da00	new: mp5 .. multiplay_gamerules
+0x7da50	102	ammo_mp5clip	new: mp5 .. multiplay_gamerules
+0x7dac0	41	CMP5AmmoClip::Spawn	new: mp5 .. multiplay_gamerules
+0x7daf0	26	CMP5AmmoClip::Precache	new: mp5 .. multiplay_gamerules
+0x7db70	102	ammo_9mmAR	new: mp5 .. multiplay_gamerules
+0x7dbe0	102	ammo_9mmbox	new: mp5 .. multiplay_gamerules
+0x7dc50	41	CMP5Chainammo::Spawn	new: mp5 .. multiplay_gamerules
+0x7dc80	26	CMP5Chainammo::Precache	new: mp5 .. multiplay_gamerules
+0x7dd00	102	ammo_mp5grenades	new: mp5 .. multiplay_gamerules
+0x7dd70	41	CMP5AmmoGrenade::Spawn	new: mp5 .. multiplay_gamerules
+0x7dda0	26	CMP5AmmoGrenade::Precache	new: mp5 .. multiplay_gamerules
+0x7de20	102	ammo_ARgrenades	new: mp5 .. multiplay_gamerules
+0x7dec0	10	FUN_1007dec0	new: mp5 .. multiplay_gamerules
+0x7ded0	12	FUN_1007ded0	new: mp5 .. multiplay_gamerules
+0x7df00	11	FUN_1007df00	new: mp5 .. multiplay_gamerules
+0x7df40	12	FUN_1007df40	new: mp5 .. multiplay_gamerules
+0x7df80	235	CHalfLifeMultiplay::CHalfLifeMultiplay	multiplay_gamerules
+0x7e070	29	CHalfLifeMultiplay::ClientCommand	multiplay_gamerules
+0x7e090	156	CHalfLifeMultiplay::RefreshSkillData	multiplay_gamerules
+0x7e130	705	FUN_1007e130	multiplay_gamerules
+0x7e430	184	FUN_1007e430	multiplay_gamerules
+0x7e600	23	CHalfLifeMultiplay::ClientConnected	multiplay_gamerules
+0x7e620	50	CHalfLifeMultiplay::UpdateGameMode	multiplay_gamerules
+0x7e660	654	FUN_1007e660	multiplay_gamerules
+0x7e8f0	233	CHalfLifeMultiplay::ClientDisconnected	multiplay_gamerules
+0x7e9f0	8	FUN_1007e9f0	multiplay_gamerules
+0x7ed10	693	FUN_1007ed10	multiplay_gamerules
+0x7efd0	91	FUN_1007efd0	multiplay_gamerules
+0x7f030	1400	FUN_1007f030	multiplay_gamerules
+0x7f610	90	FUN_1007f610	multiplay_gamerules
+0x7f6a0	28	CHalfLifeMultiplay::WeaponShouldRespawn	multiplay_gamerules
+0x7f7e0	30	CHalfLifeMultiplay::ItemShouldRespawn	multiplay_gamerules
+0x7f860	30	CHalfLifeMultiplay::AmmoShouldRespawn	multiplay_gamerules
+0x7f900	75	CHalfLifeMultiplay::GetPlayerSpawnSpot	multiplay_gamerules
+0x7f960	102	CHalfLifeMultiplay::PlayFootstepSounds	multiplay_gamerules
+0x7fab0	64	DestroyMapCycle	multiplay_gamerules
+0x7faf0	240	COM_Parse	multiplay_gamerules
+0x7fbe0	67	COM_TokenWaiting	multiplay_gamerules
+0x7fc30	712	ReloadMapCycleFile	multiplay_gamerules
+0x7ff00	58	CountPlayers	multiplay_gamerules
+0x7ff40	293	FUN_1007ff40	multiplay_gamerules
+0x80370	317	CHalfLifeMultiplay::SendMOTDToClient	multiplay_gamerules
+0x80600	138	monster_nihilanth	new: multiplay_gamerules .. nihilanth
+0x806c0	6	CNihilanth::Classify	new: multiplay_gamerules .. nihilanth
+0x806d0	6	CNihilanth::BloodColor	new: multiplay_gamerules .. nihilanth
+0x806e0	179	CNihilanth::SetObjectCollisionBox	new: multiplay_gamerules .. nihilanth
+0x807a0	48	CNihilanth::Save	nihilanth
+0x807d0	48	CNihilanth::Restore	nihilanth
+0x80800	105	nihilanth_energy_ball	nihilanth
+0x80870	48	CNihilanthHVR::Save	nihilanth
+0x808a0	48	CNihilanthHVR::Restore	nihilanth
+0x808d0	732	CNihilanth::Spawn	nihilanth
+0x80bb0	225	CNihilanth::Precache	nihilanth
+0x80d50	55	CNihilanth::DeathSound	nihilanth
+0x80d90	36	CNihilanth::NullThink	nihilanth
+0x80dc0	39	CNihilanth::StartupUse	nihilanth
+0x80df0	190	CNihilanth::StartupThink	nihilanth
+0x80eb0	18	CNihilanth::Killed	nihilanth
+0x80ed0	2218	CNihilanth::DyingThink	nihilanth
+0x81790	43	CNihilanth::CrashTouch	nihilanth
+0x817c0	1	CNihilanth::GibMonster	nihilanth
+0x817d0	224	FUN_100817d0	nihilanth
+0x818b0	1389	FUN_100818b0	nihilanth
+0x81e20	604	FUN_10081e20	nihilanth
+0x82080	1857	FUN_10082080	nihilanth
+0x827d0	743	CNihilanth::HuntThink	nihilanth
+0x82ac0	1100	FUN_10082ac0	nihilanth
+0x82f10	89	FUN_10082f10	nihilanth
+0x82f70	259	FUN_10082f70	nihilanth
+0x83840	106	CNihilanth::CommandUse	nihilanth
+0x838b0	97	CNihilanth::TakeDamage	nihilanth
+0x83920	338	CNihilanth::TraceAttack	nihilanth
+0x83ae0	49	CNihilanthHVR::Spawn	nihilanth
+0x83b20	114	CNihilanthHVR::Precache	nihilanth
+0x83ba0	267	FUN_10083ba0	nihilanth
+0x83d10	182	CNihilanthHVR::HoverThink	nihilanth
+0x83dd0	435	FUN_10083dd0	nihilanth
+0x83f90	1089	CNihilanthHVR::ZapThink	nihilanth
+0x843e0	181	CNihilanthHVR::ZapTouch	nihilanth
+0x844a0	237	FUN_100844a0	nihilanth
+0x84590	107	CNihilanthHVR::GreenBallInit	nihilanth
+0x84600	732	CNihilanthHVR::TeleportThink	nihilanth
+0x848e0	224	FUN_100848e0	nihilanth
+0x849c0	200	CNihilanthHVR::TeleportTouch	nihilanth
+0x84a90	361	CNihilanthHVR::DissipateThink	nihilanth
+0x84c00	1284	FUN_10084c00	nihilanth
+0x85110	640	FUN_10085110	nihilanth
+0x85390	592	CNihilanthHVR::Crawl	nihilanth
+0x855e0	46	CNihilanthHVR::RemoveTouch	nihilanth
+0x85610	586	CNihilanthHVR::BounceTouch	new: nihilanth .. nodes
+0x85880	102	info_node	new: nihilanth .. nodes
+0x858f0	102	info_node_air	new: nihilanth .. nodes
+0x85960	139	CGraph::InitGraph	nodes
+0x859f0	55	CGraph::AllocNodes	nodes
+0x85c40	502	CGraph::HandleLinkEnt	nodes
+0x85e40	168	CGraph::HullIndex	nodes
+0x85ef0	43	CGraph::NodeType	nodes
+0x85f20	214	CGraph::PathLength	nodes
+0x86000	137	CGraph::NextNodeInRoute	nodes
+0x86090	861	CGraph::FindShortestPath	nodes
+0x86400	886	CGraph::CheckNode	nodes
+0x86780	65	CalcBounds	nodes
+0x867d0	30	CGraph::FindNearestNode	nodes
+0x867f0	1547	CGraph::FindNearestNode	nodes
+0x86e00	358	CGraph::ShowNodeConnections	nodes
+0x86f70	1091	FUN_10086f70	nodes
+0x873c0	760	CGraph::RejectInlineLinks	nodes
+0x876c0	105	testhull	nodes
+0x87730	3	CTestHull::ObjectCaps	nodes
+0x87740	255	CTestHull::Spawn	nodes
+0x87840	73	CTestHull::DropDelay	nodes
+0x87890	180	CNodeEnt::KeyValue	nodes
+0x87950	505	CNodeEnt::Spawn	nodes
+0x87b50	583	CTestHull::ShowBadNode	nodes
+0x87da0	26	CTestHull::CallBuildNodeGraph	nodes
+0x87dc0	3668	FUN_10087dc0	nodes
+0x88c30	3	CNodeEnt::ObjectCaps	nodes
+0x88c40	301	CTestHull::PathFind	nodes
+0x88d80	50	CStack::Push	nodes
+0x88dc0	25	CStack::Pop	nodes
+0x88df0	46	CStack::CopyToArray	nodes
+0x88e20	29	CQueue::CQueue	nodes
+0x88e40	84	CQueue::Insert	nodes
+0x88ea0	60	CQueue::Remove	nodes
+0x88ee0	9	FUN_10088ee0	nodes
+0x88ef0	54	CQueuePriority::Insert	nodes
+0x88f30	47	CQueuePriority::Remove	nodes
+0x88f60	119	CQueuePriority::Heap_SiftDown	nodes
+0x88fe0	75	CQueuePriority::Heap_SiftUp	nodes
+0x89030	1046	FUN_10089030	nodes
+0x89450	579	FUN_10089450	nodes
+0x896a0	218	FUN_100896a0	nodes
+0x89780	364	CGraph::CheckNODFile	nodes
+0x898f0	171	CGraph::HashInsert	nodes
+0x899a0	243	CGraph::HashSearch	nodes
+0x89aa0	244	CGraph::HashChoosePrimes	nodes
+0x89ba0	520	CGraph::SortNodes	nodes
+0x89db0	159	CGraph::BuildLinkLookups	nodes
+0x89e50	1167	CGraph::BuildRegionTables	nodes
+0x8a2e0	1509	CGraph::ComputeStaticRoutingTables	nodes
+0x8a8d0	897	CGraph::TestRoutingTables	nodes
+0x8ac60	105	node_viewer	nodes
+0x8acd0	105	node_viewer_human	nodes
+0x8ad40	105	node_viewer_fly	nodes
+0x8adb0	105	node_viewer_large	nodes
+0x8ae20	670	CNodeViewer::Spawn	nodes
+0x8b0c0	143	FUN_1008b0c0	new: nodes .. osprey
+0x8b150	97	FUN_1008b150	new: nodes .. osprey
+0x8b1c0	435	CNodeViewer::DrawThink	new: nodes .. osprey
+0x8b380	102	nuclear_missile	new: nodes .. osprey
+0x8b610	124	FUN_1008b610	new: nodes .. osprey
+0x8b690	1769	CNuke::NukeThink	new: nodes .. osprey
+0x8bd80	554	FUN_1008bd80	new: nodes .. osprey
+0x8bfb0	966	FUN_1008bfb0	new: nodes .. osprey
+0x8c380	631	CNuke::NukeDetonateTouch	new: nodes .. osprey
+0x8c600	138	monster_osprey	new: nodes .. osprey
+0x8c6e0	3	COsprey::ObjectCaps	new: nodes .. osprey
+0x8c6f0	6	COsprey::Classify	new: nodes .. osprey
+0x8c700	4	COsprey::BloodColor	new: nodes .. osprey
+0x8c710	48	COsprey::Save	osprey
+0x8c740	48	COsprey::Restore	osprey
+0x8c770	397	COsprey::Spawn	osprey
+0x8c900	147	COsprey::Precache	osprey
+0x8c9a0	25	COsprey::CommandUse	osprey
+0x8c9c0	206	COsprey::FindAllThink	osprey
+0x8ca90	1439	COsprey::DeployThink	osprey
+0x8d030	127	FUN_1008d030	osprey
+0x8d0b0	621	FUN_1008d0b0	osprey
+0x8d320	158	COsprey::HoverThink	osprey
+0x8d3c0	592	FUN_1008d3c0	osprey
+0x8d610	324	COsprey::FlyThink	osprey
+0x8d760	1140	FUN_1008d760	osprey
+0x8dbe0	25	COsprey::HitTouch	osprey
+0x8dc00	331	COsprey::Killed	osprey
+0x8dd50	84	COsprey::CrashTouch	osprey
+0x8ddb0	1916	COsprey::DyingThink	osprey
+0x8e530	584	FUN_1008e530	osprey
+0x8e780	229	COsprey::TraceAttack	osprey
+0x8e870	102	path_corner	new: osprey .. pathcorner
+0x8e8e0	4	CPathCorner::GetDelay	new: osprey .. pathcorner
+0x8e8f0	48	CPathCorner::Save	pathcorner
+0x8e920	48	CPathCorner::Restore	pathcorner
+0x8e950	110	CPathCorner::KeyValue	pathcorner
+0x8e9c0	1	CPathCorner::Spawn	pathcorner
+0x8e9d0	48	CPathTrack::Save	pathcorner
+0x8ea00	48	CPathTrack::Restore	pathcorner
+0x8ea30	105	path_track	pathcorner
+0x8eaa0	111	CPathTrack::KeyValue	pathcorner
+0x8eb10	159	CPathTrack::Use	pathcorner
+0x8ebb0	221	FUN_1008ebb0	pathcorner
+0x8ec90	102	CPathTrack::Spawn	pathcorner
+0x8ed00	19	CPathTrack::Activate	pathcorner
+0x8ed20	33	CPathTrack::ValidPath	pathcorner
+0x8ed50	290	CPathTrack::Project	pathcorner
+0x8ee80	33	FUN_1008ee80	pathcorner
+0x8eeb0	33	FUN_1008eeb0	pathcorner
+0x8eee0	100	FUN_1008eee0	pathcorner
+0x8ef50	1009	CPathTrack::LookAhead	pathcorner
+0x8f350	209	CPathTrack::Nearest	pathcorner
+0x8f430	105	FUN_1008f430	new: pathcorner .. plane
+0x8f4a0	10	FUN_1008f4a0	new: pathcorner .. plane
+0x8f4b0	61	CPlane::InitializePlane	plane
+0x8f4f0	60	CPlane::PointInFront	plane
+0x8f530	48	CBasePlatTrain::Save	plats
+0x8f560	48	CBasePlatTrain::Restore	plats
+0x8f590	626	CBasePlatTrain::KeyValue	plats
+0x8f810	577	FUN_1008f810	plats
+0x8fab0	8	CFuncPlat::CallGoDown	plats
+0x8fac0	8	CFuncPlat::CallHitTop	plats
+0x8fad0	8	CFuncPlat::CallHitBottom	plats
+0x8fae0	105	func_plat	plats
+0x8fb50	3	CBasePlatTrain::ObjectCaps	plats
+0x8fb70	363	FUN_1008fb70	plats
+0x8fce0	36	CFuncPlat::Precache	plats
+0x8fd10	91	CFuncPlat::Spawn	plats
+0x8fd70	164	FUN_1008fd70	plats
+0x8fe30	346	FUN_1008fe30	plats
+0x8ff90	93	FUN_1008ff90	plats
+0x8fff0	106	CFuncPlat::PlatUse	plats
+0x90060	123	FUN_10090060	plats
+0x900e0	132	FUN_100900e0	plats
+0x90170	123	FUN_10090170	plats
+0x901f0	174	FUN_100901f0	plats
+0x90350	118	func_platrot	plats
+0x903d0	48	CFuncPlatRot::Save	plats
+0x90400	48	CFuncPlatRot::Restore	plats
+0x90430	283	FUN_10090430	plats
+0x90550	17	CFuncPlatRot::Spawn	plats
+0x90570	43	FUN_10090570	plats
+0x905a0	70	FUN_100905a0	plats
+0x905f0	43	FUN_100905f0	plats
+0x90620	70	FUN_10090620	plats
+0x90670	199	CFuncPlatRot::RotMove	plats
+0x90740	105	func_train	plats
+0x907b0	48	CFuncTrain::Save	plats
+0x907e0	48	CFuncTrain::Restore	plats
+0x90810	114	CFuncTrain::KeyValue	plats
+0x90a10	436	CFuncTrain::Wait	plats
+0x90bd0	744	CFuncTrain::Next	plats
+0x90ec0	300	CFuncTrain::Activate	plats
+0x90ff0	267	CFuncTrain::Spawn	plats
+0x91100	5	CFuncTrain::Precache	plats
+0x91110	175	CFuncTrain::OverrideReset	plats
+0x911c0	48	CFuncTrackTrain::Save	plats
+0x911f0	48	CFuncTrackTrain::Restore	plats
+0x91220	105	func_tracktrain	plats
+0x91290	539	CFuncTrackTrain::KeyValue	plats
+0x914b0	53	CFuncTrackTrain::NextThink	plats
+0x91740	403	FUN_10091740	plats
+0x918e0	143	FUN_100918e0	plats
+0x91970	328	FUN_10091970	plats
+0x91ac0	1513	CFuncTrackTrain::Next	plats
+0x920b0	44	FixupAngles	plats
+0x920e0	69	Fix	plats
+0x92130	6	CFuncTrackTrain::ObjectCaps	plats
+0x92140	290	CFuncTrackTrain::DeadEnd	plats
+0x92270	208	FUN_10092270	plats
+0x92340	285	CFuncTrackTrain::OnControls	plats
+0x92460	437	CFuncTrackTrain::Find	plats
+0x92620	541	CFuncTrackTrain::NearestPath	plats
+0x92840	38	CFuncTrackTrain::OverrideReset	plats
+0x92870	105	FUN_10092870	plats
+0x928e0	442	CFuncTrackTrain::Spawn	plats
+0x92aa0	264	CFuncTrackTrain::Precache	plats
+0x92bc0	102	func_traincontrols	plats
+0x92c30	3	CFuncTrainControls::ObjectCaps	plats
+0x92c40	230	CFuncTrainControls::Find	plats
+0x92d30	122	CFuncTrainControls::Spawn	plats
+0x92db0	117	func_trackchange	plats
+0x92e40	48	CFuncTrackChange::Save	plats
+0x92e70	48	CFuncTrackChange::Restore	plats
+0x92ea0	225	CFuncTrackChange::Spawn	plats
+0x92f90	26	CFuncTrackChange::Precache	plats
+0x92fc0	283	CFuncTrackChange::KeyValue	plats
+0x930e0	29	CFuncTrackChange::OverrideReset	plats
+0x93100	673	CFuncTrackChange::Find	plats
+0x933b0	183	FUN_100933b0	plats
+0x93470	542	FUN_10093470	plats
+0x93690	175	CFuncTrackChange::GoDown	plats
+0x93740	175	CFuncTrackChange::GoUp	plats
+0x937f0	101	CFuncTrackChange::UpdateAutoTargets	plats
+0x93860	185	FUN_10093860	plats
+0x93920	117	CFuncTrackChange::HitBottom	plats
+0x939a0	117	CFuncTrackChange::HitTop	plats
+0x93a20	117	func_trackautochange	plats
+0x93aa0	179	CFuncTrackAuto::UpdateAutoTargets	plats
+0x93ca0	105	func_guntarget	plats
+0x93d10	4	CGunTarget::BloodColor	plats
+0x93d20	6	CGunTarget::Classify	plats
+0x93d30	29	CGunTarget::BodyTarget	plats
+0x93d50	3	CGunTarget::ObjectCaps	plats
+0x93d60	48	CGunTarget::Save	plats
+0x93d90	48	CGunTarget::Restore	plats
+0x93dc0	205	CGunTarget::Spawn	plats
+0x93e90	188	CGunTarget::Activate	plats
+0x93f50	15	CGunTarget::Start	plats
+0x93f60	166	CGunTarget::Next	plats
+0x94010	189	CGunTarget::Wait	plats
+0x940d0	53	CGunTarget::Stop	plats
+0x94110	131	CGunTarget::TakeDamage	plats
+0x941a0	126	CGunTarget::Use	plats
+0x94220	9	FUN_10094220	new: plats .. player
+0x94230	9	FUN_10094230	new: plats .. player
+0x94240	971	FUN_10094240	new: plats .. player
+0x94610	138	player	new: plats .. player
+0x946b0	329	VecVelocityForDamage	player
+0x94800	87	TrainSpeed	player
+0x94880	18	CBasePlayer::TakeHealth	player
+0x948e0	170	CBasePlayer::TraceAttack	player
+0x949b0	2253	CBasePlayer::TakeDamage	player
+0x95280	565	FUN_10095280	player
+0x954c0	275	FUN_100954c0	player
+0x955e0	168	FUN_100955e0	player
+0x95690	36	FUN_10095690	player
+0x956c0	25	FUN_100956c0	player
+0x956e0	33	FUN_100956e0	player
+0x95710	30	FUN_10095710	player
+0x95790	31	FUN_10095790	player
+0x957b0	87	FUN_100957b0	player
+0x95810	76	FUN_10095810	player
+0x95860	36	FUN_10095860	player
+0x95890	19	FUN_10095890	player
+0x958b0	14	FUN_100958b0	player
+0x958c0	24	FUN_100958c0	player
+0x958e0	19	FUN_100958e0	player
+0x95940	12	FUN_10095940	player
+0x95950	24	FUN_10095950	player
+0x95970	59	FUN_10095970	player
+0x959b0	248	FUN_100959b0	player
+0x95ab0	208	FUN_10095ab0	player
+0x95b80	1176	FUN_10095b80	player
+0x96020	1602	CBasePlayer::Killed	player
+0x96670	1318	FUN_10096670	player
+0x96bf0	197	FUN_10096bf0	player
+0x96cc0	1415	FUN_10096cc0	player
+0x97270	18	CBasePlayer::IsOnLadder	player
+0x97290	1165	CBasePlayer::PlayerDeathThink	player
+0x97720	387	FUN_10097720	player
+0x978b0	220	FUN_100978b0	player
+0x97990	973	FUN_10097990	player
+0x97e80	77	FixPlayerCrouchStuck	player
+0x97ef0	47	CBasePlayer::Classify	player
+0x97f20	224	CBasePlayer::AddPoints	player
+0x98000	124	CBasePlayer::AddPointsToTeam	player
+0x98080	1662	FUN_10098080	player
+0x98700	798	FUN_10098700	player
+0x99710	366	FUN_10099710	player
+0x998a0	165	FUN_100998a0	player
+0x99950	307	FUN_10099950	player
+0x99a90	377	FUN_10099a90	player
+0x99c10	441	FUN_10099c10	player
+0x9a3b0	1	FUN_1009a3b0	player
+0x9a3c0	111	FUN_1009a3c0	player
+0x9a430	767	FUN_1009a430	player
+0x9a730	72	FUN_1009a730	player
+0x9a780	74	FUN_1009a780	player
+0x9a7d0	40	FUN_1009a7d0	player
+0x9a800	28	FUN_1009a800	player
+0x9a820	32	FUN_1009a820	player
+0x9a840	18	FUN_1009a840	player
+0x9a860	31	FUN_1009a860	player
+0x9a880	2095	CBasePlayer::Spawn	player
+0x9b0b0	477	FUN_1009b0b0	player
+0x9b2c0	1662	FUN_1009b2c0	player
+0x9b940	37	FUN_1009b940	player
+0x9b990	879	FUN_1009b990	player
+0x9bd10	266	CBasePlayer::Precache	player
+0x9be20	48	CBasePlayer::Save	player
+0x9be50	1	FUN_1009be50	player
+0x9be60	587	CBasePlayer::Restore	player
+0x9c0b0	206	FUN_1009c0b0	player
+0x9c180	322	FUN_1009c180	player
+0x9c2d0	110	FUN_1009c2d0	player
+0x9c340	31	FUN_1009c340	player
+0x9c370	19	CBasePlayer::TeamID	player
+0x9c390	200	CSprayCan::Spawn	player
+0x9c460	332	CSprayCan::Think	player
+0x9c5b0	156	CBloodSplat::Spawn	player
+0x9c650	200	CBloodSplat::Spray	player
+0x9c720	147	CBasePlayer::GiveNamedItem	player
+0x9c7c0	307	FindEntityForward	player
+0x9c900	13	FUN_1009c900	player
+0x9c910	166	FUN_1009c910	player
+0x9c9c0	148	FUN_1009c9c0	player
+0x9ca60	51	FUN_1009ca60	player
+0x9ce30	367	FUN_1009ce30	player
+0x9cfa0	285	FUN_1009cfa0	player
+0x9d0c0	140	FUN_1009d0c0	player
+0x9d150	431	CBasePlayer::AddPlayerItem	player
+0x9d300	197	CBasePlayer::RemovePlayerItem	player
+0x9d3d0	238	FUN_1009d3d0	player
+0x9d4c0	297	CBasePlayer::GiveAmmo	player
+0x9d5f0	38	FUN_1009d5f0	player
+0x9d620	106	FUN_1009d620	player
+0x9d690	24	FUN_1009d690	player
+0x9d6b0	66	CBasePlayer::GetAmmoIndex	player
+0x9d700	126	FUN_1009d700	player
+0x9d780	211	FUN_1009d780	player
+0x9e0a0	38	CBasePlayer::BarnacleVictimBitten	player
+0x9e0d0	15	CBasePlayer::BarnacleVictimReleased	player
+0x9e0e0	44	FUN_1009e0e0	player
+0x9e110	41	CBasePlayer::EnableControl	player
+0x9e140	1001	FUN_1009e140	player
+0x9e530	33	FUN_1009e530	player
+0x9e560	136	FUN_1009e560	player
+0x9e5f0	35	FUN_1009e5f0	player
+0x9e620	7	FUN_1009e620	player
+0x9e630	836	FUN_1009e630	player
+0x9e980	135	FUN_1009e980	player
+0x9eac0	112	FUN_1009eac0	player
+0x9eb30	114	CDeadHEV::KeyValue	player
+0x9ebb0	105	monster_hevsuit_dead	player
+0x9ec20	6	CDeadHEV::Classify	player
+0x9ec30	209	CDeadHEV::Spawn	player
+0x9ed10	102	player_weaponstrip	player
+0x9ed80	95	CStripWeapons::Use	player
+0x9ede0	102	player_loadsaved	player
+0x9ee50	48	CRevertSaved::Save	player
+0x9ee80	48	CRevertSaved::Restore	player
+0x9eeb0	363	CRevertSaved::KeyValue	player
+0x9f020	87	CRevertSaved::Use	player
+0x9f080	88	CRevertSaved::MessageThink	player
+0x9f0e0	34	CRevertSaved::LoadThink	player
+0x9f110	100	CInfoIntermission::Spawn	player
+0x9f180	290	CInfoIntermission::Think	player
+0x9f2b0	102	info_intermission	new: player .. pm_shared_pm_debug
+0x9f320	29	FUN_1009f320	new: player .. pm_shared_pm_debug
+0x9f350	199	_PM_ParticleLine	pm_shared_pm_debug
+0x9f420	84	_PM_DrawRectangle	pm_shared_pm_debug
+0x9f480	701	_PM_DrawPhysEntBBox	pm_shared_pm_debug
+0x9f740	209	_PM_DrawBBox	pm_shared_pm_debug
+0x9f820	169	_PM_ViewEntity	pm_shared_pm_debug
+0x9f8d0	35	_anglemod	pm_shared_pm_math
+0x9f900	247	_AngleVectors	pm_shared_pm_math
+0x9fa00	241	_AngleVectorsTranspose	pm_shared_pm_math
+0x9fb00	222	_AngleMatrix	pm_shared_pm_math
+0x9fbe0	222	_AngleIMatrix	pm_shared_pm_math
+0x9fcc0	64	_NormalizeAngles	pm_shared_pm_math
+0x9fd00	121	FUN_1009fd00	pm_shared_pm_math
+0x9fd80	129	_AngleBetweenVectors	pm_shared_pm_math
+0x9fe10	92	_VectorTransform	pm_shared_pm_math
+0x9fe70	45	_VectorCompare	pm_shared_pm_math
+0x9fea0	49	_VectorMA	pm_shared_pm_math
+0x9ff00	37	__VectorSubtract	pm_shared_pm_math
+0x9ff30	37	__VectorAdd	pm_shared_pm_math
+0x9ff60	25	__VectorCopy	pm_shared_pm_math
+0x9ff80	59	_CrossProduct	pm_shared_pm_math
+0x9ffc0	34	_Length	pm_shared_pm_math
+0x9fff0	53	_Distance	pm_shared_pm_math
+0xa0030	78	_VectorNormalize	pm_shared_pm_math
+0xa0080	27	_VectorInverse	pm_shared_pm_math
+0xa00a0	37	_VectorScale	pm_shared_pm_math
+0xa00d0	16	_Q_log2	pm_shared_pm_math
+0xa00e0	159	_VectorMatrix	pm_shared_pm_math
+0xa0180	209	_VectorAngles	pm_shared_pm_math
+0xa0260	272	FUN_100a0260	new: pm_shared_pm_math .. pm_shared_pm_shared
+0xa0370	179	FUN_100a0370	new: pm_shared_pm_math .. pm_shared_pm_shared
+0xa0430	101	_PM_SortTextures	pm_shared_pm_shared
+0xa04a0	660	FUN_100a04a0	pm_shared_pm_shared
+0xa0740	94	FUN_100a0740	pm_shared_pm_shared
+0xa07a0	1743	FUN_100a07a0	pm_shared_pm_shared
+0xa0f30	67	_PM_MapTextureTypeStepType	pm_shared_pm_shared
+0xa0fb0	196	FUN_100a0fb0	pm_shared_pm_shared
+0xa1080	250	_PM_CatagorizeTextureType	pm_shared_pm_shared
+0xa1180	966	FUN_100a1180	pm_shared_pm_shared
+0xa1570	160	_PM_AddToTouched	pm_shared_pm_shared
+0xa1610	235	_PM_CheckVelocity	pm_shared_pm_shared
+0xa1700	159	_PM_ClipVelocity	pm_shared_pm_shared
+0xa17a0	130	FUN_100a17a0	pm_shared_pm_shared
+0xa1830	102	FUN_100a1830	pm_shared_pm_shared
+0xa18a0	18	FUN_100a18a0	pm_shared_pm_shared
+0xa18c0	584	FUN_100a18c0	pm_shared_pm_shared
+0xa1b10	684	FUN_100a1b10	pm_shared_pm_shared
+0xa1dc0	1752	FUN_100a1dc0	pm_shared_pm_shared
+0xa24a0	157	_PM_Accelerate	pm_shared_pm_shared
+0xa2540	1556	FUN_100a2540	pm_shared_pm_shared
+0xa2b60	447	FUN_100a2b60	pm_shared_pm_shared
+0xa2d20	224	FUN_100a2d20	pm_shared_pm_shared
+0xa2e00	163	FUN_100a2e00	pm_shared_pm_shared
+0xa2eb0	597	FUN_100a2eb0	pm_shared_pm_shared
+0xa3110	224	FUN_100a3110	pm_shared_pm_shared
+0xa31f0	163	FUN_100a31f0	pm_shared_pm_shared
+0xa32a0	599	FUN_100a32a0	pm_shared_pm_shared
+0xa3500	224	FUN_100a3500	pm_shared_pm_shared
+0xa35e0	163	FUN_100a35e0	pm_shared_pm_shared
+0xa3690	779	FUN_100a3690	pm_shared_pm_shared
+0xa39a0	285	FUN_100a39a0	pm_shared_pm_shared
+0xa3ac0	977	FUN_100a3ac0	pm_shared_pm_shared
+0xa3ea0	389	FUN_100a3ea0	pm_shared_pm_shared
+0xa4030	1287	FUN_100a4030	pm_shared_pm_shared
+0xa4540	345	FUN_100a4540	pm_shared_pm_shared
+0xa46a0	328	FUN_100a46a0	pm_shared_pm_shared
+0xa47f0	19	_PM_InWater	pm_shared_pm_shared
+0xa4810	445	_PM_CheckWater	pm_shared_pm_shared
+0xa49d0	294	_PM_CatagorizePosition	pm_shared_pm_shared
+0xa4b00	77	_PM_GetRandomStuckOffsets	pm_shared_pm_shared
+0xa4b50	23	_PM_ResetStuckOffsets	pm_shared_pm_shared
+0xa4b70	887	_PM_CheckStuck	pm_shared_pm_shared
+0xa4ef0	200	FUN_100a4ef0	pm_shared_pm_shared
+0xa4fc0	956	FUN_100a4fc0	pm_shared_pm_shared
+0xa5380	31	FUN_100a5380	pm_shared_pm_shared
+0xa53a0	156	_PM_FixPlayerCrouchStuck	pm_shared_pm_shared
+0xa5440	406	FUN_100a5440	pm_shared_pm_shared
+0xa55e0	604	FUN_100a55e0	pm_shared_pm_shared
+0xa5840	1096	FUN_100a5840	pm_shared_pm_shared
+0xa5c90	197	_PM_Ladder	pm_shared_pm_shared
+0xa5d60	179	_PM_WaterJump	pm_shared_pm_shared
+0xa5e20	95	_PM_AddGravity	pm_shared_pm_shared
+0xa5e80	203	_PM_PushEntity	pm_shared_pm_shared
+0xa5f50	779	_PM_Physics_Toss	pm_shared_pm_shared
+0xa6260	174	_PM_NoClip	pm_shared_pm_shared
+0xa6310	97	_PM_PreventMegaBunnyJumping	pm_shared_pm_shared
+0xa6380	1048	FUN_100a6380	pm_shared_pm_shared
+0xa67b0	709	FUN_100a67b0	pm_shared_pm_shared
+0xa6a90	556	FUN_100a6a90	pm_shared_pm_shared
+0xa6cc0	610	FUN_100a6cc0	pm_shared_pm_shared
+0xa6f30	331	FUN_100a6f30	pm_shared_pm_shared
+0xa7080	1353	FUN_100a7080	pm_shared_pm_shared
+0xa75d0	222	_PM_PlayWaterSounds	pm_shared_pm_shared
+0xa76c0	151	_PM_CalcRoll	pm_shared_pm_shared
+0xa7760	75	FUN_100a7760	pm_shared_pm_shared
+0xa77b0	609	FUN_100a77b0	pm_shared_pm_shared
+0xa7a20	473	FUN_100a7a20	pm_shared_pm_shared
+0xa7c00	459	FUN_100a7c00	pm_shared_pm_shared
+0xa7dd0	3309	FUN_100a7dd0	pm_shared_pm_shared
+0xa8af0	539	_PM_CreateStuckTable	pm_shared_pm_shared
+0xa9120	46	_PM_GetVisEntInfo	pm_shared_pm_shared
+0xa9150	30	_PM_Init	pm_shared_pm_shared
+0xa9170	1398	FUN_100a9170	new: pm_shared_pm_shared .. python
+0xa9710	303	FUN_100a9710	new: pm_shared_pm_shared .. python
+0xa9840	99	FUN_100a9840	new: pm_shared_pm_shared .. python
+0xa98b0	64	FUN_100a98b0	new: pm_shared_pm_shared .. python
+0xa98f0	78	FUN_100a98f0	new: pm_shared_pm_shared .. python
+0xa9940	608	FUN_100a9940	new: pm_shared_pm_shared .. python
+0xaa7d0	167	FUN_100aa7d0	new: pm_shared_pm_shared .. python
+0xaa880	54	FUN_100aa880	new: pm_shared_pm_shared .. python
+0xaa8c0	64	FUN_100aa8c0	new: pm_shared_pm_shared .. python
+0xaa900	75	FUN_100aa900	new: pm_shared_pm_shared .. python
+0xaa950	143	FUN_100aa950	new: pm_shared_pm_shared .. python
+0xaa9e0	51	FUN_100aa9e0	new: pm_shared_pm_shared .. python
+0xaaa20	49	FUN_100aaa20	new: pm_shared_pm_shared .. python
+0xaaa60	158	FUN_100aaa60	new: pm_shared_pm_shared .. python
+0xaab00	166	FUN_100aab00	new: pm_shared_pm_shared .. python
+0xaabb0	110	FUN_100aabb0	new: pm_shared_pm_shared .. python
+0xaac20	239	FUN_100aac20	new: pm_shared_pm_shared .. python
+0xaad10	102	ball_lightning	new: pm_shared_pm_shared .. python
+0xaaed0	102	FUN_100aaed0	new: pm_shared_pm_shared .. python
+0xaaf40	1004	FUN_100aaf40	new: pm_shared_pm_shared .. python
+0xab330	627	CBallLighting::ImpactTouch	new: pm_shared_pm_shared .. python
+0xab5b0	425	CBallLighting::BallThink	new: pm_shared_pm_shared .. python
+0xab760	105	chain_hurter	new: pm_shared_pm_shared .. python
+0xab7d0	121	FUN_100ab7d0	new: pm_shared_pm_shared .. python
+0xab850	218	CChainHurter::HurtEnt	new: pm_shared_pm_shared .. python
+0xab930	105	weapon_python	new: pm_shared_pm_shared .. python
+0xab9a0	105	weapon_357	new: pm_shared_pm_shared .. python
+0xabae0	90	CPython::Spawn	python
+0xabb40	222	CPython::Precache	python
+0xabc20	110	FUN_100abc20	new: python .. rat
+0xabc90	128	FUN_100abc90	new: python .. rat
+0xabd10	256	FUN_100abd10	new: python .. rat
+0xac2e0	15	FUN_100ac2e0	new: python .. rat
+0xac2f0	689	FUN_100ac2f0	new: python .. rat
+0xac860	262	CPython::DelayedHurt	new: python .. rat
+0xac970	1315	FUN_100ac970	new: python .. rat
+0xacea0	1308	FUN_100acea0	new: python .. rat
+0xad3c0	743	FUN_100ad3c0	new: python .. rat
+0xad6b0	121	FUN_100ad6b0	new: python .. rat
+0xad980	102	ammo_357	new: python .. rat
+0xad9f0	41	CPythonAmmo::Spawn	new: python .. rat
+0xada20	26	CPythonAmmo::Precache	new: python .. rat
+0xadad0	102	race_controller	new: python .. rat
+0xadb50	48	FUN_100adb50	new: python .. rat
+0xadb90	582	CRaceController::InitPath	new: python .. rat
+0xae440	102	race_path	new: python .. rat
+0xae4c0	116	FUN_100ae4c0	new: python .. rat
+0xae540	33	FUN_100ae540	new: python .. rat
+0xae570	235	FUN_100ae570	new: python .. rat
+0xae660	251	FUN_100ae660	new: python .. rat
+0xae760	193	FUN_100ae760	new: python .. rat
+0xae830	153	FUN_100ae830	new: python .. rat
+0xae8d0	105	monster_rat	new: python .. rat
+0xae940	6	CRat::Classify	rat
+0xae950	14	CRat::SetYawSpeed	rat
+0xae960	238	CRat::Spawn	rat
+0xaea50	13	CRat::Precache	rat
+0xaea60	477	FUN_100aea60	new: rat .. roach
+0xaec40	463	FUN_100aec40	new: rat .. roach
+0xaee10	531	FUN_100aee10	new: rat .. roach
+0xaf030	93	FUN_100af030	new: rat .. roach
+0xaf090	93	FUN_100af090	new: rat .. roach
+0xaf0f0	93	FUN_100af0f0	new: rat .. roach
+0xaf150	248	FUN_100af150	new: rat .. roach
+0xaf270	133	FUN_100af270	new: rat .. roach
+0xaf300	100	FUN_100af300	new: rat .. roach
+0xaf370	45	FUN_100af370	new: rat .. roach
+0xaf3a0	43	FUN_100af3a0	new: rat .. roach
+0xaf3d0	373	FUN_100af3d0	new: rat .. roach
+0xaf550	821	FUN_100af550	new: rat .. roach
+0xaf890	1206	FUN_100af890	new: rat .. roach
+0xafd70	308	FUN_100afd70	new: rat .. roach
+0xafeb0	69	FUN_100afeb0	new: rat .. roach
+0xaff00	182	FUN_100aff00	new: rat .. roach
+0xaffc0	144	FUN_100affc0	new: rat .. roach
+0xb0050	1611	FUN_100b0050	new: rat .. roach
+0xb06a0	2411	FUN_100b06a0	new: rat .. roach
+0xb1030	249	FUN_100b1030	new: rat .. roach
+0xb1150	48	FUN_100b1150	new: rat .. roach
+0xb1180	188	FUN_100b1180	new: rat .. roach
+0xb16b0	2198	FUN_100b16b0	new: rat .. roach
+0xb1f50	2230	FUN_100b1f50	new: rat .. roach
+0xb2810	149	FUN_100b2810	new: rat .. roach
+0xb28b0	120	FUN_100b28b0	new: rat .. roach
+0xb2930	105	monster_cockroach	new: rat .. roach
+0xb29a0	6	CRoach::ISoundMask	roach
+0xb29b0	6	CRoach::Classify	roach
+0xb29c0	329	CRoach::Touch	roach
+0xb2b10	14	CRoach::SetYawSpeed	roach
+0xb2b20	297	CRoach::Spawn	roach
+0xb2c50	48	CRoach::Precache	roach
+0xb2c80	216	CRoach::Killed	roach
+0xb2d60	708	CRoach::MonsterThink	roach
+0xb3030	450	FUN_100b3030	roach
+0xb3200	380	CRoach::Move	roach
+0xb34d0	118	scientist_mine	new: roach .. rpg
+0xb38a0	101	CScientistMine::SciMineActivate	new: roach .. rpg
+0xb3910	1206	CScientistMine::SciMineThink	new: roach .. rpg
+0xb3dd0	83	CScientistMine::PreExplodeThink	new: roach .. rpg
+0xb3e30	151	CScientistMine::ExplodeThink	new: roach .. rpg
+0xb3f00	112	FUN_100b3f00	new: roach .. rpg
+0xb3f70	1435	FUN_100b3f70	new: roach .. rpg
+0xb4510	1186	FUN_100b4510	new: roach .. rpg
+0xb49c0	145	suck_mine	new: roach .. rpg
+0xb4cc0	64	CSuckMine::FlyingThink	new: roach .. rpg
+0xb4d00	159	CSuckMine::ActivateTouch	new: roach .. rpg
+0xb4da0	3606	CSuckMine::ActiveThink	new: roach .. rpg
+0xb5bc0	321	CSuckMine::DieThink	new: roach .. rpg
+0xb5d10	373	FUN_100b5d10	new: roach .. rpg
+0xb5f60	261	FUN_100b5f60	new: roach .. rpg
+0xb6070	118	sphere_mine	new: roach .. rpg
+0xb62e0	485	CSphereMine::BounceTouch	new: roach .. rpg
+0xb64d0	886	CSphereMine::PreactThink	new: roach .. rpg
+0xb6850	3060	CSphereMine::ActiveThink	new: roach .. rpg
+0xb74d0	313	FUN_100b74d0	new: roach .. rpg
+0xb7610	102	sm_project	new: roach .. rpg
+0xb7690	58	FUN_100b7690	new: roach .. rpg
+0xb76d0	302	FUN_100b76d0	new: roach .. rpg
+0xb7800	1331	CSMProjectile::HomeThink	new: roach .. rpg
+0xb7d40	712	CSMProjectile::ExplodeTouch	new: roach .. rpg
+0xb8010	118	rocket_mine	new: roach .. rpg
+0xb8240	64	CRocketMine::FlyingThink	new: roach .. rpg
+0xb8280	95	CRocketMine::ActivateTouch	new: roach .. rpg
+0xb82e0	1338	CRocketMine::ActiveThink	new: roach .. rpg
+0xb8820	61	FUN_100b8820	new: roach .. rpg
+0xb8860	118	rm_rocket	new: roach .. rpg
+0xb88e0	47	FUN_100b88e0	new: roach .. rpg
+0xb8910	449	FUN_100b8910	new: roach .. rpg
+0xb8ae0	2274	CRMRocket::HomeThink	new: roach .. rpg
+0xb93d0	67	CRMRocket::BoomTouch	new: roach .. rpg
+0xb9420	105	weapon_rpg	new: roach .. rpg
+0xb9530	78	CRpg::Spawn	rpg
+0xb9580	144	CRpg::Precache	rpg
+0xb9730	56	FUN_100b9730	new: rpg .. satchel
+0xb9770	106	FUN_100b9770	new: rpg .. satchel
+0xbab40	326	FUN_100bab40	new: rpg .. satchel
+0xbac90	114	FUN_100bac90	new: rpg .. satchel
+0xbadd0	102	ammo_rpgclip	new: rpg .. satchel
+0xbae40	41	CRpgAmmo::Spawn	new: rpg .. satchel
+0xbae70	26	CRpgAmmo::Precache	new: rpg .. satchel
+0xbaef0	118	monster_satchel	new: rpg .. satchel
+0xbaf80	118	roach_charge	new: rpg .. satchel
+0xbb000	26	CSatchelCharge::Precache	satchel
+0xbb020	458	CSatchelCharge::Spawn	satchel
+0xbb1f0	101	CRoachCharge::RoachBounce	satchel
+0xbb260	658	FUN_100bb260	satchel
+0xbb500	1870	CRoachCharge::RoachThink	satchel
+0xbbc50	139	CRoachCharge::RoachUse	satchel
+0xbbce0	159	conc_charge	satchel
+0xbbd90	116	FUN_100bbd90	satchel
+0xbbfc0	1807	CConcCharge::AttachTouch	satchel
+0xbc6d0	71	CConcCharge::FlyingThink	satchel
+0xbc720	1054	CConcCharge::ChargeThink	satchel
+0xbcb40	2242	CConcCharge::Detonate	satchel
+0xbd410	105	weapon_satchel	satchel
+0xbd4d0	88	CSatchel::Spawn	satchel
+0xbd530	99	CSatchel::Precache	satchel
+0xbd610	81	FUN_100bd610	new: satchel .. schedule
+0xbd670	81	FUN_100bd670	new: satchel .. schedule
+0xbd790	194	FUN_100bd790	new: satchel .. schedule
+0xbdf50	830	FUN_100bdf50	new: satchel .. schedule
+0xbe440	228	FUN_100be440	new: satchel .. schedule
+0xbe530	36	FUN_100be530	new: satchel .. schedule
+0xbe590	21	FUN_100be590	new: satchel .. schedule
+0xbe5b0	27	FUN_100be5b0	new: satchel .. schedule
+0xbe5d0	103	FUN_100be5d0	new: satchel .. schedule
+0xbe640	47	FUN_100be640	new: satchel .. schedule
+0xbe670	23	FUN_100be670	new: satchel .. schedule
+0xbe690	33	FUN_100be690	new: satchel .. schedule
+0xbe6c0	467	FUN_100be6c0	new: satchel .. schedule
+0xbe8a0	1495	CBaseMonster::RunTask	schedule
+0xbef20	97	FUN_100bef20	schedule
+0xbef90	4344	CBaseMonster::StartTask	schedule
+0xc01f0	30	FUN_100c01f0	schedule
+0xc0210	710	CBaseMonster::GetSchedule	schedule
+0xc0500	118	monster_scientist	new: schedule .. scientist
+0xc0590	6	CScientist::ObjectCaps	new: schedule .. scientist
+0xc05a0	7	CScientist::CoverRadius	new: schedule .. scientist
+0xc05b0	48	CScientist::Save	scientist
+0xc05e0	48	CScientist::Restore	scientist
+0xc0610	38	CScientist::ScheduleFromName	scientist
+0xc0640	69	FUN_100c0640	scientist
+0xc0690	100	FUN_100c0690	scientist
+0xc0700	20	CScientist::GetStoppedActivity	scientist
+0xc0720	527	CScientist::StartTask	scientist
+0xc0950	830	CScientist::RunTask	scientist
+0xc0c90	6	CScientist::Classify	scientist
+0xc0ca0	105	CScientist::SetYawSpeed	scientist
+0xc0d30	96	CScientist::HandleAnimEvent	scientist
+0xc0d90	348	CScientist::Spawn	scientist
+0xc0ef0	88	CScientist::Precache	scientist
+0xc0f50	280	FUN_100c0f50	scientist
+0xc1070	74	CScientist::TakeDamage	scientist
+0xc10c0	6	CScientist::ISoundMask	scientist
+0xc1240	25	CScientist::Killed	scientist
+0xc1260	37	CScientist::SetActivity	scientist
+0xc1290	158	CScientist::GetScheduleOfType	scientist
+0xc13a0	619	CScientist::GetSchedule	scientist
+0xc1610	366	CScientist::GetIdealState	scientist
+0xc1780	111	FUN_100c1780	scientist
+0xc17f0	139	FUN_100c17f0	scientist
+0xc18a0	114	CDeadScientist::KeyValue	scientist
+0xc1920	105	monster_scientist_dead	scientist
+0xc1990	6	CDeadScientist::Classify	scientist
+0xc19a0	225	CDeadScientist::Spawn	scientist
+0xc1a90	117	monster_sitting_scientist	scientist
+0xc1b20	48	CSittingScientist::Save	scientist
+0xc1b50	48	CSittingScientist::Restore	scientist
+0xc1b80	397	CSittingScientist::Spawn	scientist
+0xc1d10	28	CSittingScientist::Precache	scientist
+0xc1d30	6	CSittingScientist::Classify	scientist
+0xc1d60	757	CSittingScientist::SittingThink	new: scientist .. scripted
+0xc20a0	430	FUN_100c20a0	new: scientist .. scripted
+0xc2260	619	CCineMonster::KeyValue	scripted
+0xc24d0	48	CCineMonster::Save	scripted
+0xc2500	48	CCineMonster::Restore	scripted
+0xc2530	105	scripted_sequence	scripted
+0xc25a0	118	aiscripted_sequence	scripted
+0xc2620	121	CCineMonster::Spawn	scripted
+0xc26a0	17	CCineMonster::FCanOverrideState	scripted
+0xc26c0	6	CCineAI::FCanOverrideState	scripted
+0xc26d0	90	FUN_100c26d0	scripted
+0xc2770	473	FUN_100c2770	scripted
+0xc2e00	153	CCineMonster::CineThink	scripted
+0xc2ea0	165	CCineMonster::StartSequence	scripted
+0xc2f50	168	CCineAI::StartSequence	scripted
+0xc3000	83	FUN_100c3000	scripted
+0xc3060	31	CCineMonster::FixScriptMonsterSchedule	scripted
+0xc3080	71	CCineAI::FixScriptMonsterSchedule	scripted
+0xc30d0	46	FUN_100c30d0	scripted
+0xc3100	25	FUN_100c3100	scripted
+0xc3120	47	FUN_100c3120	scripted
+0xc3150	20	CCineMonster::IgnoreConditions	scripted
+0xc3170	231	FUN_100c3170	scripted
+0xc3260	166	FUN_100c3260	scripted
+0xc3310	314	FUN_100c3310	scripted
+0xc3450	336	CCineMonster::Activate	scripted
+0xc35a0	768	FUN_100c35a0	scripted
+0xc38a0	48	CScriptedSentence::Save	scripted
+0xc38d0	48	CScriptedSentence::Restore	scripted
+0xc3900	105	scripted_sentence	scripted
+0xc3970	3	CScriptedSentence::ObjectCaps	scripted
+0xc3980	712	CScriptedSentence::KeyValue	scripted
+0xc3c50	37	CScriptedSentence::Use	scripted
+0xc3c80	167	CScriptedSentence::Spawn	scripted
+0xc3d30	119	CScriptedSentence::FindThink	scripted
+0xc3db0	51	CScriptedSentence::DelayThink	scripted
+0xc3df0	178	FUN_100c3df0	scripted
+0xc3eb0	309	FUN_100c3eb0	scripted
+0xc3ff0	334	FUN_100c3ff0	scripted
+0xc4140	105	monster_furniture	scripted
+0xc41b0	3	CFurniture::ObjectCaps	scripted
+0xc41e0	187	CFurniture::Spawn	scripted
+0xc42a0	3	CFurniture::Classify	scripted
+0xc42b0	3	CCineMonster::ObjectCaps	new: scripted .. shotgun
+0xc42c0	623	FUN_100c42c0	new: scripted .. shotgun
+0xc4530	119	FUN_100c4530	new: scripted .. shotgun
+0xc45b0	1832	FUN_100c45b0	new: scripted .. shotgun
+0xc4ce0	118	shotgun_forklift	new: scripted .. shotgun
+0xc4f20	446	CShotgunForklift::GenericThink	new: scripted .. shotgun
+0xc50e0	446	CShotgunForklift::OnGroundThink	new: scripted .. shotgun
+0xc52a0	1367	CShotgunForklift::DoTouch	new: scripted .. shotgun
+0xc5810	1594	CShotgunForklift::GoBoom	new: scripted .. shotgun
+0xc5e50	118	shotgun_hev	new: scripted .. shotgun
+0xc60c0	993	CShotgunHEV::AccelThink	new: scripted .. shotgun
+0xc64b0	292	CShotgunHEV::AimThink	new: scripted .. shotgun
+0xc65e0	69	CShotgunHEV::BoomTouch	new: scripted .. shotgun
+0xc6630	118	shotgun_sci	new: scripted .. shotgun
+0xc68f0	518	CShotgunSci::AimThink	new: scripted .. shotgun
+0xc6b00	142	CShotgunSci::BoomTouch	new: scripted .. shotgun
+0xc6b90	118	shotgun_crate	new: scripted .. shotgun
+0xc6c10	83	FUN_100c6c10	new: scripted .. shotgun
+0xc6c70	217	FUN_100c6c70	new: scripted .. shotgun
+0xc6d50	319	CShotgunCrate::ExpandThink	new: scripted .. shotgun
+0xc6e90	8	CShotgunCrate::BoomTouch	new: scripted .. shotgun
+0xc6ea0	1105	CShotgunCrate::GoBoom	new: scripted .. shotgun
+0xc7300	105	weapon_shotgun	new: scripted .. shotgun
+0xc7370	64	CShotgun::Spawn	shotgun
+0xc73b0	333	CShotgun::Precache	shotgun
+0xc8340	432	FUN_100c8340	new: shotgun .. singleplay_gamerules
+0xc84f0	1148	FUN_100c84f0	new: shotgun .. singleplay_gamerules
+0xc8990	556	FUN_100c8990	new: shotgun .. singleplay_gamerules
+0xc8bc0	490	FUN_100c8bc0	new: shotgun .. singleplay_gamerules
+0xc8e90	102	ammo_buckshot	new: shotgun .. singleplay_gamerules
+0xc8f00	41	CShotgunAmmo::Spawn	new: shotgun .. singleplay_gamerules
+0xc8f30	26	CShotgunAmmo::Precache	new: shotgun .. singleplay_gamerules
+0xc8fb0	105	shrink_timer	new: shotgun .. singleplay_gamerules
+0xc9080	103	FUN_100c9080	new: shotgun .. singleplay_gamerules
+0xc90f0	955	CShrinkTimer::ShrinkInit	new: shotgun .. singleplay_gamerules
+0xc94b0	1105	CShrinkTimer::ShrinkEnt	new: shotgun .. singleplay_gamerules
+0xc9910	207	FUN_100c9910	new: shotgun .. singleplay_gamerules
+0xc99e0	395	FUN_100c99e0	new: shotgun .. singleplay_gamerules
+0xc9b70	634	CShrinkTimer::ShrunkThink	new: shotgun .. singleplay_gamerules
+0xc9df0	1699	CShrinkTimer::UnShrinkEnt	new: shotgun .. singleplay_gamerules
+0xca4a0	18	CHalfLifeRules::CHalfLifeRules	singleplay_gamerules
+0xca850	89	GetSkillCvar	skill
+0xca8b0	102	snark_project	new: skill .. sound
+0xca930	69	FUN_100ca930	new: skill .. sound
+0xca980	314	FUN_100ca980	new: skill .. sound
+0xcaac0	755	CSnarkProjectile::HomeThink	new: skill .. sound
+0xcadc0	806	CSnarkProjectile::ExplodeTouch	new: skill .. sound
+0xcb0f0	105	snark_cam	new: skill .. sound
+0xcb7d0	1491	CSnarkCam::ControlThink	new: skill .. sound
+0xcbdb0	560	FUN_100cbdb0	new: skill .. sound
+0xcbfe0	338	FUN_100cbfe0	new: skill .. sound
+0xcc140	273	FUN_100cc140	new: skill .. sound
+0xcc260	42	FUN_100cc260	new: skill .. sound
+0xcc290	277	FUN_100cc290	new: skill .. sound
+0xcc3b0	226	FUN_100cc3b0	new: skill .. sound
+0xcc540	105	ambient_generic	new: skill .. sound
+0xcc5b0	3	CAmbientGeneric::ObjectCaps	new: skill .. sound
+0xcc5c0	48	CAmbientGeneric::Save	sound
+0xcc5f0	48	CAmbientGeneric::Restore	sound
+0xcc620	269	CAmbientGeneric::Spawn	sound
+0xcc730	192	CAmbientGeneric::Precache	sound
+0xcc7f0	972	CAmbientGeneric::RampThink	sound
+0xccbc0	578	FUN_100ccbc0	sound
+0xcce10	583	CAmbientGeneric::ToggleUse	sound
+0xcd060	1680	CAmbientGeneric::KeyValue	sound
+0xcd6f0	102	env_sound	sound
+0xcd760	48	CEnvSound::Save	sound
+0xcd790	48	CEnvSound::Restore	sound
+0xcd7c0	165	CEnvSound::KeyValue	sound
+0xcd870	420	FUN_100cd870	sound
+0xcda20	543	CEnvSound::Think	sound
+0xcdc40	37	CEnvSound::Spawn	sound
+0xcdc70	102	USENTENCEG_InitLRU	sound
+0xcdce0	274	USENTENCEG_PickSequential	sound
+0xcde00	307	USENTENCEG_Pick	sound
+0xcdf40	114	SENTENCEG_GetIndex	sound
+0xcdfc0	104	SENTENCEG_PlayRndI	sound
+0xce030	146	FUN_100ce030	sound
+0xce0d0	134	SENTENCEG_PlaySequentialSz	sound
+0xce160	231	SENTENCEG_Stop	sound
+0xce250	775	SENTENCEG_Init	sound
+0xce560	179	SENTENCEG_Lookup	sound
+0xce620	303	FUN_100ce620	sound
+0xce750	110	EMIT_SOUND_SUIT	sound
+0xce7c0	108	FUN_100ce7c0	sound
+0xce830	110	FUN_100ce830	sound
+0xce8a0	145	memfgets	sound
+0xce940	471	TEXTURETYPE_Init	sound
+0xceb20	68	TEXTURETYPE_Find	sound
+0xceb70	1289	FUN_100ceb70	sound
+0xcf0c0	102	speaker	sound
+0xcf130	3	CSpeaker::ObjectCaps	sound
+0xcf140	48	CSpeaker::Save	sound
+0xcf170	48	CSpeaker::Restore	sound
+0xcf1a0	191	CSpeaker::Spawn	sound
+0xcf260	53	CSpeaker::Precache	sound
+0xcf2a0	375	CSpeaker::SpeakerThink	sound
+0xcf450	135	CSpeaker::ToggleUse	sound
+0xcf4e0	110	CSpeaker::KeyValue	sound
+0xcf550	105	soundent	new: sound .. soundent
+0xcf5c0	50	CSound::Clear	soundent
+0xcf600	44	CSound::Reset	soundent
+0xcf630	12	FUN_100cf630	soundent
+0xcf640	12	FUN_100cf640	soundent
+0xcf650	46	CSoundEnt::Spawn	soundent
+0xcf680	184	CSoundEnt::Think	soundent
+0xcf740	1	CSoundEnt::Precache	soundent
+0xcf750	95	FUN_100cf750	soundent
+0xcf7b0	61	FUN_100cf7b0	soundent
+0xcf7f0	136	FUN_100cf7f0	soundent
+0xcf880	191	FUN_100cf880	soundent
+0xcf940	80	FUN_100cf940	soundent
+0xcf990	17	FUN_100cf990	soundent
+0xcf9d0	73	FUN_100cf9d0	soundent
+0xcfa20	16	CSoundEnt::ClientSoundIndex	soundent
+0xcfa30	6	CSoundEnt::ObjectCaps	new: soundent .. spectator
+0xcfa40	41	FUN_100cfa40	new: soundent .. spectator
+0xcfa80	226	FUN_100cfa80	new: soundent .. spectator
+0xcfb70	67	CBaseSpectator::SpectatorThink	spectator
+0xcfbf0	48	FUN_100cfbf0	new: spectator .. squadmonster
+0xcfc20	48	FUN_100cfc20	new: spectator .. squadmonster
+0xcfc50	152	FUN_100cfc50	new: spectator .. squadmonster
+0xcfcf0	79	FUN_100cfcf0	new: spectator .. squadmonster
+0xcfd40	5	CSquadMonster::ScheduleChange	squadmonster
+0xcfd50	69	CSquadMonster::Killed	squadmonster
+0xcfda0	179	FUN_100cfda0	squadmonster
+0xcfe60	81	FUN_100cfe60	squadmonster
+0xcfec0	53	FUN_100cfec0	squadmonster
+0xcff00	53	FUN_100cff00	squadmonster
+0xcff40	257	FUN_100cff40	squadmonster
+0xd0050	88	FUN_100d0050	squadmonster
+0xd00b0	731	FUN_100d00b0	squadmonster
+0xd0390	117	CSquadMonster::CheckEnemy	squadmonster
+0xd0410	237	CSquadMonster::StartMonster	squadmonster
+0xd0500	760	FUN_100d0500	squadmonster
+0xd0800	77	CSquadMonster::GetIdealState	squadmonster
+0xd0850	53	CSquadMonster::FValidateCover	squadmonster
+0xd0890	140	FUN_100d0890	squadmonster
+0xd0920	143	FUN_100d0920	squadmonster
+0xd09b0	26	CSquadMonster::GetScheduleOfType	squadmonster
+0xd09d0	145	monster_snark	new: squadmonster .. squeakgrenade
+0xd0a80	6	CSqueakGrenade::BloodColor	new: squadmonster .. squeakgrenade
+0xd0a90	48	CSqueakGrenade::Save	squeakgrenade
+0xd0ac0	48	CSqueakGrenade::Restore	squeakgrenade
+0xd0af0	101	CSqueakGrenade::Classify	squeakgrenade
+0xd0b60	458	CSqueakGrenade::Spawn	squeakgrenade
+0xd0d30	113	CSqueakGrenade::Precache	squeakgrenade
+0xd0db0	286	CSqueakGrenade::Killed	squeakgrenade
+0xd0ed0	43	CSqueakGrenade::GibMonster	squeakgrenade
+0xd0f00	2039	CSqueakGrenade::HuntThink	squeakgrenade
+0xd1700	885	CSqueakGrenade::SuperBounceTouch	squeakgrenade
+0xd1b00	145	mini_grunt	squeakgrenade
+0xd1bb0	116	FUN_100d1bb0	squeakgrenade
+0xd1de0	2455	CMiniGrunt::AimThink	squeakgrenade
+0xd2780	195	FUN_100d2780	squeakgrenade
+0xd2860	2146	CMiniGrunt::DoTouch	squeakgrenade
+0xd30e0	105	weapon_snark	squeakgrenade
+0xd3170	119	CSqueak::Spawn	squeakgrenade
+0xd31f0	133	CSqueak::Precache	squeakgrenade
+0xd3390	166	FUN_100d3390	new: squeakgrenade .. subs
+0xd4370	310	FUN_100d4370	new: squeakgrenade .. subs
+0xd44b0	62	FUN_100d44b0	new: squeakgrenade .. subs
+0xd44f0	14	CPointEntity::Spawn	subs
+0xd4500	18	CNullEntity::Spawn	subs
+0xd4520	102	info_null	subs
+0xd4590	102	info_player_deathmatch	subs
+0xd4600	102	info_player_start	subs
+0xd4670	102	info_player_coop	subs
+0xd46e0	102	info_landmark	subs
+0xd4750	26	FUN_100d4750	subs
+0xd4770	117	CBaseDMStart::KeyValue	subs
+0xd47f0	26	CBaseDMStart::IsTriggered	subs
+0xd4810	123	FUN_100d4810	subs
+0xd4890	77	CBaseEntity::SUB_Remove	subs
+0xd48e0	1	CBaseEntity::SUB_DoNothing	subs
+0xd48f0	48	CBaseDelay::Save	subs
+0xd4920	48	CBaseDelay::Restore	subs
+0xd4950	190	FUN_100d4950	subs
+0xd4a10	55	CBaseEntity::SUB_UseTargets	subs
+0xd4a50	164	FUN_100d4a50	subs
+0xd4b00	102	DelayedUse	subs
+0xd4b70	503	FUN_100d4b70	subs
+0xd4d70	258	SetMovedir	subs
+0xd4e80	84	CBaseDelay::DelayThink	subs
+0xd4ee0	48	CBaseToggle::Save	subs
+0xd4f10	48	CBaseToggle::Restore	subs
+0xd4f40	365	FUN_100d4f40	subs
+0xd50b0	243	FUN_100d50b0	subs
+0xd51b0	81	CBaseToggle::LinearMoveDone	subs
+0xd5210	55	FUN_100d5210	subs
+0xd5250	243	FUN_100d5250	subs
+0xd5350	85	CBaseToggle::AngularMoveDone	subs
+0xd53b0	35	CBaseToggle::AxisValue	subs
+0xd53e0	174	CBaseToggle::AxisDir	subs
+0xd5490	55	CBaseToggle::AxisDelta	subs
+0xd54d0	201	FEntIsVisible	subs
+0xd55a0	48	FUN_100d55a0	new: subs .. talkmonster
+0xd55d0	48	FUN_100d55d0	new: subs .. talkmonster
+0xd5600	38	FUN_100d5600	new: subs .. talkmonster
+0xd5630	66	CTalkMonster::SetActivity	talkmonster
+0xd5680	823	FUN_100d5680	talkmonster
+0xd5a10	1032	FUN_100d5a10	talkmonster
+0xd5e40	120	FUN_100d5e40	talkmonster
+0xd5ec0	225	FUN_100d5ec0	talkmonster
+0xd5fb0	92	FUN_100d5fb0	talkmonster
+0xd6010	74	FUN_100d6010	talkmonster
+0xd6060	122	FUN_100d6060	talkmonster
+0xd60e0	113	FUN_100d60e0	talkmonster
+0xd6160	111	FUN_100d6160	talkmonster
+0xd61d0	21	FUN_100d61d0	talkmonster
+0xd61f0	551	FUN_100d61f0	talkmonster
+0xd6420	40	FUN_100d6420	talkmonster
+0xd6450	138	CTalkMonster::Touch	talkmonster
+0xd64e0	61	FUN_100d64e0	talkmonster
+0xd6520	197	FUN_100d6520	talkmonster
+0xd65f0	27	CTalkMonster::CanPlaySentence	talkmonster
+0xd6610	93	FUN_100d6610	talkmonster
+0xd6670	227	FUN_100d6670	talkmonster
+0xd6760	161	FUN_100d6760	talkmonster
+0xd6810	795	FUN_100d6810	talkmonster
+0xd6b30	101	CTalkMonster::PlayScriptedSentence	talkmonster
+0xd6ba0	149	CTalkMonster::PlaySentence	talkmonster
+0xd6c40	60	FUN_100d6c40	talkmonster
+0xd6c80	43	FUN_100d6c80	talkmonster
+0xd6cb0	113	FUN_100d6cb0	talkmonster
+0xd6d30	624	FUN_100d6d30	talkmonster
+0xd6ff0	29	FUN_100d6ff0	talkmonster
+0xd7010	25	CTalkMonster::PrescheduleThink	talkmonster
+0xd7030	158	FUN_100d7030	talkmonster
+0xd70d0	144	CTalkMonster::IRelationship	talkmonster
+0xd7160	208	FUN_100d7160	talkmonster
+0xd7230	170	FUN_100d7230	talkmonster
+0xd72e0	123	FUN_100d72e0	talkmonster
+0xd7360	218	CTalkMonster::FollowerUse	talkmonster
+0xd7440	198	CTalkMonster::KeyValue	talkmonster
+0xd7510	61	FUN_100d7510	new: talkmonster .. teamplay_gamerules
+0xd7550	820	FUN_100d7550	new: talkmonster .. teamplay_gamerules
+0xd7890	186	FUN_100d7890	new: talkmonster .. teamplay_gamerules
+0xd7950	1356	FUN_100d7950	new: talkmonster .. teamplay_gamerules
+0xd7ea0	331	FUN_100d7ea0	new: talkmonster .. teamplay_gamerules
+0xd7ff0	1052	FUN_100d7ff0	new: talkmonster .. teamplay_gamerules
+0xd8410	1067	FUN_100d8410	new: talkmonster .. teamplay_gamerules
+0xd8840	957	FUN_100d8840	new: talkmonster .. teamplay_gamerules
+0xd8c00	830	FUN_100d8c00	new: talkmonster .. teamplay_gamerules
+0xd8f40	336	FUN_100d8f40	new: talkmonster .. teamplay_gamerules
+0xd9090	909	FUN_100d9090	new: talkmonster .. teamplay_gamerules
+0xd9420	1232	FUN_100d9420	new: talkmonster .. teamplay_gamerules
+0xd98f0	166	FUN_100d98f0	new: talkmonster .. teamplay_gamerules
+0xd99a0	178	FUN_100d99a0	new: talkmonster .. teamplay_gamerules
+0xd9a60	147	FUN_100d9a60	new: talkmonster .. teamplay_gamerules
+0xd9b00	314	FUN_100d9b00	new: talkmonster .. teamplay_gamerules
+0xd9c40	492	FUN_100d9c40	new: talkmonster .. teamplay_gamerules
+0xd9e30	462	FUN_100d9e30	new: talkmonster .. teamplay_gamerules
+0xda000	460	FUN_100da000	new: talkmonster .. teamplay_gamerules
+0xda1d0	465	FUN_100da1d0	new: talkmonster .. teamplay_gamerules
+0xda3b0	453	FUN_100da3b0	new: talkmonster .. teamplay_gamerules
+0xda580	497	FUN_100da580	new: talkmonster .. teamplay_gamerules
+0xda780	271	FUN_100da780	new: talkmonster .. teamplay_gamerules
+0xda890	226	FUN_100da890	new: talkmonster .. teamplay_gamerules
+0xda980	235	FUN_100da980	new: talkmonster .. teamplay_gamerules
+0xdaa70	102	tcontroller_tball	new: talkmonster .. teamplay_gamerules
+0xdac10	69	FUN_100dac10	new: talkmonster .. teamplay_gamerules
+0xdac60	1512	CTController_ThrowBall::ExplodeTouch	new: talkmonster .. teamplay_gamerules
+0xdb250	105	tcontroller_cball	new: talkmonster .. teamplay_gamerules
+0xdb440	72	FUN_100db440	new: talkmonster .. teamplay_gamerules
+0xdb490	1934	CTController_ChargeBall::LeechThink	new: talkmonster .. teamplay_gamerules
+0xdbc20	1523	CTController_ChargeBall::ExplodeTouch	new: talkmonster .. teamplay_gamerules
+0xdc220	222	CHalfLifeTeamplay::CHalfLifeTeamplay	teamplay_gamerules
+0xdc4a0	146	CHalfLifeTeamplay::ClientCommand	teamplay_gamerules
+0xdc540	50	CHalfLifeTeamplay::UpdateGameMode	teamplay_gamerules
+0xdc580	198	FUN_100dc580	teamplay_gamerules
+0xdc840	347	FUN_100dc840	teamplay_gamerules
+0xdcbe0	45	CHalfLifeTeamplay::PlayerKilled	teamplay_gamerules
+0xdcc20	78	FUN_100dcc20	teamplay_gamerules
+0xdcc70	122	FUN_100dcc70	teamplay_gamerules
+0xdcd90	34	CHalfLifeTeamplay::GetTeamID	teamplay_gamerules
+0xdcdc0	76	CHalfLifeTeamplay::GetTeamIndex	teamplay_gamerules
+0xdce10	35	CHalfLifeTeamplay::GetIndexedTeamName	teamplay_gamerules
+0xdce70	169	FUN_100dce70	new: teamplay_gamerules .. tentacle
+0xdcf20	521	FUN_100dcf20	new: teamplay_gamerules .. tentacle
+0xdd210	106	monster_tentacle	new: teamplay_gamerules .. tentacle
+0xdd280	48	CTentacle::Save	tentacle
+0xdd2b0	48	CTentacle::Restore	tentacle
+0xdd2e0	6	CTentacle::Classify	tentacle
+0xdd2f0	370	CTentacle::Spawn	tentacle
+0xdd470	302	CTentacle::Precache	tentacle
+0xdd5a0	29	FUN_100dd5a0	tentacle
+0xdd5c0	3	CTentacle::ObjectCaps	tentacle
+0xdd5d0	173	CTentacle::SetObjectCollisionBox	tentacle
+0xdd6e0	7	CTentacle::HearingSensitivity	tentacle
+0xdd6f0	6	CTentacle::GetIdealState	tentacle
+0xdd700	202	CTentacle::KeyValue	tentacle
+0xdd7d0	77	CTentacle::Level	tentacle
+0xdd820	42	CTentacle::MyHeight	tentacle
+0xdd850	54	CTentacle::MyLevel	tentacle
+0xdd8d0	65	CTentacle::Test	tentacle
+0xdd920	2394	CTentacle::Cycle	tentacle
+0xde2d0	114	CTentacle::CommandUse	tentacle
+0xde350	363	CTentacle::DieThink	tentacle
+0xde990	153	CTentacle::Start	tentacle
+0xdea30	362	CTentacle::HitTouch	tentacle
+0xdeba0	62	CTentacle::TakeDamage	tentacle
+0xdebe0	13	CTentacle::Killed	tentacle
+0xdebf0	105	monster_tentaclemaw	tentacle
+0xdec60	185	CTentacleMaw::Spawn	tentacle
+0xded20	13	CTentacleMaw::Precache	tentacle
+0xded30	717	FUN_100ded30	new: tentacle .. triggers
+0xdf000	140	FUN_100df000	new: tentacle .. triggers
+0xdf090	23	FUN_100df090	new: tentacle .. triggers
+0xdf0b0	209	FUN_100df0b0	new: tentacle .. triggers
+0xdf190	204	FUN_100df190	new: tentacle .. triggers
+0xdf260	93	FUN_100df260	new: tentacle .. triggers
+0xdf2c0	93	FUN_100df2c0	new: tentacle .. triggers
+0xdf320	762	FUN_100df320	new: tentacle .. triggers
+0xdf620	1035	FUN_100df620	new: tentacle .. triggers
+0xdfa30	401	FUN_100dfa30	new: tentacle .. triggers
+0xdfbd0	317	FUN_100dfbd0	new: tentacle .. triggers
+0xdfd10	186	FUN_100dfd10	new: tentacle .. triggers
+0xdfdd0	2235	FUN_100dfdd0	new: tentacle .. triggers
+0xe0690	797	FUN_100e0690	new: tentacle .. triggers
+0xe09b0	2360	FUN_100e09b0	new: tentacle .. triggers
+0xe12f0	81	FUN_100e12f0	new: tentacle .. triggers
+0xe1350	1892	FUN_100e1350	new: tentacle .. triggers
+0xe1ac0	23	FUN_100e1ac0	new: tentacle .. triggers
+0xe1ae0	321	FUN_100e1ae0	new: tentacle .. triggers
+0xe1c30	452	FUN_100e1c30	new: tentacle .. triggers
+0xe1e00	382	FUN_100e1e00	new: tentacle .. triggers
+0xe1fa0	96	FUN_100e1fa0	new: tentacle .. triggers
+0xe2000	57	FUN_100e2000	new: tentacle .. triggers
+0xe2040	42	FUN_100e2040	new: tentacle .. triggers
+0xe2070	1	FUN_100e2070	new: tentacle .. triggers
+0xe2080	52	FUN_100e2080	new: tentacle .. triggers
+0xe20c0	144	FUN_100e20c0	new: tentacle .. triggers
+0xe21f0	1567	FUN_100e21f0	new: tentacle .. triggers
+0xe2830	1141	FUN_100e2830	new: tentacle .. triggers
+0xe2cc0	711	FUN_100e2cc0	new: tentacle .. triggers
+0xe2f90	444	FUN_100e2f90	new: tentacle .. triggers
+0xe3200	509	FUN_100e3200	new: tentacle .. triggers
+0xe3400	68	FUN_100e3400	new: tentacle .. triggers
+0xe3450	763	FUN_100e3450	new: tentacle .. triggers
+0xe3750	41	FUN_100e3750	new: tentacle .. triggers
+0xe37f0	102	func_friction	new: tentacle .. triggers
+0xe3860	3	CFrictionModifier::ObjectCaps	new: tentacle .. triggers
+0xe3870	48	CFrictionModifier::Save	triggers
+0xe38a0	48	CFrictionModifier::Restore	triggers
+0xe38d0	76	CFrictionModifier::Spawn	triggers
+0xe3920	35	CFrictionModifier::ChangeFriction	triggers
+0xe3950	116	CFrictionModifier::KeyValue	triggers
+0xe39d0	105	trigger_auto	triggers
+0xe3a40	3	CAutoTrigger::ObjectCaps	triggers
+0xe3a50	48	CAutoTrigger::Save	triggers
+0xe3a80	48	CAutoTrigger::Restore	triggers
+0xe3ab0	236	CAutoTrigger::KeyValue	triggers
+0xe3ba0	5	CAutoTrigger::Spawn	triggers
+0xe3bb0	23	CAutoTrigger::Precache	triggers
+0xe3bd0	63	CAutoTrigger::Think	triggers
+0xe3c10	102	trigger_relay	triggers
+0xe3c80	3	CTriggerRelay::ObjectCaps	triggers
+0xe3c90	48	CTriggerRelay::Save	triggers
+0xe3cc0	48	CTriggerRelay::Restore	triggers
+0xe3cf0	156	CTriggerRelay::KeyValue	triggers
+0xe3d90	1	CTriggerRelay::Spawn	triggers
+0xe3da0	40	CTriggerRelay::Use	triggers
+0xe3dd0	105	multi_manager	triggers
+0xe3e40	3	CMultiManager::ObjectCaps	triggers
+0xe3e50	48	CMultiManager::Save	triggers
+0xe3e80	48	CMultiManager::Restore	triggers
+0xe3eb0	214	CMultiManager::KeyValue	triggers
+0xe3f90	112	CMultiManager::Spawn	triggers
+0xe4000	136	CMultiManager::HasTarget	triggers
+0xe4090	224	CMultiManager::ManagerThink	triggers
+0xe4170	177	FUN_100e4170	triggers
+0xe4230	109	CMultiManager::ManagerUse	triggers
+0xe42a0	102	env_render	triggers
+0xe4310	14	CRenderFxManager::Spawn	triggers
+0xe4320	211	CRenderFxManager::Use	triggers
+0xe4400	105	trigger	triggers
+0xe4470	3	CBaseTrigger::ObjectCaps	triggers
+0xe4480	170	CBaseTrigger::InitTrigger	triggers
+0xe4530	288	CBaseTrigger::KeyValue	triggers
+0xe4650	105	trigger_hurt	triggers
+0xe46c0	105	trigger_monsterjump	triggers
+0xe4730	98	CTriggerMonsterJump::Spawn	triggers
+0xe47a0	41	CTriggerMonsterJump::Think	triggers
+0xe47d0	164	CTriggerMonsterJump::Touch	triggers
+0xe4880	105	trigger_cdaudio	triggers
+0xe48f0	30	CTriggerCDAudio::Touch	triggers
+0xe4910	5	CTriggerCDAudio::Spawn	triggers
+0xe4920	8	CTriggerCDAudio::Use	triggers
+0xe4930	117	PlayCDTrack	triggers
+0xe49b0	41	CTriggerCDAudio::PlayTrack	triggers
+0xe49e0	102	target_cdaudio	triggers
+0xe4a50	116	CTargetCDAudio::KeyValue	triggers
+0xe4ad0	62	CTargetCDAudio::Spawn	triggers
+0xe4b10	8	CTargetCDAudio::Use	triggers
+0xe4b20	117	CTargetCDAudio::Think	triggers
+0xe4ba0	34	CTargetCDAudio::Play	triggers
+0xe4bd0	136	CTriggerHurt::Spawn	triggers
+0xe4c60	824	CTriggerHurt::RadiationThink	triggers
+0xe4fa0	88	CBaseTrigger::ToggleUse	triggers
+0xe5000	503	CBaseTrigger::HurtTouch	triggers
+0xe5200	105	trigger_multiple	triggers
+0xe5270	48	CTriggerMultiple::Spawn	triggers
+0xe52a0	118	trigger_once	triggers
+0xe5320	15	CTriggerOnce::Spawn	triggers
+0xe5330	147	CBaseTrigger::MultiTouch	triggers
+0xe53d0	431	FUN_100e53d0	triggers
+0xe5580	8	CBaseTrigger::MultiWaitOver	triggers
+0xe5590	241	CBaseTrigger::CounterUse	triggers
+0xe5690	105	trigger_counter	triggers
+0xe5700	38	CTriggerCounter::Spawn	triggers
+0xe5730	102	trigger_transition	triggers
+0xe57a0	83	CTriggerVolume::Spawn	triggers
+0xe5800	102	fireanddie	triggers
+0xe5870	6	CFireAndDie::ObjectCaps	triggers
+0xe5880	27	CFireAndDie::Spawn	triggers
+0xe58a0	20	CFireAndDie::Precache	triggers
+0xe58c0	24	CFireAndDie::Think	triggers
+0xe58e0	105	trigger_changelevel	triggers
+0xe5950	48	CChangeLevel::Save	triggers
+0xe5980	48	CChangeLevel::Restore	triggers
+0xe59b0	475	CChangeLevel::KeyValue	triggers
+0xe5b90	212	CChangeLevel::Spawn	triggers
+0xe5c70	59	CChangeLevel::ExecuteChangeLevel	triggers
+0xe5cb0	158	FUN_100e5cb0	triggers
+0xe5d50	13	CChangeLevel::UseChangeLevel	triggers
+0xe5d60	641	FUN_100e5d60	triggers
+0xe5ff0	113	CChangeLevel::TouchChangeLevel	triggers
+0xe6070	259	CChangeLevel::AddTransitionToList	triggers
+0xe6180	19	FUN_100e6180	triggers
+0xe61a0	250	FUN_100e61a0	triggers
+0xe62a0	623	FUN_100e62a0	triggers
+0xe6680	105	func_ladder	triggers
+0xe66f0	13	CLadder::KeyValue	triggers
+0xe6700	101	CLadder::Precache	triggers
+0xe6770	65	CLadder::Spawn	triggers
+0xe67c0	105	trigger_push	triggers
+0xe6830	13	CTriggerPush::KeyValue	triggers
+0xe6840	147	CTriggerPush::Spawn	triggers
+0xe68e0	430	CTriggerPush::Touch	triggers
+0xe6ab0	400	CBaseTrigger::TeleportTouch	triggers
+0xe6c40	105	trigger_teleport	triggers
+0xe6cb0	17	CTriggerTeleport::Spawn	triggers
+0xe6cd0	102	info_teleport_destination	triggers
+0xe6d40	105	trigger_autosave	triggers
+0xe6db0	55	CTriggerSave::Spawn	triggers
+0xe6df0	74	CTriggerSave::SaveTouch	triggers
+0xe6e40	105	trigger_endsection	triggers
+0xe6eb0	80	CTriggerEndSection::EndSectionUse	triggers
+0xe6f00	74	CTriggerEndSection::Spawn	triggers
+0xe6f50	76	CTriggerEndSection::EndSectionTouch	triggers
+0xe6fa0	118	CTriggerEndSection::KeyValue	triggers
+0xe7020	105	trigger_gravity	triggers
+0xe7090	17	CTriggerGravity::Spawn	triggers
+0xe70b0	45	CTriggerGravity::GravityTouch	triggers
+0xe70e0	102	trigger_changetarget	triggers
+0xe7150	3	CTriggerChangeTarget::ObjectCaps	triggers
+0xe7160	48	CTriggerChangeTarget::Save	triggers
+0xe7190	48	CTriggerChangeTarget::Restore	triggers
+0xe71c0	112	CTriggerChangeTarget::KeyValue	triggers
+0xe7230	1	CTriggerChangeTarget::Spawn	triggers
+0xe7240	80	CTriggerChangeTarget::Use	triggers
+0xe7290	105	trigger_camera	triggers
+0xe7300	3	CTriggerCamera::ObjectCaps	triggers
+0xe7310	48	CTriggerCamera::Save	triggers
+0xe7340	48	CTriggerCamera::Restore	triggers
+0xe7370	117	CTriggerCamera::Spawn	triggers
+0xe73f0	365	CTriggerCamera::KeyValue	triggers
+0xe7560	761	CTriggerCamera::Use	triggers
+0xe7860	727	CTriggerCamera::FollowTarget	new: triggers .. tripmine
+0xe7b40	791	FUN_100e7b40	new: triggers .. tripmine
+0xe7e60	61	FUN_100e7e60	new: triggers .. tripmine
+0xe7ea0	159	monster_tripmine	new: triggers .. tripmine
+0xe7fc0	1151	CTripmineGrenade::Spawn	tripmine
+0xe8440	59	CTripmineGrenade::Precache	tripmine
+0xe8480	297	CTripmineGrenade::KillThink	tripmine
+0xe85b0	94	CTripmineGrenade::Killed	tripmine
+0xe8610	529	FUN_100e8610	tripmine
+0xe8830	824	CTripmineGrenade::PowerupThink	tripmine
+0xe8b70	227	CTripmineGrenade::TraceThink	tripmine
+0xe93d0	159	bouncy_tripmine	tripmine
+0xe9580	424	FUN_100e9580	tripmine
+0xe9730	241	FUN_100e9730	tripmine
+0xea860	159	punch_tripmine	tripmine
+0xea9a0	363	FUN_100ea9a0	tripmine
+0xeab10	150	FUN_100eab10	tripmine
+0xeb9e0	159	target_tripmine	tripmine
+0xeba80	56	FUN_100eba80	tripmine
+0xebc00	149	FUN_100ebc00	tripmine
+0xeca70	105	weapon_tripmine	tripmine
+0xecaf0	179	CTripmine::SetObjectCollisionBox	tripmine
+0xecbc0	234	CTripmine::Spawn	tripmine
+0xeccb0	90	CTripmine::Precache	tripmine
+0xecdb0	162	FUN_100ecdb0	new: tripmine .. turret
+0xece60	125	FUN_100ece60	new: tripmine .. turret
+0xedee0	210	FUN_100edee0	new: tripmine .. turret
+0xedfc0	211	FUN_100edfc0	new: tripmine .. turret
+0xee0a0	114	FUN_100ee0a0	new: tripmine .. turret
+0xee120	11	CBaseTurret::SpinDownCall	new: tripmine .. turret
+0xee130	11	CBaseTurret::SpinUpCall	new: tripmine .. turret
+0xee140	48	CBaseTurret::Save	turret
+0xee170	48	CBaseTurret::Restore	turret
+0xee1a0	48	CTurret::Save	turret
+0xee1d0	48	CTurret::Restore	turret
+0xee200	145	monster_turret	turret
+0xee2b0	4	CBaseTurret::BloodColor	turret
+0xee2c0	1	CBaseTurret::GibMonster	turret
+0xee2d0	145	monster_miniturret	turret
+0xee370	644	CBaseTurret::KeyValue	turret
+0xee600	193	FUN_100ee600	turret
+0xee6d0	125	CBaseTurret::Precache	turret
+0xee750	442	CTurret::Spawn	turret
+0xee910	31	CTurret::Precache	turret
+0xee930	265	CMiniTurret::Spawn	turret
+0xeea40	53	CMiniTurret::Precache	turret
+0xeea80	291	CBaseTurret::Initialize	turret
+0xeebb0	149	CBaseTurret::TurretUse	turret
+0xeec50	151	CBaseTurret::Ping	turret
+0xeecf0	49	CBaseTurret::EyeOn	turret
+0xeed30	61	CBaseTurret::EyeOff	turret
+0xeed70	1327	CBaseTurret::ActiveThink	turret
+0xef2a0	147	CTurret::Shoot	turret
+0xef340	237	CMiniTurret::Shoot	turret
+0xef430	310	CBaseTurret::Deploy	turret
+0xef570	356	CBaseTurret::Retire	turret
+0xef6e0	304	FUN_100ef6e0	turret
+0xef810	177	FUN_100ef810	turret
+0xef8d0	121	CBaseTurret::SetTurretAnim	turret
+0xef950	395	CBaseTurret::SearchThink	turret
+0xefae0	185	CBaseTurret::AutoSearchThink	turret
+0xefba0	941	CBaseTurret::TurretDeath	turret
+0xeff50	189	CBaseTurret::TraceAttack	turret
+0xf0010	249	CBaseTurret::TakeDamage	turret
+0xf0110	646	FUN_100f0110	turret
+0xf03a0	29	CBaseTurret::Classify	turret
+0xf03c0	145	monster_sentry	turret
+0xf0460	18	CSentry::Precache	turret
+0xf0480	276	CSentry::Spawn	turret
+0xf05a0	237	CSentry::Shoot	turret
+0xf0690	222	CSentry::TakeDamage	turret
+0xf0770	59	CSentry::SentryTouch	new: turret .. util
+0xf07b0	722	CSentry::SentryDeath	new: turret .. util
+0xf0a90	7	FUN_100f0a90	new: turret .. util
+0xf0aa0	53	U_Random	util
+0xf0ae0	23	U_Srand	util
+0xf0b00	58	UTIL_SharedRandomLong	util
+0xf0b40	116	UTIL_SharedRandomFloat	util
+0xf0bc0	368	UTIL_ParametricRocket	util
+0xf0d30	31	UTIL_SetGroupTrace	util
+0xf0d50	24	UTIL_UnsetGroupTrace	util
+0xf0d70	55	UTIL_GroupTrace::UTIL_GroupTrace	util
+0xf0db0	28	UTIL_GroupTrace::~UTIL_GroupTrace	util
+0xf0dd0	22	UTIL_GetNextBestWeapon	util
+0xf0df0	120	UTIL_AngleMod	util
+0xf0e70	63	FUN_100f0e70	util
+0xf0eb0	47	UTIL_VecToAngles	util
+0xf0ee0	57	UTIL_MoveToOrigin	util
+0xf0f20	257	UTIL_EntitiesInBox	util
+0xf1030	264	UTIL_MonstersInSphere	util
+0xf1140	71	FUN_100f1140	util
+0xf1190	71	FUN_100f1190	util
+0xf11e0	24	FUN_100f11e0	util
+0xf1200	24	FUN_100f1200	util
+0xf1220	153	UTIL_FindEntityGeneric	util
+0xf12c0	84	FUN_100f12c0	util
+0xf1320	13	FUN_100f1320	util
+0xf1330	44	UTIL_MakeAimVectors	util
+0xf1360	141	UTIL_MakeInvVectors	util
+0xf13f0	150	UTIL_EmitAmbientSound	util
+0xf1490	356	UTIL_ScreenShake	util
+0xf1600	33	FixedUnsigned16	util
+0xf1630	31	UTIL_ScreenShakeAll	util
+0xf1650	101	UTIL_ScreenFadeBuild	util
+0xf16c0	152	UTIL_ScreenFadeWrite	util
+0xf1760	100	UTIL_ScreenFadeAll	util
+0xf17d0	57	UTIL_ScreenFade	util
+0xf1810	471	UTIL_HudMessage	util
+0xf19f0	39	FixedSigned16	util
+0xf1a20	72	UTIL_HudMessageAll	util
+0xf1a70	121	UTIL_ClientPrintAll	util
+0xf1af0	131	ClientPrint	util
+0xf1b80	90	UTIL_SayText	util
+0xf1be0	65	UTIL_SayTextAll	util
+0xf1c30	29	FUN_100f1c30	util
+0xf1cb0	71	UTIL_ShowMessage	util
+0xf1d00	65	UTIL_ShowMessageAll	util
+0xf1d50	349	FUN_100f1d50	util
+0xf1eb0	294	FUN_100f1eb0	util
+0xf1fe0	73	FUN_100f1fe0	util
+0xf2030	57	FUN_100f2030	util
+0xf2070	62	FUN_100f2070	util
+0xf20b0	49	FUN_100f20b0	util
+0xf20f0	207	UTIL_GetGlobalTrace	util
+0xf21c0	31	UTIL_SetSize	util
+0xf21e0	13	FUN_100f21e0	util
+0xf21f0	26	UTIL_SetOrigin	util
+0xf2210	65	UTIL_ParticleEffect	util
+0xf2260	61	UTIL_Approach	util
+0xf22a0	147	FUN_100f22a0	util
+0xf2340	48	FUN_100f2340	util
+0xf2370	31	FUN_100f2370	util
+0xf2390	29	UTIL_VarArgs	util
+0xf23b0	52	UTIL_GetAimVector	util
+0xf23f0	114	FUN_100f23f0	util
+0xf2470	13	FUN_100f2470	util
+0xf2480	15	FUN_100f2480	util
+0xf2490	174	UTIL_BloodStream	util
+0xf2540	233	FUN_100f2540	util
+0xf2630	80	UTIL_RandomBloodVector	util
+0xf2680	80	UTIL_BloodDecalTrace	util
+0xf26d0	262	UTIL_DecalTrace	util
+0xf27e0	161	UTIL_PlayerDecalTrace	util
+0xf2890	135	UTIL_GunshotDecalTrace	util
+0xf2920	66	UTIL_Sparks	util
+0xf2970	88	UTIL_Ricochet	util
+0xf29d0	62	UTIL_TeamsMatch	util
+0xf2a10	152	UTIL_StringToVector	util
+0xf2ab0	157	UTIL_StringToIntArray	util
+0xf2b50	334	UTIL_ClampVectorToBox	util
+0xf2ca0	190	UTIL_WaterLevel	util
+0xf2d60	275	UTIL_Bubbles	util
+0xf2e80	288	UTIL_BubbleTrail	util
+0xf2fa0	52	UTIL_Remove	util
+0xf2fe0	115	FUN_100f2fe0	util
+0xf3060	139	FUN_100f3060	util
+0xf30f0	174	FUN_100f30f0	util
+0xf31a0	81	FUN_100f31a0	util
+0xf3200	428	FUN_100f3200	util
+0xf33b0	1357	FUN_100f33b0	util
+0xf3900	1248	FUN_100f3900	util
+0xf3de0	3601	FUN_100f3de0	util
+0xf4c50	27	FUN_100f4c50	util
+0xf4c70	196	FUN_100f4c70	util
+0xf4d40	65	FUN_100f4d40	util
+0xf4d90	55	FUN_100f4d90	util
+0xf4dd0	68	FUN_100f4dd0	util
+0xf4e70	558	FUN_100f4e70	util
+0xf50a0	187	FUN_100f50a0	util
+0xf5160	546	FUN_100f5160	util
+0xf5390	42	UTIL_LogPrintf	util
+0xf53c0	157	UTIL_DotPoints	util
+0xf5460	59	UTIL_StripToken	util
+0xf54a0	143	FUN_100f54a0	util
+0xf55b0	121	FUN_100f55b0	util
+0xf5630	456	FUN_100f5630	util
+0xf5800	159	FUN_100f5800	util
+0xf58a0	93	FUN_100f58a0	util
+0xf5900	29	FUN_100f5900	util
+0xf5920	253	FUN_100f5920	util
+0xf5a20	82	FUN_100f5a20	util
+0xf5a80	100	FUN_100f5a80	util
+0xf5af0	249	FUN_100f5af0	util
+0xf5bf0	107	FUN_100f5bf0	util
+0xf5c60	11	FUN_100f5c60	util
+0xf5c70	102	timedevent	util
+0xf5ce0	107	FUN_100f5ce0	util
+0xf5d50	41	CUTIL_TimedEvent::TimeThink	util
+0xf5d80	61	FUN_100f5d80	util
+0xf5dd0	11	FUN_100f5dd0	util
+0xf5de0	1	FUN_100f5de0	util
+0xf5df0	26	CSaveRestoreBuffer::EntityIndex	util
+0xf5e10	29	CSaveRestoreBuffer::EntityIndex	util
+0xf5e30	29	CSaveRestoreBuffer::EntityIndex	util
+0xf5e50	49	CSaveRestoreBuffer::EntityIndex	util
+0xf5e90	52	CSaveRestoreBuffer::EntityFromIndex	util
+0xf5ed0	66	CSaveRestoreBuffer::EntityFlagsSet	util
+0xf5f20	37	CSaveRestoreBuffer::BufferRewind	util
+0xf5f50	31	CSaveRestoreBuffer::HashString	util
+0xf5f70	223	CSaveRestoreBuffer::TokenHash	util
+0xf6050	23	FUN_100f6050	util
+0xf6070	26	CSave::WriteShort	util
+0xf6090	30	FUN_100f6090	util
+0xf60b0	30	FUN_100f60b0	util
+0xf60d0	91	CSave::WriteTime	util
+0xf6130	34	CSave::WriteString	util
+0xf6160	137	CSave::WriteString	util
+0xf61f0	20	CSave::WriteVector	util
+0xf6210	43	CSave::WriteVector	util
+0xf6240	117	CSave::WritePositionVector	util
+0xf62c0	188	CSave::WritePositionVector	util
+0xf6380	74	CSave::WriteFunction	util
+0xf63d0	226	EntvarsKeyvalue	util
+0xf64e0	25	FUN_100f64e0	util
+0xf6500	623	CSave::WriteFields	util
+0xf67d0	45	CSave::BufferString	util
+0xf6800	38	CSave::DataEmpty	util
+0xf6830	37	CSave::BufferField	util
+0xf6860	76	CSave::BufferHeader	util
+0xf68b0	100	CSave::BufferData	util
+0xf6920	775	FUN_100f6920	util
+0xf6c70	25	FUN_100f6c70	util
+0xf6c90	299	CRestore::ReadFields	util
+0xf6dc0	55	CRestore::BufferReadHeader	util
+0xf6e00	28	CRestore::ReadShort	util
+0xf6e20	27	CRestore::ReadInt	util
+0xf6e40	25	CRestore::ReadNamedInt	util
+0xf6e60	23	CRestore::ReadNamedString	util
+0xf6e80	11	FUN_100f6e80	util
+0xf6e90	115	CRestore::BufferReadBytes	util
+0xf6f10	15	FUN_100f6f10	util
+0xf6f20	58	CRestore::BufferSkipZString	util
+0xf6f60	70	CRestore::BufferCheckZString	util
+0xf6fb0	401	FUN_100f6fb0	new: util .. game_shared_voice_gamemgr
+0xf7150	168	FUN_100f7150	new: util .. game_shared_voice_gamemgr
+0xf7200	135	FUN_100f7200	new: util .. game_shared_voice_gamemgr
+0xf7290	102	virtual_hull	new: util .. game_shared_voice_gamemgr
+0xf7370	88	FUN_100f7370	new: util .. game_shared_voice_gamemgr
+0xf73d0	26	FUN_100f73d0	new: util .. game_shared_voice_gamemgr
+0xf73f0	58	CVirtualHull::HullTouch	new: util .. game_shared_voice_gamemgr
+0xf7430	54	CVirtualHull::HullUse	new: util .. game_shared_voice_gamemgr
+0xf7470	58	CVirtualHull::HullBlocked	new: util .. game_shared_voice_gamemgr
+0xf7550	161	FUN_100f7550	new: util .. game_shared_voice_gamemgr
+0xf7600	369	FUN_100f7600	new: util .. game_shared_voice_gamemgr
+0xf7780	62	FUN_100f7780	new: util .. game_shared_voice_gamemgr
+0xf7890	20	CVoiceGameMgr::CVoiceGameMgr	game_shared_voice_gamemgr
+0xf78b0	30	CVoiceGameMgr::`scalar_deleting_destructor'	game_shared_voice_gamemgr
+0xf78d0	7	FUN_100f78d0	game_shared_voice_gamemgr
+0xf78e0	140	CVoiceGameMgr::Init	game_shared_voice_gamemgr
+0xf7980	31	CVoiceGameMgr::Update	game_shared_voice_gamemgr
+0xf79a0	144	CVoiceGameMgr::ClientConnected	game_shared_voice_gamemgr
+0xf7a30	459	FUN_100f7a30	game_shared_voice_gamemgr
+0xf7c00	88	VoiceServerDebug	game_shared_voice_gamemgr
+0xf7c60	575	FUN_100f7c60	new: game_shared_voice_gamemgr .. weapons
+0xf7ea0	44	CBitVec<32>::operator==	new: game_shared_voice_gamemgr .. weapons
+0xf7ed0	76	FUN_100f7ed0	new: game_shared_voice_gamemgr .. weapons
+0xf7f20	66	FUN_100f7f20	new: game_shared_voice_gamemgr .. weapons
+0xf7f70	413	FUN_100f7f70	new: game_shared_voice_gamemgr .. weapons
+0xf8110	221	FUN_100f8110	new: game_shared_voice_gamemgr .. weapons
+0xf81f0	141	FUN_100f81f0	new: game_shared_voice_gamemgr .. weapons
+0xf8280	668	FUN_100f8280	new: game_shared_voice_gamemgr .. weapons
+0xf8520	253	FUN_100f8520	new: game_shared_voice_gamemgr .. weapons
+0xf8620	938	FUN_100f8620	new: game_shared_voice_gamemgr .. weapons
+0xf89d0	1254	FUN_100f89d0	new: game_shared_voice_gamemgr .. weapons
+0xf8ec0	251	MaxAmmoCarry	weapons
+0xf8fc0	18	FUN_100f8fc0	weapons
+0xf8fe0	40	ApplyMultiDamage	weapons
+0xf9010	92	AddMultiDamage	weapons
+0xf9070	34	SpawnBlood	weapons
+0xf90a0	32	DamageDecal	weapons
+0xf90c0	182	FUN_100f90c0	weapons
+0xf9180	140	EjectBrass	weapons
+0xf9210	82	AddAmmoNameToAmmoRegistry	weapons
+0xf9270	233	FUN_100f9270	weapons
+0xf9360	655	FUN_100f9360	weapons
+0xf95f0	48	FUN_100f95f0	weapons
+0xf9620	48	FUN_100f9620	weapons
+0xf9650	48	CBasePlayerWeapon::Save	weapons
+0xf9680	48	CBasePlayerWeapon::Restore	weapons
+0xf96b0	2026	FUN_100f96b0	weapons
+0xf9f00	405	FUN_100f9f00	weapons
+0xfa100	245	FUN_100fa100	weapons
+0xfa200	173	CBasePlayerItem::SetObjectCollisionBox	weapons
+0xfa2b0	125	CBaseDelay::KeyValue	subs
+0xfa330	199	FUN_100fa330	new: subs .. weapons
+0xfa400	143	CBasePlayerItem::FallThink	weapons
+0xfa490	178	CBasePlayerItem::Materialize	weapons
+0xfa550	61	CBasePlayerItem::AttemptToMaterialize	weapons
+0xfa590	33	FUN_100fa590	weapons
+0xfa6b0	151	CBasePlayerItem::DefaultTouch	weapons
+0xfa750	55	CanAttack	weapons
+0xfa790	1132	CBasePlayerWeapon::ItemPostFrame	weapons
+0xfac00	31	CBasePlayerItem::DestroyItem	weapons
+0xfac20	18	FUN_100fac20	weapons
+0xfac40	37	CBasePlayerItem::Drop	weapons
+0xfac70	37	CBasePlayerItem::Kill	weapons
+0xfacd0	127	CBasePlayerItem::AttachToPlayer	weapons
+0xfad90	150	FUN_100fad90	weapons
+0xfae30	248	FUN_100fae30	weapons
+0xfaf30	135	FUN_100faf30	weapons
+0xfafc0	191	FUN_100fafc0	weapons
+0xfb080	95	FUN_100fb080	weapons
+0xfb0e0	71	FUN_100fb0e0	weapons
+0xfb1b0	219	FUN_100fb1b0	weapons
+0xfb290	151	FUN_100fb290	weapons
+0xfb330	72	FUN_100fb330	weapons
+0xfb3b0	41	FUN_100fb3b0	weapons
+0xfb3e0	170	FUN_100fb3e0	weapons
+0xfb500	142	CBasePlayerAmmo::Materialize	weapons
+0xfb590	182	CBasePlayerAmmo::DefaultTouch	weapons
+0xfb650	152	FUN_100fb650	weapons
+0xfb780	3	FUN_100fb780	weapons
+0xfb790	4	FUN_100fb790	weapons
+0xfb7b0	7	FUN_100fb7b0	weapons
+0xfb7c0	105	weaponbox	weapons
+0xfb830	48	CWeaponBox::Save	weapons
+0xfb860	48	CWeaponBox::Restore	weapons
+0xfb890	13	CWeaponBox::Precache	weapons
+0xfb8a0	98	CWeaponBox::KeyValue	weapons
+0xfb910	79	CWeaponBox::Spawn	weapons
+0xfb960	77	CWeaponBox::Kill	weapons
+0xfb9b0	290	CWeaponBox::Touch	weapons
+0xfbae0	206	FUN_100fbae0	weapons
+0xfbbb0	92	FUN_100fbbb0	weapons
+0xfbc10	217	FUN_100fbc10	weapons
+0xfbcf0	132	FUN_100fbcf0	weapons
+0xfbdc0	173	CWeaponBox::SetObjectCollisionBox	weapons
+0xfbe70	98	FUN_100fbe70	weapons
+0xfbee0	48	CShotgun::Save	weapons
+0xfbf10	48	CShotgun::Restore	weapons
+0xfbf40	48	CSatchel::Save	weapons
+0xfbf70	48	CSatchel::Restore	weapons
+0xfbfc0	102	infodecal	new: weapons .. world
+0xfc030	107	CDecal::Spawn	world
+0xfc0a0	330	CDecal::TriggerDecal	world
+0xfc1f0	237	CDecal::StaticDecal	world
+0xfc2e0	143	CDecal::KeyValue	world
+0xfc370	102	bodyque	world
+0xfc3e0	6	CCorpse::ObjectCaps	world
+0xfc3f0	376	FUN_100fc3f0	world
+0xfc570	12	FUN_100fc570	world
+0xfc580	14	FUN_100fc580	world
+0xfc590	104	CGlobalState::Find	world
+0xfc600	66	CGlobalState::DumpGlobals	world
+0xfc650	145	CGlobalState::EntityAdd	world
+0xfc6f0	24	CGlobalState::EntitySetState	world
+0xfc710	13	FUN_100fc710	world
+0xfc720	25	CGlobalState::EntityGetState	world
+0xfc740	105	CGlobalState::Save	world
+0xfc7b0	150	CGlobalState::Restore	world
+0xfc850	71	CGlobalState::EntityUpdate	world
+0xfc8a0	38	CGlobalState::ClearStates	world
+0xfc8d0	38	SaveGlobalState	world
+0xfc900	61	RestoreGlobalState	world
+0xfc940	21	ResetGlobalState	world
+0xfc960	102	worldspawn	world
+0xfc9d0	76	CWorld::Spawn	world
+0xfca20	1214	CWorld::Precache	world
+0xfcee0	104	InitBodyQue	world
+0xfcf50	967	CWorld::KeyValue	world
+0xfd320	48	CActAnimating::Save	xen
+0xfd350	48	CActAnimating::Restore	xen
+0xfd380	59	FUN_100fd380	xen
+0xfd3c0	105	xen_plantlight	xen
+0xfd430	3	CActAnimating::ObjectCaps	xen
+0xfd440	48	CXenPLight::Save	xen
+0xfd470	48	CXenPLight::Restore	xen
+0xfd4a0	497	CXenPLight::Spawn	xen
+0xfd6a0	26	CXenPLight::Precache	xen
+0xfd6c0	141	CXenPLight::Think	xen
+0xfd750	71	CXenPLight::Touch	xen
+0xfd7a0	42	FUN_100fd7a0	xen
+0xfd7d0	42	FUN_100fd7d0	xen
+0xfd800	105	xen_hair	xen
+0xfd870	250	CXenHair::Spawn	xen
+0xfd970	36	CXenHair::Think	xen
+0xfd9a0	13	CXenHair::Precache	xen
+0xfd9b0	102	xen_ttrigger	xen
+0xfda20	158	FUN_100fda20	xen
+0xfdac0	71	CXenTreeTrigger::Touch	xen
+0xfdb10	105	xen_tree	xen
+0xfdb80	10	CXenTree::TakeDamage	xen
+0xfdb90	6	CXenTree::Classify	xen
+0xfdba0	48	CXenTree::Save	xen
+0xfdbd0	48	CXenTree::Restore	xen
+0xfdc00	449	CXenTree::Spawn	xen
+0xfddd0	84	CXenTree::Precache	xen
+0xfde30	111	CXenTree::Touch	xen
+0xfdea0	113	FUN_100fdea0	xen
+0xfe0a0	108	CXenTree::Think	xen
+0xfe110	308	FUN_100fe110	xen
+0xfe250	6	CXenHull::Classify	xen
+0xfe260	105	xen_spore_small	xen
+0xfe2d0	5	CXenSpore::TakeDamage	xen
+0xfe2e0	105	xen_spore_medium	xen
+0xfe350	105	xen_spore_large	xen
+0xfe3c0	102	xen_hull	xen
+0xfe430	99	CXenSporeSmall::Spawn	xen
+0xfe4a0	99	CXenSporeMed::Spawn	xen
+0xfe5c0	438	CXenSporeLarge::Spawn	xen
+0xfe780	178	CXenSpore::Spawn	xen
+0xfe840	25	CXenSpore::Precache	xen
+0xfe860	3	CXenSpore::Touch	xen
+0xfe870	36	CXenSpore::Think	xen
+0xfe8a0	105	monster_zombie	new: xen .. zombie
+0xfe920	5	CZombie::CheckRangeAttack1	new: xen .. zombie
+0xfe930	5	CZombie::CheckRangeAttack2	new: xen .. zombie
+0xfe940	6	CZombie::Classify	zombie
+0xfe950	14	CZombie::SetYawSpeed	zombie
+0xfe960	456	CZombie::TakeDamage	zombie
+0xfeb30	94	CZombie::PainSound	zombie
+0xfeb90	75	CZombie::AlertSound	zombie
+0xfebe0	85	CZombie::IdleSound	zombie
+0xfec40	73	CZombie::AttackSound	zombie
+0xfec90	1023	CZombie::HandleAnimEvent	zombie
+0xff090	250	CZombie::Spawn	zombie
+0xff190	185	CZombie::Precache	zombie
+0xff250	90	CZombie::IgnoreConditions	zombie
+0xff2c8	49	_fclose	libcmt:fclose
+0xff2f9	76	__fclose_lk	libcmt:fclose
+0xff345	52	_sscanf	libcmt:sscanf
+0xff379	98	FUN_100ff379	new: libcmt:sscanf .. libcmt:atox
+0xff3db	139	_atol	libcmt:atox
+0xff466	11	FUN_100ff466	libcmt:atox
+0xff471	186	__atoi64	libcmt:atox
+0xff52b	164	_strtok	libcmt:strtok
+0xff5d7	111	FUN_100ff5d7	new: libcmt:strtok .. libcmt:tolower
+0xff646	203	__tolower_lk	libcmt:tolower
+0xff711	23	__fpmath	libcmt:fpinit
+0xff729	56	__cfltcvt_init	libcmt:fpinit
+0xff761	16	___setfflag	libcmt:fpinit
+0xff771	87	FUN_100ff771	new: libcmt:fpinit .. libcmt:strncpy
+0xff7d0	254	_strncpy	libcmt:strncpy
+0xff8d0	58	_strpbrk	libcmt:strpbrk
+0xff90c	39	__ftol	libcmt:ftol
+0xff940	133	_strstr	libcmt:strstr
+0xff9c0	82	_sprintf	libcmt:sprintf
+0xffa12	46	_isalpha	libcmt:_ctype
+0xffa40	40	_isupper	libcmt:_ctype
+0xffa68	40	_islower	libcmt:_ctype
+0xffa90	40	_isdigit	libcmt:_ctype
+0xffab8	45	_isxdigit	libcmt:_ctype
+0xffae5	40	_isspace	libcmt:_ctype
+0xffb35	46	_isalnum	libcmt:_ctype
+0xffb63	46	_isprint	libcmt:_ctype
+0xffb91	46	_isgraph	libcmt:_ctype
+0xffbbf	40	_iscntrl	libcmt:_ctype
+0xffbfc	61	___iscsymf	libcmt:_ctype
+0xffc39	61	___iscsym	libcmt:_ctype
+0xffc80	291	_strncat	new: libcmt:_ctype .. libcmt:stricmp
+0xffdb0	208	_stricmp	libcmt:stricmp
+0xffe8a	10	FUN_100ffe8a	new: libcmt:stricmp .. libcmt:87fmod
+0xffe94	30	fFMOD	libcmt:87fmod
+0xffec0	56	_strncmp	libcmt:strncmp
+0xffef8	14	operator_new	new: libcmt:strncmp .. libcmt:pow
+0xfff10	25	__CIpow	libcmt:pow
+0xfff32	467	FUN_100fff32	new: libcmt:pow .. libcmt:fopen
+0x100105	40	FUN_10100105	new: libcmt:pow .. libcmt:fopen
+0x10012d	49	__fsopen	libcmt:fopen
+0x10015e	19	_fopen	libcmt:fopen
+0x100171	60	_fprintf	libcmt:fprintf
+0x1001ad	72	_free	libcmt:free
+0x1001f5	18	_malloc	libcmt:malloc
+0x100207	44	__nh_malloc	libcmt:malloc
+0x100233	78	__heap_alloc	libcmt:malloc
+0x1002e2	14	FUN_101002e2	new: libcmt:malloc .. libcmt:onexit
+0x10034b	126	__onexit	libcmt:onexit
+0x1003c9	18	_atexit	libcmt:onexit
+0x1003db	47	___onexitinit	libcmt:onexit
+0x100413	11	FUN_10100413	new: libcmt:onexit .. libcmt:calloc
+0x10041e	141	_calloc	libcmt:calloc
+0x1004ab	65	_printf	libcmt:printf
+0x1004ec	47	_fwrite	libcmt:fwrite
+0x10051b	266	__fwrite_lk	libcmt:fwrite
+0x100630	20	__CIacos	libcmt:acos
+0x10064d	174	FUN_1010064d	new: libcmt:acos .. libcmt:toupper
+0x100703	111	FUN_10100703	new: libcmt:acos .. libcmt:toupper
+0x100772	204	__toupper_lk	libcmt:toupper
+0x10083e	117	__isctype	libcmt:isctype
+0x1008b3	207	FUN_101008b3	new: libcmt:isctype .. libcmt:fflush
+0x100982	47	_fflush	libcmt:fflush
+0x1009b1	46	__fflush_lk	libcmt:fflush
+0x1009df	92	__flush	libcmt:fflush
+0x100a3b	9	FUN_10100a3b	libcmt:fflush
+0x100a44	164	_flsall	libcmt:fflush
+0x100ae8	207	FUN_10100ae8	new: libcmt:fflush .. libcmt:chkstk
+0x100bc0	47	__chkstk	libcmt:chkstk
+0x100bef	81	FUN_10100bef	new: libcmt:chkstk .. libcmt:vsnprint
+0x100c7b	67	FUN_10100c7b	new: libcmt:chkstk .. libcmt:vsnprint
+0x100cbe	53	FUN_10100cbe	new: libcmt:chkstk .. libcmt:vsnprint
+0x100cf3	80	__vsnprintf	libcmt:vsnprint
+0x100d43	217	__CRT_INIT@12	libcmt:dllcrt0
+0x100e1c	157	entry	libcmt:dllcrt0
+0x100eb9	48	__amsg_exit	libcmt:dllcrt0
+0x100eec	168	___initstdio	libcmt:_file
+0x100f94	20	___endstdio	libcmt:_file
+0x100fa8	47	FUN_10100fa8	new: libcmt:_file .. libcmt:close
+0x100fd7	35	FUN_10100fd7	new: libcmt:_file .. libcmt:close
+0x100ffa	47	FUN_10100ffa	new: libcmt:_file .. libcmt:close
+0x101029	35	FUN_10101029	new: libcmt:_file .. libcmt:close
+0x10104c	93	__close	libcmt:close
+0x1010a9	131	__close_lk	libcmt:close
+0x10112c	43	__freebuf	libcmt:_freebuf
+0x101157	2597	__input	libcmt:input
+0x101b7c	55	__hextodec	libcmt:input
+0x101bb3	26	__inc	libcmt:input
+0x101bcd	23	__un_inc	libcmt:input
+0x101be4	36	FUN_10101be4	new: libcmt:input .. libcmt:strlen
+0x101c10	123	_strlen	libcmt:strlen
+0x101c8b	220	__filbuf	libcmt:_filbuf
+0x101d70	52	__allmul	libcmt:llmul
+0x101da4	84	__mtinit	libcmt:tidtable
+0x101df8	30	__mtterm	libcmt:tidtable
+0x101e16	19	__initptd	libcmt:tidtable
+0x101e29	103	__getptd	libcmt:tidtable
+0x101e90	160	__freeptd	libcmt:tidtable
+0x101f3c	41	__mtinitlocks	libcmt:mlock
+0x101f65	108	__mtdeletelocks	libcmt:mlock
+0x101fd1	97	__lock	libcmt:mlock
+0x102032	21	__unlock	libcmt:mlock
+0x102047	24	__lockerr_exit	libcmt:mlock
+0x10205f	582	_setlocale	libcmt:setlocal
+0x1022a5	283	__setlocale_set_cat	libcmt:setlocal
+0x1023c0	185	__setlocale_get_all	libcmt:setlocal
+0x102479	280	__expandlocale	libcmt:setlocal
+0x102594	37	__strcats	libcmt:setlocal
+0x1025b9	204	___lc_strtolc	libcmt:setlocal
+0x102685	83	___lc_lctostr	libcmt:setlocal
+0x1026d8	511	___crtLCMapStringA	libcmt:a_map
+0x1028fc	43	FUN_101028fc	new: libcmt:a_map .. libcmt:fp8
+0x102927	18	__setdefaultprecision	libcmt:fp8
+0x102939	62	__ms_p5_test_fdiv	libcmt:testfdiv
+0x102977	41	__ms_p5_mp_test_fdiv	libcmt:testfdiv
+0x1029a0	90	__forcdecpt	libcmt:cvt
+0x1029fa	78	__cropzeros	libcmt:cvt
+0x102a48	24	__positive	libcmt:cvt
+0x102a60	62	__fassign	libcmt:cvt
+0x102a9e	97	__cftoe	libcmt:cvt
+0x102aff	194	__cftoe2	libcmt:cvt
+0x102bc1	85	__cftof	libcmt:cvt
+0x102c16	167	__cftof2	libcmt:cvt
+0x102cbd	147	__cftog	libcmt:cvt
+0x102d50	81	__cfltcvt	libcmt:cvt
+0x102da1	37	__shift	libcmt:cvt
+0x102dc6	127	__fltin2	libcmt:cfin
+0x102e60	6	FUN_10102e60	new: libcmt:cfin .. libcmt:strchr
+0x102e66	182	___from_strstr_to_strchr	libcmt:strchr
+0x102f1c	280	__flsbuf	libcmt:_flsbuf
+0x103034	1825	__output	libcmt:output
+0x103775	53	_write_char	libcmt:output
+0x1037aa	49	_write_multi_char	libcmt:output
+0x1037db	56	_write_string	libcmt:output
+0x103813	13	FUN_10103813	libcmt:output
+0x103820	16	_get_int64_arg	libcmt:output
+0x103830	14	FUN_10103830	new: libcmt:output .. libcmt:87cdisp
+0x103840	62	__cintrindisp2	libcmt:87cdisp
+0x10387e	61	__cintrindisp1	libcmt:87cdisp
+0x1038bb	72	__ctrandisp2	libcmt:87cdisp
+0x103903	7	FUN_10103903	libcmt:87cdisp
+0x10390a	305	FUN_1010390a	libcmt:87cdisp
+0x103a3b	51	__ctrandisp1	libcmt:87cdisp
+0x103a6e	60	__fload	libcmt:87cdisp
+0x103ab0	103	__trandisp1	libcmt:87disp
+0x103b17	140	__trandisp2	libcmt:87disp
+0x103bc2	43	__tosnan1	libcmt:87disp
+0x103c17	63	__nan2	libcmt:87disp
+0x103c56	29	FUN_10103c56	new: libcmt:87disp .. libcmt:adj_fdiv
+0x103c80	279	FUN_10103c80	new: libcmt:87disp .. libcmt:adj_fdiv
+0x103dd2	28	label8	libcmt:adj_fdiv
+0x103df3	22	label10	libcmt:adj_fdiv
+0x103e0e	28	label12	libcmt:adj_fdiv
+0x103e3a	20	label14	libcmt:adj_fdiv
+0x103e5e	32	label16	libcmt:adj_fdiv
+0x103e83	26	label18	libcmt:adj_fdiv
+0x103ea2	32	label20	libcmt:adj_fdiv
+0x103ec2	20	label21	libcmt:adj_fdiv
+0x103ed6	24	label22	libcmt:adj_fdiv
+0x103eee	20	label23	libcmt:adj_fdiv
+0x103f02	32	label24	libcmt:adj_fdiv
+0x103f27	26	label26	libcmt:adj_fdiv
+0x103f46	32	label28	libcmt:adj_fdiv
+0x103f66	20	label29	libcmt:adj_fdiv
+0x103f7a	24	label30	libcmt:adj_fdiv
+0x103f92	20	label31	libcmt:adj_fdiv
+0x103fa6	32	label32	libcmt:adj_fdiv
+0x103fcb	26	label34	libcmt:adj_fdiv
+0x103fea	32	label36	libcmt:adj_fdiv
+0x10400a	20	label37	libcmt:adj_fdiv
+0x10401e	24	label38	libcmt:adj_fdiv
+0x104036	20	label39	libcmt:adj_fdiv
+0x10404a	32	label40	libcmt:adj_fdiv
+0x10406f	26	label42	libcmt:adj_fdiv
+0x10408e	32	label44	libcmt:adj_fdiv
+0x1040ae	20	label45	libcmt:adj_fdiv
+0x1040c2	24	label46	libcmt:adj_fdiv
+0x1040da	20	label47	libcmt:adj_fdiv
+0x1040ee	32	label48	libcmt:adj_fdiv
+0x104113	26	label50	libcmt:adj_fdiv
+0x104132	32	label52	libcmt:adj_fdiv
+0x104152	20	label53	libcmt:adj_fdiv
+0x104166	24	label54	libcmt:adj_fdiv
+0x10417e	20	label55	libcmt:adj_fdiv
+0x104192	32	label56	libcmt:adj_fdiv
+0x1041b7	26	label58	libcmt:adj_fdiv
+0x1041d6	32	label60	libcmt:adj_fdiv
+0x1041f6	20	label61	libcmt:adj_fdiv
+0x10420a	24	label62	libcmt:adj_fdiv
+0x104222	20	label63	libcmt:adj_fdiv
+0x104236	19	__fdivp_sti_st	libcmt:adj_fdiv
+0x104249	19	__fdivrp_sti_st	libcmt:adj_fdiv
+0x10425c	76	__adj_fdiv_m32	libcmt:adj_fdiv
+0x1042a8	76	__adj_fdiv_m64	libcmt:adj_fdiv
+0x10435c	76	__adj_fdivr_m32	libcmt:adj_fdiv
+0x1043a8	76	__adj_fdivr_m64	libcmt:adj_fdiv
+0x10445c	21	__safe_fdiv	libcmt:adj_fdiv
+0x104471	21	__safe_fdivr	libcmt:adj_fdiv
+0x104486	518	__fprem_common	libcmt:adj_fdiv
+0x10468c	178	__adj_fprem	libcmt:adj_fdiv
+0x10473e	518	__fprem1_common	libcmt:adj_fdiv
+0x104944	181	__adj_fprem1	libcmt:adj_fdiv
+0x104a8a	16	__rtinfnpopse	libcmt:87tran
+0x104a9a	26	__fFLN	libcmt:87tran
+0x104b51	16	__rtinfnpop	libcmt:87tran
+0x104b6e	119	__ffexpm1	libcmt:87tran
+0x104c20	23	__startTwoArgErrorHandling	libcmt:genexcep
+0x104c37	60	__startOneArgErrorHandling	libcmt:genexcep
+0x104c80	21	__twoToTOS	libcmt:common
+0x104c95	23	__load_CW	libcmt:common
+0x104cac	25	__convertTOStoQNaN	libcmt:common
+0x104cc5	67	__fload_withFB	libcmt:common
+0x104d08	22	__checkTOS_withFB	libcmt:common
+0x104d1e	13	FUN_10104d1e	libcmt:common
+0x104d2b	42	__math_exit	libcmt:common
+0x104d55	20	__check_overflow_exit	libcmt:common
+0x104d69	163	__check_range_exit	libcmt:common
+0x104e0c	304	__powhlp	libcmt:powhlp
+0x104f3c	101	__d_inttype	libcmt:powhlp
+0x104fa1	368	__openfile	libcmt:_open
+0x105111	200	__getstream	libcmt:stream
+0x1051d9	141	__stbuf	libcmt:_sftbuf
+0x105266	42	__ftbuf	libcmt:_sftbuf
+0x105290	60	__heap_init	libcmt:heapinit
+0x1052cc	117	__heap_term	libcmt:heapinit
+0x105347	23	__set_sbh_threshold	libcmt:sbheap
+0x10535e	62	FUN_1010535e	libcmt:sbheap
+0x10539c	43	___sbh_find_block	libcmt:sbheap
+0x1053c7	811	FUN_101053c7	libcmt:sbheap
+0x1056f2	777	FUN_101056f2	libcmt:sbheap
+0x1059fb	177	___sbh_alloc_new_region	libcmt:sbheap
+0x105aac	251	___sbh_alloc_new_group	libcmt:sbheap
+0x105ba7	758	___sbh_resize_block	libcmt:sbheap
+0x105f6e	815	___sbh_heap_check	libcmt:sbheap
+0x10629d	36	_set_new_handler	libcmt:handler
+0x1062c7	27	__callnewh	libcmt:handler
+0x1062e2	82	FUN_101062e2	new: libcmt:handler .. libcmt:crt0dat
+0x106344	45	__cinit	libcmt:crt0dat
+0x106371	17	_exit	libcmt:crt0dat
+0x106382	17	__exit	libcmt:crt0dat
+0x106393	15	FUN_10106393	libcmt:crt0dat
+0x1063b1	163	_doexit	libcmt:crt0dat
+0x106456	9	FUN_10106456	libcmt:crt0dat
+0x10645f	9	FUN_1010645f	libcmt:crt0dat
+0x106468	26	__initterm	libcmt:crt0dat
+0x106482	312	FUN_10106482	new: libcmt:crt0dat .. libcmt:msize
+0x1065ba	69	__msize	libcmt:msize
+0x106600	88	_memset	libcmt:memset
+0x106658	101	__lseek	libcmt:lseek
+0x1066bd	395	__write_lk	libcmt:write
+0x106850	664	FUN_10106850	new: libcmt:write .. libcmt:a_str
+0x106b85	318	___crtGetStringTypeA	libcmt:a_str
+0x106cce	84	__handle_qnan1	libcmt:fpexcept
+0x106d22	96	__handle_qnan2	libcmt:fpexcept
+0x106d82	152	__except1	libcmt:fpexcept
+0x106e1a	165	__except2	libcmt:fpexcept
+0x106ebf	691	__raise_exc	libcmt:fpexcept
+0x107172	535	__handle_exc	libcmt:fpexcept
+0x107389	136	__umatherr	libcmt:fpexcept
+0x107411	40	__set_errno	libcmt:fpexcept
+0x107439	37	__get_fname	libcmt:fpexcept
+0x10745e	45	__errcode	libcmt:fpexcept
+0x10748b	18	__frnd	libcmt:frnd
+0x10749d	41	__set_exp	libcmt:util
+0x1074c6	20	__get_exp	libcmt:util
+0x1074da	44	__add_exp	libcmt:util
+0x107506	36	__set_bexp	libcmt:util
+0x10752a	90	__sptype	libcmt:util
+0x107584	193	__decomp	libcmt:util
+0x107645	14	FUN_10107645	new: libcmt:util .. libcmt:fpctrl
+0x107653	15	FUN_10107653	new: libcmt:util .. libcmt:fpctrl
+0x107662	35	__ctrlfp	libcmt:fpctrl
+0x107685	86	__set_statfp	libcmt:fpctrl
+0x1076db	147	__commit	libcmt:commit
+0x107770	104	__aulldiv	libcmt:ulldiv
+0x1077d8	444	__ioinit	libcmt:ioinit
+0x107994	84	__ioterm	libcmt:ioinit
+0x1079e8	185	__setenvp	libcmt:stdenvp
+0x107aa1	153	__setargv	libcmt:stdargv
+0x107b3a	436	_parse_cmdline	libcmt:stdargv
+0x107cee	306	___crtGetEnvironmentStringsA	libcmt:a_env
+0x107e20	57	__FF_MSGBANNER	libcmt:crt0msg
+0x107e59	339	__NMSG_WRITE	libcmt:crt0msg
+0x107fac	49	__GET_RTERRMSG	libcmt:crt0msg
+0x107fdd	129	__fcloseall	libcmt:closeall
+0x10805e	115	__dosmaperr	libcmt:dosmap
+0x1080d1	9	FUN_101080d1	new: libcmt:dosmap .. libcmt:osfinfo
+0x1080da	9	FUN_101080da	new: libcmt:dosmap .. libcmt:osfinfo
+0x1080e3	291	__alloc_osfhnd	libcmt:osfinfo
+0x108206	124	__set_osfhnd	libcmt:osfinfo
+0x108282	127	__free_osfhnd	libcmt:osfinfo
+0x108301	66	__get_osfhandle	libcmt:osfinfo
+0x108343	167	__open_osfhandle	libcmt:osfinfo
+0x1083ea	95	__lock_fhandle	libcmt:osfinfo
+0x108449	34	__unlock_fhandle	libcmt:osfinfo
+0x10846b	93	FUN_1010846b	new: libcmt:osfinfo .. libcmt:mbtowc
+0x1084c8	201	__mbtowc_lk	libcmt:mbtowc
+0x1085a0	31	__allshl	libcmt:llshl
+0x1085bf	41	_ungetc	libcmt:ungetc
+0x1085e8	110	__ungetc_lk	libcmt:ungetc
+0x108656	101	FUN_10108656	new: libcmt:ungetc .. libcmt:_getbuf
+0x1086bb	473	FUN_101086bb	new: libcmt:ungetc .. libcmt:_getbuf
+0x108894	68	__getbuf	libcmt:_getbuf
+0x1088d8	318	__XcptFilter	libcmt:winxfltr
+0x108a16	58	_xcptlookup	libcmt:winxfltr
+0x108a50	145	___init_time	libcmt:inittime
+0x108ae1	846	__get_lc_time	libcmt:inittime
+0x108e2f	400	__free_lc_time	libcmt:inittime
+0x109194	55	FUN_10109194	new: libcmt:inittime .. libcmt:initmon
+0x1091cb	203	___init_monetary	libcmt:initmon
+0x109296	290	FUN_10109296	libcmt:initmon
+0x1093b8	55	FUN_101093b8	libcmt:initmon
+0x1093ef	78	__free_lc_lconv	libcmt:initmon
+0x10943d	581	___init_ctype	libcmt:initctyp
+0x109690	129	_strcmp	libcmt:strcmp
+0x109720	62	_strcspn	libcmt:strcspn
+0x109760	7	_strcpy	libcmt:strcat
+0x109770	224	_strcat	libcmt:strcat
+0x109850	381	___get_qualified_locale	libcmt:getqloc
+0x1099cd	88	_TranslateName	libcmt:getqloc
+0x109a25	135	_GetLcidFromLangCountry	libcmt:getqloc
+0x109aac	516	_LangCountryEnumProc@4	libcmt:getqloc
+0x109cb0	86	_GetLcidFromLanguage	libcmt:getqloc
+0x109d06	189	_LanguageEnumProc@4	libcmt:getqloc
+0x109dc3	55	_GetLcidFromCountry	libcmt:getqloc
+0x109dfa	134	_CountryEnumProc@4	libcmt:getqloc
+0x109e80	26	_GetLcidFromDefault	libcmt:getqloc
+0x109e9a	102	_ProcessCodePage	libcmt:getqloc
+0x109f00	31	_TestDefaultCountry	libcmt:getqloc
+0x109f1f	98	_TestDefaultLanguage	libcmt:getqloc
+0x109f81	54	_IsThisWindowsNT	libcmt:getqloc
+0x109fb7	230	_crtGetLocaleInfoA@16	libcmt:getqloc
+0x10a09d	57	_LcidFromHexString	libcmt:getqloc
+0x10a0d6	33	_GetPrimaryLen	libcmt:getqloc
+0x10a0f8	32	__global_unwind2	libcmt:exsup
+0x10a118	34	__unwind_handler	libcmt:exsup
+0x10a13a	88	__local_unwind2	libcmt:exsup
+0x10a192	16	__NLG_Return2	libcmt:exsup
+0x10a1a2	35	__abnormal_termination	libcmt:exsup
+0x10a1ce	24	__NLG_Notify	libcmt:exsup
+0x10a1f0	189	__except_handler3	libcmt:exsup3
+0x10a2ad	27	__seh_longjmp_unwind@4	libcmt:exsup3
+0x10a2c8	19	__statusfp	libcmt:ieee87
+0x10a2db	20	__clearfp	libcmt:ieee87
+0x10a2ef	53	__control87	libcmt:ieee87
+0x10a324	22	__controlfp	libcmt:ieee87
+0x10a33a	43	__fpreset	libcmt:ieee87
+0x10a365	146	__abstract_cw	libcmt:ieee87
+0x10a3f7	137	__hw_cw	libcmt:ieee87
+0x10a480	53	__abstract_sw	libcmt:ieee87
+0x10a4b5	73	__ZeroTail	libcmt:intrncvt
+0x10a4fe	86	__IncMan	libcmt:intrncvt
+0x10a554	140	__RoundMan	libcmt:intrncvt
+0x10a5e0	27	__CopyMan	libcmt:intrncvt
+0x10a5fb	12	FUN_1010a5fb	libcmt:intrncvt
+0x10a607	27	__IsZeroMan	libcmt:intrncvt
+0x10a622	141	__ShrMan	libcmt:intrncvt
+0x10a6af	364	__ld12cvt	libcmt:intrncvt
+0x10a81b	22	FUN_1010a81b	libcmt:intrncvt
+0x10a831	22	FUN_1010a831	libcmt:intrncvt
+0x10a847	122	__ld12told	libcmt:intrncvt
+0x10a8c1	45	FUN_1010a8c1	libcmt:intrncvt
+0x10a8ee	46	__atoldbl	libcmt:intrncvt
+0x10a91c	45	FUN_1010a91c	new: libcmt:intrncvt .. libcmt:_fptostr
+0x10a949	119	__fptostr	libcmt:_fptostr
+0x10a9c0	92	__fltout2	libcmt:cfout
+0x10aa1c	182	___dtold	libcmt:cfout
+0x10aae0	664	FUN_1010aae0	new: libcmt:cfout .. libcmt:strgtold
+0x10ae15	9	__fptrap	new: libcmt:cfout .. libcmt:strgtold
+0x10ae1e	1185	___strgtold12	libcmt:strgtold
+0x10b2ef	60	___STRINGTOLD	libcmt:strgtold
+0x10b32b	101	FUN_1010b32b	new: libcmt:strgtold .. libcmt:lseek
+0x10b390	115	__lseek_lk	libcmt:lseek
+0x10b403	41	__isatty	libcmt:isatty
+0x10b42c	89	FUN_1010b42c	new: libcmt:isatty .. libcmt:wctomb
+0x10b485	105	__wctomb_lk	libcmt:wctomb
+0x10b4f0	117	__aullrem	libcmt:ullrem
+0x10b565	208	__87except	libcmt:87except
+0x10b635	33	__copysign	libcmt:ieeemisc
+0x10b656	37	__chgsign	libcmt:ieeemisc
+0x10b67b	22	__scalb	libcmt:ieeemisc
+0x10b691	231	__logb	libcmt:ieeemisc
+0x10b778	661	__nextafter	libcmt:ieeemisc
+0x10ba0d	20	__finite	libcmt:ieeemisc
+0x10ba21	46	__isnan	libcmt:ieeemisc
+0x10ba4f	146	__fpclass	libcmt:ieeemisc
+0x10bae1	23	__open	libcmt:open
+0x10baf8	719	__sopen	libcmt:open
+0x10bdc7	423	___crtGetStringTypeW	libcmt:w_str
+0x10bf8c	3	FUN_1010bf8c	new: libcmt:w_str .. libcmt:mbctype
+0x10bf8f	429	__setmbcp	libcmt:mbctype
+0x10c13c	74	_getSystemCP	libcmt:mbctype
+0x10c186	51	_CPtoLCID	libcmt:mbctype
+0x10c1b9	41	_setSBCS	libcmt:mbctype
+0x10c1e2	389	_setSBUpLow	libcmt:mbctype
+0x10c367	16	__getmbcp	libcmt:mbctype
+0x10c377	28	___initmbctable	libcmt:mbctype
+0x10c393	137	___crtMessageBoxA	libcmt:crtmbox
+0x10c41c	143	__Getdays	libcmt:strftime
+0x10c4ab	149	__Getmonths	libcmt:strftime
+0x10c540	562	FUN_1010c540	libcmt:strftime
+0x10c772	27	_strftime	libcmt:strftime
+0x10c78d	250	FUN_1010c78d	libcmt:strftime
+0x10c887	1007	__expandtime	libcmt:strftime
+0x10cc76	39	__store_str	libcmt:strftime
+0x10cc9d	111	__store_num	libcmt:strftime
+0x10cd0c	73	__store_number	libcmt:strftime
+0x10cd55	719	__store_winword	libcmt:strftime
+0x10d024	312	___getlocaleinfo	libcmt:inithelp
+0x10d162	45	__itoa	libcmt:xtoa
+0x10d18f	92	_xtoa	libcmt:xtoa
+0x10d1eb	42	__ltoa	libcmt:xtoa
+0x10d215	27	__ultoa	libcmt:xtoa
+0x10d230	49	__i64toa	libcmt:xtoa
+0x10d261	134	_x64toa@20	libcmt:xtoa
+0x10d2e7	27	__ui64toa	libcmt:xtoa
+0x10d310	257	_strnicmp	libcmt:strnicmp
+0x10d411	386	_signal	libcmt:winsig
+0x10d593	98	_ctrlevent_capture@4	libcmt:winsig
+0x10d5f5	386	_raise	libcmt:winsig
+0x10d777	61	_siglookup	libcmt:winsig
+0x10d7bd	9	FUN_1010d7bd	new: libcmt:winsig .. libcmt:mantold
+0x10d7c6	33	___addl	libcmt:mantold
+0x10d7e7	94	___add_12	libcmt:mantold
+0x10d845	46	___shl_12	libcmt:mantold
+0x10d873	45	___shr_12	libcmt:mantold
+0x10d8a0	199	___mtold12	libcmt:mantold
+0x10d967	659	_$I10_OUTPUT	libcmt:x10fout
+0x10dbfa	544	___ld12mul	libcmt:tenpow
+0x10de1a	124	___multtenpow12	libcmt:tenpow
+0x10de96	486	_ldexp	libcmt:ldexp
+0x10e07c	89	FUN_1010e07c	new: libcmt:ldexp .. libcmt:chsize
+0x10e0d5	293	__chsize_lk	libcmt:chsize
+0x10e1fa	46	___tzset	libcmt:tzset
+0x10e228	22	__tzset	libcmt:tzset
+0x10e23e	647	__tzset_lk	libcmt:tzset
+0x10e4c5	33	__isindst	libcmt:tzset
+0x10e4e6	428	__isindst_lk	libcmt:tzset
+0x10e692	320	_cvtdate	libcmt:tzset
+0x10e7d2	264	___crtGetLocaleInfoW	libcmt:w_loc
+0x10e8e5	275	___crtGetLocaleInfoA	libcmt:a_loc
+0x10ea03	89	FUN_1010ea03	new: libcmt:a_loc .. libcmt:setmode
+0x10ea5c	97	__setmode_lk	libcmt:setmode
+0x10eabd	33	_getenv	libcmt:getenv
+0x10eade	125	__getenv_lk	libcmt:getenv
+0x10eb5b	63	__mbsnbicoll	libcmt:mbsnbico
+0x10eb9a	110	___wtomb_environ	libcmt:wtombenv
+0x10ec08	597	___crtCompareStringA	libcmt:a_cmp
+0x10ee85	43	FUN_1010ee85	new: libcmt:a_cmp .. libcmt:setenv
+0x10eeb0	391	___crtsetenv	libcmt:setenv
+0x10f037	88	_findenv	libcmt:setenv
+0x10f08f	103	_copy_environ	libcmt:setenv
+0x10f0f6	151	__mbschr	libcmt:mbschr
+0x10f18d	43	__strdup	libcmt:strdup
+0x10f32e	6	KERNEL32.DLL::RtlUnwind	new: libcmt:strdup .. end

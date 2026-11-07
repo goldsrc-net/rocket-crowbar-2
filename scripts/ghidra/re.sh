@@ -9,6 +9,7 @@
 #   scripts/ghidra/re.sh setup                     fresh import + analysis + names
 #   scripts/ghidra/re.sh export <lib> [filter]     decompile to recovered/decomp/<lib>/<Class>.c
 #   scripts/ghidra/re.sh at <lib> 0x<addr> ...     decompile by address (image base 0x10000000)
+#   scripts/ghidra/re.sh list <lib>                every function -> reference/functions-<lib>.tsv
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -43,6 +44,12 @@ case "$cmd" in
       -scriptPath "$SCRIPTS" -postScript DecompAt.java "$@" 2>&1 \
       | sed -n '/DecompAt.java (HeadlessAnalyzer)/,/REPORT/p' | sed '1d;$d'
     ;;
+  list)
+    lib="${1:?usage: re.sh list <rc2|client>}"
+    "$GHIDRA" "$PROJDIR" "$PROJ" -process "$lib.dll" -noanalysis -readOnly \
+      -scriptPath "$SCRIPTS" -postScript ListFunctions.java "$ROOT/reference/functions-$lib.tsv" 2>&1 \
+      | grep -E "ListFunctions|ERROR" || true
+    ;;
   *)
-    sed -n '2,13p' "$0"; exit 2 ;;
+    sed -n '2,14p' "$0"; exit 2 ;;
 esac
