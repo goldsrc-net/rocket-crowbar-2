@@ -809,8 +809,8 @@ void COsprey::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir,
 			return;
 		else
 			m_flRightHealth -= flDamage;
-		// SDK 2.3's (stock in RC2); halflife-updated puffed the hit engine, SDK 2.3 the other one.
-		m_iDoLeftSmokePuff = 3 + (flDamage / 5.0);
+		// halflife-updated's fix, kept: the engine that was hit smokes; SDK 2.3 puffed the other one
+		m_iDoRightSmokePuff = 3 + (flDamage / 5.0);
 	}
 
 	if (ptr->iHitgroup == 2)
@@ -819,7 +819,7 @@ void COsprey::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir,
 			return;
 		else
 			m_flLeftHealth -= flDamage;
-		m_iDoRightSmokePuff = 3 + (flDamage / 5.0);
+		m_iDoLeftSmokePuff = 3 + (flDamage / 5.0);
 	}
 
 	// hit hard, hits cockpit, hits engines

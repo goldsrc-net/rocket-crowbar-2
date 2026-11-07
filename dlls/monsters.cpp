@@ -2556,9 +2556,21 @@ float CBaseMonster::ChangeYaw(int yawSpeed)
 	ideal = pev->ideal_yaw;
 	if (current != ideal)
 	{
-		// SDK 2.3's (stock in RC2); halflife-updated turned by the time since the last call
-		// (m_flLastYawTime, clamped to 0.25) times 2, so the turn rate didn't follow the frame rate
-		speed = (float)yawSpeed * gpGlobals->frametime * 10;
+		// halflife-updated's fix, kept: the turn step comes from the time since the last turn, not the
+		// server's frame time, so the turn rate doesn't follow the server's frame rate (halflife #2458)
+		if (m_flLastYawTime == 0.0f)
+		{
+			m_flLastYawTime = gpGlobals->time - gpGlobals->frametime;
+		}
+
+		float delta = gpGlobals->time - m_flLastYawTime;
+		m_flLastYawTime = gpGlobals->time;
+
+		// Clamp delta like the engine does with frametime
+		if (delta > 0.25)
+			delta = 0.25;
+
+		speed = (float)yawSpeed * delta * 2;
 		move = ideal - current;
 
 		if (ideal > current)

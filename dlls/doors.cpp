@@ -599,7 +599,7 @@ extern Vector VecBModelOrigin(entvars_t* pevBModel);
 //
 // Starts the door going to its "up" position (simply ToggleData->vecPosition2).
 //
-// orig 0x35950. SDK 2.3's at RC2's offsets.
+// orig 0x35950. SDK 2.3's at RC2's offsets, with halflife-updated's sound fix.
 void CBaseDoor::DoorGoUp()
 {
 	entvars_t* pevActivator;
@@ -609,9 +609,13 @@ void CBaseDoor::DoorGoUp()
 
 	// emit door moving and stop sounds on CHAN_STATIC so that the multicast doesn't
 	// filter them out and leave a client stuck with looping door sounds!
-	// SDK 2.3's (stock in RC2); halflife-updated skipped the sound when the door was already moving
+	// halflife-updated's fix, kept: the moving sound doesn't start again while the door is already
+	// moving (reversing when blocked or retriggered)
 	if (!FBitSet(pev->spawnflags, SF_DOOR_SILENT))
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	{
+		if (m_toggle_state != TS_GOING_UP && m_toggle_state != TS_GOING_DOWN)
+			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	}
 
 	m_toggle_state = TS_GOING_UP;
 
@@ -689,12 +693,16 @@ void CBaseDoor::DoorHitTop()
 //
 // Starts the door going to its "down" position (simply ToggleData->vecPosition1).
 //
-// orig 0x35d00. SDK 2.3's, as DoorGoUp.
+// orig 0x35d00. As DoorGoUp.
 void CBaseDoor::DoorGoDown()
 {
-	// SDK 2.3's (stock in RC2); halflife-updated skipped the sound when the door was already moving
+	// halflife-updated's fix, kept: the moving sound doesn't start again while the door is already
+	// moving (reversing when blocked or retriggered)
 	if (!FBitSet(pev->spawnflags, SF_DOOR_SILENT))
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	{
+		if (m_toggle_state != TS_GOING_UP && m_toggle_state != TS_GOING_DOWN)
+			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	}
 
 #ifdef DOOR_ASSERT
 	ASSERT(m_toggle_state == TS_AT_TOP);
@@ -943,6 +951,9 @@ public:
 	bool Restore(CRestore& restore) override;
 	static TYPEDESCRIPTION m_SaveData[];
 
+	void EXPORT DoorMoveDone();
+	void EXPORT StopMoveSound();
+
 	byte m_bMoveSnd; // sound a door makes while moving
 };
 
@@ -1062,20 +1073,47 @@ void CMomentaryDoor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 
 	if (value > 1.0)
 		value = 1.0;
+	// halflife-updated's fix, kept: the value is held at 0 too, a move to where the door is already
+	// heading isn't started again, and the moving sound stops on arrival (DoorMoveDone,
+	// StopMoveSound); SDK 2.3's loop never stopped
+	if (value < 0.0)
+		value = 0.0;
+
 	Vector move = m_vecPosition1 + (value * (m_vecPosition2 - m_vecPosition1));
 
 	Vector delta = move - pev->origin;
-	float speed = delta.Length() * 10;
+	//float speed = delta.Length() * 10;
+	float speed = delta.Length() / 0.1; // move there in 0.1 sec
+	if (speed == 0)
+		return;
 
-	// SDK 2.3's (stock in RC2); halflife-updated clamped value at 0, returned when already moving
-	// to the same point, and stopped the moving sound on arrival (DoorMoveDone, StopMoveSound)
-	if (speed != 0)
-	{
-		// This entity only thinks when it moves, so if it's thinking, it's in the process of moving
-		// play the sound when it starts moving
-		if (pev->nextthink < pev->ltime || pev->nextthink == 0)
-			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	// This entity only thinks when it moves, so if it's thinking, it's in the process of moving
+	// play the sound when it starts moving (not yet thinking)
+	if (pev->nextthink < pev->ltime || pev->nextthink == 0)
+		EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
+	// If we already moving to designated point, return
+	else if (move == m_vecFinalDest)
+		return;
 
-		LinearMove(move, speed);
-	}
+	SetMoveDone(&CMomentaryDoor::DoorMoveDone);
+	LinearMove(move, speed);
+}
+
+//
+// The door has reached needed position.
+//
+void CMomentaryDoor::DoorMoveDone()
+{
+	// Stop sounds at the next think, rather than here as another
+	// Use call might immediately follow the end of this move
+	//This think function will be replaced by LinearMove if that happens.
+	SetThink(&CMomentaryDoor::StopMoveSound);
+	pev->nextthink = pev->ltime + 0.1f;
+}
+
+void CMomentaryDoor::StopMoveSound()
+{
+	STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving));
+	EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseArrived), 1, ATTN_NORM);
+	SetThink(nullptr);
 }

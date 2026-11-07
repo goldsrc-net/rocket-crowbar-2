@@ -247,15 +247,16 @@ void UTIL_PrecacheOtherWeapon(const char* szClassname)
 		{
 			CBasePlayerItem::ItemInfoArray[II.iId] = II;
 
+			const char* weaponName = ((II.iFlags & ITEM_FLAG_EXHAUSTIBLE) != 0) ? STRING(pEntity->pev->classname) : nullptr;
 
 			if (II.pszAmmo1 && '\0' != *II.pszAmmo1)
 			{
-				AddAmmoNameToAmmoRegistry(II.pszAmmo1);
+				AddAmmoNameToAmmoRegistry(II.pszAmmo1, weaponName);
 			}
 
 			if (II.pszAmmo2 && '\0' != *II.pszAmmo2)
 			{
-				AddAmmoNameToAmmoRegistry(II.pszAmmo2);
+				AddAmmoNameToAmmoRegistry(II.pszAmmo2, weaponName);
 			}
 
 			memset(&II, 0, sizeof II);
@@ -868,9 +869,8 @@ void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 		m_iSecondaryAmmoType = pPlayer->GetAmmoIndex(pszAmmo2());
 	}
 
-	// SDK 2.3's AddWeapon (stock in RC2); halflife-updated extracted the ammo in
-	// CBasePlayer::AddPlayerItem, after the weapon joined the player's list
-	ExtractAmmo(this);
+	// SDK 2.3 ends with AddWeapon, which extracts the ammo here. halflife-updated's fix, kept:
+	// CBasePlayer::AddPlayerItem extracts it once the weapon is in the player's list
 }
 
 bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
@@ -932,9 +932,9 @@ bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
 // orig 0xfaf30 (as SDK 2.3; its slot is named RC2VW2 in names-rc2-slots.tsv)
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 {
-	// SDK 2.3's (stock in RC2); halflife-updated didn't skip the predicting client while
-	// m_ForceSendAnimations was set (its weapon switches set it around Deploy)
-	const bool skiplocal = UseDecrement() != false;
+	// halflife-updated's fix, kept: not skipping the predicting client while m_ForceSendAnimations
+	// is set (the weapon switches set it around Deploy, halflife-updated #154)
+	const bool skiplocal = !m_ForceSendAnimations && UseDecrement() != false;
 
 	m_pPlayer->pev->weaponanim = iAnim;
 
@@ -1012,20 +1012,43 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount, char* szName, int iMax)
 // (does it have ammo loaded? do I have any ammo for the
 // weapon?, etc)
 //=========================================================
-// SDK 2.3's (stock in RC2); halflife-updated also counted a WEAPON_NOCLIP weapon, secondary
-// ammo and CanDeploy() as useable.
+// halflife-updated's fix, kept: a weapon with secondary ammo left, or one CanDeploy() allows, is
+// useable too, so the MP5 isn't switched away from with grenades left (halflife #3001) and the
+// auto-switch picks a weapon it can deploy (halflife-updated #160)
 bool CBasePlayerWeapon::IsUseable()
 {
-	if (m_iClip <= 0)
+	if (m_iClip > 0)
 	{
-		if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] <= 0 && iMaxAmmo1() != -1)
+		return true;
+	}
+
+	//Player has unlimited ammo for this weapon or does not use magazines
+	if (iMaxAmmo1() == WEAPON_NOCLIP)
+	{
+		return true;
+	}
+
+	if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0)
+	{
+		return true;
+	}
+
+	if (pszAmmo2())
+	{
+		//Player has unlimited ammo for this weapon or does not use magazines
+		if (iMaxAmmo2() == WEAPON_NOCLIP)
 		{
-			// clip is empty (or nonexistant) and the player has no more ammo of this type.
-			return false;
+			return true;
+		}
+
+		if (m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] > 0)
+		{
+			return true;
 		}
 	}
 
-	return true;
+	// clip is empty (or nonexistant) and the player has no more ammo of this type.
+	return CanDeploy();
 }
 
 // orig 0xfb1b0 (as SDK 2.3; HLU's m_flLastFireTime reset kept)
@@ -1051,9 +1074,9 @@ bool CBasePlayerWeapon::PlayEmptySound()
 {
 	if (m_iPlayEmptySound)
 	{
-		// SDK 2.3's (stock in RC2); halflife-updated used EMIT_SOUND_PREDICTED, which leaves out the
-		// predicting shooter (his client plays its own).
-		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM);
+		// halflife-updated's fix, kept: the predicting shooter's client plays its own, so he isn't
+		// sent it twice, and a shooter with cl_lw 0 still gets it (halflife #3231)
+		EMIT_SOUND_PREDICTED(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM, 0, PITCH_NORM);
 		m_iPlayEmptySound = false;
 		return false;
 	}
@@ -1216,19 +1239,15 @@ bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon)
 //=========================================================
 // RetireWeapon - no more ammo for this gun, put it away.
 //=========================================================
-// SDK 2.3's (stock in RC2); halflife-updated put this off to a think 0.01 s on (DoRetireWeapon),
-// which also unequipped the weapon when there was nothing to switch to.
+// halflife-updated's fix, kept: the switch waits for a think 0.01 s on (DoRetireWeapon), which also
+// unequips the weapon when there is nothing to switch to, so the auto-switch plays the right
+// animation (halflife-updated #160)
 void CBasePlayerWeapon::RetireWeapon()
 {
-	// first, no viewmodel at all.
-	m_pPlayer->pev->viewmodel = iStringNull;
-	m_pPlayer->pev->weaponmodel = iStringNull;
-	//m_pPlayer->pev->viewmodelindex = NULL;
-
-	g_pGameRules->GetNextBestWeapon(m_pPlayer, this);
+	SetThink(&CBasePlayerWeapon::CallDoRetireWeapon);
+	pev->nextthink = gpGlobals->time + 0.01f;
 }
 
-// halflife-updated's; nothing calls it now that RetireWeapon is SDK 2.3's again.
 void CBasePlayerWeapon::DoRetireWeapon()
 {
 	if (!m_pPlayer || m_pPlayer->m_pActiveItem != this)

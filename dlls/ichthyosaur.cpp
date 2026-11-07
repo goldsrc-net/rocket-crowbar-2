@@ -111,6 +111,9 @@ public:
 
 	float m_flNextAlert;
 
+	float m_flLastPitchTime; // Last frame time pitch was changed
+	float m_flLastZYawTime;	 // Last frame time Z was changed when yaw was changed
+
 	static const char* pIdleSounds[];
 	static const char* pAlertSounds[];
 	static const char* pAttackSounds[];
@@ -596,7 +599,14 @@ Schedule_t* CIchthyosaur::GetScheduleOfType(int Type)
 	case SCHED_FAIL:
 		return slSwimAgitated;
 	case SCHED_DIE:
-		// SDK 2.3's (stock in RC2); halflife-updated went straight to slFloat when already dead.
+		// halflife-updated's fix, kept: an ichthyosaur that is already dead floats instead of
+		// starting its death sequence again (halflife-updated #152)
+		if (pev->deadflag == DEAD_DEAD)
+		{
+			//Already dead, immediately switch to float.
+			return slFloat;
+		}
+
 		return slTwitchDie;
 	case SCHED_CHASE_ENEMY:
 		AttackSound();
@@ -838,6 +848,13 @@ float CIchthyosaur::ChangePitch(int pitchSpeed)
 		float diff = FlPitchDiff();
 		float target = 0;
 
+		// halflife-updated's fix, kept: the step comes from the time since the last call, not a fixed
+		// 0.1 s whatever the call rate (halflife #2458)
+		if (m_flLastPitchTime == 0.0f)
+		{
+			m_flLastPitchTime = gpGlobals->time - gpGlobals->frametime;
+		}
+
 		if (m_IdealActivity != GetStoppedActivity())
 		{
 			if (diff < -20)
@@ -846,8 +863,15 @@ float CIchthyosaur::ChangePitch(int pitchSpeed)
 				target = -45;
 		}
 
-		// SDK 2.3's (stock in RC2); halflife-updated scaled the step by the time since the last call.
-		pev->angles.x = UTIL_Approach(target, pev->angles.x, 220.0 * 0.1);
+		float delta = gpGlobals->time - m_flLastPitchTime;
+		m_flLastPitchTime = gpGlobals->time;
+
+		// Clamp delta like the engine does with frametime
+		if (delta > 0.25f)
+			delta = 0.25f;
+
+		float speed = 220.0f * delta;
+		pev->angles.x = UTIL_Approach(target, pev->angles.x, speed);
 	}
 	return 0;
 }
@@ -859,6 +883,12 @@ float CIchthyosaur::ChangeYaw(int yawSpeed)
 		float diff = FlYawDiff();
 		float target = 0;
 
+		// halflife-updated's fix, kept: as ChangePitch, for the roll
+		if (m_flLastZYawTime == 0.0f)
+		{
+			m_flLastZYawTime = gpGlobals->time - gpGlobals->frametime;
+		}
+
 		if (m_IdealActivity != GetStoppedActivity())
 		{
 			if (diff < -20)
@@ -867,8 +897,15 @@ float CIchthyosaur::ChangeYaw(int yawSpeed)
 				target = -20;
 		}
 
-		// SDK 2.3's (stock in RC2); halflife-updated scaled the step by the time since the last call.
-		pev->angles.z = UTIL_Approach(target, pev->angles.z, 220.0 * 0.1);
+		float delta = gpGlobals->time - m_flLastZYawTime;
+		m_flLastZYawTime = gpGlobals->time;
+
+		// Clamp delta like the engine does with frametime
+		if (delta > 0.25f)
+			delta = 0.25f;
+
+		float speed = 220.f * delta;
+		pev->angles.z = UTIL_Approach(target, pev->angles.z, speed);
 	}
 	return CFlyingMonster::ChangeYaw(yawSpeed);
 }

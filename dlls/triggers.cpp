@@ -2445,9 +2445,10 @@ void CTriggerCamera::FollowTarget()
 	if (dy > 180)
 		dy = dy - 360;
 
-	// SDK 2.3's (stock in RC2); halflife-updated used a fixed 0.01 for the frame time.
-	pev->avelocity.x = dx * 40 * gpGlobals->frametime;
-	pev->avelocity.y = dy * 40 * gpGlobals->frametime;
+	// halflife-updated's fix, kept: avelocity is per second and the engine applies the frame time,
+	// so SDK 2.3's * frametime applied it twice and the turn rate followed the server's frame rate
+	pev->avelocity.x = dx * 40 * 0.01;
+	pev->avelocity.y = dy * 40 * 0.01;
 
 
 	if (!(FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)))
