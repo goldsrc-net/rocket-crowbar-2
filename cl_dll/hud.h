@@ -241,6 +241,9 @@ struct extra_player_info_t
 	bool dead;	  // UNUSED currently, spectator UI would like this
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
+	// c5 needs: RC2's damage score (ScoreInfo with bit 7 of the client byte), at +4 of its
+	// 0x1c-byte struct, over SDK 2.3's playerclass and health // name ours
+	float dmgscore;
 };
 
 struct team_info_t
@@ -255,6 +258,9 @@ struct team_info_t
 	bool already_drawn;
 	bool scores_overriden;
 	int teamnumber;
+	// c5 needs: the team's damage score (the sum of its players'), at +0x14 of RC2's
+	// 0x2c-byte struct // name ours
+	float dmgscore;
 };
 
 #include "player_info.h"

@@ -52,6 +52,9 @@ class CTransparentPanel;
 class CClassMenuPanel;
 class CTeamMenuPanel;
 class TeamFortressViewport;
+class ServerBrowser;
+class CDebugPanel;
+class CVoteMenuPanel;
 
 char* GetVGUITGAName(const char *pszName);
 BitmapTGA *LoadTGAForRes(const char* pImageName);
@@ -544,16 +547,19 @@ public:
 	TeamFortressViewport(int x,int y,int wide,int tall);
 	void Initialize( void );
 
-	int		CreateCommandMenu( const char * menuFile, bool direction, int yOffset, bool flatDesign, float flButtonSizeX, float flButtonSizeY, int xOffset );
+	// RC2's are SDK 2.1's: one command menu, read from commandmenu.txt
+	void	CreateCommandMenu( void );
 	void	CreateScoreBoard( void );
-	CommandButton * CreateCustomButton( char *pButtonText, char * pButtonName, int  iYOffset );
-	CCommandMenu *	CreateDisguiseSubmenu( CommandButton *pButton, CCommandMenu *pParentMenu, const char *commandText, int iYOffset, int iXOffset = 0 );
+	void	CreateServerBrowser( void );
+	CommandButton * CreateCustomButton( char *pButtonText, char * pButtonName );
+	CCommandMenu *	CreateDisguiseSubmenu( CommandButton *pButton, CCommandMenu *pParentMenu, const char *commandText );
 
 	void UpdateCursorState( void );
-	void UpdateCommandMenu(int menuIndex);
+	void UpdateCommandMenu( void );
 	void UpdateOnPlayerInfo( void );
 	void UpdateHighlights( void );
-	void UpdateSpectatorPanel( void );
+	void UpdateSpectatorPanel( void );	// halflife-updated's; RC2 has UpdateSpectatorMenu instead
+	void UpdateSpectatorMenu( void );
 
 	bool KeyInput( bool down, int keynum, const char *pszCurrentBinding );
 	void InputPlayerSpecial( void );
@@ -576,9 +582,11 @@ public:
 	void HideVGUIMenu( void );
 	void HideTopMenu( void );
 
+	void ToggleServerBrowser( void );
+
 	CMenuPanel* CreateTextWindow( int iTextToShow );
 
-	CCommandMenu *CreateSubMenu( CommandButton *pButton, CCommandMenu *pParentMenu, int iYOffset, int iXOffset = 0 );
+	CCommandMenu *CreateSubMenu( CommandButton *pButton, CCommandMenu *pParentMenu );
 
 	// Data Handlers
 	int GetValidClasses(int iTeam) { return m_iValidClasses[iTeam]; };
@@ -607,6 +615,17 @@ public:
 	bool MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf );
 	bool MsgFunc_SpecFade( const char *pszName, int iSize, void *pbuf );	
 	bool MsgFunc_ResetFade( const char *pszName, int iSize, void *pbuf );	
+	// Rocket Crowbar 2's
+	bool MsgFunc_AttrConf( const char *pszName, int iSize, void *pbuf );
+	bool MsgFunc_VoteBegin( const char *pszName, int iSize, void *pbuf );
+	bool MsgFunc_VoteUpdate( const char *pszName, int iSize, void *pbuf );
+	// What hud.cpp's VGUIDebugOn, DBGCounts, DBGEntInfo and InitHUD handlers do with the debug
+	// panel and the vote box (the original has the code inline there; these keep it in one
+	// place, with c4's names)
+	void SetDebugPanelVisible( bool bVisible );
+	bool MsgFunc_DBGCounts( const char *pszName, int iSize, void *pbuf );
+	bool MsgFunc_DBGEntInfo( const char *pszName, int iSize, void *pbuf );
+	void HideDebugPanels( void );
 
 	// Input
 	bool SlotInput( int iSlot );
@@ -628,8 +647,23 @@ public:
 	int						m_PlayerMenu; // a list of current player
 	CClassMenuPanel	*m_pClassMenu;
 	ScorePanel		*m_pScoreBoard;
-	SpectatorPanel *		m_pSpectatorPanel;
+	SpectatorPanel *		m_pSpectatorPanel;	// halflife-updated's; RC2 never creates one, so it stays NULL
 	char			m_szServerName[ MAX_SERVERNAME_LENGTH ];
+
+	// Rocket Crowbar 2's (SDK 2.1's spectator "menu" and server browser, and its own panels). Names
+	// ours except the SDK 2.1 ones; the original's offsets in the 0xb68-byte object.
+	ServerBrowser		*m_pServerBrowser;		// 0x880
+	CTransparentPanel	*m_pSpectatorMenu;		// 0x884
+	Label				*m_pSpectatorLabel;		// 0x888
+	Label				*m_pSpectatorHelpLabel;	// 0x88c // name ours
+	CVoteMenuPanel		*m_pVoteMenu;			// 0x894 // name ours (menu 10)
+	CDebugPanel			*m_pDebugPanel;			// 0xa48 // name ours (VGUIDebugOn, DBGCounts, DBGEntInfo)
+	CTransparentPanel	*m_pVotePanel;			// 0xa4c // name ours: the vote status box, top right
+	Label				*m_pVoteLabel;			// 0xa50 // name ours
+	char				m_szVoteText[256];		// 0xa54 // name ours: what the vote is about
+	Label				*m_pPlayerIDLabel;		// 0xb54 // name ours: the name of the player under the crosshair
+	int					m_iPlayerIDColor[3];	// 0xb58 // name ours: Briefing Text's colour
+	float				*m_pPlayerIDTeamColor;	// 0xb64 // name ours: the player's team colour (GetClientColor), or NULL
 };
 
 //============================================================
@@ -656,6 +690,8 @@ public:
 		m_iCloseVGUIMenu = true;
 	}
 
+	// orig client 0xd4b70, orig client 0xe6d90: client.dll was linked incrementally, which keeps
+	// a copy of an inline function per object file (the debug panel's and the viewport's)
 	virtual void actionPerformed(Panel* panel)
 	{
 		gEngfuncs.pfnClientCmd(m_pszCommand);
@@ -1142,6 +1178,7 @@ public:
 		sprintf( m_szMapName, "maps/%s.bsp", pMapName );
 	}
 
+	// orig client 0xe6f74: the strcmp half of this at 0xe6f60, which Ghidra split off
 	virtual bool IsNotValid()
 	{
 		const char *level = gEngfuncs.pfnGetLevelName();

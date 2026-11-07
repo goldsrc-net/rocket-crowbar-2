@@ -151,4 +151,13 @@ private:
 	int m_lastSecondaryObject;
 
 	cameraWayPoint_t m_CamPath[MAX_CAM_WAYPOINTS];
+public:
+	// c5 needs: the observer mode HLTV spectators see (gHUD+0x73c in client.dll), read by the
+	// viewport's spectator menu; named after SetModes' iMainMode // name ours
+	int m_iMainMode;
+	// c5 needs: the inset view's mode (gHUD+0x740), the player followed in eye view (gHUD+0x1078) and
+	// the overview camera's angles (gHUD+0x108c), for the spectator view // names ours
+	int m_iInsetMode;
+	int m_iObserverTarget;
+	Vector m_vecMapAngles;
 };

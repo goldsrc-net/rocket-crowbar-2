@@ -55,17 +55,34 @@ public:
 
 // grid size is marked out for 640x480 screen
 
-SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
+// Rocket Crowbar 2: two layouts, picked by the server's score mode (ScoreMode, g_iScoreMode):
+// frags and deaths, or the damage score in a wider column
+SBColumnInfo g_ColumnInfoFrags[NUM_COLUMNS] = // name ours
 	{
 		{NULL, 24, Label::a_east},	// tracker column
-		{NULL, 140, Label::a_east}, // name
-		{NULL, 56, Label::a_east},	// class
+		{NULL, 196, Label::a_east}, // name
 		{"#SCORE", 40, Label::a_east},
 		{"#DEATHS", 46, Label::a_east},
 		{"#LATENCY", 46, Label::a_east},
 		{"#VOICE", 40, Label::a_east},
 		{NULL, 2, Label::a_east}, // blank column to take up the slack
 };
+
+SBColumnInfo g_ColumnInfoDamage[NUM_COLUMNS] = // name ours
+	{
+		{NULL, 24, Label::a_east},	// tracker column
+		{NULL, 196, Label::a_east}, // name
+		{"#SCORE", 84, Label::a_east},
+		{NULL, 2, Label::a_east},
+		{"#LATENCY", 46, Label::a_east},
+		{"#VOICE", 40, Label::a_east},
+		{NULL, 2, Label::a_east}, // blank column to take up the slack
+};
+
+SBColumnInfo* g_ColumnInfo = g_ColumnInfoFrags; // name ours
+
+// 0 frags, otherwise the damage score (ScoreMode, hud.cpp, package c3)
+extern int g_iScoreMode; // name ours
 
 
 #define TEAM_NO 0
@@ -91,8 +108,13 @@ void ScorePanel::HitTestPanel::internalMousePressed(MouseCode code)
 //-----------------------------------------------------------------------------
 // Purpose: Create the ScoreBoard panel
 //-----------------------------------------------------------------------------
+// orig client 0xdb8f0. SDK 2.3's with RC2's columns for the current score mode, and no close
+// button (that's for halflife-updated's spectator panel).
 ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tall)
 {
+	g_ColumnInfo = (0 != g_iScoreMode) ? g_ColumnInfoDamage : g_ColumnInfoFrags;
+	m_iScoreMode = g_iScoreMode;
+
 	CSchemeManager* pSchemes = gViewPort->GetSchemeManager();
 	SchemeHandle_t hTitleScheme = pSchemes->getSchemeHandle("Scoreboard Title Text");
 	SchemeHandle_t hSmallScheme = pSchemes->getSchemeHandle("Scoreboard Small Text");
@@ -222,15 +244,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	m_HitTestPanel.setBounds(0, 0, wide, tall);
 	m_HitTestPanel.addInputSignal(this);
 
-	m_pCloseButton = new CommandButton("x", wide - XRES(12 + 4), YRES(2), XRES(12), YRES(12));
-	m_pCloseButton->setParent(this);
-	m_pCloseButton->addActionSignal(new CMenuHandler_StringCommandWatch("-showscores", true));
-	m_pCloseButton->setBgColor(0, 0, 0, 255);
-	m_pCloseButton->setFgColor(255, 255, 255, 0);
-	m_pCloseButton->setFont(tfont);
-	m_pCloseButton->setBoundKey((char)255);
-	m_pCloseButton->setContentAlignment(Label::a_center);
-
+	m_pCloseButton = NULL;
 
 	Initialize();
 }
@@ -239,6 +253,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 //-----------------------------------------------------------------------------
 // Purpose: Called each time a new level is started.
 //-----------------------------------------------------------------------------
+// orig client 0xdc250
 void ScorePanel::Initialize()
 {
 	// Clear out scoreboard data
@@ -258,6 +273,7 @@ bool HACK_GetPlayerUniqueID(int iPlayer, char playerID[16])
 //-----------------------------------------------------------------------------
 // Purpose: Recalculate the internal scoreboard data
 //-----------------------------------------------------------------------------
+// orig client 0xdc2a0. No close button.
 void ScorePanel::Update()
 {
 	int i;
@@ -294,20 +310,13 @@ void ScorePanel::Update()
 	m_PlayerList.SetScrollRange(m_iRows);
 
 	FillGrid();
-
-	if (gViewPort->m_pSpectatorPanel->m_menuVisible)
-	{
-		m_pCloseButton->setVisible(true);
-	}
-	else
-	{
-		m_pCloseButton->setVisible(false);
-	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Sort all the teams
 //-----------------------------------------------------------------------------
+// orig client 0xdc380. RC2 sums the damage score too, and in the damage score mode ranks teams by
+// it first.
 void ScorePanel::SortTeams()
 {
 	// clear out team scores
@@ -315,7 +324,10 @@ void ScorePanel::SortTeams()
 	for (i = 1; i <= m_iNumTeams; i++)
 	{
 		if (!g_TeamInfo[i].scores_overriden)
+		{
 			g_TeamInfo[i].frags = g_TeamInfo[i].deaths = 0;
+			g_TeamInfo[i].dmgscore = 0;
+		}
 		g_TeamInfo[i].ping = g_TeamInfo[i].packetloss = 0;
 	}
 
@@ -342,6 +354,7 @@ void ScorePanel::SortTeams()
 		{
 			g_TeamInfo[j].frags += g_PlayerExtraInfo[i].frags;
 			g_TeamInfo[j].deaths += g_PlayerExtraInfo[i].deaths;
+			g_TeamInfo[j].dmgscore += g_PlayerExtraInfo[i].dmgscore;
 		}
 
 		g_TeamInfo[j].ping += g_PlayerInfoList[i].ping;
@@ -373,21 +386,27 @@ void ScorePanel::SortTeams()
 	{
 		int highest_frags = -99999;
 		int lowest_deaths = 99999;
+		float highest_dmg = -1e16;
 		int best_team = 0;
 
 		for (i = 1; i <= m_iNumTeams; i++)
 		{
-			if (g_TeamInfo[i].players < 1)
+			if (g_TeamInfo[i].players < 1 || g_TeamInfo[i].already_drawn)
 				continue;
 
-			if (!g_TeamInfo[i].already_drawn && g_TeamInfo[i].frags >= highest_frags)
+			team_info_t* t = &g_TeamInfo[i];
+			bool bBetter;
+			if (0 == g_iScoreMode)
+				bBetter = t->frags >= highest_frags && (t->frags > highest_frags || t->deaths < lowest_deaths || t->dmgscore > highest_dmg);
+			else
+				bBetter = t->dmgscore >= highest_dmg && (t->dmgscore > highest_dmg || t->frags > highest_frags || t->deaths < lowest_deaths);
+
+			if (bBetter)
 			{
-				if (g_TeamInfo[i].frags > highest_frags || g_TeamInfo[i].deaths < lowest_deaths)
-				{
-					best_team = i;
-					lowest_deaths = g_TeamInfo[i].deaths;
-					highest_frags = g_TeamInfo[i].frags;
-				}
+				best_team = i;
+				highest_dmg = t->dmgscore;
+				lowest_deaths = t->deaths;
+				highest_frags = t->frags;
 			}
 		}
 
@@ -412,6 +431,8 @@ void ScorePanel::SortTeams()
 //-----------------------------------------------------------------------------
 // Purpose: Sort a list of players
 //-----------------------------------------------------------------------------
+// orig client 0xdc6f0. As SortTeams: frags, fewest deaths, then the damage score, or in the
+// damage score mode the damage score first.
 void ScorePanel::SortPlayers(int iTeam, char* team)
 {
 	bool bCreatedTeam = false;
@@ -422,24 +443,35 @@ void ScorePanel::SortPlayers(int iTeam, char* team)
 		// Find the top ranking player
 		int highest_frags = -99999;
 		int lowest_deaths = 99999;
+		float highest_dmg = -1e16;
 		int best_player;
 		best_player = 0;
 
 		for (int i = 1; i < MAX_PLAYERS_HUD; i++)
 		{
-			if (m_bHasBeenSorted[i] == false && g_PlayerInfoList[i].name && g_PlayerExtraInfo[i].frags >= highest_frags)
-			{
-				cl_entity_t* ent = gEngfuncs.GetEntityByIndex(i);
+			if (m_bHasBeenSorted[i] || !g_PlayerInfoList[i].name)
+				continue;
 
-				if (ent && !(team && stricmp(g_PlayerExtraInfo[i].teamname, team)))
+			extra_player_info_t* pl_info = &g_PlayerExtraInfo[i];
+			if (0 == g_iScoreMode ? pl_info->frags < highest_frags : pl_info->dmgscore < highest_dmg)
+				continue;
+
+			cl_entity_t* ent = gEngfuncs.GetEntityByIndex(i);
+
+			if (ent && !(team && stricmp(g_PlayerExtraInfo[i].teamname, team)))
+			{
+				bool bBetter;
+				if (0 == g_iScoreMode)
+					bBetter = pl_info->frags > highest_frags || pl_info->deaths < lowest_deaths || pl_info->dmgscore > highest_dmg;
+				else
+					bBetter = pl_info->dmgscore > highest_dmg || pl_info->frags > highest_frags || pl_info->deaths < lowest_deaths;
+
+				if (bBetter)
 				{
-					extra_player_info_t* pl_info = &g_PlayerExtraInfo[i];
-					if (pl_info->frags > highest_frags || pl_info->deaths < lowest_deaths)
-					{
-						best_player = i;
-						lowest_deaths = pl_info->deaths;
-						highest_frags = pl_info->frags;
-					}
+					best_player = i;
+					highest_dmg = pl_info->dmgscore;
+					lowest_deaths = pl_info->deaths;
+					highest_frags = pl_info->frags;
 				}
 			}
 		}
@@ -471,6 +503,7 @@ void ScorePanel::SortPlayers(int iTeam, char* team)
 //-----------------------------------------------------------------------------
 // Purpose: Recalculate the existing teams in the match
 //-----------------------------------------------------------------------------
+// orig client 0xdc920
 void ScorePanel::RebuildTeams()
 {
 	// clear out player counts from teams
@@ -531,6 +564,9 @@ void ScorePanel::RebuildTeams()
 }
 
 
+// orig client 0xdcae0. SDK 2.3's, with RC2's columns: when the score mode has changed since the
+// columns were laid out, they are laid out again (as the constructor does); the score column
+// shows the damage score ("%.2f") in the damage score mode, and deaths only in the frag mode.
 void ScorePanel::FillGrid()
 {
 	CSchemeManager* pSchemes = gViewPort->GetSchemeManager();
@@ -542,8 +578,72 @@ void ScorePanel::FillGrid()
 	Font* tfont = pSchemes->getFont(hTitleScheme);
 	Font* smallfont = pSchemes->getFont(hSmallScheme);
 
-	// update highlight position
 	int x, y;
+	int row;
+
+	if (m_iScoreMode != g_iScoreMode)
+	{
+		g_ColumnInfo = (0 != g_iScoreMode) ? g_ColumnInfoDamage : g_ColumnInfoFrags;
+		m_iScoreMode = g_iScoreMode;
+
+		for (int i = 0; i < NUM_COLUMNS; i++)
+		{
+			if (!g_ColumnInfo[i].m_pTitle)
+				m_HeaderLabels[i].setText("");
+			else if (g_ColumnInfo[i].m_pTitle[0] == '#')
+				m_HeaderLabels[i].setText(CHudTextMessage::BufferedLocaliseTextString(g_ColumnInfo[i].m_pTitle));
+			else
+				m_HeaderLabels[i].setText(g_ColumnInfo[i].m_pTitle);
+
+			int xwide = g_ColumnInfo[i].m_Width;
+			if (ScreenWidth >= 640)
+			{
+				xwide = XRES(xwide);
+			}
+			else if (ScreenWidth == 400)
+			{
+				// hack to make 400x300 resolution scoreboard fit
+				if (i == 1)
+				{
+					// reduces size of player name cell
+					xwide -= 28;
+				}
+				else if (i == 0)
+				{
+					// tracker icon cell
+					xwide -= 8;
+				}
+			}
+
+			m_HeaderGrid.SetColumnWidth(i, xwide);
+			m_HeaderGrid.SetEntry(i, 0, &m_HeaderLabels[i]);
+
+			m_HeaderLabels[i].setBgColor(0, 0, 0, 255);
+			m_HeaderLabels[i].setBgColor(0, 0, 0, 255);
+			m_HeaderLabels[i].setFgColor(Scheme::sc_primary1);
+			m_HeaderLabels[i].setFont(smallfont);
+			m_HeaderLabels[i].setContentAlignment(g_ColumnInfo[i].m_Alignment);
+
+			int yres = 12;
+			if (ScreenHeight >= 480)
+			{
+				yres = YRES(yres);
+			}
+			m_HeaderLabels[i].setSize(50, yres);
+		}
+
+		for (row = 0; row < NUM_ROWS; row++)
+		{
+			CGrid* pGridRow = &m_PlayerGrids[row];
+
+			pGridRow->CopyColumnWidths(&m_HeaderGrid);
+			pGridRow->AutoSetRowHeights();
+			pGridRow->setSize(PanelWidth(pGridRow), pGridRow->CalcDrawHeight());
+			pGridRow->RepositionContents();
+		}
+	}
+
+	// update highlight position
 	getApp()->getCursorPos(x, y);
 	cursorMoved(x, y, this);
 
@@ -553,8 +653,6 @@ void ScorePanel::FillGrid()
 		m_iHighlightRow = -1;
 	}
 
-	bool bNextRowIsGap = false;
-	int row;
 	for (row = 0; row < NUM_ROWS; row++)
 	{
 		CGrid* pGridRow = &m_PlayerGrids[row];
@@ -566,13 +664,6 @@ void ScorePanel::FillGrid()
 				m_PlayerEntries[col][row].setVisible(false);
 
 			continue;
-		}
-
-		bool bRowIsGap = false;
-		if (bNextRowIsGap)
-		{
-			bNextRowIsGap = false;
-			bRowIsGap = true;
 		}
 
 		for (int col = 0; col < NUM_COLUMNS; col++)
@@ -680,13 +771,13 @@ void ScorePanel::FillGrid()
 			}
 
 			// Align
-			if (col == COLUMN_NAME || col == COLUMN_CLASS)
-			{
-				pLabel->setContentAlignment(vgui::Label::a_west);
-			}
-			else if (col == COLUMN_TRACKER)
+			if (col == COLUMN_TRACKER)
 			{
 				pLabel->setContentAlignment(vgui::Label::a_center);
+			}
+			else if (col == COLUMN_NAME)
+			{
+				pLabel->setContentAlignment(vgui::Label::a_west);
 			}
 			else
 			{
@@ -704,11 +795,11 @@ void ScorePanel::FillGrid()
 				case COLUMN_NAME:
 					if (m_iIsATeam[row] == TEAM_SPECTATORS)
 					{
-						sprintf(sz2, "%s", CHudTextMessage::BufferedLocaliseTextString("#Spectators"));
+						sprintf(sz2, CHudTextMessage::BufferedLocaliseTextString("#Spectators"));
 					}
 					else
 					{
-						sprintf(sz2, "%s", gViewPort->GetTeamName(team_info->teamnumber));
+						sprintf(sz2, gViewPort->GetTeamName(team_info->teamnumber));
 					}
 
 					strcpy(sz, sz2);
@@ -729,16 +820,17 @@ void ScorePanel::FillGrid()
 						pLabel->setFont2(smallfont);
 					}
 					break;
-				case COLUMN_VOICE:
-					break;
-				case COLUMN_CLASS:
-					break;
 				case COLUMN_KILLS:
 					if (m_iIsATeam[row] == TEAM_YES)
-						sprintf(sz, "%d", team_info->frags);
+					{
+						if (0 != g_iScoreMode)
+							sprintf(sz, "%.2f", team_info->dmgscore);
+						else
+							sprintf(sz, "%d", team_info->frags);
+					}
 					break;
 				case COLUMN_DEATHS:
-					if (m_iIsATeam[row] == TEAM_YES)
+					if (m_iIsATeam[row] == TEAM_YES && 0 == g_iScoreMode)
 						sprintf(sz, "%d", team_info->deaths);
 					break;
 				case COLUMN_LATENCY:
@@ -751,84 +843,30 @@ void ScorePanel::FillGrid()
 			}
 			else
 			{
-				bool bShowClass = false;
-
 				switch (col)
 				{
 				case COLUMN_NAME:
-					/*
-					if (g_pTrackerUser)
-					{
-						int playerSlot = m_iSortedRows[row];
-						int trackerID = gEngfuncs.GetTrackerIDForPlayer(playerSlot);
-						const char *trackerName = g_pTrackerUser->GetUserName(trackerID);
-						if (trackerName && *trackerName)
-						{
-							sprintf(sz, "   (%s)", trackerName);
-							pLabel->setText2(sz);
-						}
-					}
-					*/
 					sprintf(sz, "%s  ", pl_info->name);
 					break;
-				case COLUMN_VOICE:
-					sz[0] = 0;
-					GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
-					break;
-				case COLUMN_CLASS:
-					// No class for other team's members (unless allied or spectator)
-					if (gViewPort && EV_TFC_IsAllyTeam(g_iTeamNumber, g_PlayerExtraInfo[m_iSortedRows[row]].teamnumber))
-						bShowClass = true;
-					// Don't show classes if this client hasnt picked a team yet
-					if (g_iTeamNumber == 0)
-						bShowClass = false;
-
-					if (bShowClass)
-					{
-						// Only print Civilian if this team are all civilians
-						bool bNoClass = false;
-						if (g_PlayerExtraInfo[m_iSortedRows[row]].playerclass == 0)
-						{
-							if (gViewPort->GetValidClasses(g_PlayerExtraInfo[m_iSortedRows[row]].teamnumber) != -1)
-								bNoClass = true;
-						}
-
-						if (bNoClass)
-							sz[0] = '\0';
-						else
-							sprintf(sz, "%s", CHudTextMessage::BufferedLocaliseTextString(sLocalisedClasses[g_PlayerExtraInfo[m_iSortedRows[row]].playerclass]));
-					}
-					else
-					{
-						strcpy(sz, "");
-					}
-					break;
-
-				case COLUMN_TRACKER:
-					/*
-					if (g_pTrackerUser)
-					{
-						int playerSlot = m_iSortedRows[row];
-						int trackerID = gEngfuncs.GetTrackerIDForPlayer(playerSlot);
-
-						if (g_pTrackerUser->IsFriend(trackerID) && trackerID != g_pTrackerUser->GetTrackerID())
-						{
-							pLabel->setImage(m_pTrackerIcon);
-							pLabel->setFgColorAsImageColor(false);
-							m_pTrackerIcon->setColor(Color(255, 255, 255, 0));
-						}
-					}
-					*/
-					break;
-
 				case COLUMN_KILLS:
-					sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].frags);
+					if (0 != g_iScoreMode)
+						sprintf(sz, "%.2f", g_PlayerExtraInfo[m_iSortedRows[row]].dmgscore);
+					else
+						sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].frags);
 					break;
 				case COLUMN_DEATHS:
-					sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].deaths);
+					if (0 == g_iScoreMode)
+						sprintf(sz, "%d", g_PlayerExtraInfo[m_iSortedRows[row]].deaths);
 					break;
 				case COLUMN_LATENCY:
 					sprintf(sz, "%d", g_PlayerInfoList[m_iSortedRows[row]].ping);
+					break;
+				case COLUMN_VOICE:
+					// in HLTV mode allow spectator to turn on/off commentator voice
+					if (0 == pl_info->thisplayer || 0 != gEngfuncs.IsSpectateOnly())
+					{
+						GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
+					}
 					break;
 				default:
 					break;
@@ -857,6 +895,7 @@ void ScorePanel::FillGrid()
 //-----------------------------------------------------------------------------
 // Purpose: Setup highlights for player names in scoreboard
 //-----------------------------------------------------------------------------
+// orig client 0xdd8a0
 void ScorePanel::DeathMsg(int killer, int victim)
 {
 	// if we were the one killed,  or the world killed us, set the scoreboard to indicate suicide
@@ -871,6 +910,7 @@ void ScorePanel::DeathMsg(int killer, int victim)
 }
 
 
+// orig client 0xdd920
 void ScorePanel::Open()
 {
 	RebuildTeams();
@@ -954,6 +994,7 @@ void ScorePanel::cursorMoved(int x, int y, Panel* panel)
 // Input  : row -
 //			col -
 //-----------------------------------------------------------------------------
+// orig client 0xddc00. RC2 highlights a player only when it has their voice enabled.
 void ScorePanel::MouseOverCell(int row, int col)
 {
 	CLabelHeader* label = &m_PlayerEntries[col][row];
@@ -980,13 +1021,17 @@ void ScorePanel::MouseOverCell(int row, int col)
 		return;
 
 	// setup the new highlight
-	m_pCurrentHighlightLabel = label;
-	m_iHighlightRow = row;
+	if (GetClientVoiceMgr()->IsPlayerVoiceEnabled(m_iSortedRows[row]))
+	{
+		m_pCurrentHighlightLabel = label;
+		m_iHighlightRow = row;
+	}
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Label paint functions - take into account current highligh status
 //-----------------------------------------------------------------------------
+// orig client 0xddcf0
 void CLabelHeader::paintBackground()
 {
 	Color oldBg;
@@ -1006,6 +1051,7 @@ void CLabelHeader::paintBackground()
 //-----------------------------------------------------------------------------
 // Purpose: Label paint functions - take into account current highligh status
 //-----------------------------------------------------------------------------
+// orig client 0xddd90. The image takes its colour in setFgColor, not here.
 void CLabelHeader::paint()
 {
 	Color oldFg;
@@ -1031,13 +1077,6 @@ void CLabelHeader::paint()
 	// get size of the panel and the image
 	if (_image)
 	{
-		Color imgColor;
-		getFgColor(imgColor);
-		if (_useFgColorAsImageColor)
-		{
-			_image->setColor(imgColor);
-		}
-
 		_image->getSize(iwide, itall);
 		calcAlignment(iwide, itall, x, y);
 		_image->setPos(x, y);
@@ -1131,3 +1170,13 @@ void CLabelHeader::calcAlignment(int iwide, int itall, int& x, int& y)
 	x += _offset[0];
 	y += _offset[1];
 }
+
+
+// TEMP STUB (c5): real one belongs in voice_status.cpp (RC2's, at client 0x49110, package c1)
+bool CVoiceStatus::IsPlayerVoiceEnabled(int iPlayer)
+{
+	return !!m_VoiceEnabledPlayers[iPlayer - 1];
+}
+
+// TEMP STUB (c5): real one belongs in hud.cpp (the ScoreMode message, package c3)
+int g_iScoreMode = 0;

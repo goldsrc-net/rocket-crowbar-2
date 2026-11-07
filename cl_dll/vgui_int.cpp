@@ -26,16 +26,19 @@
 
 using namespace vgui;
 
+// orig client 0xd91b0
 void VGui_ViewportPaintBackground(int extents[4])
 {
 	gEngfuncs.VGui_ViewportPaintBackground(extents);
 }
 
+// orig client 0xd91d0
 void* VGui_GetPanel()
 {
 	return (Panel*)gEngfuncs.VGui_GetPanel();
 }
 
+// orig client 0xd91f0. The Layout and BorderLayout copy constructors, operator= and destructor that follow it (client 0xd9330-0xd93a0) are the compiler's, from the VGUI headers.
 void VGui_Startup()
 {
 	Panel* root = (Panel*)VGui_GetPanel();

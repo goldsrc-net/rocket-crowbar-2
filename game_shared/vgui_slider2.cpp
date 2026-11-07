@@ -71,6 +71,7 @@ void Slider2::setSize(int wide, int tall)
 	recomputeNobPosFromValue();
 }
 
+// orig client 0xe1180
 bool Slider2::isVertical()
 {
 	return _vertical;
@@ -99,6 +100,7 @@ void Slider2::setValue(int value)
 	}
 }
 
+// orig client 0xe1210
 int Slider2::getValue()
 {
 	return _value;
@@ -421,16 +423,19 @@ void Slider2::getNobPos(int& min, int& max)
 	max = _nobPos[1];
 }
 
+// orig client 0xe1d40
 void Slider2::setRangeWindow(int rangeWindow)
 {
 	_rangeWindow = rangeWindow;
 }
 
+// orig client 0xe1d60
 void Slider2::setRangeWindowEnabled(bool state)
 {
 	_rangeWindowEnabled = state;
 }
 
+// orig client 0xe1d80
 void Slider2::setButtonOffset(int buttonOffset)
 {
 	_buttonOffset = buttonOffset;

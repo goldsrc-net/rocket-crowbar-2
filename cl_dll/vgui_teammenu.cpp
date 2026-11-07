@@ -46,6 +46,7 @@
 #define TEAMMENU_WINDOW_INFO_Y YRES(234)
 
 // Creation
+// orig client 0xe7060
 CTeamMenuPanel::CTeamMenuPanel(int iTrans, bool iRemoveMe, int x, int y, int wide, int tall) : CMenuPanel(iTrans, iRemoveMe, x, y, wide, tall)
 {
 	// Get the scheme used for the Titles
@@ -167,6 +168,7 @@ void CTeamMenuPanel::Initialize()
 //-----------------------------------------------------------------------------
 // Purpose: Called everytime the Team Menu is displayed
 //-----------------------------------------------------------------------------
+// orig client 0xe7f90
 void CTeamMenuPanel::Update()
 {
 	int iYPos = TEAMMENU_TOPLEFT_BUTTON_Y;
@@ -315,6 +317,7 @@ void CTeamMenuPanel::Update()
 
 //=====================================
 // Key inputs
+// orig client 0xe86f0
 bool CTeamMenuPanel::SlotInput(int iSlot)
 {
 	// Check for AutoAssign

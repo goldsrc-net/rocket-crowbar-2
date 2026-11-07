@@ -15,6 +15,11 @@
 //
 // $NoKeywords: $
 //=============================================================================
+// Rocket Crowbar 2: its viewport is SDK 2.1's (the one Ricochet still ships: one command menu,
+// the spectator "menu" of labels, the server browser) with SDK 2.3's team menu, TFC's class
+// code taken out, an empty command menu, and its own vote box, player name label and debug
+// panel. The functions RC2 doesn't have are halflife-updated's and kept only for the files
+// that still call them (reference/dossiers/c5.md).
 #include <VGUI_Cursor.h>
 #include <VGUI_Frame.h>
 #include <VGUI_Label.h>
@@ -53,6 +58,9 @@
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_ScorePanel.h"
 #include "vgui_SpectatorPanel.h"
+#include "rc2/vgui_ServerBrowser.h"
+#include "rc2/vgui_DebugPanel.h"
+#include "rc2/vgui_VoteMenu.h"
 
 #include "shake.h"
 #include "screenfade.h"
@@ -80,6 +88,11 @@ void IN_ResetMouse();
 void IN_ResetRelativeMouseState();
 extern CMenuPanel* CMessageWindowPanel_Create(const char* szMOTD, const char* szTitle, bool iShadeFullscreen, bool iRemoveMe, int x, int y, int wide, int tall);
 extern float* GetClientColor(int clientIndex);
+
+// Rocket Crowbar 2's attribute menu (menu 9, AttrConf), in RC2's own client code before
+// vgui_CustomObjects (package c4)
+extern CMenuPanel* CreateAttributeMenu(Panel* pParent); // name ours
+extern void ResetAttributeMenu();						 // name ours
 
 using namespace vgui;
 
@@ -145,6 +158,7 @@ const char* sTFClassSelection[] =
 
 
 // Get the name of TGA file, based on GameDir
+// orig client 0xe1da0
 char* GetVGUITGAName(const char* pszName)
 {
 	int i;
@@ -214,6 +228,7 @@ void CCommandMenu::RemoveAllButtons()
 // Input  : keyNum - the character number of the input key
 // Output : Returns true if the command menu should close, false otherwise
 //-----------------------------------------------------------------------------
+// orig client 0xe1eb0
 bool CCommandMenu::KeyInput(int keyNum)
 {
 	// loop through all our buttons looking for one bound to keyNum
@@ -247,6 +262,7 @@ bool CCommandMenu::KeyInput(int keyNum)
 // Purpose: clears the current menus buttons of any armed (highlighted)
 //			state, and all their sub buttons
 //-----------------------------------------------------------------------------
+// orig client 0xe1f70
 void CCommandMenu::ClearButtonsOfArmedState()
 {
 	for (int i = 0; i < GetNumButtons(); i++)
@@ -265,6 +281,7 @@ void CCommandMenu::ClearButtonsOfArmedState()
 // Input  : *pSubMenu -
 // Output : CommandButton
 //-----------------------------------------------------------------------------
+// orig client 0xe1fe0
 CommandButton* CCommandMenu::FindButtonWithSubmenu(CCommandMenu* pSubMenu)
 {
 	for (int i = 0; i < GetNumButtons(); i++)
@@ -277,22 +294,25 @@ CommandButton* CCommandMenu::FindButtonWithSubmenu(CCommandMenu* pSubMenu)
 }
 
 // Recalculate the visible buttons
-bool CCommandMenu::RecalculateVisibles(int iYOffset, bool bHideAll)
+// orig client 0xe2030. SDK 2.1's: no player class buttons, and every button is BUTTON_SIZE_Y tall.
+bool CCommandMenu::RecalculateVisibles(int iNewYPos, bool bHideAll)
 {
-	int i, iCurrentY = 0;
-	int iVisibleButtons = 0;
+	int iCurrentY = 0;
+	int iXPos, iYPos;
+	bool bHasButton = false;
+
+	if (0 != iNewYPos)
+		setPos(_pos[0], iNewYPos);
 
 	// Cycle through all the buttons in this menu, and see which will be visible
-	for (i = 0; i < m_iButtons; i++)
+	for (int i = 0; i < m_iButtons; i++)
 	{
-		int iClass = m_aButtons[i]->GetPlayerClass();
-
-		if ((0 != iClass && iClass != g_iPlayerClass) || (m_aButtons[i]->IsNotValid()) || bHideAll)
+		if (m_aButtons[i]->IsNotValid() || bHideAll)
 		{
 			m_aButtons[i]->setVisible(false);
 			if (m_aButtons[i]->GetSubMenu() != NULL)
 			{
-				(m_aButtons[i]->GetSubMenu())->RecalculateVisibles(0, true);
+				(m_aButtons[i]->GetSubMenu())->RecalculateVisibles(_pos[1] + iCurrentY, true);
 			}
 		}
 		else
@@ -300,7 +320,7 @@ bool CCommandMenu::RecalculateVisibles(int iYOffset, bool bHideAll)
 			// If it's got a submenu, force it to check visibilities
 			if (m_aButtons[i]->GetSubMenu() != NULL)
 			{
-				if (!(m_aButtons[i]->GetSubMenu())->RecalculateVisibles(0, false))
+				if (!(m_aButtons[i]->GetSubMenu())->RecalculateVisibles(_pos[1] + iCurrentY, false))
 				{
 					// The submenu had no visible buttons, so don't display this button
 					m_aButtons[i]->setVisible(false);
@@ -309,88 +329,54 @@ bool CCommandMenu::RecalculateVisibles(int iYOffset, bool bHideAll)
 			}
 
 			m_aButtons[i]->setVisible(true);
-			iVisibleButtons++;
+
+			// Make sure it's at the right Y position
+			m_aButtons[i]->getPos(iXPos, iYPos);
+			m_aButtons[i]->setPos(iXPos, iCurrentY);
+
+			iCurrentY += BUTTON_SIZE_Y - 1;
+			bHasButton = true;
 		}
 	}
 
 	// Set Size
-	setSize(_size[0], (iVisibleButtons * (m_flButtonSizeY - 1)) + 1);
+	setSize(_size[0], iCurrentY + 1);
 
-	if (0 != iYOffset)
-	{
-		m_iYOffset = iYOffset;
-	}
-
-	for (i = 0; i < m_iButtons; i++)
-	{
-		if (m_aButtons[i]->isVisible())
-		{
-			if (m_aButtons[i]->GetSubMenu() != NULL)
-				(m_aButtons[i]->GetSubMenu())->RecalculateVisibles(iCurrentY + m_iYOffset, false);
-
-
-			// Make sure it's at the right Y position
-			// m_aButtons[i]->getPos( iXPos, iYPos );
-
-			if (m_iDirection)
-			{
-				m_aButtons[i]->setPos(0, (iVisibleButtons - 1) * (m_flButtonSizeY - 1) - iCurrentY);
-			}
-			else
-			{
-				m_aButtons[i]->setPos(0, iCurrentY);
-			}
-
-			iCurrentY += (m_flButtonSizeY - 1);
-		}
-	}
-
-	return 0 != iVisibleButtons;
+	return bHasButton;
 }
 
 // Make sure all submenus can fit on the screen
+// orig client 0xe21a0. SDK 2.1's.
 void CCommandMenu::RecalculatePositions(int iYOffset)
 {
-	int iTop;
+	int iNewYPos = _pos[1] + iYOffset;
 	int iAdjust = 0;
 
-	m_iYOffset += iYOffset;
-
-	if (m_iDirection)
-		iTop = ScreenHeight - (m_iYOffset + _size[1]);
-	else
-		iTop = m_iYOffset;
-
-	if (iTop < 0)
-		iTop = 0;
-
 	// Calculate if this is going to fit onscreen, and shuffle it up if it won't
-	int iBottom = iTop + _size[1];
-
+	int iBottom = iNewYPos + _size[1];
 	if (iBottom > ScreenHeight)
 	{
 		// Move in increments of button sizes
 		while (iAdjust < (iBottom - ScreenHeight))
 		{
-			iAdjust += m_flButtonSizeY - 1;
+			iAdjust += BUTTON_SIZE_Y - 1;
 		}
-
-		iTop -= iAdjust;
+		iNewYPos -= iAdjust;
 
 		// Make sure it doesn't move off the top of the screen (the menu's too big to fit it all)
-		if (iTop < 0)
+		if (iNewYPos < 0)
 		{
-			iAdjust -= (0 - iTop);
-			iTop = 0;
+			iAdjust -= (0 - iNewYPos);
+			iNewYPos = 0;
 		}
 	}
-
-	setPos(_pos[0], iTop);
 
 	// We need to force all menus below this one to update their positions now, because they
 	// might have submenus riding off buttons in this menu that have just shifted.
 	for (int i = 0; i < m_iButtons; i++)
 		m_aButtons[i]->UpdateSubMenus(iAdjust);
+
+	setPos(_pos[0], iNewYPos);
 }
 
 
@@ -419,39 +405,37 @@ void CCommandMenu::MakeVisible(CCommandMenu* pChildMenu)
 
 //================================================================
 // CreateSubMenu
-CCommandMenu* TeamFortressViewport::CreateSubMenu(CommandButton* pButton, CCommandMenu* pParentMenu, int iYOffset, int iXOffset)
+// orig client 0xe22c0. SDK 2.1's.
+CCommandMenu* TeamFortressViewport::CreateSubMenu(CommandButton* pButton, CCommandMenu* pParentMenu)
 {
 	int iXPos = 0;
 	int iYPos = 0;
 	int iWide = CMENU_SIZE_X;
 	int iTall = 0;
-	bool iDirection = false;
 
 	if (pParentMenu)
 	{
-		iXPos = m_pCurrentCommandMenu->GetXOffset() + (CMENU_SIZE_X - 1) + iXOffset;
-		iYPos = m_pCurrentCommandMenu->GetYOffset() + iYOffset;
-		iDirection = pParentMenu->GetDirection();
+		iXPos = pParentMenu->GetXOffset() + CMENU_SIZE_X - 1;
+		iYPos = pParentMenu->GetYOffset() + BUTTON_SIZE_Y * (m_pCurrentCommandMenu->GetNumButtons() - 1);
 	}
 
-	CCommandMenu* pMenu = new CCommandMenu(pParentMenu, iDirection, iXPos, iYPos, iWide, iTall);
+	CCommandMenu* pMenu = new CCommandMenu(pParentMenu, iXPos, iYPos, iWide, iTall);
 	pMenu->setParent(this);
 	pButton->AddSubMenu(pMenu);
 	pButton->setFont(Scheme::sf_primary3);
-	pMenu->m_flButtonSizeY = m_pCurrentCommandMenu->m_flButtonSizeY;
 
 	// Create the Submenu-open signal
 	InputSignal* pISignal = new CMenuHandler_PopupSubMenuInput(pButton, pMenu);
 	pButton->addInputSignal(pISignal);
 
 	// Put a > to show it's a submenu
-	CImageLabel* pLabel = new CImageLabel("arrowright", XRES(CMENU_SIZE_X - SUBMENU_SIZE_X), YRES(SUBMENU_SIZE_Y));
+	CImageLabel* pLabel = new CImageLabel("arrow", CMENU_SIZE_X - SUBMENU_SIZE_X, SUBMENU_SIZE_Y);
 	pLabel->setParent(pButton);
 	pLabel->addInputSignal(pISignal);
 
 	// Reposition
 	pLabel->getPos(iXPos, iYPos);
-	pLabel->setPos(pButton->getWide() - pLabel->getImageWide() - 4, -4);
+	pLabel->setPos(CMENU_SIZE_X - pLabel->getImageWide(), (BUTTON_SIZE_Y - pLabel->getImageTall()) / 2);
 
 	// Create the mouse off signal for the Label too
 	if (!pButton->m_bNoHighlight)
@@ -511,16 +495,18 @@ public:
 
 
 //================================================================
+// orig client 0xe2690
 TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : Panel(x, y, wide, tall), m_SchemeManager(wide, tall)
 {
 	gViewPort = this;
 	m_iInitialized = false;
 	m_pTeamMenu = NULL;
-	m_pClassMenu = NULL;
 	m_pScoreBoard = NULL;
-	m_pSpectatorPanel = NULL;
+	m_pSpectatorMenu = NULL;
 	m_pCurrentMenu = NULL;
 	m_pCurrentCommandMenu = NULL;
+
+	ResetAttributeMenu();
 
 	Initialize();
 	addInputSignal(new CViewPortInputHandler);
@@ -576,35 +562,50 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 
 	// VGUI MENUS
 	CreateTeamMenu();
-	CreateClassMenu();
-	CreateSpectatorMenu();
 	CreateScoreBoard();
-	// Init command menus
-	m_iNumMenus = 0;
-	m_iCurrentTeamNumber = m_iUser1 = m_iUser2 = m_iUser3 = 0;
+	CreateCommandMenu();
+	CreateServerBrowser();
+	CreateSpectatorMenu();
 
-	m_StandardMenu = CreateCommandMenu("commandmenu.txt", false, CMENU_TOP, false, CMENU_SIZE_X, BUTTON_SIZE_Y, 0);
-	m_SpectatorOptionsMenu = CreateCommandMenu("spectatormenu.txt", true, PANEL_HEIGHT, true, CMENU_SIZE_X, BUTTON_SIZE_Y / 2, 0);						   // above bottom bar, flat design
-	m_SpectatorCameraMenu = CreateCommandMenu("spectcammenu.txt", true, PANEL_HEIGHT, true, XRES(200), BUTTON_SIZE_Y / 2, ScreenWidth - (XRES(200) + 15)); // above bottom bar, flat design
+	// Rocket Crowbar 2: the vote box (top right) and the name of the player under the crosshair
+	// (bottom centre), both in the briefing font
+	CSchemeManager* pSchemes = gViewPort->GetSchemeManager();
+	SchemeHandle_t hBriefingText = pSchemes->getSchemeHandle("Briefing Text");
 
-	m_PlayerMenu = m_iNumMenus;
-	m_iNumMenus++;
+	m_pVotePanel = new CTransparentPanel(255, XRES(435), YRES(5), XRES(200), YRES(100));
+	m_pVotePanel->setParent(this);
+	m_pVotePanel->setVisible(false);
 
-	float flLabelSize = ((ScreenWidth - (XRES(CAMOPTIONS_BUTTON_X) + 15)) - XRES(24 + 15)) - XRES((15 + OPTIONS_BUTTON_X + 15) + 38);
+	m_pVoteLabel = new Label("", 0, 0, XRES(200), YRES(100));
+	m_pVoteLabel->setParent(m_pVotePanel);
+	m_pVoteLabel->setFont(pSchemes->getFont(hBriefingText));
+	m_pVoteLabel->setFont(Scheme::sf_primary1); // VERIFY: slot 0x20c, setFont(SchemeFont 1), right after setFont(Font*)
+	pSchemes->getFgColor(hBriefingText, r, g, b, a);
+	m_pVoteLabel->setFgColor(r, g, b, a);
+	m_pVoteLabel->setBgColor(0, 0, 0, 255);
+	m_pVoteLabel->setContentAlignment(vgui::Label::a_northeast);
+	m_pVoteLabel->setText("");
 
-	m_pCommandMenus[m_PlayerMenu] = new CCommandMenu(NULL, true,
-		XRES((15 + OPTIONS_BUTTON_X + 15) + 31), PANEL_HEIGHT, flLabelSize, 300);
-	m_pCommandMenus[m_PlayerMenu]->setParent(this);
-	m_pCommandMenus[m_PlayerMenu]->setVisible(false);
-	m_pCommandMenus[m_PlayerMenu]->m_flButtonSizeY = BUTTON_SIZE_Y / 2;
-	m_pCommandMenus[m_PlayerMenu]->m_iSpectCmdMenu = true;
+	m_pPlayerIDLabel = new Label("", ScreenWidth / 2 - XRES(320) / 2,
+		ScreenHeight - YRES(18) - YRES(100) - gHUD.m_iFontHeight / 2 - gHUD.m_iFontHeight, XRES(320), YRES(18));
+	m_pPlayerIDLabel->setParent(this);
+	m_pPlayerIDLabel->setFont(pSchemes->getFont(hBriefingText));
+	m_pPlayerIDLabel->setFont(Scheme::sf_primary1);
+	pSchemes->getFgColor(hBriefingText, m_iPlayerIDColor[0], m_iPlayerIDColor[1], m_iPlayerIDColor[2], a);
+	m_pPlayerIDLabel->setFgColor(m_iPlayerIDColor[0], m_iPlayerIDColor[1], m_iPlayerIDColor[2], 255);
+	m_pPlayerIDLabel->setBgColor(0, 0, 0, 255);
+	m_pPlayerIDLabel->setContentAlignment(vgui::Label::a_center);
+	m_pPlayerIDLabel->setText("");
+	m_pPlayerIDTeamColor = NULL;
 
-	UpdatePlayerMenu(m_PlayerMenu);
+	m_pDebugPanel = new CDebugPanel();
+	m_pDebugPanel->setParent(this);
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Called everytime a new level is started. Viewport clears out it's data.
 //-----------------------------------------------------------------------------
+// orig client 0xe3150
 void TeamFortressViewport::Initialize()
 {
 	// Force each menu to Initialize
@@ -612,19 +613,15 @@ void TeamFortressViewport::Initialize()
 	{
 		m_pTeamMenu->Initialize();
 	}
-	if (m_pClassMenu)
-	{
-		m_pClassMenu->Initialize();
-	}
 	if (m_pScoreBoard)
 	{
 		m_pScoreBoard->Initialize();
 		HideScoreBoard();
 	}
-	if (m_pSpectatorPanel)
+	if (m_pSpectatorMenu)
 	{
 		// Spectator menu doesn't need initializing
-		m_pSpectatorPanel->setVisible(false);
+		m_pSpectatorMenu->setVisible(false);
 	}
 
 	// Make sure all menus are hidden
@@ -633,19 +630,15 @@ void TeamFortressViewport::Initialize()
 
 	// Clear out some data
 	m_iGotAllMOTD = true;
-	m_iRandomPC = false;
 	m_flScoreBoardLastUpdated = 0;
-	m_flSpectatorPanelLastUpdated = 0;
 
 	// reset player info
-	g_iPlayerClass = 0;
 	g_iTeamNumber = 0;
 
 	strcpy(m_sMapName, "");
 	strcpy(m_szServerName, "");
 	for (int i = 0; i < 5; i++)
 	{
-		m_iValidClasses[i] = 0;
 		strcpy(m_sTeamNames[i], "");
 	}
 
@@ -654,42 +647,33 @@ void TeamFortressViewport::Initialize()
 
 //-----------------------------------------------------------------------------
 // Purpose: Read the Command Menu structure from the txt file and create the menu.
-//			Returns Index of menu in m_pCommandMenus
 //-----------------------------------------------------------------------------
-int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction, int yOffset, bool flatDesign, float flButtonSizeX, float flButtonSizeY, int xOffset)
+// orig client 0xe32c0. SDK 2.1's, without the class buttons and the detpack strings. Its body
+// was in a try block whose catch (orig client 0xe3b4d) cleared m_iInitialized and returned;
+// nothing in it throws a C++ exception, so the try isn't kept (halflife-updated dropped it too).
+void TeamFortressViewport::CreateCommandMenu()
 {
 	// COMMAND MENU
-	// Create the root of this new Command Menu
-
-	int newIndex = m_iNumMenus;
-
-	m_pCommandMenus[newIndex] = new CCommandMenu(NULL, direction, xOffset, yOffset, flButtonSizeX, 300); // This will be resized once we know how many items are in it
-	m_pCommandMenus[newIndex]->setParent(this);
-	m_pCommandMenus[newIndex]->setVisible(false);
-	m_pCommandMenus[newIndex]->m_flButtonSizeY = flButtonSizeY;
-	m_pCommandMenus[newIndex]->m_iSpectCmdMenu = direction;
-
-	m_iNumMenus++;
+	// Create the root of the Command Menu
+	m_pCommandMenus[0] = new CCommandMenu(NULL, 0, CMENU_TOP, CMENU_SIZE_X, 300); // This will be resized once we know how many items are in it
+	m_pCommandMenus[0]->setParent(this);
+	m_pCommandMenus[0]->setVisible(false);
+	m_iNumMenus = 1;
+	m_iCurrentTeamNumber = m_iUser1 = m_iUser2 = m_iUser3 = 0;
+	m_StandardMenu = 0;
 
 	// Read Command Menu from the txt file
 	char token[1024];
-	char* pfile = (char*)gEngfuncs.COM_LoadFile(menuFile, 5, NULL);
+	char* pfile = (char*)gEngfuncs.COM_LoadFile("commandmenu.txt", 5, NULL);
 	if (!pfile)
 	{
-		gEngfuncs.Con_DPrintf("Unable to open %s\n", menuFile);
+		gEngfuncs.Con_DPrintf("Unable to open commandmenu.txt\n");
 		SetCurrentCommandMenu(NULL);
-		return newIndex;
+		return;
 	}
 
-	// First, read in the localisation strings
-
-	// Detpack strings
-	gHUD.m_TextMessage.LocaliseTextString("#DetpackSet_For5Seconds", m_sDetpackStrings[0], MAX_BUTTON_SIZE);
-	gHUD.m_TextMessage.LocaliseTextString("#DetpackSet_For20Seconds", m_sDetpackStrings[1], MAX_BUTTON_SIZE);
-	gHUD.m_TextMessage.LocaliseTextString("#DetpackSet_For50Seconds", m_sDetpackStrings[2], MAX_BUTTON_SIZE);
-
 	// Now start parsing the menu structure
-	m_pCurrentCommandMenu = m_pCommandMenus[newIndex];
+	m_pCurrentCommandMenu = m_pCommandMenus[0];
 	char szLastButtonText[32] = "file start";
 	pfile = gEngfuncs.COM_ParseFile(pfile, token);
 	while ((strlen(token) > 0) && (m_iNumMenus < MAX_MENUS))
@@ -703,20 +687,17 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			static const int cCommandLength = 128;
 			char cCommand[cCommandLength] = "";
 			char szMap[MAX_MAPNAME] = "";
-			int iPlayerClass = 0;
-			bool iCustom = false;
-			int iTeamOnly = -1;
-			bool iToggle = false;
-			int iButtonY;
+			int iCustom = false;
+			int iTeamOnly = 0;
 			bool bGetExtraToken = true;
 			CommandButton* pButton = NULL;
 
 			// We should never be here without a Command Menu
 			if (!m_pCurrentCommandMenu)
 			{
-				gEngfuncs.Con_Printf("Error in %s file after '%s'.\n", menuFile, szLastButtonText);
+				gEngfuncs.Con_Printf("Error in Commandmenu.txt file after '%s'.\n", szLastButtonText);
 				m_iInitialized = false;
-				return newIndex;
+				return;
 			}
 
 			// token should already be the bound key, or the custom name
@@ -750,16 +731,6 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 				// Get the next token
 				pfile = gEngfuncs.COM_ParseFile(pfile, token);
 			}
-			else if (0 == strncmp(cCustom, "TOGGLE", 6))
-			{
-				iToggle = true;
-				// Get the next token
-				pfile = gEngfuncs.COM_ParseFile(pfile, token);
-			}
-			else
-			{
-				// See if it's a Class
-			}
 
 			// Get the button bound key
 			strncpy(cBoundKey, token, 32);
@@ -767,8 +738,8 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 
 			// Get the button text
 			pfile = gEngfuncs.COM_ParseFile(pfile, token);
-
-			CHudTextMessage::LocaliseTextString(token, cText, sizeof(cText));
+			strncpy(cText, token, 32);
+			cText[31] = '\0';
 
 			// save off the last button text we've come across (for error reporting)
 			strcpy(szLastButtonText, cText);
@@ -778,12 +749,10 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			strncpy(cCommand, token, cCommandLength);
 			cCommand[cCommandLength - 1] = '\0';
 
-			iButtonY = (BUTTON_SIZE_Y - 1) * m_pCurrentCommandMenu->GetNumButtons();
-
 			// Custom button handling
 			if (iCustom)
 			{
-				pButton = CreateCustomButton(cText, cCommand, iButtonY);
+				pButton = CreateCustomButton(cText, cCommand);
 
 				// Get the next token to see if we're a menu
 				pfile = gEngfuncs.COM_ParseFile(pfile, token);
@@ -800,28 +769,17 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			else if (szMap[0] != '\0')
 			{
 				// create a map button
-				pButton = new MapButton(szMap, cText, xOffset, iButtonY, flButtonSizeX, flButtonSizeY);
+				pButton = new MapButton(szMap, cText, 0, BUTTON_SIZE_Y * m_pCurrentCommandMenu->GetNumButtons(), CMENU_SIZE_X, BUTTON_SIZE_Y);
 			}
-			else if (iTeamOnly != -1)
+			else if (0 != iTeamOnly)
 			{
 				// button that only shows up if the player is on team iTeamOnly
-				pButton = new TeamOnlyCommandButton(iTeamOnly, cText, xOffset, iButtonY, flButtonSizeX, flButtonSizeY, flatDesign);
-			}
-			else if (iToggle && !direction)
-			{
-				pButton = new ToggleCommandButton(cCommand, cText, xOffset, iButtonY, flButtonSizeX, flButtonSizeY, flatDesign);
-			}
-			else if (direction)
-			{
-				if (iToggle)
-					pButton = new SpectToggleButton(cCommand, cText, xOffset, iButtonY, flButtonSizeX, flButtonSizeY, flatDesign);
-				else
-					pButton = new SpectButton(iPlayerClass, cText, xOffset, iButtonY, flButtonSizeX, flButtonSizeY);
+				pButton = new TeamOnlyCommandButton(iTeamOnly, cText, 0, BUTTON_SIZE_Y * m_pCurrentCommandMenu->GetNumButtons(), CMENU_SIZE_X, BUTTON_SIZE_Y, false);
 			}
 			else
 			{
 				// normal button
-				pButton = new CommandButton(iPlayerClass, cText, xOffset, iButtonY, flButtonSizeX, flButtonSizeY, flatDesign);
+				pButton = new CommandButton(cText, 0, BUTTON_SIZE_Y * m_pCurrentCommandMenu->GetNumButtons(), CMENU_SIZE_X, BUTTON_SIZE_Y);
 			}
 
 			// add the button into the command menu
@@ -840,12 +798,14 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			{
 				if (m_iNumMenus >= MAX_MENUS)
 				{
-					gEngfuncs.Con_Printf("Too many menus in %s past '%s'\n", menuFile, szLastButtonText);
+					gEngfuncs.Con_Printf("Too many menus in commandmenu.txt past '%s'\n", szLastButtonText);
 				}
-				else if (pButton)
+				else
 				{
 					// Create the menu
-					m_pCommandMenus[m_iNumMenus] = CreateSubMenu(pButton, m_pCurrentCommandMenu, iButtonY);
+					// VERIFY: RC2 doesn't check pButton here (SDK 2.1 neither); a CUSTOM button it
+					// doesn't know followed by '{' passes NULL and crashes. Kept.
+					m_pCommandMenus[m_iNumMenus] = CreateSubMenu(pButton, m_pCurrentCommandMenu);
 					m_pCurrentCommandMenu = m_pCommandMenus[m_iNumMenus];
 					m_iNumMenus++;
 				}
@@ -853,10 +813,7 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 			else if (!iCustom)
 			{
 				// Create the button and attach it to the current menu
-				if (iToggle)
-					pButton->addActionSignal(new CMenuHandler_ToggleCvar(cCommand));
-				else
-					pButton->addActionSignal(new CMenuHandler_StringCommand(cCommand));
+				pButton->addActionSignal(new CMenuHandler_StringCommand(cCommand));
 				// Create an input signal that'll popup the current menu
 				pButton->addInputSignal(new CMenuHandler_PopupSubMenuInput(pButton, m_pCurrentCommandMenu));
 			}
@@ -879,7 +836,6 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 	gEngfuncs.COM_FreeFile(pfile);
 
 	m_iInitialized = true;
-	return newIndex;
 }
 
 //-----------------------------------------------------------------------------
@@ -887,14 +843,25 @@ int TeamFortressViewport::CreateCommandMenu(const char* menuFile, bool direction
 //			maps a command to them
 // Output : CCommandMenu
 //-----------------------------------------------------------------------------
-CCommandMenu* TeamFortressViewport::CreateDisguiseSubmenu(CommandButton* pButton, CCommandMenu* pParentMenu, const char* commandText, int iYOffset, int iXOffset)
+// orig client 0xe4300. SDK 2.1's; RC2's CreateCustomButton has no disguise buttons, so nothing calls it.
+CCommandMenu* TeamFortressViewport::CreateDisguiseSubmenu(CommandButton* pButton, CCommandMenu* pParentMenu, const char* commandText)
 {
 	// create the submenu, under which the class choices will be listed
-	CCommandMenu* pMenu = CreateSubMenu(pButton, pParentMenu, iYOffset, iXOffset);
+	CCommandMenu* pMenu = CreateSubMenu(pButton, pParentMenu);
 	m_pCommandMenus[m_iNumMenus] = pMenu;
 	m_iNumMenus++;
 
 	// create the class choice buttons
+	for (int i = 1; i <= 9; i++) // PC_SCOUT to PC_ENGINEER
+	{
+		CommandButton* pDisguiseButton = new CommandButton(CHudTextMessage::BufferedLocaliseTextString(sLocalisedClasses[i]), 0, BUTTON_SIZE_Y, CMENU_SIZE_X, BUTTON_SIZE_Y);
+
+		char sz[256];
+		sprintf(sz, "%s %d", commandText, i);
+		pDisguiseButton->addActionSignal(new CMenuHandler_StringCommand(sz));
+
+		pMenu->AddButton(pDisguiseButton);
+	}
 
 	return pMenu;
 }
@@ -905,99 +872,60 @@ CCommandMenu* TeamFortressViewport::CreateDisguiseSubmenu(CommandButton* pButton
 //			*pButtonName -
 // Output : CommandButton
 //-----------------------------------------------------------------------------
-CommandButton* TeamFortressViewport::CreateCustomButton(char* pButtonText, char* pButtonName, int iYOffset)
+// orig client 0xe45f0. RC2 keeps only the map briefing and server info buttons of SDK 2.1's, both
+// plain CommandButtons.
+CommandButton* TeamFortressViewport::CreateCustomButton(char* pButtonText, char* pButtonName)
 {
 	CommandButton* pButton = NULL;
-	CCommandMenu* pMenu = NULL;
 
-	// ChangeTeam
-	if (0 == strcmp(pButtonName, "!CHANGETEAM"))
+	// Map Briefing
+	if (0 == strcmp(pButtonName, "!MAPBRIEFING"))
 	{
-		// ChangeTeam Submenu
-		pButton = new CommandButton(pButtonText, 0, BUTTON_SIZE_Y * 2, CMENU_SIZE_X, BUTTON_SIZE_Y);
-
-		// Create the submenu
-		pMenu = CreateSubMenu(pButton, m_pCurrentCommandMenu, iYOffset);
-		m_pCommandMenus[m_iNumMenus] = pMenu;
-		m_iNumMenus++;
-
-		// ChangeTeam buttons
-		for (int i = 0; i < 4; i++)
-		{
-			char sz[256];
-			sprintf(sz, "jointeam %d", i + 1);
-			m_pTeamButtons[i] = new TeamButton(i + 1, "teamname", 0, BUTTON_SIZE_Y, CMENU_SIZE_X, BUTTON_SIZE_Y);
-			m_pTeamButtons[i]->addActionSignal(new CMenuHandler_StringCommandWatch(sz));
-			pMenu->AddButton(m_pTeamButtons[i]);
-		}
-
-		// Auto Assign button
-		m_pTeamButtons[4] = new TeamButton(5, gHUD.m_TextMessage.BufferedLocaliseTextString("#Team_AutoAssign"), 0, BUTTON_SIZE_Y, CMENU_SIZE_X, BUTTON_SIZE_Y);
-		m_pTeamButtons[4]->addActionSignal(new CMenuHandler_StringCommand("jointeam 5"));
-		pMenu->AddButton(m_pTeamButtons[4]);
-
-		// Spectate button
-		m_pTeamButtons[5] = new SpectateButton(CHudTextMessage::BufferedLocaliseTextString("#Menu_Spectate"), 0, BUTTON_SIZE_Y, CMENU_SIZE_X, BUTTON_SIZE_Y, false);
-		m_pTeamButtons[5]->addActionSignal(new CMenuHandler_StringCommand("spectate"));
-		pMenu->AddButton(m_pTeamButtons[5]);
+		pButton = new CommandButton(pButtonText, 0, BUTTON_SIZE_Y * m_pCurrentCommandMenu->GetNumButtons(), CMENU_SIZE_X, BUTTON_SIZE_Y);
+		pButton->addActionSignal(new CMenuHandler_TextWindow(MENU_MAPBRIEFING));
 	}
-	// ChangeClass
-	else if (0 == strcmp(pButtonName, "!CHANGECLASS"))
+	else if (0 == strcmp(pButtonName, "!SERVERINFO"))
 	{
-		// Create the Change class menu
-		pButton = new ClassButton(-1, pButtonText, 0, BUTTON_SIZE_Y, CMENU_SIZE_X, BUTTON_SIZE_Y, false);
-
-		// ChangeClass Submenu
-		pMenu = CreateSubMenu(pButton, m_pCurrentCommandMenu, iYOffset);
-		m_pCommandMenus[m_iNumMenus] = pMenu;
-		m_iNumMenus++;
+		pButton = new CommandButton(pButtonText, 0, BUTTON_SIZE_Y * m_pCurrentCommandMenu->GetNumButtons(), CMENU_SIZE_X, BUTTON_SIZE_Y);
+		pButton->addActionSignal(new CMenuHandler_TextWindow(MENU_INTRO));
 	}
+	else
+	{
+		return NULL;
+	}
+
+	// Create an input signal that'll popup the current menu
+	pButton->addInputSignal(new CMenuHandler_PopupSubMenuInput(pButton, m_pCurrentCommandMenu));
 
 	return pButton;
 }
 
-//=======================================================================
-void TeamFortressViewport::ShowCommandMenu(int menuIndex)
+// orig client 0xe49b0
+void TeamFortressViewport::ToggleServerBrowser()
 {
 	if (!m_iInitialized)
 		return;
 
-	//Already have a menu open.
-	if (m_pCurrentMenu)
+	if (!m_pServerBrowser)
 		return;
 
-	// is the command menu open?
-	if (m_pCurrentCommandMenu == m_pCommandMenus[menuIndex])
+	if (m_pServerBrowser->isVisible())
 	{
-		HideCommandMenu();
-		return;
+		m_pServerBrowser->setVisible(false);
+	}
+	else
+	{
+		m_pServerBrowser->setVisible(true);
 	}
 
-	// Not visible while in intermission
-	if (gHUD.m_iIntermission)
-		return;
-
-	// Recalculate visible menus
-	UpdateCommandMenu(menuIndex);
-	HideVGUIMenu();
-
-	SetCurrentCommandMenu(m_pCommandMenus[menuIndex]);
-	m_flMenuOpenTime = gHUD.m_flTime;
 	UpdateCursorState();
+}
 
-	// get command menu parameters
-	for (int i = 2; i < gEngfuncs.Cmd_Argc(); i++)
-	{
-		const char* param = gEngfuncs.Cmd_Argv(i - 1);
-		if (param)
-		{
-			if (m_pCurrentCommandMenu->KeyInput(param[0]))
-			{
-				// kill the menu open time, since the key input is final
-				HideCommandMenu();
-			}
-		}
-	}
+//=======================================================================
+// orig client 0xe4a20. Rocket Crowbar 2 has no command menu: +commandmenu does nothing. RC2's
+// takes no argument; the index is halflife-updated's, for the callers it still has.
+void TeamFortressViewport::ShowCommandMenu(int menuIndex)
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -1019,31 +947,16 @@ void TeamFortressViewport::InputSignalHideCommandMenu()
 //-----------------------------------------------------------------------------
 // Purpose: Hides the command menu
 //-----------------------------------------------------------------------------
+// orig client 0xe4a80
 void TeamFortressViewport::HideCommandMenu()
 {
 	if (!m_iInitialized)
 		return;
 
-	if (m_pCommandMenus[m_StandardMenu])
+	if (m_pCommandMenus[0])
 	{
-		m_pCommandMenus[m_StandardMenu]->ClearButtonsOfArmedState();
+		m_pCommandMenus[0]->ClearButtonsOfArmedState();
 	}
-
-	if (m_pCommandMenus[m_SpectatorOptionsMenu])
-	{
-		m_pCommandMenus[m_SpectatorOptionsMenu]->ClearButtonsOfArmedState();
-	}
-
-	if (m_pCommandMenus[m_SpectatorCameraMenu])
-	{
-		m_pCommandMenus[m_SpectatorCameraMenu]->ClearButtonsOfArmedState();
-	}
-
-	if (m_pCommandMenus[m_PlayerMenu])
-	{
-		m_pCommandMenus[m_PlayerMenu]->ClearButtonsOfArmedState();
-	}
-
 
 	m_flMenuOpenTime = 0.0f;
 	SetCurrentCommandMenu(NULL);
@@ -1053,6 +966,7 @@ void TeamFortressViewport::HideCommandMenu()
 //-----------------------------------------------------------------------------
 // Purpose: Bring up the scoreboard
 //-----------------------------------------------------------------------------
+// orig client 0xe4ad0
 void TeamFortressViewport::ShowScoreBoard()
 {
 	if (m_pScoreBoard)
@@ -1069,6 +983,7 @@ void TeamFortressViewport::ShowScoreBoard()
 //-----------------------------------------------------------------------------
 // Purpose: Returns true if the scoreboard is up
 //-----------------------------------------------------------------------------
+// orig client 0xe4b10
 bool TeamFortressViewport::IsScoreBoardVisible()
 {
 	if (m_pScoreBoard)
@@ -1080,6 +995,7 @@ bool TeamFortressViewport::IsScoreBoardVisible()
 //-----------------------------------------------------------------------------
 // Purpose: Hide the scoreboard
 //-----------------------------------------------------------------------------
+// orig client 0xe4b40
 void TeamFortressViewport::HideScoreBoard()
 {
 	// Prevent removal of scoreboard during intermission
@@ -1100,18 +1016,18 @@ void TeamFortressViewport::HideScoreBoard()
 // Purpose: Activate's the player special ability
 //			called when the player hits their "special" key
 //-----------------------------------------------------------------------------
+// orig client 0xe4b90
 void TeamFortressViewport::InputPlayerSpecial()
 {
 	if (!m_iInitialized)
 		return;
 
-	{
-		// if it's any other class, just send the command down to the server
-		EngineClientCmd("_special");
-	}
+	// just send the command down to the server
+	EngineClientCmd("_special");
 }
 
 // Set the submenu of the Command Menu
+// orig client 0xe4bc0
 void TeamFortressViewport::SetCurrentCommandMenu(CCommandMenu* pNewMenu)
 {
 	for (int i = 0; i < m_iNumMenus; i++)
@@ -1123,58 +1039,73 @@ void TeamFortressViewport::SetCurrentCommandMenu(CCommandMenu* pNewMenu)
 		m_pCurrentCommandMenu->MakeVisible(NULL);
 }
 
-void TeamFortressViewport::UpdateCommandMenu(int menuIndex)
+// orig client 0xe4c30
+void TeamFortressViewport::UpdateCommandMenu()
 {
-	// if its the player menu update the player list
-	if (menuIndex == m_PlayerMenu)
-	{
-		m_pCommandMenus[m_PlayerMenu]->RemoveAllButtons();
-		UpdatePlayerMenu(m_PlayerMenu);
-	}
-
-	m_pCommandMenus[menuIndex]->RecalculateVisibles(0, false);
-	m_pCommandMenus[menuIndex]->RecalculatePositions(0);
+	m_pCommandMenus[0]->RecalculateVisibles(0, false);
+	m_pCommandMenus[0]->RecalculatePositions(0);
 }
 
-void TeamFortressViewport::UpdatePlayerMenu(int menuIndex)
+// orig client 0xe4c70. SDK 2.2's spectator "menu": the mode and target in the title, the help
+// line below it (different for HLTV spectators), hidden when not spectating or for HLTV's
+// proxy (IsSpectateOnly 2).
+void TeamFortressViewport::UpdateSpectatorMenu()
 {
+	char sz[128];
+	char szHelp[128];
+	int iMode;
+	const char* pszHelp;
 
-	cl_entity_t* pEnt = NULL;
-	float flLabelSize = ((ScreenWidth - (XRES(CAMOPTIONS_BUTTON_X) + 15)) - XRES(24 + 15)) - XRES((15 + OPTIONS_BUTTON_X + 15) + 38);
-	gViewPort->GetAllPlayersInfo();
+	m_iUser1 = g_iUser1;
+	m_iUser2 = g_iUser2;
+	m_iUser3 = g_iUser3;
 
+	if (!m_pSpectatorMenu)
+		return;
 
-	for (int i = 1; i < MAX_PLAYERS_HUD; i++)
+	if (0 != gEngfuncs.IsSpectateOnly())
 	{
-		//if ( g_PlayerInfoList[i].name == NULL )
-		//	continue; // empty player slot, skip
+		pszHelp = "#Spec_Only_Help";
+		iMode = gHUD.m_Spectator.m_iMainMode;
+	}
+	else
+	{
+		pszHelp = "#Spec_Help";
+		iMode = m_iUser1;
+	}
 
-		pEnt = gEngfuncs.GetEntityByIndex(i);
+	sprintf(szHelp, pszHelp);
 
-		if (!gHUD.m_Spectator.IsActivePlayer(pEnt))
-			continue;
+	if (0 != iMode && gEngfuncs.IsSpectateOnly() != 2)
+	{
+		m_pSpectatorMenu->setVisible(true);
 
-		//if ( g_PlayerExtraInfo[i].teamname[0] == 0 )
-		//	continue; // skip over players who are not in a team
+		if (m_iUser2 > 0 && m_iUser2 <= gEngfuncs.GetMaxClients() && g_PlayerInfoList[m_iUser2].name)
+		{
+			// Locked onto a target, show the player's name
+			sprintf(sz, "#Spec_Mode%d : %s", iMode, g_PlayerInfoList[m_iUser2].name);
+		}
+		else
+		{
+			sprintf(sz, "#Spec_Mode%d", iMode);
+		}
 
-		SpectButton* pButton = new SpectButton(1, g_PlayerInfoList[pEnt->index].name,
-			XRES((15 + OPTIONS_BUTTON_X + 15) + 31), PANEL_HEIGHT + (i - 1) * CMENU_SIZE_X, flLabelSize, BUTTON_SIZE_Y / 2);
+		if (m_iUser1 == 4)
+		{
+			char szTemp[128];
+			sprintf(szTemp, "#Directed %s", sz);
+			strcpy(sz, szTemp);
+		}
 
-		pButton->setBoundKey((char)255);
-		pButton->setContentAlignment(vgui::Label::a_center);
-		m_pCommandMenus[menuIndex]->AddButton(pButton);
-		pButton->setParentMenu(m_pCommandMenus[menuIndex]);
-
-		// Override font in CommandMenu
-		pButton->setFont(Scheme::sf_primary3);
-
-		pButton->addActionSignal(new CMenuHandler_SpectateFollow(g_PlayerInfoList[pEnt->index].name));
-		// Create an input signal that'll popup the current menu
-		pButton->addInputSignal(new CMenuHandler_PopupSubMenuInput(pButton, m_pCommandMenus[menuIndex]));
+		// the text goes through setText's format, as in the original
+		m_pSpectatorLabel->setText(CHudTextMessage::BufferedLocaliseTextString(sz));
+		m_pSpectatorHelpLabel->setText(CHudTextMessage::BufferedLocaliseTextString(szHelp));
+	}
+	else
+	{
+		m_pSpectatorMenu->setVisible(false);
 	}
 }
-
-
 
 void COM_FileBase(const char* in, char* out);
 
@@ -1319,6 +1250,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 }
 
 //======================================================================
+// orig client 0xe4e90
 void TeamFortressViewport::CreateScoreBoard()
 {
 	int xdent = SBOARD_INDENT_X, ydent = SBOARD_INDENT_Y;
@@ -1338,8 +1270,17 @@ void TeamFortressViewport::CreateScoreBoard()
 	m_pScoreBoard->setVisible(false);
 }
 
+// orig client 0xe4fd0
+void TeamFortressViewport::CreateServerBrowser()
+{
+	m_pServerBrowser = new ServerBrowser(0, 0, ScreenWidth, ScreenHeight);
+	m_pServerBrowser->setParent(this);
+	m_pServerBrowser->setVisible(false);
+}
+
 //======================================================================
 // Set the VGUI Menu
+// orig client 0xe5090
 void TeamFortressViewport::SetCurrentMenu(CMenuPanel* pMenu)
 {
 	m_pCurrentMenu = pMenu;
@@ -1359,12 +1300,15 @@ void TeamFortressViewport::SetCurrentMenu(CMenuPanel* pMenu)
 
 //================================================================
 // Text Window
+// orig client 0xe50d0. SDK 2.3's MOTD and map briefing windows, always shaded full screen. RC2
+// has no class or spectator help text; asked for anything else it passes an uninitialised title
+// and the viewport as the text (nothing does).
 CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 {
 	char sz[256];
 	const char* cText = "";
 	char* pfile = NULL;
-	static const int MAX_TITLE_LENGTH = 64;
+	static const int MAX_TITLE_LENGTH = 32;
 	char cTitle[MAX_TITLE_LENGTH];
 
 	if (iTextToShow == SHOW_MOTD)
@@ -1372,8 +1316,8 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 		if (!m_szServerName || '\0' == m_szServerName[0])
 			strcpy(cTitle, "Half-Life");
 		else
-			strncpy(cTitle, m_szServerName, sizeof(cTitle));
-		cTitle[sizeof(cTitle) - 1] = 0;
+			strncpy(cTitle, m_szServerName, MAX_TITLE_LENGTH);
+		cTitle[MAX_TITLE_LENGTH - 1] = 0;
 		cText = m_szMOTD;
 	}
 	else if (iTextToShow == SHOW_MAPBRIEFING)
@@ -1422,20 +1366,14 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 		strncpy(cTitle, m_sMapName, MAX_TITLE_LENGTH);
 		cTitle[MAX_TITLE_LENGTH - 1] = 0;
 	}
-	else if (iTextToShow == SHOW_SPECHELP)
+	else
 	{
-		CHudTextMessage::LocaliseTextString("#Spec_Help_Title", cTitle, MAX_TITLE_LENGTH);
-		cTitle[MAX_TITLE_LENGTH - 1] = 0;
-
-		char* pfile = CHudTextMessage::BufferedLocaliseTextString("#Spec_Help_Text");
-		if (pfile)
-		{
-			cText = pfile;
-		}
+		// VERIFY: the original's text is the viewport itself and its title is never written;
+		// nothing asks for another window, so an empty one stands in
+		cTitle[0] = 0;
 	}
 
-	// if we're in the game (ie. have selected a class), flag the menu to be only grayed in the dialog box, instead of full screen
-	CMenuPanel* pMOTDPanel = CMessageWindowPanel_Create(cText, cTitle, g_iPlayerClass == PC_UNDEFINED, false, 0, 0, ScreenWidth, ScreenHeight);
+	CMenuPanel* pMOTDPanel = CMessageWindowPanel_Create(cText, cTitle, true, false, 0, 0, ScreenWidth, ScreenHeight);
 	pMOTDPanel->setParent(this);
 
 	if (pfile)
@@ -1446,6 +1384,9 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow(int iTextToShow)
 
 //================================================================
 // VGUI Menus
+// orig client 0xe5410. RC2 opens only the MOTD (5), its attribute menu (9, AttrConf) and its vote
+// menu (10); the others (team, map briefing) are ignored. A menu queued behind one that isn't
+// the class menu returns without updating the cursor.
 void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 {
 	CMenuPanel* pNewMenu = NULL;
@@ -1454,10 +1395,8 @@ void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
 		return;
 
-	// Don't open any menus except the MOTD during intermission
-	// MOTD needs to be accepted because it's sent down to the client
-	// after map change, before intermission's turned off
-	if (gHUD.m_iIntermission && iMenu != MENU_INTRO)
+	// Don't open any menus except the MOTD and the attribute menu during intermission
+	if (gHUD.m_iIntermission && iMenu != MENU_INTRO && iMenu != 9)
 		return;
 
 	// Don't create one if it's already in the list
@@ -1474,32 +1413,26 @@ void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 
 	switch (iMenu)
 	{
-	case MENU_TEAM:
-		pNewMenu = ShowTeamMenu();
-		break;
-
-	// Map Briefing removed now that it appears in the team menu
-	case MENU_MAPBRIEFING:
-		pNewMenu = CreateTextWindow(SHOW_MAPBRIEFING);
-		break;
-
 	case MENU_INTRO:
 		pNewMenu = CreateTextWindow(SHOW_MOTD);
 		break;
 
-	case MENU_CLASSHELP:
-		pNewMenu = CreateTextWindow(SHOW_CLASSDESC);
+	case 9:
+		pNewMenu = CreateAttributeMenu(this);
 		break;
 
-	case MENU_SPECHELP:
-		pNewMenu = CreateTextWindow(SHOW_SPECHELP);
-		break;
-	case MENU_CLASS:
-		pNewMenu = ShowClassMenu();
+	case 10:
+		if (!m_pVoteMenu)
+		{
+			m_pVoteMenu = new CVoteMenuPanel();
+			m_pVoteMenu->setParent(this);
+			m_pVoteMenu->setVisible(false);
+		}
+		pNewMenu = m_pVoteMenu;
 		break;
 
 	default:
-		break;
+		return;
 	}
 
 	if (!pNewMenu)
@@ -1515,29 +1448,31 @@ void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 	// See if another menu is visible, and if so, cache this one for display once the other one's finished
 	if (m_pCurrentMenu)
 	{
-		if (m_pCurrentMenu->GetMenuID() == MENU_CLASS && iMenu == MENU_TEAM)
+		if (m_pCurrentMenu->GetMenuID() == MENU_CLASS)
 		{
 			CMenuPanel* temp = m_pCurrentMenu;
 			m_pCurrentMenu->Close();
 			m_pCurrentMenu = pNewMenu;
 			m_pCurrentMenu->SetNextMenu(temp);
 			m_pCurrentMenu->Open();
-			UpdateCursorState();
 		}
 		else
 		{
 			m_pCurrentMenu->SetNextMenu(pNewMenu);
+			return;
 		}
 	}
 	else
 	{
 		m_pCurrentMenu = pNewMenu;
 		m_pCurrentMenu->Open();
-		UpdateCursorState();
 	}
+
+	UpdateCursorState();
 }
 
 // Removes all VGUI Menu's onscreen
+// orig client 0xe5660
 void TeamFortressViewport::HideVGUIMenu()
 {
 	while (m_pCurrentMenu)
@@ -1547,25 +1482,29 @@ void TeamFortressViewport::HideVGUIMenu()
 }
 
 // Remove the top VGUI menu, and bring up the next one
+// orig client 0xe5690. The next menu is read before Close, not after.
 void TeamFortressViewport::HideTopMenu()
 {
 	if (m_pCurrentMenu)
 	{
+		CMenuPanel* pNext = m_pCurrentMenu->GetNextMenu();
+
 		// Close the top one
 		m_pCurrentMenu->Close();
 
 		// Bring up the next one
-		gViewPort->SetCurrentMenu(m_pCurrentMenu->GetNextMenu());
+		SetCurrentMenu(pNext);
 	}
 
 	UpdateCursorState();
 }
 
 // Return true if the HUD's allowed to print text messages
+// orig client 0xe56e0. RC2 has no player class, so the full screen menus always block them.
 bool TeamFortressViewport::AllowedToPrintText()
 {
 	// Prevent text messages when fullscreen menus are up
-	if (m_pCurrentMenu && g_iPlayerClass == 0)
+	if (m_pCurrentMenu)
 	{
 		int iId = m_pCurrentMenu->GetMenuID();
 		if (iId == MENU_TEAM || iId == MENU_CLASS || iId == MENU_INTRO || iId == MENU_CLASSHELP)
@@ -1578,17 +1517,7 @@ bool TeamFortressViewport::AllowedToPrintText()
 //======================================================================================
 // TEAM MENU
 //======================================================================================
-// Bring up the Team selection Menu
-CMenuPanel* TeamFortressViewport::ShowTeamMenu()
-{
-	// Don't open menus in demo playback
-	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
-		return NULL;
-
-	m_pTeamMenu->Reset();
-	return m_pTeamMenu;
-}
-
+// orig client 0xe5760
 void TeamFortressViewport::CreateTeamMenu()
 {
 	// Create the panel
@@ -1598,39 +1527,56 @@ void TeamFortressViewport::CreateTeamMenu()
 }
 
 //======================================================================================
-// CLASS MENU
-//======================================================================================
-// Bring up the Class selection Menu
-CMenuPanel* TeamFortressViewport::ShowClassMenu()
-{
-	// Don't open menus in demo playback
-	if (0 != gEngfuncs.pDemoAPI->IsPlayingback())
-		return NULL;
-
-	m_pClassMenu->Reset();
-	return m_pClassMenu;
-}
-
-void TeamFortressViewport::CreateClassMenu()
-{
-	// Create the panel
-	m_pClassMenu = new CClassMenuPanel(100, false, 0, 0, ScreenWidth, ScreenHeight);
-	m_pClassMenu->setParent(this);
-	m_pClassMenu->setVisible(false);
-}
-
-//======================================================================================
 //======================================================================================
 // SPECTATOR MENU
 //======================================================================================
 // Spectator "Menu" explaining the Spectator buttons
+// orig client 0xe5820. SDK 2.1's.
 void TeamFortressViewport::CreateSpectatorMenu()
 {
 	// Create the Panel
-	m_pSpectatorPanel = new SpectatorPanel(0, 0, ScreenWidth, ScreenHeight);
-	m_pSpectatorPanel->setParent(this);
-	m_pSpectatorPanel->setVisible(false);
-	m_pSpectatorPanel->Initialize();
+	m_pSpectatorMenu = new CTransparentPanel(100, 0, ScreenHeight - YRES(60), ScreenWidth, YRES(60));
+	m_pSpectatorMenu->setParent(this);
+	m_pSpectatorMenu->setVisible(false);
+
+	// Get the scheme used for the Titles
+	CSchemeManager* pSchemes = gViewPort->GetSchemeManager();
+
+	// schemes
+	SchemeHandle_t hTitleScheme = pSchemes->getSchemeHandle("Title Font");
+	SchemeHandle_t hHelpText = pSchemes->getSchemeHandle("Primary Button Text");
+
+	// color schemes
+	int r, g, b, a;
+
+	// Create the title
+	m_pSpectatorLabel = new Label("Spectator", 0, 0, ScreenWidth, YRES(25));
+	m_pSpectatorLabel->setParent(m_pSpectatorMenu);
+	m_pSpectatorLabel->setFont(pSchemes->getFont(hTitleScheme));
+	pSchemes->getFgColor(hTitleScheme, r, g, b, a);
+	m_pSpectatorLabel->setFgColor(r, g, b, a);
+	pSchemes->getBgColor(hTitleScheme, r, g, b, a);
+	m_pSpectatorLabel->setBgColor(r, g, b, 255);
+	m_pSpectatorLabel->setContentAlignment(vgui::Label::a_north);
+
+	// Create the Help
+	m_pSpectatorHelpLabel = new Label(CHudTextMessage::BufferedLocaliseTextString("#Spec_Help"), 0, YRES(25), ScreenWidth, YRES(15));
+	m_pSpectatorHelpLabel->setParent(m_pSpectatorMenu);
+	m_pSpectatorHelpLabel->setFont(pSchemes->getFont(hHelpText));
+	pSchemes->getFgColor(hHelpText, r, g, b, a);
+	m_pSpectatorHelpLabel->setFgColor(r, g, b, a);
+	pSchemes->getBgColor(hHelpText, r, g, b, a);
+	m_pSpectatorHelpLabel->setBgColor(r, g, b, 255);
+	m_pSpectatorHelpLabel->setContentAlignment(vgui::Label::a_north);
+
+	Label* pLabel = new Label(CHudTextMessage::BufferedLocaliseTextString("#Spec_Help2"), 0, YRES(40), ScreenWidth, YRES(20));
+	pLabel->setParent(m_pSpectatorMenu);
+	pLabel->setFont(pSchemes->getFont(hHelpText));
+	pSchemes->getFgColor(hHelpText, r, g, b, a);
+	pLabel->setFgColor(r, g, b, a);
+	pSchemes->getBgColor(hHelpText, r, g, b, a);
+	pLabel->setBgColor(r, g, b, 255);
+	pLabel->setContentAlignment(vgui::Label::a_center);
 }
 
 //======================================================================================
@@ -1638,20 +1584,21 @@ void TeamFortressViewport::CreateSpectatorMenu()
 //======================================================================================
 // We've got an update on player info
 // Recalculate any menus that use it.
+// orig client 0xe5da0
 void TeamFortressViewport::UpdateOnPlayerInfo()
 {
 	if (m_pTeamMenu)
 		m_pTeamMenu->Update();
-	if (m_pClassMenu)
-		m_pClassMenu->Update();
 	if (m_pScoreBoard)
 		m_pScoreBoard->Update();
 }
 
+// orig client 0xe5de0. SDK 2.3's with the server browser and without the spectator panel; the
+// demo and relative mouse handling are halflife-updated's.
 void TeamFortressViewport::UpdateCursorState()
 {
 	// Need cursor if any VGUI window is up
-	if (m_pSpectatorPanel->m_menuVisible || m_pCurrentMenu || m_pTeamMenu->isVisible() || GetClientVoiceMgr()->IsInSquelchMode())
+	if (m_pCurrentMenu || m_pTeamMenu->isVisible() || m_pServerBrowser->isVisible() || GetClientVoiceMgr()->IsInSquelchMode())
 	{
 		g_iVisibleMouse = true;
 		App::getInstance()->setCursorOveride(App::getInstance()->getScheme()->getCursor(Scheme::scu_arrow));
@@ -1690,6 +1637,7 @@ void TeamFortressViewport::UpdateHighlights()
 		m_pCurrentCommandMenu->MakeVisible(NULL);
 }
 
+// orig client 0xe5f30
 void TeamFortressViewport::GetAllPlayersInfo()
 {
 	for (int i = 1; i < MAX_PLAYERS_HUD; i++)
@@ -1701,11 +1649,10 @@ void TeamFortressViewport::GetAllPlayersInfo()
 	}
 }
 
+// orig client 0xe5f80. SDK 2.1's order, without the class check and with SDK 2.2's spectator
+// test; it doesn't resize the viewport to its parent.
 void TeamFortressViewport::paintBackground()
 {
-	int wide, tall;
-	getParent()->getSize(wide, tall);
-	setSize(wide, tall);
 	if (m_pScoreBoard)
 	{
 		int x, y;
@@ -1716,28 +1663,15 @@ void TeamFortressViewport::paintBackground()
 	// See if the command menu is visible and needs recalculating due to some external change
 	if (g_iTeamNumber != m_iCurrentTeamNumber)
 	{
-		UpdateCommandMenu(m_StandardMenu);
-
-		if (m_pClassMenu)
-		{
-			m_pClassMenu->Update();
-		}
+		UpdateCommandMenu();
 
 		m_iCurrentTeamNumber = g_iTeamNumber;
 	}
 
-	if (g_iPlayerClass != m_iCurrentPlayerClass)
-	{
-		UpdateCommandMenu(m_StandardMenu);
-
-		m_iCurrentPlayerClass = g_iPlayerClass;
-	}
-
 	// See if the Spectator Menu needs to be update
-	if ((g_iUser1 != m_iUser1 || g_iUser2 != m_iUser2) ||
-		(m_flSpectatorPanelLastUpdated < gHUD.m_flTime))
+	if (0 != g_iUser1 || 0 != m_iUser1 || g_iUser2 != m_iUser2)
 	{
-		UpdateSpectatorPanel();
+		UpdateSpectatorMenu();
 	}
 
 	// Update the Scoreboard, if it's visible
@@ -1754,6 +1688,7 @@ void TeamFortressViewport::paintBackground()
 
 //================================================================
 // Input Handler for Drag N Drop panels
+// orig client 0xe60c0
 void CDragNDropHandler::cursorMoved(int x, int y, Panel* panel)
 {
 	if (m_bDragging)
@@ -1768,6 +1703,7 @@ void CDragNDropHandler::cursorMoved(int x, int y, Panel* panel)
 	}
 }
 
+// orig client 0xe6150
 void CDragNDropHandler::mousePressed(MouseCode code, Panel* panel)
 {
 	int x, y;
@@ -1791,6 +1727,7 @@ void CDragNDropHandler::mouseReleased(MouseCode code, Panel* panel)
 
 //================================================================
 // Number Key Input
+// orig client 0xe6220
 bool TeamFortressViewport::SlotInput(int iSlot)
 {
 	// If there's a menu up, give it the input
@@ -1801,15 +1738,9 @@ bool TeamFortressViewport::SlotInput(int iSlot)
 }
 
 // Direct Key Input
+// orig client 0xe6250. SDK 2.3's without the spectator Enter and the class menu's Escape.
 bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurrentBinding)
 {
-	// Enter gets out of Spectator Mode by bringing up the Team Menu
-	if (0 != m_iUser1 && 0 == gEngfuncs.Con_IsVisible())
-	{
-		if (down && (keynum == K_ENTER || keynum == K_KP_ENTER))
-			ShowVGUIMenu(MENU_TEAM);
-	}
-
 	// Open Text Window?
 	if (m_pCurrentMenu && 0 == gEngfuncs.Con_IsVisible())
 	{
@@ -1818,14 +1749,11 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		// Get number keys as Input for Team/Class menus
 		if (iMenuID == MENU_TEAM || iMenuID == MENU_CLASS)
 		{
-			// Escape gets you out of Team/Class menus if the Cancel button is visible
-			if (keynum == K_ESCAPE)
+			// Escape gets you out of the Team menu if you have a team
+			if (keynum == K_ESCAPE && iMenuID == MENU_TEAM && 0 != g_iTeamNumber)
 			{
-				if ((iMenuID == MENU_TEAM && 0 != g_iTeamNumber) || (iMenuID == MENU_CLASS && 0 != g_iPlayerClass))
-				{
-					HideTopMenu();
-					return false;
-				}
+				HideTopMenu();
+				return false;
 			}
 
 			for (int i = '0'; i <= '9'; i++)
@@ -1849,9 +1777,12 @@ bool TeamFortressViewport::KeyInput(bool down, int keynum, const char* pszCurren
 		}
 
 		// Grab jump key on Team Menu as autoassign
-		if (pszCurrentBinding && down && 0 == strcmp(pszCurrentBinding, "+jump"))
+		if (pszCurrentBinding)
 		{
-			if (iMenuID == MENU_TEAM)
+			if (!down)
+				return true;
+
+			if (0 == strcmp(pszCurrentBinding, "+jump") && iMenuID == MENU_TEAM)
 			{
 				m_pTeamMenu->SlotInput(5);
 				return false;
@@ -1895,11 +1826,12 @@ bool TeamFortressViewport::MsgFunc_ValClass(const char* pszName, int iSize, void
 		m_iValidClasses[i] = READ_SHORT();
 
 	// Force the menu to update
-	UpdateCommandMenu(m_StandardMenu);
+	UpdateCommandMenu();
 
 	return true;
 }
 
+// orig client 0xe6430
 bool TeamFortressViewport::MsgFunc_TeamNames(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -1939,7 +1871,7 @@ bool TeamFortressViewport::MsgFunc_Feign(const char* pszName, int iSize, void* p
 	m_iIsFeigning = READ_BYTE() != 0;
 
 	// Force the menu to update
-	UpdateCommandMenu(m_StandardMenu);
+	UpdateCommandMenu();
 
 	return true;
 }
@@ -1951,11 +1883,12 @@ bool TeamFortressViewport::MsgFunc_Detpack(const char* pszName, int iSize, void*
 	m_iIsSettingDetpack = READ_BYTE();
 
 	// Force the menu to update
-	UpdateCommandMenu(m_StandardMenu);
+	UpdateCommandMenu();
 
 	return true;
 }
 
+// orig client 0xe6500
 bool TeamFortressViewport::MsgFunc_VGUIMenu(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -1975,6 +1908,7 @@ bool TeamFortressViewport::MsgFunc_VGUIMenu(const char* pszName, int iSize, void
 	return true;
 }
 
+// orig client 0xe6580. SDK 2.3's without the HLTV test: spectators see the MOTD too.
 bool TeamFortressViewport::MsgFunc_MOTD(const char* pszName, int iSize, void* pbuf)
 {
 	if (m_iGotAllMOTD)
@@ -1989,8 +1923,7 @@ bool TeamFortressViewport::MsgFunc_MOTD(const char* pszName, int iSize, void* pb
 	strncat(m_szMOTD, READ_STRING(), roomInArray >= 0 ? roomInArray : 0);
 	m_szMOTD[sizeof(m_szMOTD) - 1] = '\0';
 
-	// don't show MOTD for HLTV spectators
-	if (m_iGotAllMOTD && 0 == gEngfuncs.IsSpectateOnly())
+	if (m_iGotAllMOTD)
 	{
 		ShowVGUIMenu(MENU_INTRO);
 	}
@@ -2005,7 +1938,7 @@ bool TeamFortressViewport::MsgFunc_BuildSt(const char* pszName, int iSize, void*
 	m_iBuildState = READ_SHORT();
 
 	// Force the menu to update
-	UpdateCommandMenu(m_StandardMenu);
+	UpdateCommandMenu();
 
 	return true;
 }
@@ -2019,6 +1952,7 @@ bool TeamFortressViewport::MsgFunc_RandomPC(const char* pszName, int iSize, void
 	return true;
 }
 
+// orig client 0xe6640
 bool TeamFortressViewport::MsgFunc_ServerName(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -2029,20 +1963,37 @@ bool TeamFortressViewport::MsgFunc_ServerName(const char* pszName, int iSize, vo
 	return true;
 }
 
+// orig client 0xe6690. RC2's ScoreInfo (6 bytes): the client byte, then frags and deaths as shorts,
+// or with bit 7 of the client byte set a float damage score sent as a long (player.cpp), then
+// the team byte. Each message zeroes the fields the other kind carries.
 bool TeamFortressViewport::MsgFunc_ScoreInfo(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
-	short cl = READ_BYTE();
-	short frags = READ_SHORT();
-	short deaths = READ_SHORT();
-	short playerclass = READ_SHORT();
-	short teamnumber = READ_SHORT();
+	int iByte = READ_BYTE();
+	short cl = iByte & 0xff7f;
+	short frags, deaths;
+	int iDmgScore;
+
+	if ((iByte & 0x80) != 0)
+	{
+		iDmgScore = READ_LONG();
+		frags = 0;
+		deaths = 0;
+	}
+	else
+	{
+		frags = READ_SHORT();
+		deaths = READ_SHORT();
+		iDmgScore = 0;
+	}
+
+	short teamnumber = READ_BYTE();
 
 	if (cl > 0 && cl <= MAX_PLAYERS_HUD)
 	{
 		g_PlayerExtraInfo[cl].frags = frags;
 		g_PlayerExtraInfo[cl].deaths = deaths;
-		g_PlayerExtraInfo[cl].playerclass = playerclass;
+		memcpy(&g_PlayerExtraInfo[cl].dmgscore, &iDmgScore, sizeof(iDmgScore));
 		g_PlayerExtraInfo[cl].teamnumber = teamnumber;
 
 		//Dont go bellow 0!
@@ -2061,6 +2012,7 @@ bool TeamFortressViewport::MsgFunc_ScoreInfo(const char* pszName, int iSize, voi
 //		short: teams kills
 //		short: teams deaths
 // if this message is never received, then scores will simply be the combined totals of the players.
+// orig client 0xe6780
 bool TeamFortressViewport::MsgFunc_TeamScore(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -2089,6 +2041,7 @@ bool TeamFortressViewport::MsgFunc_TeamScore(const char* pszName, int iSize, voi
 // accepts two values:
 //		byte: client number
 //		string: client team name
+// orig client 0xe6850
 bool TeamFortressViewport::MsgFunc_TeamInfo(const char* pszName, int iSize, void* pbuf)
 {
 	if (!m_pScoreBoard)
@@ -2109,6 +2062,7 @@ bool TeamFortressViewport::MsgFunc_TeamInfo(const char* pszName, int iSize, void
 	return true;
 }
 
+// orig client 0xe68f0
 void TeamFortressViewport::DeathMsg(int killer, int victim)
 {
 	m_pScoreBoard->DeathMsg(killer, victim);
@@ -2127,6 +2081,7 @@ bool TeamFortressViewport::MsgFunc_Spectator(const char* pszName, int iSize, voi
 	return true;
 }
 
+// orig client 0xe6970
 bool TeamFortressViewport::MsgFunc_AllowSpec(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -2134,7 +2089,7 @@ bool TeamFortressViewport::MsgFunc_AllowSpec(const char* pszName, int iSize, voi
 	m_iAllowSpectators = READ_BYTE() != 0;
 
 	// Force the menu to update
-	UpdateCommandMenu(m_StandardMenu);
+	UpdateCommandMenu();
 
 	// If the team menu is up, update it too
 	if (m_pTeamMenu)
@@ -2143,6 +2098,73 @@ bool TeamFortressViewport::MsgFunc_AllowSpec(const char* pszName, int iSize, voi
 	return true;
 }
 
+// orig client 0xe69e0. VoteBegin: a byte (open the vote menu) and what the vote is about.
+bool TeamFortressViewport::MsgFunc_VoteBegin(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int iOpenMenu = READ_BYTE();
+	strncpy(m_szVoteText, READ_STRING(), 255);
+	m_szVoteText[255] = 0;
+
+	if (m_pVoteLabel)
+		m_pVoteLabel->setText("");
+
+	if (0 != iOpenMenu)
+	{
+		ShowVGUIMenu(10);
+		// the original's: in demo playback ShowVGUIMenu returns before creating the menu, and
+		// this dereferences NULL (kept)
+		m_pVoteMenu->SetVoteText(m_szVoteText);
+	}
+
+	return true;
+}
+
+// orig client 0xe6a80. VoteUpdate (3 bytes): votes for, votes against, seconds left; 0 seconds
+// ends the vote, 255 leaves the time out.
+bool TeamFortressViewport::MsgFunc_VoteUpdate(const char* pszName, int iSize, void* pbuf)
+{
+	char szTime[252];
+	char szText[512];
+
+	BEGIN_READ(pbuf, iSize);
+
+	int iFor = READ_BYTE();
+	int iAgainst = READ_BYTE();
+	int iTime = READ_BYTE();
+
+	if (0 == iTime)
+	{
+		if (m_pCurrentMenu && m_pCurrentMenu->GetMenuID() == 10)
+			HideTopMenu();
+
+		m_pVotePanel->setVisible(false);
+		m_pVoteLabel->setText("");
+	}
+	else
+	{
+		sprintf(szText, "Vote to %s\n%i For\n%i Against", m_szVoteText, iFor, iAgainst);
+
+		if (iTime < 255)
+		{
+			sprintf(szTime, "\n%-3i second%s left\n", iTime, (iTime == 1) ? "" : "s");
+			strcat(szText, szTime);
+		}
+
+		m_pVotePanel->setVisible(true);
+		m_pVoteLabel->setText(szText);
+	}
+
+	return true;
+}
+
+// orig client 0xe6c00. AttrConf (no data): the attribute menu.
+bool TeamFortressViewport::MsgFunc_AttrConf(const char* pszName, int iSize, void* pbuf)
+{
+	ShowVGUIMenu(9);
+	return true;
+}
 
 // used to reset the player's screen immediately
 bool TeamFortressViewport::MsgFunc_ResetFade(const char* pszName, int iSize, void* pbuf)
@@ -2156,4 +2178,45 @@ bool TeamFortressViewport::MsgFunc_SpecFade(const char* pszName, int iSize, void
 {
 
 	return true;
+}
+
+// hud.cpp's VGUIDebugOn handler (client 0xa1130): shows or hides the panel, and turning it off
+// forgets the watched entity
+void TeamFortressViewport::SetDebugPanelVisible(bool bVisible)
+{
+	if (m_pDebugPanel)
+		m_pDebugPanel->setVisible(bVisible);
+	if (!bVisible)
+		g_iDebugEntity = 0;
+}
+
+// hud.cpp's DBGCounts and DBGEntInfo handlers (client 0xa11a0, 0xa11e0) pass straight on
+bool TeamFortressViewport::MsgFunc_DBGCounts(const char* pszName, int iSize, void* pbuf)
+{
+	return m_pDebugPanel->MsgFunc_DBGCounts(pszName, iSize, pbuf);
+}
+
+bool TeamFortressViewport::MsgFunc_DBGEntInfo(const char* pszName, int iSize, void* pbuf)
+{
+	return m_pDebugPanel->MsgFunc_DBGEntInfo(pszName, iSize, pbuf);
+}
+
+// CHud::MsgFunc_InitHUD hides the debug panel and the vote box
+void TeamFortressViewport::HideDebugPanels()
+{
+	if (m_pDebugPanel)
+		m_pDebugPanel->setVisible(false);
+	if (m_pVotePanel)
+		m_pVotePanel->setVisible(false);
+}
+
+// TEMP STUB (c5): real one belongs in RC2's client code at client 0xcf480 (package c4)
+CMenuPanel* CreateAttributeMenu(Panel* pParent)
+{
+	return NULL;
+}
+
+// TEMP STUB (c5): real one belongs in RC2's client code at client 0xcfec0 (package c4)
+void ResetAttributeMenu()
+{
 }
