@@ -17,5 +17,5 @@ void PM_GetEntityBox(int iEntIndex, float* vecOrigin, float* vecVAngle, float* v
 // True when pRider is on one of pPlayer's shoulders.
 bool PlayerHasRider(edict_t* pPlayer, edict_t* pRider); // name ours
 
-// The four bytes at CBaseEntity +0x64..+0x67 (cbase.h's m_iRC2Base64): RC2 uses them one by one.
-#define RC2_BASE_BYTE(pEnt, iOffset) (((unsigned char*)&(pEnt)->m_iRC2Base64)[(iOffset)-0x64])
+// The four bytes at CBaseEntity +0x64..+0x67 (cbase.h's m_ucRC2Base64[2], m_bFrozen, m_bAntiFriction): RC2 uses them one by one.
+#define RC2_BASE_BYTE(pEnt, iOffset) (((unsigned char*)&(pEnt)->m_ucRC2Base64[0])[(iOffset)-0x64])

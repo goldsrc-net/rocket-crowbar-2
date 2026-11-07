@@ -773,7 +773,7 @@ void CSqueak::Spawn() // orig 0xd3170
 	pev->sequence = 1;
 	pev->animtime = gpGlobals->time;
 	pev->framerate = 1.0;
-	m_flDeployTime = gpGlobals->time;
+	m_flNextWeaponSync = gpGlobals->time;
 }
 
 
@@ -827,7 +827,7 @@ bool CSqueak::Deploy() // orig 0xd32f0
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "squeek/sqk_hunt3.wav", 1, ATTN_NORM, 0, 100);
 
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
-	m_flDeployTime = gpGlobals->time;
+	m_flNextWeaponSync = gpGlobals->time;
 
 	// RC2 returns DefaultDeploy's result as SDK 2.3 does, without halflife-updated's idle delay
 	return DefaultDeploy("models/v_squeak.mdl", "models/p_squeak.mdl", SQUEAK_UP, "squeak");
@@ -851,6 +851,9 @@ void CSqueak::Holster() // orig 0xd3390
 }
 
 
+// p8: the server's CSqueak::PrimaryAttack and SecondaryAttack are RC2's, in dlls/rc2/squeak.cpp
+// (0xd3440-0xd44ee is work package p8's); the client keeps these.
+#ifdef CLIENT_DLL
 void CSqueak::PrimaryAttack()
 {
 	if (0 != m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
@@ -922,7 +925,11 @@ void CSqueak::SecondaryAttack()
 {
 }
 
+#endif // CLIENT_DLL (p8)
 
+
+// p8: unchanged from SDK 2.3
+// orig 0xd4250
 void CSqueak::WeaponIdle()
 {
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())

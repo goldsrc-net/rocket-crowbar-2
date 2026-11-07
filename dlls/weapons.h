@@ -1277,8 +1277,9 @@ class CTripmine : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
+	int iItemSlot() override { return 5; } // orig 0xecae0
 	bool GetItemInfo(ItemInfo* p) override;
+	// orig 0xecaf0 (unchanged from SDK 2.3)
 	void SetObjectCollisionBox() override
 	{
 		//!!!BUGBUG - fix the model!
@@ -1291,6 +1292,7 @@ public:
 	void Holster() override;
 	void WeaponIdle() override;
 
+	// orig 0xecbb0 (RC2's build had CLIENT_WEAPONS)
 	bool UseDecrement() override
 	{
 #if defined(CLIENT_WEAPONS)
@@ -1359,8 +1361,16 @@ private:
 	unsigned short m_usSnarkFire; // orig +0xec, "events/snarkfire.sc"
 
 public:
-	// p7 needs: CSqueak's RC2 members p7's functions touch (the attacks at 0xd3440.. are p8's,
-	// which also use +0xdc..+0xe4). Names ours.
-	float m_flDeployTime;			  // orig +0xe8. gpGlobals->time at Spawn and Deploy
+	// CSqueak's RC2 members and overrides: p8's attacks (dlls/rc2/squeak.cpp), p7's functions.
+	// Names ours.
+#ifndef CLIENT_DLL
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+#endif
+	int m_iSnarksDeployed;			  // orig +0xe0: live monster_snarks this player owns
+	int m_iCamsDeployed;			  // orig +0xe4: snark_cams this player owns
+	float m_flNextWeaponSync;		  // orig +0xe8: gpGlobals->time at Spawn and Deploy (p7), then when WeaponFrame next sends WeaponSync (p8)
 	unsigned short m_usSnarkCamPlace; // orig +0xee, "events/snarkcamplace.sc"
 };

@@ -18,11 +18,11 @@
 #include "snarkcam.h"
 
 // The byte at +0x66 of RC2's CBaseEntity block, which the original reads on players as "can't
-// act" (also in CBasePlayerWeapon::ItemPostFrame). Inside the int cbase.h calls m_iRC2Base64.
+// act" (also in CBasePlayerWeapon::ItemPostFrame). cbase.h's m_bFrozen.
 // VERIFY: what sets it (p1/p5), and whether that member is really bytes.
 static bool RC2EntityByte66(CBaseEntity* pEntity) // name ours
 {
-	return reinterpret_cast<const unsigned char*>(&pEntity->m_iRC2Base64)[2] != 0;
+	return pEntity->m_bFrozen;
 }
 
 //=========================================================

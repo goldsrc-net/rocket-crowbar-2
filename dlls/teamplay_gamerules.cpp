@@ -169,6 +169,7 @@ void CHalfLifeTeamplay::UpdateGameMode(CBasePlayer* pPlayer)
 }
 
 
+// orig 0xdc580
 const char* CHalfLifeTeamplay::SetDefaultPlayerTeam(CBasePlayer* pPlayer)
 {
 	// copy out the team name from the model
@@ -250,6 +251,9 @@ void CHalfLifeTeamplay::InitHUD(CBasePlayer* pPlayer)
 }
 
 
+// Rocket Crowbar 2: the team-change kill does 50000 (SDK 2.3: 900), and gmsgScoreInfo is RC2's
+// shape: no WRITE_SHORT(0), the team index as a byte.
+// orig 0xdc840
 void CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib)
 {
 	int damageFlags = DMG_GENERIC;
@@ -270,7 +274,7 @@ void CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeam
 		m_DisableDeathMessages = true;
 		m_DisableDeathPenalty = true;
 
-		pPlayer->TakeDamage(CWorld::World->pev, CWorld::World->pev, 900, damageFlags);
+		pPlayer->TakeDamage(CWorld::World->pev, CWorld::World->pev, 50000, damageFlags);
 
 		m_DisableDeathMessages = false;
 		m_DisableDeathPenalty = false;
@@ -292,8 +296,7 @@ void CHalfLifeTeamplay::ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeam
 	WRITE_BYTE(clientIndex);
 	WRITE_SHORT(pPlayer->pev->frags);
 	WRITE_SHORT(pPlayer->m_iDeaths);
-	WRITE_SHORT(0);
-	WRITE_SHORT(g_pGameRules->GetTeamIndex(pPlayer->m_szTeamName) + 1);
+	WRITE_BYTE(g_pGameRules->GetTeamIndex(pPlayer->m_szTeamName) + 1);
 	MESSAGE_END();
 }
 
@@ -398,6 +401,7 @@ bool CHalfLifeTeamplay::IsTeamplay()
 	return true;
 }
 
+// orig 0xdcc20
 bool CHalfLifeTeamplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker)
 {
 	if (pAttacker && PlayerRelationship(pPlayer, pAttacker) == GR_TEAMMATE)
@@ -415,6 +419,7 @@ bool CHalfLifeTeamplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* 
 
 //=========================================================
 //=========================================================
+// orig 0xdcc70
 int CHalfLifeTeamplay::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget)
 {
 	// half life multiplay has a simple concept of Player Relationships.
@@ -506,6 +511,7 @@ bool CHalfLifeTeamplay::IsValidTeam(const char* pTeamName)
 	return (GetTeamIndex(pTeamName) != -1) ? true : false;
 }
 
+// orig 0xdce70
 const char* CHalfLifeTeamplay::TeamWithFewestPlayers()
 {
 	int i;
@@ -544,6 +550,7 @@ const char* CHalfLifeTeamplay::TeamWithFewestPlayers()
 
 //=========================================================
 //=========================================================
+// orig 0xdcf20
 void CHalfLifeTeamplay::RecountTeams(bool bResendInfo)
 {
 	char* pName;

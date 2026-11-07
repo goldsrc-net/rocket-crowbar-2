@@ -152,8 +152,8 @@ void CScientistMine::SciMineThink() // orig 0xb3910
 		m_bActive = true;
 	}
 
-	// VERIFY: CBaseEntity byte +0x66 (the third of m_iRC2Base64's); while set the mine doesn't look for targets or idle
-	if (((unsigned char*)&m_iRC2Base64)[2] != 0)
+	// CBaseEntity byte +0x66, m_bFrozen: while set the mine doesn't look for targets or idle
+	if (m_bFrozen)
 		return;
 
 	Vector vecCenter = Center();

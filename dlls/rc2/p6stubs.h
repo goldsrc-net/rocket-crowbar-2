@@ -48,7 +48,7 @@ float RC2ShieldAbsorb(CBaseEntity* pEnt, float flDamage, float flShieldFraction,
 
 // the race controller (dlls/rc2/racecontroller.cpp): the race path point a player in a race
 // is heading for. iPlayer is the player's entity index; nothing is written when the player
-// isn't racing. "Height" is the controller's track_radius (CBasePlayer::m_flRaceTrackRadius).
+// isn't racing. "Height" is the controller's track_radius (CBasePlayer::m_flTransformVar1).
 void RacePath_GetCurrent(int iPlayer, Vector* pvecPoint, float* pflRadius);				// rc2.dll 0xae570
 void RacePath_GetRelative(int iPlayer, int iOffset, Vector* pvecPoint, float* pflRadius); // rc2.dll 0xae660, wraps around
 void RacePath_Advance(int iPlayer);														// rc2.dll 0xae760

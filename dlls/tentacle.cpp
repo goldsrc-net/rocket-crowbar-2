@@ -25,6 +25,7 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "soundent.h"
+#include "p8_needs.h"
 
 
 #define ACT_T_IDLE 1010
@@ -46,9 +47,9 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	// Don't allow the tentacle to go across transitions!!!
-	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xdd5c0
 
-	void SetObjectCollisionBox() override
+	void SetObjectCollisionBox() override // orig 0xdd5d0
 	{
 		pev->absmin = pev->origin + Vector(-400, -400, 0);
 		pev->absmax = pev->origin + Vector(400, 400, 850);
@@ -63,17 +64,26 @@ public:
 
 	void EXPORT HitTouch(CBaseEntity* pOther);
 
-	float HearingSensitivity() override { return 2.0; }
+	float HearingSensitivity() override { return 2.0; } // orig 0xdd6e0
 
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 
-	MONSTERSTATE GetIdealState() override { return MONSTERSTATE_IDLE; }
+	MONSTERSTATE GetIdealState() override { return MONSTERSTATE_IDLE; } // orig 0xdd6f0
 	//TODO: should override base, but has different signature
 	bool CanPlaySequence(bool fDisregardState) { return true; }
 
 	int Classify() override;
+
+	// Rocket Crowbar 2: the tentacle takes no global beam or fart damage and fixed zoomed
+	// crossbow damage, and answers the RC caps queries (slots 62-65, 75, 76; cbase.h)
+	float GlobalBeamDamage() override { return 0; }			// orig 0xdd6a0
+	float FartDamageInflict() override { return 0; }		// orig 0xdd6b0
+	float ZoomedPrimaryDamage() override { return 50; }		// orig 0xdd6c0
+	float ZoomedSecondaryDamage() override { return 150; }	// orig 0xdd6d0
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 2; }	// orig 0xdd680
+	int GetRCCaps2(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 5; } // orig 0xdd690
 
 	int Level(float dz);
 	int MyLevel();
@@ -113,7 +123,7 @@ public:
 bool CTentacle::g_fFlySound;
 bool CTentacle::g_fSquirmSound;
 
-LINK_ENTITY_TO_CLASS(monster_tentacle, CTentacle);
+LINK_ENTITY_TO_CLASS(monster_tentacle, CTentacle); // orig 0xdd210
 
 // stike sounds
 #define TE_NONE -1
@@ -164,7 +174,7 @@ TYPEDESCRIPTION CTentacle::m_SaveData[] =
 		DEFINE_FIELD(CTentacle, m_vecPrevSound, FIELD_POSITION_VECTOR),
 		DEFINE_FIELD(CTentacle, m_flPrevSoundTime, FIELD_TIME),
 };
-IMPLEMENT_SAVERESTORE(CTentacle, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CTentacle, CBaseMonster); // orig 0xdd280 Save, orig 0xdd2b0 Restore
 
 
 // animation sequence aliases
@@ -239,6 +249,7 @@ typedef enum
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0xdd2e0
 int CTentacle::Classify()
 {
 	return CLASS_ALIEN_MONSTER;
@@ -445,6 +456,7 @@ int CTentacle::MyLevel()
 }
 
 
+// orig 0xdd8d0
 void CTentacle::Test()
 {
 	pev->sequence = TENTACLE_ANIM_Floor_Strike;
@@ -458,6 +470,7 @@ void CTentacle::Test()
 //
 // TentacleThink
 //
+// orig 0xdd920
 void CTentacle::Cycle()
 {
 	// ALERT( at_console, "%s %.2f %d %d\n", STRING( pev->targetname ), pev->origin.z, m_MonsterState, m_IdealMonsterState );
@@ -746,6 +759,7 @@ void CTentacle::CommandUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 
 
 
+// orig 0xde350
 void CTentacle::DieThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -820,9 +834,14 @@ void CTentacle::DieThink()
 }
 
 
+// Rocket Crowbar 2: spawnflags 0x80000000 together with 0x200 force the dirt tap sounds
+// orig 0xde500
 void CTentacle::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	const char* sound;
+
+	if ((pev->spawnflags & 0x80000000) != 0 && (pev->spawnflags & 0x200) != 0) // VERIFY: what sets these spawnflags on a tentacle
+		m_iTapSound = TE_DIRT;
 
 	switch (pEvent->event)
 	{
@@ -948,6 +967,7 @@ void CTentacle::HandleAnimEvent(MonsterEvent_t* pEvent)
 // TentacleStart
 //
 // void CTentacle:: Start( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+// orig 0xde990
 void CTentacle::Start()
 {
 	SetThink(&CTentacle::Cycle);
@@ -970,6 +990,7 @@ void CTentacle::Start()
 
 
 
+// orig 0xdea30
 void CTentacle::HitTouch(CBaseEntity* pOther)
 {
 	TraceResult tr = UTIL_GetGlobalTrace();
@@ -984,14 +1005,15 @@ void CTentacle::HitTouch(CBaseEntity* pOther)
 	if (tr.pHit == NULL || tr.pHit->v.modelindex != pev->modelindex)
 		return;
 
+	float flDamage;
 	if (tr.iHitgroup >= 3)
 	{
-		pOther->TakeDamage(pev, pev, m_iHitDmg, DMG_CRUSH);
+		flDamage = m_iHitDmg;
 		// ALERT( at_console, "wack %3d : ", m_iHitDmg );
 	}
 	else if (tr.iHitgroup != 0)
 	{
-		pOther->TakeDamage(pev, pev, 20, DMG_CRUSH);
+		flDamage = 20;
 		// ALERT( at_console, "tap  %3d : ", 20 );
 	}
 	else
@@ -999,6 +1021,13 @@ void CTentacle::HitTouch(CBaseEntity* pOther)
 		return; // Huh?
 	}
 
+	// Rocket Crowbar 2: an HEV shield takes its share first, and only a hit that still does
+	// damage starts the half-second wait
+	flDamage = RC2_ShieldFilterDamage(pOther, flDamage, 2.0, tr.vecEndPos, -tr.vecPlaneNormal, NULL, NULL, 12);
+	if (flDamage == 0)
+		return;
+
+	pOther->TakeDamage(pev, pev, flDamage, DMG_CRUSH);
 	m_flHitTime = gpGlobals->time + 0.5;
 
 	// ALERT( at_console, "%s : ", STRING( tr.pHit->v.classname ) );
@@ -1023,6 +1052,7 @@ bool CTentacle::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 
 
 
+// orig 0xdebe0
 void CTentacle::Killed(entvars_t* pevAttacker, int iGib)
 {
 	m_iGoalAnim = TENTACLE_ANIM_Pit_Idle;
@@ -1038,7 +1068,7 @@ public:
 	void Precache() override;
 };
 
-LINK_ENTITY_TO_CLASS(monster_tentaclemaw, CTentacleMaw);
+LINK_ENTITY_TO_CLASS(monster_tentaclemaw, CTentacleMaw); // orig 0xdebf0
 
 //
 // Tentacle Spawn
@@ -1060,6 +1090,7 @@ void CTentacleMaw::Spawn()
 	// ResetSequenceInfo( );
 }
 
+// orig 0xded20
 void CTentacleMaw::Precache()
 {
 	PRECACHE_MODEL("models/maw.mdl");

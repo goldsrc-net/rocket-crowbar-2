@@ -123,7 +123,7 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
 	if (pPlayer->m_iTransformType != 0 || !pPlayer->IsAlive() || pPlayer->pev->deadflag != DEAD_NO)
 		return;
-	if (pPlayer->m_iShrunk != 0 || ((unsigned char*)&pPlayer->m_iRC2Base64)[2] != 0) // base byte +0x66
+	if (pPlayer->m_iShrunk != 0 || pPlayer->m_bFrozen) // base byte +0x66
 		return;
 	if (pPlayer->m_flEnergy < RC2Pref(RC2P_Attributes_TransformEnergyCost).f)
 		return;
@@ -192,10 +192,10 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	pPlayer->pev->rendercolor = g_vecZero;
 	pPlayer->pev->skin = 0;
 
-	pPlayer->m_flRace112c = gpGlobals->time - 120;
-	pPlayer->m_iRace1130 = 0;
-	pPlayer->m_flRaceSavedHealth = pPlayer->pev->health;
-	pPlayer->m_flRaceSavedMaxHealth = pPlayer->pev->max_health;
+	pPlayer->m_flTransformIdleTime = gpGlobals->time - 120;
+	pPlayer->m_iTransformIdleAnim = 0;
+	pPlayer->m_flPreTransformHealth = pPlayer->pev->health;
+	pPlayer->m_flPreTransformMaxHealth = pPlayer->pev->max_health;
 	pPlayer->pev->health = 1;
 	pPlayer->pev->max_health = 1;
 
@@ -205,19 +205,19 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	pPlayer->pev->skin = 0;
 
 	const float flStart = gpGlobals->time + 0.25;
-	pPlayer->m_flRace1128 = -1;
-	pPlayer->m_flRaceTimes[3] = flStart;
-	pPlayer->m_flRaceTimes[2] = flStart;
-	pPlayer->m_flRaceTimes[1] = flStart;
-	pPlayer->m_flRaceTimes[0] = flStart;
-	pPlayer->m_flRaceTrackRadius = 0;
-	pPlayer->m_iRace1138[0] = pPlayer->m_iRace1138[1] = pPlayer->m_iRace1138[2] = 0;
-	pPlayer->m_iRacePoint = 0;
-	pPlayer->m_iRace1158[0] = pPlayer->m_iRace1158[1] = pPlayer->m_iRace1158[2] = 0;
-	pPlayer->m_flRace1144[0] = pPlayer->m_flRace1144[1] = pPlayer->m_flRace1144[2] = pPlayer->m_flRace1144[3] = -1;
-	pPlayer->m_vecRace1164 = g_vecZero;
+	pPlayer->m_flTransformLastAttack = -1;
+	pPlayer->m_flTransformNextAttack4 = flStart;
+	pPlayer->m_flTransformNextAttack3 = flStart;
+	pPlayer->m_flTransformNextAttack2 = flStart;
+	pPlayer->m_flTransformNextAttack1 = flStart;
+	pPlayer->m_flTransformVar1 = 0;
+	pPlayer->m_flTransformVar2 = pPlayer->m_flTransformVar3 = pPlayer->m_flTransformVar4 = 0;
+	pPlayer->m_iTransformState1 = 0;
+	pPlayer->m_iTransformState2 = pPlayer->m_iTransformState3 = pPlayer->m_iTransformState4 = 0;
+	pPlayer->m_flTransformTimer1 = pPlayer->m_flTransformTimer2 = pPlayer->m_flTransformTimer3 = pPlayer->m_flTransformTimer4 = -1;
+	pPlayer->m_vecTransformVec = g_vecZero;
 	pPlayer->m_pentRaceController = edict();
-	pPlayer->m_flRaceTrackRadius = m_flTrackRadius;
+	pPlayer->m_flTransformVar1 = m_flTrackRadius;
 
 	UTIL_SetOrigin(pPlayer->pev, m_pPoints[0].vecOrigin); // VERIFY: as the original, no check that InitPath ran
 	pPlayer->pev->view_ofs = Vector(0, 0, 0);
@@ -317,7 +317,7 @@ void RacePath_GetCurrent(int iPlayer, Vector* pvecPoint, float* pflRadius) // or
 	CRaceController* pController = RacerController(iPlayer, &pPlayer);
 	if (!pController)
 		return;
-	const int i = pPlayer->m_iRacePoint;
+	const int i = pPlayer->m_iTransformState1;
 	if (i < 0 || i >= pController->m_iPointCount)
 		return;
 	if (pvecPoint)
@@ -333,7 +333,7 @@ void RacePath_GetRelative(int iPlayer, int iOffset, Vector* pvecPoint, float* pf
 	CRaceController* pController = RacerController(iPlayer, &pPlayer);
 	if (!pController)
 		return;
-	int i = iOffset + pPlayer->m_iRacePoint;
+	int i = iOffset + pPlayer->m_iTransformState1;
 	const int iCount = pController->m_iPointCount;
 	while (true)
 	{
@@ -355,11 +355,11 @@ void RacePath_Advance(int iPlayer) // orig 0xae760
 	CRaceController* pController = RacerController(iPlayer, &pPlayer);
 	if (!pController)
 		return;
-	pPlayer->m_iRacePoint++;
-	if (pPlayer->m_iRacePoint < 0)
-		pPlayer->m_iRacePoint = 0;
-	if (pPlayer->m_iRacePoint >= pController->m_iPointCount)
-		pPlayer->m_iRacePoint = 0;
+	pPlayer->m_iTransformState1++;
+	if (pPlayer->m_iTransformState1 < 0)
+		pPlayer->m_iTransformState1 = 0;
+	if (pPlayer->m_iTransformState1 >= pController->m_iPointCount)
+		pPlayer->m_iTransformState1 = 0;
 }
 
 // The track radius the race began with.
@@ -369,7 +369,7 @@ void RacePath_GetHeight(int iPlayer, float* pflHeight) // orig 0xae830
 	CRaceController* pController = RacerController(iPlayer, &pPlayer);
 	if (!pController || !pflHeight)
 		return;
-	*pflHeight = pPlayer->m_flRaceTrackRadius;
+	*pflHeight = pPlayer->m_flTransformVar1;
 }
 
 

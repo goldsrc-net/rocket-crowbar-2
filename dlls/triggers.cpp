@@ -27,6 +27,7 @@
 #include "saverestore.h"
 #include "trains.h" // trigger_camera has train functionality
 #include "gamerules.h"
+#include "game.h"
 
 #define SF_TRIGGER_PUSH_START_OFF 2		   //spawnflag that makes trigger_push spawn turned OFF
 #define SF_TRIGGER_HURT_TARGETONCE 1	   // Only fire hurt target once
@@ -47,14 +48,14 @@ public:
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
-	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xe3860
 
 	static TYPEDESCRIPTION m_SaveData[];
 
 	float m_frictionFraction; // Sorry, couldn't resist this name :)
 };
 
-LINK_ENTITY_TO_CLASS(func_friction, CFrictionModifier);
+LINK_ENTITY_TO_CLASS(func_friction, CFrictionModifier); // orig 0xe37f0
 
 // Global Savedata for changelevel friction modifier
 TYPEDESCRIPTION CFrictionModifier::m_SaveData[] =
@@ -62,7 +63,7 @@ TYPEDESCRIPTION CFrictionModifier::m_SaveData[] =
 		DEFINE_FIELD(CFrictionModifier, m_frictionFraction, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CFrictionModifier, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CFrictionModifier, CBaseEntity); // orig 0xe3870 Save, orig 0xe38a0 Restore
 
 
 // Modify an entity's friction
@@ -110,7 +111,7 @@ public:
 	void Precache() override;
 	void Think() override;
 
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xe3a40
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
@@ -120,7 +121,7 @@ private:
 	int m_globalstate;
 	USE_TYPE triggerType;
 };
-LINK_ENTITY_TO_CLASS(trigger_auto, CAutoTrigger);
+LINK_ENTITY_TO_CLASS(trigger_auto, CAutoTrigger); // orig 0xe39d0
 
 TYPEDESCRIPTION CAutoTrigger::m_SaveData[] =
 	{
@@ -128,7 +129,7 @@ TYPEDESCRIPTION CAutoTrigger::m_SaveData[] =
 		DEFINE_FIELD(CAutoTrigger, triggerType, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CAutoTrigger, CBaseDelay);
+IMPLEMENT_SAVERESTORE(CAutoTrigger, CBaseDelay); // orig 0xe3a50 Save, orig 0xe3a80 Restore
 
 bool CAutoTrigger::KeyValue(KeyValueData* pkvd)
 {
@@ -159,12 +160,14 @@ bool CAutoTrigger::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0xe3ba0
 void CAutoTrigger::Spawn()
 {
 	Precache();
 }
 
 
+// orig 0xe3bb0
 void CAutoTrigger::Precache()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -192,7 +195,7 @@ public:
 	void Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xe3c80
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
@@ -201,14 +204,14 @@ public:
 private:
 	USE_TYPE triggerType;
 };
-LINK_ENTITY_TO_CLASS(trigger_relay, CTriggerRelay);
+LINK_ENTITY_TO_CLASS(trigger_relay, CTriggerRelay); // orig 0xe3c10
 
 TYPEDESCRIPTION CTriggerRelay::m_SaveData[] =
 	{
 		DEFINE_FIELD(CTriggerRelay, triggerType, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CTriggerRelay, CBaseDelay);
+IMPLEMENT_SAVERESTORE(CTriggerRelay, CBaseDelay); // orig 0xe3c90 Save, orig 0xe3cc0 Restore
 
 bool CTriggerRelay::KeyValue(KeyValueData* pkvd)
 {
@@ -234,6 +237,7 @@ bool CTriggerRelay::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0xe3d90
 void CTriggerRelay::Spawn()
 {
 }
@@ -272,7 +276,7 @@ public:
 
 	bool HasTarget(string_t targetname) override;
 
-	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xe3e40
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -296,7 +300,7 @@ private:
 
 	CMultiManager* Clone();
 };
-LINK_ENTITY_TO_CLASS(multi_manager, CMultiManager);
+LINK_ENTITY_TO_CLASS(multi_manager, CMultiManager); // orig 0xe3dd0
 
 // Global Savedata for multi_manager
 TYPEDESCRIPTION CMultiManager::m_SaveData[] =
@@ -308,7 +312,7 @@ TYPEDESCRIPTION CMultiManager::m_SaveData[] =
 		DEFINE_ARRAY(CMultiManager, m_flTargetDelay, FIELD_FLOAT, MAX_MULTI_TARGETS),
 };
 
-IMPLEMENT_SAVERESTORE(CMultiManager, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CMultiManager, CBaseToggle); // orig 0xe3e50 Save, orig 0xe3e80 Restore
 
 bool CMultiManager::KeyValue(KeyValueData* pkvd)
 {
@@ -341,6 +345,7 @@ bool CMultiManager::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0xe3f90
 void CMultiManager::Spawn()
 {
 	pev->solid = SOLID_NOT;
@@ -484,14 +489,16 @@ public:
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 };
 
-LINK_ENTITY_TO_CLASS(env_render, CRenderFxManager);
+LINK_ENTITY_TO_CLASS(env_render, CRenderFxManager); // orig 0xe42a0
 
 
+// orig 0xe4310
 void CRenderFxManager::Spawn()
 {
 	pev->solid = SOLID_NOT;
 }
 
+// orig 0xe4320
 void CRenderFxManager::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (!FStringNull(pev->target))
@@ -532,10 +539,10 @@ public:
 	void EXPORT ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	void InitTrigger();
 
-	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xe4470
 };
 
-LINK_ENTITY_TO_CLASS(trigger, CBaseTrigger);
+LINK_ENTITY_TO_CLASS(trigger, CBaseTrigger); // orig 0xe4400
 
 /*
 ================
@@ -588,7 +595,7 @@ public:
 	void EXPORT RadiationThink();
 };
 
-LINK_ENTITY_TO_CLASS(trigger_hurt, CTriggerHurt);
+LINK_ENTITY_TO_CLASS(trigger_hurt, CTriggerHurt); // orig 0xe4650
 
 //
 // trigger_monsterjump
@@ -601,7 +608,7 @@ public:
 	void Think() override;
 };
 
-LINK_ENTITY_TO_CLASS(trigger_monsterjump, CTriggerMonsterJump);
+LINK_ENTITY_TO_CLASS(trigger_monsterjump, CTriggerMonsterJump); // orig 0xe46c0
 
 
 void CTriggerMonsterJump::Spawn()
@@ -667,15 +674,17 @@ public:
 	void Touch(CBaseEntity* pOther) override;
 };
 
-LINK_ENTITY_TO_CLASS(trigger_cdaudio, CTriggerCDAudio);
+LINK_ENTITY_TO_CLASS(trigger_cdaudio, CTriggerCDAudio); // orig 0xe4880
 
 //
 // Changes tracks or stops CD when player touches
 //
 // !!!HACK - overloaded HEALTH to avoid adding new field
+// Rocket Crowbar 2: IsActivePlayer (SDK 2.3: IsPlayer)
+// orig 0xe48f0
 void CTriggerCDAudio::Touch(CBaseEntity* pOther)
 {
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer())
 	{ // only clients may trigger these events
 		return;
 	}
@@ -683,11 +692,13 @@ void CTriggerCDAudio::Touch(CBaseEntity* pOther)
 	PlayTrack();
 }
 
+// orig 0xe4910
 void CTriggerCDAudio::Spawn()
 {
 	InitTrigger();
 }
 
+// orig 0xe4920
 void CTriggerCDAudio::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	PlayTrack();
@@ -696,7 +707,7 @@ void CTriggerCDAudio::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 void PlayCDTrack(int iTrack)
 {
 	// manually find the single player.
-	CBaseEntity* pClient = UTIL_GetLocalPlayer();
+	edict_t* pClient = INDEXENT(1); // SDK 2.3's (stock in rc2.dll); halflife-updated: UTIL_GetLocalPlayer
 
 	// Can't play if the client is not connected!
 	if (!pClient)
@@ -710,14 +721,14 @@ void PlayCDTrack(int iTrack)
 
 	if (iTrack == -1)
 	{
-		CLIENT_COMMAND(pClient->edict(), "cd stop\n");
+		CLIENT_COMMAND(pClient, "cd stop\n");
 	}
 	else
 	{
 		char string[64];
 
 		sprintf(string, "cd play %3d\n", iTrack);
-		CLIENT_COMMAND(pClient->edict(), string);
+		CLIENT_COMMAND(pClient, string);
 	}
 }
 
@@ -744,7 +755,7 @@ public:
 	void Play();
 };
 
-LINK_ENTITY_TO_CLASS(target_cdaudio, CTargetCDAudio);
+LINK_ENTITY_TO_CLASS(target_cdaudio, CTargetCDAudio); // orig 0xe49e0
 
 bool CTargetCDAudio::KeyValue(KeyValueData* pkvd)
 {
@@ -766,6 +777,7 @@ void CTargetCDAudio::Spawn()
 		pev->nextthink = gpGlobals->time + 1.0;
 }
 
+// orig 0xe4b10
 void CTargetCDAudio::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	Play();
@@ -775,7 +787,7 @@ void CTargetCDAudio::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 void CTargetCDAudio::Think()
 {
 	// manually find the single player.
-	CBaseEntity* pClient = UTIL_GetLocalPlayer();
+	edict_t* pClient = INDEXENT(1); // SDK 2.3's (stock in rc2.dll); halflife-updated: UTIL_GetLocalPlayer
 
 	// Can't play if the client is not connected!
 	if (!pClient)
@@ -783,7 +795,7 @@ void CTargetCDAudio::Think()
 
 	pev->nextthink = gpGlobals->time + 0.5;
 
-	if ((pClient->pev->origin - pev->origin).Length() <= pev->scale)
+	if ((pClient->v.origin - pev->origin).Length() <= pev->scale)
 		Play();
 }
 
@@ -830,6 +842,7 @@ void CTriggerHurt::Spawn()
 // check and set the player's geiger counter level
 // according to distance from center of trigger
 
+// orig 0xe4c60
 void CTriggerHurt::RadiationThink()
 {
 
@@ -906,6 +919,9 @@ void CBaseTrigger::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_
 }
 
 // When touched, a hurt trigger does DMG points of damage each half-second
+// Rocket Crowbar 2: IsActivePlayer throughout (SDK 2.3: IsPlayer), and no dead-player test on healing
+// (halflife-updated's)
+// orig 0xe5000
 void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 {
 	float fldmg;
@@ -913,13 +929,13 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	if (0 == pOther->pev->takedamage)
 		return;
 
-	if ((pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYTOUCH) != 0 && !pOther->IsPlayer())
+	if ((pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYTOUCH) != 0 && !pOther->IsActivePlayer())
 	{
 		// this trigger is only allowed to touch clients, and this ain't a client.
 		return;
 	}
 
-	if ((pev->spawnflags & SF_TRIGGER_HURT_NO_CLIENTS) != 0 && pOther->IsPlayer())
+	if ((pev->spawnflags & SF_TRIGGER_HURT_NO_CLIENTS) != 0 && pOther->IsActivePlayer())
 		return;
 
 	static_assert(MAX_PLAYERS <= 32, "Rework the player mask logic to support more than 32 players");
@@ -933,7 +949,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 		{
 			if (gpGlobals->time != pev->pain_finished)
 			{ // too early to hurt again, and not same frame with a different entity
-				if (pOther->IsPlayer())
+				if (pOther->IsActivePlayer())
 				{
 					int playerMask = 1 << (pOther->entindex() - 1);
 
@@ -955,7 +971,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 		{
 			// New clock, "un-touch" all players
 			pev->impulse = 0;
-			if (pOther->IsPlayer())
+			if (pOther->IsActivePlayer())
 			{
 				int playerMask = 1 << (pOther->entindex() - 1);
 
@@ -999,19 +1015,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 #endif
 
 	if (fldmg < 0)
-	{
-		bool bApplyHeal = true;
-
-		if (g_pGameRules->IsMultiplayer() && pOther->IsPlayer())
-		{
-			bApplyHeal = pOther->pev->deadflag == DEAD_NO;
-		}
-
-		if (bApplyHeal)
-		{
-			pOther->TakeHealth(-fldmg, m_bitsDamageInflict);
-		}
-	}
+		pOther->TakeHealth(-fldmg, m_bitsDamageInflict);
 	else
 		pOther->TakeDamage(pev, pev, fldmg, m_bitsDamageInflict);
 
@@ -1029,7 +1033,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 		if ((pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYFIRE) != 0)
 		{
 			// if the toucher isn't a client, don't fire the target!
-			if (!pOther->IsPlayer())
+			if (!pOther->IsActivePlayer())
 			{
 				return;
 			}
@@ -1063,7 +1067,7 @@ public:
 	void Spawn() override;
 };
 
-LINK_ENTITY_TO_CLASS(trigger_multiple, CTriggerMultiple);
+LINK_ENTITY_TO_CLASS(trigger_multiple, CTriggerMultiple); // orig 0xe5200
 
 
 void CTriggerMultiple::Spawn()
@@ -1112,7 +1116,8 @@ public:
 	void Spawn() override;
 };
 
-LINK_ENTITY_TO_CLASS(trigger_once, CTriggerOnce);
+LINK_ENTITY_TO_CLASS(trigger_once, CTriggerOnce); // orig 0xe52a0
+// orig 0xe5320
 void CTriggerOnce::Spawn()
 {
 	m_flWait = -1;
@@ -1154,6 +1159,9 @@ void CBaseTrigger::MultiTouch(CBaseEntity* pOther)
 // self.enemy should be set to the activator so it can be held through a delay
 // so wait for the delay time before firing
 //
+// Rocket Crowbar 2: a trigger_secret needs an enemy and an active player for activator
+// (SDK 2.3: the enemy's classname is "player")
+// orig 0xe53d0
 void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 {
 	if (pev->nextthink > gpGlobals->time)
@@ -1164,7 +1172,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 
 	if (FClassnameIs(pev, "trigger_secret"))
 	{
-		if (pev->enemy == NULL || !FClassnameIs(pev->enemy, "player"))
+		if (pev->enemy == NULL || !pActivator->IsActivePlayer())
 			return;
 		gpGlobals->found_secrets++;
 	}
@@ -1201,6 +1209,7 @@ void CBaseTrigger::ActivateMultiTrigger(CBaseEntity* pActivator)
 
 
 // the wait time has passed, so set back up for another activation
+// orig 0xe5580
 void CBaseTrigger::MultiWaitOver()
 {
 	//	if (pev->max_health)
@@ -1218,6 +1227,8 @@ void CBaseTrigger::MultiWaitOver()
 //
 // GLOBALS ASSUMED SET:  g_eoActivator
 //
+// Rocket Crowbar 2: tells an active player (SDK 2.3: m_hActivator named "player")
+// orig 0xe5590
 void CBaseTrigger::CounterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	m_cTriggersLeft--;
@@ -1227,8 +1238,7 @@ void CBaseTrigger::CounterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE
 		return;
 
 	bool fTellActivator =
-		(m_hActivator != 0) &&
-		FClassnameIs(m_hActivator->pev, "player") &&
+		pActivator->IsActivePlayer() && // original bug: no NULL test on pActivator
 		!FBitSet(pev->spawnflags, SPAWNFLAG_NOMESSAGE);
 	if (m_cTriggersLeft != 0)
 	{
@@ -1273,7 +1283,7 @@ class CTriggerCounter : public CBaseTrigger
 public:
 	void Spawn() override;
 };
-LINK_ENTITY_TO_CLASS(trigger_counter, CTriggerCounter);
+LINK_ENTITY_TO_CLASS(trigger_counter, CTriggerCounter); // orig 0xe5690
 
 void CTriggerCounter::Spawn()
 {
@@ -1294,7 +1304,7 @@ public:
 	void Spawn() override;
 };
 
-LINK_ENTITY_TO_CLASS(trigger_transition, CTriggerVolume);
+LINK_ENTITY_TO_CLASS(trigger_transition, CTriggerVolume); // orig 0xe5730
 
 // Define space that travels across a level transition
 void CTriggerVolume::Spawn()
@@ -1314,9 +1324,9 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	void Think() override;
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() | FCAP_FORCE_TRANSITION; } // Always go across transitions
+	int ObjectCaps() override { return CBaseDelay::ObjectCaps() | FCAP_FORCE_TRANSITION; } // Always go across transitions // orig 0xe5870
 };
-LINK_ENTITY_TO_CLASS(fireanddie, CFireAndDie);
+LINK_ENTITY_TO_CLASS(fireanddie, CFireAndDie); // orig 0xe5800
 
 void CFireAndDie::Spawn()
 {
@@ -1366,7 +1376,7 @@ public:
 	int m_changeTarget;
 	float m_changeTargetDelay;
 };
-LINK_ENTITY_TO_CLASS(trigger_changelevel, CChangeLevel);
+LINK_ENTITY_TO_CLASS(trigger_changelevel, CChangeLevel); // orig 0xe58e0
 
 // Global Savedata for changelevel trigger
 TYPEDESCRIPTION CChangeLevel::m_SaveData[] =
@@ -1377,7 +1387,7 @@ TYPEDESCRIPTION CChangeLevel::m_SaveData[] =
 		DEFINE_FIELD(CChangeLevel, m_changeTargetDelay, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CChangeLevel, CBaseTrigger);
+IMPLEMENT_SAVERESTORE(CChangeLevel, CBaseTrigger); // orig 0xe5950 Save, orig 0xe5980 Restore
 
 //
 // Cache user-entity-field values until spawn is called.
@@ -1457,6 +1467,7 @@ void CChangeLevel::ExecuteChangeLevel()
 FILE_GLOBAL char st_szNextMap[cchMapNameMost];
 FILE_GLOBAL char st_szNextSpot[cchMapNameMost];
 
+// orig 0xe5cb0
 edict_t* CChangeLevel::FindLandmark(const char* pLandmarkName)
 {
 	edict_t* pentLandmark;
@@ -1480,11 +1491,15 @@ edict_t* CChangeLevel::FindLandmark(const char* pLandmarkName)
 // triggered by buttons, etc.
 //
 //=========================================================
+// orig 0xe5d50
 void CChangeLevel::UseChangeLevel(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	ChangeLevelNow(pActivator);
 }
 
+// Rocket Crowbar 2: sv_noexit kills whoever uses it in multiplayer (not coop); in deathmatch
+// sv_chglevel 1 changes level with no landmark (SDK 2.3: does nothing in deathmatch)
+// orig 0xe5d60
 void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 {
 	edict_t* pentLandmark;
@@ -1492,9 +1507,22 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 
 	ASSERT(!FStrEq(m_szMapName, ""));
 
+	if (g_pGameRules->IsMultiplayer() && !g_pGameRules->IsCoOp() && 0 != sv_noexit.value)
+	{
+		if (pActivator)
+			pActivator->TakeDamage(pev, pev, 50000, DMG_ALWAYSGIB);
+		return;
+	}
+
 	// Don't work in deathmatch
 	if (g_pGameRules->IsDeathmatch())
+	{
+		// original bug: st_szNextMap is only filled in below, so this goes to whatever map an
+		// earlier changelevel stored there, or "" on the first one
+		if (sv_chglevel.value == 1)
+			CHANGE_LEVEL(st_szNextMap, NULL);
 		return;
+	}
 
 	// Some people are firing these multiple times in a frame, disable
 	if (gpGlobals->time == pev->dmgtime)
@@ -1503,7 +1531,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 	pev->dmgtime = gpGlobals->time;
 
 
-	CBaseEntity* pPlayer = UTIL_GetLocalPlayer();
+	CBaseEntity* pPlayer = CBaseEntity::Instance(INDEXENT(1)); // as SDK 2.3 (halflife-updated: UTIL_GetLocalPlayer)
 	if (!InTransitionVolume(pPlayer, m_szLandmarkName))
 	{
 		ALERT(at_aiconsole, "Player isn't in the transition volume %s, aborting\n", m_szLandmarkName);
@@ -1546,9 +1574,17 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 //
 // GLOBALS ASSUMED SET:  st_szNextMap
 //
+// Rocket Crowbar 2: sv_noexit kills any toucher in multiplayer (not coop); otherwise active players only
+// orig 0xe5ff0
 void CChangeLevel::TouchChangeLevel(CBaseEntity* pOther)
 {
-	if (!FClassnameIs(pOther->pev, "player"))
+	if (g_pGameRules->IsMultiplayer() && !g_pGameRules->IsCoOp() && 0 != sv_noexit.value)
+	{
+		pOther->TakeDamage(pev, pev, 50000, DMG_ALWAYSGIB);
+		return;
+	}
+
+	if (!pOther->IsActivePlayer())
 		return;
 
 	ChangeLevelNow(pOther);
@@ -1577,12 +1613,14 @@ bool CChangeLevel::AddTransitionToList(LEVELLIST* pLevelList, int listCount, con
 	return true;
 }
 
+// orig 0xe6180
 int BuildChangeList(LEVELLIST* pLevelList, int maxList)
 {
 	return CChangeLevel::ChangeList(pLevelList, maxList);
 }
 
 
+// orig 0xe61a0
 bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 {
 	edict_t* pentVolume;
@@ -1626,6 +1664,7 @@ bool CChangeLevel::InTransitionVolume(CBaseEntity* pEntity, char* pVolumeName)
 // Can we make this more elegant?
 // This builds the list of all transitions on this level and which entities are in their PVS's and can / should
 // be moved across.
+// orig 0xe62a0
 int CChangeLevel::ChangeList(LEVELLIST* pLevelList, int maxList)
 {
 	edict_t *pentChangelevel, *pentLandmark;
@@ -1766,10 +1805,11 @@ void NextLevel()
 class CLadder : public CBaseTrigger
 {
 public:
+	bool KeyValue(KeyValueData* pkvd) override { return CBaseTrigger::KeyValue(pkvd); } // orig 0xe66f0 (SDK 2.3's, only forwards)
 	void Spawn() override;
 	void Precache() override;
 };
-LINK_ENTITY_TO_CLASS(func_ladder, CLadder);
+LINK_ENTITY_TO_CLASS(func_ladder, CLadder); // orig 0xe6680
 
 //=========================================================
 // func_ladder - makes an area vertically negotiable
@@ -1802,10 +1842,11 @@ void CLadder::Spawn()
 class CTriggerPush : public CBaseTrigger
 {
 public:
+	bool KeyValue(KeyValueData* pkvd) override { return CBaseTrigger::KeyValue(pkvd); } // orig 0xe6830 (SDK 2.3's, only forwards)
 	void Spawn() override;
 	void Touch(CBaseEntity* pOther) override;
 };
-LINK_ENTITY_TO_CLASS(trigger_push, CTriggerPush);
+LINK_ENTITY_TO_CLASS(trigger_push, CTriggerPush); // orig 0xe67c0
 
 /*QUAKED trigger_push (.5 .5 .5) ? TRIG_PUSH_ONCE
 Pushes the player
@@ -1829,6 +1870,8 @@ void CTriggerPush::Spawn()
 }
 
 
+// Rocket Crowbar 2: nothing with RC caps bit 2 is pushed
+// orig 0xe68e0
 void CTriggerPush::Touch(CBaseEntity* pOther)
 {
 	entvars_t* pevToucher = pOther->pev;
@@ -1842,6 +1885,10 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 	case MOVETYPE_FOLLOW:
 		return;
 	}
+
+	// VERIFY: the original passes this as GetRCCaps2's first argument, which cbase.h types int
+	if ((pOther->GetRCCaps2(this, this) & 2) != 0)
+		return;
 
 	if (pevToucher->solid != SOLID_NOT && pevToucher->solid != SOLID_BSP)
 	{
@@ -1873,6 +1920,8 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 //
 //
 
+// Rocket Crowbar 2: the no-clients flag asks IsActivePlayer (SDK 2.3: IsPlayer)
+// orig 0xe6ab0
 void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 {
 	entvars_t* pevToucher = pOther->pev;
@@ -1895,7 +1944,7 @@ void CBaseTrigger::TeleportTouch(CBaseEntity* pOther)
 
 	if ((pev->spawnflags & SF_TRIGGER_NOCLIENTS) != 0)
 	{ // no clients allowed
-		if (pOther->IsPlayer())
+		if (pOther->IsActivePlayer())
 		{
 			return;
 		}
@@ -1935,8 +1984,9 @@ class CTriggerTeleport : public CBaseTrigger
 public:
 	void Spawn() override;
 };
-LINK_ENTITY_TO_CLASS(trigger_teleport, CTriggerTeleport);
+LINK_ENTITY_TO_CLASS(trigger_teleport, CTriggerTeleport); // orig 0xe6c40
 
+// orig 0xe6cb0
 void CTriggerTeleport::Spawn()
 {
 	InitTrigger();
@@ -1945,7 +1995,7 @@ void CTriggerTeleport::Spawn()
 }
 
 
-LINK_ENTITY_TO_CLASS(info_teleport_destination, CPointEntity);
+LINK_ENTITY_TO_CLASS(info_teleport_destination, CPointEntity); // orig 0xe6cd0
 
 
 
@@ -1955,7 +2005,7 @@ public:
 	void Spawn() override;
 	void EXPORT SaveTouch(CBaseEntity* pOther);
 };
-LINK_ENTITY_TO_CLASS(trigger_autosave, CTriggerSave);
+LINK_ENTITY_TO_CLASS(trigger_autosave, CTriggerSave); // orig 0xe6d40
 
 void CTriggerSave::Spawn()
 {
@@ -1969,13 +2019,15 @@ void CTriggerSave::Spawn()
 	SetTouch(&CTriggerSave::SaveTouch);
 }
 
+// Rocket Crowbar 2: IsActivePlayer (SDK 2.3: IsPlayer)
+// orig 0xe6df0
 void CTriggerSave::SaveTouch(CBaseEntity* pOther)
 {
 	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
 		return;
 
 	// Only save on clients
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer())
 		return;
 
 	SetTouch(NULL);
@@ -1993,7 +2045,7 @@ public:
 	bool KeyValue(KeyValueData* pkvd) override;
 	void EXPORT EndSectionUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 };
-LINK_ENTITY_TO_CLASS(trigger_endsection, CTriggerEndSection);
+LINK_ENTITY_TO_CLASS(trigger_endsection, CTriggerEndSection); // orig 0xe6e40
 
 
 void CTriggerEndSection::EndSectionUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -2042,6 +2094,7 @@ void CTriggerEndSection::EndSectionTouch(CBaseEntity* pOther)
 	UTIL_Remove(this);
 }
 
+// orig 0xe6fa0
 bool CTriggerEndSection::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "section"))
@@ -2062,18 +2115,21 @@ public:
 	void Spawn() override;
 	void EXPORT GravityTouch(CBaseEntity* pOther);
 };
-LINK_ENTITY_TO_CLASS(trigger_gravity, CTriggerGravity);
+LINK_ENTITY_TO_CLASS(trigger_gravity, CTriggerGravity); // orig 0xe7020
 
+// orig 0xe7090
 void CTriggerGravity::Spawn()
 {
 	InitTrigger();
 	SetTouch(&CTriggerGravity::GravityTouch);
 }
 
+// Rocket Crowbar 2: IsActivePlayer (SDK 2.3: IsPlayer)
+// orig 0xe70b0
 void CTriggerGravity::GravityTouch(CBaseEntity* pOther)
 {
 	// Only save on clients
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer())
 		return;
 
 	pOther->pev->gravity = pev->gravity;
@@ -2093,7 +2149,7 @@ public:
 	void Spawn() override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 
-	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xe7150
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
@@ -2102,14 +2158,14 @@ public:
 private:
 	int m_iszNewTarget;
 };
-LINK_ENTITY_TO_CLASS(trigger_changetarget, CTriggerChangeTarget);
+LINK_ENTITY_TO_CLASS(trigger_changetarget, CTriggerChangeTarget); // orig 0xe70e0
 
 TYPEDESCRIPTION CTriggerChangeTarget::m_SaveData[] =
 	{
 		DEFINE_FIELD(CTriggerChangeTarget, m_iszNewTarget, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CTriggerChangeTarget, CBaseDelay);
+IMPLEMENT_SAVERESTORE(CTriggerChangeTarget, CBaseDelay); // orig 0xe7160 Save, orig 0xe7190 Restore
 
 bool CTriggerChangeTarget::KeyValue(KeyValueData* pkvd)
 {
@@ -2122,6 +2178,7 @@ bool CTriggerChangeTarget::KeyValue(KeyValueData* pkvd)
 	return CBaseDelay::KeyValue(pkvd);
 }
 
+// orig 0xe7230
 void CTriggerChangeTarget::Spawn()
 {
 }
@@ -2160,7 +2217,7 @@ public:
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
-	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xe7300
 	static TYPEDESCRIPTION m_SaveData[];
 
 	EHANDLE m_hPlayer;
@@ -2177,7 +2234,7 @@ public:
 	float m_deceleration;
 	bool m_state;
 };
-LINK_ENTITY_TO_CLASS(trigger_camera, CTriggerCamera);
+LINK_ENTITY_TO_CLASS(trigger_camera, CTriggerCamera); // orig 0xe7290
 
 // Global Savedata for changelevel friction modifier
 TYPEDESCRIPTION CTriggerCamera::m_SaveData[] =
@@ -2197,7 +2254,7 @@ TYPEDESCRIPTION CTriggerCamera::m_SaveData[] =
 		DEFINE_FIELD(CTriggerCamera, m_state, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CTriggerCamera, CBaseDelay);
+IMPLEMENT_SAVERESTORE(CTriggerCamera, CBaseDelay); // orig 0xe7310 Save, orig 0xe7340 Restore
 
 void CTriggerCamera::Spawn()
 {
@@ -2242,6 +2299,7 @@ bool CTriggerCamera::KeyValue(KeyValueData* pkvd)
 
 
 
+// orig 0xe7560
 void CTriggerCamera::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (!ShouldToggle(useType, m_state))
@@ -2256,9 +2314,9 @@ void CTriggerCamera::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 	}
 	if (!pActivator || !pActivator->IsPlayer())
 	{
-		pActivator = UTIL_GetLocalPlayer();
+		pActivator = CBaseEntity::Instance(INDEXENT(1)); // as SDK 2.3 (halflife-updated: UTIL_GetLocalPlayer)
 
-		if (!pActivator)
+		if (!pActivator) // halflife-updated's guard, kept
 		{
 			return;
 		}

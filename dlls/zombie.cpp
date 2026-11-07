@@ -152,8 +152,8 @@ bool CZombie::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 
 	// HACK HACK -- until we fix this.
 	// Rocket Crowbar 2: no pain sound while the byte at orig +0x66 is set (the third byte of
-	// CBaseEntity's m_iRC2Base64; ItemPostFrame reads it as "can't fire"). VERIFY: its meaning
-	if (IsAlive() && ((m_iRC2Base64 >> 16) & 0xff) == 0)
+	// CBaseEntity's m_bFrozen; ItemPostFrame reads it as "can't fire"). VERIFY: its meaning
+	if (IsAlive() && !m_bFrozen)
 		PainSound();
 	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }

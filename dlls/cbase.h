@@ -424,25 +424,15 @@ public:
 	// their code does with each, and they get real names at merge.
 	int m_iRC2Base54;	   // orig +0x54. VERIFY: unread so far
 	Vector m_vecRC2Base58; // orig +0x58. Reset to g_vecZero in CBasePlayer::Spawn
-	int m_iRC2Base64;	   // orig +0x64. VERIFY: unread so far
+	unsigned char m_ucRC2Base64[2]; // orig +0x64, +0x65. VERIFY: unread so far
+	bool m_bFrozen;		  // orig +0x66, name ours: set by the freeze grenade's CFreezeTimer, cleared when it thaws (p3, p8)
+	bool m_bAntiFriction; // orig +0x67, name ours: set by the antifriction grenade's CAntiFricTimer (p8)
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
 	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
 
-	// p3 needs: the byte at orig +0x66 (third byte of m_iRC2Base64). CFreezeTimer sets it on what
-	// it freezes; CBasePlayerWeapon::ItemPostFrame drops the attack buttons while it is set.
-	bool& RC2Frozen() { return reinterpret_cast<bool*>(&m_iRC2Base64)[2]; } // name ours
-
-	// p3 needs (A weapons):
-	// end p3 (A weapons)
-
-	// p3 needs (B gauss):
-	// end p3 (B gauss)
-
-	// p3 needs (C glock):
-	// end p3 (C glock)
-
-	// p3 needs (D grenades):
-	// end p3 (D grenades)
+	// the byte at orig +0x66 (p3, p8): CFreezeTimer sets it on what it freezes; frozen talkers don't
+	// speak or follow, CBasePlayerWeapon::ItemPostFrame drops the attack buttons while it is set
+	bool& RC2Frozen() { return m_bFrozen; } // name ours
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }
