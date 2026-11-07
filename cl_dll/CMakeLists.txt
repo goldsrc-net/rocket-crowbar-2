@@ -146,6 +146,8 @@ target_sources(client PRIVATE
 	../dlls/tripmine.cpp
 	../dlls/weapons_shared.cpp
 	../dlls/glock.cpp
+	../dlls/rc2/killmessages.cpp
+	../dlls/rc2prefs_table.cpp
 
 	../game_shared/filesystem_utils.cpp
 	../game_shared/vgui_checkbutton2.cpp

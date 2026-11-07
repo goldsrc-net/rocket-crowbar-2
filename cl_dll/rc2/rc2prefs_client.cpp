@@ -24,7 +24,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "../../dlls/rc2prefs_table.cpp"
 
 // client .bss 0x210aa8: one 8-byte slot per key of g_rc2Prefs
 rc2prefvalue_t g_rc2PrefValues[RC2P_COUNT];
