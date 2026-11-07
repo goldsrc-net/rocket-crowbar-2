@@ -4,8 +4,8 @@ Decided by Steven, 2026-11-07, after the stock audits (mod-rc2 `a1.md`-`a6.md`, 
 `r1.md`-`r6.md`): halflife-updated's evident bug fixes are kept in both projects; a revert stays only
 where halflife-updated changed the game's design or balance, or added a feature. Every play revert of
 both audits is read here once, with the replaced code from the audit merge commits and the reason from
-halflife-updated's commit (`git log upstream/64bit-demo -S<code> -- <file>`;
-`~/stignored/rc2-tools/fixes/why.sh`). The same function or the same fix gets the same verdict in both
+halflife-updated's commit (`git log upstream/64bit-demo -S<code> -- <file>`, run per row by a helper
+script kept outside the repo). The same function or the same fix gets the same verdict in both
 projects.
 
 - fix: halflife-updated's code is restored, the comment reads `// halflife-updated's fix, kept: ...`.

@@ -11,7 +11,7 @@ it. Nothing new was reconstructed. Package c1 (client.dll below 0x4ec50) is stil
 reconstructed elsewhere; its stubs stay.
 
 Worktree ~/Projects/goldsrc.net/mod-rc2-wt/w3-reconcile (branch wt/w3-reconcile, from main 0047e14),
-uncommitted. The scripts used are in ~/stignored/rc2-tools/w3/ (below).
+uncommitted. The scripts used are kept outside the repo (below).
 
 ## 1. Scope
 
@@ -202,8 +202,8 @@ address            kept (defined in)                    replaced
 
 How the c5 view.cpp externs were tied to addresses (c5's stub block named none): the globals the
 original's V_CalcNormalRefdef (0xe9ee0), V_StartScreenTint (0xec590) and V_UpdateScreenTint
-(0xec6c0) read at the places c5's code tests them (~/stignored/rc2-tools/w3/globrefs.py over
-0xe9400-0xecd00, then xrefs.py for each address's other readers and writers). E.g. the third
+(0xec6c0) read at the places c5's code tests them (globrefs.py over 0xe9400-0xecd00, then
+xrefs.py for each address's other readers and writers; Helper scripts, below). E.g. the third
 person pitch test at 0xeac46 reads 0x1013cfa0, 0x101f69f8, 0x101f6a00, 0x10220c40 in c5's order; the
 view state switch at 0xeac92 reads 0x10220c3c (6, then 4 with 0x10220c4c == 2) and copies
 0x1022fe30.
@@ -327,7 +327,9 @@ houndeye's sleep; spectator in-eye (pm_shared now writes the locked view origin 
 - V_CalcSpectatorRefdef's turn test uses the original's AngleBetweenVectors, acos(dot) / (l1 l2)
   (section 4). Kept.
 
-## Helper scripts (~/stignored/rc2-tools/w3/)
+## Helper scripts
+
+Kept outside the repo; what each did:
 
 - rdis.py, callers.py (copied from ../c5, pointed at this worktree): annotated disassembly with the
   thunks followed; callers of an address.

@@ -13,13 +13,14 @@ dependency and browse files) are dropped: they don't change code.
 
 Usage:
   scripts/vc6/build_dsp.py <dir containing the .dsp> <name>.dsp <out dir>
-Needs VC6 at $VC6 (default /media/Data3/Software/vc6/VC98, see scripts/vc6/README.md) and
-Wine; uses its own prefix ($WINEPREFIX, default /media/Data3/Software/vc6/wineprefix).
+Needs VC6 at $VC6 (default $VC6_HOME/VC98, with VC6_HOME defaulting to ~/vc6; see
+scripts/vc6/README.md) and Wine; uses its own prefix ($WINEPREFIX, default $VC6_HOME/wineprefix).
 """
 import os, re, shlex, subprocess, sys
 
-VC6 = os.environ.get("VC6", "/media/Data3/Software/vc6/VC98")
-PREFIX = os.environ.get("WINEPREFIX", "/media/Data3/Software/vc6/wineprefix")
+VC6_HOME = os.environ.get("VC6_HOME", os.path.expanduser("~/vc6"))
+VC6 = os.environ.get("VC6", os.path.join(VC6_HOME, "VC98"))
+PREFIX = os.environ.get("WINEPREFIX", os.path.join(VC6_HOME, "wineprefix"))
 DROP = {"/YX", "/FD", "/Fr", "/FR", "/c", "/nologo"}
 
 

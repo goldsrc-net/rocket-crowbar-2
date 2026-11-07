@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # run.sh original|ours [map] - run one of the two test servers in the foreground (Ctrl-C stops it).
 #
-#   original  Windows HLDS under Wine (HLDS_WIN), port 27031, reference/rc2.dll
-#   ours      ~/Containers/hlds/hlds-linux32-rc2,  port 27032, build-i386/dlls/hl.so
+#   original  Windows HLDS under Wine (HLDS_WIN, default ~/Containers/hlds/hlds-win), port 27031, reference/rc2.dll
+#   ours      ~/Containers/hlds/hlds-linux32-rc2 (RIG2), port 27032, build-i386/dlls/hl.so
 #
 # Join: steam -applaunch 70 -game rc2 +connect 127.0.0.1:<port>
 # -nobreakpad (Linux): the engine's crash handler otherwise uploads minidumps to Valve.
@@ -21,7 +21,7 @@ wait_port() {
 }
 case "${1:-}" in
 	original)
-		HLDS_WIN="${HLDS_WIN:-/media/Data3/Projects/goldsrc.net/hlds-win}"
+		HLDS_WIN="${HLDS_WIN:-$HOME/Containers/hlds/hlds-win}"
 		wait_port 27031
 		cd "$HLDS_WIN"
 		export WINEPREFIX="$HLDS_WIN/wineprefix-rc2" WINEDEBUG=-all

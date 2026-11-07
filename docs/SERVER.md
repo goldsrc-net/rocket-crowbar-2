@@ -7,9 +7,9 @@ is in [GAMEPLAY.md](GAMEPLAY.md); the 1113 weapon, transform and attribute value
 are in [RC_INI.md](RC_INI.md). Where the rebuild differs from RC2 itself,
 [reference/DEVIATIONS.md](../reference/DEVIATIONS.md) says so.
 
-Everything here is read from the rebuild's code. The rebuild has been built and booted (it loads
-`rc_sandcrab` on the rig with a clean console), not played; where the code shows something whose
-effect in game hasn't been seen, this page says "unverified".
+Everything here is read from the rebuild's code. The rebuild boots on the rig with a clean
+console and has been played there; where the code shows something whose effect in game hasn't
+been seen, this page says "unverified".
 
 ## Installing and running
 
@@ -70,11 +70,11 @@ A Linux dedicated server (HLDS, the Half-Life Dedicated Server; ReHLDS works the
 ./hlds_linux -game rc2 +deathmatch 1 +maxplayers 16 +map rc_sandcrab
 ```
 
-The release's multiplayer maps are `rc_freefall`, `rc_homestead`, `rc_inanis`,
+The beta 1.1 server install the rebuild was checked against has these multiplayer maps: `rc_freefall`, `rc_homestead`, `rc_inanis`,
 `rc_marblegarden`, `rc_margaritaville`, `rc_moonside`, `rc_oneking`, `rc_race` (forklift
 racing), `rc_sandcrab` and `rc_vertigoquad`, plus `forfunstuff`, `forkliftfun`, `killbox`,
 `RCRP_Town` and `rcrp_west_final`. `forkliftfun` doesn't load: its `alex2.wad` isn't in the
-release. With an empty `mapcycle.txt` the map cycle falls back to `bootcamp`.
+install. Some of these (`rc_race` and `rc_freefall` among them) aren't in the beta 1 installer. With an empty `mapcycle.txt` the map cycle falls back to `bootcamp`.
 
 [tools/rig/README.md](../tools/rig/README.md) sets up the original (under Wine) and the rebuild
 side by side on one machine, and has a smoke test that compares their consoles.
@@ -153,7 +153,8 @@ The other stock cvars (`mp_teamplay`, `mp_timelimit`, `mp_friendlyfire`, `mp_for
 `mp_flashlight`, `mp_autocrosshair`, `decalfrequency`, `mp_teamlist`, `mp_teamoverride`,
 `mp_defaultteam`, `displaysoundlist`, `sv_alltalk`, `voice_serverdebug`, the `sk_*` skill cvars)
 keep their Half-Life defaults and meaning. Most weapon numbers come from `rc2.ini`, not the
-`sk_*` cvars.
+`sk_*` cvars. `mp_timeleft` and `mp_fragsleft` are written, not read: the game rules set them in
+`Think` to the seconds and frags left, as in Half-Life.
 
 ### Added by Half-Life Updated, not RC2
 

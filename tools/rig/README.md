@@ -16,9 +16,13 @@ is `rc_sandcrab`; `run.sh <which> <map>` takes another.
 
 ## What it sets up
 
-- `/media/Data3/Projects/goldsrc.net/hlds-win/rc2/`: links to RC2's content
-  (`/media/Data3/Projects/mods/rc2`) and a real `dlls/rc2.dll`, in the Windows HLDS mod-ts uses.
-  The original runs there under Wine with its own prefix, `hlds-win/wineprefix-rc2`: mod-ts's
+The paths below are the defaults; `RC2_CONTENT` (RC2's content: the beta 1.1 installer's `rc2`
+folder, default `~/Downloads/rc2`), `HLDS_WIN`, `RIG`, `RIG2` and `CLIENT` override them, for
+`setup.sh`, `run.sh` and `smoke.py` alike.
+
+- `~/Containers/hlds/hlds-win/rc2/` (`HLDS_WIN`): links to RC2's content and a real
+  `dlls/rc2.dll`, in a Windows HLDS install (the one mod-ts uses, fetched with steamcmd). The
+  original runs there under Wine with its own prefix, `hlds-win/wineprefix-rc2`: mod-ts's
   `test-win-server.sh` kills the shared prefix's wineserver on each run.
 - `~/Containers/hlds/hlds-linux32-rc2/`: links to every entry of the 32-bit ReHLDS rig
   (`hlds-linux32-test`), plus a real `rc2/` of content links with our `hl.so`.
@@ -55,8 +59,8 @@ diff <(tools/rig/smoke.py --clean /tmp/o.log | sort -u) <(tools/rig/smoke.py --c
 Stop both servers, then move these four away (nothing else is touched):
 
 ```
-/media/Data3/Projects/goldsrc.net/hlds-win/rc2
-/media/Data3/Projects/goldsrc.net/hlds-win/wineprefix-rc2
+~/Containers/hlds/hlds-win/rc2
+~/Containers/hlds/hlds-win/wineprefix-rc2
 ~/Containers/hlds/hlds-linux32-rc2
 ~/.local/share/Steam/steamapps/common/Half-Life/rc2
 ```

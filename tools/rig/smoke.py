@@ -35,7 +35,7 @@ import argparse, os, re, socket, subprocess, sys, time
 RCON_PW = "smoke"
 
 RIG2 = os.environ.get("RIG2", os.path.expanduser("~/Containers/hlds/hlds-linux32-rc2"))
-HLDS_WIN = os.environ.get("HLDS_WIN", "/media/Data3/Projects/goldsrc.net/hlds-win")
+HLDS_WIN = os.environ.get("HLDS_WIN", os.path.expanduser("~/Containers/hlds/hlds-win"))
 
 # RC2's own cvars (reference/cvars-rc2.tsv)
 CVARS = ["mp_teamannoy", "mp_riding", "mp_random", "mp_scoremode", "mp_allowtransform",

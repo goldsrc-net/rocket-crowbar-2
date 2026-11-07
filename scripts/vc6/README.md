@@ -22,10 +22,12 @@ RC2 layout (hl-rc2)      1982 (1576 SDK, 406 CRT)   (no client layout: it matche
 
 Visual Studio 6.0 Enterprise, CD 1, from archive.org item `en_vs6_ent`
 (`en_vs6_ent_cd1.iso`, SHA-1 `25e382cabcf6c648a327db3b90ff38962bfc0e84`). Only `VC98/` and
-`MSPDB60.DLL` are used; nothing is installed.
+`MSPDB60.DLL` are used; nothing is installed. It goes in `VC6_HOME` (default `~/vc6`), which
+`build_dsp.py` reads too.
 
 ```sh
-mkdir -p /media/Data3/Software/vc6 && cd /media/Data3/Software/vc6
+export VC6_HOME="${VC6_HOME:-$HOME/vc6}"
+mkdir -p "$VC6_HOME" && cd "$VC6_HOME"
 curl -L -o en_vs6_ent_cd1.iso https://archive.org/download/en_vs6_ent/en_vs6_ent_cd1.iso
 echo "25e382cabcf6c648a327db3b90ff38962bfc0e84  en_vs6_ent_cd1.iso" | sha1sum -c
 7z x -o. en_vs6_ent_cd1.iso 'VC98/BIN/*' 'VC98/INCLUDE/*' 'VC98/LIB/*' 'COMMON/MSDEV98/BIN/MSPDB60.DLL'
@@ -34,7 +36,7 @@ WINEPREFIX=$PWD/wineprefix wineboot -i
 WINEPREFIX=$PWD/wineprefix wine VC98/BIN/CL.EXE      # prints "Version 12.00.8168 for 80x86"
 ```
 
-Undo: delete `/media/Data3/Software/vc6`.
+Undo: delete `$VC6_HOME`.
 
 ## Building SDK 2.3
 

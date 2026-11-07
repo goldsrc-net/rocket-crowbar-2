@@ -3,7 +3,7 @@
 # servers, and the client folder to join them with. Idempotent: re-running refreshes our
 # libraries and leaves everything else alone. Undo: tools/rig/README.md.
 #
-#   tools/rig/setup.sh     needs RC2's content (RC2_CONTENT, default /media/Data3/Projects/mods/rc2),
+#   tools/rig/setup.sh     needs RC2's content (RC2_CONTENT, default ~/Downloads/rc2: the installer's rc2 folder),
 #                          build-i386/dlls/hl.so and build-i386/cl_dll/client.so (scripts/build.sh i386 all),
 #                          the Windows HLDS (HLDS_WIN) and the 32-bit Linux rig (RIG)
 #
@@ -12,8 +12,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-CONTENT="${RC2_CONTENT:-/media/Data3/Projects/mods/rc2}"
-HLDS_WIN="${HLDS_WIN:-/media/Data3/Projects/goldsrc.net/hlds-win}" # runs the original, port 27031
+CONTENT="${RC2_CONTENT:-$HOME/Downloads/rc2}"
+HLDS_WIN="${HLDS_WIN:-$HOME/Containers/hlds/hlds-win}"             # runs the original, port 27031
 RIG="${RIG:-$HOME/Containers/hlds/hlds-linux32-test}"              # the 32-bit ReHLDS install
 RIG2="${RIG2:-$HOME/Containers/hlds/hlds-linux32-rc2}"             # runs ours, port 27032
 CLIENT="${CLIENT:-$HOME/.local/share/Steam/steamapps/common/Half-Life}"

@@ -25,8 +25,8 @@ a3e0dbf8a8903f521dc6c30c9a3ac83e  rc2.dll            beta 1.1
 0f193a7e344a6b51ebd2783859aa13b9  beta1/client.dll   beta 1
 ```
 
-Beta 1.1 is the last public release. Its DLLs are byte-identical in Steven's install
-at `/media/Data3/Projects/mods/rc2/` and in `rc2beta1.1.exe` from the Wayback Machine
+Beta 1.1 is the last public release. Its DLLs are byte-identical in a beta 1.1 server
+install and in `rc2beta1.1.exe` from the Wayback Machine
 (`rocketcrowbar.com/downloads/rc2beta1.1.exe`, archived 2004-02-11). Beta 1 is
 `rc2beta1.exe` (24,470,957 bytes). The two installers' content is otherwise
 identical apart from beta 1's redundant pak0.pak and 1.1's changelog.txt and rc2.ini.

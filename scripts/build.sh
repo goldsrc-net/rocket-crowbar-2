@@ -16,8 +16,8 @@
 # BUILDTYPE=Debug builds -O0 with DWARF; BUILD_DIR=<dir under the repo> builds there instead of
 # build-<arch> (scripts/package.sh keeps its Debug build apart this way).
 #
-# The client links VGUI: 32-bit (i386) uses Valve's bundled vgui.so; 64-bit (amd64) uses
-# openvgui's ABI-compatible libvgui.so (vendored as linux/release/vgui64.so) — see cl_dll/CMakeLists.txt.
+# The client builds on i386 only and links Valve's bundled vgui.so (linux/release/); there is no
+# 64-bit VGUI in the tree, so amd64 builds the server alone (CLAUDE.md).
 set -euo pipefail
 
 ARCH="${1:-amd64}"

@@ -1,48 +1,51 @@
-# Building this SDK
+# Building
 
-## Requirements
+The libraries build on Linux in the [goldsrc-net/buildchain](https://github.com/goldsrc-net/buildchain)
+Docker image (Debian 10, glibc 2.28), so the result runs on any Linux with glibc 2.28 or newer. Build the
+image once from a buildchain checkout:
 
-### Windows
-
-* Windows 7 or newer
-* Visual Studio 2019 or newer
-
-### Linux
-
-* GCC 9 or newer (C++17 support or newer required)
-* Packages:
-    * `g++-multilib`
-    * `libgl1-mesa-dev` (or an equivalent package that provides the OpenGL headers)
-
-## Building
-
-The TWHL tutorial on setting up the Half-Life SDK for C++ mod development explains how to set up the source code and how to configure the mod installation: https://twhl.info/wiki/page/Half-Life_Programming_-_Getting_Started
-
-## Packaging mod files
-
-To package a mod for distribution as an archive, use the `CreatePackage` script:
-
-```
-cd path/to/Half-Life
-dotnet script halflife_updated/scripts/packager/CreatePackage.csx --package-name <name of archive file excluding file extension>
+```sh
+( cd ../hlds64-buildchain && make image )      # -> hlds64-buildchain:debian10
 ```
 
-## Building with CMake
+Then, from this repository:
 
-**Note:** if you are a beginner and/or have no experience with CMake, please use Visual Studio projects/solution on Windows and Linux Makefiles instead.
+```sh
+scripts/build.sh i386 all    # -> build-i386/dlls/hl.so and build-i386/cl_dll/client.so
+scripts/build.sh amd64       # -> build-amd64/dlls/hl.so, for a 64-bit HLDS (the server only)
+scripts/build.sh i386 client # the client alone; the second argument is hl (the default), client or all
+BUILDTYPE=Debug scripts/build.sh i386 all   # -O0 with debug info
+```
 
-Start by creating a `build` folder at the root of this repository. This folder is already git ignored so you don't have to update `.gitignore` yourself.
+`scripts/build.sh` only consumes the image; this repository isn't a buildchain submodule. CMake is the
+build system (`dlls/CMakeLists.txt`, `cl_dll/CMakeLists.txt`); RC2's own files in `dlls/rc2/` and
+`cl_dll/rc2/` are globbed, so a new file there needs no CMake change. The weapon files in `dlls/` are
+compiled into both libraries, as in the SDK.
 
-On Windows, make sure you specify the "Win32" architecture when invoking CMake.
+The server builds and boots on i386 and amd64. The client builds on i386 only: it links Valve's 32-bit
+`linux/release/vgui.so`, and there is no 64-bit VGUI in the tree, so a 64-bit client isn't done yet.
 
-On Linux, make sure you select the `cmake/LinuxToolchain.cmake` toolchain file when invoking CMake.
+## Windows
 
-Specify the path to your Half-Life mod (typically `C:\Program Files (x86)\Steam\steamapps\common\Half-Life\mymod` on Windows) as CMake's install prefix (`CMAKE_INSTALL_PREFIX`). When invoking CMake's `INSTALL` target, this will install the build binaries and the required `delta.lst` changes for you.
+There is no Windows build of the rebuild yet. The CI workflow inherited from goldsrc-net/halflife-updated
+has a Win32 job for `projects/vs2019/projects.sln`, whose projects don't list RC2's own sources, and a
+Win64 job that builds the `hl` target with CMake and globs them as the Linux build does, but has never
+run. A Windows server can still run the original `rc2.dll` with the original `liblist.gam`.
 
-If you are working on a multiplayer mod and want to test your binaries on a dedicated server installation (HLDS), you might want to do the same with the `HalfLife_HLDS_DIRECTORY` variable.
+`scripts/vc6/` builds Half-Life SDK 2.3 with RC2's own compiler (Visual C++ 6, under Wine). Those builds
+are for naming the stock functions in the originals; nothing built there ships.
+[scripts/vc6/README.md](scripts/vc6/README.md) has the setup.
 
-`HalfLife_LTO` is a toggle that defines if you want to enable "interprocedural optimization (IPO) / link-time optimization (LTO)" when building the binaries. If you're not sure, leave this disabled (if you want details, check [CMake's documentation](https://cmake.org/cmake/help/v3.23/module/CheckIPOSupported.html)).
+## Checking a build
 
-Optional but highly recommended, set the others `HalfLife` variables, these are used as settings for your debugger thus providing you with more comfort.
+```sh
+scripts/check_coverage.py                            # every original rc2.dll function has a counterpart
+scripts/check_coverage.py --lib client               # the same for client.dll
+scripts/check_client_engfuncs.py                     # the client's weapon code calls no engine entry it leaves NULL
+scripts/rc2ini_doc.py --ini <RC2's rc2.ini> --check  # docs/RC_INI.md matches the key table and shipped values
+scripts/check_docs.py                                # every cvar and command is in docs/SERVER.md
+tools/rig/smoke.py ours out.log                      # boot, change maps, quit (tools/rig/README.md)
+```
 
-Once these are configured, you can generate the `build` directory, open the project and build right away.
+`scripts/` also regenerates every table in `reference/` from the original libraries (see each script's
+header, and the parent goldsrc.net folder's `DECOMPILE.md`, section 2a, for the order).

@@ -7,8 +7,9 @@ value). Where the rebuild differs from RC2 itself,
 [reference/DEVIATIONS.md](../reference/DEVIATIONS.md) says so; the per-file detail, with the
 original's addresses, is in [reference/dossiers/](../reference/dossiers/).
 
-This page is read from the code. The rebuild has been built and booted, not played, so nothing
-here has been seen in game; where the code's effect isn't clear, it says "unverified".
+This page is read from the code. The rebuild has been played on the test rig (tools/rig/), and
+what turned up there is fixed, but most of this page hasn't been checked in game one detail at a
+time; where the code's effect isn't clear, it says "unverified".
 
 RC2 has its own client library, which draws most of its effects (the shield, the lightning, the
 forklift headlights, the nuke's blast) and its menus: the attribute menu, the vote display and an
@@ -277,6 +278,8 @@ wallhops by nature.
 ## Players
 
 - **No fall damage** in multiplayer.
+- **Holding +use** on the ground cuts your speed to a third. That is Half-Life Updated's; RC2 has
+  no +use slowdown (reference/DEVIATIONS.md, with the other movement fixes the rebuild keeps).
 - **Head shots** do 2.5 times the damage; other hit groups normal.
 - **Freezing** (hornet gun) holds the victim, and the players riding with him, still and
   without weapons until it thaws.
@@ -326,4 +329,4 @@ lists every class the original exports.
 
 - `crossbow_bolt`: the crossbow fires `impailer`, `explode_bolt` and `xbow_teather`.
 - `func_vehicle` and `func_vehiclecontrols` come from Half-Life Updated. The rebuild keeps them;
-  RC2 has neither (not yet listed in reference/DEVIATIONS.md).
+  RC2 has neither (reference/DEVIATIONS.md).
