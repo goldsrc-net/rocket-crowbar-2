@@ -721,7 +721,8 @@ void PlayCDTrack(int iTrack)
 
 	if (iTrack == -1)
 	{
-		CLIENT_COMMAND(pClient, "cd stop\n");
+		// SDK 2.3's (stock in RC2); halflife-updated sent "cd stop".
+		CLIENT_COMMAND(pClient, "cd pause\n");
 	}
 	else
 	{
@@ -1438,10 +1439,7 @@ void CChangeLevel::Spawn()
 	if (FStrEq(m_szLandmarkName, ""))
 		ALERT(at_console, "trigger_changelevel to %s doesn't have a landmark", m_szMapName);
 
-	if (0 == stricmp(m_szMapName, STRING(gpGlobals->mapname)))
-	{
-		ALERT(at_error, "trigger_changelevel points to the current map (%s), which does not work\n", STRING(gpGlobals->mapname));
-	}
+	// SDK 2.3's (stock in RC2); halflife-updated printed an error for a changelevel to the current map.
 
 	if (!FStringNull(pev->targetname))
 	{
@@ -2447,8 +2445,9 @@ void CTriggerCamera::FollowTarget()
 	if (dy > 180)
 		dy = dy - 360;
 
-	pev->avelocity.x = dx * 40 * 0.01;
-	pev->avelocity.y = dy * 40 * 0.01;
+	// SDK 2.3's (stock in RC2); halflife-updated used a fixed 0.01 for the frame time.
+	pev->avelocity.x = dx * 40 * gpGlobals->frametime;
+	pev->avelocity.y = dy * 40 * gpGlobals->frametime;
 
 
 	if (!(FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)))

@@ -65,7 +65,9 @@ void CBaseMonster::RunAI()
 
 	// IDLE sound permitted in ALERT state is because monsters were silent in ALERT state. Only play IDLE sound in IDLE state
 	// once we have sounds for that state.
-	if ((m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT) && RANDOM_LONG(0, 99) == 0 && (pev->spawnflags & SF_MONSTER_GAG) == 0)
+	// SDK 2.3's (stock in RC2); halflife-updated tested the gag bit in spawnflags. SDK 2.3 tests
+	// pev->flags, where bit 2 is FL_SWIM: gagged monsters still idle-talk, swimmers never do.
+	if ((m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT) && RANDOM_LONG(0, 99) == 0 && (pev->flags & SF_MONSTER_GAG) == 0)
 	{
 		IdleSound();
 	}

@@ -1007,40 +1007,20 @@ bool CBasePlayerWeapon::AddSecondaryAmmo(int iCount, char* szName, int iMax)
 // (does it have ammo loaded? do I have any ammo for the
 // weapon?, etc)
 //=========================================================
+// SDK 2.3's (stock in RC2); halflife-updated also counted a WEAPON_NOCLIP weapon, secondary
+// ammo and CanDeploy() as useable.
 bool CBasePlayerWeapon::IsUseable()
 {
-	if (m_iClip > 0)
+	if (m_iClip <= 0)
 	{
-		return true;
-	}
-
-	//Player has unlimited ammo for this weapon or does not use magazines
-	if (iMaxAmmo1() == WEAPON_NOCLIP)
-	{
-		return true;
-	}
-
-	if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0)
-	{
-		return true;
-	}
-
-	if (pszAmmo2())
-	{
-		//Player has unlimited ammo for this weapon or does not use magazines
-		if (iMaxAmmo2() == WEAPON_NOCLIP)
+		if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] <= 0 && iMaxAmmo1() != -1)
 		{
-			return true;
-		}
-
-		if (m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] > 0)
-		{
-			return true;
+			// clip is empty (or nonexistant) and the player has no more ammo of this type.
+			return false;
 		}
 	}
 
-	// clip is empty (or nonexistant) and the player has no more ammo of this type.
-	return CanDeploy();
+	return true;
 }
 
 // orig 0xfb1b0 (as SDK 2.3; HLU's m_flLastFireTime reset kept)
@@ -1066,7 +1046,9 @@ bool CBasePlayerWeapon::PlayEmptySound()
 {
 	if (m_iPlayEmptySound)
 	{
-		EMIT_SOUND_PREDICTED(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM, 0, PITCH_NORM);
+		// SDK 2.3's (stock in RC2); halflife-updated used EMIT_SOUND_PREDICTED, which leaves out the
+		// predicting shooter (his client plays its own).
+		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM);
 		m_iPlayEmptySound = false;
 		return false;
 	}
@@ -1229,12 +1211,19 @@ bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon)
 //=========================================================
 // RetireWeapon - no more ammo for this gun, put it away.
 //=========================================================
+// SDK 2.3's (stock in RC2); halflife-updated put this off to a think 0.01 s on (DoRetireWeapon),
+// which also unequipped the weapon when there was nothing to switch to.
 void CBasePlayerWeapon::RetireWeapon()
 {
-	SetThink(&CBasePlayerWeapon::CallDoRetireWeapon);
-	pev->nextthink = gpGlobals->time + 0.01f;
+	// first, no viewmodel at all.
+	m_pPlayer->pev->viewmodel = iStringNull;
+	m_pPlayer->pev->weaponmodel = iStringNull;
+	//m_pPlayer->pev->viewmodelindex = NULL;
+
+	g_pGameRules->GetNextBestWeapon(m_pPlayer, this);
 }
 
+// halflife-updated's; nothing calls it now that RetireWeapon is SDK 2.3's again.
 void CBasePlayerWeapon::DoRetireWeapon()
 {
 	if (!m_pPlayer || m_pPlayer->m_pActiveItem != this)

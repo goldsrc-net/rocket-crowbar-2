@@ -71,10 +71,8 @@ public:
 	void EXPORT DyingThink();
 	void EXPORT CommandUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
 	void ShowDamage();
-	void Update();
 
 	CBaseEntity* m_pGoalEnt;
 	Vector m_vel1;
@@ -161,13 +159,13 @@ void COsprey::Spawn()
 	UTIL_SetSize(pev, Vector(-400, -400, -100), Vector(400, 400, 32));
 	UTIL_SetOrigin(pev, pev->origin);
 
-	//Set FL_FLY so the Osprey model is interpolated.
-	pev->flags |= FL_MONSTER | FL_FLY;
+	// SDK 2.3's (stock in RC2); halflife-updated added FL_FLY, for an interpolation RC2's
+	// AddToFullPack doesn't have, and set max_health, which let the osprey take health.
+	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_YES;
 	m_flRightHealth = 200;
 	m_flLeftHealth = 200;
 	pev->health = 400;
-	pev->max_health = pev->health;
 
 	m_flFieldOfView = 0; // 180 degrees
 
@@ -356,7 +354,8 @@ void COsprey::HoverThink()
 
 	pev->nextthink = gpGlobals->time + 0.1;
 	UTIL_MakeAimVectors(pev->angles);
-	Update();
+	// SDK 2.3's (stock in RC2); halflife-updated's Update() also ran Look, Listen and the AI triggers.
+	ShowDamage();
 }
 
 
@@ -425,7 +424,8 @@ void COsprey::FlyThink()
 	}
 
 	Flight();
-	Update();
+	// SDK 2.3's (stock in RC2); halflife-updated's Update() also ran Look, Listen and the AI triggers.
+	ShowDamage();
 }
 
 
@@ -553,7 +553,7 @@ void COsprey::Killed(entvars_t* pevAttacker, int iGib)
 	pev->nextthink = gpGlobals->time + 0.1;
 	pev->health = 0;
 	pev->takedamage = DAMAGE_NO;
-	pev->deadflag = DEAD_DYING;
+	// SDK 2.3's (stock in RC2); halflife-updated set deadflag DEAD_DYING here.
 
 	m_startTime = gpGlobals->time + 4.0;
 }
@@ -583,7 +583,8 @@ void COsprey::DyingThink()
 	if (m_startTime > gpGlobals->time)
 	{
 		UTIL_MakeAimVectors(pev->angles);
-		Update();
+		// SDK 2.3's (stock in RC2); halflife-updated's Update() also ran Look, Listen and the AI triggers.
+		ShowDamage();
 
 		Vector vecSpot = pev->origin + pev->velocity * 0.2;
 
@@ -795,30 +796,8 @@ void COsprey::ShowDamage()
 	}
 }
 
-void COsprey::Update()
-{
-	//Look around so AI triggers work.
-	Look(4092);
-
-	//Listen for sounds so AI triggers work.
-	Listen();
-
-	ShowDamage();
-	FCheckAITrigger();
-}
-
-bool COsprey::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
-{
-	//Set enemy to last attacker.
-	//Ospreys are not capable of fighting so they'll get angry at whatever shoots at them, not whatever looks like an enemy.
-	m_hEnemy = Instance(pevAttacker);
-
-	//It's on now!
-	m_MonsterState = MONSTERSTATE_COMBAT;
-
-	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
-}
-
+// SDK 2.3 (and RC2's vtable) has no COsprey::TakeDamage: halflife-updated's, which made the
+// attacker the enemy and the state combat for its AI triggers, is left out with Update().
 void COsprey::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	// ALERT( at_console, "%d %.0f\n", ptr->iHitgroup, flDamage );
@@ -830,7 +809,8 @@ void COsprey::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir,
 			return;
 		else
 			m_flRightHealth -= flDamage;
-		m_iDoRightSmokePuff = 3 + (flDamage / 5.0);
+		// SDK 2.3's (stock in RC2); halflife-updated puffed the hit engine, SDK 2.3 the other one.
+		m_iDoLeftSmokePuff = 3 + (flDamage / 5.0);
 	}
 
 	if (ptr->iHitgroup == 2)
@@ -839,7 +819,7 @@ void COsprey::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir,
 			return;
 		else
 			m_flLeftHealth -= flDamage;
-		m_iDoLeftSmokePuff = 3 + (flDamage / 5.0);
+		m_iDoRightSmokePuff = 3 + (flDamage / 5.0);
 	}
 
 	// hit hard, hits cockpit, hits engines

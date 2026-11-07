@@ -294,7 +294,9 @@ void CNihilanth::Spawn()
 	UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 64));
 	UTIL_SetOrigin(pev, pev->origin);
 
-	pev->flags |= FL_MONSTER | FL_FLY;
+	// SDK 2.3's (stock in RC2); halflife-updated added FL_FLY, for an interpolation RC2's
+	// AddToFullPack doesn't have.
+	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_AIM;
 	pev->health = gSkillData.nihilanthHealth;
 	pev->view_ofs = Vector(0, 0, 300);
@@ -1224,21 +1226,10 @@ void CNihilanth::CommandUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 	{
 		CBaseEntity* pTouch = UTIL_FindEntityByTargetname(NULL, m_szDeadTouch);
 
-		if (pTouch)
+		// SDK 2.3's (stock in RC2); halflife-updated touched the first live player with no enemy.
+		if (pTouch && m_hEnemy != nullptr)
 		{
-			if (m_hEnemy != NULL)
-			{
-				pTouch->Touch(m_hEnemy);
-			}
-			// if the player is using "notarget", the ending sequence won't fire unless we catch it here
-			else
-			{
-				CBaseEntity* pEntity = UTIL_FindEntityByClassname(NULL, "player");
-				if (pEntity != NULL && pEntity->IsAlive())
-				{
-					pTouch->Touch(pEntity);
-				}
-			}
+			pTouch->Touch(m_hEnemy);
 		}
 	}
 	break;
