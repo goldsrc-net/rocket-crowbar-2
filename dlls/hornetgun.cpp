@@ -80,18 +80,24 @@ void CHgun::Precache()
 	UTIL_PrecacheOther("freeze_timer");
 }
 
-// orig 0x65110, orig client 0x3c1e0
+// orig 0x65110, orig client 0x3c1e0. RC2: the full count is the max carry pref
 void CHgun::AddToPlayer(CBasePlayer* pPlayer)
 {
+	CBasePlayerWeapon::AddToPlayer(pPlayer);
 #ifndef CLIENT_DLL
+	// SDK 2.3's order (stock in RC2): the hornets are set full after the base has given the
+	// default ammo, then WeapPickup. halflife-updated raised the default ammo to the maximum
+	// before the base, and sent WeapPickup from CBasePlayer::AddPlayerItem
 	if (g_pGameRules->IsMultiplayer())
 	{
 		// in multiplayer, all hivehands come full.
-		m_iDefaultAmmo = RC2Pref(RC2P_Ammo_MaxCarryHornets).s;
+		pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = RC2Pref(RC2P_Ammo_MaxCarryHornets).s;
 	}
-#endif
 
-	CBasePlayerWeapon::AddToPlayer(pPlayer);
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
 }
 
 // orig 0x65190, orig client 0x3c260

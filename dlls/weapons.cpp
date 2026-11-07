@@ -868,6 +868,10 @@ void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 		m_iPrimaryAmmoType = pPlayer->GetAmmoIndex(pszAmmo1());
 		m_iSecondaryAmmoType = pPlayer->GetAmmoIndex(pszAmmo2());
 	}
+
+	// SDK 2.3's AddWeapon (stock in RC2); halflife-updated extracted the ammo in
+	// CBasePlayer::AddPlayerItem, after the weapon joined the player's list
+	ExtractAmmo(this);
 }
 
 bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
@@ -929,7 +933,9 @@ bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
 // orig 0xfaf30 (as SDK 2.3; its slot is named RC2VW2 in names-rc2-slots.tsv)
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 {
-	const bool skiplocal = !m_ForceSendAnimations && UseDecrement() != false;
+	// SDK 2.3's (stock in RC2); halflife-updated didn't skip the predicting client while
+	// m_ForceSendAnimations was set (its weapon switches set it around Deploy)
+	const bool skiplocal = UseDecrement() != false;
 
 	m_pPlayer->pev->weaponanim = iAnim;
 

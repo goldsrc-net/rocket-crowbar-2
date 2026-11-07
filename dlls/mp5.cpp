@@ -127,6 +127,12 @@ bool CMP5::GetItemInfo(ItemInfo* p)
 void CMP5::AddToPlayer(CBasePlayer* pPlayer)
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
+#ifndef CLIENT_DLL
+	// SDK 2.3's (stock in RC2); halflife-updated sent WeapPickup from CBasePlayer::AddPlayerItem
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
 }
 
 // orig 0x7c210, orig client 0x3d940

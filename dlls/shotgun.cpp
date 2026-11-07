@@ -87,11 +87,15 @@ void CShotgun::Precache() // orig 0xc73b0, orig client 0x42fa0
 	m_usCrateCharge = PRECACHE_EVENT(1, "events/sgcratecharge.sc");
 }
 
-// The original also sends WeapPickup here (SDK 2.3's AddToPlayer); halflife-updated's
-// CBasePlayer::AddPlayerItem sends it instead.
 void CShotgun::AddToPlayer(CBasePlayer* pPlayer) // orig 0xc7500, orig client 0x43150
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
+#ifndef CLIENT_DLL
+	// SDK 2.3's (stock in RC2); halflife-updated sent WeapPickup from CBasePlayer::AddPlayerItem
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
 }
 
 bool CShotgun::GetItemInfo(ItemInfo* p) // orig 0xc7560, orig client 0x431d0

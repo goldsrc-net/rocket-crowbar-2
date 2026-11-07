@@ -137,11 +137,16 @@ bool CEgon::Deploy()
 	return DefaultDeploy("models/v_egon.mdl", "models/p_egon.mdl", EGON_DRAW, "egon");
 }
 
-// orig 0x3d530, orig client 0xbe80. RC2 sends gmsgWeapPickup here once the base has added the weapon;
-// halflife-updated sends that same message from CBasePlayer::AddPlayerItem (one message either way).
+// orig 0x3d530, orig client 0xbe80
 void CEgon::AddToPlayer(CBasePlayer* pPlayer)
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
+#ifndef CLIENT_DLL
+	// SDK 2.3's (stock in RC2); halflife-updated sent WeapPickup from CBasePlayer::AddPlayerItem
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
 }
 
 // orig 0x3d590, orig client 0xbf00 (the client's ends nothing: no messages, no sound)

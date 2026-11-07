@@ -378,9 +378,17 @@ bool CRpg::GetItemInfo(ItemInfo* p)
 	return true;
 }
 
-// orig 0xb9680 (orig client 0x40f40): CRpg::AddToPlayer is SDK 2.3's (CBasePlayerWeapon::AddToPlayer, then the
-// WeapPickup message); HLU sends that message from CBasePlayer::AddPlayerItem for every weapon,
-// so there is nothing to write here.
+// orig 0xb9680, orig client 0x40f40
+void CRpg::AddToPlayer(CBasePlayer* pPlayer)
+{
+	CBasePlayerWeapon::AddToPlayer(pPlayer);
+#ifndef CLIENT_DLL
+	// SDK 2.3's (stock in RC2); halflife-updated sent WeapPickup from CBasePlayer::AddPlayerItem
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
+	WRITE_BYTE(m_iId);
+	MESSAGE_END();
+#endif
+}
 
 // orig client 0x40fc0
 bool CRpg::Deploy()

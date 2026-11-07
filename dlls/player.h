@@ -298,7 +298,6 @@ public:
 
 	int GiveAmmo(int iAmount, const char* szName, int iMax) override;
 	void SendAmmoUpdate();
-	void SendSingleAmmoUpdate(int ammoIndex);
 
 private:
 	void InternalSendSingleAmmoUpdate(int ammoIndex);
@@ -354,9 +353,6 @@ public:
 	int m_iAutoWepSwitch;
 
 	bool m_bRestored;
-
-	//True if the player is currently spawning.
-	bool m_bIsSpawning = false;
 
 	// p6 needs: RC2's player members the rc2.ini console command and the shoulder riding
 	// (dlls/rc2prefs.cpp, dlls/rc2/playerride.cpp) use. Not saved, so every name is ours.
