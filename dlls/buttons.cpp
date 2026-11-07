@@ -670,10 +670,12 @@ void DoSpark(entvars_t* pev, const Vector& location)
 void CBaseButton::ButtonSpark()
 {
 	SetThink(&CBaseButton::ButtonSpark);
-	// SDK 2.3's (stock in RC2); halflife-updated timed this on pev->ltime and sparked at pev->absmin
-	pev->nextthink = gpGlobals->time + (0.1 + RANDOM_FLOAT(0, 1.5)); // spark again at random interval
+	// halflife-updated's fix, kept: a button thinks on pev->ltime, so the next spark is timed on it
+	// (halflife #1681), and the spark is at the button (absmin), not near the world origin (mins,
+	// halflife #3269)
+	pev->nextthink = pev->ltime + (0.1 + RANDOM_FLOAT(0, 1.5)); // spark again at random interval
 
-	DoSpark(pev, pev->mins);
+	DoSpark(pev, pev->absmin);
 }
 
 
@@ -894,12 +896,13 @@ void CBaseButton::ButtonBackHome()
 		SetTouch(&CBaseButton::ButtonTouch);
 
 	// reset think for a sparking button
-	// SDK 2.3's (stock in RC2); halflife-updated skipped func_rot_button here (its X Axis flag is the
-	// same bit) and timed the spark on pev->ltime
-	if (FBitSet(pev->spawnflags, SF_BUTTON_SPARK_IF_OFF))
+	// halflife-updated's fix, kept: func_rot_button's X Axis flag is the spark bit, so it doesn't
+	// start sparking (halflife #3270), and the spark is timed on pev->ltime (halflife #1681)
+	//func_rot_button's X Axis spawnflag overlaps with this one so don't use it here.
+	if (!FClassnameIs(pev, "func_rot_button") && FBitSet(pev->spawnflags, SF_BUTTON_SPARK_IF_OFF))
 	{
 		SetThink(&CBaseButton::ButtonSpark);
-		pev->nextthink = gpGlobals->time + 0.5; // no hurry.
+		pev->nextthink = pev->ltime + 0.5; // no hurry.
 	}
 }
 

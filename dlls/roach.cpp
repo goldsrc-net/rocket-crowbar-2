@@ -268,8 +268,9 @@ void CRoach::MonsterThink() // orig 0xb2d60: as SDK 2.3 (see the food test below
 				pSound = CSoundEnt::SoundPointerForIndex(m_iAudibleList);
 
 				// roach smells food and is just standing around. Go to food unless food isn't on same z-plane.
-				// SDK 2.3's integer abs (halflife-updated has fabs): a difference under 4 passes
-				if (pSound && abs((int)(pSound->m_vecOrigin.z - pev->origin.z)) <= 3)
+				// halflife-updated's fix, kept: fabs where SDK 2.3 called the C abs() on a float, which
+				// truncated it to int (so a difference under 4 passed)
+				if (pSound && fabs(pSound->m_vecOrigin.z - pev->origin.z) <= 3)
 				{
 					PickNewDest(ROACH_SMELL_FOOD);
 					SetActivity(ACT_WALK);

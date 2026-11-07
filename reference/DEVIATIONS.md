@@ -43,9 +43,50 @@ The original's set is `reference/cvars-rc2.tsv` (`scripts/cvars.py`).
 ## halflife-updated changes kept in stock functions
 
 RC2's stock functions (byte for byte SDK 2.3, `reference/names-rc2.tsv` and
-`names-rc2-present.tsv`) have SDK 2.3's behavior back wherever it shows in multiplayer play
-(audit of 2026-11-07, `reference/audit/a1.md`-`a6.md`, one row per function). What halflife-updated
-changed and we keep, besides restyling and the crash guards listed under "Crashes in the original":
+`names-rc2-present.tsv`) have SDK 2.3's behavior back wherever halflife-updated changed the game's
+design or balance, or added a feature; halflife-updated's evident bug fixes stay (audit of
+2026-11-07, `reference/audit/a1.md`-`a6.md`, one row per function; the fix or design call per revert
+in `reference/audit/FIXES.md`). What halflife-updated changed and we keep, besides restyling and
+the crash guards listed under "Crashes in the original":
+
+- **halflife-updated's bug fixes in stock functions**, kept by Steven, 2026-11-07 (each marked
+  `// halflife-updated's fix, kept:` in the code):
+  - Doors don't restart their moving sound while already moving (`dlls/doors.cpp` DoorGoUp,
+    DoorGoDown); a `momentary_door` holds its value at 0, doesn't restart a move to where it is
+    heading, and stops its moving sound on arrival (CMomentaryDoor::Use, DoorMoveDone,
+    StopMoveSound).
+  - Buttons time their sparks on `pev->ltime`, spark at the button, and a `func_rot_button` with
+    X Axis doesn't spark (`dlls/buttons.cpp` ButtonSpark, ButtonBackHome).
+  - `func_breakable`'s "explosion" 1 is directed, it can't break twice, and its break volume uses
+    `fabs` (`dlls/func_break.cpp` KeyValue, Die). Its directed gibs still fly along the attack
+    direction, as SDK 2.3 (FIXES.md, unclear).
+  - `fabs` where SDK 2.3 called the int `abs()` on a float: the train's pitch (`dlls/plats.cpp`
+    UpdateSound), the fan's pitch, volume and full-speed test (`dlls/bmodels.cpp` RampPitchVol,
+    SpinUp), the roach's food height (`dlls/roach.cpp` MonsterThink).
+  - Monsters turn by the time since their last turn, not the server's frame time
+    (`dlls/monsters.cpp` ChangeYaw, `m_flLastYawTime`); so do the ichthyosaur's pitch and roll
+    (`dlls/ichthyosaur.cpp` ChangePitch, ChangeYaw), and a dead ichthyosaur doesn't restart its
+    death (GetScheduleOfType).
+  - Gagged monsters don't idle-talk and swimming ones do (`dlls/monsterstate.cpp` RunAI, gag bit in
+    spawnflags).
+  - A talking monster doesn't reset a dying friend's schedule (`dlls/talkmonster.cpp` TakeDamage).
+  - The zombie's idle and attack sounds use its 95-104 pitch (`dlls/zombie.cpp`).
+  - Hand grenades set up their sequence timing when thrown and when landing, and stop on frame 0
+    (`dlls/ggrenade.cpp` ShootTimed, BounceTouch).
+  - The nihilanth's ending fires with no enemy (notarget) (`dlls/nihilanth.cpp` CommandUse); the
+    osprey smokes from the engine that was hit (`dlls/osprey.cpp` TraceAttack).
+  - `trigger_camera` turns at a rate that doesn't follow the frame rate (`dlls/triggers.cpp`
+    FollowTarget).
+  - Weapons: a weapon with secondary ammo or one it can deploy is useable (`dlls/weapons.cpp`
+    IsUseable); the empty click isn't sent to the predicting shooter (PlayEmptySound); retiring an
+    empty weapon waits a think (RetireWeapon, DoRetireWeapon); weapon switches send the deploy
+    animation to the predicting client (`m_ForceSendAnimations` in SelectItem, SwitchWeapon,
+    SelectLastItem, SendWeaponAnim).
+  - Ammo for an exhaustible weapon gives the weapon too (`dlls/player.cpp` GiveAmmo, with the weapon
+    name in the ammo registry, `dlls/weapons_shared.cpp`). For it, AddPlayerItem extracts a new
+    weapon's ammo once the weapon is in the list and sends the counts at once
+    (`SendSingleAmmoUpdate`), so a pickup's AmmoPickup now follows its WeapPickup. Which weapons
+    send WeapPickup is still the original's: the eight whose AddToPlayer does, at spawn too.
 
 - **Node graphs go through the engine filesystem, in the mod directory only**
   (`maps/graphs/<map>.nod`, `.nod64` on amd64; `dlls/nodes.cpp`). The original's
@@ -77,6 +118,10 @@ changed and we keep, besides restyling and the crash guards listed under "Crashe
   AttachToPlayer's `SetThink(NULL)`). SDK 2.3 lets it run, so if the engine set FL_ONGROUND on a
   held (MOVETYPE_FOLLOW) item the weapon would turn back into a pickup and could be removed from
   the inventory. Kept as a guard by Steven, 2026-11-07.
+
+Kept as SDK 2.3 until Steven decides (FIXES.md "Unclear"): the tentacle's, nihilanth's and osprey's
+interpolation flags, `CFlyingMonster::ChangeYaw`, `CBaseMonster::SetActivity`, `LinearMoveDone`,
+`PlayCDTrack`'s "cd pause", and `func_breakable`'s gib direction.
 
 ## Client
 

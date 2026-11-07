@@ -20,7 +20,7 @@
 #include "gamerules.h"
 
 // Precaches the ammo and queues the ammo info for sending to clients
-void AddAmmoNameToAmmoRegistry(const char* szAmmoname) // SDK 2.3's: no weapon name (halflife-updated's, read by nothing since GiveAmmo is the original's)
+void AddAmmoNameToAmmoRegistry(const char* szAmmoname, const char* weaponName)
 {
 	// make sure it's not already in the registry
 	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
@@ -42,6 +42,7 @@ void AddAmmoNameToAmmoRegistry(const char* szAmmoname) // SDK 2.3's: no weapon n
 
 	ammoType.pszName = szAmmoname;
 	ammoType.iId = giAmmoIndex; // yes, this info is redundant
+	ammoType.WeaponName = weaponName;
 }
 
 // orig client 0x39690 (the client's, as SDK 2.3)
@@ -239,8 +240,8 @@ void CBasePlayerWeapon::ItemPostFrame()
 }
 #endif // !CLIENT_DLL
 
-// orig client 0x39e10 (the client's: RC2's swaps and deploys the same way). The server's is stock
-// (SDK 2.3's).
+// orig client 0x39e10 (the client's: halflife-updated's ResetAutoaim, UpdateItemInfo and forced
+// animations are kept; RC2's swaps and deploys the same way)
 void CBasePlayer::SelectLastItem()
 {
 	if (!m_pLastItem)
@@ -262,8 +263,22 @@ void CBasePlayer::SelectLastItem()
 	CBasePlayerItem* pTemp = m_pActiveItem;
 	m_pActiveItem = m_pLastItem;
 	m_pLastItem = pTemp;
-	// SDK 2.3's (stock in RC2); halflife-updated set m_ForceSendAnimations around Deploy so the
-	// predicting client is sent the deploy animation
+
+	// halflife-updated's fix, kept: the deploy animation is sent to the predicting client too, so
+	// lastinv shows it (halflife-updated #154)
+	auto weapon = m_pActiveItem->GetWeaponPtr();
+
+	if (weapon)
+	{
+		weapon->m_ForceSendAnimations = true;
+	}
+
 	m_pActiveItem->Deploy();
+
+	if (weapon)
+	{
+		weapon->m_ForceSendAnimations = false;
+	}
+
 	m_pActiveItem->UpdateItemInfo();
 }

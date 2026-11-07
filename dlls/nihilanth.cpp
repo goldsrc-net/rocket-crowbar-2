@@ -1226,10 +1226,23 @@ void CNihilanth::CommandUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 	{
 		CBaseEntity* pTouch = UTIL_FindEntityByTargetname(NULL, m_szDeadTouch);
 
-		// SDK 2.3's (stock in RC2); halflife-updated touched the first live player with no enemy.
-		if (pTouch && m_hEnemy != nullptr)
+		// halflife-updated's fix, kept: with no enemy (notarget) the first live player touches the
+		// target, so the ending still fires
+		if (pTouch)
 		{
-			pTouch->Touch(m_hEnemy);
+			if (m_hEnemy != NULL)
+			{
+				pTouch->Touch(m_hEnemy);
+			}
+			// if the player is using "notarget", the ending sequence won't fire unless we catch it here
+			else
+			{
+				CBaseEntity* pEntity = UTIL_FindEntityByClassname(NULL, "player");
+				if (pEntity != NULL && pEntity->IsAlive())
+				{
+					pTouch->Touch(pEntity);
+				}
+			}
 		}
 	}
 	break;

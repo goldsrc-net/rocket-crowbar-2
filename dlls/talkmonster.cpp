@@ -1206,9 +1206,9 @@ bool CTalkMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, f
 		{
 			CBaseEntity* pFriend = FindNearestFriend(false);
 
-			// SDK 2.3's (stock in RC2); halflife-updated also skipped a friend whose deadflag isn't
-			// DEAD_NO, so a dying friend's death schedule wasn't reset
-			if (pFriend && pFriend->IsAlive())
+			// halflife-updated's fix, kept: a friend whose deadflag isn't DEAD_NO is skipped, so a
+			// dying friend's death schedule isn't reset
+			if (pFriend && pFriend->IsAlive() && pFriend->pev->deadflag == DEAD_NO)
 			{
 				// only if not dead or dying!
 				CTalkMonster* pTalkMonster = (CTalkMonster*)pFriend;

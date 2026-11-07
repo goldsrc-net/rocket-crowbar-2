@@ -29,10 +29,6 @@
 #define SF_BRUSH_HURT 32		 // rotating brush that inflicts pain based on rotation speed
 #define SF_ROTATING_NOT_SOLID 64 // some special rotating objects are not solid.
 
-// SDK 2.3 (and so RC2, orig 0x136f0 RampPitchVol and 0x137f0 SpinUp) called the C abs() on
-// floats, which truncates them to int first; halflife-updated's fabs() is reverted to that.
-static int IntAbs(float f) { return abs(static_cast<int>(f)); } // name ours
-
 // covering cheesy noise1, noise2, & noise3 fields so they make more sense (for rotating fans)
 #define noiseStart noise1
 #define noiseStop noise2
@@ -594,13 +590,15 @@ void CFuncRotating::RampPitchVol(bool fUp)
 
 	// get current angular velocity
 
-	vecCur = IntAbs(vecAVel.x != 0 ? vecAVel.x : (vecAVel.y != 0 ? vecAVel.y : vecAVel.z));
+	// halflife-updated's fix, kept: fabs where SDK 2.3 called the C abs() on a float, which
+	// truncated it to int
+	vecCur = fabs(vecAVel.x != 0 ? vecAVel.x : (vecAVel.y != 0 ? vecAVel.y : vecAVel.z));
 
 	// get target angular velocity
 
 	vecFinal = (pev->movedir.x != 0 ? pev->movedir.x : (pev->movedir.y != 0 ? pev->movedir.y : pev->movedir.z));
 	vecFinal *= pev->speed;
-	vecFinal = IntAbs(vecFinal);
+	vecFinal = fabs(vecFinal);
 
 	// calc volume and pitch as % of final vol and pitch
 
@@ -636,9 +634,11 @@ void CFuncRotating::SpinUp()
 	vecAVel = pev->avelocity; // cache entity's rotational velocity
 
 	// if we've met or exceeded target speed, set target speed and stop thinking
-	if (IntAbs(vecAVel.x) >= IntAbs(pev->movedir.x * pev->speed) &&
-		IntAbs(vecAVel.y) >= IntAbs(pev->movedir.y * pev->speed) &&
-		IntAbs(vecAVel.z) >= IntAbs(pev->movedir.z * pev->speed))
+	// halflife-updated's fix, kept: fabs where SDK 2.3 called the C abs() on a float, which
+	// truncated it to int
+	if (fabs(vecAVel.x) >= fabs(pev->movedir.x * pev->speed) &&
+		fabs(vecAVel.y) >= fabs(pev->movedir.y * pev->speed) &&
+		fabs(vecAVel.z) >= fabs(pev->movedir.z * pev->speed))
 	{
 		pev->avelocity = pev->movedir * pev->speed; // set speed in case we overshot
 		EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseRunning),

@@ -4823,11 +4823,13 @@ void CBasePlayer::SelectItem(const char* pstr)
 	m_pLastItem = m_pActiveItem;
 	m_pActiveItem = pItem;
 
-	// SDK 2.3's (stock in RC2); halflife-updated set m_ForceSendAnimations around Deploy so the
-	// predicting client is sent the deploy animation
+	// halflife-updated's fix, kept: the deploy animation is sent to the predicting client too
+	// (halflife-updated #154)
 	if (m_pActiveItem)
 	{
+		m_pActiveItem->m_ForceSendAnimations = true;
 		m_pActiveItem->Deploy();
+		m_pActiveItem->m_ForceSendAnimations = false;
 		m_pActiveItem->UpdateItemInfo();
 	}
 }
@@ -5341,10 +5343,11 @@ bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
 	}
 
 
-	// SDK 2.3's (stock in RC2): AddToPlayer extracts the weapon's ammo and the weapons that announce
-	// themselves send WeapPickup, before the item joins the list. halflife-updated extracted the
-	// ammo here after the insert, sent the ammo counts at once and sent WeapPickup for every weapon
-	// but the exhaustible ones (so also the crowbar and glock) except while spawning
+	// halflife-updated's fix, kept: the weapon's ammo is extracted here, once the weapon is in the
+	// list, so GiveAmmo's exhaustible-weapon give sees it (halflife-updated #153, #157), and the
+	// counts go out at once. WeapPickup stays the original's: SDK 2.3's AddToPlayer of the eight
+	// weapons that announce themselves sends it, at spawn too; halflife-updated sent it here for every
+	// weapon but the exhaustible ones, except while spawning
 	if (pItem->CanAddToPlayer(this))
 	{
 		pItem->AddToPlayer(this);
@@ -5352,8 +5355,25 @@ bool CBasePlayer::AddPlayerItem(CBasePlayerItem* pItem)
 		g_pGameRules->PlayerGotWeapon(this, pItem);
 		pItem->CheckRespawn();
 
+		// Add to the list before extracting ammo so weapon ownership checks work properly.
 		pItem->m_pNext = m_rgpPlayerItems[pItem->iItemSlot()];
 		m_rgpPlayerItems[pItem->iItemSlot()] = pItem;
+
+		if (auto weapon = pItem->GetWeaponPtr(); weapon)
+		{
+			weapon->ExtractAmmo(weapon);
+
+			//Immediately update the ammo HUD so weapon pickup isn't sometimes red because the HUD doesn't know about regenerating/free ammo yet.
+			if (-1 != weapon->m_iPrimaryAmmoType)
+			{
+				SendSingleAmmoUpdate(CBasePlayer::GetAmmoIndex(weapon->pszAmmo1()));
+			}
+
+			if (-1 != weapon->m_iSecondaryAmmoType)
+			{
+				SendSingleAmmoUpdate(CBasePlayer::GetAmmoIndex(weapon->pszAmmo2()));
+			}
+		}
 
 		// should we switch to this item?
 		if (g_pGameRules->FShouldSwitchWeapon(this, pItem))
@@ -5491,8 +5511,17 @@ int CBasePlayer::GiveAmmo(int iCount, const char* szName, int iMax, int* piGiven
 		return i;
 	}
 
-	// The original (as SDK 2.3) doesn't give an exhaustible weapon with its ammo, as
-	// halflife-updated did here.
+	// halflife-updated's fix, kept: ammo for an exhaustible weapon (grenades, satchels, ...) also
+	// gives the weapon when the player lacks it (halflife-updated #153, #157)
+	// If this is an exhaustible weapon make sure the player has it.
+	if (const auto& ammoType = CBasePlayerItem::AmmoInfoArray[i]; ammoType.WeaponName != nullptr)
+	{
+		if (!HasNamedPlayerItem(ammoType.WeaponName))
+		{
+			GiveNamedItem(ammoType.WeaponName, 0);
+		}
+	}
+
 	m_rgAmmo[i] += iAdd;
 
 
@@ -5621,6 +5650,16 @@ void CBasePlayer::SendAmmoUpdate()
 	{
 		InternalSendSingleAmmoUpdate(i);
 	}
+}
+
+void CBasePlayer::SendSingleAmmoUpdate(int ammoIndex)
+{
+	if (ammoIndex < 0 || ammoIndex >= MAX_AMMO_SLOTS)
+	{
+		return;
+	}
+
+	InternalSendSingleAmmoUpdate(ammoIndex);
 }
 
 void CBasePlayer::InternalSendSingleAmmoUpdate(int ammoIndex)
@@ -6365,12 +6404,14 @@ bool CBasePlayer::SwitchWeapon(CBasePlayerItem* pWeapon)
 
 	m_pActiveItem = pWeapon;
 
-	// SDK 2.3's (stock in RC2); halflife-updated set m_ForceSendAnimations around Deploy so the
-	// predicting client is sent the deploy animation. Its NULL check above is kept: the original
-	// calls CanDeploy on a NULL weapon
+	// halflife-updated's fix, kept: the deploy animation is sent to the predicting client too
+	// (halflife-updated #154). Its NULL check above is kept too: the original calls CanDeploy on a
+	// NULL weapon
 	if (pWeapon)
 	{
+		pWeapon->m_ForceSendAnimations = true;
 		pWeapon->Deploy();
+		pWeapon->m_ForceSendAnimations = false;
 	}
 
 	return true;
