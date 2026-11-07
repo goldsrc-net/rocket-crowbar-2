@@ -59,7 +59,11 @@ def main():
     def is_thunk(rva, size):
         # only client.dll was linked incrementally; in rc2.dll a lone jmp is a real function
         # that tail-calls another
-        return lib == "client" and size == 5 and (pe.read(rva, 1) or b"") == b"\xe9"
+        if lib == "client" and size == 5 and (pe.read(rva, 1) or b"") == b"\xe9":
+            return True
+        # an import's "jmp [__imp_X]" (ff 25 <IAT slot>), the linker's for each DLL function called
+        # directly (client.dll: vgui.dll's methods, wsock32)
+        return size == 6 and (pe.read(rva, 2) or b"") == b"\xff\x25"
 
     per = collections.OrderedDict()
     for rva, size, name, fl in load(os.path.join(ref, "files-%s.tsv" % lib)):

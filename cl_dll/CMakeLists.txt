@@ -158,6 +158,7 @@ target_sources(client PRIVATE
 	../game_shared/vgui_scrollbar2.cpp
 	../game_shared/vgui_slider2.cpp
 	../game_shared/voice_banmgr.cpp
+	../game_shared/voice_vgui_tweakdlg.cpp
 
 	../pm_shared/pm_debug.cpp
 	../pm_shared/pm_math.cpp

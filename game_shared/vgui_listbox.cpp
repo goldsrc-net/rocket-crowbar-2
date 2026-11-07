@@ -35,6 +35,7 @@ CListBox::CListBox() : Panel(0, 0, 0, 0),
 	m_iScrollMax = -1;
 }
 
+// orig client 0xd95e0
 CListBox::~CListBox()
 {
 	Term();
@@ -102,6 +103,7 @@ int CListBox::GetScrollPos()
 	return m_ItemOffset;
 }
 
+// orig client 0xd9800
 void CListBox::SetScrollPos(int pos)
 {
 	int maxItems = GetScrollMax();

@@ -63,6 +63,7 @@ CMenuPanel* CMessageWindowPanel_Create(const char* szMOTD, const char* szTitle, 
 //-----------------------------------------------------------------------------
 // Purpose: Constructs a message panel
 //-----------------------------------------------------------------------------
+// orig client 0xd9ef0
 CMessageWindowPanel::CMessageWindowPanel(const char* szMOTD, const char* szTitle, bool iShadeFullscreen, bool iRemoveMe, int x, int y, int wide, int tall) : CMenuPanel(iShadeFullscreen ? 100 : 255, iRemoveMe, x, y, wide, tall)
 {
 	// Get the scheme used for the Titles

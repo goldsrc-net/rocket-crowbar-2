@@ -73,6 +73,8 @@ BitmapTGA* LoadTGAForRes(const char* pImageName)
 
 //===========================================================
 // All TFC Hud buttons are derived from this one.
+// orig client 0xd3f10. RC2's CommandButton has no m_iPlayerClass or m_bFlat (it predates them),
+// and this is its only constructor; the two members stay at halflife-updated's defaults here.
 CommandButton::CommandButton(const char* text, int x, int y, int wide, int tall, bool bNoHighlight) : Button("", x, y, wide, tall)
 {
 	m_iPlayerClass = 0;
@@ -100,6 +102,7 @@ CommandButton::CommandButton(const char* text, int x, int y, int wide, int tall,
 	setText(text);
 }
 
+// orig client 0xd3f80
 void CommandButton::Init()
 {
 	m_pSubMenu = NULL;
@@ -124,20 +127,14 @@ void CommandButton::Init()
 // Purpose: Prepends the button text with the current bound key
 //			if no bound key, then a clear space ' ' instead
 //-----------------------------------------------------------------------------
+// orig client 0xd4020. RC2's has no (char)255 "no key" case: every bound key is printed.
 void CommandButton::RecalculateText()
 {
 	char szBuf[128];
 
 	if (m_cBoundKey != 0)
 	{
-		if (m_cBoundKey == (char)255)
-		{
-			strcpy(szBuf, m_sMainText);
-		}
-		else
-		{
-			sprintf(szBuf, "  %c  %s", m_cBoundKey, m_sMainText);
-		}
+		sprintf(szBuf, "  %c  %s", m_cBoundKey, m_sMainText);
 		szBuf[MAX_BUTTON_SIZE - 1] = 0;
 	}
 	else
@@ -150,6 +147,7 @@ void CommandButton::RecalculateText()
 	Button::setText(szBuf);
 }
 
+// orig client 0xd40a0
 void CommandButton::setText(const char* text)
 {
 	strncpy(m_sMainText, text, MAX_BUTTON_SIZE);
@@ -158,17 +156,20 @@ void CommandButton::setText(const char* text)
 	RecalculateText();
 }
 
+// orig client 0xd40e0
 void CommandButton::setBoundKey(char boundKey)
 {
 	m_cBoundKey = boundKey;
 	RecalculateText();
 }
 
+// orig client 0xd4110
 char CommandButton::getBoundKey()
 {
 	return m_cBoundKey;
 }
 
+// orig client 0xd4130
 void CommandButton::AddSubMenu(CCommandMenu* pNewMenu)
 {
 	m_pSubMenu = pNewMenu;
@@ -177,12 +178,14 @@ void CommandButton::AddSubMenu(CCommandMenu* pNewMenu)
 	setMouseClickEnabled(MOUSE_LEFT, false);
 }
 
+// orig client 0xd4160
 void CommandButton::UpdateSubMenus(int iAdjustment)
 {
 	if (m_pSubMenu)
 		m_pSubMenu->RecalculatePositions(iAdjustment);
 }
 
+// orig client 0xd4190
 void CommandButton::paint()
 {
 	// Make the sub label paint the same as the button
@@ -207,30 +210,19 @@ void CommandButton::paint()
 	Button::paint();
 }
 
+// orig client 0xd4230. RC2's has no flat style (no m_bFlat).
 void CommandButton::paintBackground()
 {
-	if (m_bFlat)
+	if (isArmed())
 	{
-		if (isArmed())
-		{
-			// Orange Border
-			drawSetColor(Scheme::sc_secondary1);
-			drawOutlinedRect(0, 0, _size[0], _size[1]);
-		}
+		// Orange highlight background
+		drawSetColor(Scheme::sc_primary2);
+		drawFilledRect(0, 0, _size[0], _size[1]);
 	}
-	else
-	{
-		if (isArmed())
-		{
-			// Orange highlight background
-			drawSetColor(Scheme::sc_primary2);
-			drawFilledRect(0, 0, _size[0], _size[1]);
-		}
 
-		// Orange Border
-		drawSetColor(Scheme::sc_secondary1);
-		drawOutlinedRect(0, 0, _size[0], _size[1]);
-	}
+	// Orange Border
+	drawSetColor(Scheme::sc_secondary1);
+	drawOutlinedRect(0, 0, _size[0], _size[1]);
 }
 
 //-----------------------------------------------------------------------------
@@ -261,6 +253,7 @@ void CommandButton::cursorEntered()
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
+// orig client 0xd4300
 void CommandButton::cursorExited()
 {
 	// only clear ourselves if we have do not have a containing menu
@@ -276,6 +269,7 @@ void CommandButton::cursorExited()
 // Purpose: Returns the command menu that the button is part of, if any
 // Output : CCommandMenu *
 //-----------------------------------------------------------------------------
+// orig client 0xd4340
 CCommandMenu* CommandButton::getParentMenu()
 {
 	return m_pParentMenu;
@@ -285,6 +279,7 @@ CCommandMenu* CommandButton::getParentMenu()
 // Purpose: Sets the menu that contains this button
 // Input  : *pParentMenu -
 //-----------------------------------------------------------------------------
+// orig client 0xd4360
 void CommandButton::setParentMenu(CCommandMenu* pParentMenu)
 {
 	m_pParentMenu = pParentMenu;
@@ -396,14 +391,10 @@ void CImageLabel::LoadImage(const char* pImageName)
 
 //===========================================================
 // Various overloaded paint functions for Custom VGUI objects
+// orig client 0xd44d0. RC2's has no spectator command menu style (no m_iSpectCmdMenu).
 void CCommandMenu::paintBackground()
 {
-	// Transparent black background
-
-	if (m_iSpectCmdMenu)
-		drawSetColor(0, 0, 0, 64);
-	else
-		drawSetColor(Scheme::sc_primary3);
+	drawSetColor(Scheme::sc_primary3);
 
 	drawFilledRect(0, 0, _size[0], _size[1]);
 }
@@ -411,6 +402,7 @@ void CCommandMenu::paintBackground()
 //=================================================================================
 // CUSTOM SCROLLPANEL
 //=================================================================================
+// orig client 0xd4510
 CTFScrollButton::CTFScrollButton(int iArrow, const char* text, int x, int y, int wide, int tall) : CommandButton(text, x, y, wide, tall)
 {
 	// Set text color to orange
@@ -425,6 +417,7 @@ CTFScrollButton::CTFScrollButton(int iArrow, const char* text, int x, int y, int
 	addInputSignal(pISignal);
 }
 
+// orig client 0xd45d0
 void CTFScrollButton::paint()
 {
 	if (!m_pTGA)
@@ -491,6 +484,7 @@ void CTFSlider::paintBackground()
 	}
 }
 
+// orig client 0xd4810
 CTFScrollPanel::CTFScrollPanel(int x, int y, int wide, int tall) : ScrollPanel(x, y, wide, tall)
 {
 	ScrollBar* pScrollBar = getVerticalScrollBar();

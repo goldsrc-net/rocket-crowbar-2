@@ -168,6 +168,7 @@ static void ParseRGBAFromString(byte colorArray[4], const char* colorVector)
 // Input  : xRes -
 //			yRes - dimensions of output window
 //-----------------------------------------------------------------------------
+// orig client 0xda930
 CSchemeManager::CSchemeManager(int xRes, int yRes)
 {
 	// basic setup
@@ -450,6 +451,7 @@ buildDefaultFont:
 //-----------------------------------------------------------------------------
 // Purpose: frees all the memory used by the scheme manager
 //-----------------------------------------------------------------------------
+// orig client 0xdb480 (its scalar deleting destructor, the compiler's; the destructor itself matches SDK 2.3)
 CSchemeManager::~CSchemeManager()
 {
 	delete[] m_pSchemeList;

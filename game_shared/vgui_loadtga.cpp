@@ -38,6 +38,7 @@ public:
 		m_ReadPos = m_DataLen;
 		success = true;
 	}
+	// orig client 0xd9c90
 	int getAvailable(bool& success) override
 	{
 		success = false;
@@ -66,6 +67,7 @@ public:
 			buf[i] = readUChar(success);
 	}
 
+	// orig client 0xd9d30
 	void close(bool& success) override
 	{
 		m_pData = NULL;

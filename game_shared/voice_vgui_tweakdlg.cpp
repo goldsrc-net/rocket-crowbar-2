@@ -4,20 +4,23 @@
 //
 // $NoKeywords: $
 //=============================================================================
+// Rocket Crowbar 2 links this into its client (SDK 2.3s, by its strings, calls and layout; not
+// diffed instruction by instruction: VERIFY); this tree doesnt build it
+// yet (reference/dossiers/c5.md).
 
 #include "../cl_dll/hud.h"
 #include "../cl_dll/cl_util.h"
-#include "../cl_dll/vgui_teamfortressviewport.h"
+#include "../cl_dll/vgui_TeamFortressViewport.h"
 
 
-#include "vgui_actionsignal.h"
+#include "VGUI_ActionSignal.h"
 #include "voice_vgui_tweakdlg.h"
 #include "voice_vgui_tweakdlg.h"
-#include "vgui_panel.h"
-#include "vgui_scrollbar.h"
-#include "vgui_slider.h"
+#include "VGUI_Panel.h"
+#include "VGUI_ScrollBar.h"
+#include "VGUI_Slider.h"
 #include "ivoicetweak.h"
-#include "vgui_button.h"
+#include "VGUI_Button.h"
 #include "vgui_checkbutton2.h"
 #include "vgui_helpers.h"
 
@@ -124,6 +127,7 @@ CVoiceTweakOKButton g_OKButtonSignal;
 // TweakScroller
 // ------------------------------------------------------------------------ //
 
+// orig client 0xece70
 TweakScroller::TweakScroller() :
 	m_Label(""),
 	m_Scroll(0,0,0,0,false),
@@ -132,6 +136,7 @@ TweakScroller::TweakScroller() :
 }
 
 
+// orig client 0xecec0
 void TweakScroller::Init(Panel *pParent, char *pText, int yPos)
 {
 	int parentWidth, parentHeight;
@@ -161,12 +166,14 @@ void TweakScroller::Init(Panel *pParent, char *pText, int yPos)
 }
 
 
+// orig client 0xed080
 float TweakScroller::GetValue()
 {
 	return m_Scroll.getValue() / 100.0f;
 }
 
 
+// orig client 0xed0c0
 void TweakScroller::SetValue(float val)
 {
 	m_Scroll.setValue((int)(val * 100.0f));
@@ -177,6 +184,7 @@ void TweakScroller::SetValue(float val)
 // CVoiceVGUITweakDlg implementation.
 // ------------------------------------------------------------------------ //
 
+// orig client 0xed100
 CVoiceVGUITweakDlg::CVoiceVGUITweakDlg()
 	: CMenuPanel(VOICETWEAK_TRANSPARENCY, false, 0, 0, 0, 0),
 	m_Button_OK("",0,0),
@@ -249,6 +257,7 @@ void CVoiceVGUITweakDlg::Open()
 }
 
 
+// orig client 0xed5e0
 void CVoiceVGUITweakDlg::Close()
 {
 	m_pVoiceTweak->EndVoiceTweakMode();
@@ -258,6 +267,7 @@ void CVoiceVGUITweakDlg::Close()
 }
 
 
+// orig client 0xed630
 void CVoiceVGUITweakDlg::paintBackground()
 {
 	BaseClass::paintBackground();

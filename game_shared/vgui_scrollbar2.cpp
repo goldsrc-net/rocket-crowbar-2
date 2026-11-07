@@ -167,6 +167,7 @@ void ScrollBar2::setSize(int wide, int tall)
 	}
 }
 
+// orig client 0xdf160 (an empty function; the vtable slot table names it CBasePlayerItem::DestroyItem)
 void ScrollBar2::performLayout()
 {
 }
@@ -176,6 +177,7 @@ void ScrollBar2::setValue(int value)
 	_slider->setValue(value);
 }
 
+// orig client 0xdf1b0
 int ScrollBar2::getValue()
 {
 	return _slider->getValue();
@@ -200,11 +202,13 @@ void ScrollBar2::fireIntChangeSignal()
 	}
 }
 
+// orig client 0xdf410
 bool ScrollBar2::isVertical()
 {
 	return _slider->isVertical();
 }
 
+// orig client 0xdf430
 bool ScrollBar2::hasFullRange()
 {
 	return _slider->hasFullRange();
@@ -227,6 +231,7 @@ void ScrollBar2::setButton(Button* button, int index)
 	//_button[index]->setVisible(false);
 }
 
+// orig client 0xdf510
 Button* ScrollBar2::getButton(int index)
 {
 	return _button[index];
@@ -247,6 +252,7 @@ void ScrollBar2::setSlider(Slider2* slider)
 	validate();
 }
 
+// orig client 0xdf5b0
 Slider2* ScrollBar2::getSlider()
 {
 	return _slider;
@@ -264,6 +270,7 @@ void ScrollBar2::doButtonPressed(int buttonIndex)
 	}
 }
 
+// orig client 0xdf650
 void ScrollBar2::setButtonPressedScrollValue(int value)
 {
 	_buttonPressedScrollValue = value;

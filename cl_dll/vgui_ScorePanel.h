@@ -21,15 +21,15 @@
 #define MAX_SCOREBOARD_TEAMS 5
 
 // Scoreboard cells
+// Rocket Crowbar 2 has no class column; its score column is frags or the damage score
 #define COLUMN_TRACKER 0
 #define COLUMN_NAME 1
-#define COLUMN_CLASS 2
-#define COLUMN_KILLS 3
-#define COLUMN_DEATHS 4
-#define COLUMN_LATENCY 5
-#define COLUMN_VOICE 6
-#define COLUMN_BLANK 7
-#define NUM_COLUMNS 8
+#define COLUMN_KILLS 2
+#define COLUMN_DEATHS 3
+#define COLUMN_LATENCY 4
+#define COLUMN_VOICE 5
+#define COLUMN_BLANK 6
+#define NUM_COLUMNS 7
 #define NUM_ROWS (MAX_PLAYERS_HUD + (MAX_SCOREBOARD_TEAMS * 2))
 
 using namespace vgui;
@@ -170,23 +170,23 @@ public:
 		_dualImage->getSize(wide, tall);
 	}
 
+	// orig client 0xde6e0. RC2's colours the image here (SDK 2.3 does it in paint).
 	void setFgColor(int r, int g, int b, int a) override
 	{
 		Label::setFgColor(r, g, b, a);
 		Color color(r, g, b, a);
 		_dualImage->setColor(color);
 		_dualImage->setColor2(color);
+		if (_image && _useFgColorAsImageColor)
+			_image->setColor(color);
 		repaint();
 	}
 
+	// orig client 0xde7f0. RC2's sets only the first text's colour, and doesn't repaint.
 	void setFgColor(Scheme::SchemeColor sc) override
 	{
-		int r, g, b, a;
 		Label::setFgColor(sc);
-		Label::getFgColor(r, g, b, a);
-
-		// Call the r,g,b,a version so it sets the color in the dualImage..
-		setFgColor(r, g, b, a);
+		_dualImage->setColor(Color(sc));
 	}
 
 	void setFont(Font* font) override
@@ -267,6 +267,7 @@ public:
 	int m_iShowscoresHeld;
 
 	int m_iRows;
+	int m_iScoreMode; // 0x2245c: g_iScoreMode the columns were laid out for // name ours
 	int m_iSortedRows[NUM_ROWS];
 	int m_iIsATeam[NUM_ROWS];
 	bool m_bHasBeenSorted[MAX_PLAYERS_HUD];

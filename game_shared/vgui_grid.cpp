@@ -46,6 +46,7 @@ CGrid::CGrid()
 }
 
 
+// orig client 0xd7bc0, orig client 0xd7b90 (its scalar deleting destructor, the compiler's)
 CGrid::~CGrid()
 {
 	Term();
