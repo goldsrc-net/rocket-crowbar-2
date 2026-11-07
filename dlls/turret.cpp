@@ -63,8 +63,12 @@ public:
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	int Classify() override;
 
-	int BloodColor() override { return DONT_BLEED; }
-	void GibMonster() override {} // UNDONE: Throw turret gibs?
+	int BloodColor() override { return DONT_BLEED; } // orig 0xee2b0
+	void GibMonster() override {}					 // orig 0xee2c0. UNDONE: Throw turret gibs?
+
+	// Rocket Crowbar 2: CBaseEntity slot 75 (cbase.h), 2 for every turret. VERIFY: what bit 2 means
+	// VERIFY at merge: main declares GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker); this follows the worktree's cbase.h
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 2; } // orig 0xee2a0
 
 	// Think functions
 
@@ -73,8 +77,8 @@ public:
 	void EXPORT AutoSearchThink();
 	void EXPORT TurretDeath();
 
-	virtual void EXPORT SpinDownCall() { m_iSpin = false; }
-	virtual void EXPORT SpinUpCall() { m_iSpin = true; }
+	virtual void EXPORT SpinDownCall() { m_iSpin = false; } // orig 0xee120
+	virtual void EXPORT SpinUpCall() { m_iSpin = true; }	  // orig 0xee130
 
 	// void SpinDown();
 	// float EXPORT SpinDownCall() { return SpinDown(); }
@@ -167,7 +171,7 @@ TYPEDESCRIPTION CBaseTurret::m_SaveData[] =
 		DEFINE_FIELD(CBaseTurret, m_flSpinUpTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CBaseTurret, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CBaseTurret, CBaseMonster); // orig 0xee140, orig 0xee170
 
 class CTurret : public CBaseTurret
 {
@@ -194,7 +198,7 @@ TYPEDESCRIPTION CTurret::m_SaveData[] =
 		DEFINE_FIELD(CTurret, m_iStartSpin, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CTurret, CBaseTurret);
+IMPLEMENT_SAVERESTORE(CTurret, CBaseTurret); // orig 0xee1a0, orig 0xee1d0
 
 
 class CMiniTurret : public CBaseTurret
@@ -207,8 +211,8 @@ public:
 };
 
 
-LINK_ENTITY_TO_CLASS(monster_turret, CTurret);
-LINK_ENTITY_TO_CLASS(monster_miniturret, CMiniTurret);
+LINK_ENTITY_TO_CLASS(monster_turret, CTurret);		  // orig 0xee200
+LINK_ENTITY_TO_CLASS(monster_miniturret, CMiniTurret); // orig 0xee2d0
 
 bool CBaseTurret::KeyValue(KeyValueData* pkvd)
 {
@@ -243,7 +247,7 @@ bool CBaseTurret::KeyValue(KeyValueData* pkvd)
 }
 
 
-void CBaseTurret::Spawn()
+void CBaseTurret::Spawn() // orig 0xee600, as SDK 2.3 (RC2 changed only the layout)
 {
 	Precache();
 	pev->nextthink = gpGlobals->time + 1;
@@ -349,7 +353,7 @@ void CMiniTurret::Precache()
 	PRECACHE_SOUND("weapons/hks3.wav");
 }
 
-void CBaseTurret::Initialize()
+void CBaseTurret::Initialize() // orig 0xeea80, as SDK 2.3 (RC2 changed only the layout)
 {
 	m_iOn = false;
 	m_fBeserk = false;
@@ -386,7 +390,7 @@ void CBaseTurret::Initialize()
 		SetThink(&CBaseTurret::SUB_DoNothing);
 }
 
-void CBaseTurret::TurretUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+void CBaseTurret::TurretUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) // orig 0xeebb0, as SDK 2.3 (RC2 changed only the layout)
 {
 	if (!ShouldToggle(useType, m_iOn))
 		return;
@@ -458,7 +462,7 @@ void CBaseTurret::EyeOff()
 }
 
 
-void CBaseTurret::ActiveThink()
+void CBaseTurret::ActiveThink() // orig 0xeed70, as SDK 2.3 (RC2 changed only the layout)
 {
 	bool fAttack = false;
 	Vector vecDirToEnemy;
@@ -641,7 +645,7 @@ void CMiniTurret::Shoot(Vector& vecSrc, Vector& vecDirToEnemy)
 }
 
 
-void CBaseTurret::Deploy()
+void CBaseTurret::Deploy() // orig 0xef430, as SDK 2.3 (RC2 changed only the layout)
 {
 	pev->nextthink = gpGlobals->time + 0.1;
 	StudioFrameAdvance();
@@ -679,7 +683,7 @@ void CBaseTurret::Deploy()
 	m_flLastSight = gpGlobals->time + m_flMaxWait;
 }
 
-void CBaseTurret::Retire()
+void CBaseTurret::Retire() // orig 0xef570, as SDK 2.3 (RC2 changed only the layout)
 {
 	// make the turret level
 	m_vecGoalAngles.x = 0;
@@ -727,7 +731,7 @@ void CBaseTurret::Retire()
 }
 
 
-void CTurret::SpinUpCall()
+void CTurret::SpinUpCall() // orig 0xef6e0, as SDK 2.3 (RC2 changed only the layout)
 {
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -827,7 +831,7 @@ void CBaseTurret::SetTurretAnim(TURRET_ANIM anim)
 // After a set amount of time, the barrel will spin down. After m_flMaxWait, the turret will
 // retact.
 //
-void CBaseTurret::SearchThink()
+void CBaseTurret::SearchThink() // orig 0xef950, as SDK 2.3 (RC2 changed only the layout)
 {
 	// ensure rethink
 	SetTurretAnim(TURRET_ANIM_SPIN);
@@ -920,7 +924,7 @@ void CBaseTurret::AutoSearchThink()
 }
 
 
-void CBaseTurret::TurretDeath()
+void CBaseTurret::TurretDeath() // orig 0xefba0, as SDK 2.3 (RC2 changed only the layout)
 {
 	bool iActive = false;
 
@@ -988,7 +992,7 @@ void CBaseTurret::TurretDeath()
 
 
 
-void CBaseTurret::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+void CBaseTurret::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) // orig 0xeff50, as SDK 2.3 (RC2 changed only the layout)
 {
 	if (ptr->iHitgroup == 10)
 	{
@@ -1010,7 +1014,7 @@ void CBaseTurret::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 
 // take damage. bitsDamageType indicates type of damage sustained, ie: DMG_BULLET
 
-bool CBaseTurret::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CBaseTurret::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) // orig 0xf0010, as SDK 2.3 (RC2 changed only the layout)
 {
 	if (0 == pev->takedamage)
 		return false;
@@ -1047,7 +1051,7 @@ bool CBaseTurret::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	return true;
 }
 
-bool CBaseTurret::MoveTurret()
+bool CBaseTurret::MoveTurret() // orig 0xf0110, as SDK 2.3 (RC2 changed only the layout)
 {
 	bool state = false;
 	// any x movement?
@@ -1157,7 +1161,7 @@ public:
 	void EXPORT SentryDeath();
 };
 
-LINK_ENTITY_TO_CLASS(monster_sentry, CSentry);
+LINK_ENTITY_TO_CLASS(monster_sentry, CSentry); // orig 0xf03c0
 
 void CSentry::Precache()
 {
@@ -1205,7 +1209,7 @@ void CSentry::Shoot(Vector& vecSrc, Vector& vecDirToEnemy)
 	pev->effects = pev->effects | EF_MUZZLEFLASH;
 }
 
-bool CSentry::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CSentry::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) // orig 0xf0690, as SDK 2.3 (RC2 changed only the layout)
 {
 	if (0 == pev->takedamage)
 		return false;
@@ -1238,16 +1242,17 @@ bool CSentry::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 }
 
 
-void CSentry::SentryTouch(CBaseEntity* pOther)
+// Rocket Crowbar 2: a player in play (IsActivePlayer) rather than any player
+void CSentry::SentryTouch(CBaseEntity* pOther) // orig 0xf0770
 {
-	if (pOther && (pOther->IsPlayer() || (pOther->pev->flags & FL_MONSTER) != 0))
+	if (pOther && (pOther->IsActivePlayer() || (pOther->pev->flags & FL_MONSTER) != 0))
 	{
 		TakeDamage(pOther->pev, pOther->pev, 0, 0);
 	}
 }
 
 
-void CSentry::SentryDeath()
+void CSentry::SentryDeath() // orig 0xf07b0, as SDK 2.3 (RC2 changed only the layout)
 {
 	bool iActive = false;
 

@@ -59,12 +59,16 @@ public:
 	static const char* pAttackMissSounds[];
 
 	// No range attacks
-	bool CheckRangeAttack1(float flDot, float flDist) override { return false; }
-	bool CheckRangeAttack2(float flDot, float flDist) override { return false; }
+	bool CheckRangeAttack1(float flDot, float flDist) override { return false; } // orig 0xfe920
+	bool CheckRangeAttack2(float flDot, float flDist) override { return false; } // orig 0xfe930
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+
+	// Rocket Crowbar 2: CBaseEntity slot 75 (cbase.h). VERIFY: what the bits mean; main's
+	// signature is (CBaseEntity* pOther, CBaseEntity* pAsker)
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x37ff; } // orig 0xfe910
 };
 
-LINK_ENTITY_TO_CLASS(monster_zombie, CZombie);
+LINK_ENTITY_TO_CLASS(monster_zombie, CZombie); // orig 0xfe8a0
 
 const char* CZombie::pAttackHitSounds[] =
 	{
@@ -110,7 +114,7 @@ const char* CZombie::pPainSounds[] =
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
-int CZombie::Classify()
+int CZombie::Classify() // orig 0xfe940
 {
 	return CLASS_ALIEN_MONSTER;
 }
@@ -119,7 +123,7 @@ int CZombie::Classify()
 // SetYawSpeed - allows each sequence to have a different
 // turn rate associated with it.
 //=========================================================
-void CZombie::SetYawSpeed()
+void CZombie::SetYawSpeed() // orig 0xfe950
 {
 	int ys;
 
@@ -134,7 +138,7 @@ void CZombie::SetYawSpeed()
 	pev->yaw_speed = ys;
 }
 
-bool CZombie::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CZombie::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) // orig 0xfe960
 {
 	// Take 30% damage from bullets
 	if (bitsDamageType == DMG_BULLET)
@@ -147,7 +151,9 @@ bool CZombie::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 	}
 
 	// HACK HACK -- until we fix this.
-	if (IsAlive())
+	// Rocket Crowbar 2: no pain sound while the byte at orig +0x66 is set (the third byte of
+	// CBaseEntity's m_iRC2Base64; ItemPostFrame reads it as "can't fire"). VERIFY: its meaning
+	if (IsAlive() && ((m_iRC2Base64 >> 16) & 0xff) == 0)
 		PainSound();
 	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
@@ -291,7 +297,7 @@ void CZombie::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
-void CZombie::Precache()
+void CZombie::Precache() // orig 0xff190, as SDK 2.3
 {
 	PRECACHE_MODEL("models/zombie.mdl");
 

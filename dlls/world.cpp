@@ -105,7 +105,7 @@ public:
 	void EXPORT TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 };
 
-LINK_ENTITY_TO_CLASS(infodecal, CDecal);
+LINK_ENTITY_TO_CLASS(infodecal, CDecal); // orig 0xfbfc0 (p9: the run "weapons .. world"; the factory now records the classname, util.h)
 
 // UNDONE:  These won't get sent to joining players in multi-player
 void CDecal::Spawn()

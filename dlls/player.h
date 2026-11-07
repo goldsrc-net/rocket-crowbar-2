@@ -356,6 +356,16 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p9 needs: members the virtual hulls and the votes use. Names ours unless said.
+	int m_iShrunk = 0;		   // orig +0x68c: nonzero while shrunk (another package's name); the player then gets a small virtual hull
+	float m_flNextVoteTime = 0; // orig +0x678: when this player may call the next vote
+	int m_iRidingIndex = 0;	   // orig +0x69c: entity index of the player this one rides, 0 if none (other packages' name)
+	int m_iRightRider = 0;	   // orig +0x6a4: entity index of the player on the right shoulder (theirs)
+	int m_iLeftRider = 0;	   // orig +0x6a8: entity index of the player on the left shoulder (theirs)
+	class CVirtualHull* m_rgpVirtualHulls[16] = {}; // orig +0x7a8: the player's virtual hulls (dlls/rc2/virtualhull.cpp)
+	float m_flNextHullUpdate = 0;					 // orig +0x7e8
+	void UpdateVirtualHulls();						 // orig 0xf6fb0, from PreThink
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

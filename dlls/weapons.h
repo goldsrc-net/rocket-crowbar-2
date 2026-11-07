@@ -367,7 +367,24 @@ public:
 	// hle time creep vars
 	float m_flPrevPrimaryAttack;
 	float m_flLastFireTime;
+
+	// p9 needs: RC2's added CBasePlayerWeapon virtuals and timers, ONLY so that this worktree
+	// builds (the tripmine run overrides them). They duplicate p3's declarations already merged
+	// in main, with main's names and signatures; drop this block at merge. Slots in RC2's
+	// 116-slot vtable: TertiaryAttack 107 and QuaternaryAttack 108 sit between SecondaryAttack
+	// (106) and Reload (109); WeaponFrame 114 and ReadWeaponState 115 follow UseDecrement (113).
+	virtual void TertiaryAttack() {}
+	virtual void QuaternaryAttack() {}
+	virtual void WeaponFrame() {}
+	virtual void ReadWeaponState(void* pData, int iSize) {}
+	float m_flNextTertiaryAttack;	// orig +0xb0
+	float m_flNextQuaternaryAttack; // orig +0xb4
 };
+
+// p9 needs: p3's readers (weapons.cpp, orig 0xfb780) and flag (.data 0x10181434), declared here
+// only so this worktree builds; drop at merge (main has p3's).
+inline bool RC2ReadStateBool(void** ppData, int* piSize) { return false; }
+inline bool g_fRC2PlayWeaponEvents = true;
 
 
 class CBasePlayerAmmo : public CBaseEntity
@@ -1184,8 +1201,25 @@ public:
 #endif
 	}
 
+	// Rocket Crowbar 2 (dlls/rc2/tripmine_weapon.cpp): four mines, one per attack: monster_tripmine
+	// (PrimaryAttack), bouncy_tripmine, punch_tripmine and target_tripmine, each with its [Tripmine]
+	// ammo cost, limit and refire keys. Server only: the client's tripmine keeps the stock attack.
+#ifndef CLIENT_DLL
+	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+
+	int CountMines(const char* szClassname); // name ours
+	void MineAttack(int iMine);				 // name ours: the body of all four attacks
+#endif
+
+	int m_iMinesOut[4];			// name ours. orig +0xdc..+0xe8: this player's mines of each kind in the world
+	float m_flNextMinesOutSend; // name ours. orig +0xec: when WeaponFrame next sends m_iMinesOut
+
 private:
-	unsigned short m_usTripFire;
+	unsigned short m_usTripFire; // orig +0xf0
 };
 
 enum squeak_e

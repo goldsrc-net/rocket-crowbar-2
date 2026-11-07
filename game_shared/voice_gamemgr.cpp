@@ -88,7 +88,7 @@ CVoiceGameMgr::CVoiceGameMgr()
 }
 
 
-CVoiceGameMgr::~CVoiceGameMgr()
+CVoiceGameMgr::~CVoiceGameMgr() // orig 0xf78d0
 {
 }
 
@@ -160,7 +160,8 @@ bool CVoiceGameMgr::PlayerHasBlockedPlayer(CBasePlayer* pReceiver, CBasePlayer* 
 	return (g_BanMasks[iReceiverIndex][iSenderIndex] ? true : false);
 }
 
-bool CVoiceGameMgr::ClientCommand(CBasePlayer* pPlayer, const char* cmd)
+// Rocket Crowbar 2 (as SDK 2.3): both commands update the masks at once
+bool CVoiceGameMgr::ClientCommand(CBasePlayer* pPlayer, const char* cmd) // orig 0xf7a30
 {
 	int playerClientIndex = pPlayer->entindex() - 1;
 	if (playerClientIndex < 0 || playerClientIndex >= m_nMaxPlayers)
@@ -188,7 +189,7 @@ bool CVoiceGameMgr::ClientCommand(CBasePlayer* pPlayer, const char* cmd)
 		}
 
 		// Force it to update the masks now.
-		//UpdateMasks();
+		UpdateMasks();
 		return true;
 	}
 	else if (stricmp(cmd, "VModEnable") == 0 && CMD_ARGC() >= 2)
@@ -198,7 +199,7 @@ bool CVoiceGameMgr::ClientCommand(CBasePlayer* pPlayer, const char* cmd)
 		VoiceServerDebug("CVoiceGameMgr::ClientCommand: VModEnable (%s)\n", enable ? "true" : "false");
 		g_PlayerModEnable[playerClientIndex] = enable;
 		g_bWantModEnable[playerClientIndex] = false;
-		//UpdateMasks();
+		UpdateMasks();
 		return true;
 	}
 	else
@@ -208,7 +209,7 @@ bool CVoiceGameMgr::ClientCommand(CBasePlayer* pPlayer, const char* cmd)
 }
 
 
-void CVoiceGameMgr::UpdateMasks()
+void CVoiceGameMgr::UpdateMasks() // orig 0xf7c60
 {
 	m_UpdateInterval = 0;
 
