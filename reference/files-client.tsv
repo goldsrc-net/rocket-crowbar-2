@@ -1042,7 +1042,7 @@ rva	size	name	file
 0x3b48	5	Vector::operator+	new: start .. ev_hldm
 0x3b4d	5	vgui::Dar<char*>::removeElementAt	new: start .. ev_hldm
 0x3b57	5	thunk_FUN_100b5cd0	new: start .. ev_hldm
-0x3b89	5	thunk_FUN_100c0640	new: start .. ev_hldm
+0x3b89	5	CStudioModelRenderer::Init	new: start .. ev_hldm
 0x3b93	5	thunk_FUN_100a61f0	new: start .. ev_hldm
 0x3b9d	5	thunk_FUN_1005a6a0	new: start .. ev_hldm
 0x3bb1	5	vgui::Dar<vgui::ChangeSignal*>::Dar<vgui::ChangeSignal*>	new: start .. ev_hldm
@@ -1334,7 +1334,7 @@ rva	size	name	file
 0x46fb	5	thunk_FUN_10050090	new: start .. ev_hldm
 0x4700	5	CHudServers::CompareServers	new: start .. ev_hldm
 0x4705	5	CGrenade::DetonateUse	new: start .. ev_hldm
-0x470a	5	thunk_FUN_100c29d0	new: start .. ev_hldm
+0x470a	5	CStudioModelRenderer::StudioDrawModel	new: start .. ev_hldm
 0x4714	5	thunk_FUN_100eba10	new: start .. ev_hldm
 0x4719	5	thunk_FUN_1008c5c0	new: start .. ev_hldm
 0x4723	5	thunk_FUN_100b3ac0	new: start .. ev_hldm
@@ -1412,16 +1412,27 @@ rva	size	name	file
 0x99c0	52	FUN_100099c0	new: start .. ev_hldm
 0x9a10	24	FUN_10009a10	new: start .. ev_hldm
 0x9a40	91	FUN_10009a40	new: start .. ev_hldm
+0x9ac0	6	CGlock::iItemSlot	new: start .. ev_hldm
+0x9ae0	1	CBasePlayerWeapon::WeaponIdle	new: start .. ev_hldm
+0x9b00	3	CBaseEntity::Respawn	new: start .. ev_hldm
+0x9b20	3	?keyFocusTicked@FooDefaultSliderSignal@?%../game_shared/vgui_slider2.cpp2922222@@UAEXPAVPanel@vgui@@@Z	new: start .. ev_hldm
+0x9b40	4	CGrenade::BloodColor	new: start .. ev_hldm
+0x9b60	8	CBaseEntity::IsTriggered	new: start .. ev_hldm
+0x9be0	3	CHandler_ButtonHighlight::keyPressed	new: start .. ev_hldm
+0x9c20	5	CBaseEntity::RemovePlayerItem	new: start .. ev_hldm
 0x9c40	91	FUN_10009c40	new: start .. ev_hldm
 0x9cc0	44	FUN_10009cc0	new: start .. ev_hldm
 0x9d00	26	FUN_10009d00	new: start .. ev_hldm
 0x9d50	94	FUN_10009d50	new: start .. ev_hldm
-0x9e10	7	FUN_10009e10	new: start .. ev_hldm
+0x9df0	6	CBaseEntity::GiveAmmo	new: start .. ev_hldm
+0x9e10	7	CBaseEntity::GetDelay	new: start .. ev_hldm
 0x9e30	80	CBaseEntity::IsMoving	new: start .. ev_hldm
-0x9f60	41	FUN_10009f60	new: start .. ev_hldm
+0x9f60	41	CBaseEntity::IsAlive	new: start .. ev_hldm
 0x9fa0	30	CBaseEntity::IsBSPModel	new: start .. ev_hldm
 0x9fd0	48	CBaseEntity::ReflectGauss	new: start .. ev_hldm
 0xa010	102	CBaseEntity::HasTarget	new: start .. ev_hldm
+0xa0e0	6	CBaseEntity::TeamID	new: start .. ev_hldm
+0xa100	10	CBaseEntity::Think	new: start .. ev_hldm
 0xa120	17	CBaseEntity::Touch	new: start .. ev_hldm
 0xa150	32	CBaseEntity::Use	new: start .. ev_hldm
 0xa180	17	CBaseEntity::Blocked	new: start .. ev_hldm
@@ -1865,36 +1876,45 @@ rva	size	name	file
 0x35920	1803	FUN_10035920	new: ev_hldm .. hl_hl_baseentity
 0x36200	91	FUN_10036200	new: ev_hldm .. hl_hl_baseentity
 0x36310	1	FUN_10036310	new: ev_hldm .. hl_hl_baseentity
-0x364d0	1	FUN_100364d0	new: ev_hldm .. hl_hl_baseentity
-0x365b0	3	FUN_100365b0	new: ev_hldm .. hl_hl_baseentity
-0x365f0	1	FUN_100365f0	new: ev_hldm .. hl_hl_baseentity
-0x36670	1	FUN_10036670	new: ev_hldm .. hl_hl_baseentity
-0x36690	6	FUN_10036690	new: ev_hldm .. hl_hl_baseentity
-0x366b0	1	FUN_100366b0	new: ev_hldm .. hl_hl_baseentity
-0x36890	3	FUN_10036890	new: ev_hldm .. hl_hl_baseentity
-0x368d0	1	FUN_100368d0	new: ev_hldm .. hl_hl_baseentity
+0x36330	8	CBaseEntity::TakeHealth	hl_hl_baseentity
+0x36350	8	CBaseEntity::TakeDamage	hl_hl_baseentity
+0x36370	3	CBaseMonster::HasAlienGibs	com_weapons
+0x36450	6	CBaseEntity::IsInWorld	ammo_secondary
+0x36490	6	CBaseEntity::DamageDecal	hl_hl_baseentity
+0x364d0	1	FUN_100364d0	hl_hl_baseentity
+0x365b0	3	FUN_100365b0	hl_hl_baseentity
+0x365f0	1	FUN_100365f0	hl_hl_baseentity
+0x36670	1	FUN_10036670	hl_hl_baseentity
+0x36690	6	FUN_10036690	hl_hl_baseentity
+0x366b0	1	FUN_100366b0	hl_hl_baseentity
+0x36890	3	FUN_10036890	hl_hl_baseentity
+0x368d0	1	FUN_100368d0	hl_hl_baseentity
 0x36910	31	UTIL_VecToAngles	hl_hl_baseentity
-0x36b80	3	FUN_10036b80	new: hl_hl_baseentity .. hl_hl_weapons
-0x36fe0	1	FUN_10036fe0	new: hl_hl_baseentity .. hl_hl_weapons
-0x37680	1	FUN_10037680	new: hl_hl_baseentity .. hl_hl_weapons
-0x37ac0	3	FUN_10037ac0	new: hl_hl_baseentity .. hl_hl_weapons
-0x37b20	1	FUN_10037b20	new: hl_hl_baseentity .. hl_hl_weapons
-0x37c80	3	FUN_10037c80	new: hl_hl_baseentity .. hl_hl_weapons
-0x38040	33	FUN_10038040	new: hl_hl_baseentity .. hl_hl_weapons
-0x38400	1	FUN_10038400	new: hl_hl_baseentity .. hl_hl_weapons
-0x384a0	8	FUN_100384a0	new: hl_hl_baseentity .. hl_hl_weapons
-0x38500	1	FUN_10038500	new: hl_hl_baseentity .. hl_hl_weapons
-0x38520	1	FUN_10038520	new: hl_hl_baseentity .. hl_hl_weapons
-0x38540	1	FUN_10038540	new: hl_hl_baseentity .. hl_hl_weapons
-0x38560	1	FUN_10038560	new: hl_hl_baseentity .. hl_hl_weapons
-0x385c0	3	FUN_100385c0	new: hl_hl_baseentity .. hl_hl_weapons
-0x385e0	1	FUN_100385e0	new: hl_hl_baseentity .. hl_hl_weapons
-0x38600	8	FUN_10038600	new: hl_hl_baseentity .. hl_hl_weapons
-0x386c0	5	FUN_100386c0	new: hl_hl_baseentity .. hl_hl_weapons
-0x387a0	1	FUN_100387a0	new: hl_hl_baseentity .. hl_hl_weapons
-0x387c0	3	FUN_100387c0	new: hl_hl_baseentity .. hl_hl_weapons
-0x387e0	1	FUN_100387e0	new: hl_hl_baseentity .. hl_hl_weapons
-0x38800	3	FUN_10038800	new: hl_hl_baseentity .. hl_hl_weapons
+0x36b80	3	FUN_10036b80	hl_hl_baseentity
+0x36fe0	1	FUN_10036fe0	hl_hl_baseentity
+0x37440	3	CBasePlayer::TraceAttack	hl_hl_baseentity
+0x37480	3	CBaseMonster::PlayScriptedSentence	hl_hl_baseentity
+0x37680	1	FUN_10037680	hl_hl_baseentity
+0x37ac0	3	FUN_10037ac0	hl_hl_baseentity
+0x37b20	1	FUN_10037b20	hl_hl_baseentity
+0x37c80	3	FUN_10037c80	hl_hl_baseentity
+0x38040	33	FUN_10038040	hl_hl_baseentity
+0x38400	1	FUN_10038400	hl_hl_baseentity
+0x384a0	8	FUN_100384a0	hl_hl_baseentity
+0x384c0	8	CBasePlayerWeapon::Save	hl_hl_baseentity
+0x38500	1	FUN_10038500	hl_hl_baseentity
+0x38520	1	FUN_10038520	hl_hl_baseentity
+0x38540	1	FUN_10038540	hl_hl_baseentity
+0x38560	1	FUN_10038560	hl_hl_baseentity
+0x385c0	3	FUN_100385c0	hl_hl_baseentity
+0x385e0	1	FUN_100385e0	hl_hl_baseentity
+0x38600	8	FUN_10038600	hl_hl_baseentity
+0x386c0	5	FUN_100386c0	hl_hl_baseentity
+0x387a0	1	FUN_100387a0	hl_hl_baseentity
+0x387c0	3	FUN_100387c0	hl_hl_baseentity
+0x387e0	1	FUN_100387e0	hl_hl_baseentity
+0x38800	3	FUN_10038800	hl_hl_baseentity
+0x388c0	3	CBasePlayerAmmo::DefaultTouch	hl_hl_baseentity
 0x38900	1	FUN_10038900	new: hl_hl_baseentity .. hl_hl_weapons
 0x38960	1215	FUN_10038960	new: hl_hl_baseentity .. hl_hl_weapons
 0x38f50	1	FUN_10038f50	new: hl_hl_baseentity .. hl_hl_weapons
@@ -1943,106 +1963,106 @@ rva	size	name	file
 0x3d0b0	500	FUN_1003d0b0	new: hl_hl_weapons .. common_interface
 0x3d330	91	FUN_1003d330	new: hl_hl_weapons .. common_interface
 0x3d3e0	121	_CreateInterface	common_interface
-0x3d510	24	FUN_1003d510	new: common_interface .. game_shared_voice_banmgr
-0x3d540	24	FUN_1003d540	new: common_interface .. game_shared_voice_banmgr
-0x3d590	142	FUN_1003d590	new: common_interface .. game_shared_voice_banmgr
-0x3d650	367	FUN_1003d650	new: common_interface .. game_shared_voice_banmgr
-0x3d9f0	722	FUN_1003d9f0	new: common_interface .. game_shared_voice_banmgr
-0x3e0b0	722	FUN_1003e0b0	new: common_interface .. game_shared_voice_banmgr
-0x3e790	552	FUN_1003e790	new: common_interface .. game_shared_voice_banmgr
-0x3eaa0	139	FUN_1003eaa0	new: common_interface .. game_shared_voice_banmgr
-0x3ecc0	76	FUN_1003ecc0	new: common_interface .. game_shared_voice_banmgr
-0x3ed30	24	FUN_1003ed30	new: common_interface .. game_shared_voice_banmgr
-0x3ed60	24	FUN_1003ed60	new: common_interface .. game_shared_voice_banmgr
-0x3ed90	24	FUN_1003ed90	new: common_interface .. game_shared_voice_banmgr
-0x3edc0	24	FUN_1003edc0	new: common_interface .. game_shared_voice_banmgr
-0x3edf0	24	FUN_1003edf0	new: common_interface .. game_shared_voice_banmgr
-0x3ee20	91	FUN_1003ee20	new: common_interface .. game_shared_voice_banmgr
-0x3eea0	91	FUN_1003eea0	new: common_interface .. game_shared_voice_banmgr
-0x3ef20	44	FUN_1003ef20	new: common_interface .. game_shared_voice_banmgr
-0x3f010	91	FUN_1003f010	new: common_interface .. game_shared_voice_banmgr
-0x3f090	44	FUN_1003f090	new: common_interface .. game_shared_voice_banmgr
-0x3f0d0	26	FUN_1003f0d0	new: common_interface .. game_shared_voice_banmgr
-0x3f100	96	FUN_1003f100	new: common_interface .. game_shared_voice_banmgr
-0x3f180	91	FUN_1003f180	new: common_interface .. game_shared_voice_banmgr
-0x3f200	44	FUN_1003f200	new: common_interface .. game_shared_voice_banmgr
-0x3f240	26	FUN_1003f240	new: common_interface .. game_shared_voice_banmgr
-0x3f2f0	24	FUN_1003f2f0	new: common_interface .. game_shared_voice_banmgr
-0x3f320	24	FUN_1003f320	new: common_interface .. game_shared_voice_banmgr
-0x3f460	93	FUN_1003f460	new: common_interface .. game_shared_voice_banmgr
-0x3f4e0	222	FUN_1003f4e0	new: common_interface .. game_shared_voice_banmgr
-0x3f600	107	FUN_1003f600	new: common_interface .. game_shared_voice_banmgr
-0x3f690	131	FUN_1003f690	new: common_interface .. game_shared_voice_banmgr
-0x3f750	256	FUN_1003f750	new: common_interface .. game_shared_voice_banmgr
-0x3f890	758	FUN_1003f890	new: common_interface .. game_shared_voice_banmgr
-0x3fc50	646	FUN_1003fc50	new: common_interface .. game_shared_voice_banmgr
-0x402b0	1	FUN_100402b0	new: common_interface .. game_shared_voice_banmgr
-0x402f0	392	FUN_100402f0	new: common_interface .. game_shared_voice_banmgr
-0x404f0	392	FUN_100404f0	new: common_interface .. game_shared_voice_banmgr
-0x406f0	127	FUN_100406f0	new: common_interface .. game_shared_voice_banmgr
-0x40a90	24	FUN_10040a90	new: common_interface .. game_shared_voice_banmgr
-0x40ac0	91	FUN_10040ac0	new: common_interface .. game_shared_voice_banmgr
-0x40b40	91	FUN_10040b40	new: common_interface .. game_shared_voice_banmgr
-0x40bc0	44	FUN_10040bc0	new: common_interface .. game_shared_voice_banmgr
-0x40cb0	24	FUN_10040cb0	new: common_interface .. game_shared_voice_banmgr
-0x40ce0	111	FUN_10040ce0	new: common_interface .. game_shared_voice_banmgr
-0x40d70	81	FUN_10040d70	new: common_interface .. game_shared_voice_banmgr
-0x40df0	144	FUN_10040df0	new: common_interface .. game_shared_voice_banmgr
-0x41030	56	FUN_10041030	new: common_interface .. game_shared_voice_banmgr
-0x41080	295	FUN_10041080	new: common_interface .. game_shared_voice_banmgr
-0x41200	530	FUN_10041200	new: common_interface .. game_shared_voice_banmgr
-0x414b0	530	FUN_100414b0	new: common_interface .. game_shared_voice_banmgr
-0x41760	612	FUN_10041760	new: common_interface .. game_shared_voice_banmgr
-0x41a70	612	FUN_10041a70	new: common_interface .. game_shared_voice_banmgr
-0x41da0	114	FUN_10041da0	new: common_interface .. game_shared_voice_banmgr
-0x41f30	24	FUN_10041f30	new: common_interface .. game_shared_voice_banmgr
-0x41f60	91	FUN_10041f60	new: common_interface .. game_shared_voice_banmgr
-0x41fe0	91	FUN_10041fe0	new: common_interface .. game_shared_voice_banmgr
-0x42060	44	FUN_10042060	new: common_interface .. game_shared_voice_banmgr
-0x42150	24	FUN_10042150	new: common_interface .. game_shared_voice_banmgr
-0x421f0	91	FUN_100421f0	new: common_interface .. game_shared_voice_banmgr
-0x42390	90	FUN_10042390	new: common_interface .. game_shared_voice_banmgr
-0x42410	90	FUN_10042410	new: common_interface .. game_shared_voice_banmgr
-0x42580	321	FUN_10042580	new: common_interface .. game_shared_voice_banmgr
-0x42730	200	FUN_10042730	new: common_interface .. game_shared_voice_banmgr
-0x42ac0	301	FUN_10042ac0	new: common_interface .. game_shared_voice_banmgr
-0x42e40	36	FUN_10042e40	new: common_interface .. game_shared_voice_banmgr
-0x42e80	91	FUN_10042e80	new: common_interface .. game_shared_voice_banmgr
-0x42f00	24	FUN_10042f00	new: common_interface .. game_shared_voice_banmgr
-0x42f30	67	FUN_10042f30	new: common_interface .. game_shared_voice_banmgr
-0x42fa0	333	FUN_10042fa0	new: common_interface .. game_shared_voice_banmgr
-0x431d0	108	FUN_100431d0	new: common_interface .. game_shared_voice_banmgr
-0x432f0	657	FUN_100432f0	new: common_interface .. game_shared_voice_banmgr
-0x43640	657	FUN_10043640	new: common_interface .. game_shared_voice_banmgr
-0x43990	657	FUN_10043990	new: common_interface .. game_shared_voice_banmgr
-0x43ce0	438	FUN_10043ce0	new: common_interface .. game_shared_voice_banmgr
-0x43f10	442	FUN_10043f10	new: common_interface .. game_shared_voice_banmgr
-0x44140	558	FUN_10044140	new: common_interface .. game_shared_voice_banmgr
-0x44400	497	FUN_10044400	new: common_interface .. game_shared_voice_banmgr
-0x447b0	24	FUN_100447b0	new: common_interface .. game_shared_voice_banmgr
-0x447e0	91	FUN_100447e0	new: common_interface .. game_shared_voice_banmgr
-0x44860	91	FUN_10044860	new: common_interface .. game_shared_voice_banmgr
-0x448e0	44	FUN_100448e0	new: common_interface .. game_shared_voice_banmgr
-0x44950	94	FUN_10044950	new: common_interface .. game_shared_voice_banmgr
-0x449d0	24	FUN_100449d0	new: common_interface .. game_shared_voice_banmgr
-0x44a00	124	FUN_10044a00	new: common_interface .. game_shared_voice_banmgr
-0x44aa0	133	FUN_10044aa0	new: common_interface .. game_shared_voice_banmgr
-0x44bf0	141	FUN_10044bf0	new: common_interface .. game_shared_voice_banmgr
-0x44cb0	284	FUN_10044cb0	new: common_interface .. game_shared_voice_banmgr
-0x45630	380	FUN_10045630	new: common_interface .. game_shared_voice_banmgr
-0x45a40	62	FUN_10045a40	new: common_interface .. game_shared_voice_banmgr
-0x45a90	91	FUN_10045a90	new: common_interface .. game_shared_voice_banmgr
-0x45b10	24	FUN_10045b10	new: common_interface .. game_shared_voice_banmgr
-0x45b40	235	FUN_10045b40	new: common_interface .. game_shared_voice_banmgr
-0x45c70	90	FUN_10045c70	new: common_interface .. game_shared_voice_banmgr
-0x45dc0	280	FUN_10045dc0	new: common_interface .. game_shared_voice_banmgr
-0x45f50	565	FUN_10045f50	new: common_interface .. game_shared_voice_banmgr
-0x46220	565	FUN_10046220	new: common_interface .. game_shared_voice_banmgr
-0x464f0	565	FUN_100464f0	new: common_interface .. game_shared_voice_banmgr
-0x467c0	565	FUN_100467c0	new: common_interface .. game_shared_voice_banmgr
-0x46a90	210	FUN_10046a90	new: common_interface .. game_shared_voice_banmgr
-0x46bd0	114	FUN_10046bd0	new: common_interface .. game_shared_voice_banmgr
-0x46c70	91	FUN_10046c70	new: common_interface .. game_shared_voice_banmgr
+0x3d510	24	FUN_1003d510	new: common_interface .. dlls_tripmine
+0x3d540	24	FUN_1003d540	new: common_interface .. dlls_tripmine
+0x3d590	142	FUN_1003d590	new: common_interface .. dlls_tripmine
+0x3d650	367	FUN_1003d650	new: common_interface .. dlls_tripmine
+0x3d9f0	722	FUN_1003d9f0	new: common_interface .. dlls_tripmine
+0x3e0b0	722	FUN_1003e0b0	new: common_interface .. dlls_tripmine
+0x3e790	552	FUN_1003e790	new: common_interface .. dlls_tripmine
+0x3eaa0	139	FUN_1003eaa0	new: common_interface .. dlls_tripmine
+0x3ecc0	76	FUN_1003ecc0	new: common_interface .. dlls_tripmine
+0x3ed30	24	FUN_1003ed30	new: common_interface .. dlls_tripmine
+0x3ed60	24	FUN_1003ed60	new: common_interface .. dlls_tripmine
+0x3ed90	24	FUN_1003ed90	new: common_interface .. dlls_tripmine
+0x3edc0	24	FUN_1003edc0	new: common_interface .. dlls_tripmine
+0x3edf0	24	FUN_1003edf0	new: common_interface .. dlls_tripmine
+0x3ee20	91	FUN_1003ee20	new: common_interface .. dlls_tripmine
+0x3eea0	91	FUN_1003eea0	new: common_interface .. dlls_tripmine
+0x3ef20	44	FUN_1003ef20	new: common_interface .. dlls_tripmine
+0x3f010	91	FUN_1003f010	new: common_interface .. dlls_tripmine
+0x3f090	44	FUN_1003f090	new: common_interface .. dlls_tripmine
+0x3f0d0	26	FUN_1003f0d0	new: common_interface .. dlls_tripmine
+0x3f100	96	FUN_1003f100	new: common_interface .. dlls_tripmine
+0x3f180	91	FUN_1003f180	new: common_interface .. dlls_tripmine
+0x3f200	44	FUN_1003f200	new: common_interface .. dlls_tripmine
+0x3f240	26	FUN_1003f240	new: common_interface .. dlls_tripmine
+0x3f2f0	24	FUN_1003f2f0	new: common_interface .. dlls_tripmine
+0x3f320	24	FUN_1003f320	new: common_interface .. dlls_tripmine
+0x3f460	93	FUN_1003f460	new: common_interface .. dlls_tripmine
+0x3f4e0	222	FUN_1003f4e0	new: common_interface .. dlls_tripmine
+0x3f600	107	FUN_1003f600	new: common_interface .. dlls_tripmine
+0x3f690	131	FUN_1003f690	new: common_interface .. dlls_tripmine
+0x3f750	256	FUN_1003f750	new: common_interface .. dlls_tripmine
+0x3f890	758	FUN_1003f890	new: common_interface .. dlls_tripmine
+0x3fc50	646	FUN_1003fc50	new: common_interface .. dlls_tripmine
+0x402b0	1	FUN_100402b0	new: common_interface .. dlls_tripmine
+0x402f0	392	FUN_100402f0	new: common_interface .. dlls_tripmine
+0x404f0	392	FUN_100404f0	new: common_interface .. dlls_tripmine
+0x406f0	127	FUN_100406f0	new: common_interface .. dlls_tripmine
+0x40a90	24	FUN_10040a90	new: common_interface .. dlls_tripmine
+0x40ac0	91	FUN_10040ac0	new: common_interface .. dlls_tripmine
+0x40b40	91	FUN_10040b40	new: common_interface .. dlls_tripmine
+0x40bc0	44	FUN_10040bc0	new: common_interface .. dlls_tripmine
+0x40cb0	24	FUN_10040cb0	new: common_interface .. dlls_tripmine
+0x40ce0	111	FUN_10040ce0	new: common_interface .. dlls_tripmine
+0x40d70	81	FUN_10040d70	new: common_interface .. dlls_tripmine
+0x40df0	144	FUN_10040df0	new: common_interface .. dlls_tripmine
+0x41030	56	FUN_10041030	new: common_interface .. dlls_tripmine
+0x41080	295	FUN_10041080	new: common_interface .. dlls_tripmine
+0x41200	530	FUN_10041200	new: common_interface .. dlls_tripmine
+0x414b0	530	FUN_100414b0	new: common_interface .. dlls_tripmine
+0x41760	612	FUN_10041760	new: common_interface .. dlls_tripmine
+0x41a70	612	FUN_10041a70	new: common_interface .. dlls_tripmine
+0x41da0	114	FUN_10041da0	new: common_interface .. dlls_tripmine
+0x41f30	24	FUN_10041f30	new: common_interface .. dlls_tripmine
+0x41f60	91	FUN_10041f60	new: common_interface .. dlls_tripmine
+0x41fe0	91	FUN_10041fe0	new: common_interface .. dlls_tripmine
+0x42060	44	FUN_10042060	new: common_interface .. dlls_tripmine
+0x42150	24	FUN_10042150	new: common_interface .. dlls_tripmine
+0x421f0	91	FUN_100421f0	new: common_interface .. dlls_tripmine
+0x42390	90	FUN_10042390	new: common_interface .. dlls_tripmine
+0x42410	90	FUN_10042410	new: common_interface .. dlls_tripmine
+0x42580	321	FUN_10042580	new: common_interface .. dlls_tripmine
+0x42730	200	FUN_10042730	new: common_interface .. dlls_tripmine
+0x42ac0	301	FUN_10042ac0	new: common_interface .. dlls_tripmine
+0x42e40	36	FUN_10042e40	new: common_interface .. dlls_tripmine
+0x42e80	91	FUN_10042e80	new: common_interface .. dlls_tripmine
+0x42f00	24	FUN_10042f00	new: common_interface .. dlls_tripmine
+0x42f30	67	FUN_10042f30	new: common_interface .. dlls_tripmine
+0x42fa0	333	FUN_10042fa0	new: common_interface .. dlls_tripmine
+0x431d0	108	FUN_100431d0	new: common_interface .. dlls_tripmine
+0x432f0	657	FUN_100432f0	new: common_interface .. dlls_tripmine
+0x43640	657	FUN_10043640	new: common_interface .. dlls_tripmine
+0x43990	657	FUN_10043990	new: common_interface .. dlls_tripmine
+0x43ce0	438	FUN_10043ce0	new: common_interface .. dlls_tripmine
+0x43f10	442	FUN_10043f10	new: common_interface .. dlls_tripmine
+0x44140	558	FUN_10044140	new: common_interface .. dlls_tripmine
+0x44400	497	FUN_10044400	new: common_interface .. dlls_tripmine
+0x447b0	24	FUN_100447b0	new: common_interface .. dlls_tripmine
+0x447e0	91	FUN_100447e0	new: common_interface .. dlls_tripmine
+0x44860	91	FUN_10044860	new: common_interface .. dlls_tripmine
+0x448e0	44	FUN_100448e0	new: common_interface .. dlls_tripmine
+0x44950	94	FUN_10044950	new: common_interface .. dlls_tripmine
+0x449d0	24	FUN_100449d0	new: common_interface .. dlls_tripmine
+0x44a00	124	FUN_10044a00	new: common_interface .. dlls_tripmine
+0x44aa0	133	FUN_10044aa0	new: common_interface .. dlls_tripmine
+0x44bf0	141	FUN_10044bf0	new: common_interface .. dlls_tripmine
+0x44cb0	284	FUN_10044cb0	new: common_interface .. dlls_tripmine
+0x45630	380	FUN_10045630	new: common_interface .. dlls_tripmine
+0x45a40	62	FUN_10045a40	new: common_interface .. dlls_tripmine
+0x45a90	91	FUN_10045a90	new: common_interface .. dlls_tripmine
+0x45b10	24	FUN_10045b10	new: common_interface .. dlls_tripmine
+0x45b40	235	CTripmine::Spawn	dlls_tripmine
+0x45c70	90	CTripmine::Precache	dlls_tripmine
+0x45dc0	280	FUN_10045dc0	new: dlls_tripmine .. game_shared_voice_banmgr
+0x45f50	565	FUN_10045f50	new: dlls_tripmine .. game_shared_voice_banmgr
+0x46220	565	FUN_10046220	new: dlls_tripmine .. game_shared_voice_banmgr
+0x464f0	565	FUN_100464f0	new: dlls_tripmine .. game_shared_voice_banmgr
+0x467c0	565	FUN_100467c0	new: dlls_tripmine .. game_shared_voice_banmgr
+0x46a90	210	FUN_10046a90	new: dlls_tripmine .. game_shared_voice_banmgr
+0x46bd0	114	FUN_10046bd0	new: dlls_tripmine .. game_shared_voice_banmgr
+0x46c70	91	FUN_10046c70	new: dlls_tripmine .. game_shared_voice_banmgr
 0x46cf0	22	HashPlayerID	game_shared_voice_banmgr
 0x46d20	12	FUN_10046d20	game_shared_voice_banmgr
 0x46d40	5	CVoiceBanMgr::Term	game_shared_voice_banmgr
@@ -2098,7 +2118,7 @@ rva	size	name	file
 0x49fc0	12	FUN_10049fc0	ammo
 0x49fe0	12	FUN_10049fe0	ammo
 0x4a0e0	12	FUN_1004a0e0	ammo
-0x4a160	461	FUN_1004a160	ammo
+0x4a160	461	CHudAmmo::Init	ammo
 0x4a3b0	68	CHudAmmo::Reset	ammo
 0x4a420	229	CHudAmmo::VidInit	ammo
 0x4a550	212	CHudAmmo::Think	ammo
@@ -2126,7 +2146,7 @@ rva	size	name	file
 0x4b0e0	57	CHudAmmo::UserCmd_Close	ammo
 0x4b130	189	FUN_1004b130	ammo
 0x4b220	213	FUN_1004b220	ammo
-0x4b340	1031	FUN_1004b340	ammo
+0x4b340	1031	CHudAmmo::Draw	ammo
 0x4b860	188	DrawBar	ammo
 0x4b950	191	DrawAmmoBar	ammo
 0x4ba40	1003	CHudAmmo::DrawWList	ammo
@@ -2218,7 +2238,7 @@ rva	size	name	file
 0x50540	30	FUN_10050540	new: cdll_int .. com_weapons
 0x50570	30	FUN_10050570	new: cdll_int .. com_weapons
 0x505a0	30	FUN_100505a0	new: cdll_int .. com_weapons
-0x505d0	30	FUN_100505d0	new: cdll_int .. com_weapons
+0x505d0	30	CHudDeathNotice::`scalar_deleting_destructor'	new: cdll_int .. com_weapons
 0x50600	30	FUN_10050600	new: cdll_int .. com_weapons
 0x50630	30	FUN_10050630	new: cdll_int .. com_weapons
 0x50660	30	FUN_10050660	new: cdll_int .. com_weapons
@@ -2516,7 +2536,7 @@ rva	size	name	file
 0x9b980	54	CHudDeathNotice::Init	death
 0x9b9d0	17	CHudDeathNotice::InitHUDData	death
 0x9ba00	28	CHudDeathNotice::VidInit	death
-0x9ba30	651	FUN_1009ba30	new: death .. demo
+0x9ba30	651	CHudDeathNotice::Draw	death
 0x9bd70	889	FUN_1009bd70	new: death .. demo
 0x9c3a0	31	FUN_1009c3a0	new: death .. demo
 0x9c3d0	31	FUN_1009c3d0	new: death .. demo
@@ -2552,6 +2572,7 @@ rva	size	name	file
 0x9ed30	17	EV_MuzzleFlash	ev_common
 0x9ed60	5	thunk_FUN_10038960	new: ev_common .. flashlight
 0x9ede0	73	CHudFlashlight::Init	flashlight
+0x9ee50	9	CHudFlashlight::Reset	flashlight
 0x9ee70	177	CHudFlashlight::VidInit	flashlight
 0x9ef60	55	CHudFlashlight::MsgFunc_FlashBat	flashlight
 0x9efb0	63	CHudFlashlight::MsgFunc_Flashlight	flashlight
@@ -2560,7 +2581,7 @@ rva	size	name	file
 0x9f270	12	FUN_1009f270	new: flashlight .. GameStudioModelRenderer
 0x9f2b0	5	thunk_FUN_100c0870	new: flashlight .. GameStudioModelRenderer
 0x9f2d0	18	CGameStudioModelRenderer::CGameStudioModelRenderer	GameStudioModelRenderer
-0x9f300	30	FUN_1009f300	GameStudioModelRenderer
+0x9f300	30	CStudioModelRenderer::`vector_deleting_destructor'	GameStudioModelRenderer
 0x9f360	16	R_StudioDrawModel	GameStudioModelRenderer
 0x9f380	10	FUN_1009f380	GameStudioModelRenderer
 0x9f3a0	51	_HUD_GetStudioModelInterface	GameStudioModelRenderer
@@ -2574,7 +2595,7 @@ rva	size	name	file
 0x9f970	151	FUN_1009f970	health
 0x9fa40	15	FUN_1009fa40	health
 0x9fa4f	70	CHudHealth::GetPainColor	health
-0x9fac0	685	FUN_1009fac0	health
+0x9fac0	685	CHudHealth::Draw	health
 0x9fe20	653	CHudHealth::CalcDamageDirection	health
 0xa0160	1091	CHudHealth::DrawPain	health
 0xa06d0	25	Vector::Vector	health
@@ -2906,26 +2927,30 @@ rva	size	name	file
 0xc0290	381	QuaternionSlerp	studio_util
 0xc0470	219	QuaternionMatrix	studio_util
 0xc0590	20	MatrixCopy	studio_util
-0xc0640	284	FUN_100c0640	new: studio_util .. StudioModelRenderer
-0xc07b0	97	FUN_100c07b0	new: studio_util .. StudioModelRenderer
-0xc0840	30	FUN_100c0840	new: studio_util .. StudioModelRenderer
-0xc0870	7	FUN_100c0870	new: studio_util .. StudioModelRenderer
-0xc0890	532	FUN_100c0890	new: studio_util .. StudioModelRenderer
+0xc0640	284	CStudioModelRenderer::Init	StudioModelRenderer
+0xc07b0	97	FUN_100c07b0	StudioModelRenderer
+0xc0840	30	FUN_100c0840	StudioModelRenderer
+0xc0870	7	FUN_100c0870	StudioModelRenderer
+0xc0890	532	CStudioModelRenderer::StudioCalcBoneAdj	StudioModelRenderer
 0xc0b60	450	CStudioModelRenderer::StudioCalcBoneQuaterion	StudioModelRenderer
 0xc0db0	336	CStudioModelRenderer::StudioCalcBonePosition	StudioModelRenderer
-0xc0f60	307	FUN_100c0f60	StudioModelRenderer
+0xc0f60	307	CStudioModelRenderer::StudioSlerpBones	StudioModelRenderer
+0xc10f0	149	CStudioModelRenderer::StudioGetAnim	StudioModelRenderer
 0xc11c0	215	CStudioModelRenderer::StudioPlayerBlend	StudioModelRenderer
-0xc12e0	768	FUN_100c12e0	StudioModelRenderer
+0xc12e0	768	CStudioModelRenderer::StudioSetUpTransform	StudioModelRenderer
 0xc16a0	82	CStudioModelRenderer::StudioEstimateInterpolant	StudioModelRenderer
-0xc1720	443	FUN_100c1720	new: StudioModelRenderer .. text_message
-0xc1c60	1795	FUN_100c1c60	new: StudioModelRenderer .. text_message
-0xc2540	223	FUN_100c2540	new: StudioModelRenderer .. text_message
-0xc2660	704	FUN_100c2660	new: StudioModelRenderer .. text_message
-0xc29d0	1104	FUN_100c29d0	new: StudioModelRenderer .. text_message
-0xc2f40	856	FUN_100c2f40	new: StudioModelRenderer .. text_message
-0xc3380	1020	FUN_100c3380	new: StudioModelRenderer .. text_message
-0xc5b50	862	entity_state_s::entity_state_s	new: StudioModelRenderer .. text_message
-0xc5f90	918	FUN_100c5f90	new: StudioModelRenderer .. text_message
+0xc1720	443	FUN_100c1720	StudioModelRenderer
+0xc1950	359	CStudioModelRenderer::StudioFxTransform	StudioModelRenderer
+0xc1b20	243	CStudioModelRenderer::StudioEstimateFrame	StudioModelRenderer
+0xc1c60	1795	CStudioModelRenderer::StudioSetupBones	StudioModelRenderer
+0xc2540	223	CStudioModelRenderer::StudioSaveBones	StudioModelRenderer
+0xc2660	704	CStudioModelRenderer::StudioMergeBones	StudioModelRenderer
+0xc29d0	1104	CStudioModelRenderer::StudioDrawModel	StudioModelRenderer
+0xc2f40	856	FUN_100c2f40	StudioModelRenderer
+0xc3380	1020	FUN_100c3380	StudioModelRenderer
+0xc3880	7119	CStudioModelRenderer::StudioDrawPlayer	StudioModelRenderer
+0xc5b50	862	entity_state_s::entity_state_s	StudioModelRenderer
+0xc5f90	918	CStudioModelRenderer::StudioCalcAttachments	StudioModelRenderer
 0xc6420	582	FUN_100c6420	new: StudioModelRenderer .. text_message
 0xc6710	530	FUN_100c6710	new: StudioModelRenderer .. text_message
 0xc69c0	189	FUN_100c69c0	new: StudioModelRenderer .. text_message
@@ -2993,6 +3018,7 @@ rva	size	name	file
 0xd07a0	21	CMenuPanel::Reset	new: util .. vgui_CustomObjects
 0xd07d0	24	CMenuPanel::Open	new: util .. vgui_CustomObjects
 0xd0800	44	CMenuPanel::Close	new: util .. vgui_CustomObjects
+0xd0840	5	CMenuPanel::SlotInput	new: util .. vgui_CustomObjects
 0xd0880	1497	FUN_100d0880	new: util .. vgui_CustomObjects
 0xd12d0	37	FUN_100d12d0	new: util .. vgui_CustomObjects
 0xd13f0	47	FUN_100d13f0	new: util .. vgui_CustomObjects
@@ -3111,8 +3137,10 @@ rva	size	name	file
 0xd9c10	17	MemoryInputStream::seekStart	game_shared_vgui_loadtga
 0xd9c40	22	MemoryInputStream::seekRelative	game_shared_vgui_loadtga
 0xd9c70	16	MemoryInputStream::seekEnd	game_shared_vgui_loadtga
+0xd9c90	12	MemoryInputStream::getAvailable	game_shared_vgui_loadtga
 0xd9cb0	48	MemoryInputStream::readUChar	game_shared_vgui_loadtga
 0xd9cf0	48	MemoryInputStream::readUChar	game_shared_vgui_loadtga
+0xd9d30	14	MemoryInputStream::close	game_shared_vgui_loadtga
 0xd9d50	175	vgui_LoadTGANoInvertAlpha	game_shared_vgui_loadtga
 0xd9e30	130	CMessageWindowPanel_Create	vgui_MOTDWindow
 0xd9ef0	1817	FUN_100d9ef0	new: vgui_MOTDWindow .. vgui_SchemeManager
@@ -3147,8 +3175,8 @@ rva	size	name	file
 0xdd8a0	82	FUN_100dd8a0	vgui_ScorePanel
 0xdd920	36	FUN_100dd920	vgui_ScorePanel
 0xddc00	178	FUN_100ddc00	vgui_ScorePanel
-0xddcf0	126	FUN_100ddcf0	vgui_ScorePanel
-0xddd90	370	FUN_100ddd90	vgui_ScorePanel
+0xddcf0	126	CLabelHeader::paintBackground	vgui_ScorePanel
+0xddd90	370	CLabelHeader::paint	vgui_ScorePanel
 0xddf70	205	CLabelHeader::calcAlignment	vgui_ScorePanel
 0xde0d0	301	CLabelHeader::CLabelHeader	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
 0xde250	98	CTextImage2::getSize	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
@@ -3160,28 +3188,28 @@ rva	size	name	file
 0xde470	172	CLabelHeader::setText	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
 0xde550	270	CLabelHeader::setText	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
 0xde6b0	24	CLabelHeader::getTextSize	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
-0xde6e0	196	FUN_100de6e0	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
-0xde7f0	49	FUN_100de7f0	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
+0xde6e0	196	CLabelHeader::setFgColor	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
+0xde7f0	49	CLabelHeader::setFgColor	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
 0xde840	22	CLabelHeader::setFont	new: vgui_ScorePanel .. game_shared_vgui_scrollbar2
 0xde870	1230	vgui::ScrollBar2::ScrollBar2	game_shared_vgui_scrollbar2
 0xdee80	201	ScrollBarButton::ScrollBarButton	game_shared_vgui_scrollbar2
 0xdef90	73	ScrollBarButton::paintBackground	game_shared_vgui_scrollbar2
 0xdf000	258	vgui::ScrollBar2::setSize	game_shared_vgui_scrollbar2
-0xdf160	1	FUN_100df160	game_shared_vgui_scrollbar2
+0xdf160	1	CBasePlayerItem::DestroyItem	com_weapons
 0xdf180	22	vgui::ScrollBar2::setValue	game_shared_vgui_scrollbar2
-0xdf1b0	14	FUN_100df1b0	game_shared_vgui_scrollbar2
+0xdf1b0	14	vgui::ScrollBar2::getValue	game_shared_vgui_scrollbar2
 0xdf1d0	273	vgui::ScrollBar2::addIntChangeSignal	game_shared_vgui_scrollbar2
 0xdf360	27	vgui::ScrollBar2::setRange	game_shared_vgui_scrollbar2
 0xdf390	82	vgui::ScrollBar2::fireIntChangeSignal	game_shared_vgui_scrollbar2
-0xdf410	14	FUN_100df410	game_shared_vgui_scrollbar2
-0xdf430	14	FUN_100df430	game_shared_vgui_scrollbar2
+0xdf410	14	vgui::ScrollBar2::isVertical	game_shared_vgui_scrollbar2
+0xdf430	14	vgui::ScrollBar2::hasFullRange	game_shared_vgui_scrollbar2
 0xdf450	105	vgui::ScrollBar2::setButton	game_shared_vgui_scrollbar2
 0xdf4e0	20	?actionPerformed@FooDefaultButtonSignal@?%../game_shared/vgui_scrollbar2.cpp1101829595@@UAEXPAVPanel@vgui@@@Z	game_shared_vgui_scrollbar2
-0xdf510	14	FUN_100df510	game_shared_vgui_scrollbar2
+0xdf510	14	vgui::ScrollBar2::getButton	game_shared_vgui_scrollbar2
 0xdf530	93	vgui::ScrollBar2::setSlider	game_shared_vgui_scrollbar2
-0xdf5b0	7	FUN_100df5b0	game_shared_vgui_scrollbar2
+0xdf5b0	7	vgui::ScrollBar2::getSlider	game_shared_vgui_scrollbar2
 0xdf5d0	84	vgui::ScrollBar2::doButtonPressed	game_shared_vgui_scrollbar2
-0xdf650	13	FUN_100df650	game_shared_vgui_scrollbar2
+0xdf650	13	vgui::ScrollBar2::setButtonPressedScrollValue	game_shared_vgui_scrollbar2
 0xdf670	22	vgui::ScrollBar2::setRangeWindow	game_shared_vgui_scrollbar2
 0xdf6a0	22	vgui::ScrollBar2::setRangeWindowEnabled	game_shared_vgui_scrollbar2
 0xdf6d0	144	vgui::ScrollBar2::validate	game_shared_vgui_scrollbar2
@@ -3189,6 +3217,7 @@ rva	size	name	file
 0xe0410	98	?getRowCount@ServerBrowserTablePanel@?%./vgui_ServerBrowser.cpp223223608@@UAEHXZ	new: game_shared_vgui_scrollbar2 .. vgui_ServerBrowser
 0xe04a0	35	?getCellTall@ServerBrowserTablePanel@?%./vgui_ServerBrowser.cpp223223608@@UAEHH@Z	new: game_shared_vgui_scrollbar2 .. vgui_ServerBrowser
 0xe04e0	668	?getCellRenderer@ServerBrowserTablePanel@?%./vgui_ServerBrowser.cpp223223608@@UAEPAVPanel@vgui@@HH_N00@Z	new: game_shared_vgui_scrollbar2 .. vgui_ServerBrowser
+0xe0840	5	?startCellEditing@ServerBrowserTablePanel@?%./vgui_ServerBrowser.cpp223223608@@UAEPAVPanel@vgui@@HH@Z	new: game_shared_vgui_scrollbar2 .. vgui_ServerBrowser
 0xe0860	93	?actionPerformed@ConnectHandler@?%./vgui_ServerBrowser.cpp223223608@@UAEXPAVPanel@vgui@@@Z	new: game_shared_vgui_scrollbar2 .. vgui_ServerBrowser
 0xe08e0	16	?actionPerformed@RefreshHandler@?%./vgui_ServerBrowser.cpp223223608@@UAEXPAVPanel@vgui@@@Z	new: game_shared_vgui_scrollbar2 .. vgui_ServerBrowser
 0xe0900	8	FUN_100e0900	new: game_shared_vgui_scrollbar2 .. vgui_ServerBrowser
@@ -3201,9 +3230,9 @@ rva	size	name	file
 0xe1040	24	?mousePressed@FooDefaultSliderSignal@?%../game_shared/vgui_slider2.cpp2922222@@UAEXW4MouseCode@vgui@@PAVPanel@4@@Z	game_shared_vgui_slider2
 0xe1070	24	?mouseReleased@FooDefaultSliderSignal@?%../game_shared/vgui_slider2.cpp2922222@@UAEXW4MouseCode@vgui@@PAVPanel@4@@Z	game_shared_vgui_slider2
 0xe1140	34	vgui::Slider2::setSize	game_shared_vgui_slider2
-0xe1180	7	FUN_100e1180	game_shared_vgui_slider2
+0xe1180	7	vgui::Slider2::isVertical	game_shared_vgui_slider2
 0xe11a0	77	vgui::Slider2::setValue	game_shared_vgui_slider2
-0xe1210	7	FUN_100e1210	game_shared_vgui_slider2
+0xe1210	7	vgui::Slider2::getValue	game_shared_vgui_slider2
 0xe1230	339	vgui::Slider2::recomputeNobPosFromValue	game_shared_vgui_slider2
 0xe13f0	254	vgui::Slider2::recomputeValueFromNobPos	game_shared_vgui_slider2
 0xe1530	177	vgui::Slider2::hasFullRange	game_shared_vgui_slider2
@@ -3216,9 +3245,9 @@ rva	size	name	file
 0xe1bf0	183	vgui::Slider2::privateMousePressed	game_shared_vgui_slider2
 0xe1ce0	27	vgui::Slider2::privateMouseReleased	game_shared_vgui_slider2
 0xe1d10	27	vgui::Slider2::getNobPos	game_shared_vgui_slider2
-0xe1d40	13	FUN_100e1d40	new: game_shared_vgui_slider2 .. vgui_TeamFortressViewport
-0xe1d60	13	FUN_100e1d60	new: game_shared_vgui_slider2 .. vgui_TeamFortressViewport
-0xe1d80	13	FUN_100e1d80	new: game_shared_vgui_slider2 .. vgui_TeamFortressViewport
+0xe1d40	13	vgui::Slider2::setRangeWindow	game_shared_vgui_slider2
+0xe1d60	13	vgui::Slider2::setRangeWindowEnabled	game_shared_vgui_slider2
+0xe1d80	13	vgui::Slider2::setButtonOffset	game_shared_vgui_slider2
 0xe1da0	92	FUN_100e1da0	new: game_shared_vgui_slider2 .. vgui_TeamFortressViewport
 0xe1e20	101	CCommandMenu::AddButton	vgui_TeamFortressViewport
 0xe1eb0	134	FUN_100e1eb0	vgui_TeamFortressViewport
@@ -3292,6 +3321,8 @@ rva	size	name	file
 0xe7020	48	CMenuPanel::SetNextMenu	new: vgui_TeamFortressViewport .. vgui_teammenu
 0xe7060	3060	FUN_100e7060	new: vgui_TeamFortressViewport .. vgui_teammenu
 0xe7f60	31	CTeamMenuPanel::Initialize	vgui_teammenu
+0xe7f90	1495	CTeamMenuPanel::Update	vgui_teammenu
+0xe86f0	127	CTeamMenuPanel::SlotInput	vgui_teammenu
 0xe8790	33	CTeamMenuPanel::Open	vgui_teammenu
 0xe87d0	72	CTeamMenuPanel::paintBackground	vgui_teammenu
 0xe8840	144	CTeamMenuPanel::SetActiveInfo	vgui_teammenu
@@ -3320,79 +3351,232 @@ rva	size	name	file
 0xecb10	95	FUN_100ecb10	view
 0xecb90	71	FUN_100ecb90	view
 0xecc00	16	V_PunchAxis	view
-0xecc20	240	FUN_100ecc20	new: view .. libcmt:ftol
-0xece70	59	FUN_100ece70	new: view .. libcmt:ftol
-0xecec0	352	FUN_100ecec0	new: view .. libcmt:ftol
-0xed080	35	FUN_100ed080	new: view .. libcmt:ftol
-0xed0c0	39	FUN_100ed0c0	new: view .. libcmt:ftol
-0xed100	256	FUN_100ed100	new: view .. libcmt:ftol
-0xed5e0	62	FUN_100ed5e0	new: view .. libcmt:ftol
-0xed630	191	FUN_100ed630	new: view .. libcmt:ftol
-0xed842	6	VGUI.DLL::vgui::Panel::paint	new: view .. libcmt:ftol
-0xed848	6	VGUI.DLL::vgui::Panel::paintBackground	new: view .. libcmt:ftol
-0xed920	6	VGUI.DLL::vgui::Panel::setBgColor	new: view .. libcmt:ftol
-0xed932	6	VGUI.DLL::vgui::Panel::setFgColor	new: view .. libcmt:ftol
-0xed992	6	VGUI.DLL::vgui::Panel::setPaintEnabled	new: view .. libcmt:ftol
-0xed998	6	VGUI.DLL::vgui::Panel::setPaintBackgroundEnabled	new: view .. libcmt:ftol
-0xed99e	6	VGUI.DLL::vgui::Panel::setPaintBorderEnabled	new: view .. libcmt:ftol
-0xed9a4	6	VGUI.DLL::vgui::Panel::setBorder	new: view .. libcmt:ftol
-0xed9ec	6	VGUI.DLL::vgui::Panel::requestFocus	new: view .. libcmt:ftol
-0xeda3a	6	VGUI.DLL::vgui::Panel::addInputSignal	new: view .. libcmt:ftol
-0xeda4c	6	VGUI.DLL::vgui::Panel::isKeyDown	new: view .. libcmt:ftol
-0xeda82	6	VGUI.DLL::vgui::Panel::setParent	new: view .. libcmt:ftol
-0xedaac	6	VGUI.DLL::vgui::Panel::setVisible	new: view .. libcmt:ftol
-0xedaca	6	VGUI.DLL::vgui::Panel::setBounds	new: view .. libcmt:ftol
-0xedad0	6	VGUI.DLL::vgui::Panel::getSize	new: view .. libcmt:ftol
-0xedad6	6	VGUI.DLL::vgui::Panel::setSize	new: view .. libcmt:ftol
-0xedadc	6	VGUI.DLL::vgui::Panel::getPos	new: view .. libcmt:ftol
-0xedae2	6	VGUI.DLL::vgui::Panel::setPos	new: view .. libcmt:ftol
-0xedaf4	6	VGUI.DLL::vgui::Label::setContentFitted	new: view .. libcmt:ftol
-0xedafa	6	VGUI.DLL::vgui::Label::setContentAlignment	new: view .. libcmt:ftol
-0xedb12	6	VGUI.DLL::vgui::Label::setFont	new: view .. libcmt:ftol
-0xedb18	6	VGUI.DLL::vgui::Label::setFont	new: view .. libcmt:ftol
-0xedb24	6	VGUI.DLL::vgui::Label::setText	new: view .. libcmt:ftol
-0xedb2a	6	VGUI.DLL::vgui::Label::setImage	new: view .. libcmt:ftol
-0xedb30	6	VGUI.DLL::vgui::Label::paint	new: view .. libcmt:ftol
-0xedb36	6	VGUI.DLL::vgui::Label::setFgColor	new: view .. libcmt:ftol
-0xedb3c	6	VGUI.DLL::vgui::Label::setFgColor	new: view .. libcmt:ftol
-0xedb48	6	VGUI.DLL::vgui::Label::init	new: view .. libcmt:ftol
-0xedb4e	6	VGUI.DLL::vgui::Panel::Panel	new: view .. libcmt:ftol
-0xedc0e	6	VGUI.DLL::vgui::Color::Color	new: view .. libcmt:ftol
-0xedc2c	6	VGUI.DLL::vgui::Panel::Panel	new: view .. libcmt:ftol
-0xedc74	6	VGUI.DLL::vgui::Button::addActionSignal	new: view .. libcmt:ftol
-0xedca4	6	VGUI.DLL::vgui::ImagePanel::ImagePanel	new: view .. libcmt:ftol
-0xedcaa	6	VGUI.DLL::vgui::Label::Label	new: view .. libcmt:ftol
-0xedf56	6	VGUI.DLL::vgui::ScrollPanel::getVerticalScrollBar	new: view .. libcmt:ftol
-0xedf5c	6	VGUI.DLL::vgui::ScrollPanel::getHorizontalScrollBar	new: view .. libcmt:ftol
-0xee0c4	6	VGUI.DLL::vgui::TablePanel::setHeaderPanel	new: view .. libcmt:ftol
-0xee16c	6	VGUI.DLL::vgui::BitmapTGA::BitmapTGA	new: view .. libcmt:ftol
-0xee172	6	VGUI.DLL::vgui::FileInputStream::FileInputStream	new: view .. libcmt:ftol
-0xee178	6	VGUI.DLL::vgui::Label::Label	new: view .. libcmt:ftol
-0xee17e	6	VGUI.DLL::vgui::LineBorder::LineBorder	new: view .. libcmt:ftol
-0xee280	6	VGUI.DLL::vgui::Color::Color	new: view .. libcmt:ftol
-0xee286	6	VGUI.DLL::vgui::TablePanel::TablePanel	new: view .. libcmt:ftol
-0xee28c	6	VGUI.DLL::vgui::ScrollPanel::ScrollPanel	new: view .. libcmt:ftol
-0xee292	6	VGUI.DLL::vgui::HeaderPanel::HeaderPanel	new: view .. libcmt:ftol
-0xee29e	6	VGUI.DLL::vgui::vgui_strcpy	new: view .. libcmt:ftol
-0xee31c	6	VGUI.DLL::vgui::Button::Button	new: view .. libcmt:ftol
-0xee322	6	VGUI.DLL::vgui::Label::Label	new: view .. libcmt:ftol
-0xee328	6	VGUI.DLL::vgui::Slider::Slider	new: view .. libcmt:ftol
-0xee32e	6	VGUI.DLL::vgui::Font::Font	new: view .. libcmt:ftol
-0xee334	6	VGUI.DLL::vgui::BorderLayout::BorderLayout	new: view .. libcmt:ftol
-0xee382	6	VGUI.DLL::vgui::TextPanel::TextPanel	new: view .. libcmt:ftol
-0xee38e	6	VGUI.DLL::vgui::Font::Font	new: view .. libcmt:ftol
-0xee394	6	VGUI.DLL::vgui::Color::Color	new: view .. libcmt:ftol
-0xee39a	6	VGUI.DLL::vgui::TextImage::TextImage	new: view .. libcmt:ftol
-0xee3a0	6	VGUI.DLL::vgui::Image::Image	new: view .. libcmt:ftol
-0xee3a6	6	VGUI.DLL::vgui::App::getInstance	new: view .. libcmt:ftol
-0xee454	6	VGUI.DLL::vgui::SurfaceBase::~SurfaceBase	new: view .. libcmt:ftol
-0xee4b4	6	VGUI.DLL::vgui::ScrollBar::ScrollBar	new: view .. libcmt:ftol
-0xee4ba	6	VGUI.DLL::vgui::Button::Button	new: view .. libcmt:ftol
-0xee4c0	6	WSOCK32.DLL::Ordinal_9	new: view .. libcmt:ftol
-0xee4d0	33	FUN_100ee4d0	new: view .. libcmt:ftol
-0xee500	5	FUN_100ee500	new: view .. libcmt:ftol
-0xee510	65	FUN_100ee510	new: view .. libcmt:ftol
-0xee560	28	FUN_100ee560	new: view .. libcmt:ftol
+0xecc20	240	FUN_100ecc20	new: view .. vgui:vgui.dll
+0xece70	59	FUN_100ece70	new: view .. vgui:vgui.dll
+0xecec0	352	FUN_100ecec0	new: view .. vgui:vgui.dll
+0xed080	35	FUN_100ed080	new: view .. vgui:vgui.dll
+0xed0c0	39	FUN_100ed0c0	new: view .. vgui:vgui.dll
+0xed100	256	FUN_100ed100	new: view .. vgui:vgui.dll
+0xed5e0	62	FUN_100ed5e0	new: view .. vgui:vgui.dll
+0xed630	191	FUN_100ed630	new: view .. vgui:vgui.dll
+0xed7ee	6	VGUI.DLL::vgui::Panel::internalSetCursor	vgui:vgui.dll
+0xed7f4	6	VGUI.DLL::vgui::Panel::internalFocusChanged	vgui:vgui.dll
+0xed7fa	6	VGUI.DLL::vgui::Panel::internalKeyFocusTicked	vgui:vgui.dll
+0xed800	6	VGUI.DLL::vgui::Panel::internalKeyReleased	vgui:vgui.dll
+0xed806	6	VGUI.DLL::vgui::Panel::internalKeyTyped	vgui:vgui.dll
+0xed80c	6	VGUI.DLL::vgui::Panel::internalKeyPressed	vgui:vgui.dll
+0xed812	6	VGUI.DLL::vgui::Panel::internalMouseWheeled	vgui:vgui.dll
+0xed818	6	VGUI.DLL::vgui::Panel::internalMouseReleased	vgui:vgui.dll
+0xed81e	6	VGUI.DLL::vgui::Panel::internalMouseDoublePressed	vgui:vgui.dll
+0xed824	6	VGUI.DLL::vgui::Panel::internalMousePressed	vgui:vgui.dll
+0xed82a	6	VGUI.DLL::vgui::Panel::internalCursorExited	vgui:vgui.dll
+0xed830	6	VGUI.DLL::vgui::Panel::internalCursorEntered	vgui:vgui.dll
+0xed836	6	VGUI.DLL::vgui::Panel::internalCursorMoved	vgui:vgui.dll
+0xed83c	6	VGUI.DLL::vgui::Panel::paintBuildOverlay	vgui:vgui.dll
+0xed842	6	VGUI.DLL::vgui::Panel::paint	vgui:vgui.dll
+0xed848	6	VGUI.DLL::vgui::Panel::paintBackground	vgui:vgui.dll
+0xed84e	6	VGUI.DLL::vgui::Panel::solve	vgui:vgui.dll
+0xed854	6	VGUI.DLL::vgui::Panel::drawTexturedRect	vgui:vgui.dll
+0xed85a	6	VGUI.DLL::vgui::Panel::drawSetTexture	vgui:vgui.dll
+0xed860	6	VGUI.DLL::vgui::Panel::drawSetTextureRGBA	vgui:vgui.dll
+0xed866	6	VGUI.DLL::vgui::Panel::drawPrintChar	vgui:vgui.dll
+0xed86c	6	VGUI.DLL::vgui::Panel::drawPrintChar	vgui:vgui.dll
+0xed872	6	VGUI.DLL::vgui::Panel::drawPrintText	vgui:vgui.dll
+0xed878	6	VGUI.DLL::vgui::Panel::drawPrintText	vgui:vgui.dll
+0xed87e	6	VGUI.DLL::vgui::Panel::drawSetTextPos	vgui:vgui.dll
+0xed884	6	VGUI.DLL::vgui::Panel::drawSetTextColor	vgui:vgui.dll
+0xed88a	6	VGUI.DLL::vgui::Panel::drawSetTextColor	vgui:vgui.dll
+0xed890	6	VGUI.DLL::vgui::Panel::drawSetTextFont	vgui:vgui.dll
+0xed896	6	VGUI.DLL::vgui::Panel::drawSetTextFont	vgui:vgui.dll
+0xed89c	6	VGUI.DLL::vgui::Panel::drawOutlinedRect	vgui:vgui.dll
+0xed8a2	6	VGUI.DLL::vgui::Panel::drawFilledRect	vgui:vgui.dll
+0xed8a8	6	VGUI.DLL::vgui::Panel::drawSetColor	vgui:vgui.dll
+0xed8ae	6	VGUI.DLL::vgui::Panel::drawSetColor	vgui:vgui.dll
+0xed8b4	6	VGUI.DLL::vgui::Panel::internalPerformLayout	vgui:vgui.dll
+0xed8ba	6	VGUI.DLL::vgui::Panel::performLayout	vgui:vgui.dll
+0xed8c0	6	VGUI.DLL::vgui::Panel::setSurfaceBaseTraverse	vgui:vgui.dll
+0xed8c6	6	VGUI.DLL::vgui::Panel::paintTraverse	vgui:vgui.dll
+0xed8cc	6	VGUI.DLL::vgui::Panel::paintTraverse	vgui:vgui.dll
+0xed8d2	6	VGUI.DLL::vgui::Panel::solveTraverse	vgui:vgui.dll
+0xed8d8	6	VGUI.DLL::vgui::Panel::isCursorNone	vgui:vgui.dll
+0xed8de	6	VGUI.DLL::vgui::Panel::getLayoutInfo	vgui:vgui.dll
+0xed8e4	6	VGUI.DLL::vgui::Panel::setLayoutInfo	vgui:vgui.dll
+0xed8ea	6	VGUI.DLL::vgui::Panel::getVirtualSize	vgui:vgui.dll
+0xed8f0	6	VGUI.DLL::vgui::Panel::getApp	vgui:vgui.dll
+0xed8f6	6	VGUI.DLL::vgui::Panel::setAsMouseArena	vgui:vgui.dll
+0xed8fc	6	VGUI.DLL::vgui::Panel::setAsMouseCapture	vgui:vgui.dll
+0xed902	6	VGUI.DLL::vgui::Panel::getBgColor	vgui:vgui.dll
+0xed908	6	VGUI.DLL::vgui::Panel::getBgColor	vgui:vgui.dll
+0xed90e	6	VGUI.DLL::vgui::Panel::getFgColor	vgui:vgui.dll
+0xed914	6	VGUI.DLL::vgui::Panel::getFgColor	vgui:vgui.dll
+0xed91a	6	VGUI.DLL::vgui::Panel::setBgColor	vgui:vgui.dll
+0xed920	6	VGUI.DLL::vgui::Panel::setBgColor	vgui:vgui.dll
+0xed926	6	VGUI.DLL::vgui::Panel::setBgColor	vgui:vgui.dll
+0xed92c	6	VGUI.DLL::vgui::Panel::setFgColor	vgui:vgui.dll
+0xed932	6	VGUI.DLL::vgui::Panel::setFgColor	vgui:vgui.dll
+0xed938	6	VGUI.DLL::vgui::Panel::setFgColor	vgui:vgui.dll
+0xed93e	6	VGUI.DLL::vgui::Panel::applyPersistanceText	vgui:vgui.dll
+0xed944	6	VGUI.DLL::vgui::Panel::getPersistanceText	vgui:vgui.dll
+0xed94a	6	VGUI.DLL::vgui::Panel::createPropertyPanel	vgui:vgui.dll
+0xed950	6	VGUI.DLL::vgui::Panel::repaintParent	vgui:vgui.dll
+0xed956	6	VGUI.DLL::vgui::Panel::removeAllChildren	vgui:vgui.dll
+0xed95c	6	VGUI.DLL::vgui::Panel::isBuildGroupEnabled	vgui:vgui.dll
+0xed962	6	VGUI.DLL::vgui::Panel::setBuildGroup	vgui:vgui.dll
+0xed968	6	VGUI.DLL::vgui::Panel::setEnabled	vgui:vgui.dll
+0xed96e	6	VGUI.DLL::vgui::Panel::isEnabled	vgui:vgui.dll
+0xed974	6	VGUI.DLL::vgui::Panel::getSurfaceBase	vgui:vgui.dll
+0xed97a	6	VGUI.DLL::vgui::Panel::getPreferredSize	vgui:vgui.dll
+0xed980	6	VGUI.DLL::vgui::Panel::setPreferredSize	vgui:vgui.dll
+0xed986	6	VGUI.DLL::vgui::Panel::getPaintSize	vgui:vgui.dll
+0xed98c	6	VGUI.DLL::vgui::Panel::getInset	vgui:vgui.dll
+0xed992	6	VGUI.DLL::vgui::Panel::setPaintEnabled	vgui:vgui.dll
+0xed998	6	VGUI.DLL::vgui::Panel::setPaintBackgroundEnabled	vgui:vgui.dll
+0xed99e	6	VGUI.DLL::vgui::Panel::setPaintBorderEnabled	vgui:vgui.dll
+0xed9a4	6	VGUI.DLL::vgui::Panel::setBorder	vgui:vgui.dll
+0xed9aa	6	VGUI.DLL::vgui::Panel::setAutoFocusNavEnabled	vgui:vgui.dll
+0xed9b0	6	VGUI.DLL::vgui::Panel::isAutoFocusNavEnabled	vgui:vgui.dll
+0xed9b6	6	VGUI.DLL::vgui::Panel::addFocusChangeSignal	vgui:vgui.dll
+0xed9bc	6	VGUI.DLL::vgui::Panel::requestFocusNext	vgui:vgui.dll
+0xed9c2	6	VGUI.DLL::vgui::Panel::requestFocusPrev	vgui:vgui.dll
+0xed9c8	6	VGUI.DLL::vgui::Panel::setFocusNavGroup	vgui:vgui.dll
+0xed9ce	6	VGUI.DLL::vgui::Panel::invalidateLayout	vgui:vgui.dll
+0xed9d4	6	VGUI.DLL::vgui::Panel::setLayout	vgui:vgui.dll
+0xed9da	6	VGUI.DLL::vgui::Panel::getChild	vgui:vgui.dll
+0xed9e0	6	VGUI.DLL::vgui::Panel::getChildCount	vgui:vgui.dll
+0xed9e6	6	VGUI.DLL::vgui::Panel::hasFocus	vgui:vgui.dll
+0xed9ec	6	VGUI.DLL::vgui::Panel::requestFocus	vgui:vgui.dll
+0xed9f2	6	VGUI.DLL::vgui::Panel::getMinimumSize	vgui:vgui.dll
+0xed9f8	6	VGUI.DLL::vgui::Panel::setMinimumSize	vgui:vgui.dll
+0xed9fe	6	VGUI.DLL::vgui::Panel::getCursor	vgui:vgui.dll
+0xeda04	6	VGUI.DLL::vgui::Panel::setCursor	vgui:vgui.dll
+0xeda0a	6	VGUI.DLL::vgui::Panel::setCursor	vgui:vgui.dll
+0xeda10	6	VGUI.DLL::vgui::Panel::screenToLocal	vgui:vgui.dll
+0xeda16	6	VGUI.DLL::vgui::Panel::localToScreen	vgui:vgui.dll
+0xeda1c	6	VGUI.DLL::vgui::Panel::isWithinTraverse	vgui:vgui.dll
+0xeda22	6	VGUI.DLL::vgui::Panel::isWithin	vgui:vgui.dll
+0xeda28	6	VGUI.DLL::vgui::Panel::removeRepaintSignal	vgui:vgui.dll
+0xeda2e	6	VGUI.DLL::vgui::Panel::addRepaintSignal	vgui:vgui.dll
+0xeda34	6	VGUI.DLL::vgui::Panel::removeInputSignal	vgui:vgui.dll
+0xeda3a	6	VGUI.DLL::vgui::Panel::addInputSignal	vgui:vgui.dll
+0xeda40	6	VGUI.DLL::vgui::Panel::wasKeyReleased	vgui:vgui.dll
+0xeda46	6	VGUI.DLL::vgui::Panel::wasKeyTyped	vgui:vgui.dll
+0xeda4c	6	VGUI.DLL::vgui::Panel::isKeyDown	vgui:vgui.dll
+0xeda52	6	VGUI.DLL::vgui::Panel::wasKeyPressed	vgui:vgui.dll
+0xeda58	6	VGUI.DLL::vgui::Panel::wasMouseReleased	vgui:vgui.dll
+0xeda5e	6	VGUI.DLL::vgui::Panel::isMouseDown	vgui:vgui.dll
+0xeda64	6	VGUI.DLL::vgui::Panel::wasMouseDoublePressed	vgui:vgui.dll
+0xeda6a	6	VGUI.DLL::vgui::Panel::wasMousePressed	vgui:vgui.dll
+0xeda70	6	VGUI.DLL::vgui::Panel::removeChild	vgui:vgui.dll
+0xeda76	6	VGUI.DLL::vgui::Panel::insertChildAt	vgui:vgui.dll
+0xeda7c	6	VGUI.DLL::vgui::Panel::addChild	vgui:vgui.dll
+0xeda82	6	VGUI.DLL::vgui::Panel::setParent	vgui:vgui.dll
+0xeda88	6	VGUI.DLL::vgui::Panel::getClipRect	vgui:vgui.dll
+0xeda8e	6	VGUI.DLL::vgui::Panel::getAbsExtents	vgui:vgui.dll
+0xeda94	6	VGUI.DLL::vgui::Panel::repaintAll	vgui:vgui.dll
+0xeda9a	6	VGUI.DLL::vgui::Panel::repaint	vgui:vgui.dll
+0xedaa0	6	VGUI.DLL::vgui::Panel::isVisibleUp	vgui:vgui.dll
+0xedaa6	6	VGUI.DLL::vgui::Panel::isVisible	vgui:vgui.dll
+0xedaac	6	VGUI.DLL::vgui::Panel::setVisible	vgui:vgui.dll
+0xedab2	6	VGUI.DLL::vgui::Panel::getParent	vgui:vgui.dll
+0xedab8	6	VGUI.DLL::vgui::Panel::getTall	vgui:vgui.dll
+0xedabe	6	VGUI.DLL::vgui::Panel::getWide	vgui:vgui.dll
+0xedac4	6	VGUI.DLL::vgui::Panel::getBounds	vgui:vgui.dll
+0xedaca	6	VGUI.DLL::vgui::Panel::setBounds	vgui:vgui.dll
+0xedad0	6	VGUI.DLL::vgui::Panel::getSize	vgui:vgui.dll
+0xedad6	6	VGUI.DLL::vgui::Panel::setSize	vgui:vgui.dll
+0xedadc	6	VGUI.DLL::vgui::Panel::getPos	vgui:vgui.dll
+0xedae2	6	VGUI.DLL::vgui::Panel::setPos	vgui:vgui.dll
+0xedae8	6	VGUI.DLL::vgui::Label::recomputeMinimumSize	vgui:vgui.dll
+0xedaee	6	VGUI.DLL::vgui::Label::computeAlignment	vgui:vgui.dll
+0xedaf4	6	VGUI.DLL::vgui::Label::setContentFitted	vgui:vgui.dll
+0xedafa	6	VGUI.DLL::vgui::Label::setContentAlignment	vgui:vgui.dll
+0xedb00	6	VGUI.DLL::vgui::Label::setTextAlignment	vgui:vgui.dll
+0xedb06	6	VGUI.DLL::vgui::Label::getContentSize	vgui:vgui.dll
+0xedb12	6	VGUI.DLL::vgui::Label::setFont	vgui:vgui.dll
+0xedb18	6	VGUI.DLL::vgui::Label::setFont	vgui:vgui.dll
+0xedb24	6	VGUI.DLL::vgui::Label::setText	vgui:vgui.dll
+0xedb2a	6	VGUI.DLL::vgui::Label::setImage	vgui:vgui.dll
+0xedb30	6	VGUI.DLL::vgui::Label::paint	vgui:vgui.dll
+0xedb36	6	VGUI.DLL::vgui::Label::setFgColor	vgui:vgui.dll
+0xedb3c	6	VGUI.DLL::vgui::Label::setFgColor	vgui:vgui.dll
+0xedb42	6	VGUI.DLL::vgui::Label::createPropertyPanel	vgui:vgui.dll
+0xedb48	6	VGUI.DLL::vgui::Label::init	vgui:vgui.dll
+0xedb4e	6	VGUI.DLL::vgui::Panel::Panel	vgui:vgui.dll
+0xedb5a	6	VGUI.DLL::vgui::Image::paint	vgui:vgui.dll
+0xedb60	6	VGUI.DLL::vgui::Image::drawTexturedRect	vgui:vgui.dll
+0xedb66	6	VGUI.DLL::vgui::Image::drawSetTexture	vgui:vgui.dll
+0xedb6c	6	VGUI.DLL::vgui::Image::drawSetTextureRGBA	vgui:vgui.dll
+0xedb72	6	VGUI.DLL::vgui::Image::drawPrintChar	vgui:vgui.dll
+0xedb78	6	VGUI.DLL::vgui::Image::drawPrintChar	vgui:vgui.dll
+0xedb7e	6	VGUI.DLL::vgui::Image::drawPrintText	vgui:vgui.dll
+0xedb84	6	VGUI.DLL::vgui::Image::drawPrintText	vgui:vgui.dll
+0xedb8a	6	VGUI.DLL::vgui::Image::drawSetTextPos	vgui:vgui.dll
+0xedb90	6	VGUI.DLL::vgui::Image::drawSetTextColor	vgui:vgui.dll
+0xedb96	6	VGUI.DLL::vgui::Image::drawSetTextColor	vgui:vgui.dll
+0xedb9c	6	VGUI.DLL::vgui::Image::drawSetTextFont	vgui:vgui.dll
+0xedba2	6	VGUI.DLL::vgui::Image::drawSetTextFont	vgui:vgui.dll
+0xedba8	6	VGUI.DLL::vgui::Image::drawOutlinedRect	vgui:vgui.dll
+0xedbae	6	VGUI.DLL::vgui::Image::drawFilledRect	vgui:vgui.dll
+0xedbb4	6	VGUI.DLL::vgui::Image::drawSetColor	vgui:vgui.dll
+0xedbba	6	VGUI.DLL::vgui::Image::drawSetColor	vgui:vgui.dll
+0xedbc0	6	VGUI.DLL::vgui::Image::setSize	vgui:vgui.dll
+0xedbc6	6	VGUI.DLL::vgui::Image::getColor	vgui:vgui.dll
+0xedbd8	6	VGUI.DLL::vgui::Image::getPos	vgui:vgui.dll
+0xedc0e	6	VGUI.DLL::vgui::Color::Color	vgui:vgui.dll
+0xedc2c	6	VGUI.DLL::vgui::Panel::Panel	vgui:vgui.dll
+0xedc74	6	VGUI.DLL::vgui::Button::addActionSignal	vgui:vgui.dll
+0xedca4	6	VGUI.DLL::vgui::ImagePanel::ImagePanel	vgui:vgui.dll
+0xedcaa	6	VGUI.DLL::vgui::Label::Label	vgui:vgui.dll
+0xedf56	6	VGUI.DLL::vgui::ScrollPanel::getVerticalScrollBar	vgui:vgui.dll
+0xedf5c	6	VGUI.DLL::vgui::ScrollPanel::getHorizontalScrollBar	vgui:vgui.dll
+0xee094	6	VGUI.DLL::vgui::TablePanel::privateKeyTyped	vgui:vgui.dll
+0xee09a	6	VGUI.DLL::vgui::TablePanel::privateMouseDoublePressed	vgui:vgui.dll
+0xee0a0	6	VGUI.DLL::vgui::TablePanel::privateMousePressed	vgui:vgui.dll
+0xee0a6	6	VGUI.DLL::vgui::TablePanel::stopCellEditing	vgui:vgui.dll
+0xee0ac	6	VGUI.DLL::vgui::TablePanel::setEditableCell	vgui:vgui.dll
+0xee0b2	6	VGUI.DLL::vgui::TablePanel::setCellSectionEnabled	vgui:vgui.dll
+0xee0b8	6	VGUI.DLL::vgui::TablePanel::setRowSelectionEnabled	vgui:vgui.dll
+0xee0be	6	VGUI.DLL::vgui::TablePanel::setColumnSelectionEnabled	vgui:vgui.dll
+0xee0c4	6	VGUI.DLL::vgui::TablePanel::setHeaderPanel	vgui:vgui.dll
+0xee0ca	6	VGUI.DLL::vgui::TablePanel::getSelectedCell	vgui:vgui.dll
+0xee0d0	6	VGUI.DLL::vgui::TablePanel::setSelectedCell	vgui:vgui.dll
+0xee0d6	6	VGUI.DLL::vgui::TablePanel::setColumnExtents	vgui:vgui.dll
+0xee0dc	6	VGUI.DLL::vgui::TablePanel::getColumnCount	vgui:vgui.dll
+0xee0e2	6	VGUI.DLL::vgui::TablePanel::setGridSize	vgui:vgui.dll
+0xee0e8	6	VGUI.DLL::vgui::TablePanel::setGridVisible	vgui:vgui.dll
+0xee0ee	6	VGUI.DLL::vgui::TablePanel::setColumnCount	vgui:vgui.dll
+0xee0f4	6	VGUI.DLL::vgui::TablePanel::setCellEditingEnabled	vgui:vgui.dll
+0xee0fa	6	VGUI.DLL::vgui::TablePanel::paint	vgui:vgui.dll
+0xee100	6	VGUI.DLL::vgui::TablePanel::getVirtualSize	vgui:vgui.dll
+0xee106	6	VGUI.DLL::vgui::TablePanel::isWithinTraverse	vgui:vgui.dll
+0xee16c	6	VGUI.DLL::vgui::BitmapTGA::BitmapTGA	new: vgui:vgui.dll .. libcmt:ftol
+0xee172	6	VGUI.DLL::vgui::FileInputStream::FileInputStream	new: vgui:vgui.dll .. libcmt:ftol
+0xee178	6	VGUI.DLL::vgui::Label::Label	new: vgui:vgui.dll .. libcmt:ftol
+0xee17e	6	VGUI.DLL::vgui::LineBorder::LineBorder	new: vgui:vgui.dll .. libcmt:ftol
+0xee280	6	VGUI.DLL::vgui::Color::Color	new: vgui:vgui.dll .. libcmt:ftol
+0xee286	6	VGUI.DLL::vgui::TablePanel::TablePanel	new: vgui:vgui.dll .. libcmt:ftol
+0xee28c	6	VGUI.DLL::vgui::ScrollPanel::ScrollPanel	new: vgui:vgui.dll .. libcmt:ftol
+0xee292	6	VGUI.DLL::vgui::HeaderPanel::HeaderPanel	new: vgui:vgui.dll .. libcmt:ftol
+0xee29e	6	VGUI.DLL::vgui::vgui_strcpy	new: vgui:vgui.dll .. libcmt:ftol
+0xee31c	6	VGUI.DLL::vgui::Button::Button	new: vgui:vgui.dll .. libcmt:ftol
+0xee322	6	VGUI.DLL::vgui::Label::Label	new: vgui:vgui.dll .. libcmt:ftol
+0xee328	6	VGUI.DLL::vgui::Slider::Slider	new: vgui:vgui.dll .. libcmt:ftol
+0xee32e	6	VGUI.DLL::vgui::Font::Font	new: vgui:vgui.dll .. libcmt:ftol
+0xee334	6	VGUI.DLL::vgui::BorderLayout::BorderLayout	new: vgui:vgui.dll .. libcmt:ftol
+0xee382	6	VGUI.DLL::vgui::TextPanel::TextPanel	new: vgui:vgui.dll .. libcmt:ftol
+0xee38e	6	VGUI.DLL::vgui::Font::Font	new: vgui:vgui.dll .. libcmt:ftol
+0xee394	6	VGUI.DLL::vgui::Color::Color	new: vgui:vgui.dll .. libcmt:ftol
+0xee39a	6	VGUI.DLL::vgui::TextImage::TextImage	new: vgui:vgui.dll .. libcmt:ftol
+0xee3a0	6	VGUI.DLL::vgui::Image::Image	new: vgui:vgui.dll .. libcmt:ftol
+0xee3a6	6	VGUI.DLL::vgui::App::getInstance	new: vgui:vgui.dll .. libcmt:ftol
+0xee454	6	VGUI.DLL::vgui::SurfaceBase::~SurfaceBase	new: vgui:vgui.dll .. libcmt:ftol
+0xee4b4	6	VGUI.DLL::vgui::ScrollBar::ScrollBar	new: vgui:vgui.dll .. libcmt:ftol
+0xee4ba	6	VGUI.DLL::vgui::Button::Button	new: vgui:vgui.dll .. libcmt:ftol
+0xee4c0	6	WSOCK32.DLL::Ordinal_9	new: vgui:vgui.dll .. libcmt:ftol
+0xee4d0	33	FUN_100ee4d0	new: vgui:vgui.dll .. libcmt:ftol
+0xee500	5	FUN_100ee500	new: vgui:vgui.dll .. libcmt:ftol
+0xee510	65	FUN_100ee510	new: vgui:vgui.dll .. libcmt:ftol
+0xee560	28	FUN_100ee560	new: vgui:vgui.dll .. libcmt:ftol
 0xee57c	39	__ftol	libcmt:ftol
 0xee5b0	250	FUN_100ee5b0	new: libcmt:ftol .. libcmt:exsup
 0xee6b0	15	FUN_100ee6b0	new: libcmt:ftol .. libcmt:exsup
