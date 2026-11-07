@@ -72,7 +72,11 @@ def norm(t):
 
 
 def body(text, cls, meth):
-    pat = (re.escape(cls) + r"\s*::\s*" if cls else r"(?<![\w:])") + re.escape(meth) + r"\s*\([^;{]*\)\s*(const\s*)?\{"
+    # a definition: at the start of a line after its return type (so a call inside an if doesn't
+    # match), parameters over any lines, then an optional const and // comments (our "// orig 0x"
+    # tags) before the brace
+    pat = (r"(?m)^(?:[\w:*&<>,~]+[ \t*&]+)*" + (re.escape(cls) + r"\s*::\s*" if cls else r"(?<![\w:])")
+           + re.escape(meth) + r"\s*\([^;{}]*\)\s*(?:const\s*)?(?://[^\n]*\s*)*\{")
     for m in re.finditer(pat, text):
         i, depth = m.end() - 1, 0
         for j in range(i, len(text)):
