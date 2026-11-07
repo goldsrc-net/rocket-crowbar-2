@@ -51,6 +51,25 @@ def main():
             e[1] += 1
         else:
             e[2].append((rva, int(size), name))
+    # code Ghidra's function list misses (scripts/gaps.py): counted under the file of the function
+    # before it, as "+gap" entries
+    gtsv = os.path.join(ref, "gaps-rc2.tsv")
+    if os.path.exists(gtsv):
+        before = {}
+        for rva, size, name, fl in load(os.path.join(ref, "files-rc2.tsv")):
+            before[name] = fl
+        for rva, size, kind, refname, after in load(gtsv):
+            if kind != "code":
+                continue
+            rva, fl = int(rva, 16), before.get(after, "?")
+            if fl.startswith("libcmt"):
+                continue
+            e = per.setdefault(fl, [0, 0, []])
+            e[0] += 1
+            if rva in covered:
+                e[1] += 1
+            else:
+                e[2].append((rva, int(size), "+gap after " + after))
     if args:
         for fl, (n, c, miss) in per.items():
             if args[0] in fl:
