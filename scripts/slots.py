@@ -72,6 +72,57 @@ def pair(sdk, rc2):
     return pairs, inserted
 
 
+def resolve_thunk(pe, rva):
+    """An incremental link's thunk (a lone jmp rel32) to the function it jumps to."""
+    b = pe.read(rva, 5)
+    if b and b[0] == 0xe9:
+        import struct
+        return rva + 5 + struct.unpack("<i", b[1:5])[0]
+    return rva
+
+
+def rows_by_overlap(target, names_tsv, vt, sdk_slots):
+    """For client.dll, whose classes aren't built by exported factories and whose vtables go
+    through incremental-link thunks: every vtable a constructor writes, its slots resolved
+    through the thunks, given the SDK class with the most of its own methods (?Method@Class@@)
+    in it. Rows in vtables.tsv's shape."""
+    import vtables
+    pe = PE(target)
+    names = {}
+    for line in open(names_tsv).read().split("\n")[1:]:
+        if line:
+            f = line.split("\t")
+            names[int(f[0], 16)] = f[2]
+    starts = sorted(vtables.all_vtable_stores(pe))
+    own = {c: {n for n in sdk_slots(c) if re.match(r"\?[^@]+@%s@@" % re.escape(c), n)} for c in vt}
+    rows, sdk_cache = [], {}
+    for i, v in enumerate(starts):
+        nxt = starts[i + 1] if i + 1 < len(starts) else None
+        sl, a = [], v
+        while nxt is None or a < nxt:
+            w = pe.u32(a)
+            if w is None or not pe.in_section(w - pe.base, ".text"):
+                break
+            sl.append(resolve_thunk(pe, w - pe.base))
+            a += 4
+        got = [names.get(x, "") for x in sl]
+        # by position: how many slots hold the same named function in both, inherited defaults
+        # included (the client's overrides are what RC2 changed, so its own methods rarely
+        # match); a table of the same length breaks a tie
+        score = []
+        for c in vt:
+            ref = sdk_cache.setdefault(c, sdk_slots(c))
+            hits = sum(1 for k in range(min(len(ref), len(got))) if got[k] and got[k] == ref[k])
+            if hits:
+                score.append((hits, len(ref) == len(got), len(own[c] & set(got)), c))
+        score.sort(reverse=True)
+        if not score or score[0][0] < 3 or (len(score) > 1 and score[1][:3] == score[0][:3]):
+            continue
+        rows.append(["", score[0][3], "sdk", "", "0x%x" % v, str(len(sl)),
+                     " ".join("0x%x:%s" % (x, names.get(x, "")) for x in sl)])
+    return rows
+
+
 def main():
     if len(sys.argv) != 4:
         sys.exit(__doc__)
@@ -86,7 +137,13 @@ def main():
             f = line.split("\t")
             named.add(int(f[0], 16))
             taken_names.add(f[2])
-    rows = [l.split("\t") for l in open(os.path.join(ROOT, "reference", "vtables-%s.tsv" % lib)).read().split("\n")[1:] if l]
+    vtsv = os.path.join(ROOT, "reference", "vtables-%s.tsv" % lib)
+    if os.path.exists(vtsv):
+        rows = [l.split("\t") for l in open(vtsv).read().split("\n")[1:] if l]
+    else:
+        rows = rows_by_overlap(target, tsv, vt, sdk_slots)
+        print("%s: no vtables-%s.tsv; %d vtables matched to SDK classes by the methods they share" % (
+            lib, lib, len(rows)))
     votes = collections.defaultdict(collections.Counter)
     insertions = collections.Counter()
     for r in rows:

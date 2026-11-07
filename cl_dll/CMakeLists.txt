@@ -30,6 +30,11 @@ endif()
 
 add_library(client SHARED)
 
+# Rocket Crowbar 2's own client files (what SDK 2.3's client doesn't have; names ours, as rc2.dll's
+# in dlls/rc2/), globbed so a work package can add one without editing this list.
+file(GLOB RC2_CLIENT_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rc2/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/rc2/*.h)
+target_sources(client PRIVATE ${RC2_CLIENT_SOURCES})
+
 set_target_properties(client PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 set_common_properties(client)

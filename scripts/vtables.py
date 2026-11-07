@@ -159,7 +159,8 @@ def main():
 
 
 def all_vtable_stores(pe):
-    """every .rdata address a mov [reg], imm in .text stores whose first word is a .text address."""
+    """every .rdata address a mov [reg], [reg + off] or [absolute], imm in .text stores whose first
+    word is a .text address."""
     md2 = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
     md2.skipdata = True
     _, va, _, ro, rs = pe.section(".text")
@@ -167,9 +168,11 @@ def all_vtable_stores(pe):
     for ins in md2.disasm(pe.data[ro:ro + rs], pe.base + va):
         if ins.mnemonic != "mov":
             continue
-        m = re.fullmatch(r"dword ptr \[(e\w\w)\], (0x[0-9a-f]+)", ins.op_str)
+        # [reg] for heap objects; [reg + off] and [absolute] for members and static objects (the
+        # client's HUD elements and predicted weapons are globals)
+        m = re.fullmatch(r"dword ptr \[(?:e\w\w(?: \+ 0x[0-9a-f]+)?|0x[0-9a-f]+)\], (0x[0-9a-f]+)", ins.op_str)
         if m:
-            v = int(m.group(2), 16) - pe.base
+            v = int(m.group(1), 16) - pe.base
             if pe.in_section(v, ".rdata") and pe.in_section((pe.u32(v) or 0) - pe.base, ".text"):
                 out.add(v)
     return out

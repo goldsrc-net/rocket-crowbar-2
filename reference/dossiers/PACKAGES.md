@@ -12,8 +12,8 @@ p5        88398 B    258      0x7df80-0x9f2a2
 p6        91247 B    223      0x9f2b0-0xb952c
 p7        82246 B    242      0xb9770-0xd3436
 p8        85219 B    270      0xd3440-0xece52
-p9        41792 B    215      0xece60-0x10f334
-total    730046 B
+p9        36103 B    165      0xece60-0xff2aa
+total    724357 B
 ```
 
 ## p1
@@ -233,42 +233,4 @@ new: weapons .. world                             1 fns     102 B
 xen                                              30 fns    2643 B  CXenTree CXenPLight CActAnimating CXenSpore CXenHair CXenHull
 new: xen .. zombie                                4 fns     123 B  CZombie
 zombie                                            4 fns     661 B  CZombie
-new: libcmt:sscanf .. libcmt:atox                 1 fns      98 B  
-new: libcmt:strtok .. libcmt:tolower              1 fns     111 B  
-new: libcmt:fpinit .. libcmt:strncpy              1 fns      87 B  
-new: libcmt:_ctype .. libcmt:stricmp              1 fns     291 B  
-new: libcmt:stricmp .. libcmt:87fmod              1 fns      10 B  
-new: libcmt:strncmp .. libcmt:pow                 1 fns      14 B  
-new: libcmt:pow .. libcmt:fopen                   2 fns     507 B  
-new: libcmt:malloc .. libcmt:onexit               1 fns      14 B  
-new: libcmt:onexit .. libcmt:calloc               1 fns      11 B  
-new: libcmt:acos .. libcmt:toupper                2 fns     285 B  
-new: libcmt:isctype .. libcmt:fflush              1 fns     207 B  
-new: libcmt:fflush .. libcmt:chkstk               1 fns     207 B  
-new: libcmt:chkstk .. libcmt:vsnprint             3 fns     201 B  
-new: libcmt:_file .. libcmt:close                 4 fns     164 B  
-new: libcmt:input .. libcmt:strlen                1 fns      36 B  
-new: libcmt:a_map .. libcmt:fp8                   1 fns      43 B  
-new: libcmt:cfin .. libcmt:strchr                 1 fns       6 B  
-new: libcmt:output .. libcmt:87cdisp              1 fns      14 B  
-new: libcmt:87disp .. libcmt:adj_fdiv             2 fns     308 B  
-new: libcmt:powhlp .. libcmt:_open                1 fns     101 B  
-new: libcmt:handler .. libcmt:crt0dat             1 fns      82 B  
-new: libcmt:crt0dat .. libcmt:msize               1 fns     312 B  
-new: libcmt:write .. libcmt:a_str                 1 fns     664 B  
-new: libcmt:util .. libcmt:fpctrl                 2 fns      29 B  
-new: libcmt:dosmap .. libcmt:osfinfo              2 fns      18 B  
-new: libcmt:osfinfo .. libcmt:mbtowc              1 fns      93 B  
-new: libcmt:ungetc .. libcmt:_getbuf              2 fns     574 B  
-new: libcmt:inittime .. libcmt:initmon            1 fns      55 B  
-new: libcmt:intrncvt .. libcmt:_fptostr           1 fns      45 B  
-new: libcmt:cfout .. libcmt:strgtold              2 fns     673 B  
-new: libcmt:strgtold .. libcmt:lseek              1 fns     101 B  
-new: libcmt:isatty .. libcmt:wctomb               1 fns      89 B  
-new: libcmt:w_str .. libcmt:mbctype               1 fns       3 B  
-new: libcmt:winsig .. libcmt:mantold              1 fns       9 B  
-new: libcmt:ldexp .. libcmt:chsize                1 fns      89 B  
-new: libcmt:a_loc .. libcmt:setmode               1 fns      89 B  
-new: libcmt:a_cmp .. libcmt:setenv                1 fns      43 B  
-new: libcmt:strdup .. end                         1 fns       6 B  
 ```
