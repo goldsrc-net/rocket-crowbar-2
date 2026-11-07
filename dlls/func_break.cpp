@@ -71,15 +71,8 @@ bool CBreakable::KeyValue(KeyValueData* pkvd)
 			m_Explosion = expRandom;
 		else
 			m_Explosion = expRandom;
-
-		if (!stricmp(pkvd->szValue, "1"))
-		{
-			m_Explosion = expDirected;
-		}
-		else
-		{
-			m_Explosion = expRandom;
-		}
+		// SDK 2.3's (stock in RC2); halflife-updated then reread the value as the FGD's "1" for
+		// directed, anything else random
 
 		return true;
 	}
@@ -599,11 +592,8 @@ bool CBreakable::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 // orig 0x42d40 (SDK 2.3's, at RC2's offsets)
 void CBreakable::Die()
 {
-	// Don't allow explosives to damage this again to prevent spawning multiple copies of items and gibs.
-	if (pev->solid == SOLID_NOT)
-	{
-		return;
-	}
+	// SDK 2.3's (stock in RC2); halflife-updated returned here when already SOLID_NOT, so a second
+	// Die (two hits or uses before the remove) no longer broke it again
 
 	Vector vecSpot;		// shard origin
 	Vector vecVelocity; // shard velocity
@@ -620,7 +610,8 @@ void CBreakable::Die()
 	// The more negative pev->health, the louder
 	// the sound should be.
 
-	fvol = RANDOM_FLOAT(0.85, 1.0) + (fabs(pev->health) / 100.0);
+	// SDK 2.3's (stock in RC2): the C abs() truncates the health to int; halflife-updated used fabs()
+	fvol = RANDOM_FLOAT(0.85, 1.0) + (abs(static_cast<int>(pev->health)) / 100.0);
 
 	if (fvol > 1.0)
 		fvol = 1.0;
@@ -701,8 +692,9 @@ void CBreakable::Die()
 	}
 
 
+	// SDK 2.3's (stock in RC2); halflife-updated negated the attack direction
 	if (m_Explosion == expDirected)
-		vecVelocity = -g_vecAttackDir * 200;
+		vecVelocity = g_vecAttackDir * 200;
 	else
 	{
 		vecVelocity.x = 0;

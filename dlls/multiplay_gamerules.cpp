@@ -167,7 +167,8 @@ void CHalfLifeMultiplay::RefreshSkillData()
 	gSkillData.plrDmg9MM = 12;
 
 	// 357 Round
-	gSkillData.plrDmg357 = 50;
+	// SDK 2.3's (stock in RC2); halflife-updated has HL25's 50
+	gSkillData.plrDmg357 = 40;
 
 	// MP5 Round
 	gSkillData.plrDmgMP5 = 12;
