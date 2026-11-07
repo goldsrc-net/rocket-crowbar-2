@@ -243,7 +243,7 @@ bool CGauss::CanPlaceAt(CBaseEntity* pEnt, Vector vecSpot)
 		if (pPlayer->m_bTransforming)
 			return false;
 		int iMe = ENTINDEX(m_pPlayer->edict());
-		if (pPlayer->m_iRidingIndex == iMe || pPlayer->m_iRightRider == iMe || pPlayer->m_iLeftRider == iMe)
+		if (pPlayer->m_iRidingIndex == iMe || pPlayer->m_iShoulderRider[0] == iMe || pPlayer->m_iShoulderRider[1] == iMe)
 			return false;
 	}
 

@@ -169,7 +169,7 @@ void CBasePlayer::THoundeye_SonicStart()
 		return;
 
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 512, 0.4);
-	AddMoveLock(4);
+	AddPhysFlag2Source(4);
 	pev->sequence = 10;
 	pev->frame = 0;
 	ResetSequenceInfo();
@@ -206,7 +206,7 @@ void CBasePlayer::THoundeye_BeamStart()
 	WRITE_BYTE(ENTINDEX(edict()));
 	MESSAGE_END();
 
-	AddMoveLock(4);
+	AddPhysFlag2Source(4);
 	m_iTransformState1 = 1;
 	m_flTransformTimer1 = RC2Pref(RC2P_TransformHoundeye_BeamChargeTime).f + gpGlobals->time;
 }
@@ -668,7 +668,7 @@ void CBasePlayer::THoundeye_Think()
 			if ((pev->flags & FL_ONGROUND) != 0)
 			{
 				// lie down
-				AddMoveLock(4);
+				AddPhysFlag2Source(4);
 				pev->sequence = 18;
 				pev->frame = 0;
 				ResetSequenceInfo();

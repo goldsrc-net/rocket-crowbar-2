@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "UserMessages.h"
+
 // Real ones belong in the run "new: pm_shared_pm_shared .. python" (orig 0xaa950, 0xaaa20): a
 // table of 64 pull points that CBaseEntity::ApplyExternalForce (orig 0xa9ba0) draws entities
 // towards. Add returns the slot, or -1 when the table is full; Remove frees it. Names ours.

@@ -33,12 +33,12 @@ static void PlatSpawnInsideTrigger(entvars_t* pevPlatform);
 class CBasePlatTrain : public CBaseToggle
 {
 public:
-	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x8fb50
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Precache() override;
 
 	// This is done to fix spawn flag collisions between this class and a derived class
-	virtual bool IsTogglePlat() { return (pev->spawnflags & SF_PLAT_TOGGLE) != 0; }
+	virtual bool IsTogglePlat() { return (pev->spawnflags & SF_PLAT_TOGGLE) != 0; } // orig 0x8fb60
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -56,8 +56,9 @@ TYPEDESCRIPTION CBasePlatTrain::m_SaveData[] =
 		DEFINE_FIELD(CBasePlatTrain, m_volume, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CBasePlatTrain, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CBasePlatTrain, CBaseToggle); // orig 0x8f530 Save, orig 0x8f560 Restore
 
+// orig 0x8f590
 bool CBasePlatTrain::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "lip"))
@@ -102,6 +103,7 @@ bool CBasePlatTrain::KeyValue(KeyValueData* pkvd)
 #define noiseMoving noise
 #define noiseArrived noise1
 
+// orig 0x8f810
 void CBasePlatTrain::Precache()
 {
 	// set the plat's "in-motion" sound
@@ -232,16 +234,16 @@ public:
 
 	void EXPORT PlatUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 
-	void EXPORT CallGoDown() { GoDown(); }
-	void EXPORT CallHitTop() { HitTop(); }
-	void EXPORT CallHitBottom() { HitBottom(); }
+	void EXPORT CallGoDown() { GoDown(); } // orig 0x8fab0
+	void EXPORT CallHitTop() { HitTop(); } // orig 0x8fac0
+	void EXPORT CallHitBottom() { HitBottom(); } // orig 0x8fad0
 
 	virtual void GoUp();
 	virtual void GoDown();
 	virtual void HitTop();
 	virtual void HitBottom();
 };
-LINK_ENTITY_TO_CLASS(func_plat, CFuncPlat);
+LINK_ENTITY_TO_CLASS(func_plat, CFuncPlat); // orig 0x8fae0
 
 
 // UNDONE: Need to save this!!! It needs class & linkage
@@ -377,6 +379,7 @@ void CPlatTrigger::SpawnInsideTrigger(CFuncPlat* pPlatform)
 //
 // When the platform's trigger field is touched, the platform ???
 //
+// orig 0x8ff90
 void CPlatTrigger::Touch(CBaseEntity* pOther)
 {
 	//Platform was removed, remove trigger
@@ -386,9 +389,8 @@ void CPlatTrigger::Touch(CBaseEntity* pOther)
 		return;
 	}
 
-	// Ignore touches by non-players
-	entvars_t* pevToucher = pOther->pev;
-	if (!FClassnameIs(pevToucher, "player"))
+	// Ignore touches by non-players. RC2 asks IsActivePlayer where SDK 2.3 compared the classname.
+	if (!pOther->IsActivePlayer())
 		return;
 
 	// Ignore touches by corpses
@@ -437,6 +439,7 @@ void CFuncPlat::PlatUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 //
 // Platform is at top, now starts moving down.
 //
+// orig 0x90060
 void CFuncPlat::GoDown()
 {
 	if (!FStringNull(pev->noiseMovement))
@@ -468,6 +471,7 @@ void CFuncPlat::HitBottom()
 //
 // Platform is at bottom, now starts moving up
 //
+// orig 0x90170
 void CFuncPlat::GoUp()
 {
 	if (!FStringNull(pev->noiseMovement))
@@ -539,14 +543,14 @@ public:
 
 	Vector m_end, m_start;
 };
-LINK_ENTITY_TO_CLASS(func_platrot, CFuncPlatRot);
+LINK_ENTITY_TO_CLASS(func_platrot, CFuncPlatRot); // orig 0x90350
 TYPEDESCRIPTION CFuncPlatRot::m_SaveData[] =
 	{
 		DEFINE_FIELD(CFuncPlatRot, m_end, FIELD_VECTOR),
 		DEFINE_FIELD(CFuncPlatRot, m_start, FIELD_VECTOR),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncPlatRot, CFuncPlat);
+IMPLEMENT_SAVERESTORE(CFuncPlatRot, CFuncPlat); // orig 0x903d0 Save, orig 0x90400 Restore
 
 
 void CFuncPlatRot::SetupRotation()
@@ -614,6 +618,7 @@ void CFuncPlatRot::HitTop()
 }
 
 
+// orig 0x90670
 void CFuncPlatRot::RotMove(Vector& destAngle, float time)
 {
 	// set destdelta to the vector needed to move
@@ -658,7 +663,7 @@ public:
 	bool m_activated;
 };
 
-LINK_ENTITY_TO_CLASS(func_train, CFuncTrain);
+LINK_ENTITY_TO_CLASS(func_train, CFuncTrain); // orig 0x90740
 TYPEDESCRIPTION CFuncTrain::m_SaveData[] =
 	{
 		DEFINE_FIELD(CFuncTrain, m_sounds, FIELD_INTEGER),
@@ -666,7 +671,7 @@ TYPEDESCRIPTION CFuncTrain::m_SaveData[] =
 		DEFINE_FIELD(CFuncTrain, m_activated, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncTrain, CBasePlatTrain);
+IMPLEMENT_SAVERESTORE(CFuncTrain, CBasePlatTrain); // orig 0x907b0 Save, orig 0x907e0 Restore
 
 
 bool CFuncTrain::KeyValue(KeyValueData* pkvd)
@@ -681,11 +686,20 @@ bool CFuncTrain::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0x90890
+// RC2: a gauss beacon in the way takes a fixed 2 crush damage (through GetEffectedEnt) and doesn't
+// start the half-second wait.
 void CFuncTrain::Blocked(CBaseEntity* pOther)
 
 {
 	if (gpGlobals->time < m_flActivateFinished)
 		return;
+
+	if (FClassnameIs(pOther->pev, "gauss_becon"))
+	{
+		pOther->GetEffectedEnt()->TakeDamage(pev, pev, 2, DMG_CRUSH);
+		return;
+	}
 
 	m_flActivateFinished = gpGlobals->time + 0.5;
 
@@ -759,6 +773,7 @@ void CFuncTrain::Wait()
 //
 // Train next - path corner needs to change to next target
 //
+// orig 0x90bd0
 void CFuncTrain::Next()
 {
 	CBaseEntity* pTarg;
@@ -817,6 +832,7 @@ void CFuncTrain::Next()
 }
 
 
+// orig 0x90ec0
 void CFuncTrain::Activate()
 {
 	// Not yet active, so teleport to first target
@@ -881,6 +897,7 @@ void CFuncTrain::Spawn()
 }
 
 
+// orig 0x91100
 void CFuncTrain::Precache()
 {
 	CBasePlatTrain::Precache();
@@ -912,6 +929,7 @@ void CFuncTrain::Precache()
 }
 
 
+// orig 0x91110
 void CFuncTrain::OverrideReset()
 {
 	CBaseEntity* pTarg;
@@ -960,9 +978,10 @@ TYPEDESCRIPTION CFuncTrackTrain::m_SaveData[] =
 		DEFINE_FIELD(CFuncTrackTrain, m_oldSpeed, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncTrackTrain, CBaseEntity);
-LINK_ENTITY_TO_CLASS(func_tracktrain, CFuncTrackTrain);
+IMPLEMENT_SAVERESTORE(CFuncTrackTrain, CBaseEntity); // orig 0x911c0 Save, orig 0x911f0 Restore
+LINK_ENTITY_TO_CLASS(func_tracktrain, CFuncTrackTrain); // orig 0x91220
 
+// orig 0x91290
 bool CFuncTrackTrain::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "wheels"))
@@ -1012,9 +1031,18 @@ void CFuncTrackTrain::NextThink(float thinkTime, bool alwaysThink)
 }
 
 
+// orig 0x914f0
+// RC2: a gauss beacon in the way takes a fixed 2 crush damage (through GetEffectedEnt) and is not
+// pushed.
 void CFuncTrackTrain::Blocked(CBaseEntity* pOther)
 {
 	entvars_t* pevOther = pOther->pev;
+
+	if (FClassnameIs(pevOther, "gauss_becon"))
+	{
+		pOther->GetEffectedEnt()->TakeDamage(pev, pev, 2, DMG_CRUSH);
+		return;
+	}
 
 	// Blocker is on-ground on the train
 	if (FBitSet(pevOther->flags, FL_ONGROUND) && VARS(pevOther->groundentity) == pev)
@@ -1128,6 +1156,7 @@ void CFuncTrackTrain::StopSound()
 // NOTE: when train goes through transition, m_soundPlaying should go to false,
 // which will cause the looped sound to restart.
 
+// orig 0x91970
 void CFuncTrackTrain::UpdateSound()
 {
 	float flpitch;
@@ -1168,6 +1197,7 @@ void CFuncTrackTrain::UpdateSound()
 }
 
 
+// orig 0x91ac0
 void CFuncTrackTrain::Next()
 {
 	float time = 0.5;
@@ -1380,6 +1410,7 @@ bool CFuncTrackTrain::OnControls(entvars_t* pevTest)
 }
 
 
+// orig 0x92460
 void CFuncTrackTrain::Find()
 {
 	m_ppath = CPathTrack::Instance(FIND_ENTITY_BY_TARGETNAME(NULL, STRING(pev->target)));
@@ -1417,6 +1448,7 @@ void CFuncTrackTrain::Find()
 }
 
 
+// orig 0x92620
 void CFuncTrackTrain::NearestPath()
 {
 	CBaseEntity* pTrack = NULL;
@@ -1465,6 +1497,7 @@ void CFuncTrackTrain::NearestPath()
 }
 
 
+// orig 0x92840
 void CFuncTrackTrain::OverrideReset()
 {
 	NextThink(pev->ltime + 0.1, false);
@@ -1472,6 +1505,7 @@ void CFuncTrackTrain::OverrideReset()
 }
 
 
+// orig 0x92870
 CFuncTrackTrain* CFuncTrackTrain::Instance(edict_t* pent)
 {
 	if (FClassnameIs(pent, "func_tracktrain"))
@@ -1490,6 +1524,7 @@ sounds
 1) ratchet metal
 */
 
+// orig 0x928e0
 void CFuncTrackTrain::Spawn()
 {
 	if (pev->speed == 0)
@@ -1578,13 +1613,14 @@ void CFuncTrackTrain::Precache()
 class CFuncTrainControls : public CBaseEntity
 {
 public:
-	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x92c30
 	void Spawn() override;
 	void EXPORT Find();
 };
-LINK_ENTITY_TO_CLASS(func_traincontrols, CFuncTrainControls);
+LINK_ENTITY_TO_CLASS(func_traincontrols, CFuncTrainControls); // orig 0x92bc0
 
 
+// orig 0x92c40
 void CFuncTrainControls::Find()
 {
 	edict_t* pTarget = NULL;
@@ -1665,7 +1701,7 @@ public:
 	void HitTop() override;
 	void Touch(CBaseEntity* pOther) override;
 	virtual void UpdateAutoTargets(int toggleState);
-	bool IsTogglePlat() override { return true; }
+	bool IsTogglePlat() override { return true; } // orig 0x92e30
 
 	void DisableUse() { m_use = false; }
 	void EnableUse() { m_use = true; }
@@ -1690,7 +1726,10 @@ public:
 	int m_targetState;
 	bool m_use;
 };
-LINK_ENTITY_TO_CLASS(func_trackchange, CFuncTrackChange);
+LINK_ENTITY_TO_CLASS(func_trackchange, CFuncTrackChange); // orig 0x92db0
+// orig 0x94220, orig 0x94230: CBaseEntity's and CBaseDelay's implicit constructors (they only
+// set the vtable), which VC6 emitted out of line after plats.obj for this factory and
+// func_trackautochange's. Nothing to write in C++.
 
 TYPEDESCRIPTION CFuncTrackChange::m_SaveData[] =
 	{
@@ -1705,8 +1744,9 @@ TYPEDESCRIPTION CFuncTrackChange::m_SaveData[] =
 		DEFINE_FIELD(CFuncTrackChange, m_use, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncTrackChange, CFuncPlatRot);
+IMPLEMENT_SAVERESTORE(CFuncTrackChange, CFuncPlatRot); // orig 0x92e40 Save, orig 0x92e70 Restore
 
+// orig 0x92ea0
 void CFuncTrackChange::Spawn()
 {
 	Setup();
@@ -1736,6 +1776,7 @@ void CFuncTrackChange::Spawn()
 	Precache();
 }
 
+// orig 0x92f90
 void CFuncTrackChange::Precache()
 {
 	// Can't trigger sound
@@ -1746,6 +1787,7 @@ void CFuncTrackChange::Precache()
 
 
 // UNDONE: Filter touches before re-evaluating the train.
+// orig 0x92fb0
 void CFuncTrackChange::Touch(CBaseEntity* pOther)
 {
 #if 0
@@ -1784,6 +1826,7 @@ void CFuncTrackChange::OverrideReset()
 	SetThink(&CFuncTrackChange::Find);
 }
 
+// orig 0x93100
 void CFuncTrackChange::Find()
 {
 	// Find track entities
@@ -1879,6 +1922,7 @@ void CFuncTrackChange::UpdateTrain(Vector& dest)
 	m_train->pev->velocity = pev->velocity + (local * (1.0 / time));
 }
 
+// orig 0x93690
 void CFuncTrackChange::GoDown()
 {
 	if (m_code == TRAIN_BLOCKING)
@@ -1915,6 +1959,7 @@ void CFuncTrackChange::GoDown()
 //
 // Platform is at bottom, now starts moving up
 //
+// orig 0x93740
 void CFuncTrackChange::GoUp()
 {
 	if (m_code == TRAIN_BLOCKING)
@@ -2046,7 +2091,7 @@ public:
 	void UpdateAutoTargets(int toggleState) override;
 };
 
-LINK_ENTITY_TO_CLASS(func_trackautochange, CFuncTrackAuto);
+LINK_ENTITY_TO_CLASS(func_trackautochange, CFuncTrackAuto); // orig 0x93a20
 
 // Auto track change
 void CFuncTrackAuto::UpdateAutoTargets(int toggleState)
@@ -2141,13 +2186,13 @@ public:
 	void EXPORT Wait();
 	void Stop() override;
 
-	int BloodColor() override { return DONT_BLEED; }
-	int Classify() override { return CLASS_MACHINE; }
+	int BloodColor() override { return DONT_BLEED; } // orig 0x93d10
+	int Classify() override { return CLASS_MACHINE; } // orig 0x93d20
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
 	Vector BodyTarget(const Vector& posSrc) override { return pev->origin; }
 
-	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x93d50
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
 
@@ -2158,14 +2203,14 @@ private:
 };
 
 
-LINK_ENTITY_TO_CLASS(func_guntarget, CGunTarget);
+LINK_ENTITY_TO_CLASS(func_guntarget, CGunTarget); // orig 0x93ca0
 
 TYPEDESCRIPTION CGunTarget::m_SaveData[] =
 	{
 		DEFINE_FIELD(CGunTarget, m_on, FIELD_BOOLEAN),
 };
 
-IMPLEMENT_SAVERESTORE(CGunTarget, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CGunTarget, CBaseMonster); // orig 0x93d60 Save, orig 0x93d90 Restore
 
 
 void CGunTarget::Spawn()
@@ -2208,12 +2253,14 @@ void CGunTarget::Activate()
 }
 
 
+// orig 0x93f50
 void CGunTarget::Start()
 {
 	Use(this, this, USE_ON, 0);
 }
 
 
+// orig 0x93f60
 void CGunTarget::Next()
 {
 	SetThink(NULL);

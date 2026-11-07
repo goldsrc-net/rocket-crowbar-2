@@ -41,8 +41,8 @@ Vector VecBModelOrigin(entvars_t* pevBModel);
 
 CGraph WorldGraph;
 
-LINK_ENTITY_TO_CLASS(info_node, CNodeEnt);
-LINK_ENTITY_TO_CLASS(info_node_air, CNodeEnt);
+LINK_ENTITY_TO_CLASS(info_node, CNodeEnt); // orig 0x85880
+LINK_ENTITY_TO_CLASS(info_node_air, CNodeEnt); // orig 0x858f0
 
 //=========================================================
 // CGraph - InitGraph - prepares the graph for use. Frees any
@@ -575,6 +575,7 @@ int CGraph::NextNodeInRoute(int iCurrentNode, int iDest, int iHull, int iCap)
 // find a path usable by a monster with those capabilities
 // returns the number of nodes copied into supplied array
 //=========================================================
+// orig 0x86090
 int CGraph::FindShortestPath(int* piPath, int iStart, int iDest, int iHull, int afCapMask)
 {
 	int iVisitNode;
@@ -1173,6 +1174,7 @@ void CGraph::ShowNodeConnections(int iNode)
 // If there's a problem with this process, the index
 // of the offending node will be written to piBadNode
 //=========================================================
+// orig 0x86f70
 int CGraph::LinkVisibleNodes(CLink* pLinkPool, FSFile& file, int* piBadNode)
 {
 	int i, j, z;
@@ -1471,7 +1473,7 @@ class CTestHull : public CBaseMonster
 
 public:
 	void Spawn(entvars_t* pevMasterNode);
-	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0x87730
 	void EXPORT CallBuildNodeGraph();
 	void BuildNodeGraph();
 	void EXPORT ShowBadNode();
@@ -1481,7 +1483,7 @@ public:
 	Vector vecBadNodeOrigin;
 };
 
-LINK_ENTITY_TO_CLASS(testhull, CTestHull);
+LINK_ENTITY_TO_CLASS(testhull, CTestHull); // orig 0x876c0
 
 //=========================================================
 // CTestHull::Spawn
@@ -1597,6 +1599,7 @@ void CNodeEnt::Spawn()
 // hull will be placed up the bad node's location and will generate
 // particles
 //=========================================================
+// orig 0x87b50
 void CTestHull::ShowBadNode()
 {
 	pev->movetype = MOVETYPE_FLY;
@@ -1630,6 +1633,7 @@ void CTestHull::CallBuildNodeGraph()
 // hull that walks between each node and each of its links
 // to ensure that a monster can actually fit through the space
 //=========================================================
+// orig 0x87dc0
 void CTestHull::BuildNodeGraph()
 {
 	TraceResult tr;
@@ -2223,6 +2227,7 @@ int CQueue::Remove(float& fPriority)
 //=========================================================
 // CQueue constructor
 //=========================================================
+// orig 0x88ee0
 CQueuePriority::CQueuePriority()
 {
 	m_cSize = 0;
@@ -2326,6 +2331,7 @@ constexpr const char* GRAPH_FILE_EXT = sizeof(void*) == 8 ? ".nod64" : ".nod";
 // will be loaded. If file cannot be loaded, the node tree
 // will be created and saved to disk.
 //=========================================================
+// orig 0x89030
 bool CGraph::FLoadGraph(const char* szMapName)
 {
 	// make sure the directories have been made
@@ -2494,6 +2500,7 @@ bool CGraph::FLoadGraph(const char* szMapName)
 // CGraph - FSaveGraph - It's not rocket science.
 // this WILL overwrite existing files.
 //=========================================================
+// orig 0x89450
 bool CGraph::FSaveGraph(const char* szMapName)
 {
 	if (0 == m_fGraphPresent || 0 == m_fGraphPointersSet)
@@ -2553,6 +2560,7 @@ bool CGraph::FSaveGraph(const char* szMapName)
 // this is done after loading the graph from disk, whereupon
 // the pointers are not valid.
 //=========================================================
+// orig 0x896a0
 bool CGraph::FSetGraphPointers()
 {
 	int i;
@@ -3491,10 +3499,10 @@ public:
 	void AddNode(int iFrom, int iTo);
 	void EXPORT DrawThink();
 };
-LINK_ENTITY_TO_CLASS(node_viewer, CNodeViewer);
-LINK_ENTITY_TO_CLASS(node_viewer_human, CNodeViewer);
-LINK_ENTITY_TO_CLASS(node_viewer_fly, CNodeViewer);
-LINK_ENTITY_TO_CLASS(node_viewer_large, CNodeViewer);
+LINK_ENTITY_TO_CLASS(node_viewer, CNodeViewer); // orig 0x8ac60
+LINK_ENTITY_TO_CLASS(node_viewer_human, CNodeViewer); // orig 0x8acd0
+LINK_ENTITY_TO_CLASS(node_viewer_fly, CNodeViewer); // orig 0x8ad40
+LINK_ENTITY_TO_CLASS(node_viewer_large, CNodeViewer); // orig 0x8adb0
 
 void CNodeViewer::Spawn()
 {

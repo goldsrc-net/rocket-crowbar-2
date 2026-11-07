@@ -8,11 +8,12 @@
 
 #pragma once
 
+#include "UserMessages.h"
+
 // Real ones belong in the run "new: plats .. player" (orig 0x94240 registers them): RC2's
 // user messages "CLTE" (orig .data 0x18f4b8, client temp entities: byte type, then by type) and
 // "WeaponSync" (0x18f4c0, byte weapon id, then by weapon).
-inline int gmsgCLTE = 0;
-inline int gmsgWeaponSync = 0;
+// gmsgCLTE, gmsgWeaponSync: UserMessages.h (p5)
 
 // Real one belongs in the run "new: scripted .. shotgun" (orig 0xc45b0, 1832 bytes): the damage
 // left after pEntity's shield (an RC2 player member at orig +0x778 says it is up), scaled by

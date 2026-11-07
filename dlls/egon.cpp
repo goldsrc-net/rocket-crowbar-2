@@ -832,7 +832,7 @@ void CEgon::SecondaryAttack()
 		if (m_bHolding)
 		{
 			m_bAdjusting = true;
-			m_flHoldDist += RC2Pref(RC2P_Egon_TractorExtendRate).f * m_flFrameTime;
+			m_flHoldDist += RC2Pref(RC2P_Egon_TractorExtendRate).f * m_flFrameInterval;
 		}
 		return;
 	}
@@ -887,7 +887,7 @@ void CEgon::TertiaryAttack()
 		if (!m_bHolding)
 			return;
 		m_bAdjusting = true;
-		m_flHoldDist -= RC2Pref(RC2P_Egon_TractorContractRate).f * m_flFrameTime;
+		m_flHoldDist -= RC2Pref(RC2P_Egon_TractorContractRate).f * m_flFrameInterval;
 		return;
 	}
 
@@ -951,7 +951,7 @@ void CEgon::QuaternaryAttack()
 		return;
 	}
 
-	if (EgonUnderwater(m_pPlayer) || m_pPlayer->m_flRC2NextSuperWeapon > gpGlobals->time)
+	if (EgonUnderwater(m_pPlayer) || m_pPlayer->m_flJoinTime > gpGlobals->time)
 	{
 		PlayEmptySound();
 		EGON_EXTEND4(0.5);
@@ -967,7 +967,7 @@ void CEgon::QuaternaryAttack()
 
 	EGON_AMMO -= RC2Pref(RC2P_Egon_NukeAmmoCost).s & 0xffff;
 	m_pPlayer->m_flEnergy -= RC2Pref(RC2P_Egon_NukeEnergyCost).f;
-	UTIL_ExtendTime(&m_pPlayer->m_flRC2NextSuperWeapon, gpGlobals->time, RC2Pref(RC2P_Egon_QuaternaryRefireSuperWeapon).f);
+	UTIL_ExtendTime(&m_pPlayer->m_flJoinTime, gpGlobals->time, RC2Pref(RC2P_Egon_QuaternaryRefireSuperWeapon).f);
 	EGON_EXTEND4_KEYS(Quaternary);
 	UTIL_ExtendTime(&m_pPlayer->m_flNextAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Egon_QuaternaryRefireAnything).f);
 	UTIL_ExtendTime(&m_pPlayer->m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Egon_QuaternaryEnergyRegenDelay).f);
@@ -1250,7 +1250,7 @@ void CEgon::WeaponFrame()
 	else if (m_flHoldDist > 8192)
 		m_flHoldDist = 8192;
 
-	m_flFrameTime = gpGlobals->time - m_flLastFrame;
+	m_flFrameInterval = gpGlobals->time - m_flLastFrame;
 	m_flLastFrame = gpGlobals->time;
 
 	if (m_iChargeType != 0)

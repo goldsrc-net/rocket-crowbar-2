@@ -13,12 +13,6 @@
 #include "p8_needs_transform.h"
 
 // TEMP STUB (p8): real ones belong in player.cpp (CBasePlayer::Precache sets them)
-unsigned short g_usTAssassinGun;
-unsigned short g_usTAssassinKick;
-unsigned short g_usTHoundeyeBeam;
-unsigned short g_usTHoundeyeSonic;
-unsigned short g_usTControllerThrow;
-unsigned short g_usTBatBite;
 
 // TEMP STUB (p8): real ones belong in player.cpp (LinkUserMessages)
 // gmsgCLTE: its TEMP STUB is in p8_stubs_tripmine.cpp (both halves of p8 use it)
@@ -65,19 +59,12 @@ bool RC2_GameRulesCanKnock(CBasePlayer* pAttacker, CBaseEntity* pVictim)
 	return true;
 }
 
-// TEMP STUB (p8): real ones belong in player.cpp
-void CBasePlayer::AddMoveLock(int bits)
-{
-}
+// CBasePlayer::AddPhysFlag2Source: the real one is reconstructed elsewhere now
 
 void CBasePlayer::RemoveMoveLock(int bits)
 {
 }
 
-void CBasePlayer::AddPhysFlags(int bits)
-{
-}
+// CBasePlayer::SetPhysFlags: the real one is reconstructed elsewhere now
 
-void CBasePlayer::RemovePhysFlags(int bits)
-{
-}
+// CBasePlayer::ClearPhysFlags: the real one is reconstructed elsewhere now

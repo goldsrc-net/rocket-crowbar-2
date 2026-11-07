@@ -29,6 +29,41 @@
 #include "hltv.h"
 #include "trains.h"
 #include "UserMessages.h"
+#include "rc2prefs.h"
+
+#include <algorithm>
+
+// From elsewhere in rc2.dll
+extern bool g_bRC2EquipFlag; // name ours: weapons given meanwhile bring no ammo of their own. VERIFY; orig .data 0x181430, stubbed in player.cpp
+extern int g_iScoreMode; // name ours: mp_scoremode as CWorld::Spawn read it (0 or 1); world.cpp, orig .bss 0x1afd38
+extern int GetDeathMessageIndex(const char* pszWeapon, bool bNoKiller, int iRandom); // name ours; orig 0x31fe0 (p2)
+extern const char* GetDeathMessageText(int iMessage, const char* pszVictim, const char* pszKiller, const char* pszWeapon, int iGender, bool bSuicide); // name ours; orig 0x32540 (p2)
+
+// orig 0x7efd0. The player's userinfo "gender": 1 for 1, f or F; 2 for 2, n, N, i, I, u or U;
+// 0 otherwise.
+int PlayerGender(edict_t* pPlayer) // name ours
+{
+	const char* pszGender = g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer), "gender");
+	if (!pszGender)
+		return 0;
+
+	switch (pszGender[0])
+	{
+	case '1':
+	case 'f':
+	case 'F':
+		return 1;
+	case '2':
+	case 'n':
+	case 'N':
+	case 'i':
+	case 'I':
+	case 'u':
+	case 'U':
+		return 2;
+	}
+	return 0;
+}
 
 #define ITEM_RESPAWN_TIME 30
 #define WEAPON_RESPAWN_TIME 20
@@ -163,24 +198,26 @@ void CHalfLifeMultiplay::RefreshSkillData()
 }
 
 //=========================================================
+// orig 0x7e130. RC2: mp_chattime is at least 10; with mp_scoremode 1 the frag limit applies to
+// the damage-based score, and the frags left go out with two decimals.
 //=========================================================
 void CHalfLifeMultiplay::Think()
 {
 	g_VoiceGameMgr.Update(gpGlobals->frametime);
 
 	///// Check game rules /////
-	static int last_frags;
+	static float last_frags;
 	static int last_time;
 
-	int frags_remaining = 0;
+	float frags_remaining = 0;
 	int time_remaining = 0;
 
 	if (g_fGameOver) // someone else quit the game already
 	{
 		// bounds check
 		int time = (int)CVAR_GET_FLOAT("mp_chattime");
-		if (time < 1)
-			CVAR_SET_STRING("mp_chattime", "1");
+		if (time < 10)
+			CVAR_SET_STRING("mp_chattime", "10");
 		else if (time > MAX_INTERMISSION_TIME)
 			CVAR_SET_STRING("mp_chattime", UTIL_dtos1(MAX_INTERMISSION_TIME));
 
@@ -210,28 +247,29 @@ void CHalfLifeMultiplay::Think()
 
 	if (0 != flFragLimit)
 	{
-		int bestfrags = 9999;
-		int remain;
+		float bestfrags = 1e16; // VERIFY: with nobody on, the original writes (int)1e16 to mp_fragsleft
+		float remain;
 
 		// check if any player is over the frag limit
 		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
-			CBaseEntity* pPlayer = UTIL_PlayerByIndex(i);
+			CBasePlayer* pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 
-			if (pPlayer && pPlayer->pev->frags >= flFragLimit)
+			if (!pPlayer)
+				continue;
+
+			const float flScore = g_iScoreMode != 0 ? pPlayer->m_flDmgScore : pPlayer->pev->frags;
+
+			if (flScore >= flFragLimit)
 			{
 				GoToIntermission();
 				return;
 			}
 
-
-			if (pPlayer)
+			remain = flFragLimit - flScore;
+			if (remain < bestfrags)
 			{
-				remain = flFragLimit - pPlayer->pev->frags;
-				if (remain < bestfrags)
-				{
-					bestfrags = remain;
-				}
+				bestfrags = remain;
 			}
 		}
 		frags_remaining = bestfrags;
@@ -240,7 +278,10 @@ void CHalfLifeMultiplay::Think()
 	// Updates when frags change
 	if (frags_remaining != last_frags)
 	{
-		g_engfuncs.pfnCvar_DirectSet(&fragsleft, UTIL_VarArgs("%i", frags_remaining));
+		if (g_iScoreMode != 0)
+			g_engfuncs.pfnCvar_DirectSet(&fragsleft, UTIL_VarArgs("%.2f", frags_remaining));
+		else
+			g_engfuncs.pfnCvar_DirectSet(&fragsleft, UTIL_VarArgs("%i", (int)frags_remaining));
 	}
 
 	// Updates once per second
@@ -276,9 +317,19 @@ bool CHalfLifeMultiplay::IsCoOp()
 }
 
 //=========================================================
+// orig 0x7e430. RC2: a client with the userinfo key noautoswitch set to nonzero never switches;
+// halflife-updated's cl_autowepswitch (m_iAutoWepSwitch) stays, RC2's client never sends it.
 //=========================================================
 bool CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
 {
+	char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict());
+	if (infobuffer)
+	{
+		const char* noautoswitch = g_engfuncs.pfnInfoKeyValue(infobuffer, "noautoswitch");
+		if (noautoswitch && atoi(noautoswitch) != 0)
+			return false;
+	}
+
 	if (!pWeapon->CanDeploy())
 	{
 		// that weapon can't deploy anyway.
@@ -332,6 +383,9 @@ void CHalfLifeMultiplay::UpdateGameMode(CBasePlayer* pPlayer)
 	MESSAGE_END();
 }
 
+// orig 0x7e660. RC2: ScoreInfo is RC2's six bytes (no class short), every player's score goes
+// out twice (the damage-based score as a long with 0x80 on the index, then frags and deaths),
+// and no MOTD here.
 void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 {
 	// notify other clients of player joining the game
@@ -364,11 +418,8 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 	WRITE_BYTE(ENTINDEX(pl->edict()));
 	WRITE_SHORT(0);
 	WRITE_SHORT(0);
-	WRITE_SHORT(0);
-	WRITE_SHORT(0);
+	WRITE_BYTE(0);
 	MESSAGE_END();
-
-	SendMOTDToClient(pl->edict());
 
 	// loop through all active players and send their score info to the new client
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -378,12 +429,20 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer* pl)
 
 		if (plr)
 		{
+			int iScoreBits;
+			memcpy(&iScoreBits, &plr->m_flDmgScore, sizeof(iScoreBits));
+
+			MESSAGE_BEGIN(MSG_ONE, gmsgScoreInfo, NULL, pl->edict());
+			WRITE_BYTE(i | 0x80); // client number, damage-based score
+			WRITE_LONG(iScoreBits);
+			WRITE_BYTE(GetTeamIndex(plr->m_szTeamName) + 1);
+			MESSAGE_END();
+
 			MESSAGE_BEGIN(MSG_ONE, gmsgScoreInfo, NULL, pl->edict());
 			WRITE_BYTE(i); // client number
 			WRITE_SHORT(plr->pev->frags);
 			WRITE_SHORT(plr->m_iDeaths);
-			WRITE_SHORT(0);
-			WRITE_SHORT(GetTeamIndex(plr->m_szTeamName) + 1);
+			WRITE_BYTE(GetTeamIndex(plr->m_szTeamName) + 1);
 			MESSAGE_END();
 		}
 	}
@@ -431,26 +490,17 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t* pClient)
 }
 
 //=========================================================
+// orig 0x7e9e0 (not in files-rc2.tsv: Ghidra made no function of it). RC2: no fall damage in
+// multiplayer, and no mp_falldamage.
 //=========================================================
 float CHalfLifeMultiplay::FlPlayerFallDamage(CBasePlayer* pPlayer)
 {
-	int iFallDamage = (int)falldamage.value;
-
-	switch (iFallDamage)
-	{
-	case 1: //progressive
-		pPlayer->m_flFallVelocity -= PLAYER_MAX_SAFE_FALL_SPEED;
-		return pPlayer->m_flFallVelocity * DAMAGE_FOR_FALL_SPEED;
-		break;
-	default:
-	case 0: // fixed
-		return 10;
-		break;
-	}
+	return 0;
 }
 
 //=========================================================
 //=========================================================
+// orig 0x7e9f0
 bool CHalfLifeMultiplay::FPlayerCanTakeDamage(CBasePlayer* pPlayer, CBaseEntity* pAttacker)
 {
 	return true;
@@ -475,6 +525,10 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer* pPlayer)
 
 //=========================================================
 //=========================================================
+// orig 0x7ea40 (not in files-rc2.tsv). RC2: without a game_player_equip the crowbar and the
+// weapons the player chose (CBasePlayer::m_iAttrWeapons), with the extra ammo rc2.ini gives
+// for each; the weapons give no ammo of their own meanwhile (g_bRC2EquipFlag).
+// halflife-updated's forced switch to the first weapon stays.
 void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 {
 	bool addDefault;
@@ -487,8 +541,9 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 	pPlayer->SetHasSuit(true);
 
 	addDefault = true;
+	g_bRC2EquipFlag = false;
 
-	while (pWeaponEntity = UTIL_FindEntityByClassname(pWeaponEntity, "game_player_equip"))
+	while ((pWeaponEntity = UTIL_FindEntityByClassname(pWeaponEntity, "game_player_equip")) != NULL)
 	{
 		pWeaponEntity->Touch(pPlayer);
 		addDefault = false;
@@ -496,12 +551,80 @@ void CHalfLifeMultiplay::PlayerSpawn(CBasePlayer* pPlayer)
 
 	if (addDefault)
 	{
+		const int iWeapons = pPlayer->m_iAttrWeapons;
+		int i9mm = 0, i357 = 0, iARGrenades = 0, iBuckshot = 0, iBolts = 0, iRockets = 0, iUranium = 0;
+
 		pPlayer->GiveNamedItem("weapon_crowbar");
-		pPlayer->GiveNamedItem("weapon_9mmhandgun");
-		pPlayer->GiveAmmo(68, "9mm", _9MM_MAX_CARRY); // 4 full reloads
+		if ((iWeapons & 0x001) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_9mmhandgun");
+			i9mm = (unsigned short)RC2Pref(RC2P_Attributes_GlockExtraAmmoGive).s;
+		}
+		if ((iWeapons & 0x002) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_357");
+			i357 = (unsigned short)RC2Pref(RC2P_Attributes_PythonExtraAmmoGive).s;
+		}
+		if ((iWeapons & 0x004) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_mp5");
+			i9mm += (unsigned short)RC2Pref(RC2P_Attributes_MP5ExtraAmmoGive).s;
+			iARGrenades = (unsigned short)RC2Pref(RC2P_Attributes_MP5ExtraAmmoGiveGrenades).s;
+		}
+		if ((iWeapons & 0x008) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_shotgun");
+			iBuckshot = (unsigned short)RC2Pref(RC2P_Attributes_ShotgunExtraAmmoGive).s;
+		}
+		if ((iWeapons & 0x010) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_crossbow");
+			iBolts = (unsigned short)RC2Pref(RC2P_Attributes_CrossbowExtraAmmoGive).s;
+		}
+		if ((iWeapons & 0x020) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_rpg");
+			iRockets = (unsigned short)RC2Pref(RC2P_Attributes_RPGExtraAmmoGive).s;
+		}
+		if ((iWeapons & 0x040) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_egon");
+			iUranium = (unsigned short)RC2Pref(RC2P_Attributes_EgonExtraAmmoGive).s;
+		}
+		if ((iWeapons & 0x080) != 0)
+		{
+			pPlayer->GiveNamedItem("weapon_gauss");
+			iUranium += (unsigned short)RC2Pref(RC2P_Attributes_GaussExtraAmmoGive).s;
+		}
+		if ((iWeapons & 0x100) != 0)
+			pPlayer->GiveNamedItem("weapon_hornetgun");
+
+		pPlayer->GiveAmmo(i9mm, "9mm", RC2Pref(RC2P_Ammo_MaxCarry9mmBullets).s, NULL);
+		pPlayer->GiveAmmo(i357, "357", 36, NULL);
+		pPlayer->GiveAmmo(iARGrenades, "ARgrenades", 15, NULL);
+		pPlayer->GiveAmmo(iBuckshot, "buckshot", RC2Pref(RC2P_Ammo_MaxCarryShells).s, NULL);
+		pPlayer->GiveAmmo(iBolts, "bolts", RC2Pref(RC2P_Ammo_MaxCarryCrossbowBolts).s, NULL);
+		pPlayer->GiveAmmo(iRockets, "rockets", 10, NULL);
+		pPlayer->GiveAmmo(iUranium, "uranium", RC2Pref(RC2P_Ammo_MaxCarryCells).s, NULL);
 	}
 
+	g_bRC2EquipFlag = true;
 	pPlayer->m_iAutoWepSwitch = originalAutoWepSwitch;
+}
+
+// orig 0x804b0 (not in files-rc2.tsv; RC2's CGameRules slot 57): a player may be ridden when
+// mp_riding is on and his userinfo allowriding is nonzero. VERIFY: the second argument goes unused
+bool CHalfLifeMultiplay::PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider)
+{
+	if ((int)CVAR_GET_FLOAT("mp_riding") == 0)
+		return false;
+
+	char* infobuffer = g_engfuncs.pfnGetInfoKeyBuffer(pRidden->edict());
+	if (!infobuffer)
+		return false;
+
+	const char* pszAllow = g_engfuncs.pfnInfoKeyValue(infobuffer, "allowriding");
+	return pszAllow && atoi(pszAllow) != 0;
 }
 
 //=========================================================
@@ -535,12 +658,15 @@ int CHalfLifeMultiplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKil
 
 //=========================================================
 // PlayerKilled - someone/something killed this player
+// orig 0x7ed10. RC2: a killer is a player when IsPlayer() (SDK 2.3 asked Classify()), he gains
+// energy for the kill, mp_scoremode 1 keeps the damage-based score too, ScoreInfo is RC2's six
+// bytes, and no satchels are deactivated. halflife-updated's func_vehicle driver stays.
 //=========================================================
 void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor)
 {
 	CBasePlayer* peKiller = NULL;
 	CBaseEntity* ktmp = CBaseEntity::Instance(pKiller);
-	if (ktmp && (ktmp->Classify() == CLASS_PLAYER))
+	if (ktmp && ktmp->IsPlayer())
 		peKiller = (CBasePlayer*)ktmp;
 	else if (ktmp && (ktmp->Classify() == CLASS_VEHICLE))
 	{
@@ -562,17 +688,29 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 	if (pVictim->pev == pKiller)
 	{ // killed self
 		pKiller->frags -= 1;
+		if (g_iScoreMode == 1)
+			pVictim->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForSuicide).f;
 	}
 	else if (ktmp && ktmp->IsPlayer())
 	{
+		peKiller->m_flEnergy = std::clamp(peKiller->m_flEnergy + RC2Pref(RC2P_Attributes_EnergyGivenForKill).f, 0.0f, 100.0f);
+
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
 		pKiller->frags += IPointsForKill(peKiller, pVictim);
 
 		FireTargets("game_playerkill", ktmp, ktmp, USE_TOGGLE, 0);
+
+		if (g_iScoreMode == 1)
+		{
+			peKiller->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForPlayerKill).f;
+			pVictim->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForPlayerDeath).f;
+		}
 	}
 	else
 	{ // killed by the world
 		pKiller->frags -= 1;
+		if (g_iScoreMode == 1)
+			pVictim->m_flDmgScore += RC2Pref(RC2P_Score_DmgBased_ForOtherDeath).f;
 	}
 
 	// update the scores
@@ -581,13 +719,12 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 	WRITE_BYTE(ENTINDEX(pVictim->edict()));
 	WRITE_SHORT(pVictim->pev->frags);
 	WRITE_SHORT(pVictim->m_iDeaths);
-	WRITE_SHORT(0);
-	WRITE_SHORT(GetTeamIndex(pVictim->m_szTeamName) + 1);
+	WRITE_BYTE(GetTeamIndex(pVictim->m_szTeamName) + 1);
 	MESSAGE_END();
 
 	// killers score, if it's a player
 	CBaseEntity* ep = CBaseEntity::Instance(pKiller);
-	if (ep && ep->Classify() == CLASS_PLAYER)
+	if (ep && ep->IsPlayer())
 	{
 		CBasePlayer* PK = (CBasePlayer*)ep;
 
@@ -595,22 +732,19 @@ void CHalfLifeMultiplay::PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, 
 		WRITE_BYTE(ENTINDEX(PK->edict()));
 		WRITE_SHORT(PK->pev->frags);
 		WRITE_SHORT(PK->m_iDeaths);
-		WRITE_SHORT(0);
-		WRITE_SHORT(GetTeamIndex(PK->m_szTeamName) + 1);
+		WRITE_BYTE(GetTeamIndex(PK->m_szTeamName) + 1);
 		MESSAGE_END();
 
 		// let the killer paint another decal as soon as he'd like.
 		PK->m_flNextDecalTime = gpGlobals->time;
 	}
-
-	if (pVictim->HasNamedPlayerItem("weapon_satchel"))
-	{
-		DeactivateSatchels(pVictim);
-	}
 }
 
 //=========================================================
 // Deathnotice.
+// orig 0x7f030. RC2: DeathMsg also carries RC2's death message number (chosen by the weapon)
+// and the victim's gender, a dedicated server prints the message text, and logs keep
+// halflife-updated's auth ids where RC2 printed WON ids.
 //=========================================================
 void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor)
 {
@@ -651,6 +785,9 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 		killer_weapon_name = STRING(pevInflictor->classname);
 	}
 
+	// RC2 picks its death message from the full name, before the prefix comes off
+	const char* killer_weapon_name_full = killer_weapon_name;
+
 	// strip the monster_* or weapon_* from the inflictor's classname
 	if (strncmp(killer_weapon_name, "weapon_", 7) == 0)
 		killer_weapon_name += 7;
@@ -659,10 +796,15 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 	else if (strncmp(killer_weapon_name, "func_", 5) == 0)
 		killer_weapon_name += 5;
 
+	const int iDeathMessage = GetDeathMessageIndex(killer_weapon_name_full, (pVictim->pev == pKiller || (pKiller->flags & FL_CLIENT) == 0), RANDOM_LONG(0, 1000));
+	const int iGender = PlayerGender(pVictim->edict());
+
 	MESSAGE_BEGIN(MSG_ALL, gmsgDeathMsg);
 	WRITE_BYTE(killer_index);				// the killer
 	WRITE_BYTE(ENTINDEX(pVictim->edict())); // the victim
-	WRITE_STRING(killer_weapon_name);		// what they were killed by (should this be a string?)
+	WRITE_SHORT(iDeathMessage);				// RC2's death message
+	WRITE_BYTE(iGender);
+	WRITE_STRING(killer_weapon_name); // what they were killed by (should this be a string?)
 	MESSAGE_END();
 
 	// replace the code names with the 'real' names
@@ -670,6 +812,12 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 		killer_weapon_name = gluon;
 	else if (0 == strcmp(killer_weapon_name, "gauss"))
 		killer_weapon_name = tau;
+
+	if (IS_DEDICATED_SERVER())
+	{
+		g_engfuncs.pfnServerPrint(GetDeathMessageText(iDeathMessage, STRING(pVictim->pev->netname), STRING(pKiller->netname), killer_weapon_name, PlayerGender(pVictim->edict()), pVictim->pev == pKiller));
+		g_engfuncs.pfnServerPrint("\n");
+	}
 
 	if (pVictim->pev == pKiller)
 	{
@@ -846,6 +994,7 @@ float CHalfLifeMultiplay::FlWeaponRespawnTime(CBasePlayerItem* pWeapon)
 // now,  otherwise it returns the time at which it can try
 // to spawn again.
 //=========================================================
+// orig 0x7f610
 float CHalfLifeMultiplay::FlWeaponTryRespawn(CBasePlayerItem* pWeapon)
 {
 	if (pWeapon && WEAPON_NONE != pWeapon->m_iId && (pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD) != 0)
@@ -1064,15 +1213,17 @@ bool CHalfLifeMultiplay::FAllowFlashlight()
 
 //=========================================================
 //=========================================================
+// orig 0x7f9f0 (not in files-rc2.tsv). RC2 always allows monsters; it has no mp_allowmonsters.
 bool CHalfLifeMultiplay::FAllowMonsters()
 {
-	return (allowmonsters.value != 0);
+	return true;
 }
 
 //=========================================================
 //======== CHalfLifeMultiplay private functions ===========
 #define INTERMISSION_TIME 6
 
+// orig 0x7fa00 (not in files-rc2.tsv). RC2: mp_chattime at least 10, as in Think
 void CHalfLifeMultiplay::GoToIntermission()
 {
 	if (g_fGameOver)
@@ -1083,8 +1234,8 @@ void CHalfLifeMultiplay::GoToIntermission()
 
 	// bounds check
 	int time = (int)CVAR_GET_FLOAT("mp_chattime");
-	if (time < 1)
-		CVAR_SET_STRING("mp_chattime", "1");
+	if (time < 10)
+		CVAR_SET_STRING("mp_chattime", "10");
 	else if (time > MAX_INTERMISSION_TIME)
 		CVAR_SET_STRING("mp_chattime", UTIL_dtos1(MAX_INTERMISSION_TIME));
 
@@ -1404,6 +1555,7 @@ Parse commands/key value pairs to issue right after map xxx command is issued on
  level transition
 ==============
 */
+// orig 0x7ff40
 void ExtractCommandString(char* s, char* szCommand)
 {
 	// Now make rules happen
@@ -1468,7 +1620,7 @@ void CHalfLifeMultiplay::ChangeLevel()
 	char szCommands[1500];
 	char szRules[1500];
 	int minplayers = 0, maxplayers = 0;
-	strcpy(szFirstMapInList, "hldm1"); // the absolute default level is hldm1
+	strcpy(szFirstMapInList, "bootcamp"); // the absolute default level. RC2: bootcamp (orig 0x80070, not in files-rc2.tsv)
 
 	int curplayers;
 	bool do_cycle = true;
@@ -1913,4 +2065,20 @@ void CMultiplayBusters::SetPlayerModel(CBasePlayer* pPlayer)
 	{
 		g_engfuncs.pfnSetClientKeyValue(pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "model", "skeleton");
 	}
+}
+
+// TEMP STUB (p5): real one belongs in world.cpp (CWorld::Spawn, orig 0xfc9d0, sets it from
+// mp_scoremode)
+int g_iScoreMode = 0;
+
+// TEMP STUB (p5): real ones belong in RC2's file between crowbar.cpp and defaultai.cpp (orig
+// 0x31fe0, 0x32540)
+int GetDeathMessageIndex(const char* pszWeapon, bool bNoKiller, int iRandom)
+{
+	return 0;
+}
+
+const char* GetDeathMessageText(int iMessage, const char* pszVictim, const char* pszKiller, const char* pszWeapon, int iGender, bool bSuicide)
+{
+	return "";
 }

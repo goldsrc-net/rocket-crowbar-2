@@ -180,30 +180,30 @@ void ClientDisconnect(edict_t* pEntity)
 			}
 		}
 
-		if (pPlayer->m_iRightRider)
+		if (pPlayer->m_iShoulderRider[0])
 		{
-			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iRightRider));
+			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[0]));
 			if (pRider)
 				pRider->StopRiding(false);
 		}
-		if (pPlayer->m_iLeftRider)
+		if (pPlayer->m_iShoulderRider[1])
 		{
-			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iLeftRider));
+			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[1]));
 			if (pRider)
 				pRider->StopRiding(false);
 		}
 		if (pPlayer->m_iRidingIndex)
 			pPlayer->StopRiding(true);
 
-		if (pPlayer->m_pRC2Player798)
+		if (pPlayer->m_pCam)
 		{
-			UTIL_Remove(pPlayer->m_pRC2Player798);
-			pPlayer->m_pRC2Player798 = NULL;
+			UTIL_Remove(pPlayer->m_pCam);
+			pPlayer->m_pCam = NULL;
 		}
-		if (pPlayer->m_pRC2Player79c)
+		if (pPlayer->m_pCam2)
 		{
-			UTIL_Remove(pPlayer->m_pRC2Player79c);
-			pPlayer->m_pRC2Player79c = NULL;
+			UTIL_Remove(pPlayer->m_pCam2);
+			pPlayer->m_pCam2 = NULL;
 		}
 	}
 
@@ -824,7 +824,7 @@ static bool CanGive(CBasePlayer* pPlayer, bool fActive)
 		return false;
 	if (pPlayer->m_fGiveBan || pPlayer->m_bFrozen)
 		return false;
-	return pPlayer->m_flNextGiveTime <= gpGlobals->time;
+	return pPlayer->m_flNextImpulse <= gpGlobals->time;
 }
 
 // a CLTE message about the player: type, entity index
@@ -884,7 +884,7 @@ void ClientCommand(edict_t* pEntity)
 			return;
 		}
 
-		pPlayer->m_flNextGiveTime = gpGlobals->time + 0.1;
+		pPlayer->m_flNextImpulse = gpGlobals->time + 0.1;
 		g_bUnsafeCreate = true;
 		g_fRC2Randomize = false;
 		CBaseEntity* pItem = CBaseEntity::Create(GetPrecachedClassname(CMD_ARGV(1)), pev->origin, g_vecZero, NULL);
@@ -930,7 +930,7 @@ void ClientCommand(edict_t* pEntity)
 			return;
 		}
 
-		pPlayer->m_flNextGiveTime = gpGlobals->time + 0.1;
+		pPlayer->m_flNextImpulse = gpGlobals->time + 0.1;
 		UTIL_MakeVectors(pev->v_angle);
 		g_bUnsafeCreate = true;
 		g_fRC2Randomize = false;
@@ -949,10 +949,10 @@ void ClientCommand(edict_t* pEntity)
 	else if (!strcmp(pcmd, "drop"))
 	{
 		// player is dropping an item.
-		if (pPlayer->m_flNextGiveTime > gpGlobals->time)
+		if (pPlayer->m_flNextImpulse > gpGlobals->time)
 			return;
 		pPlayer->DropPlayerItem((char*)CMD_ARGV(1));
-		pPlayer->m_flNextGiveTime = gpGlobals->time + 0.1;
+		pPlayer->m_flNextImpulse = gpGlobals->time + 0.1;
 	}
 	else if (!strcmp(pcmd, "fov"))
 	{
@@ -985,7 +985,7 @@ void ClientCommand(edict_t* pEntity)
 		if (pPlayer->m_fJetpackOn)
 		{
 			pPlayer->m_fJetpackOn = false;
-			pPlayer->RemovePhysFlags(1);
+			pPlayer->ClearPhysFlags(1);
 			MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 			WRITE_BYTE(4);
 			WRITE_BYTE(ENTINDEX(pEntity));
@@ -1001,7 +1001,7 @@ void ClientCommand(edict_t* pEntity)
 		pPlayer->m_flEnergy -= RC2Pref(RC2P_Attributes_JetpackTurnOnCost).f;
 		UTIL_ExtendTime(&pPlayer->m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Attributes_JetpackTurnOnRechargeDelay).f);
 		pPlayer->m_fJetpackOn = true;
-		pPlayer->AddPhysFlags(1);
+		pPlayer->SetPhysFlags(1);
 		pev->velocity.z += RC2Pref(RC2P_Attributes_JetpackTurnZVelBoost).f;
 		SendPlayerCLTE(pEntity, 3);
 	}
@@ -1015,7 +1015,7 @@ void ClientCommand(edict_t* pEntity)
 		}
 		if (pPlayer->m_flEnergyDrawDone < gpGlobals->time && !pPlayer->m_fDrawingEnergy && (pev->flags & FL_ONGROUND) != 0 && 0 == pPlayer->m_iShrunk)
 		{
-			pPlayer->AddMoveLock(1);
+			pPlayer->AddPhysFlag2Source(1);
 			pPlayer->m_fDrawingEnergy = true;
 			pPlayer->m_flEnergyDrawDone = RC2Pref(RC2P_Attributes_EnergyDrawTimeTaken).f + gpGlobals->time;
 			SendPlayerCLTE(pEntity, 5);
@@ -1035,7 +1035,7 @@ void ClientCommand(edict_t* pEntity)
 		{
 			pPlayer->m_fCreatingHealth = true;
 			pPlayer->m_flCreateHealthDone = RC2Pref(RC2P_Attributes_CreateHealthTimeTaken).f + gpGlobals->time;
-			pPlayer->m_iRC2Player774 = 0;
+			pPlayer->m_flHealthCreated = 0;
 			SendPlayerCLTE(pEntity, 9);
 			return;
 		}
@@ -1085,7 +1085,7 @@ void ClientCommand(edict_t* pEntity)
 			CLIENT_PRINTF(pEntity, print_console, "You can't transform while riding\n");
 			return;
 		}
-		if (pPlayer->m_iRightRider || pPlayer->m_iLeftRider)
+		if (pPlayer->m_iShoulderRider[0] || pPlayer->m_iShoulderRider[1])
 		{
 			CLIENT_PRINTF(pEntity, print_console, "You can't transform while being ridden\n");
 			return;
@@ -1369,7 +1369,7 @@ void ServerDeactivate()
 	{
 		CBasePlayer* pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 		if (pPlayer)
-			pPlayer->m_iRC2Player66c = 0;
+			pPlayer->m_iClientId = 0;
 	}
 
 	g_serveractive = 0;
@@ -1966,7 +1966,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 				CBasePlayer* pHostPlayer = static_cast<CBasePlayer*>(pHost);
 				if (0 != pHostPlayer->m_iRC2Player788)
 					fForce = true;
-				if (0 != pHostPlayer->m_iAdminSelected && pHostPlayer->m_pentAdminSelected && UTIL_IsValidEntity(pHostPlayer->m_pentAdminSelected) && pHostPlayer->m_pentAdminSelected == ent)
+				if (0 != pHostPlayer->m_bDebugCounts && pHostPlayer->m_pentDebug && UTIL_IsValidEntity(pHostPlayer->m_pentDebug) && pHostPlayer->m_pentDebug == ent)
 					fForce = true;
 				if (pEntity->IsViewOfPlayer(pHost))
 					fOwnedByHost = true;
@@ -1982,7 +1982,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 				{
 					if (pHostPlayer->m_iRidingIndex == iEnt)
 						fForce = true;
-					if (pHostPlayer->m_iRightRider == iEnt || pHostPlayer->m_iLeftRider == iEnt)
+					if (pHostPlayer->m_iShoulderRider[0] == iEnt || pHostPlayer->m_iShoulderRider[1] == iEnt)
 						fForce = true;
 					if (pEntity->IsPlayer())
 					{
@@ -1990,7 +1990,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 						const int iHost = ENTINDEX(host);
 						if (pPlayer->m_iRidingIndex == iHost)
 							fForce = true;
-						if (pPlayer->m_iRightRider == iHost || pPlayer->m_iLeftRider == iHost)
+						if (pPlayer->m_iShoulderRider[0] == iHost || pPlayer->m_iShoulderRider[1] == iHost)
 							fForce = true;
 					}
 				}
@@ -2003,7 +2003,7 @@ int AddToFullPack(struct entity_state_s* state, int e, edict_t* ent, edict_t* ho
 		// VERIFY: what +0x688 and +0x7a4 are; with iuser1 2 and iuser2 the target this looks
 		// like RC2's own spectator chase
 		CBasePlayer* pHostPlayer = static_cast<CBasePlayer*>(CBaseEntity::Instance(host));
-		if (pHostPlayer && 0 != pHostPlayer->m_iRC2Player688 && pHostPlayer->m_iRC2Player7a4 == 1 && pHostPlayer->pev->iuser1 == 2 && pHostPlayer->pev->iuser2 > 0 && pHostPlayer->pev->iuser2 == ENTINDEX(ent))
+		if (pHostPlayer && 0 != pHostPlayer->m_bNotJoined && pHostPlayer->m_bSpecChase == 1 && pHostPlayer->pev->iuser1 == 2 && pHostPlayer->pev->iuser2 > 0 && pHostPlayer->pev->iuser2 == ENTINDEX(ent))
 			fForce = true;
 	}
 
@@ -2924,11 +2924,9 @@ void VoteMap_Command(edict_t* pEntity) {}
 void VoteKick_Command(edict_t* pEntity) {}
 void UpdateVirtualHulls() {}
 void PrecacheTransforms() {}
-int gmsgAttrConf = 0;
-int gmsgSetAttr = 0;
 // StopRiding: the real one is reconstructed elsewhere now
 // StartRiding: the real one is reconstructed elsewhere now
 // StartTransform: the real one is reconstructed elsewhere now
 // StartUntransform: the real one is reconstructed elsewhere now
-// AddMoveLock: the real one is reconstructed elsewhere now
+// AddPhysFlag2Source: the real one is reconstructed elsewhere now
 void CBasePlayer::RC2StartObserver() {}

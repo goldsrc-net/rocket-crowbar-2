@@ -55,4 +55,27 @@ inline int gmsgStatusValue = 0;
 
 inline int gmsgWeapons = 0;
 
+// Rocket Crowbar 2 (LinkUserMessages, orig 0x94240). SelAmmo is SDK 2.3's, which
+// halflife-updated dropped; the rest are RC2's own, the variable names ours.
+inline int gmsgSelAmmo = 0;
+inline int gmsgEnergy = 0;
+inline int gmsgEIcons = 0;
+inline int gmsgAttrConf = 0;
+inline int gmsgSetAttr = 0;
+inline int gmsgThisClient = 0;
+inline int gmsgViewMode = 0;
+inline int gmsgScoreMode = 0;
+inline int gmsgVGUIDebugOn = 0;
+inline int gmsgDBGCounts = 0;
+inline int gmsgDBGEntInfo = 0;
+inline int gmsgCLTE = 0;
+inline int gmsgPullerCtrl = 0;
+inline int gmsgWeaponSync = 0;
+inline int gmsgRCCFG = 0;
+inline int gmsgTformStat = 0;
+inline int gmsgPlrStat = 0;
+inline int gmsgRaceStat = 0;
+inline int gmsgVoteBegin = 0;
+inline int gmsgVoteUpdate = 0;
+
 void LinkUserMessages();

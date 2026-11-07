@@ -129,7 +129,7 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 		return;
 	if (pPlayer->m_bTransforming || pPlayer->m_iMoveLock != 0)
 		return;
-	if (pPlayer->m_iRidingIndex != 0 || pPlayer->m_iRightRider != 0 || pPlayer->m_iLeftRider != 0)
+	if (pPlayer->m_iRidingIndex != 0 || pPlayer->m_iShoulderRider[0] != 0 || pPlayer->m_iShoulderRider[1] != 0)
 		return;
 
 	if (useType == USE_OFF)
@@ -161,7 +161,7 @@ void CRaceController::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 	if (pPlayer->m_fJetpackOn)
 	{
 		pPlayer->m_fJetpackOn = false;
-		pPlayer->ClearPhysKeyFlags(1);
+		pPlayer->ClearPhysFlags(1);
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(4);
 		WRITE_BYTE(ENTINDEX(pPlayer->edict()));

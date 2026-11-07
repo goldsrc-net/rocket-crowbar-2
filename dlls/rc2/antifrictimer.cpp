@@ -97,12 +97,12 @@ void CAntiFricTimer::StartFriction()
 	if (pOwner->IsPlayer())
 	{
 		CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pOwner);
-		pPlayer->AddPhysFlags(8);
+		pPlayer->SetPhysFlags(8);
 		// the players riding on its shoulders get the effect too
-		if (0 != pPlayer->m_iRightRider)
-			AntiFricEffect(true, pPlayer->m_iRightRider);
-		if (0 != pPlayer->m_iLeftRider)
-			AntiFricEffect(true, pPlayer->m_iLeftRider);
+		if (0 != pPlayer->m_iShoulderRider[0])
+			AntiFricEffect(true, pPlayer->m_iShoulderRider[0]);
+		if (0 != pPlayer->m_iShoulderRider[1])
+			AntiFricEffect(true, pPlayer->m_iShoulderRider[1]);
 	}
 	AntiFricEffect(true, ENTINDEX(pev->owner));
 
@@ -143,11 +143,11 @@ void CAntiFricTimer::StopFriction()
 	if (pOwner->IsPlayer())
 	{
 		CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pOwner);
-		pPlayer->RemovePhysFlags(8);
-		if (0 != pPlayer->m_iRightRider)
-			AntiFricEffect(false, pPlayer->m_iRightRider);
-		if (0 != pPlayer->m_iLeftRider)
-			AntiFricEffect(false, pPlayer->m_iLeftRider);
+		pPlayer->ClearPhysFlags(8);
+		if (0 != pPlayer->m_iShoulderRider[0])
+			AntiFricEffect(false, pPlayer->m_iShoulderRider[0]);
+		if (0 != pPlayer->m_iShoulderRider[1])
+			AntiFricEffect(false, pPlayer->m_iShoulderRider[1]);
 	}
 	AntiFricEffect(false, ENTINDEX(pev->owner));
 
@@ -166,5 +166,5 @@ void StopAntiFriction(edict_t* pent) // name ours
 	}
 }
 
-// AddPhysFlags: the real one is reconstructed elsewhere now
-// RemovePhysFlags: the real one is reconstructed elsewhere now
+// SetPhysFlags: the real one is reconstructed elsewhere now
+// ClearPhysFlags: the real one is reconstructed elsewhere now

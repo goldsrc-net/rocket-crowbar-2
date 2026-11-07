@@ -111,15 +111,15 @@ void CShrinkTimer::ShrinkInit()
 			}
 		}
 
-		if (pPlayer->m_iRightRider != 0)
+		if (pPlayer->m_iShoulderRider[0] != 0)
 		{
-			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iRightRider));
+			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[0]));
 			if (pRider != NULL)
 				pRider->StopRiding(0);
 		}
-		if (pPlayer->m_iLeftRider != 0)
+		if (pPlayer->m_iShoulderRider[1] != 0)
 		{
-			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iLeftRider));
+			CBasePlayer* pRider = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[1]));
 			if (pRider != NULL)
 				pRider->StopRiding(0);
 		}

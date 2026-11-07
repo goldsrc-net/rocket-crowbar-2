@@ -532,7 +532,7 @@ void CConcCharge::Detonate() // orig 0xbcb40
 		pPushed->pev->flags &= ~FL_ONGROUND;
 
 		if (pPushed->IsActivePlayer())
-			static_cast<CBasePlayer*>(pPushed)->SetPhysicsFlag10(0.5);
+			static_cast<CBasePlayer*>(pPushed)->SetPhysFlag10For(0.5);
 
 		if (pEntity->IsActivePlayer() && 0 == static_cast<CBasePlayer*>(pEntity)->m_iTransformType)
 		{

@@ -530,8 +530,8 @@ static CBaseEntity* Admin_GetAimedEntity(entvars_t* pevAdmin) // name ours
 	}
 
 	CBasePlayer* pAdmin = static_cast<CBasePlayer*>(CBaseEntity::Instance(pevAdmin->pContainingEntity));
-	if (pAdmin && UTIL_IsValidEntity(pAdmin->m_pentAdminSelected))
-		return CBaseEntity::Instance(pAdmin->m_pentAdminSelected);
+	if (pAdmin && UTIL_IsValidEntity(pAdmin->m_pentDebug))
+		return CBaseEntity::Instance(pAdmin->m_pentDebug);
 	return NULL;
 }
 
@@ -807,49 +807,49 @@ void Admin_Command(edict_t* pEntity) // name ours
 		{
 			CBaseEntity* pAimed = Admin_GetAimedEntity(pev);
 			if (pAimed)
-				pAdmin->m_pentAdminSelected = pAimed->edict();
+				pAdmin->m_pentDebug = pAimed->edict();
 		}
 		else
 		{
 			iIndex = atoi(CMD_ARGV(2));
 			if (iIndex < 1 || iIndex >= gpGlobals->maxEntities)
-				pAdmin->m_pentAdminSelected = NULL;
+				pAdmin->m_pentDebug = NULL;
 			else
-				pAdmin->m_pentAdminSelected = INDEXENT(iIndex);
+				pAdmin->m_pentDebug = INDEXENT(iIndex);
 		}
 
-		if (!UTIL_IsValidEntity(pAdmin->m_pentAdminSelected))
+		if (!UTIL_IsValidEntity(pAdmin->m_pentDebug))
 		{
 			if (iIndex < 1 || iIndex >= gpGlobals->maxEntities)
 				ClientPrint(pev, HUD_PRINTCONSOLE, "Selection cleared\n");
 			else
 				ClientPrint(pev, HUD_PRINTCONSOLE, "Nothing to select: Ussage: selectent [entindex|playerindex|-1 to clear]\n");
-			pAdmin->m_pentAdminSelected = NULL;
-			pAdmin->m_iAdminSelected = 0;
+			pAdmin->m_pentDebug = NULL;
+			pAdmin->m_bDebugCounts = 0;
 			return;
 		}
 
-		const int iSelected = ENTINDEX(pAdmin->m_pentAdminSelected);
+		const int iSelected = ENTINDEX(pAdmin->m_pentDebug);
 		if (iSelected > 0 && iSelected <= gpGlobals->maxClients)
 		{
-			CBasePlayer* pSelected = static_cast<CBasePlayer*>(CBaseEntity::Instance(pAdmin->m_pentAdminSelected));
+			CBasePlayer* pSelected = static_cast<CBasePlayer*>(CBaseEntity::Instance(pAdmin->m_pentDebug));
 			if (pSelected->IsPlayer())
 			{
 				ClientPrint(pev, HUD_PRINTCONSOLE, "Cannot select players\n");
-				pAdmin->m_pentAdminSelected = NULL;
-				pAdmin->m_iAdminSelected = 0;
+				pAdmin->m_pentDebug = NULL;
+				pAdmin->m_bDebugCounts = 0;
 			}
 			else if (!canTarget(pSelected))
 			{
 				// VERIFY: a client slot that isn't a player is checked by its admin level
 				fDenied = true;
-				pAdmin->m_pentAdminSelected = NULL;
-				pAdmin->m_iAdminSelected = 0;
+				pAdmin->m_pentDebug = NULL;
+				pAdmin->m_bDebugCounts = 0;
 			}
 		}
 
-		if (pAdmin->m_pentAdminSelected)
-			ClientPrint(pev, HUD_PRINTCONSOLE, UTIL_VarArgs("Selected: \"%s\" -- %d\n", STRING(pAdmin->m_pentAdminSelected->v.classname), iSelected));
+		if (pAdmin->m_pentDebug)
+			ClientPrint(pev, HUD_PRINTCONSOLE, UTIL_VarArgs("Selected: \"%s\" -- %d\n", STRING(pAdmin->m_pentDebug->v.classname), iSelected));
 		if (!fDenied)
 			return;
 	}

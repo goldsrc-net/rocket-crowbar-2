@@ -103,7 +103,7 @@ void CFreezeTimer::StartFreeze()
 		CBasePlayer* pPlayer = (CBasePlayer*)pOwner;
 		FreezePlayer(pPlayer, false);
 
-		int iTied[2] = {pPlayer->m_iRightRider, pPlayer->m_iLeftRider};
+		int iTied[2] = {pPlayer->m_iShoulderRider[0], pPlayer->m_iShoulderRider[1]};
 		for (int i = 0; i < 2; i++)
 		{
 			if (iTied[i] == 0)
@@ -180,7 +180,7 @@ void CFreezeTimer::EndFreeze()
 		RC2PlayerRemoveHold(pPlayer, RC2_HOLD_FROZEN);
 		pPlayer->m_iHideHUD &= ~HIDEHUD_WEAPONS;
 
-		int iTied[2] = {pPlayer->m_iRightRider, pPlayer->m_iLeftRider};
+		int iTied[2] = {pPlayer->m_iShoulderRider[0], pPlayer->m_iShoulderRider[1]};
 		for (int i = 0; i < 2; i++)
 		{
 			if (iTied[i] == 0)

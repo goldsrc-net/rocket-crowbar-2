@@ -63,7 +63,7 @@ void CBasePlayer::StartRiding() // orig 0xb16b0
 		return;
 	}
 
-	if (m_iRightRider != 0 || m_iLeftRider != 0)
+	if (m_iShoulderRider[0] != 0 || m_iShoulderRider[1] != 0)
 	{
 		CLIENT_PRINTF(edict(), print_console, "Cannot ride while being ridden\n");
 		return;
@@ -97,7 +97,7 @@ void CBasePlayer::StartRiding() // orig 0xb16b0
 			continue;
 		if (pOther->m_iShrunk != 0 || RC2_BASE_BYTE(pOther, 0x66) != 0)
 			continue;
-		if ((pOther->m_iRightRider != 0 && pOther->m_iLeftRider != 0) || pOther->m_iRidingIndex != 0)
+		if ((pOther->m_iShoulderRider[0] != 0 && pOther->m_iShoulderRider[1] != 0) || pOther->m_iRidingIndex != 0)
 			continue;
 
 		Vector vecDelta = pOther->Center() - Center();
@@ -139,19 +139,19 @@ void CBasePlayer::StartRiding() // orig 0xb16b0
 	else
 		bLeft = RANDOM_LONG(0, 1) != 0;
 
-	if (pBest->m_iLeftRider != 0 && bLeft)
+	if (pBest->m_iShoulderRider[1] != 0 && bLeft)
 	{
 		bLeft = false;
 	}
-	else if (pBest->m_iRightRider != 0)
+	else if (pBest->m_iShoulderRider[0] != 0)
 	{
 		if (!bLeft)
 		{
 			bLeft = true;
 		}
-		else if (pBest->m_iRightRider != 0 && pBest->m_iLeftRider != 0)
+		else if (pBest->m_iShoulderRider[0] != 0 && pBest->m_iShoulderRider[1] != 0)
 		{
-			ALERT(at_console, "Sanity check failed, both shoulders occupied (%d,%d), bailing\n", pBest->m_iRightRider, pBest->m_iLeftRider);
+			ALERT(at_console, "Sanity check failed, both shoulders occupied (%d,%d), bailing\n", pBest->m_iShoulderRider[0], pBest->m_iShoulderRider[1]);
 			return;
 		}
 	}
@@ -164,13 +164,13 @@ void CBasePlayer::StartRiding() // orig 0xb16b0
 
 	if (bLeft)
 	{
-		pBest->m_iLeftRider = ENTINDEX(edict());
+		pBest->m_iShoulderRider[1] = ENTINDEX(edict());
 		m_iRideShoulder = 1;
 		*pRideInfo = (unsigned char)m_iRidingIndex | 0x80;
 	}
 	else
 	{
-		pBest->m_iRightRider = ENTINDEX(edict());
+		pBest->m_iShoulderRider[0] = ENTINDEX(edict());
 		m_iRideShoulder = 0;
 		*pRideInfo = (unsigned char)m_iRidingIndex;
 	}
@@ -182,7 +182,7 @@ void CBasePlayer::StartRiding() // orig 0xb16b0
 	if (m_fJetpackOn)
 	{
 		m_fJetpackOn = false;
-		ClearPhysKeyFlags(1);
+		ClearPhysFlags(1);
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(4);
 		WRITE_BYTE(ENTINDEX(edict()));
@@ -237,9 +237,9 @@ void CBasePlayer::StopRiding(bool bQuiet) // orig 0xb1f50
 		if (pRidden)
 		{
 			if (m_iRideShoulder != 0)
-				pRidden->m_iLeftRider = 0;
+				pRidden->m_iShoulderRider[1] = 0;
 			else
-				pRidden->m_iRightRider = 0;
+				pRidden->m_iShoulderRider[0] = 0;
 			vecOrigin = pRidden->Center();
 
 			char szMyName[128];
@@ -278,7 +278,7 @@ void CBasePlayer::StopRiding(bool bQuiet) // orig 0xb1f50
 	if (RC2_BASE_BYTE(this, 0x67) != 0)
 	{
 		RC2_BASE_BYTE(this, 0x67) = 0;
-		ClearPhysKeyFlags(8);
+		ClearPhysFlags(8);
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(0xfe);
 		WRITE_SHORT(ENTINDEX(edict()));
@@ -289,7 +289,7 @@ void CBasePlayer::StopRiding(bool bQuiet) // orig 0xb1f50
 	if (RC2_BASE_BYTE(this, 0x66) != 0)
 	{
 		RC2_BASE_BYTE(this, 0x66) = 0;
-		ClearPhysKeyFlags2(2);
+		RemovePhysFlag2Source(2);
 		m_iRC2State4ac &= ~1;
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(0xfe);
@@ -370,42 +370,15 @@ bool PlayerHasRider(edict_t* pPlayer, edict_t* pRider) // orig 0xb28b0
 	if (iRider == 0)
 		return false;
 
-	return pEntity->m_iRightRider == iRider || pEntity->m_iLeftRider == iRider;
+	return pEntity->m_iShoulderRider[0] == iRider || pEntity->m_iShoulderRider[1] == iRider;
 }
 
 
 // TEMP STUB (p6): real one belongs in UserMessages.cpp (LinkUserMessages registers "CLTE")
-int gmsgCLTE = 0;
+// gmsgCLTE: UserMessages.h (p5)
 
-// TEMP STUB (p6): real one belongs in player.cpp (orig 0x9a780): clears bits of
-// m_iPhysKeyFlags and sends it as physics key "phf"
-void CBasePlayer::ClearPhysKeyFlags(int iBits)
-{
-	static char szValue[32];
-	m_iPhysKeyFlags &= ~iBits;
-	sprintf(szValue, "%02X", m_iPhysKeyFlags);
-	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "phf", szValue);
-}
+// CBasePlayer::ClearPhysFlags: the real one is reconstructed elsewhere now
 
-// TEMP STUB (p6): real one belongs in player.cpp (orig 0x9a820)
-void CBasePlayer::ClearPhysKeyFlags2(int iBits)
-{
-	m_iMoveLock &= ~iBits;
-	if (m_iMoveLock == 0)
-		ClearPhysKeyFlags(2);
-}
+// CBasePlayer::RemovePhysFlag2Source: the real one is reconstructed elsewhere now
 
-// TEMP STUB (p6): real one belongs in multiplay_gamerules.cpp (orig 0x804b0, read from the
-// disassembly): mp_riding on, and the ridden player's "allowriding" info key nonzero
-bool CHalfLifeMultiplay::PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider)
-{
-	if ((int)mp_riding.value == 0)
-		return false;
-	char* pInfo = g_engfuncs.pfnGetInfoKeyBuffer(pRidden->edict());
-	if (!pInfo)
-		return false;
-	char* pszValue = g_engfuncs.pfnInfoKeyValue(pInfo, "allowriding");
-	if (!pszValue)
-		return false;
-	return atoi(pszValue) != 0;
-}
+// CHalfLifeMultiplay::PlayerAllowsRiding is in multiplay_gamerules.cpp (p5)

@@ -434,6 +434,9 @@ public:
 	// the byte at orig +0x66 (p3, p8): CFreezeTimer sets it on what it freezes; frozen talkers don't
 	// speak or follow, CBasePlayerWeapon::ItemPostFrame drops the attack buttons while it is set
 	bool& RC2Frozen() { return m_bFrozen; } // name ours
+	// RC2's GiveAmmo (orig slot 24) has a fourth argument, where it stores how much it took; the
+	// three-argument one above stays for halflife-updated's callers (p5)
+	virtual int GiveAmmo(int iAmount, const char* szName, int iMax, int* piGiven) { return -1; }
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

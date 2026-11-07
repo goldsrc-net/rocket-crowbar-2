@@ -43,8 +43,7 @@ Vector UTIL_Reflect(Vector vecDir, Vector vecNormal)
 }
 
 #include "player.h"
-// TEMP STUB (p7): real one belongs in player.cpp (p5), the method at 0x9a860
-void CBasePlayer::SetPhysicsFlag10(float flDuration) {}
+// CBasePlayer::SetPhysFlag10For: the real one is reconstructed elsewhere now
 
 // TEMP STUB (p7): real one belongs in player.cpp (p5), registered as "ViewMode"
 int gmsgViewMode = 0;

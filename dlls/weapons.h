@@ -1178,7 +1178,7 @@ public:
 	int m_iChargeType;			  // orig +0xec, name ours: 1 while the imploder charges
 	float m_flChargeDone;		  // orig +0xf0, name ours
 	float m_flLastFrame;		  // orig +0xf4, name ours
-	float m_flFrameTime;		  // orig +0xf8, name ours
+	float m_flFrameInterval;		  // orig +0xf8, name ours
 	float m_flNextSync;			  // orig +0xfc, name ours: next gmsgWeaponSync
 	unsigned short m_usFireShrinker;  // orig +0x100, events/egonfireshrinker.sc
 	unsigned short m_usImploderCharge; // orig +0x102, events/egonimplodercharge.sc

@@ -1021,5 +1021,5 @@ bool CBaseEntity::IsViewOfPlayer(CBaseEntity* pPlayer)
 	if (0 == iOwner)
 		return false;
 	CBasePlayer* pThePlayer = static_cast<CBasePlayer*>(pPlayer);
-	return iOwner == pThePlayer->m_iRidingIndex || iOwner == pThePlayer->m_iRightRider || iOwner == pThePlayer->m_iLeftRider;
+	return iOwner == pThePlayer->m_iRidingIndex || iOwner == pThePlayer->m_iShoulderRider[0] || iOwner == pThePlayer->m_iShoulderRider[1];
 }

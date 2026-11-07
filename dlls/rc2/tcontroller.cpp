@@ -542,7 +542,7 @@ void CBasePlayer::TController_ChargeStart()
 	WRITE_BYTE(ENTINDEX(edict()));
 	MESSAGE_END();
 
-	AddMoveLock(4);
+	AddPhysFlag2Source(4);
 }
 
 // orig 0xda1d0

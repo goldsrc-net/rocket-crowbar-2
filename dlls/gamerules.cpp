@@ -153,10 +153,10 @@ bool CGameRules::CanLinkedEntityHavePlayerItem(CBasePlayer* pPlayer, CBasePlayer
 {
 	CBaseEntity* pLinked;
 
-	if (pPlayer->m_iRightRider != 0 && (pLinked = UTIL_PlayerByIndex(pPlayer->m_iRightRider)) != NULL && CanHavePlayerItem((CBasePlayer*)pLinked, pWeapon))
+	if (pPlayer->m_iShoulderRider[0] != 0 && (pLinked = UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[0])) != NULL && CanHavePlayerItem((CBasePlayer*)pLinked, pWeapon))
 		return true;
 
-	if (pPlayer->m_iLeftRider != 0 && (pLinked = UTIL_PlayerByIndex(pPlayer->m_iLeftRider)) != NULL && CanHavePlayerItem((CBasePlayer*)pLinked, pWeapon))
+	if (pPlayer->m_iShoulderRider[1] != 0 && (pLinked = UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[1])) != NULL && CanHavePlayerItem((CBasePlayer*)pLinked, pWeapon))
 		return true;
 
 	return false;

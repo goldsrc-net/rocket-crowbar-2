@@ -177,7 +177,7 @@ bool CVirtualHull::IsViewOfPlayer(CBaseEntity* pPlayer) // orig 0xf74b0
 
 	CBasePlayer* pOwner = (CBasePlayer*)(CBaseEntity*)m_hOwner;
 	const int iIndex = ENTINDEX(pPlayer->edict());
-	if (0 != iIndex && (pOwner->m_iRidingIndex == iIndex || pOwner->m_iRightRider == iIndex || pOwner->m_iLeftRider == iIndex))
+	if (0 != iIndex && (pOwner->m_iRidingIndex == iIndex || pOwner->m_iShoulderRider[0] == iIndex || pOwner->m_iShoulderRider[1] == iIndex))
 		return true;
 
 	return CBaseEntity::IsViewOfPlayer(pPlayer);

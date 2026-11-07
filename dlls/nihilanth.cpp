@@ -33,18 +33,24 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
-	int Classify() override { return CLASS_ALIEN_MILITARY; }
-	int BloodColor() override { return BLOOD_COLOR_YELLOW; }
+	int Classify() override { return CLASS_ALIEN_MILITARY; } // orig 0x806c0
+	int BloodColor() override { return BLOOD_COLOR_YELLOW; } // orig 0x806d0
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 	void GibMonster() override;
 
-	void SetObjectCollisionBox() override
+	void SetObjectCollisionBox() override // orig 0x806e0
 	{
 		pev->absmin = pev->origin + Vector(-16 * N_SCALE, -16 * N_SCALE, -48 * N_SCALE);
 		pev->absmax = pev->origin + Vector(16 * N_SCALE, 16 * N_SCALE, 28 * N_SCALE);
 	}
 
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
+
+	// Rocket Crowbar 2's base virtuals (reference/BASE_VIRTUALS.md): the crossbow's zoomed shots do
+	// a fixed amount to the nihilanth instead of rc2.ini's, and its capability bits
+	float ZoomedPrimaryDamage() override { return 50; }							 // orig 0x806a0
+	float ZoomedSecondaryDamage() override { return 150; }						 // orig 0x806b0
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x2006; } // orig 0x80690
 
 	void EXPORT StartupThink();
 	void EXPORT HuntThink();
@@ -130,7 +136,7 @@ public:
 	EHANDLE m_hFriend[3];
 };
 
-LINK_ENTITY_TO_CLASS(monster_nihilanth, CNihilanth);
+LINK_ENTITY_TO_CLASS(monster_nihilanth, CNihilanth); // orig 0x80600
 
 TYPEDESCRIPTION CNihilanth::m_SaveData[] =
 	{
@@ -166,7 +172,7 @@ TYPEDESCRIPTION CNihilanth::m_SaveData[] =
 		DEFINE_ARRAY(CNihilanth, m_hFriend, FIELD_EHANDLE, 3),
 };
 
-IMPLEMENT_SAVERESTORE(CNihilanth, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CNihilanth, CBaseMonster); // orig 0x807a0 Save, orig 0x807d0 Restore
 
 class CNihilanthHVR : public CBaseMonster
 {
@@ -213,7 +219,7 @@ public:
 	int m_nFrames;
 };
 
-LINK_ENTITY_TO_CLASS(nihilanth_energy_ball, CNihilanthHVR);
+LINK_ENTITY_TO_CLASS(nihilanth_energy_ball, CNihilanthHVR); // orig 0x80800
 
 
 TYPEDESCRIPTION CNihilanthHVR::m_SaveData[] =
@@ -226,7 +232,7 @@ TYPEDESCRIPTION CNihilanthHVR::m_SaveData[] =
 };
 
 
-IMPLEMENT_SAVERESTORE(CNihilanthHVR, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CNihilanthHVR, CBaseMonster); // orig 0x80870 Save, orig 0x808a0 Restore
 
 
 //=========================================================
@@ -275,6 +281,7 @@ const char* CNihilanth::pDeathSounds[] =
 };
 
 
+// orig 0x808d0
 void CNihilanth::Spawn()
 {
 	Precache();
@@ -331,6 +338,7 @@ void CNihilanth::Spawn()
 }
 
 
+// orig 0x80bb0
 void CNihilanth::Precache()
 {
 	PRECACHE_MODEL("models/nihilanth.mdl");
@@ -351,6 +359,7 @@ void CNihilanth::Precache()
 
 
 
+// orig 0x80ca0
 void CNihilanth::PainSound()
 {
 	if (m_flNextPainSound > gpGlobals->time)
@@ -374,6 +383,7 @@ void CNihilanth::DeathSound()
 }
 
 
+// orig 0x80d90
 void CNihilanth::NullThink()
 {
 	StudioFrameAdvance();
@@ -381,6 +391,7 @@ void CNihilanth::NullThink()
 }
 
 
+// orig 0x80dc0
 void CNihilanth::StartupUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	SetThink(&CNihilanth::HuntThink);
@@ -389,6 +400,7 @@ void CNihilanth::StartupUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 }
 
 
+// orig 0x80df0
 void CNihilanth::StartupThink()
 {
 	m_irritation = 0;
@@ -421,11 +433,13 @@ void CNihilanth::StartupThink()
 }
 
 
+// orig 0x80eb0
 void CNihilanth::Killed(entvars_t* pevAttacker, int iGib)
 {
 	CBaseMonster::Killed(pevAttacker, iGib);
 }
 
+// orig 0x80ed0
 void CNihilanth::DyingThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -557,6 +571,7 @@ void CNihilanth::CrashTouch(CBaseEntity* pOther)
 
 
 
+// orig 0x817c0
 void CNihilanth::GibMonster()
 {
 	// EMIT_SOUND_DYN(edict(), CHAN_VOICE, "common/bodysplat.wav", 0.75, ATTN_NORM, 0, 200);
@@ -593,6 +608,7 @@ void CNihilanth::FloatSequence()
 }
 
 
+// orig 0x818b0
 void CNihilanth::ShootBalls()
 {
 	if (m_flShootEnd > gpGlobals->time)
@@ -680,6 +696,7 @@ void CNihilanth::MakeFriend(Vector vecStart)
 }
 
 
+// orig 0x82080
 void CNihilanth::NextActivity()
 {
 	UTIL_MakeAimVectors(pev->angles);
@@ -841,6 +858,7 @@ void CNihilanth::NextActivity()
 	FloatSequence();
 }
 
+// orig 0x827d0
 void CNihilanth::HuntThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -907,6 +925,7 @@ void CNihilanth::HuntThink()
 
 
 
+// orig 0x82ac0
 void CNihilanth::Flight()
 {
 	// estimate where I'll be facing in one seconds
@@ -1257,6 +1276,7 @@ bool CNihilanth::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 
 
 
+// orig 0x83920
 void CNihilanth::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	if (m_irritation == 3)
@@ -1317,6 +1337,7 @@ void CNihilanthHVR::Spawn()
 }
 
 
+// orig 0x83b20
 void CNihilanthHVR::Precache()
 {
 	PRECACHE_MODEL("sprites/flare6.spr");
@@ -1333,6 +1354,7 @@ void CNihilanthHVR::Precache()
 
 
 
+// orig 0x83ba0
 void CNihilanthHVR::CircleInit(CBaseEntity* pTarget)
 {
 	pev->movetype = MOVETYPE_NOCLIP;
@@ -1375,6 +1397,7 @@ CBaseEntity* CNihilanthHVR::RandomClassname(const char* szName)
 	return pEntity;
 }
 
+// orig 0x83d10
 void CNihilanthHVR::HoverThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -1440,6 +1463,7 @@ void CNihilanthHVR::HoverThink()
 
 
 
+// orig 0x83dd0
 void CNihilanthHVR::ZapInit(CBaseEntity* pEnemy)
 {
 	pev->movetype = MOVETYPE_FLY;
@@ -1462,6 +1486,7 @@ void CNihilanthHVR::ZapInit(CBaseEntity* pEnemy)
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100);
 }
 
+// orig 0x83f90. RC2: GetEffectedEnt
 void CNihilanthHVR::ZapThink()
 {
 	pev->nextthink = gpGlobals->time + 0.05;
@@ -1488,11 +1513,12 @@ void CNihilanthHVR::ZapThink()
 
 		UTIL_TraceLine(pev->origin, m_hEnemy->Center(), dont_ignore_monsters, edict(), &tr);
 
+		// RC2: the zap lands on what the hit entity says it stands for (GetEffectedEnt)
 		CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
-		if (pEntity != NULL && 0 != pEntity->pev->takedamage)
+		if (pEntity != NULL && 0 != pEntity->GetEffectedEnt()->pev->takedamage)
 		{
 			ClearMultiDamage();
-			pEntity->TraceAttack(pev, gSkillData.nihilanthZap, pev->velocity, &tr, DMG_SHOCK);
+			pEntity->GetEffectedEnt()->TraceAttack(pev, gSkillData.nihilanthZap, pev->velocity, &tr, DMG_SHOCK);
 			ApplyMultiDamage(pev, pev);
 		}
 
@@ -1564,6 +1590,7 @@ void CNihilanthHVR::ZapTouch(CBaseEntity* pOther)
 
 
 
+// orig 0x844a0
 void CNihilanthHVR::TeleportInit(CNihilanth* pOwner, CBaseEntity* pEnemy, CBaseEntity* pTarget, CBaseEntity* pTouch)
 {
 	pev->movetype = MOVETYPE_FLY;
@@ -1605,6 +1632,7 @@ void CNihilanthHVR::GreenBallInit()
 }
 
 
+// orig 0x84600
 void CNihilanthHVR::TeleportThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -1697,6 +1725,7 @@ void CNihilanthHVR::TeleportTouch(CBaseEntity* pOther)
 }
 
 
+// orig 0x84a90
 void CNihilanthHVR::DissipateThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -1732,6 +1761,7 @@ void CNihilanthHVR::DissipateThink()
 }
 
 
+// orig 0x84c00
 bool CNihilanthHVR::CircleTarget(Vector vecTarget)
 {
 	bool fClose = false;
@@ -1807,6 +1837,7 @@ void CNihilanthHVR::MovetoTarget(Vector vecTarget)
 
 
 
+// orig 0x85390
 void CNihilanthHVR::Crawl()
 {
 

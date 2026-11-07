@@ -376,9 +376,9 @@ protected:
 	void SendMOTDToClient(edict_t* client);
 
 public:
-	// p6 needs: rc2.dll 0x804b0 is its body; the gamerules package owns it (TEMP STUB with the
-	// original's reading in dlls/rc2/playerride.cpp)
-	bool PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider) override;
+	// CBasePlayer::PreThink sends a new client the MOTD itself (orig 0x98a20; p5)
+	friend class CBasePlayer;
+	bool PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider) override; // orig 0x804b0
 };
 
 //=========================================================

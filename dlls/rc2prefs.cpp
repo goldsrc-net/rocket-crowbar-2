@@ -870,8 +870,7 @@ static bool RC2Prefs_ValuesEqual(int iIndex, const rc2prefvalue_t* pA, const rc2
 }
 
 
-// TEMP STUB (p6): real one belongs in UserMessages.cpp (LinkUserMessages registers "RCCFG")
-int gmsgRCCFG = 0;
+// gmsgRCCFG: UserMessages.h (p5)
 
 // TEMP STUB (p6): real one belongs in the run before aflock (orig 0x1160): whether the
 // player's WON id is listed in the sv_tempadmins cvar

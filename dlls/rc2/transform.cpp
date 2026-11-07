@@ -245,14 +245,14 @@ void CBasePlayer::StartTransform()
 	pev->angles = pev->v_angle;
 	pev->fixangle = 1;
 	m_vecTransformAngles = vecAngles;
-	AddPhysFlags(0x20);
+	SetPhysFlags(0x20);
 	m_iHideHUD |= 0x10;
 	m_fShieldOn = false;
 
 	if (m_fJetpackOn)
 	{
 		m_fJetpackOn = false;
-		RemovePhysFlags(1);
+		ClearPhysFlags(1);
 		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 		WRITE_BYTE(4);
 		WRITE_BYTE(ENTINDEX(edict()));
@@ -293,14 +293,14 @@ void CBasePlayer::StartTransform()
 	if (m_flEnergy < 0)
 		m_flEnergy = 0;
 
-	m_pRC2Player79c->m_iRC2Flags = 8;
-	m_pRC2Player79c->pev->effects &= ~EF_NODRAW;
+	m_pCam2->m_iRC2Flags = 8;
+	m_pCam2->pev->effects &= ~EF_NODRAW;
 
 	// the change effect: player, its entity, from 0 to the new type
 	MESSAGE_BEGIN(MSG_BROADCAST, gmsgCLTE);
 	WRITE_BYTE(0x40);
 	WRITE_BYTE(ENTINDEX(edict()));
-	WRITE_SHORT(ENTINDEX(m_pRC2Player79c->edict()));
+	WRITE_SHORT(ENTINDEX(m_pCam2->edict()));
 	WRITE_BYTE(0);
 	WRITE_BYTE(iType);
 	MESSAGE_END();
@@ -393,7 +393,7 @@ void CBasePlayer::FinishTransform()
 	pev->v_angle = m_vecTransformAngles;
 	pev->angles = pev->v_angle;
 	pev->fixangle = 1;
-	RemovePhysFlags(0x20);
+	ClearPhysFlags(0x20);
 	m_bTransforming = false;
 	m_iTransformType = iType;
 	pev->playerclass = iType;
@@ -428,8 +428,8 @@ void CBasePlayer::FinishTransform()
 	WRITE_BYTE(0x40);
 	MESSAGE_END();
 
-	m_pRC2Player79c->m_iRC2Flags = 0;
-	m_pRC2Player79c->pev->effects |= EF_NODRAW;
+	m_pCam2->m_iRC2Flags = 0;
+	m_pCam2->pev->effects |= EF_NODRAW;
 }
 
 // Start changing back: needs room for the human hull (the houndeye and headcrab rise 20 units
@@ -475,7 +475,7 @@ void CBasePlayer::StartUntransform()
 	}
 
 	SetTouch(NULL);
-	AddPhysFlags(0x20);
+	SetPhysFlags(0x20);
 	m_bTransforming = true;
 	m_flTransformDoneTime = flParalyze + gpGlobals->time;
 	pev->rendermode = kRenderNormal;
@@ -489,13 +489,13 @@ void CBasePlayer::StartUntransform()
 	if (m_flEnergy < 0)
 		m_flEnergy = 0;
 
-	m_pRC2Player79c->m_iRC2Flags = 8;
-	m_pRC2Player79c->pev->effects &= ~EF_NODRAW;
+	m_pCam2->m_iRC2Flags = 8;
+	m_pCam2->pev->effects &= ~EF_NODRAW;
 
 	MESSAGE_BEGIN(MSG_BROADCAST, gmsgCLTE);
 	WRITE_BYTE(0x40);
 	WRITE_BYTE(ENTINDEX(edict()));
-	WRITE_SHORT(ENTINDEX(m_pRC2Player79c->edict()));
+	WRITE_SHORT(ENTINDEX(m_pCam2->edict()));
 	WRITE_BYTE(m_iTransformType);
 	WRITE_BYTE(0);
 	MESSAGE_END();
@@ -504,7 +504,7 @@ void CBasePlayer::StartUntransform()
 // orig 0xe2f90
 void CBasePlayer::FinishUntransform()
 {
-	RemovePhysFlags(0x20);
+	ClearPhysFlags(0x20);
 	m_iHideHUD &= ~0x10;
 	SET_MODEL(ENT(pev), "models/player.mdl");
 	m_bTransforming = false;
@@ -535,8 +535,8 @@ void CBasePlayer::FinishUntransform()
 	WRITE_BYTE(0x40);
 	MESSAGE_END();
 
-	m_pRC2Player79c->m_iRC2Flags = 0;
-	m_pRC2Player79c->pev->effects |= EF_NODRAW;
+	m_pCam2->m_iRC2Flags = 0;
+	m_pCam2->pev->effects |= EF_NODRAW;
 }
 
 // Rocket Crowbar 2: the player's RC caps by transform (a human has all 14 bits).
