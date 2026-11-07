@@ -336,7 +336,7 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 		pev->velocity = pev->velocity * 0.8;
 
 		pev->sequence = RANDOM_LONG(1, 1);
-		ResetSequenceInfo();
+		// SDK 2.3's (stock in RC2); halflife-updated called ResetSequenceInfo() here
 	}
 	else
 	{
@@ -347,10 +347,7 @@ void CGrenade::BounceTouch(CBaseEntity* pOther)
 	if (pev->framerate > 1.0)
 		pev->framerate = 1;
 	else if (pev->framerate < 0.5)
-	{
-		pev->framerate = 0;
-		pev->frame = 0;
-	}
+		pev->framerate = 0; // SDK 2.3's (stock in RC2); halflife-updated also reset the frame to 0
 }
 
 
@@ -491,8 +488,6 @@ CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecV
 		pGrenade->pev->velocity = Vector(0, 0, 0);
 	}
 
-	// RC2 (as SDK 2.3) sets the model after the sequence; halflife-updated's ResetSequenceInfo
-	// is kept (SDK 2.3 and RC2 don't call it, so the tumble animation's timing starts unset)
 	pGrenade->pev->sequence = RANDOM_LONG(3, 6);
 	pGrenade->pev->framerate = 1.0;
 
@@ -503,7 +498,8 @@ CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecV
 	pGrenade->pev->friction = 0.8;
 
 	SET_MODEL(ENT(pGrenade->pev), "models/w_grenade.mdl");
-	pGrenade->ResetSequenceInfo();
+	// SDK 2.3's (stock in RC2); halflife-updated set the model before the sequence and called
+	// ResetSequenceInfo() here
 	pGrenade->pev->dmg = 100;
 
 	return pGrenade;

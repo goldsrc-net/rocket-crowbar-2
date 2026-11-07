@@ -1239,13 +1239,8 @@ bool CBaseMonster::PopEnemy()
 //=========================================================
 void CBaseMonster::SetActivity(Activity NewActivity)
 {
-	const Activity oldActivity = NewActivity;
-
-	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-
-	// In case someone calls this with something other than the ideal activity
-	m_IdealActivity = m_Activity;
-
+	// SDK 2.3's (stock in RC2); halflife-updated set m_Activity and m_IdealActivity first, so
+	// SetYawSpeed saw the new activity, and compared the new activity with itself for walk and run
 	const int iSequence = LookupActivity(NewActivity);
 
 	// Set to the desired anim, or default anim if the desired is not present
@@ -1254,7 +1249,7 @@ void CBaseMonster::SetActivity(Activity NewActivity)
 		if (pev->sequence != iSequence || !m_fSequenceLoops)
 		{
 			// don't reset frame between walk and run
-			if (!(oldActivity == ACT_WALK || oldActivity == ACT_RUN) || !(NewActivity == ACT_WALK || NewActivity == ACT_RUN))
+			if (!(m_Activity == ACT_WALK || m_Activity == ACT_RUN) || !(NewActivity == ACT_WALK || NewActivity == ACT_RUN))
 				pev->frame = 0;
 		}
 
@@ -1268,6 +1263,11 @@ void CBaseMonster::SetActivity(Activity NewActivity)
 		ALERT(at_aiconsole, "%s has no sequence for act:%d\n", STRING(pev->classname), NewActivity);
 		pev->sequence = 0; // Set to the reset anim (if it's there)
 	}
+
+	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
+
+	// In case someone calls this with something other than the ideal activity
+	m_IdealActivity = m_Activity;
 }
 
 //=========================================================
@@ -2556,19 +2556,9 @@ float CBaseMonster::ChangeYaw(int yawSpeed)
 	ideal = pev->ideal_yaw;
 	if (current != ideal)
 	{
-		if (m_flLastYawTime == 0.0f)
-		{
-			m_flLastYawTime = gpGlobals->time - gpGlobals->frametime;
-		}
-
-		float delta = gpGlobals->time - m_flLastYawTime;
-		m_flLastYawTime = gpGlobals->time;
-
-		// Clamp delta like the engine does with frametime
-		if (delta > 0.25)
-			delta = 0.25;
-
-		speed = (float)yawSpeed * delta * 2;
+		// SDK 2.3's (stock in RC2); halflife-updated turned by the time since the last call
+		// (m_flLastYawTime, clamped to 0.25) times 2, so the turn rate didn't follow the frame rate
+		speed = (float)yawSpeed * gpGlobals->frametime * 10;
 		move = ideal - current;
 
 		if (ideal > current)

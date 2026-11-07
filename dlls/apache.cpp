@@ -134,7 +134,8 @@ void CApache::Spawn()
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_AIM;
 	pev->health = gSkillData.apacheHealth;
-	pev->max_health = pev->health;
+	// SDK 2.3's (stock in RC2); halflife-updated set max_health here, for TakeDamage's damage
+	// conditions
 
 	m_flFieldOfView = -0.707; // 270 degrees
 
@@ -144,18 +145,18 @@ void CApache::Spawn()
 
 	InitBoneControllers();
 
+	// SDK 2.3's (stock in RC2); halflife-updated set NullThink and the next think for a waiting
+	// apache too, so it would check its AI trigger before it was started
 	if ((pev->spawnflags & SF_WAITFORTRIGGER) != 0)
 	{
-		SetThink(&CApache::NullThink);
 		SetUse(&CApache::StartupUse);
 	}
 	else
 	{
 		SetThink(&CApache::HuntThink);
 		SetTouch(&CApache::FlyTouch);
+		pev->nextthink = gpGlobals->time + 1.0;
 	}
-
-	pev->nextthink = gpGlobals->time + 1.0;
 
 	m_iRockets = 10;
 }
@@ -190,7 +191,7 @@ void CApache::Precache()
 void CApache::NullThink()
 {
 	StudioFrameAdvance();
-	FCheckAITrigger();
+	// SDK 2.3's (stock in RC2); halflife-updated checked the AI trigger here
 	pev->nextthink = gpGlobals->time + 0.5;
 }
 
@@ -218,7 +219,7 @@ void CApache::Killed(entvars_t* pevAttacker, int iGib)
 	pev->nextthink = gpGlobals->time + 0.1;
 	pev->health = 0;
 	pev->takedamage = DAMAGE_NO;
-	pev->deadflag = DEAD_DYING;
+	// SDK 2.3's (stock in RC2); halflife-updated set deadflag to DEAD_DYING here
 
 	if ((pev->spawnflags & SF_NOWRECKAGE) != 0)
 	{
@@ -241,7 +242,7 @@ void CApache::DyingThink()
 	// still falling?
 	if (m_flNextRocket > gpGlobals->time)
 	{
-		FCheckAITrigger();
+		// SDK 2.3's (stock in RC2); halflife-updated checked the AI trigger here
 
 		// random explosions
 		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
@@ -481,19 +482,9 @@ void CApache::HuntThink()
 	{
 		Look(4092);
 		m_hEnemy = BestVisibleEnemy();
-
-		//If i have an enemy i'm in combat, otherwise i'm patrolling.
-		if (m_hEnemy != nullptr)
-		{
-			m_MonsterState = MONSTERSTATE_COMBAT;
-		}
-		else
-		{
-			m_MonsterState = MONSTERSTATE_ALERT;
-		}
+		// SDK 2.3's (stock in RC2); halflife-updated set the monster state from the enemy here and
+		// called Listen() after, for the AI trigger conditions
 	}
-
-	Listen();
 
 	// generic speed up
 	if (m_flGoalSpeed < 800)
@@ -617,7 +608,7 @@ void CApache::HuntThink()
 		}
 	}
 
-	FCheckAITrigger();
+	// SDK 2.3's (stock in RC2); halflife-updated checked the AI trigger here
 }
 
 
@@ -920,32 +911,9 @@ bool CApache::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 	*/
 
 	// ALERT( at_console, "%.0f\n", flDamage );
-	const bool result = CBaseEntity::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
-
-	//Are we damaged at all?
-	if (pev->health < pev->max_health)
-	{
-		//Took some damage.
-		SetConditions(bits_COND_LIGHT_DAMAGE);
-
-		if (pev->health < (pev->max_health / 2))
-		{
-			//Seriously damaged now.
-			SetConditions(bits_COND_HEAVY_DAMAGE);
-		}
-		else
-		{
-			//Maybe somebody healed us somehow (trigger_hurt with negative damage?), clear this.
-			ClearConditions(bits_COND_HEAVY_DAMAGE);
-		}
-	}
-	else
-	{
-		//Maybe somebody healed us somehow (trigger_hurt with negative damage?), clear this.
-		ClearConditions(bits_COND_LIGHT_DAMAGE);
-	}
-
-	return result;
+	// SDK 2.3's (stock in RC2); halflife-updated set the light and heavy damage conditions after
+	// this, for the AI trigger conditions
+	return CBaseEntity::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 
