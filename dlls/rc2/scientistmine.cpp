@@ -32,7 +32,7 @@ public:
 	int Classify() override { return CLASS_PLAYER_ALLY; } // orig 0xb3570
 	int BloodColor() override { return BLOOD_COLOR_RED; } // orig 0xb3560
 	void Killed(entvars_t* pevAttacker, int iGib) override;
-	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x17fd; } // orig 0xb3550
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x17fd; } // orig 0xb3550
 
 	void EXPORT SciMineActivate(CBaseEntity* pOther);
 	void EXPORT SciMineThink();
@@ -166,10 +166,9 @@ void CScientistMine::SciMineThink() // orig 0xb3910
 	{
 		if (!pEnt->pev || !UTIL_IsValidEntity(pEnt->edict()))
 			continue;
-		// VERIFY: GetRCCaps' first argument is declared int; the original passes this mine
-		if ((pEnt->GetEffectedEnt()->GetRCCaps((int)(intptr_t)this, pOwner) & 2) == 0)
+		if ((pEnt->GetEffectedEnt()->GetRCCaps(this, pOwner) & 2) == 0)
 			continue;
-		if ((pEnt->GetRCCaps2((int)(intptr_t)pOwner, this) & 8) != 0)
+		if ((pEnt->GetRCCaps2(pOwner, this) & 8) != 0)
 			continue;
 		if (!pEnt->GetEffectedEnt()->IsAlive() || pEnt->GetEffectedEnt()->pev->deadflag != DEAD_NO)
 			continue;
@@ -379,9 +378,9 @@ void CScientistMine::LookAround() // orig 0xb4510
 	{
 		if (!pEnt->pev || !UTIL_IsValidEntity(pEnt->edict()) || pEnt->edict() == edict())
 			continue;
-		if ((pEnt->GetRCCaps((int)(intptr_t)this, pOwner) & 2) == 0) // VERIFY: as in SciMineThink
+		if ((pEnt->GetRCCaps(this, pOwner) & 2) == 0) // VERIFY: as in SciMineThink
 			continue;
-		if ((pEnt->GetRCCaps2((int)(intptr_t)pOwner, this) & 8) != 0)
+		if ((pEnt->GetRCCaps2(pOwner, this) & 8) != 0)
 			continue;
 		if (!pEnt->IsAlive() || pEnt->pev->deadflag != DEAD_NO)
 			continue;

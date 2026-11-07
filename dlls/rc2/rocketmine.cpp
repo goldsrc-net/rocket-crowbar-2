@@ -28,7 +28,7 @@ public:
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 	int GetGuassHull() override { return 1; }			   // orig 0xb80a0
 	float GetGuassDistOut() override { return 56.0f; }	   // orig 0xb80b0
-	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x14a1; } // orig 0xb8090
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x14a1; } // orig 0xb8090
 
 	void EXPORT FlyingThink();
 	void EXPORT ActivateTouch(CBaseEntity* pOther);
@@ -129,10 +129,10 @@ void CRocketMine::ActiveThink() // orig 0xb82e0
 			while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin + Vector(0, 0, 34), pev->armorvalue)) != NULL)
 			{
 				// VERIFY: slot 75's first argument is a CBaseEntity* (this) in the original, an int in cbase.h
-				if ((pEntity->GetEffectedEnt()->GetRCCaps((int)(intptr_t)this, pOwner) & 2) == 0)
+				if ((pEntity->GetEffectedEnt()->GetRCCaps(this, pOwner) & 2) == 0)
 					continue;
 				// VERIFY: as above, slot 76's first argument is the thrower's CBaseEntity*
-				if ((pEntity->GetEffectedEnt()->GetRCCaps2((int)(intptr_t)pOwner, this) & 8) != 0)
+				if ((pEntity->GetEffectedEnt()->GetRCCaps2(pOwner, this) & 8) != 0)
 					continue;
 				if (!pEntity->IsAlive() || pEntity->pev->takedamage != DAMAGE_AIM || pEntity->pev->deadflag != DEAD_NO)
 					continue;
@@ -282,9 +282,9 @@ void CRMRocket::HomeThink() // orig 0xb8ae0
 			if (!pEntity->IsAlive() || pEntity->pev->deadflag != DEAD_NO || pEntity->pev->takedamage != DAMAGE_AIM)
 				continue;
 			// VERIFY: slot 75/76 first arguments are CBaseEntity* in the original (see rocket mine)
-			if ((pEntity->GetEffectedEnt()->GetRCCaps((int)(intptr_t)this, pOwner) & 2) == 0)
+			if ((pEntity->GetEffectedEnt()->GetRCCaps(this, pOwner) & 2) == 0)
 				continue;
-			if ((pEntity->GetRCCaps2((int)(intptr_t)pOwner, this) & 8) != 0)
+			if ((pEntity->GetRCCaps2(pOwner, this) & 8) != 0)
 				continue;
 
 			Vector vecTo = pEntity->Center() - pev->origin;

@@ -37,7 +37,7 @@ public:
 	void ReleasePull(CBaseEntity* pPulled) override;
 	int GetGuassHull() override { return 1; }				 // orig 0xb4a70
 	float GetGuassDistOut() override { return 56.0f; }		 // orig 0xb4a80
-	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x14a1; } // orig 0xb4a60
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x14a1; } // orig 0xb4a60
 
 	void EXPORT FlyingThink();
 	void EXPORT ActivateTouch(CBaseEntity* pOther);
@@ -261,10 +261,9 @@ void CSuckMine::ActiveThink() // orig 0xb4da0
 				continue;
 			if (!pEnt->IsAlive() || pEnt->pev->takedamage != DAMAGE_AIM || pEnt->pev->deadflag != DEAD_NO)
 				continue;
-			// VERIFY: GetRCCaps' first argument is declared int; the original passes the thrower
-			if ((pEnt->GetRCCaps((int)(intptr_t)pOwner, this) & 0x10) == 0)
+			if ((pEnt->GetRCCaps(pOwner, this) & 0x10) == 0)
 				continue;
-			if ((pEnt->GetRCCaps2((int)(intptr_t)pOwner, this) & 8) != 0)
+			if ((pEnt->GetRCCaps2(pOwner, this) & 8) != 0)
 				continue;
 			if (pEnt->IsActivePlayer())
 			{

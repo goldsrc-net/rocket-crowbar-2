@@ -15,7 +15,7 @@ class CBallLighting : public CBaseEntity
 public:
 	void Spawn() override;
 	void Precache() override;
-	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 2; } // orig 0xaad80
+	int GetRCCaps2(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 2; } // orig 0xaad80
 
 	void EXPORT ImpactTouch(CBaseEntity* pOther);
 	void EXPORT BallThink();

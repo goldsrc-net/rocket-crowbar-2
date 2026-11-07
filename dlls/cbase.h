@@ -396,8 +396,8 @@ public:
 	virtual void GravGrenAnnihilate(CBaseEntity* pInflictor, CBaseEntity* pAttacker); // 72, ours
 	virtual bool IsActivePlayer() { return false; }	  // 73, ours: where SDK 2.3 asked IsPlayer() in touches (orig 0x4d40)
 	virtual bool IsCleanupKillable() { return false; } // 74, ours: killed by the cleanup function at 0x1350 (orig 0x4d50)
-	virtual int GetRCCaps(int iAsker, CBaseEntity* pAsker) { return 0; }	// 75, RC 1.9's idea; VERIFY: argument types (orig 0x4d60)
-	virtual int GetRCCaps2(int iAsker, CBaseEntity* pAsker) { return 0; } // 76, ours; VERIFY: as 75 (orig 0x4d70)
+	virtual int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) { return 0; }	// 75, RC 1.9's idea: capability bits; callers pass 0 or an entity first (orig 0x4d60)
+	virtual int GetRCCaps2(CBaseEntity* pOther, CBaseEntity* pAsker) { return 0; } // 76, ours: a second set, same arguments (orig 0x4d70)
 	virtual bool IsViewOfPlayer(CBaseEntity* pPlayer);				  // 77, ours: the player sees through this
 	virtual bool IsSeeThroughFor(edict_t* pViewed) { return false; } // 78, ours: the player is drawn translucent (orig 0x4d80)
 

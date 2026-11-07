@@ -32,7 +32,7 @@ public:
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 	int GetGuassHull() override { return 3; }			   // orig 0xb6100
 	float GetGuassDistOut() override { return 36.0f; }	   // orig 0xb6110
-	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x14a1; } // orig 0xb60f0
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x14a1; } // orig 0xb60f0
 
 	void EXPORT BounceTouch(CBaseEntity* pOther);
 	void EXPORT PreactThink();
@@ -364,7 +364,7 @@ class CSMProjectile : public CBaseEntity
 public:
 	void Spawn() override;
 	void Precache() override;
-	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 2; } // orig 0xb7680
+	int GetRCCaps2(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 2; } // orig 0xb7680
 
 	void EXPORT HomeThink();
 	void EXPORT ExplodeTouch(CBaseEntity* pOther);
