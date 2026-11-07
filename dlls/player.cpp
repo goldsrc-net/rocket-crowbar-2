@@ -5801,6 +5801,23 @@ void CBasePlayer::UpdateClientData()
 		MESSAGE_END();
 	}
 
+	// halflife-updated's: the weapon bits, the suit's among them, go to the client in its 64-bit
+	// "Weapons" message, the only place our client (cl_dll/hud_msg.cpp) takes them from. RC2's client
+	// read them from the client data instead; without this the HUD never sees the suit, so no weapon
+	// can be selected (found in play, 2026-11-07).
+	if (m_WeaponBits != m_ClientWeaponBits)
+	{
+		m_ClientWeaponBits = m_WeaponBits;
+
+		const int lowerBits = m_WeaponBits & 0xFFFFFFFF;
+		const int upperBits = (m_WeaponBits >> 32) & 0xFFFFFFFF;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgWeapons, nullptr, pev);
+		WRITE_LONG(lowerBits);
+		WRITE_LONG(upperBits);
+		MESSAGE_END();
+	}
+
 	// the pull on the player (m_vecRC2Base58) while it is on (RC2PullActive), once more when it ends
 	bool bSendPull;
 	if (m_vecClientPull != m_vecRC2Base58)

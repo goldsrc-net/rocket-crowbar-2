@@ -970,6 +970,11 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 		// Store off v_angles before munging for third person
 		v_angles = pparams->viewangles;
+		// halflife-updated's: the aim client-predicted weapon events fire along (com_weapons.cpp
+		// HUD_PlaybackEvent reads it in place of SDK 2.3's v_angles). It was never set here, so every
+		// predicted effect, the egon's tractor beam among them, aimed at angles 0 (found in play,
+		// 2026-11-07).
+		v_client_aimangles = pparams->cl_viewangles;
 
 		if (bThirdPerson)
 		{

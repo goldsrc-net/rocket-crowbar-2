@@ -49,6 +49,13 @@ design or balance, or added a feature; halflife-updated's evident bug fixes stay
 in `reference/audit/FIXES.md`). What halflife-updated changed and we keep, besides restyling and
 the crash guards listed under "Crashes in the original":
 
+- **The weapon bits reach the client in halflife-updated's 64-bit `Weapons` message**
+  (`dlls/player.cpp` UpdateClientData; `cl_dll/hud_msg.cpp`), not the client data RC2's client
+  read, and **client-predicted weapon events aim along `v_client_aimangles`** (`cl_dll/view.cpp`,
+  `cl_dll/com_weapons.cpp`). Both were half there after the reconstruction: the client took the
+  bits only from the message the server never sent (no suit, so no weapon selection), and the
+  events read an aim nothing set (every predicted effect, the egon's beam among them, aimed at
+  angles 0). Found in play, 2026-11-07.
 - **A death's respawn count starts from 0** (`dlls/player.cpp` Killed): halflife-updated's reset of
   m_flRespawnTimer at each death, kept in both projects as a stale-count guard (Steven, 2026-11-07).
 - **Flying monsters' roll and monsters' activity changes are halflife-updated's fixes**
