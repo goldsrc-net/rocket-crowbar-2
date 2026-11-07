@@ -109,9 +109,23 @@ typedef int EOFFSET;
 // This is the glue that hooks .MAP entity class names to our CPP classes
 // The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
 // The function is used to intialize / allocate the object for the entity
+// Rocket Crowbar 2 (as RC 1.9): every factory also records its classname in the precache list
+// (util.cpp; monster_zombie at orig 0xfe8a0: GetClassPtr, then AddToPrecachedList). The client,
+// which compiles the weapons' factories too, has no list.
+void AddToPrecachedList(const char* pszClassname);
+#ifndef CLIENT_DLL
+#define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)    \
+	extern "C" DLLEXPORT void mapClassName(entvars_t* pev); \
+	void mapClassName(entvars_t* pev)                       \
+	{                                                       \
+		GetClassPtr((DLLClassName*)pev);                    \
+		AddToPrecachedList(#mapClassName);                  \
+	}
+#else
 #define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)    \
 	extern "C" DLLEXPORT void mapClassName(entvars_t* pev); \
 	void mapClassName(entvars_t* pev) { GetClassPtr((DLLClassName*)pev); }
+#endif
 
 /**
 *	@brief Gets the list of entities.
@@ -345,6 +359,50 @@ extern void UTIL_BubbleTrail(Vector from, Vector to, int count);
 
 // allows precacheing of other entities
 extern void UTIL_PrecacheOther(const char* szClassname);
+
+// Rocket Crowbar 2's own utility code (util.cpp; reference/dossiers/p9.md). Names ours unless
+// the comment there says whose.
+class CBaseEntity;
+extern int g_iRC2ClientBits;					// orig .bss 0x101af2a8: a bit per client slot
+extern entvars_t* g_pevRC2DamageInflictor;		// orig .bss 0x101afd30: made by CWorld::Precache
+void UTIL_RC2PreTrace(edict_t* pentIgnore);		// orig 0xf1d50: every trace's solidity changes...
+void UTIL_RC2PostTrace(edict_t* pentIgnore);	// orig 0xf1eb0: ...and their undoing
+int UTIL_CountEntitiesByClass(const char* szClassname);
+CBaseEntity* UTIL_RandomEntityByClassname(const char* szClassname);
+bool UTIL_RayIntersectsBox(Vector vecStart, Vector vecDir, Vector vecMins, Vector vecMaxs, float* pflFraction);
+CBaseEntity* UTIL_FindEntityNearestInSphere(CBaseEntity* pStart, Vector vecCenter, float flRadius, float* pflDist, Vector* pvecNearest);
+void UTIL_ClearEntityMarks();
+void UTIL_PushEntityMarks();
+void UTIL_PopEntityMarks();
+void UTIL_MarkEntity(int iEntIndex);
+bool UTIL_IsEntityMarked(int iEntIndex);
+void RC2RadiusDamage(entvars_t* pevAttacker, entvars_t* pevInflictor, edict_t* pentIgnore, Vector vecSrc, float flRadius,
+	float flDamage, float flExponent, int bitsDamageType, int fTrace);
+bool UTIL_RouteExists(Vector vecStart, Vector vecEnd, bool fTryVertical, Vector vecSize, int iHull, edict_t* pentIgnore, edict_t* pentTarget, Vector* pvecVia);
+void UTIL_RC2WaterDischarge(Vector vecSrc, float flDamage, entvars_t* pevInflictor, entvars_t* pevAttacker);
+Vector UTIL_Accelerate(const Vector& vecVelocity, const Vector& vecWishDir, float flWishSpeed, float flAccel, float flFrameTime);
+bool UTIL_BlastReaches(Vector vecSrc, Vector vecEnd, Vector vecDir, float* pflPunch, edict_t* pentIgnore, edict_t* pentTarget, TraceResult* ptr, int iMaxSteps);
+FILE* UTIL_OpenGameDirFile(const char* szName, const char* szMode);
+void UTIL_KillEntityEffects(edict_t* pEdict);
+Vector UTIL_RandomSpreadDir(Vector vecDir, Vector vecRight, Vector vecUp, float flSpread);
+Vector UTIL_ReflectVector(Vector vecDir, Vector vecNormal);
+entvars_t* UTIL_RC2DamageInflictor(const char* szClassname);
+int UTIL_PackNormal(Vector vecDir);
+bool IsClassnamePrecachedNoInvalid(const char* pszClassname);
+bool IsClassnameMapOnly(const char* pszClassname);
+const char* GetPrecachedName(const char* pszClassname);
+void ResetPrecachedList();
+void UTIL_RC2TimedEvent(void (*pfnEvent)(int), int iArg, float flDelay);
+
+// flTime = flBase + flDelay unless flTime is already later. Every RC2 weapon sets its four
+// attack timers with it. Inline because the client compiles the weapons too. Name p7's.
+inline void UTIL_ExtendTime(float* pflTime, float flBase, float flDelay) // orig 0xf5900
+{
+	const float flNew = flBase + flDelay;
+	if (flNew > *pflTime)
+		*pflTime = flNew;
+}
+inline void UTIL_ExtendTime(float& flTime, float flBase, float flDelay) { UTIL_ExtendTime(&flTime, flBase, flDelay); }
 
 // prints a message to each client
 extern void UTIL_ClientPrintAll(int msg_dest, const char* msg_name, const char* param1 = NULL, const char* param2 = NULL, const char* param3 = NULL, const char* param4 = NULL);

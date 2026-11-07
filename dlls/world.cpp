@@ -105,7 +105,7 @@ public:
 	void EXPORT TriggerDecal(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 };
 
-LINK_ENTITY_TO_CLASS(infodecal, CDecal);
+LINK_ENTITY_TO_CLASS(infodecal, CDecal); // orig 0xfbfc0 (p9: the run "weapons .. world"; the factory now records the classname, util.h)
 
 // UNDONE:  These won't get sent to joining players in multi-player
 void CDecal::Spawn()
@@ -827,8 +827,7 @@ bool CWorld::KeyValue(KeyValueData* pkvd)
 }
 
 
-// TEMP STUB (p3): real one belongs in client.cpp (connect bookkeeping, 0x1a8f0)
-int g_iRC2ClientBits;
+// g_iRC2ClientBits: defined in util.cpp (p9)
 // TEMP STUB (p3): real one belongs in the .lcs loader's file (items .. leech, 0x6d4d0)
 char g_szRC2SpawnCommand[512];
 // TEMP STUB (p3): real one belongs with ApplyExternalForce (pm_shared .. python, 0xa9ba0)
@@ -845,5 +844,4 @@ void RC2ResetUtil4c50() {}
 void RC2ResetPrecachedList() {}
 // TEMP STUB (p3): real one belongs in the .lcs loader's file (items .. leech, 0x6d4d0)
 void RC2LoadLCS(int iWhen) {}
-// TEMP STUB (p3): real one belongs in util.cpp (0xf5d80)
-void UTIL_RC2TimedEvent(void (*pfn)(int), int iArg, float flDelay) {}
+// UTIL_RC2TimedEvent: the real one is reconstructed elsewhere now

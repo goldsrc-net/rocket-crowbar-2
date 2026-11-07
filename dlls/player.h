@@ -414,6 +414,12 @@ public:
 	// m_flStartCharge: from there on the stock members sit 0x1c further than in SDK 2.3 (the
 	// gauss reads m_flPlayAftershock at +0x65c and m_flNextAmmoBurn at +0x660, stock +0x640 and
 	// +0x644). Found by p3; the player package (p5) places them.
+
+	// p9: the votes and the virtual hulls. Names ours.
+	float m_flNextVoteTime = 0; // orig +0x678: when this player may call the next vote
+	class CVirtualHull* m_rgpVirtualHulls[16] = {}; // orig +0x7a8: the player's virtual hulls (dlls/rc2/virtualhull.cpp)
+	float m_flNextHullUpdate = 0;					 // orig +0x7e8
+	void UpdateVirtualHulls();						 // orig 0xf6fb0, from PreThink
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

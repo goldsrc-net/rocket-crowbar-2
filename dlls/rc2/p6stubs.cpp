@@ -44,16 +44,9 @@ bool UTIL_RC2WasHit(int iEntIndex)
 	return false;
 }
 
-// TEMP STUB (p6): real one belongs in util.cpp
-entvars_t* UTIL_RC2DamageInflictor(const char* szClassname)
-{
-	return VARS(INDEXENT(0));
-}
+// UTIL_RC2DamageInflictor: the real one is reconstructed elsewhere now
 
-// TEMP STUB (p6): real one belongs in util.cpp
-void UTIL_RC2WaterDischarge(Vector vecSrc, float flDamage, entvars_t* pevInflictor, entvars_t* pevAttacker)
-{
-}
+// UTIL_RC2WaterDischarge: the real one is reconstructed elsewhere now
 
 // TEMP STUB (p6): real one belongs in the run between scripted and shotgun (p7)
 float RC2ShieldAbsorb(CBaseEntity* pEnt, float flDamage, float flShieldFraction, Vector vecHitPos, Vector vecDir,

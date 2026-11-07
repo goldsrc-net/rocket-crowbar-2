@@ -29,7 +29,7 @@ public:
 	void SetActivity(Activity act);
 	inline Activity GetActivity() { return m_Activity; }
 
-	int ObjectCaps() override { return CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	int ObjectCaps() override { return CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; } // orig 0xfd430
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -44,7 +44,7 @@ TYPEDESCRIPTION CActAnimating::m_SaveData[] =
 		DEFINE_FIELD(CActAnimating, m_Activity, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CActAnimating, CBaseAnimating);
+IMPLEMENT_SAVERESTORE(CActAnimating, CBaseAnimating); // orig 0xfd320, orig 0xfd350
 
 void CActAnimating::SetActivity(Activity act)
 {
@@ -80,16 +80,16 @@ private:
 	CSprite* m_pGlow;
 };
 
-LINK_ENTITY_TO_CLASS(xen_plantlight, CXenPLight);
+LINK_ENTITY_TO_CLASS(xen_plantlight, CXenPLight); // orig 0xfd3c0
 
 TYPEDESCRIPTION CXenPLight::m_SaveData[] =
 	{
 		DEFINE_FIELD(CXenPLight, m_pGlow, FIELD_CLASSPTR),
 };
 
-IMPLEMENT_SAVERESTORE(CXenPLight, CActAnimating);
+IMPLEMENT_SAVERESTORE(CXenPLight, CActAnimating); // orig 0xfd440, orig 0xfd470
 
-void CXenPLight::Spawn()
+void CXenPLight::Spawn() // orig 0xfd4a0, as SDK 2.3
 {
 	Precache();
 
@@ -108,14 +108,14 @@ void CXenPLight::Spawn()
 }
 
 
-void CXenPLight::Precache()
+void CXenPLight::Precache() // orig 0xfd6a0, as SDK 2.3
 {
 	PRECACHE_MODEL("models/light.mdl");
 	PRECACHE_MODEL(XEN_PLANT_GLOW_SPRITE);
 }
 
 
-void CXenPLight::Think()
+void CXenPLight::Think() // orig 0xfd6c0, as SDK 2.3
 {
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -150,9 +150,10 @@ void CXenPLight::Think()
 }
 
 
-void CXenPLight::Touch(CBaseEntity* pOther)
+// Rocket Crowbar 2: a player in play (IsActivePlayer) rather than any player
+void CXenPLight::Touch(CBaseEntity* pOther) // orig 0xfd750
 {
-	if (pOther->IsPlayer())
+	if (pOther->IsActivePlayer())
 	{
 		pev->dmgtime = gpGlobals->time + XEN_PLANT_HIDE_TIME;
 		if (GetActivity() == ACT_IDLE || GetActivity() == ACT_STAND)
@@ -188,7 +189,7 @@ public:
 	void Think() override;
 };
 
-LINK_ENTITY_TO_CLASS(xen_hair, CXenHair);
+LINK_ENTITY_TO_CLASS(xen_hair, CXenHair); // orig 0xfd800
 
 #define SF_HAIR_SYNC 0x0001
 
@@ -212,14 +213,14 @@ void CXenHair::Spawn()
 }
 
 
-void CXenHair::Think()
+void CXenHair::Think() // orig 0xfd970, as SDK 2.3
 {
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.5;
 }
 
 
-void CXenHair::Precache()
+void CXenHair::Precache() // orig 0xfd9a0, as SDK 2.3
 {
 	PRECACHE_MODEL("models/hair.mdl");
 }
@@ -231,7 +232,7 @@ public:
 	void Touch(CBaseEntity* pOther) override;
 	static CXenTreeTrigger* TriggerCreate(edict_t* pOwner, const Vector& position);
 };
-LINK_ENTITY_TO_CLASS(xen_ttrigger, CXenTreeTrigger);
+LINK_ENTITY_TO_CLASS(xen_ttrigger, CXenTreeTrigger); // orig 0xfd9b0
 
 CXenTreeTrigger* CXenTreeTrigger::TriggerCreate(edict_t* pOwner, const Vector& position)
 {
@@ -265,14 +266,14 @@ public:
 	void Precache() override;
 	void Touch(CBaseEntity* pOther) override;
 	void Think() override;
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override
+	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override // orig 0xfdb80
 	{
 		Attack();
 		return false;
 	}
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	void Attack();
-	int Classify() override { return CLASS_BARNACLE; }
+	int Classify() override { return CLASS_BARNACLE; } // orig 0xfdb90
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -285,16 +286,16 @@ private:
 	CXenTreeTrigger* m_pTrigger;
 };
 
-LINK_ENTITY_TO_CLASS(xen_tree, CXenTree);
+LINK_ENTITY_TO_CLASS(xen_tree, CXenTree); // orig 0xfdb10
 
 TYPEDESCRIPTION CXenTree::m_SaveData[] =
 	{
 		DEFINE_FIELD(CXenTree, m_pTrigger, FIELD_CLASSPTR),
 };
 
-IMPLEMENT_SAVERESTORE(CXenTree, CActAnimating);
+IMPLEMENT_SAVERESTORE(CXenTree, CActAnimating); // orig 0xfdba0, orig 0xfdbd0
 
-void CXenTree::Spawn()
+void CXenTree::Spawn() // orig 0xfdc00, as SDK 2.3
 {
 	Precache();
 
@@ -340,9 +341,10 @@ void CXenTree::Precache()
 }
 
 
-void CXenTree::Touch(CBaseEntity* pOther)
+// Rocket Crowbar 2: IsActivePlayer where SDK 2.3 asks IsPlayer
+void CXenTree::Touch(CBaseEntity* pOther) // orig 0xfde30
 {
-	if (!pOther->IsPlayer() && FClassnameIs(pOther->pev, "monster_bigmomma"))
+	if (!pOther->IsActivePlayer() && FClassnameIs(pOther->pev, "monster_bigmomma"))
 		return;
 
 	Attack();
@@ -398,7 +400,7 @@ void CXenTree::HandleAnimEvent(MonsterEvent_t* pEvent)
 	CActAnimating::HandleAnimEvent(pEvent);
 }
 
-void CXenTree::Think()
+void CXenTree::Think() // orig 0xfe0a0, as SDK 2.3
 {
 	float flInterval = StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -435,7 +437,7 @@ public:
 	void Precache() override;
 	void Touch(CBaseEntity* pOther) override;
 	void Think() override;
-	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override
+	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override // orig 0xfe2d0
 	{
 		Attack();
 		return false;
@@ -468,7 +470,7 @@ class CXenHull : public CPointEntity
 {
 public:
 	static CXenHull* CreateHull(CBaseEntity* source, const Vector& mins, const Vector& maxs, const Vector& offset);
-	int Classify() override { return CLASS_BARNACLE; }
+	int Classify() override { return CLASS_BARNACLE; } // orig 0xfe250
 };
 
 CXenHull* CXenHull::CreateHull(CBaseEntity* source, const Vector& mins, const Vector& maxs, const Vector& offset)
@@ -490,10 +492,10 @@ CXenHull* CXenHull::CreateHull(CBaseEntity* source, const Vector& mins, const Ve
 }
 
 
-LINK_ENTITY_TO_CLASS(xen_spore_small, CXenSporeSmall);
-LINK_ENTITY_TO_CLASS(xen_spore_medium, CXenSporeMed);
-LINK_ENTITY_TO_CLASS(xen_spore_large, CXenSporeLarge);
-LINK_ENTITY_TO_CLASS(xen_hull, CXenHull);
+LINK_ENTITY_TO_CLASS(xen_spore_small, CXenSporeSmall); // orig 0xfe260
+LINK_ENTITY_TO_CLASS(xen_spore_medium, CXenSporeMed);  // orig 0xfe2e0
+LINK_ENTITY_TO_CLASS(xen_spore_large, CXenSporeLarge); // orig 0xfe350
+LINK_ENTITY_TO_CLASS(xen_hull, CXenHull);			   // orig 0xfe3c0
 
 void CXenSporeSmall::Spawn()
 {
@@ -565,12 +567,12 @@ void CXenSpore::Precache()
 }
 
 
-void CXenSpore::Touch(CBaseEntity* pOther)
+void CXenSpore::Touch(CBaseEntity* pOther) // orig 0xfe860, as SDK 2.3
 {
 }
 
 
-void CXenSpore::Think()
+void CXenSpore::Think() // orig 0xfe870, as SDK 2.3
 {
 	float flInterval = StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;

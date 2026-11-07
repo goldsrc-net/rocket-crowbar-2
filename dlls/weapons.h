@@ -1300,8 +1300,25 @@ public:
 #endif
 	}
 
+	// Rocket Crowbar 2 (dlls/rc2/tripmine_weapon.cpp): four mines, one per attack: monster_tripmine
+	// (PrimaryAttack), bouncy_tripmine, punch_tripmine and target_tripmine, each with its [Tripmine]
+	// ammo cost, limit and refire keys. Server only: the client's tripmine keeps the stock attack.
+#ifndef CLIENT_DLL
+	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+
+	int CountMines(const char* szClassname); // name ours
+	void MineAttack(int iMine);				 // name ours: the body of all four attacks
+#endif
+
+	int m_iMinesOut[4];			// name ours. orig +0xdc..+0xe8: this player's mines of each kind in the world
+	float m_flNextMinesOutSend; // name ours. orig +0xec: when WeaponFrame next sends m_iMinesOut
+
 private:
-	unsigned short m_usTripFire;
+	unsigned short m_usTripFire; // orig +0xf0
 };
 
 enum squeak_e

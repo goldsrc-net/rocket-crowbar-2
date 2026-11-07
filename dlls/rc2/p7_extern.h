@@ -15,15 +15,7 @@ class CBaseEntity;
 extern int gmsgCLTE;	   // "CLTE": client temp effects. byte type, then per type
 extern int gmsgWeaponSync; // "WeaponSync"
 
-// TEMP STUB (p7): real one belongs in util.cpp (p9); this is the body read at 0xf5900.
-// flTime = flBase + flDelay unless flTime is already later. Every RC2 weapon sets its four
-// attack timers with it. Name ours. Inline here because the client compiles the weapons too.
-inline void UTIL_ExtendTime(float& flTime, float flBase, float flDelay)
-{
-	const float flNew = flBase + flDelay;
-	if (flNew > flTime)
-		flTime = flNew;
-}
+// UTIL_ExtendTime: the real one is reconstructed elsewhere now
 
 // p7, dlls/rc2/shield.cpp (0xc45b0): the player shield (RC2's [Shield] keys). Returns the damage
 // left after the shield of pEntity's player absorbs what its energy allows. Name ours.

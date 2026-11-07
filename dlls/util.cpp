@@ -31,8 +31,10 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#include "rc2prefs.h"
+#include "rc2/p9_needs.h"
 
-float UTIL_WeaponTimeBase()
+float UTIL_WeaponTimeBase() // orig 0xf0a90 (CLIENT_WEAPONS: 0)
 {
 #if defined(CLIENT_WEAPONS)
 	return 0.0;
@@ -366,7 +368,7 @@ void DBG_AssertFunction(
 #endif // DEBUG
 
 // ripped this out of the engine
-float UTIL_AngleMod(float a)
+float UTIL_AngleMod(float a) // orig 0xf0df0
 {
 	if (a < 0)
 	{
@@ -525,7 +527,7 @@ int UTIL_MonstersInSphere(CBaseEntity** pList, int listMax, const Vector& center
 }
 
 
-CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius)
+CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) // orig 0xf1140
 {
 	edict_t* pentEntity;
 
@@ -542,7 +544,7 @@ CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& ve
 }
 
 
-CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue)
+CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue) // orig 0xf1190
 {
 	edict_t* pentEntity;
 
@@ -558,12 +560,12 @@ CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKe
 	return NULL;
 }
 
-CBaseEntity* UTIL_FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName)
+CBaseEntity* UTIL_FindEntityByClassname(CBaseEntity* pStartEntity, const char* szName) // orig 0xf11e0
 {
 	return UTIL_FindEntityByString(pStartEntity, "classname", szName);
 }
 
-CBaseEntity* UTIL_FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName)
+CBaseEntity* UTIL_FindEntityByTargetname(CBaseEntity* pStartEntity, const char* szName) // orig 0xf1200
 {
 	return UTIL_FindEntityByString(pStartEntity, "targetname", szName);
 }
@@ -596,7 +598,7 @@ CBaseEntity* UTIL_FindEntityGeneric(const char* szWhatever, Vector& vecSrc, floa
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
 // otherwise returns NULL
 // Index is 1 based
-CBaseEntity* UTIL_PlayerByIndex(int playerIndex)
+CBaseEntity* UTIL_PlayerByIndex(int playerIndex) // orig 0xf12c0, the same but for the extra checks it makes on the edict
 {
 	CBaseEntity* pPlayer = NULL;
 
@@ -613,7 +615,7 @@ CBaseEntity* UTIL_PlayerByIndex(int playerIndex)
 }
 
 
-void UTIL_MakeVectors(const Vector& vecAngles)
+void UTIL_MakeVectors(const Vector& vecAngles) // orig 0xf1320
 {
 	MAKE_VECTORS(vecAngles);
 }
@@ -912,7 +914,7 @@ void UTIL_SayTextAll(const char* pText, CBaseEntity* pEntity)
 }
 
 
-char* UTIL_dtos1(int d)
+char* UTIL_dtos1(int d) // orig 0xf1c30. VERIFY: the only one of the four left in rc2.dll; which it is can't be told
 {
 	static char buf[8];
 	sprintf(buf, "%d", d);
@@ -965,28 +967,101 @@ void UTIL_ShowMessageAll(const char* pString)
 	}
 }
 
-// Overloaded to add IGNORE_GLASS
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t* pentIgnore, TraceResult* ptr)
+// Rocket Crowbar 2: every trace first changes some entities' solidity, for the entity it
+// ignores, and puts it back after (UTIL_RC2PreTrace, UTIL_RC2PostTrace). Each entity keeps its
+// own solid meanwhile in CBaseEntity's m_iRC2Base6c (orig +0x6c).
+//   - an entity whose IsSeeThroughFor(pentIgnore) is true is traced as SOLID_BBOX;
+//   - when pentIgnore is a player, every entity whose IsViewOfPlayer(that player) is true is
+//     traced as SOLID_NOT.
+// Names ours.
+static void UTIL_RC2SetTraceSolid(edict_t* pentIgnore, bool fRestore)
 {
+	for (int i = 1; i < gpGlobals->maxEntities; i++)
+	{
+		edict_t* pent = INDEXENT(i);
+		if (!UTIL_IsValidEntity(pent))
+			continue;
+		CBaseEntity* pEntity = CBaseEntity::Instance(pent);
+		if (pEntity && pEntity->IsSeeThroughFor(pentIgnore))
+		{
+			if (fRestore)
+				pEntity->pev->solid = pEntity->m_iRC2Base6c;
+			else
+			{
+				pEntity->m_iRC2Base6c = pEntity->pev->solid;
+				pEntity->pev->solid = SOLID_BBOX;
+			}
+		}
+	}
+
+	if (!UTIL_IsValidEntity(pentIgnore))
+		return;
+
+	CBaseEntity* pIgnore = CBaseEntity::Instance(pentIgnore);
+	if (!pIgnore || !pIgnore->IsPlayer())
+		return;
+
+	for (int i = 1; i < gpGlobals->maxEntities; i++)
+	{
+		edict_t* pent = INDEXENT(i);
+		if (!UTIL_IsValidEntity(pent))
+			continue;
+		CBaseEntity* pEntity = CBaseEntity::Instance(pent);
+		if (pEntity && pEntity->IsViewOfPlayer(pIgnore))
+		{
+			if (fRestore)
+				pEntity->pev->solid = pEntity->m_iRC2Base6c;
+			else
+			{
+				// one that is both keeps its first saved solid
+				if (!pEntity->IsSeeThroughFor(pentIgnore))
+					pEntity->m_iRC2Base6c = pEntity->pev->solid;
+				pEntity->pev->solid = SOLID_NOT;
+			}
+		}
+	}
+}
+
+void UTIL_RC2PreTrace(edict_t* pentIgnore) // orig 0xf1d50
+{
+	UTIL_RC2SetTraceSolid(pentIgnore, false);
+}
+
+void UTIL_RC2PostTrace(edict_t* pentIgnore) // orig 0xf1eb0
+{
+	UTIL_RC2SetTraceSolid(pentIgnore, true);
+}
+
+// Overloaded to add IGNORE_GLASS
+void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t* pentIgnore, TraceResult* ptr) // orig 0xf1fe0
+{
+	UTIL_RC2PreTrace(pentIgnore);
 	//TODO: define constants
 	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0) | (ignore_glass == ignoreGlass ? 0x100 : 0), pentIgnore, ptr);
+	UTIL_RC2PostTrace(pentIgnore);
 }
 
 
-void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, edict_t* pentIgnore, TraceResult* ptr)
+void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, edict_t* pentIgnore, TraceResult* ptr) // orig 0xf2030
 {
+	UTIL_RC2PreTrace(pentIgnore);
 	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), pentIgnore, ptr);
+	UTIL_RC2PostTrace(pentIgnore);
 }
 
 
-void UTIL_TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr)
+void UTIL_TraceHull(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t* pentIgnore, TraceResult* ptr) // orig 0xf2070
 {
+	UTIL_RC2PreTrace(pentIgnore);
 	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? 1 : 0), hullNumber, pentIgnore, ptr);
+	UTIL_RC2PostTrace(pentIgnore);
 }
 
-void UTIL_TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr)
+void UTIL_TraceModel(const Vector& vecStart, const Vector& vecEnd, int hullNumber, edict_t* pentModel, TraceResult* ptr) // orig 0xf20b0
 {
+	UTIL_RC2PreTrace(pentModel);
 	g_engfuncs.pfnTraceModel(vecStart, vecEnd, hullNumber, pentModel, ptr);
+	UTIL_RC2PostTrace(pentModel);
 }
 
 
@@ -1014,7 +1089,7 @@ void UTIL_SetSize(entvars_t* pev, const Vector& vecMin, const Vector& vecMax)
 }
 
 
-float UTIL_VecToYaw(const Vector& vec)
+float UTIL_VecToYaw(const Vector& vec) // orig 0xf21e0
 {
 	return VEC_TO_YAW(vec);
 }
@@ -1048,10 +1123,12 @@ float UTIL_Approach(float target, float value, float speed)
 }
 
 
-float UTIL_ApproachAngle(float target, float value, float speed)
+// Rocket Crowbar 2 fixed SDK 2.3's bug here (halflife-updated keeps it): value is wrapped
+// from value, not from target.
+float UTIL_ApproachAngle(float target, float value, float speed) // orig 0xf22a0
 {
 	target = UTIL_AngleMod(target);
-	value = UTIL_AngleMod(target);
+	value = UTIL_AngleMod(value);
 
 	float delta = target - value;
 
@@ -1088,7 +1165,7 @@ float UTIL_AngleDistance(float next, float cur)
 }
 
 
-float UTIL_SplineFraction(float value, float scale)
+float UTIL_SplineFraction(float value, float scale) // orig 0xf2370
 {
 	value = scale * value;
 	float valueSquared = value * value;
@@ -1117,7 +1194,7 @@ Vector UTIL_GetAimVector(edict_t* pent, float flSpeed)
 	return tmp;
 }
 
-bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
+bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator) // orig 0xf23f0
 {
 	if (!FStringNull(sMaster))
 	{
@@ -1137,25 +1214,13 @@ bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity* pActivator)
 	return true;
 }
 
-bool UTIL_ShouldShowBlood(int color)
+// Rocket Crowbar 2: the violence_hblood/violence_ablood cvars aren't asked
+bool UTIL_ShouldShowBlood(int color) // orig 0xf2470
 {
-	if (color != DONT_BLEED)
-	{
-		if (color == BLOOD_COLOR_RED)
-		{
-			if (CVAR_GET_FLOAT("violence_hblood") != 0)
-				return true;
-		}
-		else
-		{
-			if (CVAR_GET_FLOAT("violence_ablood") != 0)
-				return true;
-		}
-	}
-	return false;
+	return color != DONT_BLEED;
 }
 
-int UTIL_PointContents(const Vector& vec)
+int UTIL_PointContents(const Vector& vec) // orig 0xf2480
 {
 	return POINT_CONTENTS(vec);
 }
@@ -1182,7 +1247,8 @@ void UTIL_BloodStream(const Vector& origin, const Vector& direction, int color, 
 	MESSAGE_END();
 }
 
-void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount)
+// Rocket Crowbar 2: no German low violence, and the blood is always doubled
+void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount) // orig 0xf2540
 {
 	if (!UTIL_ShouldShowBlood(color))
 		return;
@@ -1190,14 +1256,8 @@ void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, i
 	if (color == DONT_BLEED || amount == 0)
 		return;
 
-	if (g_Language == LANGUAGE_GERMAN && color == BLOOD_COLOR_RED)
-		color = 0;
-
-	if (g_pGameRules->IsMultiplayer())
-	{
-		// scale up blood effect in multiplayer for better visibility
-		amount *= 2;
-	}
+	// scale up blood effect in multiplayer for better visibility
+	amount *= 2;
 
 	if (amount > 255)
 		amount = 255;
@@ -1573,7 +1633,7 @@ void UTIL_BubbleTrail(Vector from, Vector to, int count)
 }
 
 
-void UTIL_Remove(CBaseEntity* pEntity)
+void UTIL_Remove(CBaseEntity* pEntity) // orig 0xf2fa0
 {
 	if (!pEntity)
 		return;
@@ -1584,17 +1644,36 @@ void UTIL_Remove(CBaseEntity* pEntity)
 }
 
 
-bool UTIL_IsValidEntity(edict_t* pent)
+// Rocket Crowbar 2: also a private entity other than the world, and client slots go by
+// g_iRC2ClientBits (below)
+bool UTIL_IsValidEntity(edict_t* pent) // orig 0xf2fe0
 {
 	if (!pent || 0 != pent->free || (pent->v.flags & FL_KILLME) != 0)
 		return false;
+
+	if (!pent->pvPrivateData || 0 == OFFSET(pent))
+		return false;
+
+	const int iIndex = ENTINDEX(pent);
+	if (iIndex <= 0 || iIndex > gpGlobals->maxClients)
+		return true;
+
+	// Original bug kept: "!" binds to the mask alone, so with no bits set the first client's
+	// slot is invalid and otherwise every client slot is valid
+	if (((g_iRC2ClientBits == 0) ? 1 : 0) & (1 << (iIndex - 1)))
+		return false;
+
 	return true;
 }
 
 
-void UTIL_PrecacheOther(const char* szClassname)
+// Rocket Crowbar 2 (as RC 1.9): once per classname, by the precache list
+void UTIL_PrecacheOther(const char* szClassname) // orig 0xf3060
 {
 	edict_t* pent;
+
+	if (IsClassnamePrecachedNoInvalid(szClassname))
+		return;
 
 	pent = CREATE_NAMED_ENTITY(MAKE_STRING(szClassname));
 	if (FNullEnt(pent))
@@ -1607,6 +1686,7 @@ void UTIL_PrecacheOther(const char* szClassname)
 	if (pEntity)
 		pEntity->Precache();
 	REMOVE_ENTITY(pent);
+	AddToPrecachedList(szClassname);
 }
 
 //=========================================================
@@ -1723,13 +1803,13 @@ static int gFileSizes[FIELD_TYPECOUNT] =
 
 
 // Base class includes common SAVERESTOREDATA pointer, and manages the entity table
-CSaveRestoreBuffer::CSaveRestoreBuffer(SAVERESTOREDATA& data)
+CSaveRestoreBuffer::CSaveRestoreBuffer(SAVERESTOREDATA& data) // orig 0xf5dd0
 	: m_data(data)
 {
 }
 
 
-CSaveRestoreBuffer::~CSaveRestoreBuffer() = default;
+CSaveRestoreBuffer::~CSaveRestoreBuffer() = default; // orig 0xf5de0
 
 int CSaveRestoreBuffer::EntityIndex(CBaseEntity* pEntity)
 {
@@ -1886,7 +1966,7 @@ unsigned short CSaveRestoreBuffer::TokenHash(const char* pszToken)
 	return 0;
 }
 
-void CSave::WriteData(const char* pname, int size, const char* pdata)
+void CSave::WriteData(const char* pname, int size, const char* pdata) // orig 0xf6050
 {
 	BufferField(pname, size, pdata);
 }
@@ -1898,13 +1978,13 @@ void CSave::WriteShort(const char* pname, const short* data, int count)
 }
 
 
-void CSave::WriteInt(const char* pname, const int* data, int count)
+void CSave::WriteInt(const char* pname, const int* data, int count) // orig 0xf6090
 {
 	BufferField(pname, sizeof(int) * count, (const char*)data);
 }
 
 
-void CSave::WriteFloat(const char* pname, const float* data, int count)
+void CSave::WriteFloat(const char* pname, const float* data, int count) // orig 0xf60b0
 {
 	BufferField(pname, sizeof(float) * count, (const char*)data);
 }
@@ -2074,7 +2154,7 @@ void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd)
 
 
 
-bool CSave::WriteEntVars(const char* pname, entvars_t* pev)
+bool CSave::WriteEntVars(const char* pname, entvars_t* pev) // orig 0xf64e0
 {
 	return WriteFields(pname, pev, gEntvarsDescription, ENTVARS_COUNT);
 }
@@ -2267,7 +2347,7 @@ void CSave::BufferData(const char* pdata, int size)
 //
 // --------------------------------------------------------------
 
-int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount, int startField, int size, char* pName, void* pData)
+int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCount, int startField, int size, char* pName, void* pData) // orig 0xf6920
 {
 	int i, j, stringCount, fieldNumber, entityIndex;
 	TYPEDESCRIPTION* pTest;
@@ -2445,7 +2525,7 @@ int CRestore::ReadField(void* pBaseData, TYPEDESCRIPTION* pFields, int fieldCoun
 }
 
 
-bool CRestore::ReadEntVars(const char* pname, entvars_t* pev)
+bool CRestore::ReadEntVars(const char* pname, entvars_t* pev) // orig 0xf6c70
 {
 	return ReadFields(pname, pev, gEntvarsDescription, ENTVARS_COUNT);
 }
@@ -2543,7 +2623,7 @@ char* CRestore::ReadNamedString(const char* pName)
 }
 
 
-char* CRestore::BufferPointer()
+char* CRestore::BufferPointer() // orig 0xf6e80
 {
 	return m_data.pCurrentData;
 }
@@ -2567,7 +2647,7 @@ void CRestore::BufferReadBytes(char* pOutput, int size)
 }
 
 
-void CRestore::BufferSkipBytes(int bytes)
+void CRestore::BufferSkipBytes(int bytes) // orig 0xf6f10
 {
 	BufferReadBytes(NULL, bytes);
 }
@@ -2598,4 +2678,661 @@ bool CRestore::BufferCheckZString(const char* string)
 			return true;
 	}
 	return false;
+}
+
+
+//=========================================================
+// Rocket Crowbar 2's own utility code (rc2.dll keeps it in util.cpp, between SDK 2.3's
+// functions). Names ours unless marked.
+//=========================================================
+
+int g_iRC2ClientBits = 0; // orig .bss 0x101af2a8: a bit per client slot (client code sets them; CWorld::Precache clears them). Name p3's
+
+// how many entities (other than the world) have this classname
+int UTIL_CountEntitiesByClass(const char* szClassname) // orig 0xf30f0
+{
+	edict_t* pent = INDEXENT(1);
+	int iCount = 0;
+
+	if (!pent)
+		return 0;
+
+	for (int i = 1; i < gpGlobals->maxEntities; i++, pent++)
+	{
+		if (UTIL_IsValidEntity(pent) && 0 == strcmp(STRING(VARS(pent)->classname), szClassname))
+			iCount++;
+	}
+
+	return iCount;
+}
+
+// one of the entities of this classname, picked at random
+CBaseEntity* UTIL_RandomEntityByClassname(const char* szClassname) // orig 0xf31a0
+{
+	int iCount = UTIL_CountEntitiesByClass(szClassname);
+	if (iCount < 1)
+		return NULL;
+
+	int iPick = RANDOM_LONG(0, iCount);
+	CBaseEntity* pEntity = UTIL_FindEntityByClassname(NULL, szClassname);
+	// past the end the search starts over from NULL; up to 1000 tries to land on one
+	for (int i = 0; i < iPick || (!pEntity && i < 1000); i++)
+		pEntity = UTIL_FindEntityByClassname(pEntity, szClassname);
+
+	return pEntity;
+}
+
+// a ray (vecDir need not be unit length) against a box: true when it hits; *pflFraction is how
+// far along vecDir it enters (0 when vecStart is inside the box)
+bool UTIL_RayIntersectsBox(Vector vecStart, Vector vecDir, Vector vecMins, Vector vecMaxs, float* pflFraction) // orig 0xf3200
+{
+	if (!(vecMaxs.x <= vecStart.x || vecStart.x < vecMins.x || vecMaxs.y <= vecStart.y || vecStart.y < vecMins.y ||
+			vecMaxs.z <= vecStart.z || vecStart.z < vecMins.z))
+	{
+		if (pflFraction)
+			*pflFraction = 0;
+		return true;
+	}
+
+	if (vecDir == g_vecZero)
+		return false;
+
+	float flFar = 9999;
+	float flNear = -9999;
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (vecDir[i] == 0)
+		{
+			if (vecMaxs[i] < vecStart[i] || vecStart[i] < vecMins[i])
+				return false;
+		}
+		else
+		{
+			float t1 = (vecMins[i] - vecStart[i]) / vecDir[i];
+			float t2 = (vecMaxs[i] - vecStart[i]) / vecDir[i];
+			if (t2 < t1)
+				std::swap(t1, t2);
+			if (flNear < t1)
+				flNear = t1;
+			if (t2 < flFar)
+				flFar = t2;
+			if (flFar < flNear || flFar < 0)
+				return false;
+		}
+	}
+
+	if (pflFraction)
+		*pflFraction = flNear;
+	return true;
+}
+
+// the next valid entity after pStart (by index) that comes within flRadius of vecCenter: a BSP
+// model by its bounds, anything else as an upright cylinder 2 units thinner than its box.
+// *pflDist gets the distance to the nearest point, *pvecNearest the point. Name p7's.
+CBaseEntity* UTIL_FindEntityNearestInSphere(CBaseEntity* pStart, Vector vecCenter, float flRadius, float* pflDist, Vector* pvecNearest) // orig 0xf33b0
+{
+	int i = 1;
+	if (pStart)
+		i = ENTINDEX(pStart->edict()) + 1;
+
+	for (; i < gpGlobals->maxEntities; i++)
+	{
+		edict_t* pent = INDEXENT(i);
+		if (!UTIL_IsValidEntity(pent))
+			continue;
+		CBaseEntity* pEntity = CBaseEntity::Instance(pent);
+		if (!pEntity)
+			continue;
+
+		entvars_t* pev = pEntity->pev;
+		Vector vecNearest;
+		float flDistSqr;
+
+		if (!pEntity->IsBSPModel())
+		{
+			float flX = V_max(fabs(pev->mins.x), fabs(pev->maxs.x)) - 2;
+			float flY = V_max(fabs(pev->mins.y), fabs(pev->maxs.y)) - 2;
+			if (flX <= 0)
+				flX = 0;
+			if (flY <= 0)
+				flY = 0;
+			const float flCylRadius = sqrt(flX * flX + flY * flY);
+
+			if (pev->absmin.z <= vecCenter.z)
+			{
+				vecNearest.z = vecCenter.z;
+				if (pev->absmax.z < vecCenter.z)
+					vecNearest.z = pev->absmax.z;
+			}
+			else
+				vecNearest.z = pev->absmin.z;
+
+			if (flRadius + 64 < fabs(vecNearest.z - vecCenter.z) - 32)
+				continue;
+
+			Vector vecFlat(vecCenter.x - pev->origin.x, vecCenter.y - pev->origin.y, 0);
+			float flLen = sqrt(vecFlat.x * vecFlat.x + vecFlat.y * vecFlat.y);
+			if (flLen == 0)
+				flLen = 1;
+			if (flCylRadius < flLen)
+				vecFlat = (vecFlat / flLen) * flCylRadius;
+
+			vecNearest.x = pev->origin.x + vecFlat.x;
+			vecNearest.y = pev->origin.y + vecFlat.y;
+			vecNearest.z = vecNearest.z + vecFlat.z;
+		}
+		else
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				if (vecCenter[j] <= pev->absmin[j] || pev->absmax[j] <= vecCenter[j])
+					vecNearest[j] = (pev->absmin[j] <= vecCenter[j]) ? pev->absmax[j] : pev->absmin[j];
+				else
+					vecNearest[j] = vecCenter[j];
+			}
+		}
+
+		const Vector vecDelta = vecNearest - vecCenter;
+		flDistSqr = DotProduct(vecDelta, vecDelta);
+
+		if (sqrt(flDistSqr) <= flRadius + 64)
+		{
+			if (pvecNearest)
+				*pvecNearest = vecNearest;
+			if (pflDist)
+				*pflDist = (vecNearest - vecCenter).Length();
+			return pEntity;
+		}
+	}
+
+	return NULL;
+}
+
+// The entity marks: a stack of bit sets, one bit per entity index, so that nested radius
+// effects hit each entity once. 128 levels (orig .bss 0x101af084, the level at 0x101af2ac).
+static unsigned char* g_rgpRC2EntityMarks[128];
+static int g_iRC2EntityMarkLevel = 0;
+
+void UTIL_ClearEntityMarks() // orig 0xf4c50
+{
+	memset(g_rgpRC2EntityMarks, 0, sizeof(g_rgpRC2EntityMarks)); // Original bug kept: the sets aren't freed
+	g_iRC2EntityMarkLevel = 0;
+}
+
+// a new, empty set on top (the top one is reused while it isn't in use)
+void UTIL_PushEntityMarks() // orig 0xf4c70
+{
+	if (g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel])
+	{
+		g_iRC2EntityMarkLevel++;
+		if (g_iRC2EntityMarkLevel > 127)
+			g_iRC2EntityMarkLevel = 127;
+	}
+
+	// VERIFY: the size goes through a C runtime function at 0x1008b3, read here as ceil; and at
+	// the top level the original leaks the set it overwrites
+	const int iBytes = (int)ceil(gpGlobals->maxEntities * 0.125f);
+	g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel] = (unsigned char*)malloc(iBytes);
+	for (int i = 0; i < (int)ceil(gpGlobals->maxEntities * 0.125f); i++)
+		g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel][i] = 0;
+}
+
+void UTIL_PopEntityMarks() // orig 0xf4d40
+{
+	if (!g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel])
+	{
+		if (g_iRC2EntityMarkLevel > 0)
+			g_iRC2EntityMarkLevel--;
+		return;
+	}
+
+	free(g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel]);
+	g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel] = NULL;
+	if (g_iRC2EntityMarkLevel > 0)
+		g_iRC2EntityMarkLevel--;
+}
+
+void UTIL_MarkEntity(int iEntIndex) // orig 0xf4d90. Name p7's
+{
+	if (g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel])
+		g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel][iEntIndex / 8] |= 1 << (iEntIndex % 8);
+}
+
+bool UTIL_IsEntityMarked(int iEntIndex) // orig 0xf4dd0
+{
+	if (!g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel])
+		return false;
+	return (g_rgpRC2EntityMarks[g_iRC2EntityMarkLevel][iEntIndex / 8] & (1 << (iEntIndex % 8))) != 0;
+}
+
+// Rocket Crowbar 2's radius damage: every entity within flRadius of vecSrc that takes damage and
+// can be seen from it takes flDamage less (dist / flRadius) ^ flExponent of it, through its
+// shield. With fTrace the damage is dealt as a TraceAttack where the trace ended short. Each
+// entity (by GetEffectedEnt) is hit once. pevAttacker defaults to the world, pevInflictor to the
+// attacker. Name p3's and p6's.
+void RC2RadiusDamage(entvars_t* pevAttacker, entvars_t* pevInflictor, edict_t* pentIgnore, Vector vecSrc, float flRadius,
+	float flDamage, float flExponent, int bitsDamageType, int fTrace) // orig 0xf3900
+{
+	if (!pevAttacker || !UTIL_IsValidEntity(pevAttacker->pContainingEntity))
+		pevAttacker = VARS(INDEXENT(0));
+	if (!pevInflictor || !UTIL_IsValidEntity(pevInflictor->pContainingEntity))
+		pevInflictor = pevAttacker;
+
+	UTIL_PushEntityMarks();
+
+	CBaseEntity* pEntity = NULL;
+	float flDist;
+	Vector vecNearest;
+	TraceResult tr;
+
+	while ((pEntity = UTIL_FindEntityNearestInSphere(pEntity, vecSrc, flRadius, &flDist, &vecNearest)) != NULL)
+	{
+		if (pEntity->pev->takedamage == DAMAGE_NO)
+			continue;
+		if (UTIL_IsEntityMarked(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
+			continue;
+		if (!(flDist < flRadius))
+			continue;
+
+		Vector vecDir = (vecNearest - vecSrc).Normalize();
+
+		if (0 == fTrace)
+		{
+			UTIL_TraceLine(vecSrc, vecNearest, ignore_monsters, pentIgnore, &tr);
+			if (tr.flFraction < 1.0 && tr.pHit != pEntity->edict())
+				continue;
+		}
+		else
+		{
+			if (!pEntity->IsBSPModel())
+				vecNearest = vecNearest + vecDir * 32;
+
+			UTIL_TraceLine(vecSrc, vecNearest, dont_ignore_monsters, pentIgnore, &tr);
+			if (tr.flFraction < 1.0 && tr.pHit != pEntity->edict())
+			{
+				UTIL_TraceLine(vecSrc, vecNearest, ignore_monsters, pentIgnore, &tr);
+				if (tr.flFraction < 1.0 && tr.pHit != pEntity->edict())
+					continue;
+			}
+		}
+
+		float flAdjusted = flDamage - pow(flDist / flRadius, flExponent) * flDamage;
+		if (flAdjusted < 0.0)
+			flAdjusted = 0.0;
+		else if (flAdjusted > flDamage)
+			flAdjusted = flDamage;
+
+		const float flShieldScale = (bitsDamageType & DMG_BLAST) != 0 ? RC2Pref(RC2P_Shield_BlastDamageFraction).f : RC2Pref(RC2P_Shield_GenericRadiusFraction).f;
+		flAdjusted = ShieldDeflect(pEntity, flAdjusted, flShieldScale, tr.vecEndPos, vecDir, NULL, NULL, 8);
+		if (!(flAdjusted > 0.0))
+			continue;
+
+		if (0 != fTrace && tr.flFraction < 1.0)
+		{
+			ClearMultiDamage();
+			pEntity->GetEffectedEnt()->TraceAttack(pevAttacker, flAdjusted, vecDir, &tr, bitsDamageType);
+			ApplyMultiDamage(pevInflictor, pevAttacker);
+		}
+		else
+		{
+			pEntity->GetEffectedEnt()->TakeDamage(pevInflictor, pevAttacker, flAdjusted, bitsDamageType);
+		}
+
+		UTIL_MarkEntity(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
+	}
+
+	UTIL_PopEntityMarks();
+}
+
+// whether something of vecSize can get from vecStart to vecEnd: straight, or by one of the
+// points to the sides of where the straight line is blocked (and, with fTryVertical, above and
+// below it), moving those points out up to 8 times. *pvecVia gets the point used.
+bool UTIL_RouteExists(Vector vecStart, Vector vecEnd, bool fTryVertical, Vector vecSize, int iHull, edict_t* pentIgnore, edict_t* pentTarget, Vector* pvecVia) // orig 0xf3de0
+{
+	float flWidth = V_max(vecSize.x, vecSize.y);
+	if (flWidth <= 16)
+		flWidth = 16;
+	const float flHeight = (vecSize.z <= 16) ? 16 : vecSize.z;
+
+	TraceResult tr;
+	auto trace = [&](const Vector& a, const Vector& b)
+	{
+		if (iHull < 1)
+			UTIL_TraceLine(a, b, ignore_monsters, pentIgnore, &tr);
+		else
+			UTIL_TraceHull(a, b, ignore_monsters, iHull, pentIgnore, &tr);
+		return tr.flFraction >= 1.0 || (pentTarget && tr.pHit && tr.pHit == pentTarget);
+	};
+
+	const Vector vecDir = (vecEnd - vecStart).Normalize();
+	const Vector vecRight(vecDir.y, -vecDir.x, 0); // CrossProduct(vecDir, up), not normalized
+	const Vector vecUp(0, 0, 1);
+
+	if (trace(vecStart, vecEnd))
+		return true;
+
+	const float flHitDist = (vecEnd - vecStart).Length() * tr.flFraction;
+	const Vector vecAhead = vecStart + vecDir * (flHitDist + flWidth);
+	const Vector vecHit = vecStart + vecDir * flHitDist;
+
+	Vector vecSideA = vecAhead + vecRight * (flWidth * 3);
+	Vector vecSideB = vecAhead - vecRight * (flWidth * 3);
+	Vector vecUpper = vecHit + vecUp * flHeight * 3;
+	Vector vecLower = vecHit - vecUp * flHeight * 3;
+	const Vector vecSideStep = vecRight * flWidth * 2;
+	const Vector vecUpStep = vecUp * flHeight * 2;
+
+	auto via = [&](const Vector& vecPoint)
+	{
+		if (trace(vecStart, vecPoint) && trace(vecPoint, vecEnd))
+		{
+			if (pvecVia)
+				*pvecVia = vecPoint;
+			return true;
+		}
+		return false;
+	};
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (via(vecSideA) || via(vecSideB))
+			return true;
+		if (fTryVertical && (via(vecUpper) || via(vecLower)))
+			return true;
+
+		vecSideA = vecSideA + vecSideStep;
+		vecSideB = vecSideB - vecSideStep;
+		vecUpper = vecUpper + vecUpStep;
+		vecLower = vecLower - vecUpStep;
+	}
+
+	return false;
+}
+
+// an electric discharge into the water at vecSrc: every entity in the water that takes damage
+// and that a 16-unit route reaches from vecSrc takes flDamage (DMG_SHOCK), when its shield lets
+// any of it through. Each entity once. Name p6's.
+void UTIL_RC2WaterDischarge(Vector vecSrc, float flDamage, entvars_t* pevInflictor, entvars_t* pevAttacker) // orig 0xf4e70
+{
+	UTIL_PushEntityMarks();
+
+	for (int i = 1; i < gpGlobals->maxEntities; i++)
+	{
+		edict_t* pent = INDEXENT(i);
+		if (!UTIL_IsValidEntity(pent))
+			continue;
+		CBaseEntity* pEntity = CBaseEntity::Instance(pent);
+		if (!pEntity)
+			continue;
+
+		CBaseEntity* pEffected = pEntity->GetEffectedEnt();
+		if (UTIL_IsEntityMarked(ENTINDEX(pEffected->edict())))
+			continue;
+		if (pEntity->GetEffectedEnt()->pev->takedamage == DAMAGE_NO)
+			continue;
+		if (pEntity->GetEffectedEnt()->pev->waterlevel < 1)
+			continue;
+
+		Vector vecTarget = pEntity->GetEffectedEnt()->pev->origin;
+		vecTarget.z = vecTarget.z + pEntity->GetEffectedEnt()->pev->mins.z + 12;
+
+		if (!UTIL_RouteExists(vecSrc, vecTarget, false, Vector(16, 16, 16), 0, pevInflictor->pContainingEntity, pEntity->edict(), NULL))
+			continue;
+
+		// Original bug kept: what the shield lets through is only tested, the full flDamage is dealt
+		if (ShieldDeflect(pEntity, flDamage, RC2Pref(RC2P_Shield_GenericDischargeFraction).f, g_vecZero, g_vecZero, NULL, NULL, 5) > 0)
+			pEntity->GetEffectedEnt()->TakeDamage(pevInflictor, pevAttacker, flDamage, DMG_SHOCK);
+
+		UTIL_MarkEntity(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
+	}
+
+	UTIL_PopEntityMarks();
+}
+
+// PM_Accelerate's step: vecVelocity sped up along vecWishDir toward flWishSpeed. Name ours (p's).
+Vector UTIL_Accelerate(const Vector& vecVelocity, const Vector& vecWishDir, float flWishSpeed, float flAccel, float flFrameTime) // orig 0xf50a0
+{
+	const float flAdd = flWishSpeed - DotProduct(vecVelocity, vecWishDir);
+	if (flAdd <= 0)
+		return vecVelocity;
+
+	float flAccelSpeed = flWishSpeed * flAccel * flFrameTime;
+	if (flAdd < flAccelSpeed)
+		flAccelSpeed = flAdd;
+
+	return vecVelocity + vecWishDir * flAccelSpeed;
+}
+
+// true when a blast from vecSrc reaches vecEnd (or pentTarget on the way): traces on through
+// entities that aren't BSP models, and punches through solid world in 8-unit steps while
+// *pflPunch lasts (what is left is written back). iMaxSteps limits the recursion. Name p7's.
+bool UTIL_BlastReaches(Vector vecSrc, Vector vecEnd, Vector vecDir, float* pflPunch, edict_t* pentIgnore, edict_t* pentTarget, TraceResult* ptr, int iMaxSteps) // orig 0xf5160
+{
+	if (iMaxSteps < 0)
+		return false;
+	iMaxSteps--;
+
+	UTIL_TraceLine(vecSrc, vecEnd, ignore_monsters, pentIgnore, ptr);
+	if (ptr->flFraction >= 1.0)
+		return true;
+	if (pentTarget && ptr->pHit == pentTarget)
+		return true;
+
+	if (ptr->pHit && CBaseEntity::Instance(ptr->pHit) && !CBaseEntity::Instance(ptr->pHit)->IsBSPModel())
+		return UTIL_BlastReaches(ptr->vecEndPos, vecEnd, vecDir, pflPunch, ptr->pHit, pentTarget, ptr, iMaxSteps);
+
+	Vector vecPos = ptr->vecEndPos;
+	if (*pflPunch <= 0)
+		return false;
+
+	while (true)
+	{
+		const float flStep = (*pflPunch < 8) ? *pflPunch : 8;
+		*pflPunch -= flStep;
+		vecPos = vecPos + vecDir * flStep;
+
+		if (UTIL_PointContents(vecPos) != CONTENTS_SOLID)
+			return UTIL_BlastReaches(vecPos, vecEnd, vecDir, pflPunch, ptr->pHit, pentTarget, ptr, iMaxSteps);
+
+		if (*pflPunch <= 0)
+			return false;
+	}
+}
+
+// a file in the game directory
+FILE* UTIL_OpenGameDirFile(const char* szName, const char* szMode) // orig 0xf54a0
+{
+	char szPath[512];
+
+	GET_GAME_DIR(szPath);
+	strcat(szPath, "//");
+	strcat(szPath, szName);
+	return fopen(szPath, szMode);
+}
+
+// kills the beams attached to an entity, and tells RC2's client effects (gmsgCLTE) to drop
+// theirs. Name p3's and p6's.
+void UTIL_KillEntityEffects(edict_t* pEdict) // orig 0xf55b0
+{
+	if (!UTIL_IsValidEntity(pEdict))
+		return;
+
+	MESSAGE_BEGIN(MSG_ALL, SVC_TEMPENTITY);
+	WRITE_BYTE(TE_KILLBEAM);
+	WRITE_SHORT(ENTINDEX(pEdict));
+	MESSAGE_END();
+
+	if (0 != gmsgCLTE)
+	{
+		MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
+		WRITE_BYTE(255);
+		WRITE_SHORT(ENTINDEX(pEdict));
+		MESSAGE_END();
+	}
+}
+
+// vecDir spread at random by up to flSpread along vecRight and vecUp (as the shotgun's spread,
+// inside a circle), normalized
+Vector UTIL_RandomSpreadDir(Vector vecDir, Vector vecRight, Vector vecUp, float flSpread) // orig 0xf5630
+{
+	float x, y;
+	do
+	{
+		x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+		y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+	} while (x * x + y * y > 1);
+
+	return (vecDir + vecRight * (x * flSpread) + vecUp * (y * flSpread)).Normalize();
+}
+
+// vecDir mirrored about the plane with normal vecNormal
+Vector UTIL_ReflectVector(Vector vecDir, Vector vecNormal) // orig 0xf5800
+{
+	const float flDot = -DotProduct(vecDir, vecNormal);
+	return vecNormal * 2 * flDot + vecDir;
+}
+
+// The entity RC2 hands out as a named inflictor, so that death notices name the weapon or
+// effect (CWorld::Precache makes it; orig .bss 0x101afd30, its name in 0x101aef84).
+entvars_t* g_pevRC2DamageInflictor = NULL;
+static char g_szRC2DamageInflictorName[256];
+
+// that entity, renamed szClassname; the world when there is none. Name p6's.
+entvars_t* UTIL_RC2DamageInflictor(const char* szClassname) // orig 0xf58a0
+{
+	if (g_pevRC2DamageInflictor)
+	{
+		strncpy(g_szRC2DamageInflictorName, szClassname, 255);
+		g_szRC2DamageInflictorName[255] = 0;
+		g_pevRC2DamageInflictor->classname = MAKE_STRING(g_szRC2DamageInflictorName);
+		return g_pevRC2DamageInflictor;
+	}
+
+	return VARS(INDEXENT(0));
+}
+
+// a direction packed into an int for an event's iparam: 9 bits of each normalized component's
+// size, 0x200 its sign, x in bits 0-9, y 10-19, z 20-29. Name p3's.
+int UTIL_PackNormal(Vector vecDir) // orig 0xf5920
+{
+	const Vector n = vecDir.Normalize();
+
+	int x = (int)(fabs(n.x) * 511.0);
+	if (n.x < 0)
+		x |= 0x200;
+	int y = (int)(fabs(n.y) * 511.0);
+	if (n.y < 0)
+		y |= 0x200;
+	int z = (int)(fabs(n.z) * 511.0);
+	if (n.z < 0)
+		z |= 0x200;
+
+	return z << 20 | x | y << 10;
+}
+
+// RC 1.9's precache list (orig .bss 0x1019eb84, the count at 0x101af2b4): the classnames every
+// factory and UTIL_PrecacheOther have seen. RC 1.9's names (cbase.cpp there).
+static char g_pPrecachedStuff[512][128];
+static int g_iCntPrecached = 0;
+
+void AddToPrecachedList(const char* pszClassname) // orig 0xf5a20
+{
+	if (g_iCntPrecached >= 512)
+		return;
+
+	// Original bug kept: the duplicate check compares nothing (it tests the name for NULL once
+	// per entry), so every call adds the name again until the list is full
+	for (int i = 0; i < g_iCntPrecached; i++)
+	{
+		if (!pszClassname)
+			return;
+	}
+
+	strcpy(g_pPrecachedStuff[g_iCntPrecached++], pszClassname);
+}
+
+bool IsClassnamePrecachedNoInvalid(const char* pszClassname) // orig 0xf5a80
+{
+	for (int i = 0; i < g_iCntPrecached; i++)
+	{
+		if (0 == strcmp(g_pPrecachedStuff[i], pszClassname))
+			return true;
+	}
+	return false;
+}
+
+// classnames that only a map places (or that only make sense placed by one)
+bool IsClassnameMapOnly(const char* pszClassname) // orig 0xf5af0. Name p's
+{
+	if (0 == strcmp(pszClassname, "monster_generic"))
+		return true;
+	if (0 == strcmp(pszClassname, "monster_maker"))
+		return true;
+	if (0 == strncmp(pszClassname, "env_", 4))
+		return true;
+	if (0 == strncmp(pszClassname, "trigger_", 8))
+		return true;
+	if (0 == strncmp(pszClassname, "func_", 5))
+		return true;
+	return 0 == strncmp(pszClassname, "info_", 5);
+}
+
+// the precache list's own copy of a classname (a string that stays), or pszClassname itself
+const char* GetPrecachedName(const char* pszClassname) // orig 0xf5bf0
+{
+	for (int i = 0; i < g_iCntPrecached; i++)
+	{
+		if (0 == strcmp(g_pPrecachedStuff[i], pszClassname))
+			return g_pPrecachedStuff[i];
+	}
+	return pszClassname;
+}
+
+void ResetPrecachedList() // orig 0xf5c60. RC 1.9's name
+{
+	g_iCntPrecached = 0;
+}
+
+//=========================================================
+// CUTIL_TimedEvent ("timedevent"): calls a function once, after a delay, then removes itself.
+//=========================================================
+class CUTIL_TimedEvent : public CBaseEntity
+{
+public:
+	void Spawn() override;
+	void EXPORT TimeThink();
+
+	void (*m_pfnEvent)(int); // name ours. orig +0x70
+	int m_iEventArg;		 // name ours. orig +0x74
+};
+
+LINK_ENTITY_TO_CLASS(timedevent, CUTIL_TimedEvent); // orig 0xf5c70
+
+void CUTIL_TimedEvent::Spawn() // orig 0xf5ce0
+{
+	pev->effects |= EF_NODRAW;
+	UTIL_SetOrigin(pev, pev->origin);
+	UTIL_SetSize(pev, g_vecZero, g_vecZero);
+	pev->movetype = MOVETYPE_NONE;
+	pev->solid = SOLID_NOT;
+	SetThink(&CUTIL_TimedEvent::TimeThink);
+	pev->nextthink = gpGlobals->time + 1.0;
+}
+
+void CUTIL_TimedEvent::TimeThink() // orig 0xf5d50
+{
+	if (m_pfnEvent)
+		m_pfnEvent(m_iEventArg);
+	pev->flags |= FL_KILLME;
+}
+
+// pfnEvent(iArg) flDelay seconds from now. Name p3's.
+void UTIL_RC2TimedEvent(void (*pfnEvent)(int), int iArg, float flDelay) // orig 0xf5d80
+{
+	CUTIL_TimedEvent* pEvent = (CUTIL_TimedEvent*)CBaseEntity::Create("timedevent", g_vecZero, g_vecZero, NULL);
+	// Original bug kept: no NULL check
+	pEvent->pev->nextthink = flDelay + gpGlobals->time;
+	pEvent->m_pfnEvent = pfnEvent;
+	pEvent->m_iEventArg = iArg;
 }
