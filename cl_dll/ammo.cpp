@@ -29,6 +29,10 @@
 #include "ammohistory.h"
 #include "vgui_TeamFortressViewport.h"
 
+// RC2's HIDEHUD bit: no weapon selection, crosshair or ammo display (the server sets it on a
+// shrunk or transformed player, dlls/rc2/shrinktimer.cpp and transform.cpp)
+#define HIDEHUD_RC2_NOWEAPONS (1 << 4) // name ours
+
 WEAPON* gpActiveSel; // NULL means off, 1 means just the menu bar, otherwise
 					 // this points to the active weapon menu item
 WEAPON* gpLastSel;	 // Last weapon menu selection
@@ -233,27 +237,29 @@ int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and 
 
 HSPRITE ghsprBuckets; // Sprite for top row of weapons menu
 
-DECLARE_MESSAGE(m_Ammo, CurWeapon);	 // Current weapon and clip
-DECLARE_MESSAGE(m_Ammo, WeaponList); // new weapon type
-DECLARE_MESSAGE(m_Ammo, AmmoX);		 // update known ammo type's count
-DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record
-DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record
-DECLARE_MESSAGE(m_Ammo, HideWeapon); // hides the weapon, ammo, and crosshair displays temporarily
-DECLARE_MESSAGE(m_Ammo, ItemPickup);
+// The __MsgFunc_ and __CmdFunc_ wrappers, stock; Ghidra's list has only AmmoX, Slot1, Slot2 and
+// Slot10, the rest are in gaps of it.
+DECLARE_MESSAGE(m_Ammo, CurWeapon);	 // Current weapon and clip  orig client 0x49e70 (gap)
+DECLARE_MESSAGE(m_Ammo, WeaponList); // new weapon type  orig client 0x49ea0 (gap)
+DECLARE_MESSAGE(m_Ammo, AmmoX);		 // update known ammo type's count  orig client 0x49ed0
+DECLARE_MESSAGE(m_Ammo, AmmoPickup); // flashes an ammo pickup record  orig client 0x49f00 (gap)
+DECLARE_MESSAGE(m_Ammo, WeapPickup); // flashes a weapon pickup record  orig client 0x49f30 (gap)
+DECLARE_MESSAGE(m_Ammo, HideWeapon); // hides the weapon, ammo, and crosshair displays temporarily  orig client 0x49f60 (gap)
+DECLARE_MESSAGE(m_Ammo, ItemPickup); // orig client 0x49f90 (gap)
 
-DECLARE_COMMAND(m_Ammo, Slot1);
-DECLARE_COMMAND(m_Ammo, Slot2);
-DECLARE_COMMAND(m_Ammo, Slot3);
-DECLARE_COMMAND(m_Ammo, Slot4);
-DECLARE_COMMAND(m_Ammo, Slot5);
-DECLARE_COMMAND(m_Ammo, Slot6);
-DECLARE_COMMAND(m_Ammo, Slot7);
-DECLARE_COMMAND(m_Ammo, Slot8);
-DECLARE_COMMAND(m_Ammo, Slot9);
-DECLARE_COMMAND(m_Ammo, Slot10);
-DECLARE_COMMAND(m_Ammo, Close);
-DECLARE_COMMAND(m_Ammo, NextWeapon);
-DECLARE_COMMAND(m_Ammo, PrevWeapon);
+DECLARE_COMMAND(m_Ammo, Slot1);		 // orig client 0x49fc0
+DECLARE_COMMAND(m_Ammo, Slot2);		 // orig client 0x49fe0
+DECLARE_COMMAND(m_Ammo, Slot3);		 // orig client 0x4a000 (gap)
+DECLARE_COMMAND(m_Ammo, Slot4);		 // orig client 0x4a020 (gap)
+DECLARE_COMMAND(m_Ammo, Slot5);		 // orig client 0x4a040 (gap)
+DECLARE_COMMAND(m_Ammo, Slot6);		 // orig client 0x4a060 (gap)
+DECLARE_COMMAND(m_Ammo, Slot7);		 // orig client 0x4a080 (gap)
+DECLARE_COMMAND(m_Ammo, Slot8);		 // orig client 0x4a0a0 (gap)
+DECLARE_COMMAND(m_Ammo, Slot9);		 // orig client 0x4a0c0 (gap)
+DECLARE_COMMAND(m_Ammo, Slot10);	 // orig client 0x4a0e0
+DECLARE_COMMAND(m_Ammo, Close);		 // orig client 0x4a100 (gap)
+DECLARE_COMMAND(m_Ammo, NextWeapon); // orig client 0x4a120 (gap)
+DECLARE_COMMAND(m_Ammo, PrevWeapon); // orig client 0x4a140 (gap)
 
 // width of ammo fonts
 #define AMMO_SMALL_WIDTH 10
@@ -261,6 +267,9 @@ DECLARE_COMMAND(m_Ammo, PrevWeapon);
 
 #define HISTORY_DRAW_TIME "5"
 
+// orig client 0x4a160
+// Same as SDK 2.3's (it is named by its vtable slot, not byte-matched, only because of the
+// relocations).
 bool CHudAmmo::Init()
 {
 	gHUD.AddHudElem(this);
@@ -415,6 +424,7 @@ HSPRITE* WeaponsResource::GetAmmoPicFromWeapon(int iAmmoId, Rect& rect)
 
 // Menu Selection Code
 
+// orig client 0x4a730
 void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 {
 	if (gHUD.m_Menu.m_fMenuDisplayed && (!fAdvance) && (iDirection == 1))
@@ -426,7 +436,7 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 	if (iSlot > MAX_WEAPON_SLOTS)
 		return;
 
-	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL | HIDEHUD_RC2_NOWEAPONS)) != 0)
 		return;
 
 	if (!gHUD.HasSuit())
@@ -478,6 +488,15 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 		gpActiveSel = p;
 }
 
+// orig client 0x4a900
+// RC2's own: puts the current weapon's plain crosshair back. Called from RC2 code outside
+// ammo.cpp (client 0xc9e00's function, at 0xca2c2).
+void CHudAmmo::RestoreCrosshair() // name ours
+{
+	if (m_pWeapon)
+		SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
+}
+
 //------------------------------------------------------------------------
 // Message Handlers
 //------------------------------------------------------------------------
@@ -485,12 +504,15 @@ void WeaponsResource::SelectSlot(int iSlot, bool fAdvance, int iDirection)
 //
 // AmmoX  -- Update the count of a known type of ammo
 //
+// orig client 0x4a970
+// names-client.tsv calls this stock, but RC2 reads the count as a short (AmmoX is 3 bytes, see
+// dlls/player.cpp SendAmmoUpdate); the byte matcher took READ_SHORT's thunk for READ_BYTE's.
 bool CHudAmmo::MsgFunc_AmmoX(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 
 	int iIndex = READ_BYTE();
-	int iCount = READ_BYTE();
+	int iCount = READ_SHORT();
 
 	gWR.SetAmmo(iIndex, abs(iCount));
 
@@ -532,16 +554,15 @@ bool CHudAmmo::MsgFunc_ItemPickup(const char* pszName, int iSize, void* pbuf)
 }
 
 
+// orig client 0x4aa90
+// RC2: no IsSpectateOnly early return (SDK 2.3 has one), and its own bit hides the crosshair too.
 bool CHudAmmo::MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 
 	gHUD.m_iHideHUDDisplay = READ_BYTE();
 
-	if (0 != gEngfuncs.IsSpectateOnly())
-		return true;
-
-	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL | HIDEHUD_RC2_NOWEAPONS)) != 0)
 	{
 		static Rect nullrc;
 		gpActiveSel = NULL;
@@ -561,6 +582,9 @@ bool CHudAmmo::MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf)
 //  counts are updated with AmmoX. Server assures that the Weapon ammo type
 //  numbers match a real ammo type.
 //
+// orig client 0x4ab80
+// RC2: the clip is a short (CurWeapon is 4 bytes), there is no g_iUser1 != OBS_IN_EYE test around
+// the dead check, and the crosshair is left alone while the HUD hides weapons.
 bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
 {
 	static Rect nullrc;
@@ -570,7 +594,7 @@ bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
 
 	int iState = READ_BYTE();
 	int iId = READ_CHAR();
-	int iClip = READ_CHAR();
+	int iClip = READ_SHORT();
 
 	// detect if we're also on target
 	if (iState > 1)
@@ -580,22 +604,20 @@ bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
 
 	if (iId < 1)
 	{
+		// halflife-updated also clears m_pWeapon here; RC2 keeps it
 		SetCrosshair(0, nullrc, 0, 0, 0);
-		m_pWeapon = nullptr;
 		return false;
 	}
 
-	if (g_iUser1 != OBS_IN_EYE)
+	// Is player dead???
+	// (never true: iId < 1 has returned already, as in SDK 2.3)
+	if ((iId == -1) && (iClip == -1))
 	{
-		// Is player dead???
-		if ((iId == -1) && (iClip == -1))
-		{
-			gHUD.m_fPlayerDead = true;
-			gpActiveSel = NULL;
-			return true;
-		}
-		gHUD.m_fPlayerDead = false;
+		gHUD.m_fPlayerDead = true;
+		gpActiveSel = NULL;
+		return true;
 	}
+	gHUD.m_fPlayerDead = false;
 
 	WEAPON* pWeapon = gWR.GetWeapon(iId);
 
@@ -613,19 +635,22 @@ bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
 
 	m_pWeapon = pWeapon;
 
-	if (gHUD.m_iFOV >= 90)
-	{ // normal crosshairs
-		if (fOnTarget && 0 != m_pWeapon->hAutoaim)
-			SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
+	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL | HIDEHUD_RC2_NOWEAPONS)) == 0)
+	{
+		if (gHUD.m_iFOV >= 90)
+		{ // normal crosshairs
+			if (fOnTarget && 0 != m_pWeapon->hAutoaim)
+				SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
+			else
+				SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
+		}
 		else
-			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
-	}
-	else
-	{ // zoomed crosshairs
-		if (fOnTarget && 0 != m_pWeapon->hZoomedAutoaim)
-			SetCrosshair(m_pWeapon->hZoomedAutoaim, m_pWeapon->rcZoomedAutoaim, 255, 255, 255);
-		else
-			SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
+		{ // zoomed crosshairs
+			if (fOnTarget && 0 != m_pWeapon->hZoomedAutoaim)
+				SetCrosshair(m_pWeapon->hZoomedAutoaim, m_pWeapon->rcZoomedAutoaim, 255, 255, 255);
+			else
+				SetCrosshair(m_pWeapon->hZoomedCrosshair, m_pWeapon->rcZoomedCrosshair, 255, 255, 255);
+		}
 	}
 
 	m_fFade = 200.0f; //!!!
@@ -637,6 +662,8 @@ bool CHudAmmo::MsgFunc_CurWeapon(const char* pszName, int iSize, void* pbuf)
 //
 // WeaponList -- Tells the hud about a new weapon type.
 //
+// orig client 0x4ae00
+// RC2: the primary max ammo is a short, 0xffff meaning none (dlls/player.cpp sends it so)
 bool CHudAmmo::MsgFunc_WeaponList(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -647,8 +674,8 @@ bool CHudAmmo::MsgFunc_WeaponList(const char* pszName, int iSize, void* pbuf)
 	Weapon.szName[sizeof(Weapon.szName) - 1] = '\0';
 	Weapon.iAmmoType = (int)READ_CHAR();
 
-	Weapon.iMax1 = READ_BYTE();
-	if (Weapon.iMax1 == 255)
+	Weapon.iMax1 = READ_SHORT();
+	if (Weapon.iMax1 == 0xffff) // RC2's test; never true, READ_SHORT sign-extends (0xffff reads as -1 anyway)
 		Weapon.iMax1 = -1;
 
 	Weapon.iAmmo2Type = READ_CHAR();
@@ -700,51 +727,61 @@ void CHudAmmo::SlotInput(int iSlot)
 	gWR.SelectSlot(iSlot, false, 1);
 }
 
+// orig client 0x4afa0
 void CHudAmmo::UserCmd_Slot1()
 {
 	SlotInput(0);
 }
 
+// orig client 0x4afc0
 void CHudAmmo::UserCmd_Slot2()
 {
 	SlotInput(1);
 }
 
+// orig client 0x4afe0
 void CHudAmmo::UserCmd_Slot3()
 {
 	SlotInput(2);
 }
 
+// orig client 0x4b000
 void CHudAmmo::UserCmd_Slot4()
 {
 	SlotInput(3);
 }
 
+// orig client 0x4b020
 void CHudAmmo::UserCmd_Slot5()
 {
 	SlotInput(4);
 }
 
+// orig client 0x4b040
 void CHudAmmo::UserCmd_Slot6()
 {
 	SlotInput(5);
 }
 
+// orig client 0x4b060
 void CHudAmmo::UserCmd_Slot7()
 {
 	SlotInput(6);
 }
 
+// orig client 0x4b080
 void CHudAmmo::UserCmd_Slot8()
 {
 	SlotInput(7);
 }
 
+// orig client 0x4b0a0
 void CHudAmmo::UserCmd_Slot9()
 {
 	SlotInput(8);
 }
 
+// orig client 0x4b0c0
 void CHudAmmo::UserCmd_Slot10()
 {
 	SlotInput(9);
@@ -764,9 +801,10 @@ void CHudAmmo::UserCmd_Close()
 
 
 // Selects the next item in the weapon menu
+// orig client 0x4b130
 void CHudAmmo::UserCmd_NextWeapon()
 {
-	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL | HIDEHUD_RC2_NOWEAPONS)) != 0)
 		return;
 
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
@@ -805,9 +843,10 @@ void CHudAmmo::UserCmd_NextWeapon()
 }
 
 // Selects the previous item in the menu
+// orig client 0x4b220
 void CHudAmmo::UserCmd_PrevWeapon()
 {
-	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+	if (gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL | HIDEHUD_RC2_NOWEAPONS)) != 0)
 		return;
 
 	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
@@ -851,6 +890,7 @@ void CHudAmmo::UserCmd_PrevWeapon()
 // Drawing code
 //-------------------------------------------------------------------------
 
+// orig client 0x4b340
 bool CHudAmmo::Draw(float flTime)
 {
 	int a, x, y, r, g, b;
@@ -860,6 +900,10 @@ bool CHudAmmo::Draw(float flTime)
 		return true;
 
 	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)) != 0)
+		return true;
+
+	// RC2 (a test of its own, after SDK 2.3's)
+	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_RC2_NOWEAPONS) != 0)
 		return true;
 
 	// Draw Weapon Menu

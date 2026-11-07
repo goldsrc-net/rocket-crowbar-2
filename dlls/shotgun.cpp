@@ -35,9 +35,12 @@ extern bool g_runfuncs; // cl_dll/com_weapons.cpp
 #define WEAPON_RUNFUNCS (0 != g_iWeaponRunFuncs)
 #endif
 
+// The client's prediction (client.dll, reference/dossiers/c1.md) compiles this file as is: the
+// projectiles, their setup and the recoil are the server's alone.
+// orig client 0x42f00 (and its GetClassPtr<CShotgun>, orig client 0x447e0)
 LINK_ENTITY_TO_CLASS(weapon_shotgun, CShotgun); // orig 0xc7300
 
-void CShotgun::Spawn() // orig 0xc7370
+void CShotgun::Spawn() // orig 0xc7370, orig client 0x42f30
 {
 	Precache();
 	m_iId = WEAPON_SHOTGUN;
@@ -48,7 +51,7 @@ void CShotgun::Spawn() // orig 0xc7370
 	FallInit(); // get ready to fall
 }
 
-void CShotgun::Precache() // orig 0xc73b0
+void CShotgun::Precache() // orig 0xc73b0, orig client 0x42fa0
 {
 	PRECACHE_MODEL("models/v_shotgun.mdl");
 	PRECACHE_MODEL("models/w_shotgun.mdl");
@@ -87,12 +90,12 @@ void CShotgun::Precache() // orig 0xc73b0
 
 // The original also sends WeapPickup here (SDK 2.3's AddToPlayer); halflife-updated's
 // CBasePlayer::AddPlayerItem sends it instead.
-void CShotgun::AddToPlayer(CBasePlayer* pPlayer) // orig 0xc7500
+void CShotgun::AddToPlayer(CBasePlayer* pPlayer) // orig 0xc7500, orig client 0x43150
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-bool CShotgun::GetItemInfo(ItemInfo* p) // orig 0xc7560
+bool CShotgun::GetItemInfo(ItemInfo* p) // orig 0xc7560, orig client 0x431d0
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "buckshot";
@@ -109,19 +112,19 @@ bool CShotgun::GetItemInfo(ItemInfo* p) // orig 0xc7560
 	return true;
 }
 
-bool CShotgun::Deploy() // orig 0xc75d0
+bool CShotgun::Deploy() // orig 0xc75d0, orig client 0x43260
 {
 	m_fCrateCharging = false;
 	m_fInAttack = 0;
 	return DefaultDeploy("models/v_shotgun.mdl", "models/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun");
 }
 
-bool CShotgun::CanHolster() // orig 0xc7600
+bool CShotgun::CanHolster() // orig 0xc7600, orig client 0x432a0
 {
 	return 0 == m_fInAttack; // not while charging a crate
 }
 
-void CShotgun::Holster() // orig 0xc7610
+void CShotgun::Holster() // orig 0xc7610, orig client 0x432c0
 {
 	m_fCrateCharging = false;
 	m_fInAttack = 0;
@@ -165,8 +168,8 @@ static bool ShotgunLaunch(CShotgun* pGun, const char* szClassname, int iAmmoCost
 	pGun->m_iClip -= iAmmoCost;
 	pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
+	Vector vecSrc = pPlayer->GetGunPosition(); // the client's asks too, and drops it
 #ifndef CLIENT_DLL
-	Vector vecSrc = pPlayer->GetGunPosition();
 	if (fClampPitch)
 	{
 		Vector vecAngles = pPlayer->pev->v_angle;
@@ -225,7 +228,7 @@ static void ShotgunLaunchDone(CShotgun* pGun, unsigned short usEvent, float flRe
 }
 
 // The scientist: thrown feet first, with recoil.
-void CShotgun::PrimaryAttack() // orig 0xc7630
+void CShotgun::PrimaryAttack() // orig 0xc7630, orig client 0x432f0
 {
 	CBaseEntity* pSci;
 	if (!ShotgunLaunch(this, "shotgun_sci", RC2Pref(RC2P_Shotgun_ScientistAmmoCost).s, 0, false, &pSci))
@@ -247,7 +250,7 @@ void CShotgun::PrimaryAttack() // orig 0xc7630
 }
 
 // The HEV suit: flies off under its own engine along the aim (pev->movedir).
-void CShotgun::SecondaryAttack() // orig 0xc7a80
+void CShotgun::SecondaryAttack() // orig 0xc7a80, orig client 0x43640
 {
 	CBaseEntity* pSuit;
 	if (!ShotgunLaunch(this, "shotgun_hev", RC2Pref(RC2P_Shotgun_HEVAmmoCost).s, 8, false, &pSuit))
@@ -268,7 +271,7 @@ void CShotgun::SecondaryAttack() // orig 0xc7a80
 }
 
 // The mini forklift: aimed no steeper than 80 degrees, no recoil.
-void CShotgun::TertiaryAttack() // orig 0xc7f20
+void CShotgun::TertiaryAttack() // orig 0xc7f20, orig client 0x43990
 {
 	CBaseEntity* pForklift;
 	if (!ShotgunLaunch(this, "shotgun_forklift", RC2Pref(RC2P_Shotgun_ForkliftAmmoCost).s, 0, true, &pForklift))
@@ -287,7 +290,7 @@ void CShotgun::TertiaryAttack() // orig 0xc7f20
 
 // The crate: starts charging; WeaponFrame burns clip shells while it charges and fires it when
 // [Shotgun] CrateChargeTime is up.
-void CShotgun::QuaternaryAttack() // orig 0xc8340
+void CShotgun::QuaternaryAttack() // orig 0xc8340, orig client 0x43ce0
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !CanFireUnderwater(m_pPlayer))
 	{
@@ -323,7 +326,7 @@ void CShotgun::QuaternaryAttack() // orig 0xc8340
 	}
 }
 
-void CShotgun::FireCrate() // orig 0xc84f0
+void CShotgun::FireCrate() // orig 0xc84f0, orig client 0x43f10
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !CanFireUnderwater(m_pPlayer))
 	{
@@ -389,11 +392,11 @@ void CShotgun::FireCrate() // orig 0xc84f0
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.75;
 }
 
-int CShotgun::iItemSlot() { return 3; } // orig 0xc8970
+int CShotgun::iItemSlot() { return 3; } // orig 0xc8970, orig client 0x3bbd0
 
-bool CShotgun::UseDecrement() { return true; } // orig 0xc8980
+bool CShotgun::UseDecrement() { return true; } // orig 0xc8980, orig client 0x3bbf0
 
-void CShotgun::Reload() // orig 0xc8990
+void CShotgun::Reload() // orig 0xc8990, orig client 0x44140
 {
 	if (0 != m_fInAttack || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == RC2Pref(RC2P_Ammo_ShotgunClipSize).s)
 		return;
@@ -441,7 +444,7 @@ void CShotgun::Reload() // orig 0xc8990
 	}
 }
 
-void CShotgun::WeaponIdle() // orig 0xc8bc0
+void CShotgun::WeaponIdle() // orig 0xc8bc0, orig client 0x44400
 {
 	if (0 != m_fInAttack)
 		return; // charging a crate
@@ -499,7 +502,7 @@ void CShotgun::WeaponIdle() // orig 0xc8bc0
 
 // While a crate charges: a clip shell burns every CrateChargeTime/CrateAmmoCost seconds, the
 // other attacks wait, and the crate fires when the charge time is up.
-void CShotgun::WeaponFrame() // orig 0xc8db0
+void CShotgun::WeaponFrame() // orig 0xc8db0, orig client 0x44680
 {
 	if (!m_fCrateCharging)
 		return;
@@ -524,18 +527,18 @@ void CShotgun::WeaponFrame() // orig 0xc8db0
 
 class CShotgunAmmo : public CBasePlayerAmmo
 {
-	void Spawn() override // orig 0xc8f00
+	void Spawn() override // orig 0xc8f00, orig client 0x448e0
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_shotbox.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
-	void Precache() override // orig 0xc8f30
+	void Precache() override // orig 0xc8f30, orig client 0x44920
 	{
 		PRECACHE_MODEL("models/w_shotbox.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
-	bool AddAmmo(CBaseEntity* pOther) override // orig 0xc8f50
+	bool AddAmmo(CBaseEntity* pOther) override // orig 0xc8f50, orig client 0x44950
 	{
 		// VERIFY: RC2's GiveAmmo takes a fourth argument, 0 here (as in CRpgAmmo::AddAmmo)
 		if (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_ShellBoxGive).s, "buckshot", RC2Pref(RC2P_Ammo_MaxCarryShells).s) != -1)
@@ -546,4 +549,5 @@ class CShotgunAmmo : public CBasePlayerAmmo
 		return false;
 	}
 };
+// orig client 0x447b0 (and its GetClassPtr<CShotgunAmmo>, orig client 0x44860)
 LINK_ENTITY_TO_CLASS(ammo_buckshot, CShotgunAmmo); // orig 0xc8e90

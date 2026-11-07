@@ -20,8 +20,14 @@
 #include "player.h"
 #include "effects.h"
 #include "gamerules.h"
+#include "rc2prefs.h"
 #ifndef CLIENT_DLL
 #include "p8_needs.h"
+#include "rc2/p9_needs.h"
+#else
+#define g_fRC2PlayWeaponEvents g_runfuncs // the original's one event flag, g_runfuncs on the client
+extern bool g_runfuncs;					  // cl_dll/com_weapons.cpp
+inline int RC2PrefWord(rc2pref_e index) { return (unsigned short)RC2Pref(index).s; } // as p8_needs.h's
 #endif
 
 #define TRIPMINE_PRIMARY_VOLUME 450
@@ -1490,10 +1496,11 @@ void CTargetTripmine::BeamUpdate()
 
 #endif
 
+// orig client 0x45b10 (and its GetClassPtr<CTripmine>, orig client 0x46c70)
 LINK_ENTITY_TO_CLASS(weapon_tripmine, CTripmine); // orig 0xeca70
 
 // Rocket Crowbar 2: clears its own members, and a pickup gives rc2.ini's TripminePickupGive.
-// orig 0xecbc0
+// orig 0xecbc0, orig client 0x45b40
 void CTripmine::Spawn()
 {
 	Precache();
@@ -1513,16 +1520,9 @@ void CTripmine::Spawn()
 
 	FallInit(); // get ready to fall down
 
-#ifndef CLIENT_DLL
 	m_iDefaultAmmo = RC2PrefWord(RC2P_Ammo_TripminePickupGive);
-#else
-	m_iDefaultAmmo = TRIPMINE_DEFAULT_GIVE;
-#endif
 
-	//HACK: force the body to the first person view by default so it doesn't show up as a huge tripmine for a second.
-#ifdef CLIENT_DLL
-	pev->body = 0;
-#endif
+	// halflife-updated's client pev->body = 0 hack is not in RC2's client
 
 #ifdef CLIENT_DLL
 	if (!bIsMultiplayer())
@@ -1535,7 +1535,7 @@ void CTripmine::Spawn()
 }
 
 // Rocket Crowbar 2: and the three new mines
-// orig 0xeccb0
+// orig 0xeccb0, orig client 0x45c70
 void CTripmine::Precache()
 {
 	PRECACHE_MODEL("models/v_tripmine.mdl");
@@ -1549,16 +1549,12 @@ void CTripmine::Precache()
 }
 
 // Rocket Crowbar 2: the carry limit from rc2.ini, and weight 0
-// orig 0xecd10
+// orig 0xecd10, orig client 0x45cf0
 bool CTripmine::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "Trip Mine";
-#ifndef CLIENT_DLL
 	p->iMaxAmmo1 = RC2PrefWord(RC2P_Ammo_MaxCarryTripmines);
-#else
-	p->iMaxAmmo1 = TRIPMINE_MAX_CARRY;
-#endif
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -1572,7 +1568,7 @@ bool CTripmine::GetItemInfo(ItemInfo* p)
 }
 
 // Rocket Crowbar 2: notes the time (no pev->body = 0 any more)
-// orig 0xecd80
+// orig 0xecd80, orig client 0x45d80
 bool CTripmine::Deploy()
 {
 	m_flNextMinesOutSend = gpGlobals->time;
@@ -1581,7 +1577,7 @@ bool CTripmine::Deploy()
 
 
 // unchanged from SDK 2.3
-// orig 0xecdb0
+// orig 0xecdb0, orig client 0x45dc0
 void CTripmine::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
@@ -1598,11 +1594,61 @@ void CTripmine::Holster()
 	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "common/null.wav", 1.0, ATTN_NORM);
 }
 
-// p8: CTripmine's attacks, its weapon-sync pair and the rest of its RC2 code (from 0xece60
-// onward) are work package p9's; this and WeaponIdle are still halflife-updated's.
-void CTripmine::PrimaryAttack()
+// Rocket Crowbar 2: the tripmine weapon's own code, the run of RC2's functions right after SDK
+// 2.3's (rc2.dll 0xece60-0xee0a0, client.dll 0x45f30-0x46bd0), moved here from
+// dlls/rc2/tripmine_weapon.cpp (c1) because the client's prediction compiles it too
+// (reference/dossiers/c1.md): there it spends and times the same, but sticks, finds and counts
+// nothing. Four mines, one per attack, each with its [Tripmine] ammo cost, limit and refire keys.
+// what tells the four mines apart: everything else in the original's four copies is the same
+struct tripmineattack_t
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	const char* pszClassname;
+	rc2pref_e iAmmoCost;	   // short: ammo used per mine
+	rc2pref_e iMaxOut;		   // char: how many may be out at once (one more is let through)
+	rc2pref_e iDeployDistance; // float: how far ahead the mine can be stuck on
+	rc2pref_e iRefire[4];	   // float: delays this attack puts on the primary..quaternary attacks
+};
+
+static const tripmineattack_t kMineAttacks[4] = {
+	{"monster_tripmine", RC2P_Tripmine_PrimaryAmmoCost, RC2P_Tripmine_PrimaryMaxOut, RC2P_Tripmine_PrimaryDeployDistance,
+		{RC2P_Tripmine_PrimaryRefirePrimary, RC2P_Tripmine_PrimaryRefireSecondary, RC2P_Tripmine_PrimaryRefireTertiary, RC2P_Tripmine_PrimaryRefireQuaternary}},
+	{"bouncy_tripmine", RC2P_Tripmine_BouncyAmmoCost, RC2P_Tripmine_BouncyMaxOut, RC2P_Tripmine_BouncyDeployDistance,
+		{RC2P_Tripmine_SecondaryRefirePrimary, RC2P_Tripmine_SecondaryRefireSecondary, RC2P_Tripmine_SecondaryRefireTertiary, RC2P_Tripmine_SecondaryRefireQuaternary}},
+	{"punch_tripmine", RC2P_Tripmine_PunchAmmoCost, RC2P_Tripmine_PunchMaxOut, RC2P_Tripmine_PunchDeployDistance,
+		{RC2P_Tripmine_TertiaryRefirePrimary, RC2P_Tripmine_TertiaryRefireSecondary, RC2P_Tripmine_TertiaryRefireTertiary, RC2P_Tripmine_TertiaryRefireQuaternary}},
+	{"target_tripmine", RC2P_Tripmine_TargetAmmoCost, RC2P_Tripmine_TargetMaxOut, RC2P_Tripmine_TargetDeployDistance,
+		{RC2P_Tripmine_QuaternaryRefirePrimary, RC2P_Tripmine_QuaternaryRefireSecondary, RC2P_Tripmine_QuaternaryRefireTertiary, RC2P_Tripmine_QuaternaryRefireQuaternary}},
+};
+
+// how many mines of this kind the player who has this weapon has out
+int CTripmine::CountMines(const char* szClassname) // orig 0xece60, orig client 0x45f30 (0 on the client)
+{
+	int iCount = 0;
+#ifndef CLIENT_DLL
+	CBaseEntity* pMine = NULL;
+
+	while ((pMine = UTIL_FindEntityByClassname(pMine, szClassname)) != NULL)
+	{
+		CBaseEntity* pPlacer = TripmineGrenade_GetPlacer(pMine);
+		if (pPlacer && pPlacer->edict() == m_pPlayer->edict())
+			iCount++;
+	}
+#endif
+
+	return iCount;
+}
+
+// the body of the four attacks (the original has it four times over, each with its keys)
+void CTripmine::MineAttack(int iMine)
+{
+	const tripmineattack_t& attack = kMineAttacks[iMine];
+	const int iAmmoCost = (unsigned short)RC2Pref(attack.iAmmoCost).s;
+
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < iAmmoCost)
+		return;
+
+	// Original bug kept: "greater than", so one mine more than the limit goes out
+	if (m_iMinesOut[iMine] > (unsigned char)RC2Pref(attack.iMaxOut).c)
 		return;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -1611,27 +1657,26 @@ void CTripmine::PrimaryAttack()
 
 	TraceResult tr;
 
-	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 128, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
+	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * RC2Pref(attack.iDeployDistance).f, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
 
-	int flags;
-#ifdef CLIENT_WEAPONS
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
-#endif
+	if (g_fRC2PlayWeaponEvents)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usTripFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usTripFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-
+#ifndef CLIENT_DLL
 	if (tr.flFraction < 1.0)
 	{
 		CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
-		if (pEntity && (pEntity->pev->flags & FL_CONVEYOR) == 0)
+		// Rocket Crowbar 2: a shielded player's shield can stop the mine going on
+		if (pEntity && (pEntity->pev->flags & FL_CONVEYOR) == 0 &&
+			ShieldDeflect(pEntity, RC2Pref(RC2P_Tripmine_GlobalDeployShieldDamage).f, 1.0f, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 4) >= RC2Pref(RC2P_Tripmine_GlobalDeployShieldDamage).f)
 		{
 			Vector angles = UTIL_VecToAngles(tr.vecPlaneNormal);
 
-			CBaseEntity* pEnt = CBaseEntity::Create("monster_tripmine", tr.vecEndPos + tr.vecPlaneNormal * 8, angles, m_pPlayer->edict());
+			CBaseEntity::Create(attack.pszClassname, tr.vecEndPos + tr.vecPlaneNormal * 8, angles, m_pPlayer->edict());
 
-			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+			m_flNextMinesOutSend = gpGlobals->time; // send the new count next frame
+
+			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= iAmmoCost;
 
 			// player "shoot" animation
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -1643,24 +1688,39 @@ void CTripmine::PrimaryAttack()
 				return;
 			}
 		}
-		else
-		{
-			// ALERT( at_console, "no deploy\n" );
-		}
 	}
-	else
-	{
-	}
+#endif
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.3);
+	UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[0]).f);
+	UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[1]).f);
+	UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[2]).f);
+	UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[3]).f);
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 }
 
-void CTripmine::WeaponIdle()
+void CTripmine::PrimaryAttack() // orig 0xecee0, orig client 0x45f50
 {
-	//If we're here then we're in a player's inventory, and need to use this body
-	pev->body = 0;
+	MineAttack(0);
+}
 
+void CTripmine::SecondaryAttack() // orig 0xed2e0, orig client 0x46220
+{
+	MineAttack(1);
+}
+
+void CTripmine::TertiaryAttack() // orig 0xed6e0, orig client 0x464f0
+{
+	MineAttack(2);
+}
+
+void CTripmine::QuaternaryAttack() // orig 0xedae0, orig client 0x467c0
+{
+	MineAttack(3);
+}
+
+// SDK 2.3's (halflife-updated's pev->body = 0 at the top is in neither library)
+void CTripmine::WeaponIdle() // orig 0xedee0, orig client 0x46a90
+{
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
 
@@ -1693,4 +1753,35 @@ void CTripmine::WeaponIdle()
 	}
 
 	SendWeaponAnim(iAnim);
+}
+
+// counts the mines out and, twice a second, tells the client
+void CTripmine::WeaponFrame() // orig 0xedfc0, orig client 0x46bb0 (empty on the client)
+{
+#ifndef CLIENT_DLL
+	for (int i = 0; i < 4; i++)
+		m_iMinesOut[i] = CountMines(kMineAttacks[i].pszClassname);
+
+	if (m_flNextMinesOutSend < gpGlobals->time)
+	{
+		m_flNextMinesOutSend = gpGlobals->time + 0.5;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgWeaponSync, NULL, m_pPlayer->edict());
+		WRITE_BYTE(WEAPON_TRIPMINE);
+		WRITE_BYTE(m_iMinesOut[0]);
+		WRITE_BYTE(m_iMinesOut[1]);
+		WRITE_BYTE(m_iMinesOut[2]);
+		WRITE_BYTE(m_iMinesOut[3]);
+		MESSAGE_END();
+	}
+#endif
+}
+
+// reads the counts back (only the client's readers read anything)
+void CTripmine::ReadWeaponState(void* pData, int iSize) // orig 0xee0a0, orig client 0x46bd0
+{
+	m_iMinesOut[0] = RC2ReadStateByte(&pData, &iSize);
+	m_iMinesOut[1] = RC2ReadStateByte(&pData, &iSize);
+	m_iMinesOut[2] = RC2ReadStateByte(&pData, &iSize);
+	m_iMinesOut[3] = RC2ReadStateByte(&pData, &iSize);
 }

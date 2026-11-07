@@ -133,6 +133,10 @@ private:
 	WEAPON* m_pWeapon;
 	int m_HUD_bucket0;
 	int m_HUD_selection;
+
+	// c1 needs:
+public:
+	void RestoreCrosshair(); // client 0x4a900, in ammo.cpp; name ours
 };
 
 //

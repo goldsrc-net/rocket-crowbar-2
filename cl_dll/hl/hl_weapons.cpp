@@ -29,8 +29,18 @@
 #include "cl_dll.h"
 #include "../com_weapons.h"
 #include "../demo.h"
+#include "hud.h"
 
 extern int g_iUser1;
+
+// Rocket Crowbar 2: the HUD's copies of what the server tells the client about players (names
+// ours; c2's, see the TEMP STUBs at the bottom)
+extern float g_flRC2LocalEnergy;					// orig client .data 0x1a8004: the local player's energy
+extern int g_iRC2LocalFrozen;						// orig client .data 0x1f69f8: the local player is frozen
+int RC2_GetPlayerAbilities(int iPlayer);			// orig client 0x4f4c0: player iPlayer's ability bits, 0 out of 1..32
+unsigned char* RC2_GetPlayerRiding(int iPlayer);	// orig client 0xaf980: player iPlayer's riding byte
+static void RC2_ApplyWeaponSync(CBasePlayerWeapon* pWeapon);
+bool CanAttack(float attack_time, float curtime, bool isPredicted); // weapons_shared.cpp
 
 // Pool of client side entities/entvars_t
 static entvars_t ev[MAX_WEAPONS + 1];
@@ -88,6 +98,7 @@ void AlertMessage(ALERT_TYPE atype, const char* szFmt, ...)
 
 //Returns if it's multiplayer.
 //Mostly used by the client side weapons.
+// orig client 0x39480
 bool bIsMultiplayer()
 {
 	return gEngfuncs.GetMaxClients() != 1;
@@ -106,6 +117,8 @@ Links the raw entity to an entvars_s holder.  If a player is passed in as the ow
 we set up the m_pPlayer field.
 =====================
 */
+// orig client 0x394d0. RC2's is SDK 2.3's; halflife-updated's ItemInfoArray and ammo registry
+// filling are kept (RC2's ItemPostFrame reads ItemInfoArray, which nothing else fills here).
 void HUD_PrepEntity(CBaseEntity* pEntity, CBasePlayer* pWeaponOwner)
 {
 	memset(&ev[num_ents], 0, sizeof(entvars_t));
@@ -160,6 +173,7 @@ CBasePlayerWeapon:: DefaultDeploy
 
 =====================
 */
+// orig client 0x39730 (as SDK 2.3)
 bool CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, int body)
 {
 	if (!CanDeploy())
@@ -181,6 +195,7 @@ CBasePlayerWeapon:: PlayEmptySound
 
 =====================
 */
+// orig client 0x397c0 (as SDK 2.3)
 bool CBasePlayerWeapon::PlayEmptySound()
 {
 	if (m_iPlayEmptySound)
@@ -199,6 +214,7 @@ CBasePlayerWeapon::Holster
 Put away weapon
 =====================
 */
+// orig client 0x39820 (as SDK 2.3)
 void CBasePlayerWeapon::Holster()
 {
 	m_fInReload = false; // cancel any reload in progress.
@@ -213,6 +229,7 @@ CBasePlayerWeapon::SendWeaponAnim
 Animate weapon model
 =====================
 */
+// orig client 0x39850 (as SDK 2.3; its skiplocal argument is halflife-updated's to drop)
 void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int body)
 {
 	m_pPlayer->pev->weaponanim = iAnim;
@@ -295,6 +312,7 @@ CBasePlayer::Killed
 
 =====================
 */
+// orig client 0x39e90 (as SDK 2.3)
 void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 {
 	// Holster weapon immediately, to allow it to cleanup
@@ -310,6 +328,7 @@ CBasePlayer::Spawn
 
 =====================
 */
+// orig client 0x39ec0 (as SDK 2.3)
 void CBasePlayer::Spawn()
 {
 	if (m_pActiveItem)
@@ -412,6 +431,7 @@ HUD_InitClientWeapons
 Set up weapons, player and functions needed to run weapons code client-side.
 =====================
 */
+// orig client 0x3a2a0 (as SDK 2.3)
 void HUD_InitClientWeapons()
 {
 	static bool initialized = false;
@@ -509,6 +529,12 @@ HUD_WeaponsPostThink
 Run Weapon firing code on client
 =====================
 */
+// orig client 0x3a530. RC2's is SDK 2.3's with: the local player's energy and ability bits and
+// the player it rides, from the HUD's copies; the tertiary and quaternary attack timers carried in
+// weapon_data_t's m_flPumpTime and fuser4 (as the server's GetWeaponData sends them); a WeaponSync
+// message applied to the weapon before it runs; no spectator (g_iUser1) check; no RPG laser spot
+// state. halflife-updated's clock, frametime, v_angle and origin copies are kept; its per-weapon
+// SetWeaponData/GetWeaponData/DecrementTimers hooks are left out, as RC2's server leaves them out.
 void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed)
 {
 	int i;
@@ -613,6 +639,18 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	if (!pWeapon)
 		return;
 
+	// Rocket Crowbar 2: the local player's energy and attribute ability bits. VERIFY: read
+	// literally (pEventAPI slot 4, EV_IsLocal, on number - 1); what sets the HUD's copies is c2's
+	if (!gEngfuncs.pEventAPI->EV_IsLocal(from->playerstate.number - 1))
+	{
+		player.m_flEnergy = 100;
+	}
+	else
+	{
+		player.m_flEnergy = g_flRC2LocalEnergy;
+		player.m_iAbilities = RC2_GetPlayerAbilities(from->playerstate.number);
+	}
+
 	for (i = 0; i < MAX_WEAPONS; i++)
 	{
 		pCurrent = g_pWpns[i];
@@ -629,6 +667,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pCurrent->m_iClip = pfrom->m_iClip;
 		pCurrent->m_flNextPrimaryAttack = pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
+		pCurrent->m_flNextTertiaryAttack = pfrom->m_flPumpTime;
+		pCurrent->m_flNextQuaternaryAttack = pfrom->fuser4;
 		pCurrent->m_flTimeWeaponIdle = pfrom->m_flTimeWeaponIdle;
 		pCurrent->pev->fuser1 = pfrom->fuser1;
 		pCurrent->m_flStartThrow = pfrom->fuser2;
@@ -641,8 +681,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pCurrent->m_iPrimaryAmmoType = (int)from->client.vuser4[0];
 		player.m_rgAmmo[pCurrent->m_iPrimaryAmmoType] = (int)from->client.vuser4[1];
 		player.m_rgAmmo[pCurrent->m_iSecondaryAmmoType] = (int)from->client.vuser4[2];
-
-		pCurrent->SetWeaponData(*pfrom);
 	}
 
 	// For random weapon events, use this seed to seed random # generator
@@ -671,7 +709,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.pev->deadflag = from->client.deadflag;
 	player.pev->waterlevel = from->client.waterlevel;
 	player.pev->maxspeed = from->client.maxspeed;
-	player.m_iFOV = from->client.fov;
+	player.pev->fov = from->client.fov; // RC2 (as SDK 2.3): pev->fov, which the crossbow's zoom reads
 	player.pev->weaponanim = from->client.weaponanim;
 	player.pev->viewmodel = from->client.viewmodel;
 	player.m_flNextAttack = from->client.m_flNextAttack;
@@ -688,6 +726,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.ammo_hornets = (int)from->client.vuser2[0];
 	player.ammo_rockets = (int)from->client.ammo_rockets;
 
+	// Rocket Crowbar 2: the player this one rides (the HUD's per-player byte, its top bit dropped).
+	// VERIFY: the byte table's meaning (orig client .data 0x20d5b8, written by a c2/c3 message handler)
+	player.m_iRidingIndex = *RC2_GetPlayerRiding(from->playerstate.number) & 0x7f;
 
 	// Point to current weapon object
 	if (WEAPON_NONE != from->client.m_iId)
@@ -695,17 +736,13 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		player.m_pActiveItem = g_pWpns[from->client.m_iId];
 	}
 
-	if (player.m_pActiveItem->m_iId == WEAPON_RPG)
-	{
-		((CRpg*)player.m_pActiveItem)->m_fSpotActive = static_cast<bool>(from->client.vuser2[1]);
-		((CRpg*)player.m_pActiveItem)->m_cActiveRockets = (int)from->client.vuser2[2];
-	}
-
 	// Don't go firing anything if we have died or are spectating
 	// Or if we don't have a weapon model deployed
 	if ((player.pev->deadflag != (DEAD_DISCARDBODY + 1)) &&
-		!CL_IsDead() && 0 != player.pev->viewmodel && 0 == g_iUser1)
+		!CL_IsDead() && 0 != player.pev->viewmodel)
 	{
+		RC2_ApplyWeaponSync(pWeapon);
+
 		if (player.m_flNextAttack <= 0)
 		{
 			pWeapon->ItemPostFrame();
@@ -745,7 +782,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	// Copy in results of prediction code
 	to->client.viewmodel = player.pev->viewmodel;
-	to->client.fov = player.m_iFOV;
+	to->client.fov = player.pev->fov;
 	to->client.weaponanim = player.pev->weaponanim;
 	to->client.m_flNextAttack = player.m_flNextAttack;
 	to->client.fuser2 = player.m_flNextAmmoBurn;
@@ -763,21 +800,21 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	to->client.vuser2[0] = player.ammo_hornets;
 	to->client.ammo_rockets = player.ammo_rockets;
 
-	if (player.m_pActiveItem->m_iId == WEAPON_RPG)
-	{
-		to->client.vuser2[1] = static_cast<float>(((CRpg*)player.m_pActiveItem)->m_fSpotActive);
-		to->client.vuser2[2] = ((CRpg*)player.m_pActiveItem)->m_cActiveRockets;
-	}
-
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
 	if (g_runfuncs && (HUD_GetWeaponAnim() != to->client.weaponanim))
 	{
-		//Make sure the 357 has the right body
-		g_Python.pev->body = bIsMultiplayer() ? 1 : 0;
+		// RC2 (as SDK 2.3): body 2, 0 for the tripmine, 1 for the python in multiplayer
+		int body = 2;
+
+		if (pWeapon == &g_Tripmine)
+			body = 0;
+
+		if (pWeapon == &g_Python && bIsMultiplayer())
+			body = 1;
 
 		// Force a fixed anim down to viewmodel
-		HUD_SendWeaponAnim(to->client.weaponanim, pWeapon->pev->body, true);
+		HUD_SendWeaponAnim(to->client.weaponanim, body, true);
 	}
 
 	for (i = 0; i < MAX_WEAPONS; i++)
@@ -798,6 +835,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pto->m_iClip = pCurrent->m_iClip;
 		pto->m_flNextPrimaryAttack = pCurrent->m_flNextPrimaryAttack;
 		pto->m_flNextSecondaryAttack = pCurrent->m_flNextSecondaryAttack;
+		pto->m_flPumpTime = pCurrent->m_flNextTertiaryAttack;
+		pto->fuser4 = pCurrent->m_flNextQuaternaryAttack;
 		pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
 		pto->fuser1 = pCurrent->pev->fuser1;
 		pto->fuser2 = pCurrent->m_flStartThrow;
@@ -811,6 +850,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pto->m_fNextAimBonus -= cmd->msec / 1000.0;
 		pto->m_flNextPrimaryAttack -= cmd->msec / 1000.0;
 		pto->m_flNextSecondaryAttack -= cmd->msec / 1000.0;
+		pto->m_flPumpTime -= cmd->msec / 1000.0;
+		pto->fuser4 -= cmd->msec / 1000.0;
 		pto->m_flTimeWeaponIdle -= cmd->msec / 1000.0;
 		pto->fuser1 -= cmd->msec / 1000.0;
 
@@ -818,10 +859,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		to->client.vuser4[0] = pCurrent->m_iPrimaryAmmoType;
 		to->client.vuser4[1] = player.m_rgAmmo[pCurrent->m_iPrimaryAmmoType];
 		to->client.vuser4[2] = player.m_rgAmmo[pCurrent->m_iSecondaryAmmoType];
-
-		pCurrent->DecrementTimers();
-
-		pCurrent->GetWeaponData(*pto);
 
 		/*		if ( pto->m_flPumpTime != -9999 )
 		{
@@ -843,6 +880,16 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		if (pto->m_flNextSecondaryAttack < -0.001)
 		{
 			pto->m_flNextSecondaryAttack = -0.001;
+		}
+
+		if (pto->m_flPumpTime < -0.001)
+		{
+			pto->m_flPumpTime = -0.001;
+		}
+
+		if (pto->fuser4 < -0.001)
+		{
+			pto->fuser4 = -0.001;
 		}
 
 		if (pto->m_flTimeWeaponIdle < -0.001)
@@ -898,6 +945,7 @@ runfuncs is 1 if this is the first time we've predicted this command.  If so, so
 be ignored
 =====================
 */
+// orig client 0x3ba90 (as SDK 2.3; halflife-updated's HUD_InitClientWeapons call and weapon id kept)
 void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
 	//	RecClPostRunCmd(from, to, cmd, runfuncs, time, random_seed);
@@ -929,4 +977,236 @@ void DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* 
 	// All games can use FOV state
 	g_lastFOV = to->client.fov;
 	g_CurrentWeaponId = to->client.m_iId;
+}
+
+/*
+=====================
+CBasePlayerWeapon::ItemPostFrame
+
+The client's (orig client 0x39a40). SDK 2.3's client ItemPostFrame with RC2's two extra attacks
+(Quaternary on +alt1, Tertiary on +cancel, before the secondary and the primary, each on its own
+timer), WeaponFrame first every frame, a frozen player's attack buttons dropped, attacks held while
+the HUD's hide bit 0x10 (shrunk or transformed) is set, and the auto-reload waiting for all four timers. A finished reload
+fills the clip from the ammo (halflife-updated's fix of SDK 2.3's "m_iClip += 10"); the timers are
+checked with halflife-updated's CanAttack (RC2's compares them with 0 directly).
+=====================
+*/
+void CBasePlayerWeapon::ItemPostFrame()
+{
+	if (0 != g_iRC2LocalFrozen)
+	{
+		m_pPlayer->pev->button &= ~(IN_ATTACK | IN_ATTACK2 | IN_CANCEL | IN_ALT1);
+		WeaponFrame();
+		return;
+	}
+
+	WeaponFrame();
+
+	if ((m_fInReload) && (m_pPlayer->m_flNextAttack <= 0.0))
+	{
+		int j = V_min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+		m_iClip += j;
+		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;
+		m_fInReload = false;
+	}
+
+	// HideWeapon bit 0x10, which RC2's server sets while the player is shrunk or transformed
+	// (ammo.cpp's HIDEHUD_RC2_NOWEAPONS): nothing fires or idles
+	if ((gHUD.m_iHideHUDDisplay & 0x10) != 0)
+		return;
+
+	if ((m_pPlayer->pev->button & IN_ALT1) != 0 && CanAttack(m_flNextQuaternaryAttack, gpGlobals->time, UseDecrement()))
+	{
+		QuaternaryAttack();
+		m_pPlayer->pev->button &= ~IN_ALT1;
+	}
+	else if ((m_pPlayer->pev->button & IN_CANCEL) != 0 && CanAttack(m_flNextTertiaryAttack, gpGlobals->time, UseDecrement()))
+	{
+		TertiaryAttack();
+		m_pPlayer->pev->button &= ~IN_CANCEL;
+	}
+	else if ((m_pPlayer->pev->button & IN_ATTACK2) != 0 && CanAttack(m_flNextSecondaryAttack, gpGlobals->time, UseDecrement()))
+	{
+		if (pszAmmo2() && 0 == m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()])
+		{
+			m_fFireOnEmpty = true;
+		}
+
+		SecondaryAttack();
+		m_pPlayer->pev->button &= ~IN_ATTACK2;
+	}
+	else if ((m_pPlayer->pev->button & IN_ATTACK) != 0 && CanAttack(m_flNextPrimaryAttack, gpGlobals->time, UseDecrement()))
+	{
+		if ((m_iClip == 0 && pszAmmo1()) || (iMaxClip() == -1 && 0 == m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]))
+		{
+			m_fFireOnEmpty = true;
+		}
+
+		PrimaryAttack();
+	}
+	else if ((m_pPlayer->pev->button & IN_RELOAD) != 0 && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
+	{
+		// reload when reload is pressed, or if no buttons are down and weapon is empty.
+		Reload();
+	}
+	else if ((m_pPlayer->pev->button & (IN_ATTACK | IN_ATTACK2 | IN_CANCEL | IN_ALT1)) == 0)
+	{
+		// no fire buttons down
+		m_fFireOnEmpty = false;
+
+		// weapon is useable. Reload if empty and every attack has waited as long as it has to
+		if (m_iClip == 0 && (iFlags() & ITEM_FLAG_NOAUTORELOAD) == 0 && m_flNextPrimaryAttack < 0.0 && m_flNextSecondaryAttack < 0.0 && m_flNextTertiaryAttack < 0.0 && m_flNextQuaternaryAttack < 0.0)
+		{
+			Reload();
+			return;
+		}
+
+		WeaponIdle();
+		return;
+	}
+
+	// catch all
+	if (ShouldWeaponIdle())
+	{
+		WeaponIdle();
+	}
+}
+
+// orig client 0x39f60 UTIL_ExtendTime: util.h's inline, which the client has out of line here.
+
+// Rocket Crowbar 2's client copies of the server's direction helpers (util.cpp there), which the
+// predicted weapons call. Bodies as the server's.
+// orig client 0x3b400
+int UTIL_PackNormal(Vector vecDir)
+{
+	const Vector n = vecDir.Normalize();
+
+	int x = (int)(fabs(n.x) * 511.0);
+	if (n.x < 0)
+		x |= 0x200;
+	int y = (int)(fabs(n.y) * 511.0);
+	if (n.y < 0)
+		y |= 0x200;
+	int z = (int)(fabs(n.z) * 511.0);
+	if (n.z < 0)
+		z |= 0x200;
+
+	return z << 20 | x | y << 10;
+}
+
+// orig client 0x3b560
+Vector UTIL_ReflectVector(Vector vecDir, Vector vecNormal)
+{
+	const float flDot = -DotProduct(vecDir, vecNormal);
+	return vecNormal * 2 * flDot + vecDir;
+}
+
+// orig client 0x3b630
+Vector UTIL_RandomSpreadDir(Vector vecDir, Vector vecRight, Vector vecUp, float flSpread)
+{
+	float x, y;
+	do
+	{
+		x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+		y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+	} while (x * x + y * y > 1);
+
+	return (vecDir + vecRight * (x * flSpread) + vecUp * (y * flSpread)).Normalize();
+}
+
+// Rocket Crowbar 2: the WeaponSync message (the server's CBasePlayerWeapon::WeaponFrame sends it,
+// the weapon id then its state), kept until the weapon it names runs. Names ours.
+static unsigned char g_rgucRC2WeaponSync[256]; // orig client .data 0x17c44c
+static int g_iRC2WeaponSyncSize = 0;		   // orig client .data 0x1843f8
+
+// orig client 0x3b880: hand a pending WeaponSync to its weapon's ReadWeaponState
+static void RC2_ApplyWeaponSync(CBasePlayerWeapon* pWeapon)
+{
+	if (!pWeapon || g_iRC2WeaponSyncSize <= 1)
+		return;
+
+	ItemInfo info;
+	pWeapon->GetItemInfo(&info);
+
+	if (g_rgucRC2WeaponSync[0] == info.iId)
+	{
+		pWeapon->ReadWeaponState(&g_rgucRC2WeaponSync[1], g_iRC2WeaponSyncSize - 1);
+		g_iRC2WeaponSyncSize = 0;
+	}
+}
+
+// orig client 0x3b900. Original bug, kept: no bound on iSize (the server sends a few bytes).
+// Its HOOK_MESSAGE is in the HUD's init (orig client 0xa148c, c2's).
+int __MsgFunc_WeaponSync(const char* pszName, int iSize, void* pbuf)
+{
+	memcpy(g_rgucRC2WeaponSync, pbuf, iSize);
+	g_iRC2WeaponSyncSize = iSize;
+	return 1;
+}
+
+// The client's readers for ReadWeaponState (weapons.h; the server's return 0). Original oddity,
+// kept: each checks *piSize but never lowers it, so a reader can run past the message.
+// orig client 0x3b940
+unsigned char RC2ReadStateByte(void** ppData, int* piSize)
+{
+	if (*piSize < 1)
+		return 0;
+	unsigned char* p = (unsigned char*)*ppData;
+	*ppData = p + 1;
+	return p[0];
+}
+
+// orig client 0x3b970
+short RC2ReadStateShort(void** ppData, int* piSize)
+{
+	if (*piSize < 2)
+		return 0;
+	unsigned char* p = (unsigned char*)*ppData;
+	*ppData = p + 2;
+	return (short)(p[0] + (p[1] << 8));
+}
+
+// orig client 0x3b9b0
+int RC2ReadStateInt(void** ppData, int* piSize)
+{
+	if (*piSize < 4)
+		return 0;
+	unsigned char* p = (unsigned char*)*ppData;
+	*ppData = p + 4;
+	return p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+}
+
+// orig client 0x3ba20
+float RC2ReadStateFloat(void** ppData, int* piSize)
+{
+	if ((unsigned int)*piSize < 4)
+		return 0.0f;
+	float* p = (float*)*ppData;
+	*ppData = p + 1;
+	return *p;
+}
+
+// orig client 0x3ba60: attribute flag 0x200 (the player may fire under water). The server's reads
+// it by entity index (player.cpp, orig 0x95860); the client's from the predicted player.
+bool PlayerHasAttrFlag200(CBaseEntity* pPlayer)
+{
+	return ((((CBasePlayer*)pPlayer)->m_iAbilities >> 9) & 1) != 0;
+}
+
+// Inline virtuals the original emitted as COMDATs here (bodies stock, from the headers):
+//   orig client 0x3b190 CBaseMonster::Stop
+//   orig client 0x3b360 CBaseMonster's RC2 slot 147 default (basemonster.h)
+//   orig client 0x3bcf0 CTripmine::iItemSlot (5)
+//   orig client 0x3be00 CTripmine::UseDecrement (true)
+//   orig client 0x3be60 CBasePlayer::BodyTarget
+
+// TEMP STUB (c1): real ones belong to the client's HUD and message handlers (c2's): the
+// addresses above. Zero until those are reconstructed.
+float g_flRC2LocalEnergy = 0;
+int g_iRC2LocalFrozen = 0;
+int RC2_GetPlayerAbilities(int iPlayer) { return 0; }
+unsigned char* RC2_GetPlayerRiding(int iPlayer)
+{
+	static unsigned char ucNone = 0;
+	return &ucNone;
 }

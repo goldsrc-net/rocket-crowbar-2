@@ -29,6 +29,7 @@ unsigned char HashPlayerID(char const playerID[16])
 
 
 
+// orig client 0x46d20
 CVoiceBanMgr::CVoiceBanMgr()
 {
 	Clear();
@@ -97,6 +98,7 @@ void CVoiceBanMgr::Term()
 }
 
 
+// orig client 0x46ed0
 void CVoiceBanMgr::SaveState(char const* pGameDir)
 {
 	// Save the file out.

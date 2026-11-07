@@ -45,6 +45,7 @@ void AddAmmoNameToAmmoRegistry(const char* szAmmoname, const char* weaponName)
 	ammoType.WeaponName = weaponName;
 }
 
+// orig client 0x39690 (the client's, as SDK 2.3)
 bool CBasePlayerWeapon::CanDeploy()
 {
 	bool bHasAmmo = false;
@@ -75,7 +76,7 @@ bool CBasePlayerWeapon::CanDeploy()
 	return true;
 }
 
-// orig 0xfb290 (as SDK 2.3)
+// orig 0xfb290 (as SDK 2.3), orig client 0x395c0 (the client's, as SDK 2.3)
 bool CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay, int body)
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -97,7 +98,7 @@ bool CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay, in
 	return true;
 }
 
-// orig 0xfb380 (as SDK 2.3; its slot is named RC2VW1 in names-rc2-slots.tsv)
+// orig 0xfb380 (as SDK 2.3; its slot is named RC2VW1 in names-rc2-slots.tsv), orig client 0x39800
 void CBasePlayerWeapon::ResetEmptySound()
 {
 	m_iPlayEmptySound = true;
@@ -123,6 +124,8 @@ bool CanAttack(float attack_time, float curtime, bool isPredicted)
 // it is set (orig .data 0x181434, starts set)
 bool g_fRC2PlayWeaponEvents = true;
 
+// The client's ItemPostFrame is its own, in cl_dll/hl/hl_weapons.cpp (as SDK 2.3's was).
+#ifndef CLIENT_DLL
 // orig 0xfa790. RC2: two more attacks, Tertiary on +cancel and Quaternary on +alt1, checked before
 // the secondary and the primary, each with its own timer; WeaponFrame runs first every frame; a
 // frozen player's attack buttons are dropped (WeaponFrame still runs).
@@ -233,7 +236,10 @@ void CBasePlayerWeapon::ItemPostFrame()
 		WeaponIdle();
 	}
 }
+#endif // !CLIENT_DLL
 
+// orig client 0x39e10 (the client's: halflife-updated's ResetAutoaim, UpdateItemInfo and forced
+// animations are kept; RC2's swaps and deploys the same way)
 void CBasePlayer::SelectLastItem()
 {
 	if (!m_pLastItem)

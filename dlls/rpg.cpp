@@ -24,22 +24,18 @@
 #include "rc2prefs.h"
 #include "rc2/p7_extern.h"
 #include <algorithm>
-#ifndef CLIENT_DLL
+// The client reads its copy of rc2.ini as the server does (client.dll, reference/dossiers/c1.md).
 #define RC2_RPG_PICKUP_GIVE RC2Pref(RC2P_Ammo_RPGPickupGive).s
 #define RC2_RPG_MAX_CARRY RC2Pref(RC2P_Ammo_MaxCarryRPG).s
 #define RC2_RPG_CLIP_SIZE RC2Pref(RC2P_Ammo_RPGClipSize).s
-#else
-// the client has no rc2.ini: rc2.ini's defaults (reference/prefs-rc2.tsv). VERIFY against client.dll
-#define RC2_RPG_PICKUP_GIVE 2
-#define RC2_RPG_MAX_CARRY 10
-#define RC2_RPG_CLIP_SIZE 1
-#endif
 
 // Rocket Crowbar 2: RC2's rpg file starts here (0xb9420-0xb952c are the p6 package's; CRpg's
 // 0xb9530-0xb9770 are in no package yet). The inline CRpg methods in weapons.h are compiled here
 // in the original: iItemSlot returns 4 (orig 0xb9490), ShouldWeaponIdle and UseDecrement return
 // true (orig 0xb94a0, orig 0xb94b0), all as SDK 2.3's.
 // VERIFY: the original's factory also calls RC 1.9's AddToPrecachedList("weapon_rpg") (0xf5a20); the shared macro doesn't yet
+// orig client 0x40cb0 (and its GetClassPtr<CRpg>, orig client 0x41f60); the inline iItemSlot,
+// ShouldWeaponIdle and UseDecrement are orig client 0x3bc10, orig client 0x3bc30 and orig client 0x3bc50
 LINK_ENTITY_TO_CLASS(weapon_rpg, CRpg); // orig 0xb9420
 
 #ifndef CLIENT_DLL
@@ -313,9 +309,8 @@ void CRpgRocket::FollowThink()
 
 
 
-void CRpg::Reload() // orig 0xb94c0
+void CRpg::Reload() // orig 0xb94c0, orig client 0x40ce0
 {
-#ifndef CLIENT_DLL
 	// Rocket Crowbar 2: the clip size and reload time come from rc2.ini, and none of SDK 2.3's
 	// laser-spot handling is left (no next-attack delay, no suspending the spot, no waiting
 	// for rockets in flight)
@@ -328,58 +323,9 @@ void CRpg::Reload() // orig 0xb94c0
 
 	if (DefaultReload(iClipSize, RPG_RELOAD, RC2Pref(RC2P_RPG_ReloadTime).f))
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-#else
-	//ALERT(at_console, "RPG Reload, m_cActiveRockets: %d, m_fSpotActive: %d\n", m_cActiveRockets, m_fSpotActive);
-
-	if (m_iClip == 1)
-	{
-		// don't bother with any of this if don't need to reload.
-		return;
-	}
-
-	if (m_pPlayer->ammo_rockets <= 0)
-		return;
-
-	// because the RPG waits to autoreload when no missiles are active while  the LTD is on, the
-	// weapons code is constantly calling into this function, but is often denied because
-	// a) missiles are in flight, but the LTD is on
-	// or
-	// b) player is totally out of ammo and has nothing to switch to, and should be allowed to
-	//    shine the designator around
-	//
-	// Set the next attack time into the future so that WeaponIdle will get called more often
-	// than reload, allowing the RPG LTD to be updated
-
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-
-	if (0 != m_cActiveRockets && m_fSpotActive)
-	{
-		//ALERT(at_console, "RPG reload failed, m_cActiveRockets: %d, m_fSpotActive: %d\n", m_cActiveRockets, m_fSpotActive);
-
-		// no reloading when there are active missiles tracking the designator.
-		// ward off future autoreload attempts by setting next attack time into the future for a bit.
-		return;
-	}
-
-#ifndef CLIENT_DLL
-	if (m_pSpot && m_fSpotActive)
-	{
-		m_pSpot->Suspend(2.1);
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.1;
-	}
-#endif
-
-	if (m_iClip == 0)
-	{
-		const bool iResult = DefaultReload(RPG_MAX_CLIP, RPG_RELOAD, 2);
-
-		if (iResult)
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-	}
-#endif
 }
 
-// orig 0xb9530. RC2: rc2.ini's pickup amount; no laser spot to start with.
+// orig 0xb9530, orig client 0x40d70. RC2: rc2.ini's pickup amount; no laser spot to start with.
 void CRpg::Spawn()
 {
 	Precache();
@@ -393,7 +339,7 @@ void CRpg::Spawn()
 }
 
 
-// orig 0xb9580. RC2: the launcher throws RC2's four mines instead of laser-guided rockets.
+// orig 0xb9580, orig client 0x40df0. RC2: the launcher throws RC2's four mines instead of laser-guided rockets.
 void CRpg::Precache()
 {
 	PRECACHE_MODEL("models/w_rpg.mdl");
@@ -415,7 +361,7 @@ void CRpg::Precache()
 }
 
 
-// orig 0xb9610. RC2: carry and clip from rc2.ini, no flags, weight 12.
+// orig 0xb9610, orig client 0x40eb0. RC2: carry and clip from rc2.ini, no flags, weight 12.
 bool CRpg::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
@@ -433,10 +379,11 @@ bool CRpg::GetItemInfo(ItemInfo* p)
 	return true;
 }
 
-// orig 0xb9680: CRpg::AddToPlayer is SDK 2.3's (CBasePlayerWeapon::AddToPlayer, then the
+// orig 0xb9680 (orig client 0x40f40): CRpg::AddToPlayer is SDK 2.3's (CBasePlayerWeapon::AddToPlayer, then the
 // WeapPickup message); HLU sends that message from CBasePlayer::AddPlayerItem for every weapon,
 // so there is nothing to write here.
 
+// orig client 0x40fc0
 bool CRpg::Deploy()
 {
 	if (m_iClip == 0)
@@ -448,13 +395,13 @@ bool CRpg::Deploy()
 }
 
 
-// orig 0xb9720. RC2: always.
+// orig 0xb9720, orig client 0x41010. RC2: always.
 bool CRpg::CanHolster()
 {
 	return true;
 }
 
-// orig 0xb9730. RC2: no laser spot to kill.
+// orig 0xb9730, orig client 0x41030. RC2: no laser spot to kill.
 void CRpg::Holster()
 {
 	m_fInReload = false; // cancel any reload in progress.
@@ -473,17 +420,28 @@ void CRpg::Holster()
 
 // How many of szClassname this player has out (the mines keep their launcher in
 // pev->dmg_inflictor).
+// The client's (orig client 0x41080) answers with the counts WeaponSync last sent.
 int CRpg::CountMines(const char* szClassname) // orig 0xb9770
 {
+#ifdef CLIENT_DLL
+	if (0 == strcmp(szClassname, "scientist_mine"))
+		return m_iSciMines;
+	if (0 == strcmp(szClassname, "suck_mine"))
+		return m_iSuckMines;
+	if (0 == strcmp(szClassname, "sphere_mine"))
+		return m_iSphereMines;
+	if (0 == strcmp(szClassname, "rocket_mine"))
+		return m_iRomanCandles;
+	return 0;
+#else
 	int iCount = 0;
-#ifndef CLIENT_DLL
 	for (CBaseEntity* pMine = UTIL_FindEntityByClassname(NULL, szClassname); pMine != NULL; pMine = UTIL_FindEntityByClassname(pMine, szClassname))
 	{
 		if (pMine->pev != NULL && UTIL_IsValidEntity(pMine->pev->pContainingEntity) && pMine->pev->dmg_inflictor == m_pPlayer->pev->pContainingEntity)
 			iCount++;
 	}
-#endif
 	return iCount;
+#endif
 }
 
 // name ours: the body the original repeats in each of the four attacks
@@ -552,7 +510,7 @@ void CRpg::LaunchMine(const char* szClassname, int iAmmoCost, int iMaxDeployed, 
 }
 
 // The scientist mine.
-void CRpg::PrimaryAttack() // orig 0xb97e0
+void CRpg::PrimaryAttack() // orig 0xb97e0, orig client 0x41200
 {
 	LaunchMine("scientist_mine", RC2Pref(RC2P_RPG_SciMineAmmoCost).s, RC2Pref(RC2P_RPG_SciMineMaxDeployed).s, NULL, NULL,
 		RC2Pref(RC2P_RPG_SciMineLaunchVelocity).f, &RC2Pref(RC2P_RPG_SciMineLaunchZBoost).f,
@@ -560,7 +518,7 @@ void CRpg::PrimaryAttack() // orig 0xb97e0
 }
 
 // The suck mine.
-void CRpg::SecondaryAttack() // orig 0xb9cb0
+void CRpg::SecondaryAttack() // orig 0xb9cb0, orig client 0x414b0
 {
 	LaunchMine("suck_mine", RC2Pref(RC2P_RPG_SuckMineAmmoCost).s, RC2Pref(RC2P_RPG_SuckMineMaxDeployed).s, NULL, NULL,
 		RC2Pref(RC2P_RPG_SuckMineLaunchVelocity).f, &RC2Pref(RC2P_RPG_SuckMineLaunchZBoost).f,
@@ -568,7 +526,7 @@ void CRpg::SecondaryAttack() // orig 0xb9cb0
 }
 
 // The sphere mine: costs energy, and has no z boost (rc2.ini has no key for one).
-void CRpg::TertiaryAttack() // orig 0xba180
+void CRpg::TertiaryAttack() // orig 0xba180, orig client 0x41760
 {
 	LaunchMine("sphere_mine", RC2Pref(RC2P_RPG_SphereMineAmmoCost).s, RC2Pref(RC2P_RPG_SphereMineMaxDeployed).s, &RC2Pref(RC2P_RPG_SphereMineEnergyCost).f, &RC2Pref(RC2P_RPG_SphereMineEnergyRegenDelay).f,
 		RC2Pref(RC2P_RPG_SphereMineLaunchVelocity).f, NULL,
@@ -576,7 +534,7 @@ void CRpg::TertiaryAttack() // orig 0xba180
 }
 
 // The roman candle (rocket_mine): costs energy.
-void CRpg::QuaternaryAttack() // orig 0xba670
+void CRpg::QuaternaryAttack() // orig 0xba670, orig client 0x41a70
 {
 	LaunchMine("rocket_mine", RC2Pref(RC2P_RPG_RomanCandleAmmoCost).s, RC2Pref(RC2P_RPG_RomanCandleMaxDeployed).s, &RC2Pref(RC2P_RPG_RomanCandleEnergyCost).f, &RC2Pref(RC2P_RPG_RomanCandleEnergyRegenDelay).f,
 		RC2Pref(RC2P_RPG_RomanCandleLaunchVelocity).f, &RC2Pref(RC2P_RPG_RomanCandleLaunchZBoost).f,
@@ -584,8 +542,9 @@ void CRpg::QuaternaryAttack() // orig 0xba670
 }
 
 // Every frame: four times a second, recount this player's mines and send the counts to the HUD.
-void CRpg::WeaponFrame() // orig 0xbab40
+void CRpg::WeaponFrame() // orig 0xbab40, orig client 0x41d80 (empty on the client)
 {
+#ifndef CLIENT_DLL
 	if (m_flNextMineCount < gpGlobals->time)
 	{
 		m_flNextMineCount = gpGlobals->time + 0.25;
@@ -594,7 +553,6 @@ void CRpg::WeaponFrame() // orig 0xbab40
 		m_iSphereMines = CountMines("sphere_mine");
 		m_iRomanCandles = CountMines("rocket_mine");
 
-#ifndef CLIENT_DLL
 		MESSAGE_BEGIN(MSG_ONE, gmsgWeaponSync, NULL, m_pPlayer->edict());
 		WRITE_BYTE(WEAPON_RPG);
 		WRITE_BYTE(std::clamp(m_iSciMines, 0, 255));
@@ -602,21 +560,21 @@ void CRpg::WeaponFrame() // orig 0xbab40
 		WRITE_BYTE(std::clamp(m_iSphereMines, 0, 255));
 		WRITE_BYTE(std::clamp(m_iRomanCandles, 0, 255));
 		MESSAGE_END();
-#endif
 	}
+#endif
 }
 
-void CRpg::ReadWeaponState(void* pData, int iSize) // orig 0xbac90
+// The four counts, a byte each (the server's reader, 0xfb780, answers 0; the client's,
+// orig client 0x3b940, reads them)
+void CRpg::ReadWeaponState(void* pData, int iSize) // orig 0xbac90, orig client 0x41da0
 {
-	// VERIFY: each count is assigned the result of 0xfb780 (weapons.cpp, p3) called with the
-	// addresses of both arguments; that function always returns false.
-	m_iSciMines = 0;
-	m_iSuckMines = 0;
-	m_iSphereMines = 0;
-	m_iRomanCandles = 0;
+	m_iSciMines = RC2ReadStateByte(&pData, &iSize);
+	m_iSuckMines = RC2ReadStateByte(&pData, &iSize);
+	m_iSphereMines = RC2ReadStateByte(&pData, &iSize);
+	m_iRomanCandles = RC2ReadStateByte(&pData, &iSize);
 }
 
-void CRpg::WeaponIdle() // orig 0xbad10
+void CRpg::WeaponIdle() // orig 0xbad10, orig client 0x41e40
 {
 	ResetEmptySound();
 
@@ -679,18 +637,18 @@ void CRpg::UpdateSpot()
 
 class CRpgAmmo : public CBasePlayerAmmo
 {
-	void Spawn() override // orig 0xbae40
+	void Spawn() override // orig 0xbae40, orig client 0x42060
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_rpgammo.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
-	void Precache() override // orig 0xbae70
+	void Precache() override // orig 0xbae70, orig client 0x420a0
 	{
 		PRECACHE_MODEL("models/w_rpgammo.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
-	bool AddAmmo(CBaseEntity* pOther) override // orig 0xbae90
+	bool AddAmmo(CBaseEntity* pOther) override // orig 0xbae90, orig client 0x420d0
 	{
 		if (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_RPGRocketBoxGive).s, "rockets", RC2Pref(RC2P_Ammo_MaxCarryRPG).s) != -1)
 		{
@@ -700,4 +658,5 @@ class CRpgAmmo : public CBasePlayerAmmo
 		return false;
 	}
 };
+// orig client 0x41f30 (and its GetClassPtr<CRpgAmmo>, orig client 0x41fe0)
 LINK_ENTITY_TO_CLASS(ammo_rpgclip, CRpgAmmo); // orig 0xbadd0

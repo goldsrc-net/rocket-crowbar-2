@@ -28,18 +28,25 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#ifndef CLIENT_DLL
 #include "rc2prefs.h"
+#ifndef CLIENT_DLL
 #include "p3b_temp.h" // TEMP STUB: gmsgWeaponSync, RC2RaiseTime
+#else
+// The client's prediction (client.dll, reference/dossiers/c1.md) compiles the same code: it pulls
+// pins, throws (animations, timers, ammo) and counts nothing itself: WeaponSync tells it.
+static void RC2RaiseTime(float* pflTime, float flBase, float flDelay) { UTIL_ExtendTime(pflTime, flBase, flDelay); }
 #endif
 
 
 #define HANDGRENADE_PRIMARY_VOLUME 450
 
+// orig client 0x35190 (and its GetClassPtr<CHandGrenade>, orig client 0x36200); the inline
+// iItemSlot and UseDecrement are orig client 0x36280 and orig client 0x362a0, the empty
+// QuaternaryAttack orig client 0x35770
 LINK_ENTITY_TO_CLASS(weapon_handgrenade, CHandGrenade); // orig 0x5bdd0
 
 
-// orig 0x5be60
+// orig 0x5be60, orig client 0x351c0
 void CHandGrenade::Spawn()
 {
 	Precache();
@@ -48,10 +55,8 @@ void CHandGrenade::Spawn()
 
 #ifndef CLIENT_DLL
 	pev->dmg = gSkillData.plrDmgHandGrenade;
-	m_iDefaultAmmo = RC2Pref(RC2P_Ammo_GrenadePickupGive).s;
-#else
-	m_iDefaultAmmo = HANDGRENADE_DEFAULT_GIVE;
 #endif
+	m_iDefaultAmmo = RC2Pref(RC2P_Ammo_GrenadePickupGive).s;
 
 	m_flNextCountTime = gpGlobals->time;
 	m_iGravDeployed = 0;
@@ -61,30 +66,24 @@ void CHandGrenade::Spawn()
 }
 
 
-// orig 0x5bed0
+// orig 0x5bed0, orig client 0x35240
 void CHandGrenade::Precache()
 {
 	PRECACHE_MODEL("models/w_grenade.mdl");
 	PRECACHE_MODEL("models/v_grenade.mdl");
 	PRECACHE_MODEL("models/p_grenade.mdl");
-#ifndef CLIENT_DLL
 	UTIL_PrecacheOther("gravity_grenade");
 	UTIL_PrecacheOther("antifriction_grenade");
 	UTIL_PrecacheOther("suck_grenade");
 	UTIL_PrecacheOther("ultima_grenade");
-#endif
 }
 
-// orig 0x5bf20
+// orig 0x5bf20, orig client 0x352b0
 bool CHandGrenade::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "Hand Grenade";
-#ifndef CLIENT_DLL
 	p->iMaxAmmo1 = RC2Pref(RC2P_Ammo_MaxCarryGrenades).s;
-#else
-	p->iMaxAmmo1 = HANDGRENADE_MAX_CARRY;
-#endif
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -98,7 +97,7 @@ bool CHandGrenade::GetItemInfo(ItemInfo* p)
 }
 
 
-// orig 0x5bf90
+// orig 0x5bf90, orig client 0x35340
 bool CHandGrenade::Deploy()
 {
 	m_flNextCountTime = gpGlobals->time;
@@ -108,13 +107,14 @@ bool CHandGrenade::Deploy()
 	return DefaultDeploy("models/v_grenade.mdl", "models/p_grenade.mdl", HANDGRENADE_DRAW, "crowbar");
 }
 
+// orig client 0x35390
 bool CHandGrenade::CanHolster()
 {
 	// can only holster hand grenades when not primed!
 	return (m_flStartThrow == 0);
 }
 
-// orig 0x5bff0. RC2's doesn't clear m_flStartThrow (halflife-updated's does).
+// orig 0x5bff0, orig client 0x353c0. RC2's doesn't clear m_flStartThrow (halflife-updated's does).
 void CHandGrenade::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
@@ -135,10 +135,9 @@ void CHandGrenade::Holster()
 }
 
 // The three attacks pull the pin of grenade kind m_fInAttack (1 antifriction, 2 suck, 3 gravity).
-// orig 0x5c0a0
+// orig 0x5c0a0, orig client 0x35530
 void CHandGrenade::PrimaryAttack()
 {
-#ifndef CLIENT_DLL
 	if (0 == m_flStartThrow && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= (unsigned short)RC2Pref(RC2P_Grenade_AFGrenAmmoCost).s)
 	{
 		m_flStartThrow = gpGlobals->time;
@@ -147,13 +146,11 @@ void CHandGrenade::PrimaryAttack()
 		SendWeaponAnim(HANDGRENADE_PINPULL);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
 	}
-#endif
 }
 
-// orig 0x5c120
+// orig 0x5c120, orig client 0x355d0
 void CHandGrenade::SecondaryAttack()
 {
-#ifndef CLIENT_DLL
 	if (0 == m_flStartThrow && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= (unsigned short)RC2Pref(RC2P_Grenade_SuckGrenAmmoCost).s && m_iSuckDeployed < (unsigned char)RC2Pref(RC2P_Grenade_SuckGrenMaxDeployed).c)
 	{
 		m_flStartThrow = gpGlobals->time;
@@ -162,13 +159,11 @@ void CHandGrenade::SecondaryAttack()
 		SendWeaponAnim(HANDGRENADE_PINPULL);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
 	}
-#endif
 }
 
-// orig 0x5c1b0
+// orig 0x5c1b0, orig client 0x356a0
 void CHandGrenade::TertiaryAttack()
 {
-#ifndef CLIENT_DLL
 	if (0 == m_flStartThrow && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= (unsigned short)RC2Pref(RC2P_Grenade_GravGrenAmmoCost).s && m_iGravDeployed < (unsigned char)RC2Pref(RC2P_Grenade_GravGrenMaxDeployed).c)
 	{
 		m_flStartThrow = gpGlobals->time;
@@ -177,11 +172,10 @@ void CHandGrenade::TertiaryAttack()
 		SendWeaponAnim(HANDGRENADE_PINPULL);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
 	}
-#endif
 }
 
 
-// orig 0x5c250: only the idle and fidget animations; the throw is WeaponFrame's
+// orig 0x5c250, orig client 0x35790: only the idle and fidget animations; the throw is WeaponFrame's
 void CHandGrenade::WeaponIdle()
 {
 	if (0 != m_flStartThrow)
@@ -210,7 +204,7 @@ void CHandGrenade::WeaponIdle()
 	}
 }
 
-// orig 0x5c330: how many of the player's pszClassname grenades are out (they keep the thrower
+// orig 0x5c330, orig client 0x358b0 (0 on the client): how many of the player's pszClassname grenades are out (they keep the thrower
 // in pev->dmg_inflictor)
 int CHandGrenade::CountThrown(const char* pszClassname)
 {
@@ -226,16 +220,13 @@ int CHandGrenade::CountThrown(const char* pszClassname)
 	return iCount;
 }
 
-// orig 0x5c3a0
+// orig 0x5c3a0, orig client 0x358d0
 void CHandGrenade::ReadWeaponState(void* pData, int iSize)
 {
-#ifndef CLIENT_DLL
 	m_iGravDeployed = RC2ReadStateByte(&pData, &iSize);
 	m_iSuckDeployed = RC2ReadStateByte(&pData, &iSize);
-#endif
 }
 
-#ifndef CLIENT_DLL
 // The attack timers each throw (or abort) pushes forward.
 static void RaiseAttackTimers(CHandGrenade* pWeapon, float flPrimary, float flSecondary, float flTertiary)
 {
@@ -243,9 +234,8 @@ static void RaiseAttackTimers(CHandGrenade* pWeapon, float flPrimary, float flSe
 	RC2RaiseTime(&pWeapon->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flSecondary);
 	RC2RaiseTime(&pWeapon->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flTertiary);
 }
-#endif
 
-// orig 0x5c3e0: count what is out twice a second, and throw the primed grenade once its button
+// orig 0x5c3e0, orig client 0x35920 (the client's counts nothing and creates nothing): count what is out twice a second, and throw the primed grenade once its button
 // is up or SharedMaxTimer has passed
 void CHandGrenade::WeaponFrame()
 {
@@ -262,6 +252,7 @@ void CHandGrenade::WeaponFrame()
 		WRITE_BYTE(V_max(0, V_min(m_iSuckDeployed, 255)));
 		MESSAGE_END();
 	}
+#endif
 
 	if (m_flReleaseThrow == 0 && m_flStartThrow != 0)
 		m_flReleaseThrow = gpGlobals->time;
@@ -338,6 +329,7 @@ void CHandGrenade::WeaponFrame()
 			break;
 		}
 
+#ifndef CLIENT_DLL
 		CBaseEntity* pGrenade = CBaseEntity::Create(pszClassname, vecSrc, angThrow, m_pPlayer->edict());
 		if (pGrenade)
 		{
@@ -361,6 +353,7 @@ void CHandGrenade::WeaponFrame()
 					pGrenade->pev->owner = pentLinked;
 			}
 		}
+#endif
 
 		if (flVel < 500)
 			SendWeaponAnim(HANDGRENADE_THROW1);
@@ -422,5 +415,4 @@ void CHandGrenade::WeaponFrame()
 			RetireWeapon();
 		}
 	}
-#endif
 }
