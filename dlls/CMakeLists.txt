@@ -1,5 +1,12 @@
 add_library(hl SHARED $<$<PLATFORM_ID:Windows>:hl.def>)
 
+# Rocket Crowbar 2's own source files (the classes SDK 2.3 doesn't have). The originals'
+# file names are lost, so these are named after their classes, and they're globbed so a work
+# package can add one without editing this list (reference/dossiers/AGENT_BRIEF.md).
+file(GLOB RC2_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rc2/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/rc2/*.h)
+target_sources(hl PRIVATE ${RC2_SOURCES})
+target_include_directories(hl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/rc2)
+
 set_common_properties(hl)
 
 target_include_directories(hl PRIVATE
