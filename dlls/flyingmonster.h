@@ -44,5 +44,6 @@ protected:
 	float m_flightSpeed; // Current flight speed (decays when not flapping or gliding)
 	float m_stopTime;	 // Last time we stopped (to avoid switching states too soon)
 	float m_momentum;	 // Weight for desired vs. momentum velocity
+	float m_flLastZYawTime = 0; // halflife-updated's (343bbb2): when ChangeYaw last stepped the roll
 	const char* m_pFlapSound;
 };

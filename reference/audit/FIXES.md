@@ -195,22 +195,22 @@ row) gets fabs back and keeps RC's 0-255 clamp.
 
 Counts: fix 28 (27 rows and UpdateSound), design 12, unclear 4.
 
-## Unclear, for Steven
+## Unclear, decided by Steven 2026-11-07 (each line says how)
 
 - (decided, Steven 2026-11-07: restored in both, with the AddToFullPack side) `CTentacle::Spawn`, `CNihilanth::Spawn`, `COsprey::Spawn` (mod-rc2): halflife-updated's interpolation
   fix (halflife#3228) lives in its AddToFullPack, which RC2's own AddToFullPack doesn't have. Restore
   the flags with that AddToFullPack change, or leave both out.
-- `CFlyingMonster::ChangeYaw` (mod-rc2): restore upstream's (time base, but 220 * 220 * delta, the roll
+- (decided, Steven 2026-11-07: 343bbb2's 220 * delta, restored) `CFlyingMonster::ChangeYaw` (mod-rc2): restore upstream's (time base, but 220 * 220 * delta, the roll
   snaps), restore 343bbb2's 220 * delta, or keep SDK 2.3's.
-- `CBaseMonster::SetActivity` (mod-rc2): restore upstream's as it is (its `oldActivity` is the new
+- (decided, Steven 2026-11-07: restored with `oldActivity = m_Activity`) `CBaseMonster::SetActivity` (mod-rc2): restore upstream's as it is (its `oldActivity` is the new
   activity), restore it with `oldActivity = m_Activity` (what the commit meant), or keep SDK 2.3's.
-- `CBreakable::Die`'s gib direction (both): halflife-updated's negation fixes damage breaks and
+- (decided, Steven 2026-11-07: the original's direction, both) `CBreakable::Die`'s gib direction (both): halflife-updated's negation fixes damage breaks and
   reverses triggered ones; restoring it would want Use's direction negated too.
-- `CBaseToggle::LinearMoveDone` (both): the 2013 SDK's creep at speed 100, or the original's snap.
-- `PlayCDTrack` (mod-rc2): "cd stop" or "cd pause" for track -1; decided by whether today's engine
+- (decided, Steven 2026-11-07: the original's snap, both) `CBaseToggle::LinearMoveDone` (both): the 2013 SDK's creep at speed 100, or the original's snap.
+- (decided, Steven 2026-11-07: the original's "cd pause" until today's engine is shown to resume it) `PlayCDTrack` (mod-rc2): "cd stop" or "cd pause" for track -1; decided by whether today's engine
   resumes a paused track by itself.
-- `CBasePlayer::UpdatePlayerSound` (mod-rockcrowbar): SDK 2.1's UTIL_MakeVectors side effect.
-- `CRoach::Spawn` (mod-rockcrowbar): 1 or 2 units tall.
+- (decided, Steven 2026-11-07: the original's call) `CBasePlayer::UpdatePlayerSound` (mod-rockcrowbar): SDK 2.1's UTIL_MakeVectors side effect.
+- (decided, Steven 2026-11-07: halflife-updated's 2 units, restored) `CRoach::Spawn` (mod-rockcrowbar): 1 or 2 units tall.
 
 ## mod-rc2 functions outside the audits with a halflife-updated change that a mod-rockcrowbar verdict calls design
 

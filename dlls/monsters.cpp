@@ -1239,8 +1239,17 @@ bool CBaseMonster::PopEnemy()
 //=========================================================
 void CBaseMonster::SetActivity(Activity NewActivity)
 {
-	// SDK 2.3's (stock in RC2); halflife-updated set m_Activity and m_IdealActivity first, so
-	// SetYawSpeed saw the new activity, and compared the new activity with itself for walk and run
+	// halflife-updated's fix, kept (Steven, 2026-11-07; its #176): m_Activity is set before the
+	// sequence, so SetYawSpeed sees the new activity. Its own version saved oldActivity from
+	// NewActivity, a typo that made the walk/run test compare the new activity with itself; the
+	// old one is m_Activity, saved before it changes.
+	const Activity oldActivity = m_Activity;
+
+	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
+
+	// In case someone calls this with something other than the ideal activity
+	m_IdealActivity = m_Activity;
+
 	const int iSequence = LookupActivity(NewActivity);
 
 	// Set to the desired anim, or default anim if the desired is not present
@@ -1249,7 +1258,7 @@ void CBaseMonster::SetActivity(Activity NewActivity)
 		if (pev->sequence != iSequence || !m_fSequenceLoops)
 		{
 			// don't reset frame between walk and run
-			if (!(m_Activity == ACT_WALK || m_Activity == ACT_RUN) || !(NewActivity == ACT_WALK || NewActivity == ACT_RUN))
+			if (!(oldActivity == ACT_WALK || oldActivity == ACT_RUN) || !(NewActivity == ACT_WALK || NewActivity == ACT_RUN))
 				pev->frame = 0;
 		}
 
@@ -1263,11 +1272,6 @@ void CBaseMonster::SetActivity(Activity NewActivity)
 		ALERT(at_aiconsole, "%s has no sequence for act:%d\n", STRING(pev->classname), NewActivity);
 		pev->sequence = 0; // Set to the reset anim (if it's there)
 	}
-
-	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-
-	// In case someone calls this with something other than the ideal activity
-	m_IdealActivity = m_Activity;
 }
 
 //=========================================================

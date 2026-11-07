@@ -49,6 +49,11 @@ design or balance, or added a feature; halflife-updated's evident bug fixes stay
 in `reference/audit/FIXES.md`). What halflife-updated changed and we keep, besides restyling and
 the crash guards listed under "Crashes in the original":
 
+- **Flying monsters' roll and monsters' activity changes are halflife-updated's fixes**
+  (`dlls/flyingmonster.cpp` ChangeYaw: the roll steps by the time since the last call, 343bbb2's
+  220 * delta, not its HL25 backport's 220 * 220 * delta; `dlls/monsters.cpp` SetActivity: the new
+  activity is set before the sequence, its #176, with the old activity read from m_Activity where
+  halflife-updated's own copy read the new one). Kept by Steven, 2026-11-07.
 - **Flying monsters are smoothed on the client, and living things sound like flesh**
   (`dlls/client.cpp` AddToFullPack; the tentacle, nihilanth and osprey Spawn). halflife-updated's
   fixes (halflife#3228 and its flesh impact sounds): EFLAG_SLERP from FL_FLY, in place of SDK 2.x's
