@@ -57,6 +57,6 @@ Original content: Steven's install at `/media/Data3/Projects/mods/rc2/` (beta 1.
 - Stock functions (byte-identical to SDK 2.3 in RC2) were audited against SDK 2.3 for
   halflife-updated's changes (`reference/audit/`, a1-a6, 460 functions): 55 reverted to SDK 2.3
   where multiplayer play shows it, the rest style, crash guards, singleplayer-only or engine
-  (kept, `reference/DEVIATIONS.md`). Four "unclear" ones await Steven (`reference/audit/a6.md`).
+  (kept, `reference/DEVIATIONS.md`); the four unclear ones Steven decided (DEVIATIONS.md).
   `scripts/stock_drift.py --sdk` reruns it; RC 1.9 gets the same pass next.
 - Not yet: playing ours against the original with our client.
