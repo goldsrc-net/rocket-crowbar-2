@@ -38,7 +38,7 @@ public:
 	int IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled) override;
 	void InitHUD(CBasePlayer* pl) override;
 	void DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor) override;
-	const char* GetGameDescription() override { return "HL Teamplay"; } // this is the game name that gets seen in the server browser
+	const char* GetGameDescription() override { return "HL Teamplay"; } // orig 0xdc300. this is the game name that gets seen in the server browser
 	void UpdateGameMode(CBasePlayer* pPlayer) override;					// the client needs to be informed of the current game mode
 	void PlayerKilled(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pInflictor) override;
 	void Think() override;
@@ -47,6 +47,8 @@ public:
 	bool IsValidTeam(const char* pTeamName) override;
 	const char* SetDefaultPlayerTeam(CBasePlayer* pPlayer) override;
 	void ChangePlayerTeam(CBasePlayer* pPlayer, const char* pTeamName, bool bKill, bool bGib) override;
+	bool PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* pRider) override;
+	bool PlayerCanAffect(CBaseEntity* pPlayer, CBaseEntity* pTarget) override;
 
 private:
 	void RecountTeams(bool bResendInfo = false);

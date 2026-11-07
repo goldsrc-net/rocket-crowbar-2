@@ -482,6 +482,10 @@ static bool SV_InitServer()
 
 // Register your console variables here
 // This gets called one time when the game is initialied
+// orig 0x470a0 (reached only through gFunctionTable, so Ghidra's list missed it). The original
+// registers the same cvars in this order, less halflife-updated's allow_spectators, sv_busters,
+// sv_allowbunnyhopping, sk_plr_hornet_dmg1-3 and sv_pushable_fixed_tick_fudge, and has no
+// SV_InitServer, sv_allow_autoaim, sv_cheats or InitMapLoadingUtils; those are kept.
 void GameDLLInit()
 {
 	// Register cvars here:
@@ -490,6 +494,7 @@ void GameDLLInit()
 	g_psv_aim = CVAR_GET_POINTER("sv_aim");
 	g_psv_allow_autoaim = CVAR_GET_POINTER("sv_allow_autoaim");
 	g_footsteps = CVAR_GET_POINTER("mp_footsteps");
+	g_psv_maxvelocity = CVAR_GET_POINTER("sv_maxvelocity"); // Rocket Crowbar 2 (orig .data 0x18c500)
 	g_psv_cheats = CVAR_GET_POINTER("sv_cheats");
 
 	if (!SV_InitServer())
@@ -522,11 +527,11 @@ void GameDLLInit()
 
 	CVAR_REGISTER(&mp_chattime);
 
-	// Rocket Crowbar 2
-	CVAR_REGISTER(&mp_teamannoy);
-	CVAR_REGISTER(&mp_riding);
+	// Rocket Crowbar 2 (the original registers mp_random and mp_scoremode first)
 	CVAR_REGISTER(&mp_random);
 	CVAR_REGISTER(&mp_scoremode);
+	CVAR_REGISTER(&mp_teamannoy);
+	CVAR_REGISTER(&mp_riding);
 	CVAR_REGISTER(&mp_allowtransform);
 	CVAR_REGISTER(&sv_allowgive);
 	CVAR_REGISTER(&sv_noexit);

@@ -42,6 +42,7 @@ static int PM_boxpnt[6][4] =
 		{7, 6, 4, 5}, // -Z
 };
 
+// orig 0x9f340
 void PM_ShowClipBox()
 {
 #if defined(_DEBUG)

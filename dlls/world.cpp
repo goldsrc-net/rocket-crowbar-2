@@ -38,6 +38,7 @@
 #include "rc2/maintainent.h"
 #include "rc2/pullers.h"
 
+// orig 0xfbfa0 and orig 0xfbfb0: the compiler-generated initializer that runs the constructor below
 CGlobalState gGlobalState;
 
 extern void W_Precache();

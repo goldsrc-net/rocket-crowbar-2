@@ -241,6 +241,7 @@ void CCineMonster::Touch(CBaseEntity* pOther) // orig 0xc2740
 //
 // ********** Cinematic DIE **********
 //
+// orig 0xc2750
 void CCineMonster::Die()
 {
 	SetThink(&CCineMonster::SUB_Remove);
@@ -249,6 +250,7 @@ void CCineMonster::Die()
 //
 // ********** Cinematic PAIN **********
 //
+// orig 0xc2760
 void CCineMonster::Pain()
 {
 }

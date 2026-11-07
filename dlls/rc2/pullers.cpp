@@ -18,6 +18,8 @@
 
 extern playermove_t* pmove;
 
+// orig 0xa96f0 and orig 0xa9700: the compiler-generated initializer for this array (empty:
+// Vector's constructor does nothing)
 Vector g_vecPullPointOrg[64];
 float g_flPullPointMonsterForce[64];
 float g_flPullPointPlayerForce[64];

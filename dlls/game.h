@@ -61,4 +61,5 @@ inline cvar_t* g_psv_gravity;
 inline cvar_t* g_psv_aim;
 inline cvar_t* g_psv_allow_autoaim;
 inline cvar_t* g_footsteps;
+inline cvar_t* g_psv_maxvelocity; // Rocket Crowbar 2, name ours
 inline cvar_t* g_psv_cheats;

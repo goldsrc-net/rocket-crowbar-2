@@ -175,6 +175,7 @@ TYPEDESCRIPTION CFuncTank::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CFuncTank, CBaseEntity); // orig 0x43b40, orig 0x43b70
 
+// orig 0x43ba0: the compiler-generated initializer for this table (its body is stock)
 static Vector gTankSpread[] =
 	{
 		Vector(0, 0, 0),			 // perfect

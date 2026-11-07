@@ -250,7 +250,7 @@ LINK_ENTITY_TO_CLASS(func_plat, CFuncPlat); // orig 0x8fae0
 class CPlatTrigger : public CBaseEntity
 {
 public:
-	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DONT_SAVE; }
+	int ObjectCaps() override { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DONT_SAVE; } // orig 0x8fe20
 	void SpawnInsideTrigger(CFuncPlat* pPlatform);
 	void Touch(CBaseEntity* pOther) override;
 	EHANDLE m_hPlatform;

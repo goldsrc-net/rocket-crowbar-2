@@ -159,23 +159,15 @@ LINK_ENTITY_TO_CLASS(player, CBasePlayer); // orig 0x94610
 
 
 
+// orig 0x946a0 (not in files-rc2.tsv). Rocket Crowbar 2: empty; nothing calls it
 void CBasePlayer::Pain()
 {
-	float flRndSound; //sound randomizer
-
-	flRndSound = RANDOM_FLOAT(0, 1);
-
-	if (flRndSound <= 0.33)
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain5.wav", 1, ATTN_NORM);
-	else if (flRndSound <= 0.66)
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain6.wav", 1, ATTN_NORM);
-	else
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain7.wav", 1, ATTN_NORM);
 }
 
 /* 
  *
  */
+// orig 0x946b0
 Vector VecVelocityForDamage(float flDamage)
 {
 	Vector vec(RANDOM_FLOAT(-100, 100), RANDOM_FLOAT(-100, 100), RANDOM_FLOAT(200, 300));
@@ -4865,6 +4857,7 @@ bool CBasePlayer::HasWeapons()
 	return false;
 }
 
+// orig 0x9c360
 void CBasePlayer::SelectPrevItem(int iItem)
 {
 }
@@ -4890,7 +4883,7 @@ public:
 	void Spawn(entvars_t* pevOwner);
 	void Think() override;
 
-	int ObjectCaps() override { return FCAP_DONT_SAVE; }
+	int ObjectCaps() override { return FCAP_DONT_SAVE; } // orig 0x9ce20
 };
 
 // orig 0x9c390
@@ -4905,6 +4898,7 @@ void CSprayCan::Spawn(entvars_t* pevOwner)
 	EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/sprayer.wav", 1, ATTN_NORM);
 }
 
+// orig 0x9c460
 void CSprayCan::Think()
 {
 	TraceResult tr;
@@ -4950,6 +4944,7 @@ public:
 	void Spray();
 };
 
+// orig 0x9c5b0
 void CBloodSplat::Spawn(entvars_t* pevOwner)
 {
 	pev->origin = pevOwner->origin + Vector(0, 0, 32);
@@ -4960,6 +4955,7 @@ void CBloodSplat::Spawn(entvars_t* pevOwner)
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
+// orig 0x9c650
 void CBloodSplat::Spray()
 {
 	TraceResult tr;

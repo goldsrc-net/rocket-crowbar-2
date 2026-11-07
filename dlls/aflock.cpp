@@ -161,7 +161,7 @@ void CFlockingFlyerFlock::Spawn()
 
 //=========================================================
 //=========================================================
-// orig 0x56e0 (stock; PrecacheFlockSounds inlined, its tail shared at orig 0x5723)
+// orig 0x56e0 (stock; it ends in a jump to PrecacheFlockSounds, which Ghidra took for the rest of it)
 void CFlockingFlyerFlock::Precache()
 {
 	//PRECACHE_MODEL("models/aflock.mdl");
@@ -171,6 +171,8 @@ void CFlockingFlyerFlock::Precache()
 }
 
 
+// orig 0x5700 (stock; files-rc2.tsv counts it in Precache, and gaps-rc2.tsv has its last 13 bytes
+// as a tail at 0x5723)
 void CFlockingFlyerFlock::PrecacheFlockSounds()
 {
 	PRECACHE_SOUND("boid/boid_alert1.wav");

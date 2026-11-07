@@ -49,6 +49,7 @@ void* GetModuleHandle(const char* name)
 InterfaceReg* InterfaceReg::s_pInterfaceRegs = NULL;
 
 
+// orig 0x6a6f0
 InterfaceReg::InterfaceReg(InstantiateInterfaceFn fn, const char* pName) : m_pName(pName)
 {
 	m_CreateFn = fn;
@@ -61,7 +62,7 @@ InterfaceReg::InterfaceReg(InstantiateInterfaceFn fn, const char* pName) : m_pNa
 // ------------------------------------------------------------------------------------ //
 // CreateInterface.
 // ------------------------------------------------------------------------------------ //
-// orig 0x6a710 (not counted by check_coverage: public/ is not scanned)
+// orig 0x6a710
 EXPORT_FUNCTION void* CreateInterface(const char* pName, int* pReturnCode)
 {
 	InterfaceReg* pCur;
@@ -128,6 +129,7 @@ void* Sys_GetProcAddress(void* pModuleHandle, const char* pName)
 // Input  : *pModuleName - filename of the component
 // Output : opaque handle to the module (hides system dependency)
 //-----------------------------------------------------------------------------
+// orig 0x6a790. The original is LoadLibrary alone, without the retry with ".dll" (Windows only)
 CSysModule* Sys_LoadModule(const char* pModuleName)
 {
 #if defined(WIN32)
@@ -186,6 +188,7 @@ CSysModule* Sys_LoadModule(const char* pModuleName)
 // Input  : *pModuleName - filename of the component
 // Output : opaque handle to the module (hides system dependency)
 //-----------------------------------------------------------------------------
+// orig 0x6a7a0
 void Sys_UnloadModule(CSysModule* pModule)
 {
 	if (!pModule)
@@ -205,6 +208,7 @@ void Sys_UnloadModule(CSysModule* pModule)
 //			*pName - proc name
 // Output : factory for this module
 //-----------------------------------------------------------------------------
+// orig 0x6a7c0
 CreateInterfaceFn Sys_GetFactory(CSysModule* pModule)
 {
 	if (!pModule)
@@ -222,6 +226,7 @@ CreateInterfaceFn Sys_GetFactory(CSysModule* pModule)
 // Purpose: returns the instance of this module
 // Output : interface_instance_t
 //-----------------------------------------------------------------------------
+// orig 0x6a7b0 (right after Sys_UnloadModule with no padding between, so in the same gaps-rc2.tsv piece)
 CreateInterfaceFn Sys_GetFactoryThis()
 {
 	// BEN-NOTE: unifying this on all platforms

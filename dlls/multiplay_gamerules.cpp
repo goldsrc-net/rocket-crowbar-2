@@ -70,10 +70,12 @@ int PlayerGender(edict_t* pPlayer) // name ours
 // longest the intermission can last, in seconds
 #define MAX_INTERMISSION_TIME 120
 
-// The statics below are stock; the original's compiler-generated code for them: orig 0x7dec0
-// (g_VoiceGameMgr's constructor), orig 0x7ded0 (its atexit), orig 0x7df00 (the helper's
-// constructor), orig 0x7df10 (CMultiplayGameMgrHelper::CanPlayerHearPlayer), orig 0x7df40 (the
-// helper's atexit), orig 0x7df60 (its deleting destructor)
+// The statics below are stock; the original's compiler-generated code for them: orig 0x7deb0
+// (g_VoiceGameMgr's initializer), orig 0x7dec0 (its constructor), orig 0x7ded0 (its atexit),
+// orig 0x7dee0 (the destructor that atexit runs), orig 0x7def0 (the helper's initializer),
+// orig 0x7df00 (the helper's constructor), orig 0x7df10
+// (CMultiplayGameMgrHelper::CanPlayerHearPlayer), orig 0x7df40 (the helper's atexit), orig 0x7df50
+// (the destructor it runs), orig 0x7df60 (its deleting destructor)
 CVoiceGameMgr g_VoiceGameMgr;
 
 class CMultiplayGameMgrHelper : public IVoiceGameMgrHelper
@@ -299,6 +301,7 @@ void CHalfLifeMultiplay::Think()
 
 //=========================================================
 //=========================================================
+// orig 0x7e400
 bool CHalfLifeMultiplay::IsMultiplayer()
 {
 	return true;
@@ -306,6 +309,7 @@ bool CHalfLifeMultiplay::IsMultiplayer()
 
 //=========================================================
 //=========================================================
+// orig 0x7e410
 bool CHalfLifeMultiplay::IsDeathmatch()
 {
 	return true;
@@ -313,6 +317,7 @@ bool CHalfLifeMultiplay::IsDeathmatch()
 
 //=========================================================
 //=========================================================
+// orig 0x7e420
 bool CHalfLifeMultiplay::IsCoOp()
 {
 	return 0 != gpGlobals->coop;
@@ -631,6 +636,7 @@ bool CHalfLifeMultiplay::PlayerAllowsRiding(CBasePlayer* pRidden, CBasePlayer* p
 
 //=========================================================
 //=========================================================
+// orig 0x7ecc0
 bool CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer* pPlayer)
 {
 	return true;
@@ -638,6 +644,7 @@ bool CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer* pPlayer)
 
 //=========================================================
 //=========================================================
+// orig 0x7ecd0
 float CHalfLifeMultiplay::FlPlayerSpawnTime(CBasePlayer* pPlayer)
 {
 	return gpGlobals->time; //now!
@@ -652,6 +659,7 @@ bool CHalfLifeMultiplay::AllowAutoTargetCrosshair()
 // IPointsForKill - how many points awarded to anyone
 // that kills this player?
 //=========================================================
+// orig 0x7ed00
 int CHalfLifeMultiplay::IPointsForKill(CBasePlayer* pAttacker, CBasePlayer* pKilled)
 {
 	return 1;
@@ -965,6 +973,7 @@ void CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, e
 // PlayerGotWeapon - player has grabbed a weapon that was
 // sitting in the world
 //=========================================================
+// orig 0x7f5b0
 void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pWeapon)
 {
 }
@@ -1038,6 +1047,9 @@ int CHalfLifeMultiplay::WeaponShouldRespawn(CBasePlayerItem* pWeapon)
 // CanHaveWeapon - returns false if the player is not allowed
 // to pick up this weapon
 //=========================================================
+// orig 0x7f6c0 (not in files-rc2.tsv; the vtable's slot 30). Rocket Crowbar 2: with
+// mp_weaponstay on, a weapon the player already carries goes to the first player linked with him
+// (m_iShoulderRider) whom these rules let have it.
 bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem* pItem)
 {
 	if (weaponstay.value > 0)
@@ -1054,6 +1066,16 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem
 			{
 				if (it->m_iId == pItem->m_iId)
 				{
+					// Original bug, kept: UTIL_PlayerByIndex's result isn't checked before the call
+					for (int j = 0; j < 2; j++)
+					{
+						if (pPlayer->m_iShoulderRider[j] == 0)
+							continue;
+
+						CBasePlayer* pLinked = (CBasePlayer*)UTIL_PlayerByIndex(pPlayer->m_iShoulderRider[j]);
+						if (CanHavePlayerItem(pLinked, pItem))
+							return CGameRules::CanHavePlayerItem(pLinked, pItem);
+					}
 					return false;
 				}
 
@@ -1067,6 +1089,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, CBasePlayerItem
 
 //=========================================================
 //=========================================================
+// orig 0x7f7c0
 bool CHalfLifeMultiplay::CanHaveItem(CBasePlayer* pPlayer, CItem* pItem)
 {
 	return true;
@@ -1074,6 +1097,7 @@ bool CHalfLifeMultiplay::CanHaveItem(CBasePlayer* pPlayer, CItem* pItem)
 
 //=========================================================
 //=========================================================
+// orig 0x7f7d0
 void CHalfLifeMultiplay::PlayerGotItem(CBasePlayer* pPlayer, CItem* pItem)
 {
 }
@@ -1110,12 +1134,14 @@ Vector CHalfLifeMultiplay::VecItemRespawnSpot(CItem* pItem)
 
 //=========================================================
 //=========================================================
+// orig 0x7f840
 void CHalfLifeMultiplay::PlayerGotAmmo(CBasePlayer* pPlayer, char* szName, int iCount)
 {
 }
 
 //=========================================================
 //=========================================================
+// orig 0x7f850
 bool CHalfLifeMultiplay::IsAllowedToSpawn(CBaseEntity* pEntity)
 {
 	//	if ( pEntity->pev->flags & FL_MONSTER )
@@ -1152,12 +1178,14 @@ Vector CHalfLifeMultiplay::VecAmmoRespawnSpot(CBasePlayerAmmo* pAmmo)
 
 //=========================================================
 //=========================================================
+// orig 0x7f8c0
 float CHalfLifeMultiplay::FlHealthChargerRechargeTime()
 {
 	return 60;
 }
 
 
+// orig 0x7f8d0
 float CHalfLifeMultiplay::FlHEVChargerRechargeTime()
 {
 	return 30;
@@ -1165,6 +1193,7 @@ float CHalfLifeMultiplay::FlHEVChargerRechargeTime()
 
 //=========================================================
 //=========================================================
+// orig 0x7f8e0
 int CHalfLifeMultiplay::DeadPlayerWeapons(CBasePlayer* pPlayer)
 {
 	return GR_PLR_DROP_GUN_ACTIVE;
@@ -1172,6 +1201,7 @@ int CHalfLifeMultiplay::DeadPlayerWeapons(CBasePlayer* pPlayer)
 
 //=========================================================
 //=========================================================
+// orig 0x7f8f0
 int CHalfLifeMultiplay::DeadPlayerAmmo(CBasePlayer* pPlayer)
 {
 	return GR_PLR_DROP_AMMO_ACTIVE;
@@ -1191,6 +1221,7 @@ edict_t* CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer* pPlayer)
 
 //=========================================================
 //=========================================================
+// orig 0x7f950
 int CHalfLifeMultiplay::PlayerRelationship(CBaseEntity* pPlayer, CBaseEntity* pTarget)
 {
 	// half life deathmatch has only enemies
