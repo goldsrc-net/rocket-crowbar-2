@@ -274,6 +274,11 @@ public:
 	void FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t* pevAttacker = NULL);
 	Vector FireBulletsPlayer(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t* pevAttacker = NULL, int shared_rand = 0);
 
+	// Rocket Crowbar 2 (orig slot 47, the one virtual RC2 inserted before Respawn): the entity an
+	// effect really lands on; CBaseEntity's own code forwards TakeDamage to it when it isn't this.
+	// RC 1.9's name. reference/BASE_VIRTUALS.md
+	virtual CBaseEntity* GetEffectedEnt() { return this; } // orig 0x4ab0
+
 	virtual CBaseEntity* Respawn() { return NULL; }
 
 	void SUB_UseTargets(CBaseEntity* pActivator, USE_TYPE useType, float value);
@@ -366,6 +371,35 @@ public:
 
 	virtual bool FVisible(CBaseEntity* pEntity);
 	virtual bool FVisible(const Vector& vecOrigin);
+
+	// Rocket Crowbar 2: the 21 virtuals RC2 appended to CBaseEntity, in its order (orig slots
+	// 58-78). rc2.dll keeps no names for them; RC 1.9's are used where it is the same virtual,
+	// the rest are ours (marked). Bodies are the original's defaults; reference/BASE_VIRTUALS.md
+	// has what each one's callers and overrides do.
+	// 58: where a grabbing entity pulls pPulled to (RC 1.9's GetPullOrg, with a second float).
+	virtual bool GetPullOrg(CBaseEntity* pPulled, Vector& vecOrigin, float& flForce, float& flOther) { return false; } // VERIFY: the floats' meaning // orig 0x4c30
+	virtual float GetForceScale() { return 1.0f; } // 59, ours: scales the force ApplyExternalForce applies (orig 0x4c40)
+	virtual bool ApplyExternalForce(float flInterval); // 60, ours: an outside force into pev->velocity
+	// 61-68, ours, named from the rc2.ini key each default returns: the damage that effect does
+	// to this entity (the big monsters override them with fixed amounts)
+	virtual float TransphasicImpactDamage();
+	virtual float GlobalBeamDamage();
+	virtual float FartDamageInflict();
+	virtual float ZoomedPrimaryDamage();
+	virtual float ZoomedSecondaryDamage();
+	virtual float BeamCoreDamage();
+	virtual float BeamRadialMaxDamage();
+	virtual float BeamViewDamage();
+	virtual void ReleasePull(CBaseEntity* pPulled) {} // 69, ours: let go of what GetPullOrg holds (orig 0x4cd0)
+	virtual int GetGuassHull() { return 1; }		  // 70, RC 1.9's: the hull the gauss traces against this (orig 0x4ce0)
+	virtual float GetGuassDistOut() { return 56.0f; } // 71, RC 1.9's (an int there) (orig 0x4cf0)
+	virtual void GravGrenAnnihilate(CBaseEntity* pInflictor, CBaseEntity* pAttacker); // 72, ours
+	virtual bool IsActivePlayer() { return false; }	  // 73, ours: where SDK 2.3 asked IsPlayer() in touches (orig 0x4d40)
+	virtual bool IsCleanupKillable() { return false; } // 74, ours: killed by the cleanup function at 0x1350 (orig 0x4d50)
+	virtual int GetRCCaps(int iAsker, CBaseEntity* pAsker) { return 0; }	// 75, RC 1.9's idea; VERIFY: argument types (orig 0x4d60)
+	virtual int GetRCCaps2(int iAsker, CBaseEntity* pAsker) { return 0; } // 76, ours; VERIFY: as 75 (orig 0x4d70)
+	virtual bool IsViewOfPlayer(CBaseEntity* pPlayer);				  // 77, ours: the player sees through this
+	virtual bool IsSeeThroughFor(edict_t* pViewed) { return false; } // 78, ours: the player is drawn translucent (orig 0x4d80)
 
 	//We use this variables to store each ammo count.
 	int ammo_9mm;

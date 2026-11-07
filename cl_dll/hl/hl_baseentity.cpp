@@ -164,6 +164,18 @@ bool CBaseMonster::FInViewCone(CBaseEntity* pEntity) { return false; }
 bool CBaseMonster::FInViewCone(Vector* pOrigin) { return false; }
 bool CBaseEntity::FVisible(CBaseEntity* pEntity) { return false; }
 bool CBaseEntity::FVisible(const Vector& vecOrigin) { return false; }
+// Rocket Crowbar 2's added CBaseEntity virtuals (dlls/cbase.cpp on the server)
+float CBaseEntity::TransphasicImpactDamage() { return 0; }
+float CBaseEntity::GlobalBeamDamage() { return 0; }
+float CBaseEntity::FartDamageInflict() { return 0; }
+float CBaseEntity::ZoomedPrimaryDamage() { return 0; }
+float CBaseEntity::ZoomedSecondaryDamage() { return 0; }
+float CBaseEntity::BeamCoreDamage() { return 0; }
+float CBaseEntity::BeamRadialMaxDamage() { return 0; }
+float CBaseEntity::BeamViewDamage() { return 0; }
+void CBaseEntity::GravGrenAnnihilate(CBaseEntity* pInflictor, CBaseEntity* pAttacker) {}
+bool CBaseEntity::ApplyExternalForce(float flInterval) { return false; }
+bool CBaseEntity::IsViewOfPlayer(CBaseEntity* pPlayer) { return false; }
 void CBaseMonster::MakeIdealYaw(Vector vecTarget) {}
 float CBaseMonster::FlYawDiff() { return 0.0; }
 float CBaseMonster::ChangeYaw(int yawSpeed) { return 0; }

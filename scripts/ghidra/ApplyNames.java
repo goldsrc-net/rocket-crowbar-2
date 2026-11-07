@@ -62,6 +62,27 @@ public class ApplyNames extends GhidraScript {
             }
         }
         }
+        // every vtable slot target is a function, even one only ever called through its vtable,
+        // which analysis can miss (reference/vtables-<lib>.tsv)
+        int slotFns = 0;
+        File vt = new File(refDir, "vtables-" + lib + ".tsv");
+        if (vt.exists()) {
+            try (BufferedReader r = new BufferedReader(new FileReader(vt))) {
+                String line = r.readLine();
+                while ((line = r.readLine()) != null) {
+                    String[] f = line.split("\t");
+                    if (f.length < 7) continue;
+                    for (String e : f[6].split(" ")) {
+                        Address a = base.add(Long.decode(e.split(":")[0]));
+                        if (getFunctionAt(a) == null) {
+                            disassemble(a);
+                            if (createFunction(a, null) != null) slotFns++;
+                        }
+                    }
+                }
+            }
+        }
+        println("ApplyNames: " + lib + ": " + slotFns + " functions created at vtable slots");
         println("ApplyNames: " + lib + ": " + renamed + " named (" + created + " functions created, " +
                 demangled + " demangled), " + kept + " already named by analysis");
         int total = 0, named = 0;

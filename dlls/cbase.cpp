@@ -22,6 +22,7 @@
 #include "gamerules.h"
 #include "game.h"
 #include "pm_shared.h"
+#include "rc2prefs.h"
 
 void EntvarsKeyvalue(entvars_t* pev, KeyValueData* pkvd);
 
@@ -812,4 +813,48 @@ CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, co
 	pEntity->pev->angles = vecAngles;
 	DispatchSpawn(pEntity->edict());
 	return pEntity;
+}
+
+
+// Rocket Crowbar 2: the defaults of CBaseEntity's added virtuals that aren't inline in cbase.h
+// (the original has them inline; here they read rc2.ini, which the client doesn't link).
+// reference/BASE_VIRTUALS.md
+
+// orig 0x4c50
+float CBaseEntity::TransphasicImpactDamage() { return RC2Pref(RC2P_Glock_TransphasicImpactDamage).f; }
+// orig 0x4c60
+float CBaseEntity::GlobalBeamDamage() { return RC2Pref(RC2P_Tripmine_GlobalBeamDamage).f; }
+// orig 0x4c70
+float CBaseEntity::FartDamageInflict() { return RC2Pref(RC2P_MP5_FartDamageInflict).f; }
+// orig 0x4c80
+float CBaseEntity::ZoomedPrimaryDamage() { return RC2Pref(RC2P_Crossbow_ZoomedPrimaryDamage).f; }
+// orig 0x4c90
+float CBaseEntity::ZoomedSecondaryDamage() { return RC2Pref(RC2P_Crossbow_ZoomedSecondaryDamage).f; }
+// orig 0x4ca0
+float CBaseEntity::BeamCoreDamage() { return RC2Pref(RC2P_TransformHoundeye_BeamCoreDamage).f; }
+// orig 0x4cb0
+float CBaseEntity::BeamRadialMaxDamage() { return RC2Pref(RC2P_TransformHoundeye_BeamRadialMaxDamage).f; }
+// orig 0x4cc0
+float CBaseEntity::BeamViewDamage() { return RC2Pref(RC2P_TransformHoundeye_BeamViewDamage).f; }
+
+// orig 0x4d00: the gravity grenade's kill, as blast + energy beam that always gibs
+void CBaseEntity::GravGrenAnnihilate(CBaseEntity* pInflictor, CBaseEntity* pAttacker)
+{
+	if (pev->takedamage != DAMAGE_NO)
+		TakeDamage(pInflictor->pev, pAttacker->pev, RC2Pref(RC2P_Grenade_GravGrenAnnihilateDamage).f, DMG_ALWAYSGIB | DMG_ENERGYBEAM | DMG_BLAST);
+}
+
+// TEMP STUB for 0xa9ba0 (3107 bytes, the run between pm_shared and python in files-rc2.tsv):
+// its package reconstructs it.
+bool CBaseEntity::ApplyExternalForce(float flInterval)
+{
+	return false;
+}
+
+// TEMP STUB for 0x1a7e0: true when pPlayer is a player and this entity's owner is one of three
+// entity indices the player keeps (RC2 members at +0x69c, +0x6a4, +0x6a8); the player package
+// reconstructs it with those members.
+bool CBaseEntity::IsViewOfPlayer(CBaseEntity* pPlayer)
+{
+	return false;
 }
