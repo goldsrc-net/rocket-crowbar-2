@@ -162,6 +162,14 @@ public:
 
 protected:
 	CBasePlayerItem* FindNextBestWeapon(CBasePlayer* pPlayer, CBasePlayerItem* pCurrentWeapon);
+
+public:
+	// p4 needs:
+	// orig slot 58 (0xe8; RC2 added three CGameRules virtuals before PlayFootstepSounds, now 60):
+	// may a player's attack hurt pVictim. CHalfLifeMultiplay's returns 1 (0x805a0); asked by the
+	// freeze grenade and RC2's other area attacks when the attacker is a player. Name ours.
+	// VERIFY: the singleplayer and teamplay bodies are not read yet
+	virtual bool FCanHurt(CBaseEntity* pAttacker, CBaseEntity* pVictim) { return true; }
 };
 
 extern CGameRules* InstallGameRules();

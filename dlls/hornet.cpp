@@ -29,7 +29,7 @@
 int iHornetTrail;
 int iHornetPuff;
 
-LINK_ENTITY_TO_CLASS(hornet, CHornet);
+LINK_ENTITY_TO_CLASS(hornet, CHornet); // orig 0x62890
 
 //=========================================================
 // Save/Restore
@@ -41,7 +41,7 @@ TYPEDESCRIPTION CHornet::m_SaveData[] =
 		DEFINE_FIELD(CHornet, m_flFlySpeed, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CHornet, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CHornet, CBaseMonster); // orig 0x62900 (Save), orig 0x62930 (Restore)
 
 //=========================================================
 // don't let hornets gib, ever.
@@ -57,6 +57,7 @@ bool CHornet::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float 
 
 //=========================================================
 //=========================================================
+// orig 0x62990
 void CHornet::Spawn()
 {
 	Precache();
@@ -165,6 +166,7 @@ int CHornet::Classify()
 //=========================================================
 // StartTrack - starts a hornet out tracking its target
 //=========================================================
+// orig 0x62c30
 void CHornet::StartTrack()
 {
 	IgniteTrail();
@@ -246,6 +248,7 @@ old colors
 //=========================================================
 // Hornet is flying, gently tracking target
 //=========================================================
+// orig 0x62d40
 void CHornet::TrackTarget()
 {
 	Vector vecFlightDir;
@@ -402,6 +405,7 @@ void CHornet::TrackTouch(CBaseEntity* pOther)
 	DieTouch(pOther);
 }
 
+// orig 0x63740
 void CHornet::DartTouch(CBaseEntity* pOther)
 {
 	DieTouch(pOther);

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -12,6 +12,11 @@
 *   without written permission from Valve LLC.
 *
 ****/
+
+// Rocket Crowbar 2: the MP5 fires the bolts of rc2/mp5bolts.cpp, every number from rc2.ini's
+// [MP5] and [Ammo]. The rules are server-side; the client build of this file (weapon
+// prediction) keeps only what it needs to compile, since RC2's own client.dll does its
+// prediction.
 
 #include "extdll.h"
 #include "util.h"
@@ -22,13 +27,18 @@
 #include "soundent.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#ifndef CLIENT_DLL
+#include "rc2prefs.h"
+#include "p4_needs.h"
+#endif
 
-LINK_ENTITY_TO_CLASS(weapon_mp5, CMP5);
-LINK_ENTITY_TO_CLASS(weapon_9mmAR, CMP5);
+LINK_ENTITY_TO_CLASS(weapon_mp5, CMP5);	  // orig 0x7be40
+LINK_ENTITY_TO_CLASS(weapon_9mmAR, CMP5); // orig 0x7beb0
 
 
 //=========================================================
 //=========================================================
+// orig 0x7bf30
 void CMP5::Spawn()
 {
 	pev->classname = MAKE_STRING("weapon_9mmAR"); // hack to allow for old names
@@ -36,12 +46,20 @@ void CMP5::Spawn()
 	SET_MODEL(ENT(pev), "models/w_9mmAR.mdl");
 	m_iId = WEAPON_MP5;
 
-	m_iDefaultAmmo = gpGlobals->maxClients > 1 ? MP5_MAX_CLIP : MP5_DEFAULT_GIVE;
+#ifndef CLIENT_DLL
+	m_iDefaultAmmo = RC2Pref(RC2P_Ammo_MP5PickupGive).s;
+	m_iDefaultAmmo2 = RC2Pref(RC2P_Ammo_MP5PickupGrenadeGive).s;
+#endif
+	m_sBlasterCount = 0;
+	m_sBouncyCount = 0;
+	m_sPulseCount = 0;
+	m_flNextSync = gpGlobals->time;
 
 	FallInit(); // get ready to fall down.
 }
 
 
+// orig 0x7bfc0
 void CMP5::Precache()
 {
 	PRECACHE_MODEL("models/v_9mmAR.mdl");
@@ -61,172 +79,413 @@ void CMP5::Precache()
 	PRECACHE_SOUND("weapons/hks1.wav"); // H to the K
 	PRECACHE_SOUND("weapons/hks2.wav"); // H to the K
 	PRECACHE_SOUND("weapons/hks3.wav"); // H to the K
+	PRECACHE_SOUND("weapons/mp5charge.wav");
 
 	PRECACHE_SOUND("weapons/glauncher.wav");
 	PRECACHE_SOUND("weapons/glauncher2.wav");
 
 	PRECACHE_SOUND("weapons/357_cock1.wav");
+	PRECACHE_SOUND("debris/beamstart4.wav");
+	PRECACHE_SOUND("debris/beamstart9.wav");
+	PRECACHE_SOUND("debris/beamstart10.wav");
+	PRECACHE_SOUND("ambience/biggun3.wav");
 
-	m_usMP5 = PRECACHE_EVENT(1, "events/mp5.sc");
-	m_usMP52 = PRECACHE_EVENT(1, "events/mp52.sc");
+	UTIL_PrecacheOther("blaster_bolt");
+	UTIL_PrecacheOther("phase_pulse");
+	UTIL_PrecacheOther("bouncy_bolt");
+
+	m_usMP5Primary = PRECACHE_EVENT(1, "events/mp5primary.sc");
+	m_usMP5Fart = PRECACHE_EVENT(1, "events/mp5fart.sc");
+	m_usMP5Bouncy = PRECACHE_EVENT(1, "events/mp5bouncy.sc");
+	m_usMP5Pulse = PRECACHE_EVENT(1, "events/mp5pulse.sc");
+	m_usMP5Charge = PRECACHE_EVENT(1, "events/mp5charge.sc");
 }
 
+// orig 0x7c130
 bool CMP5::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "9mm";
-	p->iMaxAmmo1 = _9MM_MAX_CARRY;
 	p->pszAmmo2 = "ARgrenades";
+#ifndef CLIENT_DLL
+	p->iMaxAmmo1 = RC2Pref(RC2P_Ammo_MaxCarry9mmBullets).s;
+	p->iMaxAmmo2 = RC2Pref(RC2P_Ammo_MaxCarryMP5Grenades).s;
+	p->iMaxClip = RC2Pref(RC2P_Ammo_MP5ClipSize).s;
+#else
+	p->iMaxAmmo1 = _9MM_MAX_CARRY;
 	p->iMaxAmmo2 = M203_GRENADE_MAX_CARRY;
 	p->iMaxClip = MP5_MAX_CLIP;
+#endif
 	p->iSlot = 2;
 	p->iPosition = 0;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_MP5;
-	p->iWeight = MP5_WEIGHT;
+	p->iWeight = 20; // Rocket Crowbar 2: MP5_WEIGHT is 15
 
 	return true;
 }
 
+// orig 0x7c1b0
+void CMP5::AddToPlayer(CBasePlayer* pPlayer)
+{
+	CBasePlayerWeapon::AddToPlayer(pPlayer);
+}
+
+// orig 0x7c210
 bool CMP5::Deploy()
 {
+	m_iPulseCharging = 0;
+	m_fInAttack = 0;
+
+#ifndef CLIENT_DLL
+	// the bolt counts, for the client's bolts to match the server's
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeaponSync, NULL, m_pPlayer->edict());
+	WRITE_BYTE(WEAPON_MP5);
+	WRITE_SHORT(m_sBlasterCount);
+	WRITE_SHORT(m_sBouncyCount);
+	WRITE_SHORT(m_sPulseCount);
+	MESSAGE_END();
+#endif
+	m_flNextSync = gpGlobals->time + 0.25;
+
 	return DefaultDeploy("models/v_9mmAR.mdl", "models/p_9mmAR.mdl", MP5_DEPLOY, "mp5");
 }
 
-
-void CMP5::PrimaryAttack()
+// orig 0x7c2c0
+bool CMP5::CanHolster()
 {
-	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
+	return 0 == m_fInAttack && 0 == m_iPulseCharging;
+}
+
+// orig 0x7c2e0
+void CMP5::Holster()
+{
+	m_fInReload = false;
+	m_iPulseCharging = 0;
+	m_fInAttack = 0;
+	CBasePlayerWeapon::Holster();
+}
+
+// Every attack timer pushed at least flDelay out (the "can't fire" answer). Name ours.
+void CMP5::WeaponTimeout(float flDelay)
+{
+#ifndef CLIENT_DLL
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flDelay);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flDelay);
+#endif
+}
+
+// The primary and tertiary fire, which differ only in the bolt, its count, event and rc2.ini
+// keys: one bolt from the clip, from the gun along the view, with the player's ping as its
+// head start. Name ours.
+void CMP5::FireBolt(const char* pszBolt, short& sCount, unsigned short usEvent, int iAmmoCost, float flRefire1, float flRefire2, float flRefire3, float flRefire4)
+{
+#ifndef CLIENT_DLL
+	// under water only with the player's attribute for it
+	if (m_pPlayer->pev->waterlevel == 3 && !RC2_PlayerFiresUnderwater(m_pPlayer))
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
+		WeaponTimeout(0.15);
 		return;
 	}
 
-	if (m_iClip <= 0)
+	if (m_iClip < iAmmoCost)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
+		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] + m_iClip >= iAmmoCost)
+		{
+			Reload();
+			return;
+		}
+		WeaponTimeout(0.15);
 		return;
 	}
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
-
-	m_iClip--;
-
-
-	m_pPlayer->pev->effects = (int)(m_pPlayer->pev->effects) | EF_MUZZLEFLASH;
-
-	// player "shoot" animation
+	m_iClip -= iAmmoCost;
+	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
-	Vector vecDir;
 
-#ifdef CLIENT_DLL
-	if (bIsMultiplayer())
-#else
-	if (g_pGameRules->IsMultiplayer())
-#endif
-	{
-		// optimized multiplayer. Widened to make it easier to hit a moving player
-		vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
-	}
-	else
-	{
-		// single player spread
-		vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
-	}
-
-	int flags;
-#if defined(CLIENT_WEAPONS)
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
-#endif
-
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usMP5, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0);
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, sCount, 0, 0);
 
 	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.1);
-
-	if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
-
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flRefire1);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flRefire2);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flRefire3);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flRefire4);
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	CBaseEntity* pBolt = CBaseEntity::Create(pszBolt, vecSrc, g_vecZero, m_pPlayer->edict());
+	pBolt->pev->movedir = gpGlobals->v_forward;
+	pBolt->pev->impulse = sCount;
+	pBolt->pev->button = ENTINDEX(m_pPlayer->edict());
+
+	int iPing = 0, iLoss = 0;
+	PLAYER_CNX_STATS(m_pPlayer->edict(), &iPing, &iLoss);
+	pBolt->pev->armorvalue = iPing * 0.001;
+
+	if (++sCount > 0x7ffe)
+		sCount = 0;
+
+	m_flNextSync = gpGlobals->time + 0.2;
+#endif
 }
 
+// orig 0x7c300
+void CMP5::PrimaryAttack()
+{
+#ifndef CLIENT_DLL
+	FireBolt("blaster_bolt", m_sBlasterCount, m_usMP5Primary, (unsigned short)RC2Pref(RC2P_MP5_PrimaryAmmoCost).s,
+		RC2Pref(RC2P_MP5_PrimaryRefirePrimary).f, RC2Pref(RC2P_MP5_PrimaryRefireSecondary).f, RC2Pref(RC2P_MP5_PrimaryRefireTertiary).f, RC2Pref(RC2P_MP5_PrimaryRefireQuaternary).f);
+#endif
+}
 
-
+// orig 0x7c6e0
 void CMP5::SecondaryAttack()
 {
-	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
+#ifndef CLIENT_DLL
+	// the fart: hurts what is behind the player, throws the player forward. Grenade ammo.
+	if (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] < (unsigned short)RC2Pref(RC2P_MP5_FartAmmoCost).s || 0 != m_pPlayer->m_iRC2LinkedEnt)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
+		WeaponTimeout(0.15);
 		return;
 	}
 
-	if (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] == 0)
+	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
+	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
+	m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] -= (unsigned short)RC2Pref(RC2P_MP5_FartAmmoCost).s;
+	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+	m_pPlayer->SetAnimation(PLAYER_SUPERJUMP);
+
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5Fart, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, m_pPlayer->pev->waterlevel >= 2 ? 1 : 0, 0);
+
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_MP5_SecondaryRefirePrimary).f);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_MP5_SecondaryRefireSecondary).f);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_MP5_SecondaryRefireTertiary).f);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_MP5_SecondaryRefireQuaternary).f);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	Vector vecDir = gpGlobals->v_forward;
+	if (RC2Pref(RC2P_MP5_FartForceHorizontal).b)
+	{
+		const float flLength = sqrt(vecDir.x * vecDir.x + vecDir.y * vecDir.y);
+		if (flLength == 0)
+			vecDir = Vector(0, 0, 1);
+		else
+			vecDir = Vector(vecDir.x * (1 / flLength), vecDir.y * (1 / flLength), 0);
+	}
+
+	float flScale;
+	if (m_pPlayer->pev->waterlevel >= 2)
+	{
+		// under water: no damage, a different push
+		flScale = RC2Pref(RC2P_MP5_FartWaterSpeedScale).f;
+	}
+	else
+	{
+		flScale = 1.0;
+
+		const Vector vecSrc = m_pPlayer->pev->origin;
+		const float flMinDot = RC2Pref(RC2P_MP5_FartDamageMinDot).f;
+		const float flMaxDist = RC2Pref(RC2P_MP5_FartDamageMaxDist).f;
+
+		UTIL_PushEntityMask();
+		CBaseEntity* pEntity = NULL;
+		Vector vecSpot;
+		while ((pEntity = UTIL_FindEntityInSphereDist(pEntity, vecSrc, flMaxDist, NULL, &vecSpot)) != NULL)
+		{
+			CBaseEntity* pTarget = pEntity->GetEffectedEnt();
+			if (!pTarget)
+				continue;
+			if (UTIL_IsEntityMarked(ENTINDEX(pTarget->edict())))
+				continue;
+			if (pTarget->edict() == m_pPlayer->edict())
+				continue;
+			if (pTarget->pev->takedamage != DAMAGE_AIM)
+				continue;
+			if (!pTarget->IsAlive())
+				continue;
+			if (!(pTarget->FartDamageInflict() > 0))
+				continue;
+
+			// only what is behind the player (the direction from it to the player is the aim)
+			Vector vecToPlayer = vecSrc - vecSpot;
+			const float flLength = vecToPlayer.Length();
+			const Vector vecToPlayerDir = flLength == 0 ? Vector(0, 0, 1) : vecToPlayer * (1 / flLength);
+			if (DotProduct(vecToPlayerDir, vecDir) < flMinDot)
+				continue;
+
+			TraceResult tr;
+			UTIL_TraceLine(vecSrc, vecSpot, ignore_monsters, m_pPlayer->edict(), &tr);
+			if (tr.flFraction < 1.0 && tr.pHit != pEntity->edict())
+				continue;
+
+			pTarget->TakeDamage(UTIL_NamedInflictor("mp5_fart"), m_pPlayer->pev, pTarget->FartDamageInflict(), DMG_NERVEGAS | DMG_NEVERGIB);
+			UTIL_MarkEntity(ENTINDEX(pTarget->edict()));
+		}
+		UTIL_PopEntityMask();
+
+		// an event for HLTV (the old SVC_HLTV director message, type 50)
+		MESSAGE_BEGIN(MSG_SPEC, 50);
+		WRITE_BYTE(3); // DRC_EVENT
+		WRITE_SHORT(ENTINDEX(m_pPlayer->edict()));
+		WRITE_SHORT(0);
+		WRITE_LONG(1);
+		MESSAGE_END();
+	}
+
+	m_pPlayer->pev->velocity = m_pPlayer->pev->velocity + (vecDir * RC2Pref(RC2P_MP5_FartSpeed).f + Vector(0, 0, RC2Pref(RC2P_MP5_FartZBoost).f)) * flScale;
+#endif
+}
+
+// orig 0x7cdc0
+void CMP5::TertiaryAttack()
+{
+#ifndef CLIENT_DLL
+	FireBolt("bouncy_bolt", m_sBouncyCount, m_usMP5Bouncy, (unsigned short)RC2Pref(RC2P_MP5_TertiaryAmmoCost).s,
+		RC2Pref(RC2P_MP5_TertiaryRefirePrimary).f, RC2Pref(RC2P_MP5_TertiaryRefireSecondary).f, RC2Pref(RC2P_MP5_TertiaryRefireTertiary).f, RC2Pref(RC2P_MP5_TertiaryRefireQuaternary).f);
+#endif
+}
+
+// orig 0x7d1a0
+void CMP5::QuaternaryAttack()
+{
+#ifndef CLIENT_DLL
+	// start charging a phase pulse: grenade ammo now, clip ammo while it charges (WeaponFrame)
+	if (m_pPlayer->pev->waterlevel == 3 && !RC2_PlayerFiresUnderwater(m_pPlayer))
 	{
 		PlayEmptySound();
+		WeaponTimeout(0.15);
+		return;
+	}
+
+	if (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] < (unsigned short)RC2Pref(RC2P_MP5_PulseSecondaryAmmoCost).s)
+	{
+		PlayEmptySound();
+		WeaponTimeout(0.15);
+		return;
+	}
+
+	const int iCost = (unsigned short)RC2Pref(RC2P_MP5_PulsePrimaryAmmoCost).s;
+	if (m_iClip < iCost)
+	{
+		PlayEmptySound();
+		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] + m_iClip >= iCost)
+		{
+			Reload();
+			return;
+		}
+		WeaponTimeout(0.15);
+		return;
+	}
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flNextTertiaryAttack = m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 2.0;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase();
+	m_iPulseCharging = 1;
+	m_fInAttack = 1;
+	m_flPulseReady = gpGlobals->time + RC2Pref(RC2P_MP5_PulseChargeTime).f;
+	m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] -= (unsigned short)RC2Pref(RC2P_MP5_PulseSecondaryAmmoCost).s;
+
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5Charge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, 0, 0);
+#endif
+}
+
+// orig 0x7d420
+void CMP5::FirePulse()
+{
+#ifndef CLIENT_DLL
+	if (m_pPlayer->pev->waterlevel == 3 && !RC2_PlayerFiresUnderwater(m_pPlayer))
+	{
+		// went under water while charging: the charge is lost
+		PlayEmptySound();
+		m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 0.3;
+		m_flNextTertiaryAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+		if (0 != g_iRC2WeaponFrame)
+		{
+			m_iPulseCharging = 0;
+			m_fInAttack = 0;
+		}
 		return;
 	}
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-
-	m_pPlayer->m_iExtraSoundTypes = bits_SOUND_DANGER;
-	m_pPlayer->m_flStopExtraSoundTime = UTIL_WeaponTimeBase() + 0.2;
-
-	m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType]--;
-
-	// player "shoot" animation
+	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
+	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	Vector vecSrc = m_pPlayer->GetGunPosition();
 
-	// we don't add in player velocity anymore.
-	CGrenade::ShootContact(m_pPlayer->pev,
-		m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16,
-		gpGlobals->v_forward * 800);
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMP5Pulse, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, m_sPulseCount, 0, 0);
 
-	int flags;
-#if defined(CLIENT_WEAPONS)
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
-#endif
-
-	PLAYBACK_EVENT(flags, m_pPlayer->edict(), m_usMP52);
-
-	m_flNextPrimaryAttack = GetNextAttackDelay(1);
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5; // idle pretty soon after shooting.
-
-	if (0 == m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType])
-		// HEV suit - indicate out of ammo condition
+	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
+
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_MP5_QuaternaryRefirePrimary).f;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_MP5_QuaternaryRefireSecondary).f;
+	m_flNextTertiaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_MP5_QuaternaryRefireTertiary).f;
+	m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_MP5_QuaternaryRefireQuaternary).f;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	CBaseEntity* pPulse = CBaseEntity::Create("phase_pulse", vecSrc + gpGlobals->v_forward * 12, g_vecZero, m_pPlayer->edict());
+	pPulse->pev->movedir = gpGlobals->v_forward;
+	pPulse->pev->impulse = m_sPulseCount;
+	pPulse->pev->button = ENTINDEX(m_pPlayer->edict());
+
+	int iPing = 0, iLoss = 0;
+	PLAYER_CNX_STATS(m_pPlayer->edict(), &iPing, &iLoss);
+	pPulse->pev->armorvalue = iPing * 0.001;
+
+	if (0 != g_iRC2WeaponFrame)
+	{
+		m_sPulseCount++;
+		m_fInAttack = 0;
+		m_iPulseCharging = 0;
+		if (m_sPulseCount > 0x7ffe)
+			m_sPulseCount = 0;
+	}
+#endif
 }
 
+// orig 0x7d7b0
 void CMP5::Reload()
 {
+	if (0 != m_fInAttack) // Rocket Crowbar 2: not while charging
+		return;
+
 	if (m_pPlayer->ammo_9mm <= 0)
 		return;
 
+#ifndef CLIENT_DLL
+	DefaultReload(RC2Pref(RC2P_Ammo_MP5ClipSize).s, MP5_RELOAD, RC2Pref(RC2P_MP5_ReloadTime).f);
+#else
 	DefaultReload(MP5_MAX_CLIP, MP5_RELOAD, 1.5);
+#endif
 }
 
 
+// orig 0x7d7e0
 void CMP5::WeaponIdle()
 {
+	if (0 != m_fInAttack) // Rocket Crowbar 2: not while charging
+		return;
+
 	ResetEmptySound();
 
 	m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
@@ -252,24 +511,85 @@ void CMP5::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15); // how long till we do this again.
 }
 
+// orig 0x7d870
+void CMP5::WeaponFrame()
+{
+#ifndef CLIENT_DLL
+	// the bolt counts to the client every half second
+	if (m_flNextSync < gpGlobals->time)
+	{
+		m_flNextSync = gpGlobals->time + 0.5;
+		MESSAGE_BEGIN(MSG_ONE, gmsgWeaponSync, NULL, m_pPlayer->edict());
+		WRITE_BYTE(WEAPON_MP5);
+		WRITE_SHORT(m_sBlasterCount);
+		WRITE_SHORT(m_sBouncyCount);
+		WRITE_SHORT(m_sPulseCount);
+		MESSAGE_END();
+	}
+
+	if (0 == m_iPulseCharging)
+		return;
+
+	if (m_fInAttack == 1)
+	{
+		// the charge draws [MP5] PulsePrimaryAmmoCost from the clip over PulseChargeTime
+		if (UTIL_WeaponTimeBase() >= m_pPlayer->m_flNextAmmoBurn)
+		{
+			m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + RC2Pref(RC2P_MP5_PulseChargeTime).f / (unsigned short)RC2Pref(RC2P_MP5_PulsePrimaryAmmoCost).s;
+			if (--m_iClip < 0)
+				m_iClip = 0;
+		}
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flNextTertiaryAttack = m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 2.0;
+	}
+
+	if (m_flPulseReady < gpGlobals->time)
+	{
+		FirePulse();
+		return;
+	}
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flNextTertiaryAttack = m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 1.0;
+	// no UTIL_WeaponTimeBase() here (kept)
+	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+#endif
+}
+
+// orig 0x7da00
+void CMP5::ReadSyncState(void* pData, int iSize)
+{
+#ifndef CLIENT_DLL
+	// the server's readers answer 0, so on the server this zeroes the counts
+	m_sBlasterCount = ReadSyncShort(&pData, &iSize);
+	m_sBouncyCount = ReadSyncShort(&pData, &iSize);
+	m_sPulseCount = ReadSyncShort(&pData, &iSize);
+#endif
+}
 
 
 class CMP5AmmoClip : public CBasePlayerAmmo
 {
+	// orig 0x7dac0
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_9mmARclip.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
+	// orig 0x7daf0
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_9mmARclip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
+	// orig 0x7db10
 	bool AddAmmo(CBaseEntity* pOther) override
 	{
+#ifndef CLIENT_DLL
+		// Rocket Crowbar 2: the amounts from rc2.ini (GiveAmmo takes a fourth argument there, 0 here)
+		bool bResult = (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_MP5SpareClipGive).s, "9mm", RC2Pref(RC2P_Ammo_MaxCarry9mmBullets).s) != -1);
+#else
 		bool bResult = (pOther->GiveAmmo(AMMO_MP5CLIP_GIVE, "9mm", _9MM_MAX_CARRY) != -1);
+#endif
 		if (bResult)
 		{
 			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
@@ -277,27 +597,35 @@ class CMP5AmmoClip : public CBasePlayerAmmo
 		return bResult;
 	}
 };
-LINK_ENTITY_TO_CLASS(ammo_mp5clip, CMP5AmmoClip);
-LINK_ENTITY_TO_CLASS(ammo_9mmAR, CMP5AmmoClip);
+LINK_ENTITY_TO_CLASS(ammo_mp5clip, CMP5AmmoClip); // orig 0x7da50
+LINK_ENTITY_TO_CLASS(ammo_9mmAR, CMP5AmmoClip);	  // orig 0x7db70
 
 
 
 class CMP5Chainammo : public CBasePlayerAmmo
 {
+	// orig 0x7dc50
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_chainammo.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
+	// orig 0x7dc80
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_chainammo.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
+	// orig 0x7dca0
 	bool AddAmmo(CBaseEntity* pOther) override
 	{
+#ifndef CLIENT_DLL
+		// Rocket Crowbar 2: the amounts from rc2.ini (GiveAmmo takes a fourth argument there, 0 here)
+		bool bResult = (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_Chainbox9mmGive).s, "9mm", RC2Pref(RC2P_Ammo_MaxCarry9mmBullets).s) != -1);
+#else
 		bool bResult = (pOther->GiveAmmo(AMMO_CHAINBOX_GIVE, "9mm", _9MM_MAX_CARRY) != -1);
+#endif
 		if (bResult)
 		{
 			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
@@ -305,25 +633,33 @@ class CMP5Chainammo : public CBasePlayerAmmo
 		return bResult;
 	}
 };
-LINK_ENTITY_TO_CLASS(ammo_9mmbox, CMP5Chainammo);
+LINK_ENTITY_TO_CLASS(ammo_9mmbox, CMP5Chainammo); // orig 0x7dbe0
 
 
 class CMP5AmmoGrenade : public CBasePlayerAmmo
 {
+	// orig 0x7dd70
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_ARgrenade.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
+	// orig 0x7dda0
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_ARgrenade.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
+	// orig 0x7ddc0
 	bool AddAmmo(CBaseEntity* pOther) override
 	{
+#ifndef CLIENT_DLL
+		// Rocket Crowbar 2: the amounts from rc2.ini (GiveAmmo takes a fourth argument there, 0 here)
+		bool bResult = (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_MP5LooseGrenadeGive).s, "ARgrenades", RC2Pref(RC2P_Ammo_MaxCarryMP5Grenades).s) != -1);
+#else
 		bool bResult = (pOther->GiveAmmo(AMMO_M203BOX_GIVE, "ARgrenades", M203_GRENADE_MAX_CARRY) != -1);
+#endif
 
 		if (bResult)
 		{
@@ -332,5 +668,5 @@ class CMP5AmmoGrenade : public CBasePlayerAmmo
 		return bResult;
 	}
 };
-LINK_ENTITY_TO_CLASS(ammo_mp5grenades, CMP5AmmoGrenade);
-LINK_ENTITY_TO_CLASS(ammo_ARgrenades, CMP5AmmoGrenade);
+LINK_ENTITY_TO_CLASS(ammo_mp5grenades, CMP5AmmoGrenade); // orig 0x7dd00
+LINK_ENTITY_TO_CLASS(ammo_ARgrenades, CMP5AmmoGrenade);	 // orig 0x7de20

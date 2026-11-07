@@ -125,6 +125,9 @@ public:
 	void Precache() override;
 	void SetYawSpeed() override;
 	int Classify() override;
+	// Rocket Crowbar 2: the capability bits the RC2 effects ask of a grunt (slot 75)
+	// orig 0x5f830
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x37ff; }
 	int ISoundMask() override;
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	bool FCanCheckAttacks() override;
@@ -185,7 +188,7 @@ public:
 	static const char* pGruntSentences[];
 };
 
-LINK_ENTITY_TO_CLASS(monster_human_grunt, CHGrunt);
+LINK_ENTITY_TO_CLASS(monster_human_grunt, CHGrunt); // orig 0x5f7b0
 
 TYPEDESCRIPTION CHGrunt::m_SaveData[] =
 	{
@@ -203,7 +206,7 @@ TYPEDESCRIPTION CHGrunt::m_SaveData[] =
 		DEFINE_FIELD(CHGrunt, m_iSentence, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CHGrunt, CSquadMonster);
+IMPLEMENT_SAVERESTORE(CHGrunt, CSquadMonster); // orig 0x5f840 (Save), orig 0x5f870 (Restore)
 
 const char* CHGrunt::pGruntSentences[] =
 	{
@@ -240,6 +243,7 @@ enum HGRUNT_SENTENCE_TYPES
 // may still fail but in most cases, well after the grunt has
 // started moving.
 //=========================================================
+// orig 0x5f8a0
 void CHGrunt::SpeakSentence()
 {
 	if (m_iSentence == HGRUNT_SENT_NONE)
@@ -259,8 +263,16 @@ void CHGrunt::SpeakSentence()
 // IRelationship - overridden because Alien Grunts are
 // Human Grunt's nemesis.
 //=========================================================
+// orig 0x5f900
 int CHGrunt::IRelationship(CBaseEntity* pTarget)
 {
+	// Rocket Crowbar 2: a grunt shrunk below half size fears anything that isn't (unscaled
+	// or over half). CBaseMonster's own rule uses full size; this one is the grunt's.
+	if (pev->scale < 0.5 && pev->scale > 0 && (pTarget->pev->scale == 0 || pTarget->pev->scale > 0.5))
+	{
+		return R_FR;
+	}
+
 	if (FClassnameIs(pTarget->pev, "monster_alien_grunt") || (FClassnameIs(pTarget->pev, "monster_gargantua")))
 	{
 		return R_NM;
@@ -272,6 +284,7 @@ int CHGrunt::IRelationship(CBaseEntity* pTarget)
 //=========================================================
 // GibMonster - make gun fly through the air.
 //=========================================================
+// orig 0x5fa00
 void CHGrunt::GibMonster()
 {
 	Vector vecGunPos;
@@ -315,6 +328,7 @@ void CHGrunt::GibMonster()
 // hear the DANGER sound that is made by hand grenades and
 // other dangerous items.
 //=========================================================
+// orig 0x5fc00
 int CHGrunt::ISoundMask()
 {
 	return bits_SOUND_WORLD |
@@ -392,6 +406,7 @@ void CHGrunt::PrescheduleThink()
 // this is a bad bug. Friendly machine gun fire avoidance
 // will unecessarily prevent the throwing of a grenade as well.
 //=========================================================
+// orig 0x5fd10
 bool CHGrunt::FCanCheckAttacks()
 {
 	if (!HasConditions(bits_COND_ENEMY_TOOFAR))
@@ -439,13 +454,14 @@ bool CHGrunt::CheckMeleeAttack1(float flDot, float flDist)
 // occluded (throw grenade over wall, etc). We must
 // disqualify the machine gun attack if the enemy is occluded.
 //=========================================================
+// orig 0x5fda0
 bool CHGrunt::CheckRangeAttack1(float flDot, float flDist)
 {
 	if (!HasConditions(bits_COND_ENEMY_OCCLUDED) && flDist <= 2048 && flDot >= 0.5 && NoFriendlyFire())
 	{
 		TraceResult tr;
 
-		if (!m_hEnemy->IsPlayer() && flDist <= 64)
+		if (!m_hEnemy->IsActivePlayer() && flDist <= 64) // Rocket Crowbar 2: IsActivePlayer
 		{
 			// kick nonclients, but don't shoot at them.
 			return false;
@@ -681,6 +697,7 @@ void CHGrunt::SetYawSpeed()
 	pev->yaw_speed = ys;
 }
 
+// orig 0x60570
 void CHGrunt::IdleSound()
 {
 	if (FOkToSpeak() && (0 != g_fGruntQuestion || RANDOM_LONG(0, 1)))
@@ -736,6 +753,7 @@ void CHGrunt::CheckAmmo()
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x60700
 int CHGrunt::Classify()
 {
 	return CLASS_HUMAN_MILITARY;
@@ -837,6 +855,7 @@ void CHGrunt::Shotgun()
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
+// orig 0x60ea0
 void CHGrunt::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	Vector vecShootDir;
@@ -1820,6 +1839,7 @@ IMPLEMENT_CUSTOM_SCHEDULES(CHGrunt, CSquadMonster);
 //=========================================================
 // SetActivity
 //=========================================================
+// orig 0x61a50
 void CHGrunt::SetActivity(Activity NewActivity)
 {
 	int iSequence = ACTIVITY_NOT_AVAILABLE;
@@ -1929,6 +1949,7 @@ void CHGrunt::SetActivity(Activity NewActivity)
 //=========================================================
 // Get Schedule!
 //=========================================================
+// orig 0x61c10
 Schedule_t* CHGrunt::GetSchedule()
 {
 
@@ -2022,7 +2043,7 @@ Schedule_t* CHGrunt::GetSchedule()
 					// before he starts pluggin away.
 					if (FOkToSpeak()) // && RANDOM_LONG(0,1))
 					{
-						if ((m_hEnemy != NULL) && m_hEnemy->IsPlayer())
+						if ((m_hEnemy != NULL) && m_hEnemy->IsActivePlayer()) // Rocket Crowbar 2: IsActivePlayer
 							// player
 							SENTENCEG_PlayRndSz(ENT(pev), "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
 						else if ((m_hEnemy != NULL) &&
@@ -2177,6 +2198,7 @@ Schedule_t* CHGrunt::GetSchedule()
 
 //=========================================================
 //=========================================================
+// orig 0x620c0
 Schedule_t* CHGrunt::GetScheduleOfType(int Type)
 {
 	switch (Type)
@@ -2285,7 +2307,7 @@ Schedule_t* CHGrunt::GetScheduleOfType(int Type)
 	}
 	case SCHED_GRUNT_SUPPRESS:
 	{
-		if (m_hEnemy->IsPlayer() && m_fFirstEncounter)
+		if (m_hEnemy->IsActivePlayer() && m_fFirstEncounter) // Rocket Crowbar 2: IsActivePlayer
 		{
 			m_fFirstEncounter = false; // after first encounter, leader won't issue handsigns anymore when he has a new enemy
 			return &slGruntSignalSuppress[0];
@@ -2343,7 +2365,7 @@ public:
 	int m_iSpriteTexture; // Don't save, precache
 };
 
-LINK_ENTITY_TO_CLASS(monster_grunt_repel, CHGruntRepel);
+LINK_ENTITY_TO_CLASS(monster_grunt_repel, CHGruntRepel); // orig 0x623d0
 
 void CHGruntRepel::Spawn()
 {
@@ -2359,6 +2381,7 @@ void CHGruntRepel::Precache()
 	m_iSpriteTexture = PRECACHE_MODEL("sprites/rope.spr");
 }
 
+// orig 0x62490
 void CHGruntRepel::RepelUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	TraceResult tr;
@@ -2395,6 +2418,7 @@ class CDeadHGrunt : public CBaseMonster
 {
 public:
 	void Spawn() override;
+	// orig 0x62740
 	int Classify() override { return CLASS_HUMAN_MILITARY; }
 
 	bool KeyValue(KeyValueData* pkvd) override;
@@ -2416,7 +2440,7 @@ bool CDeadHGrunt::KeyValue(KeyValueData* pkvd)
 	return CBaseMonster::KeyValue(pkvd);
 }
 
-LINK_ENTITY_TO_CLASS(monster_hgrunt_dead, CDeadHGrunt);
+LINK_ENTITY_TO_CLASS(monster_hgrunt_dead, CDeadHGrunt); // orig 0x626d0
 
 //=========================================================
 // ********** DeadHGrunt SPAWN **********

@@ -21,6 +21,7 @@
 #include "items.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#include "rc2prefs.h"
 
 class CHealthKit : public CItem
 {
@@ -37,7 +38,7 @@ class CHealthKit : public CItem
 };
 
 
-LINK_ENTITY_TO_CLASS(item_healthkit, CHealthKit);
+LINK_ENTITY_TO_CLASS(item_healthkit, CHealthKit); // orig 0x5ee80
 
 /*
 TYPEDESCRIPTION	CHealthKit::m_SaveData[] = 
@@ -49,6 +50,7 @@ TYPEDESCRIPTION	CHealthKit::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CHealthKit, CItem);
 */
 
+// orig 0x5eef0
 void CHealthKit::Spawn()
 {
 	Precache();
@@ -57,12 +59,14 @@ void CHealthKit::Spawn()
 	CItem::Spawn();
 }
 
+// orig 0x5ef20
 void CHealthKit::Precache()
 {
 	PRECACHE_MODEL("models/w_medkit.mdl");
 	PRECACHE_SOUND("items/smallmedkit1.wav");
 }
 
+// orig 0x5ef40
 bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
 {
 	if (pPlayer->pev->deadflag != DEAD_NO)
@@ -70,7 +74,29 @@ bool CHealthKit::MyTouch(CBasePlayer* pPlayer)
 		return false;
 	}
 
-	if (pPlayer->TakeHealth(gSkillData.healthkitCapacity, DMG_GENERIC))
+	// Rocket Crowbar 2: some of the creatures a player can be turned into can't use one
+	switch (pPlayer->m_iRC2Morph)
+	{
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+		return false;
+	}
+
+	// Rocket Crowbar 2: a player at full health can still take a kit, up to
+	// [Attributes] BaseHealthKitSuperFraction of max_health (truncated before the multiply)
+	bool bTaken = pPlayer->TakeHealth(gSkillData.healthkitCapacity, DMG_GENERIC);
+	if (!bTaken && (int)pPlayer->pev->max_health * RC2Pref(RC2P_Attributes_BaseHealthKitSuperFraction).f > pPlayer->pev->health)
+	{
+		const float flCap = (int)pPlayer->pev->max_health * RC2Pref(RC2P_Attributes_BaseHealthKitSuperFraction).f;
+		pPlayer->pev->health += gSkillData.healthkitCapacity;
+		if (flCap < pPlayer->pev->health)
+			pPlayer->pev->health = flCap;
+		bTaken = true;
+	}
+
+	if (bTaken)
 	{
 		MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev);
 		WRITE_STRING(STRING(pev->classname));
@@ -108,6 +134,7 @@ public:
 	void EXPORT Recharge();
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
+	// orig 0x5f210
 	int ObjectCaps() override { return (CBaseToggle::ObjectCaps() | FCAP_CONTINUOUS_USE) & ~FCAP_ACROSS_TRANSITION; }
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -130,11 +157,12 @@ TYPEDESCRIPTION CWallHealth::m_SaveData[] =
 		DEFINE_FIELD(CWallHealth, m_flSoundTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CWallHealth, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CWallHealth, CBaseEntity); // orig 0x5f140 (Save), orig 0x5f170 (Restore)
 
-LINK_ENTITY_TO_CLASS(func_healthcharger, CWallHealth);
+LINK_ENTITY_TO_CLASS(func_healthcharger, CWallHealth); // orig 0x5f1a0
 
 
+// orig 0x5f220
 bool CWallHealth::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "style") ||
@@ -154,6 +182,7 @@ bool CWallHealth::KeyValue(KeyValueData* pkvd)
 	return CBaseToggle::KeyValue(pkvd);
 }
 
+// orig 0x5f3a0
 void CWallHealth::Spawn()
 {
 	Precache();
@@ -168,6 +197,7 @@ void CWallHealth::Spawn()
 	pev->frame = 0;
 }
 
+// orig 0x5f430
 void CWallHealth::Precache()
 {
 	PRECACHE_SOUND("items/medshot4.wav");
@@ -176,16 +206,27 @@ void CWallHealth::Precache()
 }
 
 
+// orig 0x5f460
 void CWallHealth::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	// Make sure that we have a caller
 	if (!pActivator)
 		return;
 	// if it's not a player, ignore
-	if (!pActivator->IsPlayer())
+	if (!pActivator->IsActivePlayer())
 		return;
 
 	auto player = static_cast<CBasePlayer*>(pActivator);
+
+	// Rocket Crowbar 2: some of the creatures a player can be turned into can't use one
+	switch (player->m_iRC2Morph)
+	{
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+		return;
+	}
 
 	// if there is no juice left, turn it off
 	if (m_iJuice <= 0)
@@ -230,6 +271,18 @@ void CWallHealth::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 	// charge the player
 	if (player->TakeHealth(1, DMG_GENERIC))
 	{
+		m_iJuice--;
+	}
+
+	// Rocket Crowbar 2: past max_health, up to [Attributes] BaseHealthWallSuperFraction of it.
+	// Runs on the same tick as a TakeHealth that succeeded too, so a player just short of full
+	// gets 2 points for 2 juice.
+	if ((int)(RC2Pref(RC2P_Attributes_BaseHealthWallSuperFraction).f * player->pev->max_health) > player->pev->health)
+	{
+		player->pev->health += 1;
+		const int iCap = (int)(RC2Pref(RC2P_Attributes_BaseHealthWallSuperFraction).f * player->pev->max_health);
+		if (iCap < player->pev->health)
+			player->pev->health = iCap;
 		m_iJuice--;
 	}
 

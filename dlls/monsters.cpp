@@ -278,6 +278,7 @@ float CBaseMonster::FLSoundVolume(CSound* pSound)
 // FValidateHintType - tells use whether or not the monster cares
 // about the type of Hint Node given
 //=========================================================
+// orig 0x749f0
 bool CBaseMonster::FValidateHintType(short sHint)
 {
 	return false;
@@ -295,6 +296,7 @@ bool CBaseMonster::FValidateHintType(short sHint)
 // (linked via each ent's m_pLink field)
 //
 //=========================================================
+// orig 0x74a00
 void CBaseMonster::Look(int iDistance)
 {
 	int iSighted = 0;
@@ -327,7 +329,14 @@ void CBaseMonster::Look(int iDistance)
 				// don't check anything else about an entity that can't be seen, or an entity that you don't care about.
 				if (IRelationship(pSightEnt) != R_NO && FInViewCone(pSightEnt) && !FBitSet(pSightEnt->pev->flags, FL_NOTARGET) && FVisible(pSightEnt))
 				{
-					if (pSightEnt->IsPlayer())
+					// Rocket Crowbar 2: what the entity's capability bits (slot 76) say about
+					// being seen: 8, never; 0x20, only by humans, alien soldiers and player allies
+					if ((pSightEnt->GetRCCaps2(0, this) & 8) != 0)
+						continue;
+					if ((pSightEnt->GetRCCaps2(0, this) & 0x20) != 0 && Classify() != CLASS_HUMAN_PASSIVE && Classify() != CLASS_HUMAN_MILITARY && Classify() != CLASS_ALIEN_MILITARY && Classify() != CLASS_PLAYER_ALLY)
+						continue;
+
+					if (pSightEnt->IsActivePlayer()) // Rocket Crowbar 2: IsActivePlayer
 					{
 						if ((pev->spawnflags & SF_MONSTER_WAIT_TILL_SEEN) != 0)
 						{
@@ -395,6 +404,7 @@ void CBaseMonster::Look(int iDistance)
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
+// orig 0x74cc0
 int CBaseMonster::ISoundMask()
 {
 	return bits_SOUND_WORLD |
@@ -511,14 +521,22 @@ CSound* CBaseMonster::PBestScent()
 // Monster Think - calls out to core AI functions and handles this
 // monster's specific animation events
 //=========================================================
+// orig 0x74e60
 void CBaseMonster::MonsterThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1; // keep monster thinking.
 
+	// Rocket Crowbar 2: a frozen monster doesn't think; only outside forces still move it
+	if (m_fRC2Frozen)
+	{
+		ApplyExternalForce(RC2FrameAdvance(0));
+		return;
+	}
 
 	RunAI();
 
 	float flInterval = StudioFrameAdvance(); // animate
+	ApplyExternalForce(flInterval);			 // Rocket Crowbar 2
 											 // start or end a fidget
 											 // This needs a better home -- switching animations over time should be encapsulated on a per-activity basis
 											 // perhaps MaintainActivity() or a ShiftAnimationOverTime() or something.
@@ -564,6 +582,7 @@ void CBaseMonster::MonsterThink()
 // CBaseMonster - USE - will make a monster angry at whomever
 // activated it.
 //=========================================================
+// orig 0x74f40
 void CBaseMonster::MonsterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	//Don't do this because it can resurrect dying monsters
@@ -608,6 +627,7 @@ void CBaseMonster::RouteClear()
 // Route New - clears out a route to be changed, but keeps
 //				goal intact.
 //=========================================================
+// orig 0x74fc0
 void CBaseMonster::RouteNew()
 {
 	m_Route[0].iType = 0;
@@ -939,6 +959,7 @@ bool CBaseMonster::FBecomeProne()
 //=========================================================
 // CheckRangeAttack1
 //=========================================================
+// orig 0x75750
 bool CBaseMonster::CheckRangeAttack1(float flDot, float flDist)
 {
 	if (flDist > 64 && flDist <= 784 && flDot >= 0.5)
@@ -951,6 +972,7 @@ bool CBaseMonster::CheckRangeAttack1(float flDot, float flDist)
 //=========================================================
 // CheckRangeAttack2
 //=========================================================
+// orig 0x75790
 bool CBaseMonster::CheckRangeAttack2(float flDot, float flDist)
 {
 	if (flDist > 64 && flDist <= 512 && flDot >= 0.5)
@@ -976,6 +998,7 @@ bool CBaseMonster::CheckMeleeAttack1(float flDot, float flDist)
 //=========================================================
 // CheckMeleeAttack2
 //=========================================================
+// orig 0x75830
 bool CBaseMonster::CheckMeleeAttack2(float flDot, float flDist)
 {
 	if (flDist <= 64 && flDot >= 0.7)
@@ -1392,6 +1415,7 @@ int CBaseMonster::CheckLocalMove(const Vector& vecStart, const Vector& vecEnd, C
 }
 
 
+// orig 0x76270
 float CBaseMonster::OpenDoorAndWait(entvars_t* pevDoor)
 {
 	float flTravelTime = 0;
@@ -1786,6 +1810,7 @@ bool CBaseMonster::FTriangulate(const Vector& vecStart, const Vector& vecEnd, fl
 //=========================================================
 #define DIST_TO_CHECK 200
 
+// orig 0x771a0
 void CBaseMonster::Move(float flInterval)
 {
 	float flWaypointDist;
@@ -1956,6 +1981,7 @@ void CBaseMonster::Move(float flInterval)
 }
 
 
+// orig 0x77680
 bool CBaseMonster::ShouldAdvanceRoute(float flWaypointDist)
 {
 	if (flWaypointDist <= MONSTER_CUT_CORNER_DIST)
@@ -1996,14 +2022,10 @@ void CBaseMonster::MoveExecute(CBaseEntity* pTargetEnt, const Vector& vecDir, fl
 // initialization that should take place for all monsters
 // goes here.
 //=========================================================
+// orig 0x77750
 void CBaseMonster::MonsterInit()
 {
-	if (!g_pGameRules->FAllowMonsters())
-	{
-		pev->flags |= FL_KILLME; // Post this because some monster code modifies class data after calling this function
-								 //		REMOVE_ENTITY(ENT(pev));
-		return;
-	}
+	// Rocket Crowbar 2: no FAllowMonsters check (mp_allowmonsters is gone)
 
 	// Set fields common to all monsters
 	pev->effects = 0;
@@ -2044,6 +2066,7 @@ void CBaseMonster::MonsterInit()
 // MonsterInitThink - Calls StartMonster. Startmonster is
 // virtual, but this function cannot be
 //=========================================================
+// orig 0x77850
 void CBaseMonster::MonsterInitThink()
 {
 	StartMonster();
@@ -2053,6 +2076,7 @@ void CBaseMonster::MonsterInitThink()
 // StartMonster - final bit of initization before a monster
 // is turned over to the AI.
 //=========================================================
+// orig 0x77860
 void CBaseMonster::StartMonster()
 {
 	// update capabilities
@@ -2078,12 +2102,7 @@ void CBaseMonster::StartMonster()
 	{
 		pev->origin.z += 1;
 		DROP_TO_FLOOR(ENT(pev));
-		// Try to move the monster to make sure it's not stuck in a brush.
-		if (!WALK_MOVE(ENT(pev), 0, 0, WALKMOVE_NORMAL))
-		{
-			ALERT(at_error, "Monster %s stuck in wall--level design error", STRING(pev->classname));
-			pev->effects = EF_BRIGHTFIELD;
-		}
+		// Rocket Crowbar 2: no stuck-in-a-brush check
 	}
 	else
 	{
@@ -2187,6 +2206,7 @@ bool CBaseMonster::TaskIsRunning()
 // IRelationship - returns an integer that describes the
 // relationship between two types of monster.
 //=========================================================
+// orig 0x77b30
 int CBaseMonster::IRelationship(CBaseEntity* pTarget)
 {
 	static int iEnemy[14][14] =
@@ -2206,8 +2226,17 @@ int CBaseMonster::IRelationship(CBaseEntity* pTarget)
 			/*PBIOWEAPON*/ {R_NO, R_NO, R_DL, R_DL, R_DL, R_DL, R_DL, R_DL, R_DL, R_DL, R_NO, R_DL, R_NO, R_DL},
 			/*ABIOWEAPON*/ {R_NO, R_NO, R_DL, R_DL, R_DL, R_AL, R_NO, R_DL, R_DL, R_NO, R_NO, R_DL, R_DL, R_NO}};
 
+	// Rocket Crowbar 2: shrunk below full size, it fears anything that isn't (unscaled or full)
+	if (pev->scale < 1.0 && pev->scale > 0 && (pTarget->pev->scale == 0 || pTarget->pev->scale >= 1.0))
+		return R_FR;
+
+	// Rocket Crowbar 2: made friendly to players, it sees them as allies
+	if (m_fPlayerAlly && pTarget->IsActivePlayer() && pTarget->Classify() == CLASS_PLAYER)
+		return R_AL;
+
 	return iEnemy[Classify()][pTarget->Classify()];
 }
+
 
 //=========================================================
 // FindCover - tries to find a nearby node that will hide
@@ -2619,6 +2648,7 @@ void CBaseMonster::SetEyePosition()
 	}
 }
 
+// orig 0x78650
 void CBaseMonster::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
@@ -2842,6 +2872,7 @@ bool CBaseMonster::FGetNodeRoute(Vector vecDest)
 //=========================================================
 // FindHintNode
 //=========================================================
+// orig 0x78ba0
 int CBaseMonster::FindHintNode()
 {
 	int i;
@@ -2888,6 +2919,7 @@ int CBaseMonster::FindHintNode()
 }
 
 
+// orig 0x78d20
 void CBaseMonster::ReportAIState()
 {
 	ALERT_TYPE level = at_console;
@@ -2996,6 +3028,7 @@ bool CBaseMonster::KeyValue(KeyValueData* pkvd)
 //
 // Returns true if the target is fired.
 //=========================================================
+// orig 0x79090
 bool CBaseMonster::FCheckAITrigger()
 {
 	bool fFireTarget;
@@ -3011,7 +3044,7 @@ bool CBaseMonster::FCheckAITrigger()
 	switch (m_iTriggerCondition)
 	{
 	case AITRIGGER_SEEPLAYER_ANGRY_AT_PLAYER:
-		if (m_hEnemy != NULL && m_hEnemy->IsPlayer() && HasConditions(bits_COND_SEE_ENEMY))
+		if (m_hEnemy != NULL && m_hEnemy->IsActivePlayer() && HasConditions(bits_COND_SEE_ENEMY)) // Rocket Crowbar 2: IsActivePlayer
 		{
 			fFireTarget = true;
 		}
@@ -3221,6 +3254,7 @@ bool CBaseMonster::FacingIdeal()
 //=========================================================
 // FCanActiveIdle
 //=========================================================
+// orig 0x79760
 bool CBaseMonster::FCanActiveIdle()
 {
 	/*
@@ -3233,6 +3267,7 @@ bool CBaseMonster::FCanActiveIdle()
 }
 
 
+// orig 0x79830
 void CBaseMonster::CorpseFallThink()
 {
 	if ((pev->flags & FL_ONGROUND) != 0)
@@ -3331,6 +3366,7 @@ bool CBaseMonster::BBoxFlat()
 //=========================================================
 // Get Enemy - tries to find the best suitable enemy for the monster.
 //=========================================================
+// orig 0x79c70
 bool CBaseMonster::GetEnemy()
 {
 	CBaseEntity* pNewEnemy;
@@ -3390,6 +3426,7 @@ bool CBaseMonster::GetEnemy()
 //=========================================================
 // DropItem - dead monster drops named item
 //=========================================================
+// orig 0x79dc0
 CBaseEntity* CBaseMonster::DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng)
 {
 	if (!pszItemName)
@@ -3399,6 +3436,12 @@ CBaseEntity* CBaseMonster::DropItem(const char* pszItemName, const Vector& vecPo
 	}
 
 	if (!m_AllowItemDropping)
+	{
+		return nullptr;
+	}
+
+	// Rocket Crowbar 2: monsters drop nothing in multiplayer
+	if (g_pGameRules->IsMultiplayer())
 	{
 		return nullptr;
 	}
@@ -3420,11 +3463,13 @@ CBaseEntity* CBaseMonster::DropItem(const char* pszItemName, const Vector& vecPo
 }
 
 
+// orig 0x79e90
 bool CBaseMonster::ShouldFadeOnDeath()
 {
 	// if flagged to fade out or I have an owner (I came from a monster spawner)
 	if ((pev->spawnflags & SF_MONSTER_FADECORPSE) != 0 || !FNullEnt(pev->owner))
 		return true;
 
-	return false;
+	// Rocket Crowbar 2: every corpse fades in multiplayer
+	return g_pGameRules->IsMultiplayer();
 }

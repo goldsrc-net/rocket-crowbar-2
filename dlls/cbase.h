@@ -427,6 +427,9 @@ public:
 	int m_iRC2Base64;	   // orig +0x64. VERIFY: unread so far
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
 	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
+
+	// p4 needs:
+	bool m_fRC2Frozen; // orig +0x66, a byte inside what this block calls m_iRC2Base64: set by freeze_timer while the entity is frozen (players can't attack, the hornet gun doesn't recharge). Name ours
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }
@@ -565,6 +568,12 @@ public:
 	float m_flLastEventCheck; // last time the event list was checked
 	bool m_fSequenceFinished; // flag set when StudioAdvanceFrame moves across a frame boundry
 	bool m_fSequenceLoops;	  // true if the sequence loops
+
+	// p4 needs:
+	// orig 0x9380 (p1, "new: airtank .. animating"): RC2's StudioFrameAdvance that holds the
+	// frame while m_fRC2Frozen (it only moves animtime on). CBaseMonster::MonsterThink calls it
+	// for a frozen monster. Name ours.
+	float RC2FrameAdvance(float flInterval = 0.0);
 };
 
 

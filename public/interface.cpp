@@ -61,6 +61,7 @@ InterfaceReg::InterfaceReg(InstantiateInterfaceFn fn, const char* pName) : m_pNa
 // ------------------------------------------------------------------------------------ //
 // CreateInterface.
 // ------------------------------------------------------------------------------------ //
+// orig 0x6a710 (not counted by check_coverage: public/ is not scanned)
 EXPORT_FUNCTION void* CreateInterface(const char* pName, int* pReturnCode)
 {
 	InterfaceReg* pCur;

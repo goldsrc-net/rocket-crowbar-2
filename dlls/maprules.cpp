@@ -53,7 +53,7 @@ TYPEDESCRIPTION CRuleEntity::m_SaveData[] =
 		DEFINE_FIELD(CRuleEntity, m_iszMaster, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CRuleEntity, CBaseEntity);
+IMPLEMENT_SAVERESTORE(CRuleEntity, CBaseEntity); // orig 0x70550 (Save), orig 0x70580 (Restore)
 
 
 void CRuleEntity::Spawn()
@@ -64,6 +64,7 @@ void CRuleEntity::Spawn()
 }
 
 
+// orig 0x705e0
 bool CRuleEntity::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "master"))
@@ -145,9 +146,10 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(game_score, CGameScore);
+LINK_ENTITY_TO_CLASS(game_score, CGameScore); // orig 0x706e0
 
 
+// orig 0x70750
 void CGameScore::Spawn()
 {
 	CRulePointEntity::Spawn();
@@ -197,9 +199,10 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(game_end, CGameEnd);
+LINK_ENTITY_TO_CLASS(game_end, CGameEnd); // orig 0x70850
 
 
+// orig 0x708c0
 void CGameEnd::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (!CanFireForActivator(pActivator))
@@ -236,7 +239,7 @@ private:
 	hudtextparms_t m_textParms;
 };
 
-LINK_ENTITY_TO_CLASS(game_text, CGameText);
+LINK_ENTITY_TO_CLASS(game_text, CGameText); // orig 0x708e0
 
 // Save parms as a block.  Will break save/restore if the structure changes, but this entity didn't ship with Half-Life, so
 // it can't impact saved Half-Life games.
@@ -245,9 +248,10 @@ TYPEDESCRIPTION CGameText::m_SaveData[] =
 		DEFINE_ARRAY(CGameText, m_textParms, FIELD_CHARACTER, sizeof(hudtextparms_t)),
 };
 
-IMPLEMENT_SAVERESTORE(CGameText, CRulePointEntity);
+IMPLEMENT_SAVERESTORE(CGameText, CRulePointEntity); // orig 0x70950 (Save), orig 0x70980 (Restore)
 
 
+// orig 0x709b0
 bool CGameText::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "channel"))
@@ -351,6 +355,7 @@ class CGameTeamMaster : public CRulePointEntity
 public:
 	bool KeyValue(KeyValueData* pkvd) override;
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) override;
+	// orig 0x70e80
 	int ObjectCaps() override { return CRulePointEntity::ObjectCaps() | FCAP_MASTER; }
 
 	bool IsTriggered(CBaseEntity* pActivator) override;
@@ -365,7 +370,7 @@ private:
 	USE_TYPE triggerType;
 };
 
-LINK_ENTITY_TO_CLASS(game_team_master, CGameTeamMaster);
+LINK_ENTITY_TO_CLASS(game_team_master, CGameTeamMaster); // orig 0x70e10
 
 bool CGameTeamMaster::KeyValue(KeyValueData* pkvd)
 {
@@ -396,6 +401,7 @@ bool CGameTeamMaster::KeyValue(KeyValueData* pkvd)
 }
 
 
+// orig 0x70f80
 void CGameTeamMaster::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (!CanFireForActivator(pActivator))
@@ -423,12 +429,14 @@ void CGameTeamMaster::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 }
 
 
+// orig 0x71020
 bool CGameTeamMaster::IsTriggered(CBaseEntity* pActivator)
 {
 	return TeamMatch(pActivator);
 }
 
 
+// orig 0x71030
 const char* CGameTeamMaster::TeamID()
 {
 	if (m_teamIndex < 0) // Currently set to "no team"
@@ -468,7 +476,7 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(game_team_set, CGameTeamSet);
+LINK_ENTITY_TO_CLASS(game_team_set, CGameTeamSet); // orig 0x710a0
 
 
 void CGameTeamSet::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -513,7 +521,7 @@ private:
 	string_t m_iszOutCount;
 };
 
-LINK_ENTITY_TO_CLASS(game_zone_player, CGamePlayerZone);
+LINK_ENTITY_TO_CLASS(game_zone_player, CGamePlayerZone); // orig 0x71160
 TYPEDESCRIPTION CGamePlayerZone::m_SaveData[] =
 	{
 		DEFINE_FIELD(CGamePlayerZone, m_iszInTarget, FIELD_STRING),
@@ -522,8 +530,9 @@ TYPEDESCRIPTION CGamePlayerZone::m_SaveData[] =
 		DEFINE_FIELD(CGamePlayerZone, m_iszOutCount, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CGamePlayerZone, CRuleBrushEntity);
+IMPLEMENT_SAVERESTORE(CGamePlayerZone, CRuleBrushEntity); // orig 0x711d0 (Save), orig 0x71200 (Restore)
 
+// orig 0x71230
 bool CGamePlayerZone::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "intarget"))
@@ -622,7 +631,7 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(game_player_hurt, CGamePlayerHurt);
+LINK_ENTITY_TO_CLASS(game_player_hurt, CGamePlayerHurt); // orig 0x71510
 
 
 void CGamePlayerHurt::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -677,7 +686,7 @@ private:
 	inline void SetInitialValue(int value) { pev->dmg = value; }
 };
 
-LINK_ENTITY_TO_CLASS(game_counter, CGameCounter);
+LINK_ENTITY_TO_CLASS(game_counter, CGameCounter); // orig 0x71610
 
 void CGameCounter::Spawn()
 {
@@ -740,7 +749,7 @@ public:
 private:
 };
 
-LINK_ENTITY_TO_CLASS(game_counter_set, CGameCounterSet);
+LINK_ENTITY_TO_CLASS(game_counter_set, CGameCounterSet); // orig 0x71790
 
 
 void CGameCounterSet::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -793,7 +802,7 @@ TYPEDESCRIPTION CGamePlayerEquip::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CGamePlayerEquip, CRulePointEntity);
 
-LINK_ENTITY_TO_CLASS(game_player_equip, CGamePlayerEquip);
+LINK_ENTITY_TO_CLASS(game_player_equip, CGamePlayerEquip); // orig 0x71840
 
 
 bool CGamePlayerEquip::KeyValue(KeyValueData* pkvd)
@@ -854,6 +863,7 @@ void CGamePlayerEquip::EquipPlayer(CBaseEntity* pEntity)
 }
 
 
+// orig 0x719f0
 void CGamePlayerEquip::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	EquipPlayer(pActivator);
@@ -883,7 +893,7 @@ private:
 	const char* TargetTeamName(const char* pszTargetName);
 };
 
-LINK_ENTITY_TO_CLASS(game_player_team, CGamePlayerTeam);
+LINK_ENTITY_TO_CLASS(game_player_team, CGamePlayerTeam); // orig 0x71a00
 
 
 const char* CGamePlayerTeam::TargetTeamName(const char* pszTargetName)
@@ -900,6 +910,7 @@ const char* CGamePlayerTeam::TargetTeamName(const char* pszTargetName)
 }
 
 
+// orig 0x71b00
 void CGamePlayerTeam::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (!CanFireForActivator(pActivator))

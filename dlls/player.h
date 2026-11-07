@@ -356,6 +356,11 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p4 needs:
+	int m_iRC2LinkedEnt; // orig +0x69c: an entity index set by the player code (0 = none); such a player can't be frozen. Name ours. VERIFY: what it links
+	int m_iRC2Morph;	 // orig +0x10f8: the creature the player has been turned into (0 = none, also in pev->playerclass); health kits and chargers refuse 2-5. Name ours
+	bool m_fRC2Transforming; // orig +0x10fc: set while the player changes creature (1 during, 0 after); freeze damage skips the player then. Name ours. VERIFY
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

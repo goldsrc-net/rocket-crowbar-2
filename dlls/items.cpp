@@ -29,6 +29,8 @@
 #include "items.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#include "game.h"
+#include "p4_needs.h"
 
 class CWorldItem : public CBaseEntity
 {
@@ -38,8 +40,9 @@ public:
 	int m_iType;
 };
 
-LINK_ENTITY_TO_CLASS(world_items, CWorldItem);
+LINK_ENTITY_TO_CLASS(world_items, CWorldItem); // orig 0x6c250
 
+// orig 0x6c2c0
 bool CWorldItem::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "type"))
@@ -51,6 +54,7 @@ bool CWorldItem::KeyValue(KeyValueData* pkvd)
 	return CBaseEntity::KeyValue(pkvd);
 }
 
+// orig 0x6c330
 void CWorldItem::Spawn()
 {
 	CBaseEntity* pEntity = NULL;
@@ -86,6 +90,7 @@ void CWorldItem::Spawn()
 }
 
 
+// orig 0x6c410
 void CItem::Spawn()
 {
 	pev->movetype = MOVETYPE_TOSS;
@@ -94,18 +99,17 @@ void CItem::Spawn()
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
 	SetTouch(&CItem::ItemTouch);
 
-	if (DROP_TO_FLOOR(ENT(pev)) == 0)
-	{
-		ALERT(at_error, "Item %s fell out of level at %f,%f,%f", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
-		UTIL_Remove(this);
-		return;
-	}
+	// Rocket Crowbar 2: items no longer drop to the floor (nor get removed for falling out of
+	// the level); with mp_random set, multiplayer swaps them for a random one
+	if (g_pGameRules->IsMultiplayer() && mp_random.value != 0)
+		ReplaceWithRandomItem(this);
 }
 
+// orig 0x6c4c0
 void CItem::ItemTouch(CBaseEntity* pOther)
 {
 	// if it's not a player, ignore
-	if (!pOther->IsPlayer())
+	if (!pOther->IsActivePlayer()) // Rocket Crowbar 2: IsActivePlayer
 	{
 		return;
 	}
@@ -141,6 +145,7 @@ void CItem::ItemTouch(CBaseEntity* pOther)
 	}
 }
 
+// orig 0x6c560
 CBaseEntity* CItem::Respawn()
 {
 	SetTouch(NULL);
@@ -153,8 +158,11 @@ CBaseEntity* CItem::Respawn()
 	return this;
 }
 
+// orig 0x6c5d0
 void CItem::Materialize()
 {
+	SetTouch(&CItem::ItemTouch);
+
 	if ((pev->effects & EF_NODRAW) != 0)
 	{
 		// changing from invisible state to visible.
@@ -163,26 +171,35 @@ void CItem::Materialize()
 		pev->effects |= EF_MUZZLEFLASH;
 	}
 
-	SetTouch(&CItem::ItemTouch);
+	// Rocket Crowbar 2: mp_random above 2 swaps it for a random item on every respawn too
+	if (g_pGameRules->IsMultiplayer() && mp_random.value > 2)
+		ReplaceWithRandomItem(this);
 }
 
 #define SF_SUIT_SHORTLOGON 0x0001
 
 class CItemSuit : public CItem
 {
+	// orig 0x6c6d0
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_suit.mdl");
 		CItem::Spawn();
 	}
+	// orig 0x6c700
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_suit.mdl");
 	}
+	// orig 0x6c710
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
 		if (pPlayer->HasSuit())
+			return false;
+
+		// Rocket Crowbar 2: not while turned into a creature
+		if (0 != pPlayer->m_iRC2Morph)
 			return false;
 
 		if ((pev->spawnflags & SF_SUIT_SHORTLOGON) != 0)
@@ -195,23 +212,26 @@ class CItemSuit : public CItem
 	}
 };
 
-LINK_ENTITY_TO_CLASS(item_suit, CItemSuit);
+LINK_ENTITY_TO_CLASS(item_suit, CItemSuit); // orig 0x6c660
 
 
 
 class CItemBattery : public CItem
 {
+	// orig 0x6c800
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_battery.mdl");
 		CItem::Spawn();
 	}
+	// orig 0x6c830
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_battery.mdl");
 		PRECACHE_SOUND("items/gunpickup2.wav");
 	}
+	// orig 0x6c850
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
 		if (pPlayer->pev->deadflag != DEAD_NO)
@@ -219,14 +239,26 @@ class CItemBattery : public CItem
 			return false;
 		}
 
-		if ((pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY) &&
+		// Rocket Crowbar 2: not while turned into a creature
+		if (0 != pPlayer->m_iRC2Morph)
+		{
+			return false;
+		}
+
+		// Rocket Crowbar 2: the cap is the player's attribute 6 (when over 100) plus attribute 7
+		int iMaxArmor = MAX_NORMAL_BATTERY;
+		if (RC2_PlayerAttribute(6, ENTINDEX(pPlayer->edict())) > 100)
+			iMaxArmor = (int)RC2_PlayerAttribute(6, ENTINDEX(pPlayer->edict()));
+		iMaxArmor = (int)(RC2_PlayerAttribute(7, ENTINDEX(pPlayer->edict())) + iMaxArmor);
+
+		if ((pPlayer->pev->armorvalue < (float)iMaxArmor) &&
 			pPlayer->HasSuit())
 		{
 			int pct;
 			char szcharge[64];
 
 			pPlayer->pev->armorvalue += gSkillData.batteryCapacity;
-			pPlayer->pev->armorvalue = V_min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
+			pPlayer->pev->armorvalue = V_min(pPlayer->pev->armorvalue, (float)iMaxArmor);
 
 			EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
 
@@ -237,7 +269,7 @@ class CItemBattery : public CItem
 
 			// Suit reports new power level
 			// For some reason this wasn't working in release build -- round it.
-			pct = (int)((float)(pPlayer->pev->armorvalue * 100.0) * (1.0 / MAX_NORMAL_BATTERY) + 0.5);
+			pct = (int)((float)(pPlayer->pev->armorvalue * 100.0) * (1.0 / iMaxArmor) + 0.5);
 			pct = (pct / 5);
 			if (pct > 0)
 				pct--;
@@ -252,23 +284,30 @@ class CItemBattery : public CItem
 	}
 };
 
-LINK_ENTITY_TO_CLASS(item_battery, CItemBattery);
+LINK_ENTITY_TO_CLASS(item_battery, CItemBattery); // orig 0x6c790
 
 
 class CItemAntidote : public CItem
 {
+	// orig 0x6cab0
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_antidote.mdl");
 		CItem::Spawn();
 	}
+	// orig 0x6cae0
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_antidote.mdl");
 	}
+	// orig 0x6caf0
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
+		// Rocket Crowbar 2: not while turned into a creature
+		if (0 != pPlayer->m_iRC2Morph)
+			return false;
+
 		pPlayer->SetSuitUpdate("!HEV_DET4", false, SUIT_NEXT_IN_1MIN);
 
 		pPlayer->m_rgItems[ITEM_ANTIDOTE] += 1;
@@ -276,17 +315,19 @@ class CItemAntidote : public CItem
 	}
 };
 
-LINK_ENTITY_TO_CLASS(item_antidote, CItemAntidote);
+LINK_ENTITY_TO_CLASS(item_antidote, CItemAntidote); // orig 0x6ca40
 
 
 class CItemSecurity : public CItem
 {
+	// orig 0x6cba0
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_security.mdl");
 		CItem::Spawn();
 	}
+	// orig 0x6cbd0
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_security.mdl");
@@ -298,23 +339,32 @@ class CItemSecurity : public CItem
 	}
 };
 
-LINK_ENTITY_TO_CLASS(item_security, CItemSecurity);
+LINK_ENTITY_TO_CLASS(item_security, CItemSecurity); // orig 0x6cb30
 
 class CItemLongJump : public CItem
 {
+	// orig 0x6cc70
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_longjump.mdl");
 		CItem::Spawn();
 	}
+	// orig 0x6cca0
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_longjump.mdl");
 	}
+	// orig 0x6ccb0
 	bool MyTouch(CBasePlayer* pPlayer) override
 	{
 		if (pPlayer->m_fLongJump)
+		{
+			return false;
+		}
+
+		// Rocket Crowbar 2: not while turned into a creature
+		if (0 != pPlayer->m_iRC2Morph)
 		{
 			return false;
 		}
@@ -336,4 +386,4 @@ class CItemLongJump : public CItem
 	}
 };
 
-LINK_ENTITY_TO_CLASS(item_longjump, CItemLongJump);
+LINK_ENTITY_TO_CLASS(item_longjump, CItemLongJump); // orig 0x6cc00

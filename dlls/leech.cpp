@@ -77,9 +77,10 @@ public:
 
 	void EXPORT SwimThink();
 	void EXPORT DeadThink();
+	// orig 0x6e5e0
 	void Touch(CBaseEntity* pOther) override
 	{
-		if (pOther->IsPlayer())
+		if (pOther->IsActivePlayer()) // Rocket Crowbar 2: IsActivePlayer
 		{
 			// If the client is pushing me, give me some base velocity
 			if (gpGlobals->trace_ent && gpGlobals->trace_ent == edict())
@@ -90,6 +91,7 @@ public:
 		}
 	}
 
+	// orig 0x6e640
 	void SetObjectCollisionBox() override
 	{
 		pev->absmin = pev->origin + Vector(-8, -8, 0);
@@ -106,10 +108,12 @@ public:
 
 	// Base entity functions
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
+	// orig 0x6e6f0
 	int BloodColor() override { return DONT_BLEED; }
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 	void Activate() override;
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	// orig 0x6e700
 	int Classify() override { return CLASS_INSECT; }
 	int IRelationship(CBaseEntity* pTarget) override;
 
@@ -143,7 +147,7 @@ private:
 
 
 
-LINK_ENTITY_TO_CLASS(monster_leech, CLeech);
+LINK_ENTITY_TO_CLASS(monster_leech, CLeech); // orig 0x6e570
 
 TYPEDESCRIPTION CLeech::m_SaveData[] =
 	{
@@ -161,7 +165,7 @@ TYPEDESCRIPTION CLeech::m_SaveData[] =
 		DEFINE_FIELD(CLeech, m_attackSoundTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CLeech, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CLeech, CBaseMonster); // orig 0x6e710 (Save), orig 0x6e740 (Restore)
 
 
 const char* CLeech::pAttackSounds[] =
@@ -209,6 +213,7 @@ void CLeech::Spawn()
 }
 
 
+// orig 0x6e8b0
 void CLeech::Activate()
 {
 	RecalculateWaterlevel();
@@ -265,9 +270,10 @@ void CLeech::SwitchLeechState()
 }
 
 
+// orig 0x6eac0
 int CLeech::IRelationship(CBaseEntity* pTarget)
 {
-	if (pTarget->IsPlayer())
+	if (pTarget->IsActivePlayer()) // Rocket Crowbar 2: IsActivePlayer
 		return R_DL;
 	return CBaseMonster::IRelationship(pTarget);
 }
@@ -416,6 +422,7 @@ float CLeech::ObstacleDistance(CBaseEntity* pTarget)
 }
 
 
+// orig 0x6f370
 void CLeech::DeadThink()
 {
 	if (m_fSequenceFinished)
@@ -550,6 +557,7 @@ void CLeech::UpdateMotion()
 }
 
 
+// orig 0x6f710
 void CLeech::SwimThink()
 {
 	TraceResult tr;

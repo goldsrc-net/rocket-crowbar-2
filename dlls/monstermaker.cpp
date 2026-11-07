@@ -62,7 +62,7 @@ public:
 	bool m_fFadeChildren; // should we make the children fadeout?
 };
 
-LINK_ENTITY_TO_CLASS(monstermaker, CMonsterMaker);
+LINK_ENTITY_TO_CLASS(monstermaker, CMonsterMaker); // orig 0x74120
 
 TYPEDESCRIPTION CMonsterMaker::m_SaveData[] =
 	{
@@ -76,7 +76,7 @@ TYPEDESCRIPTION CMonsterMaker::m_SaveData[] =
 };
 
 
-IMPLEMENT_SAVERESTORE(CMonsterMaker, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CMonsterMaker, CBaseMonster); // orig 0x74190 (Save), orig 0x741c0 (Restore)
 
 bool CMonsterMaker::KeyValue(KeyValueData* pkvd)
 {
@@ -238,6 +238,7 @@ void CMonsterMaker::MakeMonster()
 // CyclicUse - drops one monster from the monstermaker
 // each time we call this.
 //=========================================================
+// orig 0x74660
 void CMonsterMaker::CyclicUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	MakeMonster();

@@ -360,4 +360,28 @@ public:
 	*	Will return @c nullptr if item dropping is disabled for this NPC.
 	*/
 	CBaseEntity* DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng);
+
+	// p4 needs:
+	// The virtual RC2 added after StopFollowing (orig slot 147, default 0x74d0, monsters.cpp):
+	// the pitch a shrunk monster's sounds go up by. Called by CAGrunt's sounds and
+	// PrescheduleThink and CScientistMine::SciMineThink. Name ours.
+	// (1 - scale) * 1.25 * 40, clamped to 0-40, and 0 when unscaled or at full size.
+	// orig 0x74d0
+	virtual int ScalePitchShift()
+	{
+		if (pev->scale == 0 || pev->scale == 1)
+			return 0;
+
+		double flShift = (1.0 - pev->scale) * 1.25 * 40.0;
+		if (flShift < 0)
+			flShift = 0;
+		else if (flShift > 40)
+			flShift = 40;
+		return (int)flShift;
+	}
+	// CBaseMonster's 4 added bytes, after m_pCine (orig +0x2b0, a byte and padding; not saved):
+	// set (with bits_MEMORY_PROVOKED cleared and a player enemy dropped) by the function at
+	// 0x13b0, cleared by 0x1450 (both p1); IRelationship then answers R_AL for active players.
+	// Name ours.
+	bool m_fPlayerAlly = false;
 };

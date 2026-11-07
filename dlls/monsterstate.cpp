@@ -115,6 +115,7 @@ void CBaseMonster::RunAI()
 // GetIdealState - surveys the Conditions information available
 // and finds the best new state for a monster.
 //=========================================================
+// orig 0x7a050
 MONSTERSTATE CBaseMonster::GetIdealState()
 {
 	int iConditions;

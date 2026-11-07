@@ -25,6 +25,7 @@
 #include "effects.h"
 #include "weapons.h"
 #include "soundent.h"
+#include "p4_needs.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -45,6 +46,9 @@ public:
 	void SetYawSpeed() override;
 	int ISoundMask() override;
 	int Classify() override;
+	// Rocket Crowbar 2: the capability bits the RC2 effects ask of it (slot 75)
+	// orig 0x6a860
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x37ff; }
 	int IRelationship(CBaseEntity* pTarget) override;
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	bool CheckRangeAttack1(float flDot, float flDist) override;
@@ -91,8 +95,8 @@ public:
 	static const char* pPainSounds[];
 	static const char* pDeathSounds[];
 };
-LINK_ENTITY_TO_CLASS(monster_alien_slave, CISlave);
-LINK_ENTITY_TO_CLASS(monster_vortigaunt, CISlave);
+LINK_ENTITY_TO_CLASS(monster_alien_slave, CISlave); // orig 0x6a7e0
+LINK_ENTITY_TO_CLASS(monster_vortigaunt, CISlave); // orig 0x6a870
 
 
 TYPEDESCRIPTION CISlave::m_SaveData[] =
@@ -109,7 +113,7 @@ TYPEDESCRIPTION CISlave::m_SaveData[] =
 
 };
 
-IMPLEMENT_SAVERESTORE(CISlave, CSquadMonster);
+IMPLEMENT_SAVERESTORE(CISlave, CSquadMonster); // orig 0x6a8f0 (Save), orig 0x6a920 (Restore)
 
 
 
@@ -143,6 +147,7 @@ const char* CISlave::pDeathSounds[] =
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x6a950
 int CISlave::Classify()
 {
 	return CLASS_ALIEN_MILITARY;
@@ -187,6 +192,7 @@ void CISlave::CallForHelp(const char* szClassname, float flDist, EHANDLE hEnemy,
 //=========================================================
 // ALertSound - scream
 //=========================================================
+// orig 0x6aa90
 void CISlave::AlertSound()
 {
 	if (m_hEnemy != NULL)
@@ -200,6 +206,7 @@ void CISlave::AlertSound()
 //=========================================================
 // IdleSound
 //=========================================================
+// orig 0x6ab00
 void CISlave::IdleSound()
 {
 	if (RANDOM_LONG(0, 2) == 0)
@@ -257,6 +264,7 @@ void CISlave::DeathSound()
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards.
 //=========================================================
+// orig 0x6abf0
 int CISlave::ISoundMask()
 {
 	return bits_SOUND_WORLD |
@@ -462,6 +470,7 @@ bool CISlave::CheckRangeAttack1(float flDot, float flDist)
 //=========================================================
 // CheckRangeAttack2 - check bravery and try to resurect dead comrades
 //=========================================================
+// orig 0x6b200
 bool CISlave::CheckRangeAttack2(float flDot, float flDist)
 {
 	return false;
@@ -798,6 +807,7 @@ void CISlave::WackBeam(int side, CBaseEntity* pEntity)
 //=========================================================
 // ZapBeam - heavy damage directly forward
 //=========================================================
+// orig 0x6bcb0
 void CISlave::ZapBeam(int side)
 {
 	Vector vecSrc, vecAim;
@@ -826,9 +836,13 @@ void CISlave::ZapBeam(int side)
 	m_iBeams++;
 
 	pEntity = CBaseEntity::Instance(tr.pHit);
-	if (pEntity != NULL && 0 != pEntity->pev->takedamage)
+	// Rocket Crowbar 2: the zap lands on the effected entity, and a player's shield takes
+	// its share ([0.7] of the energy cost)
+	if (pEntity != NULL && 0 != pEntity->GetEffectedEnt()->pev->takedamage)
 	{
-		pEntity->TraceAttack(pev, gSkillData.slaveDmgZap, vecAim, &tr, DMG_SHOCK);
+		const float flDamage = ShieldAbsorbDamage(pEntity->GetEffectedEnt(), gSkillData.slaveDmgZap, 0.7, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 7);
+		if (flDamage > 0)
+			pEntity->GetEffectedEnt()->TraceAttack(pev, flDamage, vecAim, &tr, DMG_SHOCK);
 	}
 	UTIL_EmitAmbientSound(ENT(pev), tr.vecEndPos, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG(140, 160));
 }
