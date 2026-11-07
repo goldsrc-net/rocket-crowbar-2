@@ -17,4 +17,4 @@ The original's set is `reference/cvars-rc2.tsv` (`scripts/cvars.py`).
   (client 0x95e50 Think, 0x971c0 EntityGone) frees trail 0, then calls plain `operator delete` on
   the `new[]` array's pointer (block + 4). MSVC6's release heap rejects that silently and the
   trails leak; glibc would abort. We leave the delete out and keep the leak
-  (`cl_dll/rc2/tcontroller.cpp`, `reference/dossiers/c3.md`).
+  (`cl_dll/rc2/tcontroller_tents.cpp`, `reference/dossiers/c3.md`).
