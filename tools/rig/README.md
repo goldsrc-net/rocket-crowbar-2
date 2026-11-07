@@ -24,9 +24,25 @@ is `rc_sandcrab`; `run.sh <which> <map>` takes another.
   (`hlds-linux32-test`), plus a real `rc2/` of content links with our `hl.so`.
 - `~/.local/share/Steam/steamapps/common/Half-Life/rc2/`: the client's mod folder, a copy of the
   content with RC2's own `config.cfg` (60 binds) and our `client.so`. The Linux client can't
-  load RC2's Windows `client.dll`, so it plays both servers with ours; until the client is
-  reconstructed that is Half-Life's client with RC2's content.
+  load RC2's Windows `client.dll`, so it plays both servers with ours.
 - Servers run with `+sv_cheats 1` and `+sv_lan 1`.
+
+## Smoke test
+
+`tools/rig/smoke.py original|ours <log>` boots one server headless on its own port (27041,
+27042, clear of run.sh's), reads back RC2's cvars, changes map through rc_sandcrab, rc_race and
+rc_oneking over rcon, quits, and saves the console plus the rcon replies. `--clean` drops what
+differs between the Windows engine and ReHLDS rather than between the games; compare sorted,
+since the two engines send a command's output to different places (the docstring has the
+details and the expected differences). As of 2026-11-07 the only game difference is the
+`sk_plr_hornet_dmg1` warning (`reference/DEVIATIONS.md`).
+
+```sh
+tools/rig/smoke.py original /tmp/o.log; tools/rig/smoke.py ours /tmp/u.log
+diff <(tools/rig/smoke.py --clean /tmp/o.log | sort -u) <(tools/rig/smoke.py --clean /tmp/u.log | sort -u)
+```
+
+`forkliftfun` (one of the extra maps) loads on neither: its `alex2.wad` isn't in the content.
 
 ## Undo
 
