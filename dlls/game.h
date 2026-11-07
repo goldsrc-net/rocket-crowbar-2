@@ -41,6 +41,19 @@ extern cvar_t allowmonsters;
 extern cvar_t allow_spectators;
 extern cvar_t mp_chattime;
 
+// Rocket Crowbar 2
+extern cvar_t mp_teamannoy;
+extern cvar_t mp_riding;
+extern cvar_t mp_random;
+extern cvar_t mp_scoremode;
+extern cvar_t mp_allowtransform;
+extern cvar_t sv_allowgive;
+extern cvar_t sv_noexit;
+extern cvar_t sv_chglevel;
+extern cvar_t sv_pcstuff;
+extern cvar_t sv_tempadmins;
+extern cvar_t rccfgfile;
+
 extern cvar_t sv_allowbunnyhopping;
 
 extern cvar_t sv_busters;

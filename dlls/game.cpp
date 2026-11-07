@@ -45,6 +45,20 @@ cvar_t allow_spectators = {"allow_spectators", "0.0", FCVAR_SERVER}; // 0 preven
 
 cvar_t mp_chattime = {"mp_chattime", "10", FCVAR_SERVER};
 
+// Rocket Crowbar 2's own cvars, in the original's order (reference/cvars-rc2.tsv)
+cvar_t mp_teamannoy = {"mp_teamannoy", "0", FCVAR_SERVER}; // orig .data 0x1429f0
+cvar_t mp_riding = {"mp_riding", "1", FCVAR_SERVER}; // orig .data 0x142a08
+cvar_t mp_random = {"mp_random", "0", FCVAR_SERVER}; // orig .data 0x142a20
+cvar_t mp_scoremode = {"mp_scoremode", "0", FCVAR_SERVER}; // orig .data 0x142a38
+cvar_t mp_allowtransform = {"mp_allowtransform", "1", FCVAR_SERVER}; // orig .data 0x142a50
+cvar_t sv_allowgive = {"sv_allowgive", "1", FCVAR_SERVER}; // orig .data 0x142a68
+cvar_t sv_noexit = {"sv_noexit", "1", FCVAR_SERVER}; // orig .data 0x142a80
+cvar_t sv_chglevel = {"sv_chglevel", "0", FCVAR_SERVER}; // orig .data 0x142a98
+cvar_t sv_pcstuff = {"sv_pcstuff", "1", FCVAR_SERVER}; // orig .data 0x142ab0
+cvar_t sv_tempadmins = {"sv_tempadmins", "0", FCVAR_SERVER}; // orig .data 0x142ac8
+cvar_t rccfgfile = {"rccfgfile", "rc2.ini", FCVAR_SERVER}; // orig .data 0x142ae0
+
+
 cvar_t sv_allowbunnyhopping = {"sv_allowbunnyhopping", "0", FCVAR_SERVER};
 
 //CVARS FOR SKILL LEVEL SETTINGS
@@ -511,6 +525,20 @@ void GameDLLInit()
 	CVAR_REGISTER(&allowmonsters);
 
 	CVAR_REGISTER(&mp_chattime);
+
+	// Rocket Crowbar 2
+	CVAR_REGISTER(&mp_teamannoy);
+	CVAR_REGISTER(&mp_riding);
+	CVAR_REGISTER(&mp_random);
+	CVAR_REGISTER(&mp_scoremode);
+	CVAR_REGISTER(&mp_allowtransform);
+	CVAR_REGISTER(&sv_allowgive);
+	CVAR_REGISTER(&sv_noexit);
+	CVAR_REGISTER(&sv_chglevel);
+	CVAR_REGISTER(&sv_pcstuff);
+	CVAR_REGISTER(&sv_tempadmins);
+	CVAR_REGISTER(&rccfgfile);
+
 
 	CVAR_REGISTER(&sv_busters);
 
