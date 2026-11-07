@@ -22,6 +22,7 @@
 #include "monsters.h"
 #include "schedule.h"
 #include "game.h"
+#include "p4_needs.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -88,9 +89,15 @@ public:
 	bool CheckRangeAttack2(float flDot, float flDist) override;
 	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
 
+	// orig 0x5e140
 	virtual float GetDamageAmount() { return gSkillData.headcrabDmgBite; }
+	// orig 0x5e150
 	virtual int GetVoicePitch() { return 100; }
+	// orig 0x5e160
 	virtual float GetSoundVolue() { return 1.0; }
+	// Rocket Crowbar 2: the capability bits the RC2 effects ask of a headcrab (slot 75)
+	// orig 0x5e130
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x37ff; }
 	Schedule_t* GetScheduleOfType(int Type) override;
 
 	CUSTOM_SCHEDULES;
@@ -102,14 +109,14 @@ public:
 	static const char* pDeathSounds[];
 	static const char* pBiteSounds[];
 };
-LINK_ENTITY_TO_CLASS(monster_headcrab, CHeadCrab);
+LINK_ENTITY_TO_CLASS(monster_headcrab, CHeadCrab); // orig 0x5e0c0
 
 DEFINE_CUSTOM_SCHEDULES(CHeadCrab){
 	slHCRangeAttack1,
 	slHCRangeAttack1Fast,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CHeadCrab, CBaseMonster);
+IMPLEMENT_CUSTOM_SCHEDULES(CHeadCrab, CBaseMonster); // orig 0x5e170 (ScheduleFromName)
 
 const char* CHeadCrab::pIdleSounds[] =
 	{
@@ -149,6 +156,7 @@ const char* CHeadCrab::pBiteSounds[] =
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x5e1a0
 int CHeadCrab::Classify()
 {
 	return CLASS_ALIEN_PREY;
@@ -165,6 +173,7 @@ Vector CHeadCrab::Center()
 }
 
 
+// orig 0x5e1f0
 Vector CHeadCrab::BodyTarget(const Vector& posSrc)
 {
 	return Center();
@@ -293,6 +302,7 @@ void CHeadCrab::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
+// orig 0x5e6d0
 void CHeadCrab::Precache()
 {
 	PRECACHE_SOUND_ARRAY(pIdleSounds);
@@ -335,6 +345,7 @@ void CHeadCrab::RunTask(Task_t* pTask)
 // LeapTouch - this is the headcrab's touch function when it
 // is in the air
 //=========================================================
+// orig 0x5e7c0
 void CHeadCrab::LeapTouch(CBaseEntity* pOther)
 {
 	if (0 == pOther->pev->takedamage)
@@ -350,6 +361,15 @@ void CHeadCrab::LeapTouch(CBaseEntity* pOther)
 	// Don't hit if back on ground
 	if (!FBitSet(pev->flags, FL_ONGROUND))
 	{
+		// Rocket Crowbar 2: a player's shield takes the bite (always 25, whatever
+		// GetDamageAmount says) and bounces the crab off it, still able to bite on the rebound
+		Vector vecNormal;
+		if (ShieldAbsorbDamage(pOther, 25, 1, pev->origin, pev->velocity.Normalize(), NULL, &vecNormal, 8) != 25)
+		{
+			pev->velocity = UTIL_ReflectVector(pev->velocity.Normalize(), vecNormal) * pev->velocity.Length() * 0.75;
+			return;
+		}
+
 		EMIT_SOUND_DYN(edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 
 		pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
@@ -406,6 +426,7 @@ bool CHeadCrab::CheckRangeAttack1(float flDot, float flDist)
 //=========================================================
 // CheckRangeAttack2
 //=========================================================
+// orig 0x5eab0
 bool CHeadCrab::CheckRangeAttack2(float flDot, float flDist)
 {
 	return false;
@@ -432,6 +453,7 @@ bool CHeadCrab::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 // IdleSound
 //=========================================================
 #define CRAB_ATTN_IDLE (float)1.5
+// orig 0x5eaf0
 void CHeadCrab::IdleSound()
 {
 	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
@@ -448,6 +470,7 @@ void CHeadCrab::AlertSound()
 //=========================================================
 // AlertSound
 //=========================================================
+// orig 0x5eb90
 void CHeadCrab::PainSound()
 {
 	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
@@ -482,13 +505,15 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	void SetYawSpeed() override;
+	// orig 0x5ecd0
 	float GetDamageAmount() override { return gSkillData.headcrabDmgBite * 0.3; }
 	bool CheckRangeAttack1(float flDot, float flDist) override;
 	Schedule_t* GetScheduleOfType(int Type) override;
 	int GetVoicePitch() override { return PITCH_NORM + RANDOM_LONG(40, 50); }
+	// orig 0x5ed00
 	float GetSoundVolue() override { return 0.8; }
 };
-LINK_ENTITY_TO_CLASS(monster_babycrab, CBabyCrab);
+LINK_ENTITY_TO_CLASS(monster_babycrab, CBabyCrab); // orig 0x5ec50
 
 void CBabyCrab::Spawn()
 {
@@ -501,6 +526,7 @@ void CBabyCrab::Spawn()
 	pev->health = gSkillData.headcrabHealth * 0.25; // less health than full grown
 }
 
+// orig 0x5edb0
 void CBabyCrab::Precache()
 {
 	PRECACHE_MODEL("models/baby_headcrab.mdl");
@@ -508,6 +534,7 @@ void CBabyCrab::Precache()
 }
 
 
+// orig 0x5edd0
 void CBabyCrab::SetYawSpeed()
 {
 	pev->yaw_speed = 120;

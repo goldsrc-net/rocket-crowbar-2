@@ -120,12 +120,13 @@ TYPEDESCRIPTION CHAssassin::m_SaveData[] =
 		DEFINE_FIELD(CHAssassin, m_iFrustration, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CHAssassin, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CHAssassin, CBaseMonster); // orig 0x5cdc0 (Save), orig 0x5cdf0 (Restore)
 
 
 //=========================================================
 // DieSound
 //=========================================================
+// orig 0x5ce20
 void CHAssassin::DeathSound()
 {
 }
@@ -133,6 +134,7 @@ void CHAssassin::DeathSound()
 //=========================================================
 // IdleSound
 //=========================================================
+// orig 0x5ce30
 void CHAssassin::IdleSound()
 {
 }
@@ -141,6 +143,7 @@ void CHAssassin::IdleSound()
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards.
 //=========================================================
+// orig 0x5ce40
 int CHAssassin::ISoundMask()
 {
 	return bits_SOUND_WORLD |
@@ -154,6 +157,7 @@ int CHAssassin::ISoundMask()
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x5ce50
 int CHAssassin::Classify()
 {
 	return CLASS_HUMAN_MILITARY;
@@ -185,6 +189,7 @@ void CHAssassin::SetYawSpeed()
 //=========================================================
 // Shoot
 //=========================================================
+// orig 0x5ce80
 void CHAssassin::Shoot()
 {
 	if (m_hEnemy == NULL)

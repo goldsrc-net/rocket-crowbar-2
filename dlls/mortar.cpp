@@ -36,6 +36,7 @@ public:
 	bool KeyValue(KeyValueData* pkvd) override;
 
 	// Bmodels don't go across transitions
+	// orig 0x7a2a0
 	int ObjectCaps() override { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 	bool Save(CSave& save) override;
@@ -53,7 +54,7 @@ public:
 	int m_fControl;
 };
 
-LINK_ENTITY_TO_CLASS(func_mortar_field, CFuncMortarField);
+LINK_ENTITY_TO_CLASS(func_mortar_field, CFuncMortarField); // orig 0x7a230
 
 TYPEDESCRIPTION CFuncMortarField::m_SaveData[] =
 	{
@@ -65,7 +66,7 @@ TYPEDESCRIPTION CFuncMortarField::m_SaveData[] =
 		DEFINE_FIELD(CFuncMortarField, m_fControl, FIELD_INTEGER),
 };
 
-IMPLEMENT_SAVERESTORE(CFuncMortarField, CBaseToggle);
+IMPLEMENT_SAVERESTORE(CFuncMortarField, CBaseToggle); // orig 0x7a2b0 (Save), orig 0x7a2e0 (Restore)
 
 
 bool CFuncMortarField::KeyValue(KeyValueData* pkvd)
@@ -112,6 +113,7 @@ void CFuncMortarField::Spawn()
 }
 
 
+// orig 0x7a540
 void CFuncMortarField::Precache()
 {
 	PRECACHE_SOUND("weapons/mortar.wav");
@@ -203,7 +205,7 @@ public:
 	int m_spriteTexture;
 };
 
-LINK_ENTITY_TO_CLASS(monster_mortar, CMortar);
+LINK_ENTITY_TO_CLASS(monster_mortar, CMortar); // orig 0x7a810
 
 void CMortar::Spawn()
 {

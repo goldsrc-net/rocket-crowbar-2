@@ -25,6 +25,7 @@
 #include "nodes.h"
 #include "squadmonster.h"
 #include "soundent.h"
+#include "player.h"
 #include "game.h"
 
 // houndeye does 20 points of damage spread over a sphere 384 units in diameter, and each additional
@@ -78,6 +79,16 @@ public:
 	void Spawn() override;
 	void Precache() override;
 	int Classify() override;
+	// Rocket Crowbar 2: the capability bits the RC2 effects ask of a houndeye (slot 75), and no
+	// damage from the transformed houndeye's beam (slots 66-68)
+	// orig 0x66420
+	int GetRCCaps(CBaseEntity* pOther, CBaseEntity* pAsker) override { return 0x27ff; }
+	// orig 0x66430
+	float BeamCoreDamage() override { return 0; }
+	// orig 0x66440
+	float BeamRadialMaxDamage() override { return 0; }
+	// orig 0x66450
+	float BeamViewDamage() override { return 0; }
 	void HandleAnimEvent(MonsterEvent_t* pEvent) override;
 	void SetYawSpeed() override;
 	void WarmUpSound();
@@ -109,7 +120,7 @@ public:
 	bool m_fDontBlink;		// don't try to open/close eye if this bit is set!
 	Vector m_vecPackCenter; // the center of the pack. The leader maintains this by averaging the origins of all pack members.
 };
-LINK_ENTITY_TO_CLASS(monster_houndeye, CHoundeye);
+LINK_ENTITY_TO_CLASS(monster_houndeye, CHoundeye); // orig 0x663a0
 
 TYPEDESCRIPTION CHoundeye::m_SaveData[] =
 	{
@@ -119,12 +130,13 @@ TYPEDESCRIPTION CHoundeye::m_SaveData[] =
 		DEFINE_FIELD(CHoundeye, m_vecPackCenter, FIELD_POSITION_VECTOR),
 };
 
-IMPLEMENT_SAVERESTORE(CHoundeye, CSquadMonster);
+IMPLEMENT_SAVERESTORE(CHoundeye, CSquadMonster); // orig 0x66460 (Save), orig 0x66490 (Restore)
 
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x664c0
 int CHoundeye::Classify()
 {
 	return CLASS_ALIEN_MONSTER;
@@ -133,6 +145,7 @@ int CHoundeye::Classify()
 //=========================================================
 //  FValidateHintType
 //=========================================================
+// orig 0x664d0
 bool CHoundeye::FValidateHintType(short sHint)
 {
 	int i;
@@ -271,6 +284,7 @@ void CHoundeye::SetActivity(Activity NewActivity)
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
+// orig 0x666d0
 void CHoundeye::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
@@ -388,6 +402,7 @@ void CHoundeye::Precache()
 //=========================================================
 // IdleSound
 //=========================================================
+// orig 0x66a40
 void CHoundeye::IdleSound()
 {
 	switch (RANDOM_LONG(0, 2))
@@ -423,6 +438,7 @@ void CHoundeye::WarmUpSound()
 //=========================================================
 // WarnSound
 //=========================================================
+// orig 0x66b50
 void CHoundeye::WarnSound()
 {
 	switch (RANDOM_LONG(0, 2))
@@ -467,6 +483,7 @@ void CHoundeye::AlertSound()
 //=========================================================
 // DeathSound
 //=========================================================
+// orig 0x66cb0
 void CHoundeye::DeathSound()
 {
 	switch (RANDOM_LONG(0, 2))
@@ -486,6 +503,7 @@ void CHoundeye::DeathSound()
 //=========================================================
 // PainSound
 //=========================================================
+// orig 0x66d50
 void CHoundeye::PainSound()
 {
 	switch (RANDOM_LONG(0, 2))
@@ -555,6 +573,7 @@ void CHoundeye::WriteBeamColor()
 //=========================================================
 // SonicAttack
 //=========================================================
+// orig 0x66ea0
 void CHoundeye::SonicAttack()
 {
 	float flAdjustedDamage;
@@ -626,6 +645,10 @@ void CHoundeye::SonicAttack()
 			if (!FClassnameIs(pEntity->pev, "monster_houndeye"))
 			{ // houndeyes don't hurt other houndeyes with their attack
 
+				// Rocket Crowbar 2: nor a player turned into creature 2
+				if (pEntity->IsPlayer() && static_cast<CBasePlayer*>(pEntity)->m_iTransformType == 2)
+					continue;
+
 				// houndeyes do FULL damage if the ent in question is visible. Half damage otherwise.
 				// This means that you must get out of the houndeye's attack range entirely to avoid damage.
 				// Calculate full damage first
@@ -647,7 +670,7 @@ void CHoundeye::SonicAttack()
 
 				if (!FVisible(pEntity))
 				{
-					if (pEntity->IsPlayer())
+					if (pEntity->IsActivePlayer()) // Rocket Crowbar 2: IsActivePlayer
 					{
 						// if this entity is a client, and is not in full view, inflict half damage. We do this so that players still
 						// take the residual damage if they don't totally leave the houndeye's effective radius. We restrict it to clients
@@ -777,6 +800,7 @@ void CHoundeye::StartTask(Task_t* pTask)
 //=========================================================
 // RunTask
 //=========================================================
+// orig 0x67470
 void CHoundeye::RunTask(Task_t* pTask)
 {
 	switch (pTask->iTask)
@@ -1127,11 +1151,12 @@ DEFINE_CUSTOM_SCHEDULES(CHoundeye){
 	slHoundCombatFailNoPVS,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CHoundeye, CSquadMonster);
+IMPLEMENT_CUSTOM_SCHEDULES(CHoundeye, CSquadMonster); // orig 0x67840 (ScheduleFromName)
 
 //=========================================================
 // GetScheduleOfType
 //=========================================================
+// orig 0x67870
 Schedule_t* CHoundeye::GetScheduleOfType(int Type)
 {
 	if (m_fAsleep)

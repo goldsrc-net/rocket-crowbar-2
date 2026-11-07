@@ -42,7 +42,7 @@ private:
 	int m_iStyle;
 	int m_iszPattern;
 };
-LINK_ENTITY_TO_CLASS(light, CLight);
+LINK_ENTITY_TO_CLASS(light, CLight); // orig 0x6fee0
 
 TYPEDESCRIPTION CLight::m_SaveData[] =
 	{
@@ -50,7 +50,7 @@ TYPEDESCRIPTION CLight::m_SaveData[] =
 		DEFINE_FIELD(CLight, m_iszPattern, FIELD_STRING),
 };
 
-IMPLEMENT_SAVERESTORE(CLight, CPointEntity);
+IMPLEMENT_SAVERESTORE(CLight, CPointEntity); // orig 0x6ff50 (Save), orig 0x6ff80 (Restore)
 
 
 //
@@ -131,7 +131,7 @@ void CLight::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType
 //
 // shut up spawn functions for new spotlights
 //
-LINK_ENTITY_TO_CLASS(light_spot, CLight);
+LINK_ENTITY_TO_CLASS(light_spot, CLight); // orig 0x70200
 
 
 class CEnvLight : public CLight
@@ -141,7 +141,7 @@ public:
 	void Spawn() override;
 };
 
-LINK_ENTITY_TO_CLASS(light_environment, CEnvLight);
+LINK_ENTITY_TO_CLASS(light_environment, CEnvLight); // orig 0x70270
 
 bool CEnvLight::KeyValue(KeyValueData* pkvd)
 {

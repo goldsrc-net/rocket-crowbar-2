@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -12,6 +12,12 @@
 *   without written permission from Valve LLC.
 *
 ****/
+
+// Rocket Crowbar 2: the hornet gun no longer fires hornets. It is RC2's freeze gun: a hitscan
+// freeze shot, a charged freeze shot, the freeze grenade (rc2/freezegrenade.cpp) and a zoom,
+// every number from rc2.ini's [HornetGun]. The rules are server-side; the client build of this
+// file (weapon prediction) keeps only what it needs to compile, since RC2's own client.dll does
+// its prediction.
 
 #include "extdll.h"
 #include "util.h"
@@ -22,72 +28,80 @@
 #include "hornet.h"
 #include "gamerules.h"
 #include "UserMessages.h"
-
-static float GetRechargeTime()
-{
-	if (gpGlobals->maxClients > 1)
-	{
-		return 0.3f;
-	}
-	return 0.5f;
-}
-
-enum firemode_e
-{
-	FIREMODE_TRACK = 0,
-	FIREMODE_FAST
-};
+#ifndef CLIENT_DLL
+#include "rc2prefs.h"
+#include "p4_needs.h"
+#include "freezegrenade.h"
+#endif
 
 
-LINK_ENTITY_TO_CLASS(weapon_hornetgun, CHgun);
+LINK_ENTITY_TO_CLASS(weapon_hornetgun, CHgun); // orig 0x64fb0
 
+// orig 0x65020
 bool CHgun::IsUseable()
 {
 	return true;
 }
 
+// orig 0x65030
 void CHgun::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_HORNETGUN;
 	SET_MODEL(ENT(pev), "models/w_hgun.mdl");
 
-	m_iDefaultAmmo = HIVEHAND_DEFAULT_GIVE;
-	m_iFirePhase = 0;
+#ifndef CLIENT_DLL
+	m_iDefaultAmmo = RC2Pref(RC2P_Ammo_HornetGunPickupGive).s;
+#endif
 
 	FallInit(); // get ready to fall down.
 }
 
 
+// orig 0x65070
 void CHgun::Precache()
 {
 	PRECACHE_MODEL("models/v_hgun.mdl");
 	PRECACHE_MODEL("models/w_hgun.mdl");
 	PRECACHE_MODEL("models/p_hgun.mdl");
 
-	m_usHornetFire = PRECACHE_EVENT(1, "events/firehornet.sc");
+	PRECACHE_SOUND("agrunt/ag_fire1.wav");
+	PRECACHE_SOUND("agrunt/ag_fire2.wav");
+	PRECACHE_SOUND("agrunt/ag_fire3.wav");
+	PRECACHE_SOUND("ambience/alien_purrmachine.wav");
+	PRECACHE_MODEL("sprites/freezef.spr");
 
-	UTIL_PrecacheOther("hornet");
+	m_usHornetFire = PRECACHE_EVENT(1, "events/hgunfire.sc");
+	m_usHgunSetCharge = PRECACHE_EVENT(1, "events/hgunsetcharge.sc");
+
+	UTIL_PrecacheOther("freeze_grenade");
+	UTIL_PrecacheOther("freeze_timer");
 }
 
+// orig 0x65110
 void CHgun::AddToPlayer(CBasePlayer* pPlayer)
 {
 #ifndef CLIENT_DLL
 	if (g_pGameRules->IsMultiplayer())
 	{
 		// in multiplayer, all hivehands come full.
-		m_iDefaultAmmo = HORNET_MAX_CARRY;
+		m_iDefaultAmmo = RC2Pref(RC2P_Ammo_MaxCarryHornets).s;
 	}
 #endif
 
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
+// orig 0x65190
 bool CHgun::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "Hornets";
+#ifndef CLIENT_DLL
+	p->iMaxAmmo1 = RC2Pref(RC2P_Ammo_MaxCarryHornets).s;
+#else
 	p->iMaxAmmo1 = HORNET_MAX_CARRY;
+#endif
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -101,11 +115,22 @@ bool CHgun::GetItemInfo(ItemInfo* p)
 }
 
 
+// orig 0x65200
 bool CHgun::Deploy()
 {
+	m_fInAttack = 0;
+	m_fCharging = false;
+	m_flChargeStart = gpGlobals->time;
+	m_pPlayer->m_iFOV = 0;
+	m_pPlayer->pev->fov = 0;
+
+	// clear the client's charge display
+	PLAYBACK_EVENT_FULL(FEV_GLOBAL, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, ENTINDEX(m_pPlayer->edict()), 0, 1, 0);
+
 	return DefaultDeploy("models/v_hgun.mdl", "models/p_hgun.mdl", HGUN_UP, "hive");
 }
 
+// orig 0x652a0
 void CHgun::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
@@ -116,162 +141,229 @@ void CHgun::Holster()
 	{
 		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = 1;
 	}
+
+	// Rocket Crowbar 2: unzoom, drop any charge
+	m_pPlayer->m_iFOV = 0;
+	m_pPlayer->pev->fov = 0;
+	m_fInAttack = 0;
+	m_fCharging = false;
+	m_flChargeStart = gpGlobals->time;
+
+	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, ENTINDEX(m_pPlayer->edict()), 0, 1, 0);
 }
 
 
+// orig 0x65380
 void CHgun::PrimaryAttack()
 {
-	Reload();
-
-	if (m_pPlayer->ammo_hornets <= 0)
-	{
-		return;
-	}
-
 #ifndef CLIENT_DLL
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+	// the hitscan freeze shot
+	if (m_fCharging || 0 != m_fInAttack)
+		return;
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < (unsigned short)RC2Pref(RC2P_HornetGun_PrimaryAmmoCost).s)
+		return;
 
-	CBaseEntity* pHornet = CBaseEntity::Create("hornet", m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -12, m_pPlayer->pev->v_angle, m_pPlayer->edict());
-	pHornet->pev->velocity = gpGlobals->v_forward * 300;
-
-	m_flRechargeTime = gpGlobals->time + GetRechargeTime();
-#endif
-
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
-
-
-	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
-
-	int flags;
-#if defined(CLIENT_WEAPONS)
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
-#endif
-
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usHornetFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-
-
-
-	// player "shoot" animation
+	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, 0, 0);
 
-	if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
-	{
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25;
-	}
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] == 0)
-	{
-		m_flNextPrimaryAttack += GetRechargeTime();
-	}
-
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefirePrimary).f);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefireSecondary).f);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefireTertiary).f);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefireQuaternary).f);
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	UTIL_ExtendTime(&m_flRechargeTime, gpGlobals->time, RC2Pref(RC2P_HornetGun_PrimaryRechargeDelay).f);
+
+	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= (unsigned short)RC2Pref(RC2P_HornetGun_PrimaryAmmoCost).s;
+
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	TraceResult tr;
+	UTIL_TraceLine(vecSrc, vecSrc + gpGlobals->v_forward * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
+	if (tr.flFraction < 1.0 && 0 != UTIL_IsValidEdict(tr.pHit))
+	{
+		CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
+		if (pHit && g_pGameRules->PlayerCanAffect(m_pPlayer, pHit))
+		{
+			FreezeDamage(pHit, m_pPlayer->pev, UTIL_NamedInflictor("freeze"),
+				RC2Pref(RC2P_HornetGun_PrimaryDamage).f, RC2Pref(RC2P_HornetGun_PrimaryFreezeDamage).f, RC2Pref(RC2P_HornetGun_PrimaryFreezeTime).f,
+				&tr, gpGlobals->v_forward, true);
+		}
+	}
+#endif
 }
 
-
-
+// orig 0x656b0
 void CHgun::SecondaryAttack()
 {
-	Reload();
-
-	if (m_pPlayer->ammo_hornets <= 0)
-	{
-		return;
-	}
-
-	//Wouldn't be a bad idea to completely predict these, since they fly so fast...
 #ifndef CLIENT_DLL
-	CBaseEntity* pHornet;
-	Vector vecSrc;
+	// start charging; WeaponFrame draws more ammo into it and lets it go
+	if (m_fCharging || 0 != m_fInAttack)
+		return;
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+		return;
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
-
-	vecSrc = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -12;
-
-	m_iFirePhase++;
-	switch (m_iFirePhase)
-	{
-	case 1:
-		vecSrc = vecSrc + gpGlobals->v_up * 8;
-		break;
-	case 2:
-		vecSrc = vecSrc + gpGlobals->v_up * 8;
-		vecSrc = vecSrc + gpGlobals->v_right * 8;
-		break;
-	case 3:
-		vecSrc = vecSrc + gpGlobals->v_right * 8;
-		break;
-	case 4:
-		vecSrc = vecSrc + gpGlobals->v_up * -8;
-		vecSrc = vecSrc + gpGlobals->v_right * 8;
-		break;
-	case 5:
-		vecSrc = vecSrc + gpGlobals->v_up * -8;
-		break;
-	case 6:
-		vecSrc = vecSrc + gpGlobals->v_up * -8;
-		vecSrc = vecSrc + gpGlobals->v_right * -8;
-		break;
-	case 7:
-		vecSrc = vecSrc + gpGlobals->v_right * -8;
-		break;
-	case 8:
-		vecSrc = vecSrc + gpGlobals->v_up * 8;
-		vecSrc = vecSrc + gpGlobals->v_right * -8;
-		m_iFirePhase = 0;
-		break;
-	}
-
-	pHornet = CBaseEntity::Create("hornet", vecSrc, m_pPlayer->pev->v_angle, m_pPlayer->edict());
-	pHornet->pev->velocity = gpGlobals->v_forward * 1200;
-	pHornet->pev->angles = UTIL_VecToAngles(pHornet->pev->velocity);
-
-	pHornet->SetThink(&CHornet::StartDart);
-
-	m_flRechargeTime = gpGlobals->time + GetRechargeTime();
-#endif
-
-	int flags;
-#if defined(CLIENT_WEAPONS)
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
-#endif
-
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usHornetFire, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
-
-
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
+	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+	m_iChargeAmmo = 1;
+	m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + RC2Pref(RC2P_HornetGun_SecondaryChargeTime).f / (unsigned short)RC2Pref(RC2P_HornetGun_SecondaryMaxAmmoCost).s;
+	m_flChargeStart = gpGlobals->time;
+	m_flChargeReady = gpGlobals->time + RC2Pref(RC2P_HornetGun_SecondaryMinChargeTime).f;
+	m_fInAttack = 1;
+	m_fCharging = true;
 
-	// player "shoot" animation
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1;
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] == 0)
-	{
-		m_flRechargeTime = gpGlobals->time + 0.5;
-		m_flNextSecondaryAttack += 0.5;
-		m_flNextPrimaryAttack += 0.5;
-	}
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0.01, 0, ENTINDEX(m_pPlayer->edict()), 0, 0, 1);
+#endif
 }
 
-
-void CHgun::Reload()
+// orig 0x657d0
+void CHgun::TertiaryAttack()
 {
 #ifndef CLIENT_DLL
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= HORNET_MAX_CARRY)
+	// the freeze grenade
+	if (m_fCharging || 0 != m_fInAttack)
+		return;
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < (unsigned short)RC2Pref(RC2P_HornetGun_GrenadeAmmoCost).s)
 		return;
 
-	while (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < HORNET_MAX_CARRY && m_flRechargeTime < gpGlobals->time)
+	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= (unsigned short)RC2Pref(RC2P_HornetGun_GrenadeAmmoCost).s;
+
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, 2, 0);
+
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_TertiaryRefirePrimary).f);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_TertiaryRefireSecondary).f);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_TertiaryRefireTertiary).f);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_TertiaryRefireQuaternary).f);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	UTIL_ExtendTime(&m_flRechargeTime, gpGlobals->time, RC2Pref(RC2P_HornetGun_GrenadeRechargeDelay).f);
+
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+	UTIL_MakeVectors(vecAngles);
+	vecAngles.x = -vecAngles.x;
+
+	CBaseEntity* pGrenade = CBaseEntity::Create("freeze_grenade", vecSrc, vecAngles, m_pPlayer->edict());
+	pGrenade->pev->velocity = gpGlobals->v_forward * RC2Pref(RC2P_HornetGun_GrenadeLaunchVel).f;
+	pGrenade->pev->velocity.z += RC2Pref(RC2P_HornetGun_GrenadeLaunchZBoost).f;
+
+	// thrown from what the player is linked to, it belongs to that entity
+	if (0 != m_pPlayer->m_iRidingIndex)
+	{
+		edict_t* pent = INDEXENT(m_pPlayer->m_iRidingIndex);
+		if (0 != UTIL_IsValidEdict(pent))
+			pGrenade->pev->owner = pent;
+	}
+#endif
+}
+
+// orig 0x65aa0
+void CHgun::QuaternaryAttack()
+{
+#ifndef CLIENT_DLL
+	// zoom toggle
+	if (m_fCharging || 0 != m_fInAttack)
+		return;
+
+	if (m_pPlayer->pev->fov != 0)
+	{
+		m_pPlayer->m_iFOV = 0;
+		m_pPlayer->pev->fov = 0;
+	}
+	else
+	{
+		m_pPlayer->m_iFOV = (int)RC2Pref(RC2P_HornetGun_ZoomedFOV).f;
+		m_pPlayer->pev->fov = m_pPlayer->m_iFOV;
+	}
+
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_QuaternaryRefirePrimary).f);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_QuaternaryRefireSecondary).f);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_QuaternaryRefireTertiary).f);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_QuaternaryRefireQuaternary).f);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+#endif
+}
+
+// orig 0x65bd0
+void CHgun::ReleaseCharge(bool bBackfire)
+{
+#ifndef CLIENT_DLL
+	// the charged shot, or with bBackfire the overcharge going off on the player
+	if (0 != g_iRC2WeaponFrame)
+	{
+		m_fInAttack = 0;
+		m_fCharging = false;
+	}
+
+	float flCharge = (gpGlobals->time - m_flChargeStart) / RC2Pref(RC2P_HornetGun_SecondaryChargeTime).f;
+	if (flCharge < 0.0)
+		flCharge = 0.0;
+	else if (flCharge > 1.0)
+		flCharge = 1.0;
+
+	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+
+	if (0 != g_iRC2WeaponFrame)
+	{
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0, (float*)&g_vecZero, (float*)&g_vecZero, flCharge + 1.0, 0, 0, 0, bBackfire ? 1 : 0, 0);
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, ENTINDEX(m_pPlayer->edict()), 0, 1, 0);
+		PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, m_pPlayer->edict(), m_usHgunSetCharge, 0.01, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, ENTINDEX(m_pPlayer->edict()), 0, 1, 0);
+	}
+
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_SecondaryRefirePrimary).f);
+	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_SecondaryRefireSecondary).f);
+	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_SecondaryRefireTertiary).f);
+	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_SecondaryRefireQuaternary).f);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	UTIL_ExtendTime(&m_flRechargeTime, gpGlobals->time, RC2Pref(RC2P_HornetGun_SecondaryRechargeDelay).f);
+
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+
+	float flDamage = RC2Pref(RC2P_HornetGun_SecondaryAddDamage).f * flCharge + RC2Pref(RC2P_HornetGun_SecondaryBaseDamage).f;
+	float flFreezeDamage = RC2Pref(RC2P_HornetGun_SecondaryAddFreezeDamage).f * flCharge + RC2Pref(RC2P_HornetGun_SecondaryBaseFreezeDamage).f;
+	float flFreezeTime = RC2Pref(RC2P_HornetGun_SecondaryAddFreezeTime).f * flCharge + RC2Pref(RC2P_HornetGun_SecondaryBaseFreezeTime).f;
+
+	if (!bBackfire)
+	{
+		UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+		TraceResult tr;
+		UTIL_TraceLine(vecSrc, vecSrc + gpGlobals->v_forward * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
+		if (tr.flFraction < 1.0 && 0 != UTIL_IsValidEdict(tr.pHit))
+		{
+			CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
+			if (pHit && g_pGameRules->PlayerCanAffect(m_pPlayer, pHit))
+				FreezeDamage(pHit, m_pPlayer->pev, UTIL_NamedInflictor("freeze"), flDamage, flFreezeDamage, flFreezeTime, &tr, gpGlobals->v_forward, true);
+		}
+	}
+	else
+	{
+		// the player takes [HornetGun] SecondaryBackfireScale of it, past any shield
+		const float flScale = RC2Pref(RC2P_HornetGun_SecondaryBackfireScale).f;
+		FreezeDamage(m_pPlayer, m_pPlayer->pev, UTIL_NamedInflictor("freeze"), flScale * flDamage, flScale * flFreezeDamage, flScale * flFreezeTime, NULL, g_vecZero, false);
+	}
+#endif
+}
+
+// orig 0x66080
+void CHgun::Recharge()
+{
+#ifndef CLIENT_DLL
+	// what Reload did in the SDK: an ammo point per [HornetGun] SharedRechargeGiveDelay
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= RC2Pref(RC2P_Ammo_MaxCarryHornets).s)
+		return;
+
+	while (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < RC2Pref(RC2P_Ammo_MaxCarryHornets).s && m_flRechargeTime < gpGlobals->time)
 	{
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]++;
-		m_flRechargeTime += GetRechargeTime();
+		m_flRechargeTime = RC2Pref(RC2P_HornetGun_SharedRechargeGiveDelay).f + m_flRechargeTime;
 	}
 
 	m_pPlayer->TabulateAmmo();
@@ -279,10 +371,10 @@ void CHgun::Reload()
 }
 
 
+// orig 0x66100
 void CHgun::WeaponIdle()
 {
-	Reload();
-
+	// Rocket Crowbar 2: no Reload() here; WeaponFrame recharges
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
 
@@ -304,4 +396,53 @@ void CHgun::WeaponIdle()
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 35.0 / 16.0;
 	}
 	SendWeaponAnim(iAnim);
+}
+
+// orig 0x661a0
+void CHgun::WeaponFrame()
+{
+#ifndef CLIENT_DLL
+	if (!m_pPlayer->m_bFrozen && !m_fCharging && 0 == m_fInAttack)
+		Recharge();
+
+	if (!m_fCharging)
+		return;
+
+	// let go when the button is up and the minimum charge is in
+	if ((m_pPlayer->pev->button & IN_ATTACK2) == 0 && m_flChargeReady < gpGlobals->time)
+	{
+		ReleaseCharge(false);
+		return;
+	}
+
+	// held too long: it goes off on the player
+	if (gpGlobals->time - m_flChargeStart > RC2Pref(RC2P_HornetGun_SecondaryOverChargeTime).f)
+	{
+		ReleaseCharge(true);
+		return;
+	}
+
+	// draw another ammo point into the charge, up to [HornetGun] SecondaryMaxAmmoCost
+	if (UTIL_WeaponTimeBase() >= m_pPlayer->m_flNextAmmoBurn && m_iChargeAmmo < (unsigned short)RC2Pref(RC2P_HornetGun_SecondaryMaxAmmoCost).s)
+	{
+		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+		{
+			ReleaseCharge(false);
+			return;
+		}
+
+		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+		m_iChargeAmmo++;
+		m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + RC2Pref(RC2P_HornetGun_SecondaryChargeTime).f / (unsigned short)RC2Pref(RC2P_HornetGun_SecondaryMaxAmmoCost).s;
+	}
+
+	double flCharge = (gpGlobals->time - m_flChargeStart) / RC2Pref(RC2P_HornetGun_SecondaryChargeTime).f;
+	if (flCharge < 0.0)
+		flCharge = 0.0;
+	else if (flCharge > 1.0)
+		flCharge = 1.0;
+
+	if (0 != g_iRC2WeaponFrame)
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, (float)flCharge, 0, ENTINDEX(m_pPlayer->edict()), 0, 0, 0);
+#endif
 }

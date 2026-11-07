@@ -750,17 +750,40 @@ class CMP5 : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
+	// orig 0x7de90
 	int iItemSlot() override { return 3; }
 	bool GetItemInfo(ItemInfo* p) override;
+	void AddToPlayer(CBasePlayer* pPlayer) override;
+	// orig 0x7bf20
+	int SecondaryAmmoIndex() override { return m_iSecondaryAmmoType; }
 
+	// Rocket Crowbar 2: the MP5 fires bolts. Primary: blaster_bolt; secondary: the "fart", a
+	// push that hurts what is behind the player; tertiary: bouncy_bolt; quaternary: charge a
+	// phase_pulse (WeaponFrame fires it when the charge is done).
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+	void FirePulse();
 	bool Deploy() override;
+	bool CanHolster() override;
+	void Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
 	float m_flNextAnimTime;
 	int m_iShell;
 
+	// Not saved, so the names are ours.
+	short m_sBlasterCount; // orig +0xe4: count of blaster bolts fired (to 0x7ffe), sent with each, synced to the client
+	short m_sBouncyCount;  // orig +0xe6: the same for bouncy bolts
+	short m_sPulseCount;   // orig +0xe8: the same for phase pulses
+	int m_iPulseCharging;  // orig +0xec: a pulse charge is on
+	float m_flPulseReady;  // orig +0xf0: the charge fires at this time
+	float m_flNextSync;	   // orig +0xf4: when to send WeaponSync again
+
+	// orig 0x7dea0
 	bool UseDecrement() override
 	{
 #if defined(CLIENT_WEAPONS)
@@ -771,8 +794,14 @@ public:
 	}
 
 private:
-	unsigned short m_usMP5;
-	unsigned short m_usMP52;
+	void FireBolt(const char* pszBolt, short& sCount, unsigned short usEvent, int iAmmoCost, float flRefire1, float flRefire2, float flRefire3, float flRefire4);
+	void WeaponTimeout(float flDelay);
+
+	unsigned short m_usMP5Primary; // orig +0xf8: events/mp5primary.sc. Names ours, after the event files
+	unsigned short m_usMP5Fart;	   // orig +0xfa: events/mp5fart.sc
+	unsigned short m_usMP5Bouncy;  // orig +0xfc: events/mp5bouncy.sc
+	unsigned short m_usMP5Pulse;   // orig +0xfe: events/mp5pulse.sc
+	unsigned short m_usMP5Charge;  // orig +0x100: events/mp5charge.sc
 };
 
 enum crossbow_e
@@ -1271,23 +1300,36 @@ public:
 
 	void Spawn() override;
 	void Precache() override;
+	// orig 0x66380
 	int iItemSlot() override { return 4; }
 	bool GetItemInfo(ItemInfo* p) override;
 	void AddToPlayer(CBasePlayer* pPlayer) override;
 
+	// Rocket Crowbar 2: the hornet gun freezes. Primary is a hitscan freeze shot, secondary
+	// charges one up while held (overcharged, it backfires on the player), tertiary throws a
+	// freeze grenade, quaternary zooms. Ammo recharges in WeaponFrame instead of Reload.
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
 	bool Deploy() override;
 	bool IsUseable() override;
 	void Holster() override;
-	void Reload() override;
 	void WeaponIdle() override;
+	void Recharge();
+	void ReleaseCharge(bool bBackfire);
 	float m_flNextAnimTime;
 
 	float m_flRechargeTime;
 
-	int m_iFirePhase; // don't save me.
+	// Not saved, so the names are ours.
+	float m_flChargeStart; // orig +0xe4: when the secondary charge began (also reset on deploy and holster)
+	float m_flChargeReady; // orig +0xe8: the charge can be let go from this time on
+	int m_iChargeAmmo;	   // orig +0xec: ammo drawn into the charge so far
+	bool m_fCharging;	   // orig +0xf0
 
+	// orig 0x66390
 	bool UseDecrement() override
 	{
 #if defined(CLIENT_WEAPONS)
@@ -1299,6 +1341,7 @@ public:
 
 private:
 	unsigned short m_usHornetFire;
+	unsigned short m_usHgunSetCharge; // orig +0xf4: events/hgunsetcharge.sc. Name ours
 };
 
 enum handgrenade_e

@@ -1333,5 +1333,5 @@ const char* GetPrecachedClassname(const char* pszClassname) { return pszClassnam
 void LCS_ParseTokens(char* pszScript, LCSTOKENFUNC pfnToken) {}
 float LCS_EvalFloat(char* pszToken) { return 0; }
 Vector LCS_EvalVector(char* pszToken) { return g_vecZero; }
-void LCS_Command(int iFirstArg, edict_t* pClient) {}
+// LCS_Command: the real one is reconstructed elsewhere now
 // StopVote: the real one is reconstructed elsewhere now
