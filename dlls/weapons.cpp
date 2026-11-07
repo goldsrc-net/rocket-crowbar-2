@@ -914,7 +914,7 @@ bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
 		MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, pPlayer->pev);
 		WRITE_BYTE(state);
 		WRITE_BYTE(m_iId);
-		WRITE_BYTE(m_iClip);
+		WRITE_SHORT(m_iClip); // RC2's CurWeapon: the clip is a short (4 bytes; UserMessages.cpp)
 		MESSAGE_END();
 
 		m_iClientClip = m_iClip;
