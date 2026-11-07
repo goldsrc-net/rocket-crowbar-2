@@ -48,10 +48,12 @@ Original content: Steven's install at `/media/Data3/Projects/mods/rc2/` (beta 1.
   are left. Builds on i386 and amd64; on the rig it boots and loads rc_sandcrab with a clean
   console. Booted only, not played.
 - **Client (client.dll):** 1,466 functions to reconstruct (incremental-link and import thunks
-  skipped). c2-c5 are merged: 786 have a counterpart (53%); c1 (weapons, events, ammo) is
-  running. The packages named each other's code differently, so many stubs still stand in for
-  real code under another name (c2's effect dispatcher reaches none of c3's effects, nothing in
-  CLTE draws). w3-reconcile is unifying them by original address (`scripts/merge/stub_addrs.py`).
+  skipped). All five packages are merged: 1,158 have a counterpart (78%); most of the rest is
+  template and compiler-generated code c1 lists in its dossier. The weapon files in dlls/ are one
+  source for both libraries. The packages named each other's code differently, so many stubs
+  still stand in for real code under another name (c2's effect dispatcher reaches none of c3's
+  effects, nothing in CLTE draws). w3-reconcile is unifying them by original address
+  (`scripts/merge/stub_addrs.py`).
 - Not yet: playing ours against the original, ORIGINAL_BUGS.md from the dossiers, the server
   docs (as mod-rockcrowbar's docs/), the amd64 client (no 64-bit VGUI).
 - Merging packages: the shared headers collect each package's names for the same members;
