@@ -1116,13 +1116,9 @@ bool CScriptedSentence::AcceptableSpeaker(CBaseToggle* pTarget)
 		if (pMonster->CanPlaySentence(override))
 			return true;
 	}
-	else
-	{
-		// targeting something other than a monster, sure it can speak
-		if (pTarget && pTarget->IsAllowedToSpeak())
-			return true;
-	}
 
+	// SDK 2.3's (stock in RC2); halflife-updated also let a non-monster that IsAllowedToSpeak
+	// (func_button) speak the sentence
 	return false;
 }
 
