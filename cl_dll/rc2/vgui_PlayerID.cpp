@@ -26,9 +26,9 @@ static Vector g_vecPlayerIDCentre[PLAYERID_MAX]; // 0x102221c0
 
 extern float* GetClientColor(int clientIndex);
 extern Vector v_angles; // view.cpp
-// the per-player byte RC2 keeps for what a player is attached to, bit 7 a flag (RC2's own
-// client code at client 0xaf980, package c3)
-extern unsigned char* RC2_GetPlayerAttachment(int iEntity); // name ours
+// the player's ride info from PlrStat: the low 7 bits the player he rides, bit 7 the left
+// shoulder (rc2/pm_client.cpp, client 0xaf980)
+unsigned char* PM_GetRideInfo(int iEnt);
 
 // orig client 0xd8980. Called from HUD_Frame with the frame time.
 void PlayerID_Frame(float flFrameTime)
@@ -99,7 +99,7 @@ void PlayerID_Frame(float flFrameTime)
 	if (gHUD.m_Health.m_iHealth <= 0)
 		return;
 
-	int iLocalAttached = *RC2_GetPlayerAttachment(pPlayer->index) & 0x7f;
+	int iLocalAttached = *PM_GetRideInfo(pPlayer->index) & 0x7f;
 
 	Vector vecAngles = v_angles;
 	Vector vecEye;
@@ -128,7 +128,7 @@ void PlayerID_Frame(float flFrameTime)
 
 		// skip what the player is attached to if that's the local player, and what the local
 		// player is attached to
-		int iAttached = *RC2_GetPlayerAttachment(iEntity) & ~0x80;
+		int iAttached = *PM_GetRideInfo(iEntity) & ~0x80;
 		if (0 != iAttached && 0 != gEngfuncs.pEventAPI->EV_IsLocal(iAttached - 1))
 			continue;
 
@@ -230,9 +230,3 @@ void PlayerID_Disable()
 	g_bPlayerIDEnabled = false;
 }
 
-// TEMP STUB (c5): real one belongs in RC2's client code at client 0xaf980 (package c3)
-unsigned char* RC2_GetPlayerAttachment(int iEntity)
-{
-	static unsigned char s_bNone = 0;
-	return &s_bNone;
-}

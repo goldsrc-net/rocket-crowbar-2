@@ -23,10 +23,6 @@
 #include <cmath>
 
 // c3 needs:
-// orig 0xe9ca0 (view.cpp, a stock file RC2 changed): starts a view shake unless one of a higher
-// iPriority is running; also rolls new random phases for it. The meaning of the three floats
-// is read off their use there. name ours
-void RC2_ViewShake(float flAmplitude, float flFrequency, float flDuration, int iPriority);
 // orig 0xdd80 ("new: start .. ev_hldm"): the height of the water surface above vecPosition
 // between flMinZ and flMaxZ, by bisection on PM_PointContents (as UTIL_WaterLevel). name ours
 float RC2_WaterLevel(const float* vecPosition, float flMinZ, float flMaxZ);
@@ -38,16 +34,16 @@ class CGravGrenadeTent : public CClientTent // name ours
 public:
 	CGravGrenadeTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	bool UpdateDebris(float flFrametime);
 	void SpawnDebris();
 
 	int m_iEntIndex;			  // orig +0x8
 	bool m_bSeen;				  // orig +0xc: the entity was current on the last think
-	bool m_bDead;				  // orig +0xd: the entity is gone (EntityGone)
+	bool m_bDead;				  // orig +0xd: the entity is gone (KillEntity)
 	model_s* m_pDebrisSprite;	  // orig +0x10: sprites/gradsmoke.spr
 	model_s* m_pSparkSprite;	  // orig +0x14: sprites/gradsmoke2.spr
 	Vector m_vecOrigin;			  // orig +0x18
@@ -63,7 +59,7 @@ public:
 	Vector m_vecRing[9];		  // orig +0x48: the octagon's corners in its own frame, the first again last
 	Vector m_vecCorner[8];		  // orig +0xb4: the corners in the world
 	BEAM* m_pRingBeams[8];		  // orig +0x114
-	CRC2Trail m_Sparks[8];		  // orig +0x134: one per corner
+	CTentTrail m_Sparks[8];		  // orig +0x134: one per corner
 	float m_flNextSparks;		  // orig +0x274
 	Vector m_vecAngles;			  // orig +0x278: the octagon's
 	Vector m_vecAVelocity;		  // orig +0x284
@@ -73,7 +69,7 @@ public:
 	Vector m_vecDebris[16];		  // orig +0x29c
 	Vector m_vecDebrisPrev[16];	  // orig +0x35c: where each was at the last trace
 	Vector m_vecDebrisVel[16];	  // orig +0x41c
-	CRC2Trail m_DebrisTrails[16]; // orig +0x4dc
+	CTentTrail m_DebrisTrails[16]; // orig +0x4dc
 	float m_flDebrisLife[16];	  // orig +0x75c: -1 flying, then the trail's fade time left, 0 unused
 };
 
@@ -81,7 +77,7 @@ public:
 // implicit copy constructor (inline in the original).
 CClientTent* RC2_NewGravGrenadeTent(const CClientTent* pCopy) // orig client 0x7dee0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -137,8 +133,8 @@ CGravGrenadeTent::CGravGrenadeTent() // orig client 0x80cb0
 
 	// VERIFY: m_pBeam, m_pGlow, m_pFlare, m_pDlight and m_pElight are left unset when there is no
 	// entity (harmless: nothing reads them then) and m_pBeam, m_pGlow, m_pFlare also when their
-	// sprite doesn't load, which EntityGone and Think then dereference (an original bug, kept)
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	// sprite doesn't load, which KillEntity and Update then dereference (an original bug, kept)
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_bDead = true;
@@ -238,16 +234,16 @@ CGravGrenadeTent::CGravGrenadeTent() // orig client 0x80cb0
 // The debris and the sparks: traces the flying debris (more often at higher cl_detail) and
 // adds a point to each one's trail, moves it under gravity, ages the landed ones, and below
 // cl_detail 1 nothing more; above, every 0.07 s a spark from each corner of the octagon flies
-// outward at 300 while it lasts. True while any trail still has points. Inline in Think three
+// outward at 300 while it lasts. True while any trail still has points. Inline in Update three
 // times in the original, a call there once.
 bool CGravGrenadeTent::UpdateDebris(float flFrametime) // orig client 0x7fef0
 {
 	m_flNextDebrisTrace -= flFrametime;
 	if (m_flNextDebrisTrace <= 0)
 	{
-		if (g_iClDetail < 0)
+		if (g_iClientDetail < 0)
 			m_flNextDebrisTrace = 0.15;
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flNextDebrisTrace = 0.1;
 		else
 			m_flNextDebrisTrace = 0.075;
@@ -300,7 +296,7 @@ bool CGravGrenadeTent::UpdateDebris(float flFrametime) // orig client 0x7fef0
 		}
 	}
 
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 	{
 		if (!m_bDead)
 		{
@@ -349,23 +345,23 @@ void CGravGrenadeTent::SpawnDebris() // orig client 0x805b0
 	m_vecDebrisVel[i] = vecDir * gEngfuncs.pfnRandomFloat(450, 550);
 
 	m_flDebrisLife[i] = -1;
-	m_DebrisTrails[i].Clear();
+	m_DebrisTrails[i].Reset();
 	m_DebrisTrails[i].AddPoint(m_vecDebris[i], Vector(0, 0, 0), Vector(0, 0, 0), Vector(0.7, 0.7, 1.0), 0.8, 3.0, 0.533333, 0, nullptr);
 }
 
-bool CGravGrenadeTent::Think(float flFrametime) // orig client 0x7e2e0
+bool CGravGrenadeTent::Update(float flFrametime) // orig client 0x7e2e0
 {
 	if (!m_iEntIndex || m_bDead)
 	{
-		if (g_iClDetail < 0)
+		if (g_iClientDetail < 0)
 			return true;
 		return !(UpdateDebris(flFrametime) && m_bSeen);
 	}
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return !(UpdateDebris(flFrametime) && m_bSeen);
 	}
 
@@ -396,7 +392,7 @@ bool CGravGrenadeTent::Think(float flFrametime) // orig client 0x7e2e0
 					flFrac = 0;
 				else if (flFrac > 1)
 					flFrac = 1;
-				RC2_ViewShake(flFrac * 1.5 + 0.5, 20, flFrac * 0.5, 0);
+				V_StartViewShake(flFrac * 1.5 + 0.5, 20, flFrac * 0.5, 0);
 			}
 		}
 
@@ -462,7 +458,7 @@ bool CGravGrenadeTent::Think(float flFrametime) // orig client 0x7e2e0
 	}
 
 	// bubbles in a 64 cube around it, up to the surface, under water
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_flNextBubbles -= flFrametime;
 		if (m_flNextBubbles <= 0)
@@ -487,7 +483,7 @@ bool CGravGrenadeTent::Think(float flFrametime) // orig client 0x7e2e0
 		// so the two shorter intervals are all but unreachable; kept
 		if (m_flNextDebris < 0)
 			m_flNextDebris = gEngfuncs.pfnRandomFloat(0.4, 0.6);
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flNextDebris = gEngfuncs.pfnRandomFloat(0.2, 0.4);
 		else
 			m_flNextDebris = gEngfuncs.pfnRandomFloat(0.15, 0.35);
@@ -504,9 +500,9 @@ void CGravGrenadeTent::DrawTransparent() // orig client 0x80860
 {
 	if (!m_bSeen)
 		return;
-	if (m_iDebrisCount <= 0 && g_iClDetail < 1)
+	if (m_iDebrisCount <= 0 && g_iClientDetail < 1)
 		return;
-	if (g_iClDetail == -2)
+	if (g_iClientDetail == -2)
 		return;
 
 	bool bDebris = true;
@@ -520,16 +516,16 @@ void CGravGrenadeTent::DrawTransparent() // orig client 0x80860
 	}
 	if (i >= 16)
 	{
-		if (g_iClDetail <= 0)
+		if (g_iClientDetail <= 0)
 			return;
 		bDebris = false;
 	}
 
-	if (g_iClDetail == -3)
+	if (g_iClientDetail == -3)
 	{
 		bDebris = false;
 	}
-	else if (g_iClDetail > 0 || g_iClDetail == -4)
+	else if (g_iClientDetail > 0 || g_iClientDetail == -4)
 	{
 		for (i = 0; i < 8; i++)
 		{
@@ -542,7 +538,7 @@ void CGravGrenadeTent::DrawTransparent() // orig client 0x80860
 				return;
 			bSparks = false;
 		}
-		if (g_iClDetail == -4)
+		if (g_iClientDetail == -4)
 			bSparks = false;
 	}
 
@@ -563,7 +559,7 @@ void CGravGrenadeTent::DrawTransparent() // orig client 0x80860
 		}
 	}
 
-	if (g_iClDetail > 0 && m_pSparkSprite && bSparks)
+	if (g_iClientDetail > 0 && m_pSparkSprite && bSparks)
 	{
 		gEngfuncs.pTriAPI->SpriteTexture(m_pSparkSprite, 0);
 		for (i = 0; i < 8; i++)
@@ -580,7 +576,7 @@ void CGravGrenadeTent::DrawTransparent() // orig client 0x80860
 
 // The grenade is gone: stop its sound, drop the glows, lights and beams. Always false, so the
 // effect stays for its debris and sparks to finish.
-bool CGravGrenadeTent::EntityGone(int iEntIndex) // orig client 0x80b50
+bool CGravGrenadeTent::KillEntity(int iEntIndex) // orig client 0x80b50
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

@@ -21,16 +21,20 @@ extern int g_bHoundeyeAsleep;
 // (upside down), the look controls turn the other way. .bss 0x10220c4c.
 extern int g_iBatPerch;
 
+// The houndeye's sleep fade, 0 to 1 (RC2_TempEntThink moves it): the screen goes black with it
+// (view.cpp's V_UpdateScreenTint). .bss 0x10220c48.
+extern float g_flHoundeyeSleepFade;
+
 inline bool TransformViewInverted() // name ours: the original tests this inline everywhere
 {
 	return g_iPlayerClass == 4 && g_iBatPerch == 2;
 }
 
-// From elsewhere (TEMP STUBs in input_stubs_V.cpp until their files are reconstructed):
+// From elsewhere:
 extern int g_iViewMode;				// hud.cpp .bss 0x1020bb38: the ViewMode message's byte (client.dll 0xa10b0)
 extern float g_flTransformFOV;		// hud.cpp .bss 0x1020bb44: the FOV HUD_GetFOV gives in a transform (0xa1f30)
-extern int g_bViewLockTent;			// .bss 0x101f69f8: a client tent locks the local player's view (0x7bff0)
-extern int g_bViewLockEffect;		// .bss 0x101f6a00: an effect on the local player locks the view (0x8ebf0)
+extern int g_iLocalPlayerFrozen;	// rc2/clte.cpp, .bss 0x101f69f8: CLTE 0x2f froze the local player (0x7bff0); locks the view
+extern int g_bLocalTransforming;	// rc2/clte.cpp, .bss 0x101f6a00: CLTE 0x40 transforms the local player (0x8ebf0); locks the view
 
 // The view angles input works from: in view mode 3 the last refdef's (view.cpp's v_angles,
 // .bss 0x10227148), else the engine's.

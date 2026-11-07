@@ -183,13 +183,11 @@ float GetPlayerAttrFloat(int iEnt, int iSlot)
 	return g_flLocalFloats[iSlot];
 }
 
-float HUD_GetEnergy(); // the energy HUD element's value, gHUD.m_Energy +0x18 (orig gHUD +0x204); another package's
-
 // orig client 0x4f680. The local player's energy as the HUD shows it, 100 for anyone else
 float PM_GetEnergy(int iEnt)
 {
 	if (0 != gEngfuncs.pEventAPI->EV_IsLocal(iEnt - 1))
-		return HUD_GetEnergy();
+		return gHUD.m_Energy.GetEnergy(); // orig gHUD +0x204, read inline
 	return 100;
 }
 
@@ -216,10 +214,4 @@ static float Attr_PointsToValue(int i, int iPoints)
 	case 9: return iPoints / RC2Pref(RC2P_Attributes_DamageReflectionCost).f;
 	}
 	return 0;
-}
-
-// TEMP STUB (c2): real one belongs in the energy HUD element's file (client.dll 0x9cdc0 on, CHudEnergy)
-float HUD_GetEnergy()
-{
-	return 100;
 }

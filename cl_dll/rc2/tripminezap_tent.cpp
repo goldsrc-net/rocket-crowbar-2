@@ -18,17 +18,12 @@
 #include "pm_defs.h"
 #include "pmtrace.h"
 
-// c3 needs:
-// orig 0xec590 (view, a changed SDK file): starts a screen colour fade from colFrom/flFrom to
-// colTo/flTo over flDuration, unless one of higher iPriority is running. name fork E's
-void V_StartColorFade(Vector colFrom, Vector colTo, float flFrom, float flTo, float flDuration, int iPriority);
-
 class CTripmineZapTent : public CClientTent // name ours
 {
 public:
 	CTripmineZapTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 
 	Vector m_vecStart;		  // orig +0x8
 	Vector m_vecEnd;		  // orig +0x14
@@ -41,7 +36,7 @@ public:
 
 CClientTent* RC2_NewTripmineZapTent(const CClientTent* pCopy) // orig client 0x98230
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -106,12 +101,12 @@ CTripmineZapTent::CTripmineZapTent() // orig client 0x98a00
 	pmtrace_t tr;
 	gEngfuncs.pEventAPI->EV_PlayerTrace(m_vecStart, vecEye, PM_STUDIO_IGNORE | PM_GLASS_IGNORE, -1, &tr);
 	if (tr.fraction >= 1.0 || (tr.ent != 0 && gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr) == pLocal->index))
-		V_StartColorFade(Vector(255, 255, 255), Vector(255, 255, 255), 200, 0, 0.3, 0);
+		V_StartScreenTint(255, 255, 255, 255, 255, 255, 200, 0, 0.3, 0);
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
 // The triangle spins about the line and spreads (2 to 6 units) as the beams thin and fade.
-bool CTripmineZapTent::Think(float flFrametime) // orig client 0x98480
+bool CTripmineZapTent::Update(float flFrametime) // orig client 0x98480
 {
 	m_vecAngles = m_vecAngles + m_vecAngularVel * flFrametime;
 	m_flLife = m_flLife - flFrametime * 1.4285714285714286;

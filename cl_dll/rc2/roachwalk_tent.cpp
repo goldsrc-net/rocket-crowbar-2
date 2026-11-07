@@ -23,31 +23,10 @@
 #define SND_CHANGE_PITCH (1 << 7)
 #endif
 
-class CRoachWalkTent : public CClientTent // name ours
-{
-public:
-	CRoachWalkTent();
-
-	bool Think(float flFrametime) override;
-	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
-
-	int m_iEntIndex;		 // orig +0x8: the charge (the dispatcher sets it)
-	float m_flTrailTime;	 // orig +0xc: until the next trail point
-	bool m_bVisible;		 // orig +0x10: in the PVS this frame
-	Vector m_vecOrigin;		 // orig +0x14
-	model_s* m_pTrailSprite; // orig +0x20: sprites/gradsmoke.spr (the dispatcher loads it)
-	CRC2Trail m_Trail;		 // orig +0x24
-	BEAM* m_pBeam;			 // orig +0x4c: the follow beam below cl_detail 0 (the dispatcher makes it)
-	bool m_bArmed;			 // orig +0x50 (the dispatcher sets it)
-	float m_flArmTimeLeft;	 // orig +0x54
-	float m_flArmTime;		 // orig +0x58
-};
-
 // The factory; reads nothing (the dispatcher read the message). The copy is inline here.
 CClientTent* RC2_NewRoachWalkTent(const CClientTent* pCopy) // orig client 0x97b40
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -64,9 +43,9 @@ CRoachWalkTent::CRoachWalkTent()
 	m_iEntIndex = 0;
 	m_flArmTime = 1.0;
 	m_flArmTimeLeft = 1.0;
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		m_flTrailTime = 0.1;
-	else if (g_iClDetail == 0)
+	else if (g_iClientDetail == 0)
 		m_flTrailTime = 0.075;
 	else
 		m_flTrailTime = 0.05;
@@ -74,15 +53,15 @@ CRoachWalkTent::CRoachWalkTent()
 	m_pBeam = nullptr;
 }
 
-bool CRoachWalkTent::Think(float flFrametime) // orig client 0x97d70
+bool CRoachWalkTent::Update(float flFrametime) // orig client 0x97d70
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -103,7 +82,7 @@ bool CRoachWalkTent::Think(float flFrametime) // orig client 0x97d70
 	if (pLocal && pEntity->curstate.messagenum < pLocal->curstate.messagenum)
 	{
 		// out of the PVS: only the trail fades
-		if (g_iClDetail >= 0 && m_bArmed)
+		if (g_iClientDetail >= 0 && m_bArmed)
 			m_Trail.Update(flFrametime);
 		m_bVisible = false;
 		return false;
@@ -112,18 +91,18 @@ bool CRoachWalkTent::Think(float flFrametime) // orig client 0x97d70
 	const float flPitch = flArm * 150 + 100;
 	gEngfuncs.pEventAPI->EV_PlaySound(m_iEntIndex, pEntity->origin, 6, "roach/rch_walk.wav", flArm * 0.75 + 0.25, 0.9 - flArm * 0.4, SND_CHANGE_VOL | SND_CHANGE_PITCH, (int)flPitch);
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		if (!m_bArmed)
 			return false;
 
-		m_vecOrigin = RC2_GetEntityOrigin(m_iEntIndex);
+		m_vecOrigin = CLTE_GetOrigin(m_iEntIndex);
 		m_flTrailTime = m_flTrailTime - flFrametime;
 		if (m_flTrailTime <= 0)
 		{
-			if (g_iClDetail < 0)
+			if (g_iClientDetail < 0)
 				m_flTrailTime = 0.15;
-			else if (g_iClDetail == 0)
+			else if (g_iClientDetail == 0)
 				m_flTrailTime = 0.1;
 			else
 				m_flTrailTime = 0.075;
@@ -146,7 +125,7 @@ bool CRoachWalkTent::Think(float flFrametime) // orig client 0x97d70
 
 void CRoachWalkTent::DrawTransparent() // orig client 0x980c0
 {
-	if (!m_bVisible || g_iClDetail < 0 || !m_bArmed)
+	if (!m_bVisible || g_iClientDetail < 0 || !m_bArmed)
 		return;
 	if (!m_Trail.CanDraw())
 		return;
@@ -161,7 +140,7 @@ void CRoachWalkTent::DrawTransparent() // orig client 0x980c0
 
 // The charge gone (or killed with CLTE 0xfe/0x3b): the follow beam ends and the scuttle stops.
 // m_iEntIndex is left as it is.
-bool CRoachWalkTent::EntityGone(int iEntIndex) // orig client 0x981b0
+bool CRoachWalkTent::KillEntity(int iEntIndex) // orig client 0x981b0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

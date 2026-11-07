@@ -91,8 +91,7 @@ extern float* GetClientColor(int clientIndex);
 
 // Rocket Crowbar 2's attribute menu (menu 9, AttrConf), in RC2's own client code before
 // vgui_CustomObjects (package c4)
-extern CMenuPanel* CreateAttributeMenu(Panel* pParent); // name ours
-extern void ResetAttributeMenu();						 // name ours
+#include "rc2/vgui_attributes.h" // AttrMenu_Create (client 0xcf480), AttrMenu_Forget (0xcfec0)
 
 using namespace vgui;
 
@@ -506,7 +505,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	m_pCurrentMenu = NULL;
 	m_pCurrentCommandMenu = NULL;
 
-	ResetAttributeMenu();
+	AttrMenu_Forget();
 
 	Initialize();
 	addInputSignal(new CViewPortInputHandler);
@@ -1418,7 +1417,7 @@ void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 		break;
 
 	case 9:
-		pNewMenu = CreateAttributeMenu(this);
+		pNewMenu = AttrMenu_Create(this);
 		break;
 
 	case 10:
@@ -2210,13 +2209,3 @@ void TeamFortressViewport::HideDebugPanels()
 		m_pVotePanel->setVisible(false);
 }
 
-// TEMP STUB (c5): real one belongs in RC2's client code at client 0xcf480 (package c4)
-CMenuPanel* CreateAttributeMenu(Panel* pParent)
-{
-	return NULL;
-}
-
-// TEMP STUB (c5): real one belongs in RC2's client code at client 0xcfec0 (package c4)
-void ResetAttributeMenu()
-{
-}

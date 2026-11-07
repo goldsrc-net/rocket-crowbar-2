@@ -22,9 +22,9 @@ class CSnarkTrailTent : public CClientTent // name ours
 public:
 	CSnarkTrailTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	void AddTrailPoint();
 
@@ -32,7 +32,7 @@ public:
 	bool m_bVisible;		// orig +0xc: in the local player's view this frame
 	float m_flNextPoint;	// orig +0x10
 	Vector m_vecOrigin;		// orig +0x14
-	CRC2Trail m_Trail;		// orig +0x20
+	CTentTrail m_Trail;		// orig +0x20
 	model_s* m_pGlowSprite; // orig +0x48: sprites/glow04.spr
 	model_s* m_pTrailSprite; // orig +0x4c: sprites/gradsmoke.spr
 	bool m_bDying;			// orig +0x50: the projectile is gone, the trail fades
@@ -42,7 +42,7 @@ public:
 // copy shares the trail's arrays.
 CClientTent* RC2_NewSnarkTrailTent(const CClientTent* pCopy) // orig client 0x8baf0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -66,7 +66,7 @@ CSnarkTrailTent::CSnarkTrailTent()
 	m_bDying = false;
 	m_pGlowSprite = nullptr;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -76,9 +76,9 @@ CSnarkTrailTent::CSnarkTrailTent()
 	m_vecOrigin = pEntity->origin;
 	AddTrailPoint();
 
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		m_flNextPoint = 0.1;
-	else if (g_iClDetail == 0)
+	else if (g_iClientDetail == 0)
 		m_flNextPoint = 0.075;
 	else
 		m_flNextPoint = 0.05;
@@ -88,7 +88,7 @@ CSnarkTrailTent::CSnarkTrailTent()
 	m_pTrailSprite = gEngfuncs.CL_LoadModel("sprites/gradsmoke.spr", &iModelIndex);
 }
 
-bool CSnarkTrailTent::Think(float flFrametime) // orig client 0x8be10
+bool CSnarkTrailTent::Update(float flFrametime) // orig client 0x8be10
 {
 	if (m_bDying)
 		return m_Trail.Update(flFrametime) == 0;
@@ -96,10 +96,10 @@ bool CSnarkTrailTent::Think(float flFrametime) // orig client 0x8be10
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -112,9 +112,9 @@ bool CSnarkTrailTent::Think(float flFrametime) // orig client 0x8be10
 		if (m_flNextPoint <= 0)
 		{
 			// VERIFY: these are 0.15, 0.1, 0.075, the constructor's 0.1, 0.075, 0.05
-			if (g_iClDetail < 0)
+			if (g_iClientDetail < 0)
 				m_flNextPoint = 0.15;
-			else if (g_iClDetail == 0)
+			else if (g_iClientDetail == 0)
 				m_flNextPoint = 0.1;
 			else
 				m_flNextPoint = 0.075;
@@ -140,14 +140,14 @@ void CSnarkTrailTent::DrawTransparent() // orig client 0x8bff0
 	if (!m_Trail.CanDraw())
 	{
 		bTrail = false;
-		if (g_iClDetail < 0 || m_bDying)
+		if (g_iClientDetail < 0 || m_bDying)
 			return;
 	}
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
-	if (g_iClDetail >= 0 && !m_bDying)
+	if (g_iClientDetail >= 0 && !m_bDying)
 	{
 		if (m_pGlowSprite)
 			gEngfuncs.pTriAPI->SpriteTexture(m_pGlowSprite, 0);
@@ -184,7 +184,7 @@ void CSnarkTrailTent::DrawTransparent() // orig client 0x8bff0
 
 // The projectile is gone: a last point where it was, and the trail fades out (the effect stays
 // until it has).
-bool CSnarkTrailTent::EntityGone(int iEntIndex) // orig client 0x8c4e0
+bool CSnarkTrailTent::KillEntity(int iEntIndex) // orig client 0x8c4e0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

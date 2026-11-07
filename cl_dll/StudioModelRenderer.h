@@ -75,7 +75,7 @@ public:
 	virtual void StudioCalcRotations(float pos[][3], vec4_t* q, mstudioseqdesc_t* pseqdesc, mstudioanim_t* panim, float f);
 
 	// Send bones and verts to renderer. RC2: bShellColor lets a weapon model take the
-	// player's coloured shell (RC2_GetEntityShellColor)
+	// player's coloured shell (CLTE_GetPlayerOverride)
 	virtual void StudioRenderModel(bool bShellColor);
 
 	// Finalize rendering
@@ -200,7 +200,7 @@ public:
 	float m_vRenderOrigin[3];
 
 	// RC2: the model origin StudioSetUpTransform computes (a local in SDK 2.3), +0x40bc; the
-	// draws hand it to RC2_SetEntityDrawOrigin
+	// draws hand it to CLTE_SetOrigin
 	Vector m_vecModelPos; // name ours
 
 	// Model render counters ( from engine )

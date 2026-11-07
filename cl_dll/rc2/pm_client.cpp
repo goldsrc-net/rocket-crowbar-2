@@ -51,9 +51,3 @@ void PM_GetEntityBox(int iEntIndex, float* vecOrigin, float* vecVAngle, float* v
 	VectorCopy(pEnt->curstate.maxs, vecMaxs);
 }
 
-// TEMP STUB (c4-P): the real ones belong in view.cpp (client 0xe9400-0xebb00) and the client's
-// prediction code (client 0x59d50), other packages'. Weak, so the real ones replace them.
-__attribute__((weak)) int g_iPMSpecView;	  // client .bss 0x10227160
-__attribute__((weak)) int g_bPMSetViewAngles; // client .bss 0x102270f0
-__attribute__((weak)) int g_bPMSetViewOrigin; // client .bss 0x10227164
-__attribute__((weak)) void PM_SetPredictedOrigin(int iEnt, const float* vecOrigin) {}

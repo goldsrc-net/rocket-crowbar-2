@@ -27,9 +27,9 @@ class CNukeTent : public CClientTent // name ours
 public:
 	CNukeTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	void FlameVertex(Vector vecBase, float flForward, float flRight, float flUp, float s, float t);
 
@@ -57,7 +57,7 @@ public:
 // The factory (the dispatcher's case 0x2a; c3_tents.h). The copy is inline here.
 CClientTent* RC2_NewNukeTent(const CClientTent* pCopy) // orig client 0x75a80
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -85,7 +85,7 @@ CNukeTent::CNukeTent() // orig client 0x76c40
 	m_pFlame = nullptr;
 	m_vecForward = Vector(0, 0, 0);
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 		return;
 
@@ -170,7 +170,7 @@ CNukeTent::CNukeTent() // orig client 0x76c40
 		}
 	}
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_pLight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		if (m_pLight)
@@ -195,15 +195,15 @@ CNukeTent::CNukeTent() // orig client 0x76c40
 	}
 }
 
-bool CNukeTent::Think(float flFrametime) // orig client 0x75d70
+bool CNukeTent::Update(float flFrametime) // orig client 0x75d70
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -319,7 +319,7 @@ void CNukeTent::DrawTransparent() // orig client 0x76620
 		return;
 	if (m_iOwner != 0 && gEngfuncs.pEventAPI->EV_IsLocal(m_iOwner - 1))
 		return;
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	const float flWidth = gEngfuncs.pfnRandomFloat(-1, 1) + 9;
@@ -362,8 +362,8 @@ void CNukeTent::FlameVertex(Vector vecBase, float flForward, float flRight, floa
 }
 
 // Lets its beams, glows and lights die and stops the engine sound. Returns false even for its
-// own entity (Think then ends it).
-bool CNukeTent::EntityGone(int iEntIndex) // orig client 0x76b30
+// own entity (Update then ends it).
+bool CNukeTent::KillEntity(int iEntIndex) // orig client 0x76b30
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

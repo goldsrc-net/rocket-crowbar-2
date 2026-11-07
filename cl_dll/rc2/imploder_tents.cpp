@@ -39,16 +39,16 @@ class CImploderShotTent : public CClientTent // name ours
 public:
 	CImploderShotTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	Vector m_vecOrigin[IMPLODER_SPARKS];	 // orig +0x8
 	Vector m_vecVelocity[IMPLODER_SPARKS];	 // orig +0x50
 	Vector m_vecSteer[IMPLODER_SPARKS];		 // orig +0x98: the turn toward the target, added to the velocity each second
 	BEAM* m_pBeams[IMPLODER_SPARKS][3];		 // orig +0xe0
 	TEMPENTITY* m_pGlows[IMPLODER_SPARKS];	 // orig +0x128
-	CRC2Trail m_Trails[IMPLODER_SPARKS];	 // orig +0x140
+	CTentTrail m_Trails[IMPLODER_SPARKS];	 // orig +0x140
 	dlight_t* m_pLights[IMPLODER_SPARKS];	 // orig +0x230
 	dlight_t* m_pELights[IMPLODER_SPARKS];	 // orig +0x248
 	Vector m_vecBeamEnds[3];				 // orig +0x260: in a spark's own axes, (-4, 10 around)
@@ -66,7 +66,7 @@ public:
 // The factory (the dispatcher's case 0x2d; c3_tents.h). The copy is inline here.
 CClientTent* RC2_NewImploderShotTent(const CClientTent* pCopy) // orig client 0x788a0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -132,7 +132,7 @@ CImploderShotTent::CImploderShotTent() // orig client 0x79eb0
 		flAngle += 2.0943952; // 2 pi / 3
 	}
 
-	if (g_iClDetail > 0)
+	if (g_iClientDetail > 0)
 		m_flTrailWait = 0.075;
 	else
 		m_flTrailWait = 0.1;
@@ -159,7 +159,7 @@ CImploderShotTent::CImploderShotTent() // orig client 0x79eb0
 
 		m_vecOrigin[i] = vecSrc;
 
-		if (g_iClDetail >= 0)
+		if (g_iClientDetail >= 0)
 			m_Trails[i].AddPoint(m_vecOrigin[i], Vector(0, 0, 0), Vector(0, 0, 0), Vector(1.0, 0.8, 0.0), 0.7, 2.0, 0.7, 0, nullptr);
 
 		if (pGlow)
@@ -179,7 +179,7 @@ CImploderShotTent::CImploderShotTent() // orig client 0x79eb0
 			}
 		}
 
-		if (g_iClDetail >= 1)
+		if (g_iClientDetail >= 1)
 		{
 			m_pLights[i] = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 			if (m_pLights[i])
@@ -220,7 +220,7 @@ CImploderShotTent::CImploderShotTent() // orig client 0x79eb0
 
 // While tracking, each spark steers at the target's centre until it gets within
 // ImplodeHitDist; once tracking is over the shot fades for a second and ends.
-bool CImploderShotTent::Think(float flFrametime) // orig client 0x78c40
+bool CImploderShotTent::Update(float flFrametime) // orig client 0x78c40
 {
 	float flFade = 1.0;
 	Vector vecTarget(0, 0, 0);
@@ -282,11 +282,11 @@ bool CImploderShotTent::Think(float flFrametime) // orig client 0x78c40
 		if (iTracking == 0)
 			m_flTrackLife = 0;
 
-		cl_entity_t* pTarget = RC2_GetEntity(m_iTarget);
+		cl_entity_t* pTarget = GetEntity(m_iTarget);
 		if (!pTarget)
 		{
 			// clears m_iTarget, so the sparks below stop steering
-			EntityGone(m_iTarget);
+			KillEntity(m_iTarget);
 		}
 		else
 		{
@@ -380,12 +380,12 @@ bool CImploderShotTent::Think(float flFrametime) // orig client 0x78c40
 		}
 	}
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_flTrailWait = m_flTrailWait - flFrametime;
 		if (m_flTrailWait <= 0)
 		{
-			if (g_iClDetail == 0)
+			if (g_iClientDetail == 0)
 				m_flTrailWait = 0.1;
 			else
 				m_flTrailWait = 0.075;
@@ -407,7 +407,7 @@ bool CImploderShotTent::Think(float flFrametime) // orig client 0x78c40
 // The trails, led by each spark.
 void CImploderShotTent::DrawTransparent() // orig client 0x79cd0
 {
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	int i;
@@ -442,7 +442,7 @@ void CImploderShotTent::DrawTransparent() // orig client 0x79cd0
 }
 
 // The target is gone: the sparks fly on untracked. Never ends the effect.
-bool CImploderShotTent::EntityGone(int iEntIndex) // orig client 0x79e80
+bool CImploderShotTent::KillEntity(int iEntIndex) // orig client 0x79e80
 {
 	if (iEntIndex == m_iTarget)
 		m_iTarget = 0;
@@ -460,9 +460,9 @@ class CImplodeTent : public CClientTent // name ours
 public:
 	CImplodeTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	void SpawnFlare(int iFlare);
 
@@ -494,7 +494,7 @@ static bool s_bImplodeOtherSide = false;
 // copy constructor, out of line in the original (orig client 0x9a320).
 CClientTent* RC2_NewImplodeTent(const CClientTent* pCopy) // orig client 0x7aa70
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -518,7 +518,7 @@ CImplodeTent::CImplodeTent()
 	m_flScale = 1.0;
 	m_flPrevSpin = m_flSpin = gEngfuncs.pfnRandomFloat(0, 3.1415927);
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -538,7 +538,7 @@ CImplodeTent::CImplodeTent()
 	m_pSprite = gEngfuncs.CL_LoadModel("sprites/sqflare.spr", &iModelIndex);
 }
 
-bool CImplodeTent::Think(float flFrametime) // orig client 0x7aec0
+bool CImplodeTent::Update(float flFrametime) // orig client 0x7aec0
 {
 	if (!m_iEntIndex && !m_bEnded)
 		return true;
@@ -546,10 +546,10 @@ bool CImplodeTent::Think(float flFrametime) // orig client 0x7aec0
 	cl_entity_t* pEntity = nullptr;
 	if (!m_bEnded)
 	{
-		pEntity = RC2_GetEntity(m_iEntIndex);
+		pEntity = GetEntity(m_iEntIndex);
 		if (!pEntity)
 		{
-			EntityGone(m_iEntIndex);
+			KillEntity(m_iEntIndex);
 			m_iEntIndex = 0;
 			return true;
 		}
@@ -577,9 +577,9 @@ bool CImplodeTent::Think(float flFrametime) // orig client 0x7aec0
 			m_flScale = 0.05;
 			m_bBurst = true;
 			int iBurst;
-			if (g_iClDetail >= 1)
+			if (g_iClientDetail >= 1)
 				iBurst = 50;
-			else if (g_iClDetail != 0)
+			else if (g_iClientDetail != 0)
 				iBurst = 20;
 			else
 				iBurst = 30;
@@ -607,9 +607,9 @@ bool CImplodeTent::Think(float flFrametime) // orig client 0x7aec0
 		m_flSpin = flFrametime * 12.566371 + m_flSpin; // 4 pi
 		m_vecSpawnSize = m_vecExtents * m_flScale;
 
-		if (g_iClDetail >= 1)
+		if (g_iClientDetail >= 1)
 			m_flSpawn = flFrametime * 86.666667 + m_flSpawn;
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flSpawn = flFrametime * 60 + m_flSpawn;
 		else
 			m_flSpawn = flFrametime * 40 + m_flSpawn;
@@ -682,7 +682,7 @@ bool CImplodeTent::Think(float flFrametime) // orig client 0x7aec0
 	return false;
 }
 
-// A new flare in slot iFlare, as the spawn in Think does.
+// A new flare in slot iFlare, as the spawn in Update does.
 void CImplodeTent::SpawnFlare(int iFlare) // orig client 0x7b840
 {
 	const float flFrac = gEngfuncs.pfnRandomFloat(0, 1);
@@ -707,7 +707,7 @@ void CImplodeTent::SpawnFlare(int iFlare) // orig client 0x7b840
 	m_vecFlareAccel[iFlare].z = 0;
 }
 
-bool CImplodeTent::EntityGone(int iEntIndex) // orig client 0x7ba40
+bool CImplodeTent::KillEntity(int iEntIndex) // orig client 0x7ba40
 {
 	if (iEntIndex == m_iEntIndex)
 	{

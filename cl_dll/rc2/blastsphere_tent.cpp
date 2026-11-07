@@ -16,19 +16,12 @@
 
 #include <cmath>
 
-// c3 needs:
-// orig 0xe9ca0 (view.cpp, changed stock code): starts a view wobble of flAmplitude, flSpeed
-// and flTime (RC2's own, kept in view.cpp's globals 0x10227978, 0x1022682c, 0x1022716c with
-// random phases for each axis) unless one of higher iPriority is running. Names ours.
-// VERIFY: what each float means is read off the setter only.
-void RC2_ViewShake(float flAmplitude, float flSpeed, float flTime, int iPriority);
-
 class CBlastSphereTent : public CClientTent // name ours
 {
 public:
 	CBlastSphereTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
 
 	Vector m_vecOrigin;	 // orig +0x8
@@ -46,7 +39,7 @@ public:
 // The factory (the dispatcher's case 0x2b; c3_tents.h). The copy is inline here.
 CClientTent* RC2_NewBlastSphereTent(const CClientTent* pCopy) // orig client 0x772d0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -81,7 +74,7 @@ CBlastSphereTent::CBlastSphereTent()
 	}
 }
 
-bool CBlastSphereTent::Think(float flFrametime) // orig client 0x775d0
+bool CBlastSphereTent::Update(float flFrametime) // orig client 0x775d0
 {
 	m_flRing = flFrametime * 4000 + m_flRing;
 	m_flShock = flFrametime * 6000 + m_flShock;
@@ -121,11 +114,11 @@ bool CBlastSphereTent::Think(float flFrametime) // orig client 0x775d0
 		cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
 		if (pLocal)
 		{
-			const Vector vecDelta = RC2_GetEntityOrigin(pLocal->index) - m_vecOrigin;
+			const Vector vecDelta = CLTE_GetOrigin(pLocal->index) - m_vecOrigin;
 			if (vecDelta.Length() < m_flShock)
 			{
 				m_bShaken = true;
-				RC2_ViewShake(3.5, 20, 2, 5);
+				V_StartViewShake(3.5, 20, 2, 5);
 			}
 		}
 	}
@@ -140,12 +133,12 @@ void CBlastSphereTent::DrawTransparent() // orig client 0x778c0
 		return;
 
 	int iCircle, iRings;
-	if (g_iClDetail >= 1)
+	if (g_iClientDetail >= 1)
 	{
 		iCircle = 3;
 		iRings = 16;
 	}
-	else if (g_iClDetail >= 0)
+	else if (g_iClientDetail >= 0)
 	{
 		iCircle = 1;
 		iRings = 10;
@@ -173,11 +166,11 @@ void CBlastSphereTent::DrawTransparent() // orig client 0x778c0
 	for (int i = 0; i < iRings; i++)
 	{
 		if (i == 0)
-			RC2_DrawEllipsoidCap(m_vecOrigin, vecForward, vecRight, vecUp, flPrevZ, flZ, flRing, iCircle, colSphere, m_flAlpha, colSphere, m_flAlpha);
+			CLTE_DrawCone(m_vecOrigin, vecForward, vecRight, vecUp, flPrevZ, flZ, flRing, iCircle, colSphere, m_flAlpha, colSphere, m_flAlpha);
 		else if (i == iRings - 1)
-			RC2_DrawEllipsoidCap(m_vecOrigin, vecForward, vecRight, vecUp, flZ, flPrevZ, flPrevRing, iCircle, colSphere, m_flAlpha, colSphere, m_flAlpha);
+			CLTE_DrawCone(m_vecOrigin, vecForward, vecRight, vecUp, flZ, flPrevZ, flPrevRing, iCircle, colSphere, m_flAlpha, colSphere, m_flAlpha);
 		else
-			RC2_DrawEllipsoidBand(m_vecOrigin, vecForward, vecRight, vecUp, flPrevRing, flRing, flPrevZ, flZ, iCircle, colSphere, m_flAlpha, colSphere, m_flAlpha);
+			CLTE_DrawRing(m_vecOrigin, vecForward, vecRight, vecUp, flPrevRing, flRing, flPrevZ, flZ, iCircle, colSphere, m_flAlpha, colSphere, m_flAlpha);
 
 		flPrevRing = flRing;
 		flPrevZ = flZ;

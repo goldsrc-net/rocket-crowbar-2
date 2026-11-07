@@ -28,7 +28,7 @@ class CRingBlastTent : public CClientTent // name ours
 public:
 	CRingBlastTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
 
 	float m_flTimeLeft;		// orig +0x8
@@ -51,7 +51,7 @@ public:
 // orig client 0x9b1a0). The dispatcher always passes null.
 CClientTent* RC2_NewRingBlastTent(const CClientTent* pCopy) // orig client 0x91c40
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -86,9 +86,9 @@ CRingBlastTent::CRingBlastTent()
 	int iModelIndex;
 	m_pSprite = gEngfuncs.CL_LoadModel("sprites/heflare4.spr", &iModelIndex);
 
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		m_iPoints = 8;
-	else if (g_iClDetail == 0)
+	else if (g_iClientDetail == 0)
 		m_iPoints = 10;
 	else
 		m_iPoints = 12;
@@ -110,7 +110,7 @@ CRingBlastTent::CRingBlastTent()
 	}
 }
 
-bool CRingBlastTent::Think(float flFrametime) // orig client 0x92350
+bool CRingBlastTent::Update(float flFrametime) // orig client 0x92350
 {
 	m_flTimeLeft -= flFrametime;
 	if (m_flTimeLeft < 0)

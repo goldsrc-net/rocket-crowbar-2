@@ -26,18 +26,6 @@
 // orig .bss 0x10210aa8: the client's copy of the rc2.ini values (8 bytes a key, in the server's
 // key order, the NETWORK_SYNC ones filled from the RCCFG message), read through rc2prefs.h's
 // RC2Pref() over the client's g_rc2PrefValues.
-// orig .bss 0x101f6a00 (c2's): set while the local player is transforming. name ours
-extern int g_bLocalTransforming;
-// orig 0x55190 (c2): a strip of camera-facing quads through iCount points, each with its
-// width, colour and alpha, using the bound texture; bStretch/bByLength choose how the texture
-// runs along it, pflSegLengths is scratch for the second. CRC2Trail::Draw calls it. name ours
-void RC2_DrawStrip(Vector* pvecPoints, float* pflWidths, Vector* pcolColors, float* pflAlphas, int iCount, bool bStretch, bool bByLength, float* pflSegLengths);
-// orig 0xec590 (view, a changed SDK file): starts a screen colour fade from colFrom/flFrom to
-// colTo/flTo over flDuration, unless one of higher iPriority is running. name ours
-void V_StartColorFade(Vector colFrom, Vector colTo, float flFrom, float flTo, float flDuration, int iPriority);
-// orig 0xa9fd0 (in_camera, a changed SDK file): the camera is in third person (cam_thirdperson
-// set and RC2's 0x1020be40 clear). name ours
-bool CAM_IsThirdPerson();
 
 //
 // CLTE 0x40: byte the player, short his stand-in, byte the type he changes from, byte the
@@ -48,9 +36,9 @@ class CTransformTent : public CClientTent // name ours
 public:
 	CTransformTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	void BuildRing(Vector vecOrigin, Vector vecAxis1, Vector vecAxis2, float flRadius1, float flRadius2, float flPhase, Vector* pvecPoints);
 
@@ -72,7 +60,7 @@ public:
 	float* m_pflFromAlpha;	 // orig +0x7c: only with cl_detail >= 0
 	Vector* m_pcolColors;	 // orig +0x80
 	float* m_pflWidths;		 // orig +0x84
-	float* m_pflSegLengths;	 // orig +0x88: m_iPoints + 1, scratch for RC2_DrawStrip
+	float* m_pflSegLengths;	 // orig +0x88: m_iPoints + 1, scratch for CLTE_DrawStrip
 	int m_iPoints;			 // orig +0x8c: 11, 13 or 15 by cl_detail
 	model_s* m_pSprite;		 // orig +0x90: sprites/gradpulse.spr
 };
@@ -82,7 +70,7 @@ public:
 // passes null.
 CClientTent* RC2_NewTransformTent(const CClientTent* pCopy) // orig client 0x8d960
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -174,7 +162,7 @@ CTransformTent::CTransformTent() // orig client 0x8ebf0
 		m_flSpin[i] = gEngfuncs.pfnRandomFloat(8.975979, 7.8539815) * flSign;
 	}
 
-	cl_entity_t* pPlayer = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pPlayer = GetEntity(m_iEntIndex);
 	if (!pPlayer)
 	{
 		m_iEntIndex = 0;
@@ -184,10 +172,10 @@ CTransformTent::CTransformTent() // orig client 0x8ebf0
 	if (gEngfuncs.pEventAPI->EV_IsLocal(m_iEntIndex - 1))
 		g_bLocalTransforming = 1;
 
-	if (g_iClDetail < 0)
+	if (g_iClientDetail < 0)
 		m_iPoints = 11;
 	else
-		m_iPoints = g_iClDetail != 0 ? 15 : 13;
+		m_iPoints = g_iClientDetail != 0 ? 15 : 13;
 
 	Vector vecAngles = pPlayer->angles;
 	vecAngles.x = 0;
@@ -203,7 +191,7 @@ CTransformTent::CTransformTent() // orig client 0x8ebf0
 	m_pvecToRing[2] = (Vector*)malloc(m_iPoints * 12);
 
 	const Vector vecOrigin = pPlayer->origin;
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_pvecFromRing[0] = (Vector*)malloc(m_iPoints * 12);
 		m_pvecFromRing[1] = (Vector*)malloc(m_iPoints * 12);
@@ -223,7 +211,7 @@ CTransformTent::CTransformTent() // orig client 0x8ebf0
 	{
 		m_pflWidths[i] = 2.0;
 		// Original bug, kept: the alphas are set at index 1 each time, not i; the rest stay as
-		// malloc left them until the first Think.
+		// malloc left them until the first Update.
 		m_pflToAlpha[1] = 0;
 		if (m_pflFromAlpha)
 			m_pflFromAlpha[1] = 0.95;
@@ -247,15 +235,15 @@ void CTransformTent::BuildRing(Vector vecOrigin, Vector vecAxis1, Vector vecAxis
 	}
 }
 
-bool CTransformTent::Think(float flFrametime) // orig client 0x8dc00
+bool CTransformTent::Update(float flFrametime) // orig client 0x8dc00
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pPlayer = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pPlayer = GetEntity(m_iEntIndex);
 	if (!pPlayer)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -277,12 +265,12 @@ bool CTransformTent::Think(float flFrametime) // orig client 0x8dc00
 		return false;
 	}
 
-	cl_entity_t* pStandIn = RC2_GetEntity(m_iStandIn);
+	cl_entity_t* pStandIn = GetEntity(m_iStandIn);
 	if (pStandIn)
 	{
 		// the player himself in first person doesn't see the stand-in. Original bug, kept: a
 		// null local player is dereferenced here.
-		if (!CAM_IsThirdPerson() && pLocal->index == m_iEntIndex)
+		if (!CL_IsThirdPerson() && pLocal->index == m_iEntIndex)
 		{
 			pStandIn->curstate.rendermode = kRenderTransTexture;
 			pStandIn->curstate.renderamt = 0;
@@ -311,7 +299,7 @@ bool CTransformTent::Think(float flFrametime) // orig client 0x8dc00
 
 	for (int i = 0; i < 3; i++)
 	{
-		if (g_iClDetail >= 0)
+		if (g_iClientDetail >= 0)
 			m_flFromPhase[i] = m_flFromPhase[i] - flFrametime * m_flSpin[i];
 		m_flToPhase[i] = flFrametime * m_flSpin[i] + m_flToPhase[i];
 	}
@@ -319,7 +307,7 @@ bool CTransformTent::Think(float flFrametime) // orig client 0x8dc00
 	const float flToAlpha = flDone * 0.95;
 	for (int i = 0; i < m_iPoints; i++)
 	{
-		if (g_iClDetail >= 0 && m_pflFromAlpha)
+		if (g_iClientDetail >= 0 && m_pflFromAlpha)
 			m_pflFromAlpha[i] = flFrac * 0.95;
 		m_pflToAlpha[i] = flToAlpha;
 	}
@@ -332,7 +320,7 @@ bool CTransformTent::Think(float flFrametime) // orig client 0x8dc00
 	// Only the forward/right and right/up rings follow; the forward/up ones keep where the
 	// constructor put them (as in the original).
 	const Vector vecOrigin = pPlayer->origin;
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		if (m_pvecFromRing[0])
 			BuildRing(vecOrigin, vecForward, vecRight, m_flFromRadius[0], m_flFromRadius[1], m_flFromPhase[0], m_pvecFromRing[0]);
@@ -354,22 +342,22 @@ void CTransformTent::DrawTransparent() // orig client 0x8e360
 	if (m_pSprite)
 		gEngfuncs.pTriAPI->SpriteTexture(m_pSprite, 0);
 
-	if (g_iClDetail >= 0 && m_pflFromAlpha)
+	if (g_iClientDetail >= 0 && m_pflFromAlpha)
 	{
 		if (m_pvecFromRing[0])
-			RC2_DrawStrip(m_pvecFromRing[0], m_pflWidths, m_pcolColors, m_pflFromAlpha, m_iPoints, false, false, m_pflSegLengths);
+			CLTE_DrawStrip(m_pvecFromRing[0], m_pflWidths, m_pcolColors, m_pflFromAlpha, m_iPoints, false, false, m_pflSegLengths);
 		if (m_pvecFromRing[2])
-			RC2_DrawStrip(m_pvecFromRing[2], m_pflWidths, m_pcolColors, m_pflFromAlpha, m_iPoints, false, false, m_pflSegLengths);
+			CLTE_DrawStrip(m_pvecFromRing[2], m_pflWidths, m_pcolColors, m_pflFromAlpha, m_iPoints, false, false, m_pflSegLengths);
 	}
-	RC2_DrawStrip(m_pvecToRing[0], m_pflWidths, m_pcolColors, m_pflToAlpha, m_iPoints, false, false, m_pflSegLengths);
-	RC2_DrawStrip(m_pvecToRing[2], m_pflWidths, m_pcolColors, m_pflToAlpha, m_iPoints, false, false, m_pflSegLengths);
+	CLTE_DrawStrip(m_pvecToRing[0], m_pflWidths, m_pcolColors, m_pflToAlpha, m_iPoints, false, false, m_pflSegLengths);
+	CLTE_DrawStrip(m_pvecToRing[2], m_pflWidths, m_pcolColors, m_pflToAlpha, m_iPoints, false, false, m_pflSegLengths);
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }
 
 // The change is done (CLTE 0xfe/0x40) or the player is gone: hide the stand-in, show the
 // player again with a zap, free the rings, and flash whoever sees it.
-bool CTransformTent::EntityGone(int iEntIndex) // orig client 0x8e4e0
+bool CTransformTent::KillEntity(int iEntIndex) // orig client 0x8e4e0
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;
@@ -378,14 +366,14 @@ bool CTransformTent::EntityGone(int iEntIndex) // orig client 0x8e4e0
 		g_bLocalTransforming = 0;
 	gEngfuncs.pEventAPI->EV_StopSound(m_iEntIndex, CHAN_ITEM, "ambience/labgear.wav");
 
-	cl_entity_t* pStandIn = RC2_GetEntity(m_iStandIn);
+	cl_entity_t* pStandIn = GetEntity(m_iStandIn);
 	if (pStandIn)
 	{
 		pStandIn->curstate.playerclass = 0;
 		pStandIn->curstate.effects |= EF_NODRAW;
 	}
 
-	cl_entity_t* pPlayer = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pPlayer = GetEntity(m_iEntIndex);
 	if (pPlayer)
 	{
 		pPlayer->curstate.rendermode = kRenderNormal;
@@ -426,7 +414,7 @@ bool CTransformTent::EntityGone(int iEntIndex) // orig client 0x8e4e0
 
 	if (pPlayer && pPlayer->index == pLocal->index)
 	{
-		V_StartColorFade(Vector(255, 255, 255), Vector(230, 230, 255), 240, 0, 0.45, 1);
+		V_StartScreenTint(255, 255, 255, 230, 230, 255, 240, 0, 0.45, 1);
 		return true;
 	}
 
@@ -448,7 +436,7 @@ bool CTransformTent::EntityGone(int iEntIndex) // orig client 0x8e4e0
 	pmtrace_t tr;
 	gEngfuncs.pEventAPI->EV_PlayerTrace(pPlayer->origin, vecEye, PM_STUDIO_IGNORE | PM_GLASS_IGNORE, -1, &tr);
 	if (tr.fraction >= 1.0 || (tr.ent != 0 && gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr) == pLocal->index))
-		V_StartColorFade(Vector(255, 255, 255), Vector(230, 230, 255), 200, 0, 0.3, 0);
+		V_StartScreenTint(255, 255, 255, 230, 230, 255, 200, 0, 0.3, 0);
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 	return true;

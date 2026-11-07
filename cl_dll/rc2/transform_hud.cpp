@@ -18,7 +18,7 @@
 #include "pm_defs.h"
 #include "rc2prefs.h"
 #include "rc2/transform_hud.h"
-#include "rc2/c4_needs.h" // g_iHighestEntIndex (.bss 0x10206918)
+#include "rc2/c4_needs.h" // g_iHighestEntIndex (.bss 0x10206918, entity.cpp)
 
 #include <cmath>
 
@@ -27,10 +27,10 @@ int PM_GetPlayerTimer(int iEnt, int iSlot);														  // pm_rc2.h
 
 extern Vector v_angles; // view.cpp
 
-// From elsewhere (TEMP STUBs in input_stubs_V.cpp):
+// From elsewhere (Ammo_RestoreCrosshair and EV_TraceVisible are c1's; input_stubs_V.cpp stands in for them):
 extern void Ammo_RestoreCrosshair();					// client.dll 0x4a900: CHudAmmo's, sets the current weapon's crosshair again (package c1)
-extern void ClientTents_Remove(int iEnt, int iType);	// client.dll 0x52280: frees the client tents of a type on an entity (package c2)
-extern void GetEntityRenderOrigin(float* vecOut, int iEnt); // client.dll 0x59be0: an entity's origin as drawn (package c2)
+extern void CLTE_KillByEntity(int iEnt, int iType); // client.dll 0x52280 (rc2/clte.cpp): frees the client tents of a type on an entity
+extern Vector CLTE_GetOrigin(int iEnt);				// client.dll 0x59be0 (rc2/clte.cpp): an entity's origin as drawn
 // client.dll 0xee70 (ev_hldm.cpp, package c1): what is left of flRange after tracing from vecStart
 // along vecDir towards pTarget; 0 when it doesn't get there.
 extern float EV_TraceVisible(Vector vecStart, Vector vecEnd, Vector vecDir, float flRange, cl_entity_t* pTarget, pmtrace_t* ptr, int iDepth);
@@ -56,7 +56,7 @@ static HSPRITE s_hMeterEmpty;			  // 0x10220c34
 static HSPRITE s_hMeterFull;			  // 0x10220c1c
 static bool s_bHoundeyeLocator;			  // 0x10220c45: TformStat bit 0
 static bool s_bHoundeyeSleeping;		  // 0x10220c46: TformStat bit 1
-static float s_flHoundeyeSleepFade;		  // 0x10220c48
+float g_flHoundeyeSleepFade;			  // 0x10220c48 (transform_hud.h)
 static int s_iBatPerchInfo;				  // 0x10220c50
 static float s_vecBatPerchOffset[3];	  // 0x10220c10
 static int s_bHeadcrabLeap;				  // 0x10220c54
@@ -112,23 +112,23 @@ void RC2_TempEntThink(float flFrameTime)
 				SetCrosshair(s_hEgonCross, s_rcHoundeyeCross, 255, 255, 255);
 		}
 
-		if (0 == g_bViewLockEffect)
+		if (0 == g_bLocalTransforming)
 		{
 			if (!s_bHoundeyeSleeping)
 			{
-				if (0 < s_flHoundeyeSleepFade)
-					s_flHoundeyeSleepFade -= flFrameTime * 0.5f;
+				if (0 < g_flHoundeyeSleepFade)
+					g_flHoundeyeSleepFade -= flFrameTime * 0.5f;
 			}
-			else if (s_flHoundeyeSleepFade < 1)
-				s_flHoundeyeSleepFade += flFrameTime * 0.3f;
+			else if (g_flHoundeyeSleepFade < 1)
+				g_flHoundeyeSleepFade += flFrameTime * 0.3f;
 		}
-		else if (0 < s_flHoundeyeSleepFade)
-			s_flHoundeyeSleepFade -= flFrameTime * 1.2f;
+		else if (0 < g_flHoundeyeSleepFade)
+			g_flHoundeyeSleepFade -= flFrameTime * 1.2f;
 
-		if (s_flHoundeyeSleepFade < 0)
-			s_flHoundeyeSleepFade = 0;
-		else if (1 < s_flHoundeyeSleepFade)
-			s_flHoundeyeSleepFade = 1;
+		if (g_flHoundeyeSleepFade < 0)
+			g_flHoundeyeSleepFade = 0;
+		else if (1 < g_flHoundeyeSleepFade)
+			g_flHoundeyeSleepFade = 1;
 		bDone = true;
 		break;
 
@@ -183,12 +183,12 @@ void RC2_TempEntThink(float flFrameTime)
 		g_flTransformFOV = 0;
 		s_bHoundeyeLocator = false;
 		s_bHoundeyeSleeping = false;
-		s_flHoundeyeSleepFade = 0;
+		g_flHoundeyeSleepFade = 0;
 		g_bHoundeyeAsleep = 0;
 		g_iBatPerch = 0;
 		s_iBatPerchInfo = 0;
 		if (0 != s_bHeadcrabLeap && pLocal)
-			ClientTents_Remove(pLocal->index, 0x44);
+			CLTE_KillByEntity(pLocal->index, 0x44);
 		s_bHeadcrabLeap = 0;
 
 		if (0 != s_iOldViewMode && 0 == g_iViewMode)
@@ -313,8 +313,7 @@ void RC2_HudRedraw(float flTime, float flTimeDelta)
 			const float flCosLimit = cos((((g_flTransformFOV == 0) ? 45.0 : g_flTransformFOV) + 5.0) * (M_PI / 180.0));
 			const float flRange = RC2Pref(RC2P_TransformHoundeye_LocatorMaxPunch).f;
 
-			Vector vecOrg, vecOfs;
-			GetEntityRenderOrigin(vecOrg, pLocal->index);
+			Vector vecOrg = CLTE_GetOrigin(pLocal->index), vecOfs;
 			gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(vecOfs);
 			const Vector vecEye = vecOrg + vecOfs;
 

@@ -26,34 +26,10 @@
 #define SND_CHANGE_PITCH (1 << 7)
 #endif
 
-//
-// CLTE 0x39: short tripmine, short its beam entity, short its glow entity. VERIFY: the server
-// (tripmine.cpp) writes tripmine, beam, 0, glow, 0, so the third short read here is the 0 and
-// the glow is never touched; whether the server reconstruction or the original is off is open.
-// c2's dispatcher also touches this effect: CLTE 0x3a (the laser tripped) plays
-// debris/beamstart9.wav on the tripmine and zeroes m_flCharge of every 0x39 effect on it.
-//
-class CTripmineChargeTent : public CClientTent // name ours
-{
-public:
-	CTripmineChargeTent();
-
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
-
-	int m_iEntIndex;	// orig +0x8: the tripmine
-	int m_iBeam;		// orig +0xc: its beam entity
-	int m_iGlow;		// orig +0x10: its glow entity
-	float m_flCharge;	// orig +0x14: 0-1 (CLTE 0x3a zeroes it)
-	float m_flRoll;		// orig +0x18: the glow's roll
-	float m_flRollSpeed; // orig +0x1c: 200-300 a second, either way
-	float m_flHue;		// orig +0x20: 0-3 around red, green, blue
-};
-
 // The factory (the dispatcher's case 0x39). The implicit copy constructor is inline here.
 CClientTent* RC2_NewTripmineChargeTent(const CClientTent* pCopy) // orig client 0x8a790
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -71,7 +47,7 @@ CTripmineChargeTent::CTripmineChargeTent()
 	if (!m_iEntIndex)
 		return;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -86,7 +62,7 @@ CTripmineChargeTent::CTripmineChargeTent()
 	gEngfuncs.pEventAPI->EV_PlaySound(m_iEntIndex, pEntity->origin, CHAN_STATIC, "ambience/labdrone2.wav", 0.4, 0.9, 0, 80);
 }
 
-bool CTripmineChargeTent::Think(float flFrametime) // orig client 0x8aa80
+bool CTripmineChargeTent::Update(float flFrametime) // orig client 0x8aa80
 {
 	if (!m_iEntIndex)
 		return true;
@@ -107,10 +83,10 @@ bool CTripmineChargeTent::Think(float flFrametime) // orig client 0x8aa80
 	while (m_flRoll > 360)
 		m_flRoll -= 360;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -125,7 +101,7 @@ bool CTripmineChargeTent::Think(float flFrametime) // orig client 0x8aa80
 
 	gEngfuncs.pEventAPI->EV_PlaySound(m_iEntIndex, pEntity->origin, CHAN_STATIC, "ambience/labdrone2.wav", m_flCharge * 0.6 + 0.4, 0.9, SND_CHANGE_VOL | SND_CHANGE_PITCH, (int)(m_flCharge * 70 + 80));
 
-	cl_entity_t* pBeam = RC2_GetEntity(m_iBeam);
+	cl_entity_t* pBeam = GetEntity(m_iBeam);
 	if (pBeam)
 	{
 		pBeam->curstate.renderamt = (int)(m_flCharge * 80 + 90);
@@ -134,7 +110,7 @@ bool CTripmineChargeTent::Think(float flFrametime) // orig client 0x8aa80
 		pBeam->curstate.rendercolor.b = (int)(colHue.z * 255);
 	}
 
-	cl_entity_t* pGlow = RC2_GetEntity(m_iGlow);
+	cl_entity_t* pGlow = GetEntity(m_iGlow);
 	if (pGlow)
 	{
 		pGlow->curstate.renderamt = (int)(m_flCharge * 80 + 170);
@@ -147,7 +123,7 @@ bool CTripmineChargeTent::Think(float flFrametime) // orig client 0x8aa80
 	return false;
 }
 
-bool CTripmineChargeTent::EntityGone(int iEntIndex) // orig client 0x8ae10
+bool CTripmineChargeTent::KillEntity(int iEntIndex) // orig client 0x8ae10
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;
@@ -164,8 +140,8 @@ class CConcChargeTent : public CClientTent // name ours
 public:
 	CConcChargeTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;  // orig +0x8
 	float m_flArm;	  // orig +0xc: 0-1 over [Satchel] ConcArmTime
@@ -175,7 +151,7 @@ public:
 // The factory (the dispatcher's case 0x3c). The implicit copy constructor is inline here.
 CClientTent* RC2_NewConcChargeTent(const CClientTent* pCopy) // orig client 0x8ae60
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -191,7 +167,7 @@ CConcChargeTent::CConcChargeTent()
 	if (!m_iEntIndex)
 		return;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -203,7 +179,7 @@ CConcChargeTent::CConcChargeTent()
 	gEngfuncs.pEventAPI->EV_PlaySound(m_iEntIndex, pEntity->origin, CHAN_STATIC, "ambience/dronemachine2.wav", 0.3, 0.5, 0, 90);
 }
 
-bool CConcChargeTent::Think(float flFrametime) // orig client 0x8b0c0
+bool CConcChargeTent::Update(float flFrametime) // orig client 0x8b0c0
 {
 	if (!m_iEntIndex)
 		return true;
@@ -214,10 +190,10 @@ bool CConcChargeTent::Think(float flFrametime) // orig client 0x8b0c0
 	else if (m_flArm > 1)
 		m_flArm = 1;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -233,7 +209,7 @@ bool CConcChargeTent::Think(float flFrametime) // orig client 0x8b0c0
 	return false;
 }
 
-bool CConcChargeTent::EntityGone(int iEntIndex) // orig client 0x8b280
+bool CConcChargeTent::KillEntity(int iEntIndex) // orig client 0x8b280
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

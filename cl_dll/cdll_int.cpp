@@ -78,25 +78,26 @@ void IN_Commands();
 
 // RC2 (client.dll's own code elsewhere; names ours)
 void CLTE_Reset();				// cl_dll/rc2/clte.cpp
-void RC2_ResetEntityTables();	// orig client 0xbd0e0: three 64-entry tables at .bss 0x10210170-0x10210474
-void RC2_ResetViewportFlags();	// orig client 0xd9150: .bss 0x102223c0 = 0, 0x102223c4 = 1
-void RC2_ResetPendingMenu();	// orig client 0xcfe90: .bss 0x101755e0 = -1, 0x10221ab0 = 0
-void RC2_LoadCrosshairs();		// orig client 0xcb1c0: the crosshair sprites from sprites/weapon_crossbow.txt
-void RC2Prefs_ResetToDefaults(); // orig client 0xbe3c0: the client's copy of rc2.ini back to its defaults
-void RC2_ViewportFrame(float flTime); // orig client 0xd8980
-void RC2_RunPendingMenu();		// orig client 0xcfe10
+void PM_ResetPullers();			// client 0xbd0e0, rc2/pullers_client.cpp: the tethers and pull points
+void PlayerID_Enable();			// client 0xd9150, rc2/vgui_PlayerID.cpp: the player name label on again
+void AttrMenu_Init();			// client 0xcfe90, rc2/vgui_attributes.cpp: no attribute menu pending
+void TransformHud_VidInit();	// client 0xcb1c0, rc2/transform_hud.cpp: the transform crosshair and meter sprites
+void RC2Prefs_ResetToDefaults(); // client 0xbe3c0, rc2/rc2prefs_client.cpp: the client's copy of rc2.ini back to its defaults
+void PlayerID_Frame(float flFrameTime); // client 0xd8980, rc2/vgui_PlayerID.cpp: the name under the crosshair
+void AttrMenu_Think();			// client 0xcfe10, rc2/vgui_attributes.cpp: opens the attribute menu once it is due
 extern cvar_t* cl_detail;		// "cl_detail", registered by CHud::Init (orig .bss 0x1020bb30)
-extern int g_iMaxPlayerEnt;		// 1 + the highest player entity HUD_AddEntity has seen (orig .bss 0x10206918)
+extern int g_iHighestEntIndex;	// entity.cpp (orig .bss 0x10206918)
 extern unsigned int g_iClientFrame; // cl_dll/rc2/clte.cpp
 
-// orig client 0x4fe80. RC2: what HUD_Init, HUD_VidInit and HUD_Reset all clear. name ours
-static void RC2_ResetClientState()
+// orig client 0x4fe80. RC2: what HUD_Init, HUD_VidInit, HUD_Reset and CHud::MsgFunc_InitHUD all
+// clear. name ours
+void RC2_ResetClientState()
 {
 	CLTE_Reset();
-	RC2_ResetEntityTables();
-	g_iMaxPlayerEnt = 0;
-	RC2_ResetViewportFlags();
-	RC2_ResetPendingMenu();
+	PM_ResetPullers();
+	g_iHighestEntIndex = 0;
+	PlayerID_Enable();
+	AttrMenu_Init();
 }
 
 /*
@@ -226,7 +227,7 @@ int DLLEXPORT HUD_VidInit()
 	VGui_Startup();
 
 	RC2_ResetClientState();
-	RC2_LoadCrosshairs();
+	TransformHud_VidInit();
 
 	return 1;
 }
@@ -327,8 +328,8 @@ void DLLEXPORT HUD_Frame(double time)
 	//	RecClHudFrame(time);
 
 	GetClientVoiceMgr()->Frame(time);
-	RC2_ViewportFrame((float)time);
-	RC2_RunPendingMenu();
+	PlayerID_Frame((float)time);
+	AttrMenu_Think();
 
 	if (cl_detail)
 		g_iClientDetail = (int)cl_detail->value;
@@ -483,13 +484,3 @@ public:
 };
 
 EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION);
-
-// TEMP STUB (c2): real ones belong in input.cpp/hud.cpp/entity.cpp and RC2's own client files
-// at the addresses given with their declarations above (other client packages)
-void RC2_ResetEntityTables() {}
-void RC2_ResetViewportFlags() {}
-void RC2_ResetPendingMenu() {}
-void RC2_LoadCrosshairs() {}
-void RC2_ViewportFrame(float flTime) {}
-void RC2_RunPendingMenu() {}
-int g_iMaxPlayerEnt = 0;

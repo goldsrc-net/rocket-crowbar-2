@@ -87,7 +87,7 @@ void CHud::MsgFunc_InitHUD(const char* pszName, int iSize, void* pbuf)
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;
 
-	RC2_InitHUD();
+	RC2_ResetClientState();
 
 	if (gViewPort)
 		gViewPort->HideDebugPanels();

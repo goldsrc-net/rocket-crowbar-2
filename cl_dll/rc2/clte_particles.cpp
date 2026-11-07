@@ -65,7 +65,7 @@ int Particle_FadeToBlue(float flFrametime, Vector* pPos, Vector* pVel, Vector* p
 }
 
 // orig client 0x50b90. A particle that grows in place for its first fifth, then flies to its effect's
-// target (pUser, CLTE 0x41's object), arriving as its life runs out; it dies if it overshoots
+// target (pUser, CLTE 0x41's effect: in front of the houndeye), arriving as its life runs out; it dies if it overshoots
 int Particle_Seek(float flFrametime, Vector* pPos, Vector* pVel, Vector* pAccel, Vector* pColor,
 	float* pAlpha, float* pSize, float* pFade, float* pLife, void* pUser)
 {
@@ -103,7 +103,7 @@ int Particle_Seek(float flFrametime, Vector* pPos, Vector* pVel, Vector* pAccel,
 	if (flTime < 0.01)
 		flTime = 0.01;
 
-	const Vector& vecTarget = static_cast<CTentType41*>(pUser)->m_vecTarget;
+	const Vector& vecTarget = static_cast<CHoundeyeChargeTent*>(pUser)->m_vecOrigin;
 	*pAccel = (vecTarget - *pPos) * (2.0 / (flTime * flTime));
 	*pVel = *pAccel * flFrametime + *pVel;
 	*pPos = *pVel * flFrametime + *pPos;
@@ -134,8 +134,9 @@ CTentTrail::CTentTrail()
 	m_iRenderCount = 0;
 }
 
-// orig client 0x5a720. orig client 0x51030 is its compiler-generated vector deleting destructor
-CTentTrail::~CTentTrail()
+// orig client 0x5a720. The destructor's body; the original also calls it directly (no effect's
+// destructor runs, see CClientTent), so it has a name of its own here
+void CTentTrail::Free()
 {
 	m_iAllocated = 0;
 	m_iCount = 0;

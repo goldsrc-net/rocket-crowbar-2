@@ -30,9 +30,9 @@ class CSuckGrenadeTent : public CClientTent // name ours
 public:
 	CSuckGrenadeTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;		   // orig +0x8
 	bool m_bSeen;			   // orig +0xc: the entity was current on the last think
@@ -40,7 +40,7 @@ public:
 	Vector m_vecOrigin;		   // orig +0x14
 	float m_flLife;			   // orig +0x20: 10 s
 	float m_flScale;		   // orig +0x24: 0-1, the size and brightness of it all
-	CRC2Trail m_Trails[2];	   // orig +0x28
+	CTentTrail m_Trails[2];	   // orig +0x28
 	Vector m_vecTip[2];		   // orig +0x78: the arm's ends
 	Vector m_vecArmAngles;	   // orig +0x90
 	Vector m_vecArmAVelocity;  // orig +0x9c
@@ -57,7 +57,7 @@ public:
 // implicit copy constructor (inline in the original).
 CClientTent* RC2_NewSuckGrenadeTent(const CClientTent* pCopy) // orig client 0x819a0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -101,7 +101,7 @@ CSuckGrenadeTent::CSuckGrenadeTent() // orig client 0x82f40
 	const int iArmSign = m_vecAVelocity.y < 0 ? 1 : -1;
 	m_vecArmAVelocity = Vector(0, gEngfuncs.pfnRandomFloat(150, 200) * iArmSign, 0);
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -150,22 +150,22 @@ CSuckGrenadeTent::CSuckGrenadeTent() // orig client 0x82f40
 	}
 }
 
-bool CSuckGrenadeTent::Think(float flFrametime) // orig client 0x81d00
+bool CSuckGrenadeTent::Update(float flFrametime) // orig client 0x81d00
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
 	m_flLife -= flFrametime;
 	if (m_flLife < 0)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		return true;
 	}
 
@@ -257,9 +257,9 @@ bool CSuckGrenadeTent::Think(float flFrametime) // orig client 0x81d00
 	m_flNextTrail -= flFrametime;
 	if (m_flNextTrail <= 0)
 	{
-		if (g_iClDetail < 0)
+		if (g_iClientDetail < 0)
 			m_flNextTrail = 0.1;
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flNextTrail = 0.075;
 		else
 			m_flNextTrail = 0.05;
@@ -276,7 +276,7 @@ bool CSuckGrenadeTent::Think(float flFrametime) // orig client 0x81d00
 // The arm's two trails, each led by its tip.
 void CSuckGrenadeTent::DrawTransparent() // orig client 0x82d10
 {
-	if (!m_bSeen || g_iClDetail < 0)
+	if (!m_bSeen || g_iClientDetail < 0)
 		return;
 	if (!m_Trails[0].CanDraw() && !m_Trails[1].CanDraw())
 		return;
@@ -293,7 +293,7 @@ void CSuckGrenadeTent::DrawTransparent() // orig client 0x82d10
 }
 
 // The pull point is gone: stop the sound, drop the beams and glows.
-bool CSuckGrenadeTent::EntityGone(int iEntIndex) // orig client 0x82e80
+bool CSuckGrenadeTent::KillEntity(int iEntIndex) // orig client 0x82e80
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

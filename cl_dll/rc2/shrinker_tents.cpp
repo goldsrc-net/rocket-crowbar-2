@@ -31,9 +31,9 @@ class CShrinkerGlowTent : public CClientTent // name ours
 public:
 	CShrinkerGlowTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;							 // orig +0x8
 	Vector m_vecOrigin;							 // orig +0xc: where the shot was last frame
@@ -59,7 +59,7 @@ public:
 // (orig client 0x99e90).
 CClientTent* RC2_NewShrinkerGlowTent(const CClientTent* pCopy) // orig client 0x72bf0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -83,7 +83,7 @@ CShrinkerGlowTent::CShrinkerGlowTent()
 	m_pDlight = nullptr;
 	m_pElight = nullptr;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -100,7 +100,7 @@ CShrinkerGlowTent::CShrinkerGlowTent()
 	m_pSparkSprite = gEngfuncs.CL_LoadModel("sprites/sqflare.spr", &iModelIndex);
 	m_pFlareSprite = gEngfuncs.CL_LoadModel("sprites/shrinkf.spr", &iModelIndex);
 
-	if (g_iClDetail >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		m_pDlight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		if (m_pDlight)
@@ -130,7 +130,7 @@ CShrinkerGlowTent::CShrinkerGlowTent()
 // first into free slots in order, then any still owed onto random slots, live or not. Each spark
 // starts somewhere along the stretch the shot covered this frame, a little off its line, and
 // flies backward, decelerating hard until it turns forward again, fading over 0.72 seconds.
-bool CShrinkerGlowTent::Think(float flFrametime) // orig client 0x73120
+bool CShrinkerGlowTent::Update(float flFrametime) // orig client 0x73120
 {
 	m_vecNewOrigin = m_vecOrigin;
 	cl_entity_t* pEntity = nullptr;
@@ -140,10 +140,10 @@ bool CShrinkerGlowTent::Think(float flFrametime) // orig client 0x73120
 		if (m_iEntIndex <= 0)
 			return true;
 
-		pEntity = RC2_GetEntity(m_iEntIndex);
+		pEntity = GetEntity(m_iEntIndex);
 		if (!pEntity)
 		{
-			EntityGone(m_iEntIndex);
+			KillEntity(m_iEntIndex);
 			m_iEntIndex = 0;
 			return true;
 		}
@@ -160,9 +160,9 @@ bool CShrinkerGlowTent::Think(float flFrametime) // orig client 0x73120
 		VectorAngles(m_vecDir, m_vecAngles);
 		m_vecAngles.x = -m_vecAngles.x;
 
-		if (g_iClDetail >= 1)
+		if (g_iClientDetail >= 1)
 			m_flSparksDue += flFrametime * 150;
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flSparksDue += flFrametime * 100;
 		else
 			m_flSparksDue += flFrametime * 50;
@@ -269,7 +269,7 @@ bool CShrinkerGlowTent::Think(float flFrametime) // orig client 0x73120
 }
 
 // The shot is gone: put the lights out at once, stop the hum, and let the sparks die out.
-bool CShrinkerGlowTent::EntityGone(int iEntIndex) // orig client 0x73b20
+bool CShrinkerGlowTent::KillEntity(int iEntIndex) // orig client 0x73b20
 {
 	if (iEntIndex == m_iEntIndex)
 	{
@@ -368,9 +368,9 @@ class CShrinkTent : public CClientTent // name ours
 public:
 	CShrinkTent();
 
-	bool Think(float flFrametime) override;
+	bool Update(float flFrametime) override;
 	void DrawTransparent() override;
-	bool EntityGone(int iEntIndex) override;
+	bool KillEntity(int iEntIndex) override;
 
 	void SpawnSpark(int i);
 
@@ -402,7 +402,7 @@ public:
 // (orig client 0x9a090).
 CClientTent* RC2_NewShrinkTent(const CClientTent* pCopy) // orig client 0x74600
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -434,7 +434,7 @@ CShrinkTent::CShrinkTent()
 	m_flScale = m_bRestore ? 0.2 : 1.0;
 	m_flAngle = m_flPrevAngle = gEngfuncs.pfnRandomFloat(0, M_PI);
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -460,7 +460,7 @@ CShrinkTent::CShrinkTent()
 static bool s_bShrinkSparkFlip = true;
 
 // A spark at a random point of the spiral's sweep this frame. Inline at both uses in the
-// original (Think's two spawn loops). name ours
+// original (Update's two spawn loops). name ours
 void CShrinkTent::SpawnSpark(int i)
 {
 	const float flFrac = gEngfuncs.pfnRandomFloat(0, 1);
@@ -489,7 +489,7 @@ void CShrinkTent::SpawnSpark(int i)
 // (two turns a second) and sheds sparks along it: 86.7, 60 or 40 a second by cl_detail, first
 // into free slots in order, then any still owed onto random slots. The sparks fade over 1.35
 // seconds, accelerating outward.
-bool CShrinkTent::Think(float flFrametime) // orig client 0x74b30
+bool CShrinkTent::Update(float flFrametime) // orig client 0x74b30
 {
 	if (!m_iEntIndex && !m_bDying)
 		return true;
@@ -497,10 +497,10 @@ bool CShrinkTent::Think(float flFrametime) // orig client 0x74b30
 	cl_entity_t* pEntity = nullptr;
 	if (!m_bDying)
 	{
-		pEntity = RC2_GetEntity(m_iEntIndex);
+		pEntity = GetEntity(m_iEntIndex);
 		if (!pEntity)
 		{
-			EntityGone(m_iEntIndex);
+			KillEntity(m_iEntIndex);
 			m_iEntIndex = 0;
 			return true;
 		}
@@ -545,9 +545,9 @@ bool CShrinkTent::Think(float flFrametime) // orig client 0x74b30
 		const float flRing = m_bRestore ? m_flScale * 5.0 : m_flScale;
 		m_vecRing = Vector(flRing * m_flSizeX, flRing * m_flSizeY, flRing * m_flHeight);
 
-		if (g_iClDetail >= 1)
+		if (g_iClientDetail >= 1)
 			m_flSparksDue += flFrametime * 86.666664;
-		else if (g_iClDetail == 0)
+		else if (g_iClientDetail == 0)
 			m_flSparksDue += flFrametime * 60;
 		else
 			m_flSparksDue += flFrametime * 40;
@@ -604,7 +604,7 @@ bool CShrinkTent::Think(float flFrametime) // orig client 0x74b30
 	return false;
 }
 
-bool CShrinkTent::EntityGone(int iEntIndex) // orig client 0x754d0
+bool CShrinkTent::KillEntity(int iEntIndex) // orig client 0x754d0
 {
 	if (iEntIndex == m_iEntIndex)
 	{

@@ -28,8 +28,8 @@ class CImploderChargeTent : public CClientTent // name ours
 public:
 	CImploderChargeTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex;	   // orig +0x8
 	float m_flLife;		   // orig +0xc: charge time left
@@ -53,7 +53,7 @@ static void ScaleVector(float* pOut, float flScale, const float* pIn) // orig cl
 // copy constructor, out of line in the original (orig client 0x9a2b0).
 CClientTent* RC2_NewImploderChargeTent(const CClientTent* pCopy) // orig client 0x77cc0
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -71,7 +71,7 @@ CImploderChargeTent::CImploderChargeTent()
 	m_pBeam = nullptr;
 	m_pSpark = nullptr;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
 		m_iEntIndex = 0;
@@ -83,7 +83,7 @@ CImploderChargeTent::CImploderChargeTent()
 	int iModelIndex;
 	if (gEngfuncs.pEventAPI->EV_IsLocal(m_iEntIndex - 1))
 	{
-		Vector vecSrc = RC2_GetEntityOrigin(m_iEntIndex);
+		Vector vecSrc = CLTE_GetOrigin(m_iEntIndex);
 		m_flForward = 16;
 		m_flRight = 3;
 		m_flUp = -6;
@@ -148,15 +148,15 @@ CImploderChargeTent::CImploderChargeTent()
 	m_pSpark->die += 10;
 }
 
-bool CImploderChargeTent::Think(float flFrametime) // orig client 0x78350
+bool CImploderChargeTent::Update(float flFrametime) // orig client 0x78350
 {
 	if (!m_iEntIndex)
 		return true;
 
-	cl_entity_t* pEntity = RC2_GetEntity(m_iEntIndex);
+	cl_entity_t* pEntity = GetEntity(m_iEntIndex);
 	if (!pEntity)
 	{
-		EntityGone(m_iEntIndex);
+		KillEntity(m_iEntIndex);
 		m_iEntIndex = 0;
 		return true;
 	}
@@ -191,7 +191,7 @@ bool CImploderChargeTent::Think(float flFrametime) // orig client 0x78350
 	}
 	else
 	{
-		Vector vecSrc = RC2_GetEntityOrigin(m_iEntIndex);
+		Vector vecSrc = CLTE_GetOrigin(m_iEntIndex);
 		Vector vecViewOfs;
 		gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(vecViewOfs);
 		const Vector vecUp = g_vecTentUp * m_flUp;
@@ -206,7 +206,7 @@ bool CImploderChargeTent::Think(float flFrametime) // orig client 0x78350
 	return false;
 }
 
-bool CImploderChargeTent::EntityGone(int iEntIndex) // orig client 0x78800
+bool CImploderChargeTent::KillEntity(int iEntIndex) // orig client 0x78800
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;

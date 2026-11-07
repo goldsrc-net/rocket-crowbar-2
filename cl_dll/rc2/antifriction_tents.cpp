@@ -14,21 +14,13 @@
 #include "c3_needs.h"
 #include "c3_tents.h"
 
-// c3 needs:
-// orig .bss 0x101edc7c (c2's; c2 clears it, 0x100 dwords, with the rest of the effect state):
-// per entity index, whether it is frictionless. name ours
-extern unsigned char g_abRC2AntiFriction[1024];
-// orig .bss 0x101f69fc (c2's): the local player is frictionless; view.cpp's 0xec590 reads it.
-// name ours
-extern int g_iRC2LocalAntiFriction;
-
 class CAntiFrictionTent : public CClientTent // name ours
 {
 public:
 	CAntiFrictionTent();
 
-	bool Think(float flFrametime) override;
-	bool EntityGone(int iEntIndex) override;
+	bool Update(float flFrametime) override;
+	bool KillEntity(int iEntIndex) override;
 
 	int m_iEntIndex; // orig +0x8
 };
@@ -37,7 +29,7 @@ public:
 // implicit copy constructor (inline in the original).
 CClientTent* RC2_NewAntiFrictionTent(const CClientTent* pCopy) // orig client 0x83520
 {
-	const int iSlot = RC2_FindFreeClientTent();
+	const int iSlot = CLTE_FreeSlot();
 	if (iSlot < 0)
 		return nullptr;
 
@@ -59,12 +51,12 @@ CAntiFrictionTent::CAntiFrictionTent()
 }
 
 // Lives until its entity's kill.
-bool CAntiFrictionTent::Think(float flFrametime) // orig client 0x83700
+bool CAntiFrictionTent::Update(float flFrametime) // orig client 0x83700
 {
 	return m_iEntIndex == 0;
 }
 
-bool CAntiFrictionTent::EntityGone(int iEntIndex) // orig client 0x83720
+bool CAntiFrictionTent::KillEntity(int iEntIndex) // orig client 0x83720
 {
 	if (iEntIndex != m_iEntIndex)
 		return false;
