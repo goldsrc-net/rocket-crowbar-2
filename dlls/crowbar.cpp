@@ -384,7 +384,12 @@ bool CCrowbar::Swing(bool fFirst)
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrowbar, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
-	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_PrimaryRefirePrimary).f);
+	// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep,
+	// on a hit here and on a miss below, as halflife-updated's Swing has it
+	if (tr.flFraction < 1.0)
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_Crowbar_PrimaryRefirePrimary).f), 0.0f);
+	else
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_PrimaryRefirePrimary).f);
 	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_PrimaryRefireSecondary).f);
 	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_PrimaryRefireTertiary).f);
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_PrimaryRefireQuaternary).f);
@@ -393,9 +398,9 @@ bool CCrowbar::Swing(bool fFirst)
 	{
 		if (fFirst)
 		{
-			// miss
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
-			UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.5);
+			// miss. halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay; the original
+			// sets 0.5 and then extends to it again, which would undo the compensation
+			m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
 
 			// player "shoot" animation
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);

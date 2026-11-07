@@ -112,6 +112,12 @@ the crash guards listed under "Crashes in the original":
     empty weapon waits a think (RetireWeapon, DoRetireWeapon); weapon switches send the deploy
     animation to the predicting client (`m_ForceSendAnimations` in SelectItem, SwitchWeapon,
     SelectLastItem, SendWeaponAnim).
+  - Fire rates go through halflife-updated's `GetNextAttackDelay` (`dlls/weapons.cpp`) at RC2's
+    rc2.ini refires, extended as RC2 extends its timers, in the crossbow, crowbar, gauss, glock,
+    hornet gun, mp5, RPG, satchel, shotgun, snark and tripmine, where halflife-updated's weapons
+    call it (FIXES.md, its GetNextAttackDelay section; not the hand grenade, python or egon). A held
+    weapon keeps its cycle however late the frame catches each shot. The client predicts with
+    halflife-updated's stub, the plain delay. Steven, 2026-11-07.
   - Ammo for an exhaustible weapon gives the weapon too (`dlls/player.cpp` GiveAmmo, with the weapon
     name in the ammo registry, `dlls/weapons_shared.cpp`). For it, AddPlayerItem extracts a new
     weapon's ammo once the weapon is in the list and sends the counts at once

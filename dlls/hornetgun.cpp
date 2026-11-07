@@ -170,7 +170,8 @@ void CHgun::PrimaryAttack()
 	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHornetFire, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 0, 0, 0, 0);
 
-	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefirePrimary).f);
+	// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_HornetGun_PrimaryRefirePrimary).f), 0.0f);
 	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefireSecondary).f);
 	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefireTertiary).f);
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_PrimaryRefireQuaternary).f);

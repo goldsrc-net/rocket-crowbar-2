@@ -188,6 +188,8 @@ void CGlock::PrimaryAttack()
 	{
 		PlayEmptySound();
 		GlockRaiseAll(this, 0.2);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
 		return;
 	}
 
@@ -205,6 +207,9 @@ void CGlock::PrimaryAttack()
 
 	GlockRaiseAll(this, RC2Pref(RC2P_Glock_PrimaryRefirePrimary).f, RC2Pref(RC2P_Glock_PrimaryRefireSecondary).f,
 		RC2Pref(RC2P_Glock_PrimaryRefireTertiary).f, RC2Pref(RC2P_Glock_PrimaryRefireQuaternary).f);
+	// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep (after
+	// the raise, which would otherwise extend it back)
+	m_flNextPrimaryAttack = GetNextAttackDelay(RC2Pref(RC2P_Glock_PrimaryRefirePrimary).f);
 
 	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition

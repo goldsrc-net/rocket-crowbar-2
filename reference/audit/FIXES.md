@@ -239,7 +239,9 @@ rva        file                     function                           what half
 0x23b250   weapons.cpp              CBasePlayerWeapon::ExtractAmmo     |= the secondary result (d42b905, halflife#3027)             fix      the weapon was left behind when its ammo was taken
 0x23b370   weapons.cpp              CBasePlayerWeapon::RetireWeapon    as mod-rc2                                                   fix      as mod-rc2
 0x23af00   weapons.cpp              CBasePlayerWeapon::PlayEmptySound  as mod-rc2                                                   fix      (Steven 2026-11-07: unclear goes to halflife-updated)
-0x23a250   weapons_shared.cpp       CBasePlayerWeapon::ItemPostFrame   TabulateAmmo, m_flLastFireTime (SDK 2.2+)                    design   prediction bookkeeping; nothing reads it here
+0x23a250   weapons_shared.cpp       CBasePlayerWeapon::ItemPostFrame   TabulateAmmo (SDK 2.2+)                                      design   prediction bookkeeping
+0x23a250   weapons_shared.cpp       CBasePlayerWeapon::ItemPostFrame   m_flLastFireTime reset on a released trigger (SDK 2.2+)      fix      (Steven 2026-11-07) GetNextAttackDelay's bookkeeping,
+                                                                                                                                         below
 0x19c7d0   ggrenade.cpp             CGrenade::Explode                  source 1 unit lower against RadiusDamage's + 1 (d6accf1,     fix      damage through the brush a grenade hit from below
                                                                        halflife#3244)
 0x19c7d0   ggrenade.cpp             CGrenade::Explode                  pull-out 0.6, was (dmg - 24) * 0.6 (078e787, halflife#3244)  fix      (Steven 2026-11-07: unclear goes to halflife-updated);
@@ -345,10 +347,10 @@ Not reverts (RC 1.9's own, since SDK 2.1 already has halflife-updated's code the
 weapon and sets weaponanim; the original does neither), `CHalfLifeMultiplay::ChangeLevel` (SDK
 2.1 has the mapcycle_t code), and the weapon bodies RC rewrote whole (the gauss, tripmine laser,
 egon, crowbar, python, mp5, glock fire code), whose halflife-updated fixes are for code RC
-dropped.
+dropped, except GetNextAttackDelay (its section below).
 
-Counts (rows above, a multi-function row once): fix 56 (8 of them unclear until Steven's rule),
-design 18.
+Counts (rows above, a multi-function row once, a split row once per part): fix 57 (8 of them
+unclear until Steven's rule), design 18.
 
 The seven left unclear here and the grenade's pull-out follow Steven's rule of 2026-11-07 (unclear
 goes to halflife-updated's version), applied, in `reference/DEVIATIONS.md`. Still to check in an
@@ -594,8 +596,11 @@ rva       file                    function                           what halfli
 0x12a530  weapons.cpp             CBasePlayerWeapon::SendWeaponAnim  m_ForceSendAnimations (42f45bd)                                 fix      as mod-rc2
 0x12a300  weapons.cpp             CBasePlayerWeapon::AddToPlayer     no extract (6951bf1)                                            fix      as mod-rc2
 0x12aa40  weapons_shared.cpp      CBasePlayerWeapon::DefaultReload   forwards body (a3783be)                                         fix      inert: weapons-a's callers pass 0
--         weapons.cpp             GetNextAttackDelay (crowbar,       the 2013 SDK's fire-rate compensation (seed)                    fix      (Steven 2026-11-07: unclear goes to
-                                  glock, mp5, shotgun, crossbow)                                                                              halflife-updated); weapons-b's design revert stays
+-         weapons.cpp             GetNextAttackDelay (crowbar,       the 2013 SDK's fire-rate compensation (seed)                    fix      (Steven 2026-11-07); the mp5 keeps the floor at
+                                  glock, mp5, shotgun, crossbow)                                                                              now + cycle that goes with it; its section below
+0x130ff0  hl_wpn_glock.cpp        CGlock::Reload                     reloads to the clip in both branches (seed, 9ae57ad's restyle)  fix      the original asked for clip_glock + 1 with a round
+                                                                                                                                              left (SDK 2.3's 18): a full glock replayed the
+                                                                                                                                              reload
 0xfdf00   rpg.cpp                 CRpgRocket::RocketTouch,           launcher decrement in the destructor, EHANDLE launcher          fix      a rocket that blew up in flight locked the reload
                                   ~CRpgRocket                        (40d3849, 8092ab5)
 0xfe1a0   rpg.cpp                 CRpgRocket::FollowThink            launcher release at 8192 units or 6 s, sky detonate (9b9d6c3,   design
@@ -606,8 +611,9 @@ rva       file                    function                           what halfli
 0xff450   rpg.cpp                 CRpg::UpdateSpot                   no laser while reloading (9784339)                              fix
 0xfea50   rpg.cpp                 CRpg::Reload                       reads only this reload's result (c82c3fa)                       fix
 0xfed20   rpg.cpp                 CRpg::GetItemInfo                  ITEM_FLAG_NOAUTOSWITCHTO (2353ca4, HL25)                        design   as mod-rockcrowbar
--         rpg, gauss, egon,       weapons-b's attacks                GetNextAttackDelay for UTIL_WeaponTimeBase() + x (seed)         design   as mod-rc2 and mod-rockcrowbar (made before the
-          hornetgun, ...                                                                                                                      rule; stays)
+-         rpg, gauss, hornetgun,  weapons-b's attacks                GetNextAttackDelay for UTIL_WeaponTimeBase() + x (seed)         fix      (Steven 2026-11-07); its section below (the egon
+          handgrenade, satchel,                                                                                                               has no call upstream)
+          tripmine, squeakgrenade
 0xfedf0   rpg, gauss, egon,       ::AddToPlayer (0xc0750, 0xb2d20,   WeapPickup moved to AddPlayerItem                               design   as mod-rc2
           hornetgun               0xca390)
 0xc1220   gauss.cpp               CGauss::StartFire                  V_min(m_flStartCharge, time) (8c5d4ab, HL25)                    fix
@@ -644,7 +650,7 @@ rva       file                    function                           what halfli
 0x10f850  squeakgrenade.cpp       CSqueak::Deploy                    first idle at 1.7 s (33385ad)                                   fix      as mod-rockcrowbar
 ```
 
-Counts (rows above): fix 126 (7 of them unclear until Steven's rule), design 52.
+Counts (rows above): fix 128 (7 of them unclear until Steven's rule), design 51.
 
 ### Where an OZ verdict differed from mod-rc2 or mod-rockcrowbar
 
@@ -680,9 +686,9 @@ Counts (rows above): fix 126 (7 of them unclear until Steven's rule), design 52.
 
 Each was unclear in its dossier, or kept there without a call; all now have halflife-updated's
 version (rows above), in `reference/DEVIATIONS.md` where it differs from the original:
-- weapons-a's `GetNextAttackDelay`: the crowbar, glock, mp5, shotgun and crossbow set the next primary
-  attack through it where halflife-updated's do (the python has none upstream). weapons-b's design
-  revert of the same stays.
+- `GetNextAttackDelay`: every weapon sets the next primary attack through it where
+  halflife-updated's do (the python and egon have none upstream); weapons-b's design revert of it
+  is undone (Steven 2026-11-07, its section below).
 - `CGauss::Fire` clears the hitgroup on a self-hit (8c5d4ab).
 - `CGrenade::Explode` pulls out of the wall by 0.6 units (078e787).
 - `CBasePlayer::ForceClientDllUpdate`'s extra resends: kept.
@@ -690,3 +696,82 @@ version (rows above), in `reference/DEVIATIONS.md` where it differs from the ori
 - `CBasePlayer::PreThink`'s func_vehicle controls, `CBasePlayer::Spawn`'s "bj" physinfo and chat
   time, `PM_PreventMegaBunnyJumping`'s sv_allowbunnyhopping: kept, as they were.
 - The user-message set: this tree's registrations, as before (not a FIXES row; the rules dossier).
+
+## GetNextAttackDelay in every weapon (Steven 2026-11-07)
+
+Decided by Steven: `CBasePlayerWeapon::GetNextAttackDelay`, the 2013 SDK's fire-rate compensation
+(seed, with its `m_flLastFireTime` and `m_flPrevPrimaryAttack` bookkeeping in DefaultDeploy and
+ItemPostFrame), is a fix in all three projects. Each weapon's next primary attack goes through it
+where halflife-updated's own weapon calls it, at the mod's own rate (cvars, prefs, curse and rune
+scales); only the timing form changes. Every site is marked `// halflife-updated's fix, kept`.
+
+It keeps a held weapon on its cycle: the creep is the time since the last shot less the last
+delay, taken off the next one. Its reset test (`m_flNextPrimaryAttack == -1`) is a relative
+CLIENT_WEAPONS timer bottoming out at -1, a second after it ran out.
+
+- mod-ozdm and mod-rc2 build their servers with CLIENT_WEAPONS (relative timers,
+  `UTIL_WeaponTimeBase()` 0): halflife-updated's function as it is.
+- mod-rockcrowbar's server has no CLIENT_WEAPONS (absolute timers): the reset test is
+  `m_flNextPrimaryAttack <= UTIL_WeaponTimeBase() - 1.0f`, the same second past due, and reads the
+  same for a relative timer. ItemPostFrame gets the released-trigger reset of `m_flLastFireTime`
+  (wave 2 row 0x23a250); DefaultDeploy already had its reset.
+- mod-rc2 sets its timers with `UTIL_ExtendTime` (only ever later): those sites become
+  `UTIL_ExtendTime(&m_flNextPrimaryAttack, GetNextAttackDelay(x), 0.0f)`. Where a helper raises all
+  four timers first (the glock's GlockRaiseAll, the gauss's RaiseAttackTimes), the compensated value
+  is assigned after it. The client keeps halflife-updated's stub (`cl_dll/hl/hl_baseentity.cpp`,
+  returns the delay), so it predicts `0 + x` as before.
+
+```
+project          file                 function                           sites (halflife-updated's)
+mod-ozdm         crowbar, glock,      weapons-a, done before             as upstream; the mp5 gets back halflife-updated's floor
+                 mp5, shotgun,                                           at now + cycle after it (dropped by 5bacd5a)
+                 crossbow
+mod-ozdm         rpg.cpp              CRpg::Reload, PrimaryAttack        0.5, 1.5 (OZ's empty-fire 0.5 is its own, unchanged)
+mod-ozdm         gauss.cpp            PrimaryAttack, SecondaryAttack     the underwater refusals, 0.15 and 0.5
+mod-ozdm         hornetgun.cpp        CHgun::PrimaryAttack               cycle_hivehand (haste halves it), for SDK 2.3's
+                                                                         accumulating cycle; the floor after it stays
+mod-ozdm         handgrenade.cpp      WeaponIdle                         the throw and the last-grenade 0.5
+mod-ozdm         satchel.cpp          PrimaryAttack, Throw, WeaponIdle   detonate 0.5, throw 1.0, redraw 0.5
+mod-ozdm         tripmine.cpp         PlaceMine                          0.3
+mod-ozdm         squeakgrenade.cpp    PrimaryAttack                      0.3
+mod-rockcrowbar  crossbow.cpp         FireSniperBolt, FireBolt           CrossbowRefire, ImpailerRefire
+mod-rockcrowbar  crowbar.cpp          Swing                              PrimaryNoHitRefire, PrimaryHitRefire
+mod-rockcrowbar  gauss.cpp            PrimaryAttack, SecondaryAttack     the underwater refusals, 0.15 and 0.5
+mod-rockcrowbar  glock.cpp            GlockFire                          the empty 0.2, PrimaryRefire
+mod-rockcrowbar  handgrenade.cpp      WeaponIdle                         RefireRate, the last-grenade 0.5
+mod-rockcrowbar  mp5.cpp              PrimaryAttack, SecondaryAttack     0.1, FartRefire (the empty 0.15 has none upstream)
+mod-rockcrowbar  rpg.cpp              Reload, PrimaryAttack              0.5, SciMineRefire
+mod-rockcrowbar  satchel.cpp          PrimaryAttack, Throw, WeaponIdle   PrimaryDetRefire, ThrowPrimaryRefire, 0.5
+mod-rockcrowbar  shotgun.cpp          PrimaryAttack, SecondaryAttack,    the underwater 0.15 twice, PrimaryRefire,
+                                      Reload                             SecondaryRefire, the reload start 1.0
+mod-rockcrowbar  squeakgrenade.cpp    CSqueak::PrimaryAttack             PrimaryRefire
+mod-rockcrowbar  tripmine.cpp         CTripmine::PrimaryAttack           PrimaryRefire
+mod-rc2          crossbow.cpp         PrimaryAttack                      ZoomedPrimaryRefirePrimary, PrimaryRefirePrimary
+mod-rc2          crowbar.cpp          Swing                              PrimaryRefirePrimary on a hit; the miss's 0.5, whose
+                                                                         second ExtendTime (a no-op that would undo it) goes
+mod-rc2          gauss.cpp            PrimaryAttack, SecondaryAttack     the underwater refusals, 0.15
+mod-rc2          glock.cpp            PrimaryAttack                      the empty 0.2, PrimaryRefirePrimary
+mod-rc2          hornetgun.cpp        PrimaryAttack                      PrimaryRefirePrimary
+mod-rc2          mp5.cpp              FireBolt, SecondaryAttack          flRefire1 (primary and tertiary bolts share it),
+                                                                         SecondaryRefirePrimary
+mod-rc2          rpg.cpp              LaunchMine                         flRefirePrimary (all four mine attacks share it)
+mod-rc2          satchel.cpp          PrimaryAttack, Throw, WeaponIdle   DetonateRefirePrimary, ThrowRefirePrimary, 0.5
+mod-rc2          shotgun.cpp          ShotgunLaunch, ShotgunLaunchDone,  the underwater 0.15, flRefirePrimary (the first three
+                                      Reload                             attacks share both), ReloadStartRefirePrimary
+mod-rc2          squeakgrenade.cpp    CSqueak::PrimaryAttack             PrimaryRefirePrimary
+mod-rc2          tripmine.cpp         MineAttack                         attack.iRefire[0] (all four mine attacks)
+```
+
+No call, where the mod's weapon has no place matching halflife-updated's:
+- The python and the egon in all three (none upstream).
+- mod-rockcrowbar's hornet gun: RC's charge weapon fires when the charge runs out, not on a
+  refire, and its charge start sets the timer outside the function; the stale bookkeeping could
+  leave the next charge's start in the past.
+- mod-rc2's hand grenade: RC2 throws from WeaponFrame, before ItemPostFrame's reset, so the
+  bookkeeping would carry over from a cooked throw. halflife-updated's call sits in WeaponIdle,
+  which runs only with the buttons up, after the reset, so it never compensates anyway.
+- Each mod's own attacks (RC's crowbar shove and rocket, RC2's tertiary and quaternary attacks
+  outside the shared helpers above).
+
+A shared helper compensates only while the primary trigger is held (`m_flLastFireTime` is reset
+otherwise), so its other attacks fire as before unless primary attack is held with them.

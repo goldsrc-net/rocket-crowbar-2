@@ -500,7 +500,8 @@ void CRpg::LaunchMine(const char* szClassname, int iAmmoCost, int iMaxDeployed, 
 			UTIL_ExtendTime(pPlayer->m_flEnergyRegenTime, gpGlobals->time, *pflEnergyRegenDelay);
 		}
 
-		UTIL_ExtendTime(pRpg->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flRefirePrimary);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		UTIL_ExtendTime(pRpg->m_flNextPrimaryAttack, pRpg->GetNextAttackDelay(flRefirePrimary), 0.0f);
 		UTIL_ExtendTime(pRpg->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flRefireSecondary);
 		UTIL_ExtendTime(pRpg->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flRefireTertiary);
 		UTIL_ExtendTime(pRpg->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flRefireQuaternary);

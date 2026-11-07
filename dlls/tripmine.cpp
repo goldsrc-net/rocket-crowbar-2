@@ -1659,7 +1659,8 @@ void CTripmine::MineAttack(int iMine)
 	}
 #endif
 
-	UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[0]).f);
+	// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+	UTIL_ExtendTime(m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(attack.iRefire[0]).f), 0.0f);
 	UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[1]).f);
 	UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[2]).f);
 	UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(attack.iRefire[3]).f);

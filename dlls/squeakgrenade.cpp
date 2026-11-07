@@ -887,7 +887,8 @@ void CSqueak::PrimaryAttack()
 
 		m_fJustThrown = true;
 
-		UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefirePrimary).f);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		UTIL_ExtendTime(m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_Snark_PrimaryRefirePrimary).f), 0.0f);
 		UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireSecondary).f);
 		UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireTertiary).f);
 		UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Snark_PrimaryRefireQuaternary).f);

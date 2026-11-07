@@ -274,7 +274,8 @@ void CCrossbow::PrimaryAttack()
 
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_ZoomedPrimaryRefirePrimary).f);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_Crossbow_ZoomedPrimaryRefirePrimary).f), 0.0f);
 		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_ZoomedPrimaryRefireSecondary).f);
 		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_ZoomedPrimaryRefireTertiary).f);
 		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_ZoomedPrimaryRefireQuaternary).f);
@@ -351,7 +352,8 @@ void CCrossbow::PrimaryAttack()
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usImpailer, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, m_iClip != 0, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0);
 
-	UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_PrimaryRefirePrimary).f);
+	// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+	UTIL_ExtendTime(&m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_Crossbow_PrimaryRefirePrimary).f), 0.0f);
 	UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_PrimaryRefireSecondary).f);
 	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_PrimaryRefireTertiary).f);
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crossbow_PrimaryRefireQuaternary).f);

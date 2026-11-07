@@ -717,7 +717,8 @@ void CSatchel::PrimaryAttack() // orig 0xbd860, orig client 0x42730
 
 		m_chargeReady = 2;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
-		UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_DetonateRefirePrimary).f);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		UTIL_ExtendTime(m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_Satchel_DetonateRefirePrimary).f), 0.0f);
 		UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_DetonateRefireSecondary).f);
 		UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_DetonateRefireTertiary).f);
 		UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_DetonateRefireQuaternary).f);
@@ -837,7 +838,8 @@ void CSatchel::Throw() // orig 0xbdf50, orig client 0x42ac0
 		m_chargeReady = 1;
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= RC2Pref(RC2P_Satchel_RoachAmmoCost).s;
 
-		UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_ThrowRefirePrimary).f);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		UTIL_ExtendTime(m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_Satchel_ThrowRefirePrimary).f), 0.0f);
 		UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_ThrowRefireSecondary).f);
 		UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_ThrowRefireTertiary).f);
 		UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Satchel_ThrowRefireQuaternary).f);
@@ -880,7 +882,8 @@ void CSatchel::WeaponIdle() // orig 0xbe290, orig client 0x42c40
 		// use tripmine animations
 		strcpy(m_pPlayer->m_szAnimExtention, "trip");
 
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5;
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 		m_chargeReady = 0;
 		break;

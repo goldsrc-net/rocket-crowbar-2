@@ -151,7 +151,8 @@ static bool ShotgunLaunch(CShotgun* pGun, const char* szClassname, int iAmmoCost
 	if (pPlayer->pev->waterlevel == 3 && !CanFireUnderwater(pPlayer))
 	{
 		pGun->PlayEmptySound();
-		UTIL_ExtendTime(pGun->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), 0.15);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		UTIL_ExtendTime(pGun->m_flNextPrimaryAttack, pGun->GetNextAttackDelay(0.15), 0.0f);
 		UTIL_ExtendTime(pGun->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		UTIL_ExtendTime(pGun->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), 0.15);
 		UTIL_ExtendTime(pGun->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), 0.15);
@@ -218,7 +219,8 @@ static void ShotgunLaunchDone(CShotgun* pGun, unsigned short usEvent, float flRe
 	if (0 != pGun->m_iClip)
 		pGun->m_flPumpTime = gpGlobals->time + 0.5;
 
-	UTIL_ExtendTime(pGun->m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), flRefirePrimary);
+	// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+	UTIL_ExtendTime(pGun->m_flNextPrimaryAttack, pGun->GetNextAttackDelay(flRefirePrimary), 0.0f);
 	UTIL_ExtendTime(pGun->m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), flRefireSecondary);
 	UTIL_ExtendTime(pGun->m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), flRefireTertiary);
 	UTIL_ExtendTime(pGun->m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flRefireQuaternary);
@@ -415,7 +417,8 @@ void CShotgun::Reload() // orig 0xc8990, orig client 0x44140
 		m_fInSpecialReload = 1;
 		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + RC2Pref(RC2P_Shotgun_ReloadStartDelay).f;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + RC2Pref(RC2P_Shotgun_ReloadStartDelay).f;
-		UTIL_ExtendTime(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Shotgun_ReloadStartRefirePrimary).f);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		UTIL_ExtendTime(m_flNextPrimaryAttack, GetNextAttackDelay(RC2Pref(RC2P_Shotgun_ReloadStartRefirePrimary).f), 0.0f);
 		UTIL_ExtendTime(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Shotgun_ReloadStartRefireSecondary).f);
 		UTIL_ExtendTime(m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Shotgun_ReloadStartRefireTertiary).f);
 		UTIL_ExtendTime(m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Shotgun_ReloadStartRefireQuaternary).f);

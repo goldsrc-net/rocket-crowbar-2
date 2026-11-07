@@ -394,6 +394,8 @@ void CGauss::PrimaryAttack()
 	{
 		PlayEmptySound();
 		RaiseAttackTimes(0.15);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
 		return;
 	}
 
@@ -565,6 +567,8 @@ void CGauss::SecondaryAttack()
 	{
 		PlayEmptySound();
 		RaiseAttackTimes(0.15);
+		// halflife-updated's fix, kept (Steven 2026-11-07): GetNextAttackDelay evens out the fire-rate creep
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
 		return;
 	}
 
