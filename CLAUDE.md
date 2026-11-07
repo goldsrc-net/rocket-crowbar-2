@@ -38,10 +38,18 @@ Original content: Steven's install at `/media/Data3/Projects/mods/rc2/` (beta 1.
 ## Status (2026-11-07)
 
 Naming the originals (`../DECOMPILE.md` section 2a). Both were built with VC6 12.00.8168
-(`scripts/rich.py`). SDK 2.3 built with that compiler names 1,013 functions of `rc2.dll` and
-591 of `client.dll` byte for byte; after the Ghidra setup 1,618 of 3,030 and 2,450 of 4,276
-have a name. Next: vtables from the 301 entity factories, then the call graph, then the work
-list and the tables (cvars, save fields) as mod-rockcrowbar has them.
+(`scripts/rich.py`). rc2.dll: 2,738 of 3,807 functions named (SDK 2.3 matched byte for byte,
+then stock virtuals by vtable position); client.dll: 2,450 of 4,276. Tables in `reference/`:
+`vtables-rc2.tsv` (292 entity classes, size, vtable), `savefields-rc2.tsv` (57 save tables, all
+stock), `cvars-rc2.tsv` (278, 11 RC2's own; `mp_allowmonsters` and `mp_falldamage` gone).
+
+RC2 added virtuals to the SDK bases, which come first, as in mod-rockcrowbar: one between
+`CBaseEntity::Respawn` and `UpdateOwner` and 21 at the end of `CBaseEntity`, one at the end
+of `CBaseMonster`, four after `CBasePlayerItem::AttachToPlayer`. Each factory also calls
+RC 1.9's `AddToPrecachedList`, so code is shared with RC 1.9 beyond `CCrowbarRocket`.
+
+Next: client.dll's vtables (its weapons are static objects), the rest by call graph and the
+decompile, then the work list.
 
 - The amd64 client doesn't link yet (no 64-bit VGUI; mod-ts links openvgui statically). The
   Half-Life client players run is 32-bit, so it waits.
