@@ -360,4 +360,16 @@ public:
 	*	Will return @c nullptr if item dropping is disabled for this NPC.
 	*/
 	CBaseEntity* DropItem(const char* pszItemName, const Vector& vecPos, const Vector& vecAng);
+
+	// p3 needs (A weapons):
+	// end p3 (A weapons)
+
+	// p3 needs (B gauss):
+	// end p3 (B gauss)
+
+	// p3 needs (C glock):
+	// end p3 (C glock)
+
+	// p3 needs (D grenades):
+	// end p3 (D grenades)
 };

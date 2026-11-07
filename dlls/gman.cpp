@@ -48,11 +48,16 @@ public:
 
 	void PlayScriptedSentence(const char* pszSentence, float duration, float volume, float attenuation, bool bConcurrent, CBaseEntity* pListener) override;
 
+	// Rocket Crowbar 2: the gman's answers to the two capability queries (fixed bit sets).
+	// VERIFY: what the bits mean (reference/BASE_VIRTUALS.md, slots 75 and 76)
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x10bd; } // orig 0x56360
+	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 5; }	   // orig 0x56370
+
 	EHANDLE m_hPlayer;
 	EHANDLE m_hTalkTarget;
 	float m_flTalkTime;
 };
-LINK_ENTITY_TO_CLASS(monster_gman, CGMan);
+LINK_ENTITY_TO_CLASS(monster_gman, CGMan); // orig 0x562f0
 
 
 TYPEDESCRIPTION CGMan::m_SaveData[] =
@@ -60,13 +65,14 @@ TYPEDESCRIPTION CGMan::m_SaveData[] =
 		DEFINE_FIELD(CGMan, m_hTalkTarget, FIELD_EHANDLE),
 		DEFINE_FIELD(CGMan, m_flTalkTime, FIELD_TIME),
 };
-IMPLEMENT_SAVERESTORE(CGMan, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CGMan, CBaseMonster); // orig 0x56380, orig 0x563b0
 
 
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x563e0
 int CGMan::Classify()
 {
 	return CLASS_NONE;
@@ -76,6 +82,7 @@ int CGMan::Classify()
 // SetYawSpeed - allows each sequence to have a different
 // turn rate associated with it.
 //=========================================================
+// orig 0x563f0
 void CGMan::SetYawSpeed()
 {
 	int ys;
@@ -94,6 +101,7 @@ void CGMan::SetYawSpeed()
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
+// orig 0x56400
 void CGMan::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	switch (pEvent->event)
@@ -108,6 +116,7 @@ void CGMan::HandleAnimEvent(MonsterEvent_t* pEvent)
 //=========================================================
 // ISoundMask - generic monster can't hear.
 //=========================================================
+// orig 0x56410
 int CGMan::ISoundMask()
 {
 	return bits_SOUND_NONE;
@@ -136,6 +145,7 @@ void CGMan::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
+// orig 0x564e0
 void CGMan::Precache()
 {
 	PRECACHE_MODEL("models/gman.mdl");
@@ -161,6 +171,7 @@ void CGMan::StartTask(Task_t* pTask)
 	CBaseMonster::StartTask(pTask);
 }
 
+// orig 0x56540
 void CGMan::RunTask(Task_t* pTask)
 {
 	switch (pTask->iTask)

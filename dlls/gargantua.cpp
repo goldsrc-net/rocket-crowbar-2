@@ -29,6 +29,8 @@
 #include "explode.h"
 #include "func_break.h"
 
+#include "p3b_temp.h" // TEMP STUBs: RC2ShieldDamage, RC2EntMark*
+
 //=========================================================
 // Gargantua Monster
 //=========================================================
@@ -68,10 +70,10 @@ class CSpiral : public CBaseEntity
 public:
 	void Spawn() override;
 	void Think() override;
-	int ObjectCaps() override { return FCAP_DONT_SAVE; }
+	int ObjectCaps() override { return FCAP_DONT_SAVE; } // orig 0x48640 (stock body)
 	static CSpiral* Create(const Vector& origin, float height, float radius, float duration);
 };
-LINK_ENTITY_TO_CLASS(streak_spiral, CSpiral);
+LINK_ENTITY_TO_CLASS(streak_spiral, CSpiral); // orig 0x485d0
 
 
 class CStomp : public CBaseEntity
@@ -92,7 +94,7 @@ private:
 	//	CSprite		*m_pSprites[ STOMP_SPRITE_COUNT ];
 };
 
-LINK_ENTITY_TO_CLASS(garg_stomp, CStomp);
+LINK_ENTITY_TO_CLASS(garg_stomp, CStomp); // orig 0x48650
 
 TYPEDESCRIPTION CStomp::m_SaveData[] =
 	{
@@ -131,6 +133,8 @@ void CStomp::Spawn()
 
 #define STOMP_INTERVAL 0.025
 
+// orig 0x488b0. RC2: the hit goes through the shield (0.6) and lands on GetEffectedEnt(). The
+// step is halflife-updated's (frametime-independent); RC2 has SDK 2.3's gpGlobals->frametime.
 void CStomp::Think()
 {
 	if (m_flLastThinkTime == 0)
@@ -162,7 +166,12 @@ void CStomp::Think()
 			pevOwner = VARS(pev->owner);
 
 		if (pEntity)
-			pEntity->TakeDamage(pev, pevOwner, gSkillData.gargantuaDmgStomp, DMG_SONIC);
+		{
+			Vector vecShieldHit;
+			float flDamage = RC2ShieldDamage(pEntity, gSkillData.gargantuaDmgStomp, 0.6, tr.vecEndPos, pev->movedir, &vecShieldHit, NULL, 8);
+			if (flDamage != 0)
+				pEntity->GetEffectedEnt()->TakeDamage(pev, pevOwner, flDamage, DMG_SONIC);
+		}
 	}
 
 	// Accelerate the effect
@@ -232,7 +241,7 @@ public:
 	bool CheckMeleeAttack1(float flDot, float flDist) override; // Swipe
 	bool CheckMeleeAttack2(float flDot, float flDist) override; // Flames
 	bool CheckRangeAttack1(float flDot, float flDist) override; // Stomp attack
-	void SetObjectCollisionBox() override
+	void SetObjectCollisionBox() override // orig 0x48f10 (stock body)
 	{
 		pev->absmin = pev->origin + Vector(-80, -80, 0);
 		pev->absmax = pev->origin + Vector(80, 80, 214);
@@ -259,6 +268,15 @@ public:
 	inline bool FlameIsOn() { return m_pFlame[0] != NULL; }
 
 	void FlameDamage(Vector vecStart, Vector vecEnd, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType);
+
+	// Rocket Crowbar 2: the garg's answers to RC2's CBaseEntity virtuals (reference/BASE_VIRTUALS.md)
+	float GlobalBeamDamage() override { return 0; }		  // orig 0x48ec0
+	float FartDamageInflict() override { return 0; }	  // orig 0x48ed0
+	float ZoomedPrimaryDamage() override { return 50; }	  // orig 0x48ee0
+	float ZoomedSecondaryDamage() override { return 150; } // orig 0x48ef0
+	float BeamViewDamage() override { return 0; }		  // orig 0x48f00
+	int GetRCCaps(int iAsker, CBaseEntity* pAsker) override { return 0x2006; } // orig 0x48ea0. VERIFY: the bits' meaning
+	int GetRCCaps2(int iAsker, CBaseEntity* pAsker) override { return 4; }	  // orig 0x48eb0. VERIFY: as above
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -293,7 +311,7 @@ private:
 	float m_flameY;
 };
 
-LINK_ENTITY_TO_CLASS(monster_gargantua, CGargantua);
+LINK_ENTITY_TO_CLASS(monster_gargantua, CGargantua); // orig 0x48e30
 
 TYPEDESCRIPTION CGargantua::m_SaveData[] =
 	{
@@ -308,7 +326,7 @@ TYPEDESCRIPTION CGargantua::m_SaveData[] =
 		DEFINE_FIELD(CGargantua, m_flameY, FIELD_FLOAT),
 };
 
-IMPLEMENT_SAVERESTORE(CGargantua, CBaseMonster);
+IMPLEMENT_SAVERESTORE(CGargantua, CBaseMonster); // orig 0x48fc0, orig 0x48ff0 (stock bodies)
 
 const char* CGargantua::pAttackHitSounds[] =
 	{
@@ -456,15 +474,17 @@ DEFINE_CUSTOM_SCHEDULES(CGargantua){
 	slGargSwipe,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CGargantua, CBaseMonster);
+IMPLEMENT_CUSTOM_SCHEDULES(CGargantua, CBaseMonster); // ScheduleFromName: orig 0x49020 (stock body)
 
 
+// orig 0x49050 (stock body)
 void CGargantua::EyeOn(int level)
 {
 	m_eyeBrightness = level;
 }
 
 
+// orig 0x49060 (stock body)
 void CGargantua::EyeOff()
 {
 	m_eyeBrightness = 0;
@@ -621,6 +641,8 @@ void CGargantua::FlameUpdate()
 
 
 
+// orig 0x49a90. RC2: each entity is hurt at most once per call (the mark set, by the index of
+// what GetEffectedEnt() names), the damage goes through the shield (0.8) and lands on GetEffectedEnt().
 void CGargantua::FlameDamage(Vector vecStart, Vector vecEnd, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType)
 {
 	CBaseEntity* pEntity = NULL;
@@ -634,59 +656,72 @@ void CGargantua::FlameDamage(Vector vecStart, Vector vecEnd, entvars_t* pevInfli
 
 	Vector vecAim = (vecEnd - vecStart).Normalize();
 
+	RC2EntMarkPush();
+
 	// iterate on all entities in the vicinity.
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecMid, searchRadius)) != NULL)
 	{
-		if (pEntity->pev->takedamage != DAMAGE_NO)
-		{
-			// UNDONE: this should check a damage mask, not an ignore
-			if (iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore)
-			{ // houndeyes don't hurt other houndeyes with their attack
-				continue;
+		if (pEntity->GetEffectedEnt()->pev->takedamage == DAMAGE_NO)
+			continue;
+		if (RC2EntMarkTest(ENTINDEX(pEntity->GetEffectedEnt()->edict())))
+			continue;
+
+		// UNDONE: this should check a damage mask, not an ignore
+		if (iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore)
+		{ // houndeyes don't hurt other houndeyes with their attack
+			continue;
+		}
+
+		vecSpot = pEntity->BodyTarget(vecMid);
+
+		float dist = DotProduct(vecAim, vecSpot - vecMid);
+		if (dist > searchRadius)
+			dist = searchRadius;
+		else if (dist < -searchRadius)
+			dist = searchRadius;
+
+		Vector vecSrc = vecMid + dist * vecAim;
+
+		UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, ENT(pev), &tr);
+
+		if (tr.flFraction == 1.0 || tr.pHit == pEntity->edict())
+		{ // the explosion can 'see' this entity, so hurt them!
+			// decrease damage for an ent that's farther from the flame.
+			dist = (vecSrc - tr.vecEndPos).Length();
+
+			if (dist > 64)
+			{
+				flAdjustedDamage = flDamage - (dist - 64) * 0.4;
+				if (flAdjustedDamage <= 0)
+					continue;
+			}
+			else
+			{
+				flAdjustedDamage = flDamage;
 			}
 
-			vecSpot = pEntity->BodyTarget(vecMid);
+			// RC2: the shield may move the hit point (it writes tr.vecEndPos)
+			flAdjustedDamage = RC2ShieldDamage(pEntity, flAdjustedDamage, 0.8, tr.vecEndPos, vecAim, &tr.vecEndPos, NULL, 8);
+			RC2EntMarkSet(ENTINDEX(pEntity->GetEffectedEnt()->edict()));
 
-			float dist = DotProduct(vecAim, vecSpot - vecMid);
-			if (dist > searchRadius)
-				dist = searchRadius;
-			else if (dist < -searchRadius)
-				dist = searchRadius;
-
-			Vector vecSrc = vecMid + dist * vecAim;
-
-			UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, ENT(pev), &tr);
-
-			if (tr.flFraction == 1.0 || tr.pHit == pEntity->edict())
-			{ // the explosion can 'see' this entity, so hurt them!
-				// decrease damage for an ent that's farther from the flame.
-				dist = (vecSrc - tr.vecEndPos).Length();
-
-				if (dist > 64)
-				{
-					flAdjustedDamage = flDamage - (dist - 64) * 0.4;
-					if (flAdjustedDamage <= 0)
-						continue;
-				}
-				else
-				{
-					flAdjustedDamage = flDamage;
-				}
-
+			if (flAdjustedDamage > 0)
+			{
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
 				if (tr.flFraction != 1.0)
 				{
 					ClearMultiDamage();
-					pEntity->TraceAttack(pevInflictor, flAdjustedDamage, (tr.vecEndPos - vecSrc).Normalize(), &tr, bitsDamageType);
+					pEntity->GetEffectedEnt()->TraceAttack(pevInflictor, flAdjustedDamage, (tr.vecEndPos - vecSrc).Normalize(), &tr, bitsDamageType);
 					ApplyMultiDamage(pevInflictor, pevAttacker);
 				}
 				else
 				{
-					pEntity->TakeDamage(pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType);
+					pEntity->GetEffectedEnt()->TakeDamage(pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType);
 				}
 			}
 		}
 	}
+
+	RC2EntMarkPop();
 }
 
 
@@ -724,6 +759,7 @@ void CGargantua::PrescheduleThink()
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
+// orig 0x4a130 (stock body)
 int CGargantua::Classify()
 {
 	return CLASS_ALIEN_MONSTER;
@@ -816,6 +852,7 @@ void CGargantua::Precache()
 }
 
 
+// orig 0x4a4e0. RC2: no pain sound while frozen
 void CGargantua::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	ALERT(at_aiconsole, "CGargantua::TraceAttack\n");
@@ -829,7 +866,7 @@ void CGargantua::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecD
 	// UNDONE: Hit group specific damage?
 	if ((bitsDamageType & (GARG_DAMAGE | DMG_BLAST)) != 0)
 	{
-		if (m_painSoundTime < gpGlobals->time)
+		if (m_painSoundTime < gpGlobals->time && !RC2Frozen()) // RC2: not while frozen
 		{
 			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0, ATTN_GARG, 0, PITCH_NORM);
 			m_painSoundTime = gpGlobals->time + RANDOM_FLOAT(2.5, 4);
@@ -909,6 +946,7 @@ void CGargantua::Killed(entvars_t* pevAttacker, int iGib)
 // Garg swipe attack
 //
 //=========================================================
+// orig 0x4a880 (stock body)
 bool CGargantua::CheckMeleeAttack1(float flDot, float flDist)
 {
 	//	ALERT(at_aiconsole, "CheckMelee(%f, %f)\n", flDot, flDist);
@@ -1028,6 +1066,7 @@ void CGargantua::HandleAnimEvent(MonsterEvent_t* pEvent)
 // a percentage of his height (otherwise he swings over the
 // players head)
 //=========================================================
+// orig 0x4ac10
 CBaseEntity* CGargantua::GargantuaCheckTraceHullAttack(float flDist, int iDamage, int iDmgType)
 {
 	TraceResult tr;
@@ -1045,7 +1084,10 @@ CBaseEntity* CGargantua::GargantuaCheckTraceHullAttack(float flDist, int iDamage
 
 		if (iDamage > 0)
 		{
-			pEntity->TakeDamage(pev, pev, iDamage, iDmgType);
+			// RC2: through the shield (2.0)
+			float flDamage = RC2ShieldDamage(pEntity, iDamage, 2.0, tr.vecEndPos, gpGlobals->v_forward, NULL, NULL, 10);
+			if (flDamage > 0)
+				pEntity->TakeDamage(pev, pev, flDamage, iDmgType);
 		}
 
 		return pEntity;
@@ -1235,8 +1277,9 @@ public:
 	void Think() override;
 };
 
-LINK_ENTITY_TO_CLASS(env_smoker, CSmoker);
+LINK_ENTITY_TO_CLASS(env_smoker, CSmoker); // orig 0x4b400
 
+// orig 0x4b470 (stock body)
 void CSmoker::Spawn()
 {
 	pev->movetype = MOVETYPE_NONE;
@@ -1269,6 +1312,7 @@ void CSmoker::Think()
 }
 
 
+// orig 0x4b640 (stock body)
 void CSpiral::Spawn()
 {
 	pev->movetype = MOVETYPE_NONE;
@@ -1300,6 +1344,7 @@ CSpiral* CSpiral::Create(const Vector& origin, float height, float radius, float
 
 #define SPIRAL_INTERVAL 0.1 //025
 
+// orig 0x4b7a0 (stock body)
 void CSpiral::Think()
 {
 	float time = gpGlobals->time - pev->dmgtime;
@@ -1354,3 +1399,4 @@ void SpawnExplosion(Vector center, float randomRange, float time, int magnitude)
 	pExplosion->SetThink(&CBaseEntity::SUB_CallUseToggle);
 	pExplosion->pev->nextthink = gpGlobals->time + time;
 }
+

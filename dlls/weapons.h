@@ -23,6 +23,13 @@ class CBasePlayerWeapon;
 
 void DeactivateSatchels(CBasePlayer* pOwner);
 
+// Rocket Crowbar 2 (p3, ggrenade): from other files of the original, used by the grenades
+extern unsigned short g_usExplodeEvent; // events/explode.sc, precached in W_Precache (weapons.cpp, .data 0x101afd18); name ours
+void UTIL_KillEntityEffects(edict_t* pEdict); // util 0xf55b0: TE_KILLBEAM on it, and RC2's user message; name ours
+int UTIL_PackNormal(Vector vecDir);			  // util 0xf5920: a direction as three signed 9-bit fractions; name ours
+void RC2RadiusDamage(entvars_t* pevAttacker, entvars_t* pevInflictor, edict_t* pentIgnore, Vector vecSrc, float flRadius,
+	float flDamage, float flExponent, int bitsDamageType, int iFlags); // util 0xf3900; name ours
+
 // Contact Grenade / Timed grenade / Satchel Charge
 class CGrenade : public CBaseMonster
 {
@@ -42,6 +49,10 @@ public:
 
 	void Explode(Vector vecSrc, Vector vecAim);
 	void Explode(TraceResult* pTrace, int bitsDamageType);
+	void RadialExplode(TraceResult* pTrace);		  // Rocket Crowbar 2, ours
+	void PlayExplosionEvent(TraceResult* pTrace);	  // Rocket Crowbar 2, ours
+	void EXPORT Detonate2();						  // Rocket Crowbar 2
+	void EXPORT ExplodeTouch2(CBaseEntity* pOther);	  // Rocket Crowbar 2
 	void EXPORT Smoke();
 
 	void EXPORT BounceTouch(CBaseEntity* pOther);
@@ -58,6 +69,18 @@ public:
 	void Killed(entvars_t* pevAttacker, int iGib) override;
 
 	bool m_fRegisteredSound; // whether or not this grenade has issued its DANGER sound to the world sound list yet.
+
+	// p3 needs (A weapons):
+	// end p3 (A weapons)
+
+	// p3 needs (B gauss):
+	// end p3 (B gauss)
+
+	// p3 needs (C glock):
+	// end p3 (C glock)
+
+	// p3 needs (D grenades):
+	// end p3 (D grenades)
 };
 
 
@@ -211,6 +234,7 @@ class CBasePlayerItem : public CBaseAnimating
 {
 public:
 	void SetObjectCollisionBox() override;
+	bool KeyValue(KeyValueData* pkvd) override; // Rocket Crowbar 2: "norandomize"
 
 	bool Save(CSave& save) override;
 	bool Restore(CRestore& restore) override;
@@ -367,7 +391,37 @@ public:
 	// hle time creep vars
 	float m_flPrevPrimaryAttack;
 	float m_flLastFireTime;
+
+	// Rocket Crowbar 2 (weapons, package p3). RC2 gave every weapon four attacks and two more
+	// virtuals. In the original's vtable the attacks follow SecondaryAttack (slots 107, 108, so
+	// Reload is 109 and WeaponIdle 110) and the other two follow UseDecrement (114, 115).
+	// rc2.ini's [<Weapon>] keys name the four attacks Primary..Quaternary; the method names are ours.
+	virtual void TertiaryAttack() {}   // slot 107, ours: "+cancel" (IN_CANCEL), timed by m_flNextTertiaryAttack
+	virtual void QuaternaryAttack() {} // slot 108, ours: "+alt1" (IN_ALT1), timed by m_flNextQuaternaryAttack
+	// slot 114, ours: called first thing every ItemPostFrame, also while the player is frozen
+	virtual void WeaponFrame() {} // orig 0x58b20 (the default; h_cycler's place in .text)
+	// slot 115, ours: each override reads its flags through the stub readers below (which return
+	// 0 on the server), one per member. VERIFY: what the two arguments are and who calls it.
+	virtual void ReadWeaponState(void* pData, int iSize) {} // orig 0x54c70 (the default)
+
+	float m_flNextTertiaryAttack;	// orig +0xb0, ours: soonest time ItemPostFrame calls TertiaryAttack
+	float m_flNextQuaternaryAttack; // orig +0xb4, ours: soonest time ItemPostFrame calls QuaternaryAttack
+	int m_iDefaultAmmo2;			// orig +0xd8, saved: secondary ammo given on pickup
 };
+
+// Rocket Crowbar 2: mp_random's swap of an item for a random one (weapons.cpp; items.cpp's CItem
+// uses it too), and the flags around it. Names ours.
+void RC2RandomizeItem(CBaseEntity* pItem);
+extern bool g_fRC2Randomize;
+extern bool g_fRC2PlayWeaponEvents;
+extern unsigned short g_usExplodeEvent;
+
+// Rocket Crowbar 2: the readers ReadWeaponState's overrides call, as the server has them: each
+// takes the two arguments by address and returns 0 (names ours). weapons.cpp
+bool RC2ReadStateBool(void** ppData, int* piSize);
+short RC2ReadStateShort(void** ppData, int* piSize);
+int RC2ReadStateInt(void** ppData, int* piSize);
+float RC2ReadStateFloat(void** ppData, int* piSize);
 
 
 class CBasePlayerAmmo : public CBaseEntity
@@ -490,36 +544,42 @@ enum glock_e
 	GLOCK_ADD_SILENCER
 };
 
+// Rocket Crowbar 2's glock: four attacks, all from rc2.ini's [Glock] heading. Primary launches a
+// bouncing gib (glock_gib), secondary is the fart jump, tertiary a sticky gas gib
+// (glock_stickygib), quaternary charges and then fires the transphasic gib (transphasic_gib).
+// glock.cpp; the gibs are in rc2/glockgibs.cpp.
 class CGlock : public CBasePlayerWeapon
 {
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 2; }
+	int iItemSlot() override { return 2; } // orig 0x54c80
 	bool GetItemInfo(ItemInfo* p) override;
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
-	void GlockFire(float flSpread, float flCycleTime, bool fUseAutoAim);
+	void TertiaryAttack() override;
+	void QuaternaryAttack() override;
+	void WeaponFrame() override;
 	bool Deploy() override;
+	bool CanHolster() override { return m_fInAttack == 0; } // orig 0x54ca0: not while charging
+	void Holster() override;
 	void Reload() override;
 	void WeaponIdle() override;
+	void FireTransphasic(); // name ours: the charge's shot, from WeaponFrame
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
+	bool UseDecrement() override { return true; } // orig 0x54c90 (RC2 returns TRUE outright)
+
+	bool m_fCharging;		// orig +0xdc, ours: the transphasic charge is running
+	float m_flChargeDone;	// orig +0xe0, ours: when the charge fires
 
 private:
-	int m_iShell;
+	int m_iShell;			// orig +0xe8
 
-
-	unsigned short m_usFireGlock1;
-	unsigned short m_usFireGlock2;
+	unsigned short m_usFireGib;		// orig +0xec: events/glockfiregib.sc (primary and tertiary)
+	unsigned short m_usTPCharge;	// orig +0xee: events/glocktpcharge.sc
+	unsigned short m_usTPGibFire;	// orig +0xf0: events/glocktpgibfire.sc
+	unsigned short m_usFart;		// orig +0xf2: events/glockfart.sc
 };
 
 enum crowbar_e
@@ -777,11 +837,7 @@ enum rpg_e
 class CRpg : public CBasePlayerWeapon
 {
 public:
-#ifndef CLIENT_DLL
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-#endif
+	// Rocket Crowbar 2: no save table of its own (CBasePlayerWeapon's)
 
 	void Spawn() override;
 	void Precache() override;
@@ -813,8 +869,10 @@ public:
 #endif
 	}
 
+	float m_flRC2SpawnTime; // orig +0xec, ours: gpGlobals->time at Spawn. VERIFY: who reads it (the rest of CRpg is another package's)
+
 private:
-	unsigned short m_usRpg;
+	unsigned short m_usRpg; // orig +0xf0
 };
 
 class CRpgRocket : public CGrenade
@@ -855,54 +913,59 @@ enum gauss_e
 	GAUSS_DRAW
 };
 
+class CGaussBecon;
+
+// Rocket Crowbar 2's gauss (gauss.cpp): a teleporter driven by a thrown beacon (CGaussBecon,
+// dlls/rc2/gaussbecon.h). RC2 has no save table for it. Method and member names are ours unless
+// the vtable slot gives a stock one.
 class CGauss : public CBasePlayerWeapon
 {
 public:
-#ifndef CLIENT_DLL
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-#endif
-
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 4; }
+	int iItemSlot() override { return 4; } // orig 0x4fc80
 	bool GetItemInfo(ItemInfo* p) override;
+	void AddToPlayer(CBasePlayer* pPlayer) override;
 
 	bool Deploy() override;
+	bool CanHolster() override;
 	void Holster() override;
 
-	void PrimaryAttack() override;
-	void SecondaryAttack() override;
+	void PrimaryAttack() override;	  // the beam: teleports what it hits to the beacon, or swaps places with it
+	void SecondaryAttack() override;  // teleports the player to the beacon, or to a random spawn point
+	void TertiaryAttack() override;	  // starts the charge whose release TertiaryFire*() does
+	void QuaternaryAttack() override; // throws the beacon, or brings it back
 	void WeaponIdle() override;
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
 
-	void StartFire();
-	void Fire(Vector vecOrigSrc, Vector vecDirShooting, float flDamage);
-	float GetFullChargeTime();
-	int m_iBalls;
-	int m_iGlow;
-	int m_iBeam;
-	int m_iSoundState; // don't save this
+	bool UseDecrement() override { return true; } // orig 0x4fc90 (RC2 returns 1 without the CLIENT_WEAPONS test)
 
-	// was this weapon just fired primary or secondary?
-	// we need to know so we can pick the right set of effects.
-	bool m_fPrimaryFire;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
+#ifndef CLIENT_DLL
+	CGaussBecon* FindBecon();
+	bool HasBecon() { return FindBecon() != NULL; } // orig 0x4d4b0
+	bool CanPlaceAt(CBaseEntity* pEnt, Vector vecSpot);
+	bool TeleFragEnt(CBaseEntity* pMover, CBaseEntity* pInBox, CBaseEntity* pSkip);
+	bool TeleFragBox(CBaseEntity* pMover, Vector vecSpot, CBaseEntity* pSkip);
+	void TeleportEnt(CBaseEntity* pEnt, Vector vecDest, Vector vecAngles, Vector vecVelocity);
+	bool BeconTeleport(CGaussBecon* pBecon, CBaseEntity* pEnt, bool bFlashArrival);
+	void PrimaryDenyEvent();
+	void TeleportFlash(CBaseEntity* pEnt, Vector vecOrigin, bool bArrival);
+	void TertiaryFireNoBecon();
+	void TertiaryFireBecon();
+	void RaiseAttackTimes(float flDelay);
 #endif
-	}
 
-private:
-	void SendStopEvent(bool sendToHost);
-
-private:
-	unsigned short m_usGaussFire;
-	unsigned short m_usGaussSpin;
+	bool m_blHasBecon;			  // orig +0xdc: the player's beacon is out (sent to the client with WeaponSync)
+	float m_flNextBeconSync;	  // orig +0xe0: when WeaponFrame next sends m_blHasBecon
+	int m_iTertiaryState;		  // orig +0xe4: 0 idle, 1 charging without a beacon, 2 with one
+	float m_flTertiaryChargeEnd;  // orig +0xe8: when the tertiary charge fires
+	unsigned short m_usGaussPrimary;	 // orig +0xec, events/gaussprimary.sc
+	unsigned short m_usGaussBecon;		 // orig +0xee, events/gaussbecon.sc
+	unsigned short m_usGaussPrimaryDeny; // orig +0xf0, events/gaussprimarydeny.sc
+	unsigned short m_usTeleportFlash;	 // orig +0xf2, events/teleportflash.sc
+	unsigned short m_usGaussCharge;		 // orig +0xf4, events/gausscharge.sc
+	unsigned short m_usGaussThird;		 // orig +0xf6, events/gaussthird.sc
 };
 
 enum egon_e
@@ -1071,23 +1134,28 @@ class CHandGrenade : public CBasePlayerWeapon
 public:
 	void Spawn() override;
 	void Precache() override;
-	int iItemSlot() override { return 5; }
+	int iItemSlot() override { return 5; } // orig 0x5be40
 	bool GetItemInfo(ItemInfo* p) override;
 
-	void PrimaryAttack() override;
+	// Rocket Crowbar 2: three grenades, one per attack (the fourth is empty), and the throw
+	// itself happens in WeaponFrame (handgrenade.cpp)
+	void PrimaryAttack() override;	 // antifriction_grenade
+	void SecondaryAttack() override; // suck_grenade
+	void TertiaryAttack() override;	 // gravity_grenade
+	void QuaternaryAttack() override {} // orig 0x5c240
 	bool Deploy() override;
 	bool CanHolster() override;
 	void Holster() override;
 	void WeaponIdle() override;
+	void WeaponFrame() override;
+	void ReadWeaponState(void* pData, int iSize) override;
+	int CountThrown(const char* pszClassname); // name ours
 
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
+	bool UseDecrement() override { return true; } // orig 0x5be50: RC2 returns true on the server too
+
+	int m_iGravDeployed;	   // orig +0xdc, ours: gravity_grenades of this player's still out
+	int m_iSuckDeployed;	   // orig +0xe0, ours: suck_grenades of this player's still out
+	float m_flNextCountTime; // orig +0xe4, ours: when WeaponFrame next counts them
 };
 
 enum satchel_e

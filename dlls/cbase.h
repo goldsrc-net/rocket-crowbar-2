@@ -427,6 +427,22 @@ public:
 	int m_iRC2Base64;	   // orig +0x64. VERIFY: unread so far
 	int m_iRC2Flags;	   // orig +0x68. Bit 0x10 set and cleared by the snark cam; 0 in Spawn and the forklift's GoBoom
 	int m_iRC2Base6c;	   // orig +0x6c. VERIFY: unread so far
+
+	// p3 needs: the byte at orig +0x66 (third byte of m_iRC2Base64). CFreezeTimer sets it on what
+	// it freezes; CBasePlayerWeapon::ItemPostFrame drops the attack buttons while it is set.
+	bool& RC2Frozen() { return reinterpret_cast<bool*>(&m_iRC2Base64)[2]; } // name ours
+
+	// p3 needs (A weapons):
+	// end p3 (A weapons)
+
+	// p3 needs (B gauss):
+	// end p3 (B gauss)
+
+	// p3 needs (C glock):
+	// end p3 (C glock)
+
+	// p3 needs (D grenades):
+	// end p3 (D grenades)
 };
 
 inline bool FNullEnt(CBaseEntity* ent) { return (ent == NULL) || FNullEnt(ent->edict()); }

@@ -356,6 +356,35 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// p3 needs (A weapons):
+	// Player indices this player is linked with (CBaseEntity::IsViewOfPlayer compares an owner
+	// against these and +0x69c; the gamerules' item check tries them). Names ours.
+	int m_iRC2LinkedEnt1; // orig +0x6a4, a player index or 0
+	int m_iRC2LinkedEnt2; // orig +0x6a8, a player index or 0
+	int m_iRC2PlayerForm; // orig +0x10f8, ours: while nonzero the player picks up no weapons, ammo or weaponboxes, and CopyToBodyQue gives it to the corpse as pev->playerclass. VERIFY: what sets it (mp_allowtransform?)
+	// end p3 (A weapons)
+
+	// p3 needs (B gauss):
+	// orig +0x69c: a player index or 0, like A's m_iRC2LinkedEnt1/2 (IsViewOfPlayer compares all
+	// three). The gauss refuses most attacks while the firer's is set and won't teleport a player
+	// whose is. Name ours.
+	int m_iRC2LinkedEnt0;
+	// orig +0x10fc (a byte): the gauss won't teleport a player with it set. Name ours.
+	bool m_bRC2NoTeleport;
+	// Note: RC2's CBasePlayer has 28 more bytes somewhere between m_szAnimExtention (+0x618, as
+	// stock) and m_flStartCharge: the gauss reads m_flPlayAftershock at +0x65c and
+	// m_flNextAmmoBurn at +0x660 (stock +0x640, +0x644). gauss.cpp uses the stock names.
+	// end p3 (B gauss)
+
+	// p3 needs (C glock):
+	// orig +0x758: the energy the transphasic shot costs ([Glock] TransphasicEnergyCost). Name ours.
+	// VERIFY: who fills it (the attributes code's EnergyRegen?).
+	float m_flRC2Energy;
+	// end p3 (C glock)
+
+	// p3 needs (D grenades):
+	// end p3 (D grenades)
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

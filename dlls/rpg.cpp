@@ -21,6 +21,17 @@
 #include "player.h"
 #include "gamerules.h"
 #include "UserMessages.h"
+#ifndef CLIENT_DLL
+#include "rc2prefs.h"
+#define RC2_RPG_PICKUP_GIVE RC2Pref(RC2P_Ammo_RPGPickupGive).s
+#define RC2_RPG_MAX_CARRY RC2Pref(RC2P_Ammo_MaxCarryRPG).s
+#define RC2_RPG_CLIP_SIZE RC2Pref(RC2P_Ammo_RPGClipSize).s
+#else
+// the client has no rc2.ini: rc2.ini's defaults (reference/prefs-rc2.tsv). VERIFY against client.dll
+#define RC2_RPG_PICKUP_GIVE 2
+#define RC2_RPG_MAX_CARRY 10
+#define RC2_RPG_CLIP_SIZE 1
+#endif
 
 LINK_ENTITY_TO_CLASS(weapon_rpg, CRpg);
 
@@ -82,7 +93,10 @@ void CLaserSpot::Precache()
 	PRECACHE_MODEL("sprites/laserdot.spr");
 };
 
-LINK_ENTITY_TO_CLASS(rpg_rocket, CRpgRocket);
+// Rocket Crowbar 2: the rocket is SDK 2.3's (func_tank's rocket turret and RC2's own code fire it);
+// RC2 has no launcher link, so the launcher bookkeeping below is HLU's, kept for HLU's CRpg code.
+// The link order puts the rocket's code inside func_tank.cpp's in the original.
+LINK_ENTITY_TO_CLASS(rpg_rocket, CRpgRocket); // orig 0x46070
 
 CRpgRocket::~CRpgRocket()
 {
@@ -112,6 +126,7 @@ CRpgRocket* CRpgRocket::CreateRpgRocket(Vector vecOrigin, Vector vecAngles, CBas
 
 //=========================================================
 //=========================================================
+// orig 0x46150. RC2: a fixed 120 damage instead of the skill setting.
 void CRpgRocket::Spawn()
 {
 	Precache();
@@ -137,19 +152,24 @@ void CRpgRocket::Spawn()
 
 	pev->nextthink = gpGlobals->time + 0.4;
 
-	pev->dmg = gSkillData.plrDmgRPG;
+	pev->dmg = 120;
 }
 
 //=========================================================
 //=========================================================
+// orig 0x462c0. RC2: a rocket that carries a dmg_inflictor explodes as that entity's.
 void CRpgRocket::RocketTouch(CBaseEntity* pOther)
 {
+	if (!FNullEnt(pev->dmg_inflictor))
+		pev->owner = pev->dmg_inflictor;
+
 	STOP_SOUND(edict(), CHAN_VOICE, "weapons/rocket1.wav");
 	ExplodeTouch(pOther);
 }
 
 //=========================================================
 //=========================================================
+// orig 0x46310
 void CRpgRocket::Precache()
 {
 	PRECACHE_MODEL("models/rpgrocket.mdl");
@@ -158,6 +178,7 @@ void CRpgRocket::Precache()
 }
 
 
+// orig 0x46340
 void CRpgRocket::IgniteThink()
 {
 	// pev->movetype = MOVETYPE_TOSS;
@@ -199,6 +220,7 @@ CRpg* CRpgRocket::GetLauncher()
 	return (CRpg*)((CBaseEntity*)m_hLauncher);
 }
 
+// orig 0x46440. RC2: SDK 2.3's, without HLU's launcher release and sky check.
 void CRpgRocket::FollowThink()
 {
 	CBaseEntity* pOther = NULL;
@@ -277,26 +299,6 @@ void CRpgRocket::FollowThink()
 		}
 	}
 
-	if (GetLauncher())
-	{
-		float flDistance = (pev->origin - GetLauncher()->pev->origin).Length();
-
-		// if we've travelled more than max distance the player can send a spot, stop tracking the original launcher (allow it to reload)
-		if (flDistance > 8192.0f || gpGlobals->time - m_flIgniteTime > 6.0f)
-		{
-			// ALERT(at_console, "RPG too far (%f)!\n", flDistance);
-			GetLauncher()->m_cActiveRockets--;
-			m_hLauncher = NULL;
-		}
-
-		//ALERT(at_console, "%.0f, m_pLauncher: %u, flDistance: %f\n", flSpeed, GetLauncher(), flDistance);
-	}
-
-	if ((UTIL_PointContents(pev->origin) == CONTENTS_SKY))
-	{
-		//ALERT( at_console, "Rocket is in the sky, detonating...\n");
-		Detonate();
-	}
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -355,32 +357,21 @@ void CRpg::Reload()
 	}
 }
 
+// orig 0xb9530. RC2: rc2.ini's pickup amount; no laser spot to start with.
 void CRpg::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_RPG;
 
 	SET_MODEL(ENT(pev), "models/w_rpg.mdl");
-	m_fSpotActive = true;
-
-#ifdef CLIENT_DLL
-	if (bIsMultiplayer())
-#else
-	if (g_pGameRules->IsMultiplayer())
-#endif
-	{
-		// more default ammo in multiplay.
-		m_iDefaultAmmo = RPG_DEFAULT_GIVE * 2;
-	}
-	else
-	{
-		m_iDefaultAmmo = RPG_DEFAULT_GIVE;
-	}
+	m_iDefaultAmmo = RC2_RPG_PICKUP_GIVE;
+	m_flRC2SpawnTime = gpGlobals->time;
 
 	FallInit(); // get ready to fall down.
 }
 
 
+// orig 0xb9580. RC2: the launcher throws RC2's four mines instead of laser-guided rockets.
 void CRpg::Precache()
 {
 	PRECACHE_MODEL("models/w_rpg.mdl");
@@ -389,8 +380,11 @@ void CRpg::Precache()
 
 	PRECACHE_SOUND("items/9mmclip1.wav");
 
-	UTIL_PrecacheOther("laser_spot");
 	UTIL_PrecacheOther("rpg_rocket");
+	UTIL_PrecacheOther("scientist_mine");
+	UTIL_PrecacheOther("suck_mine");
+	UTIL_PrecacheOther("sphere_mine");
+	UTIL_PrecacheOther("rocket_mine");
 
 	PRECACHE_SOUND("weapons/rocketfire1.wav");
 	PRECACHE_SOUND("weapons/glauncher.wav"); // alternative fire sound
@@ -399,22 +393,27 @@ void CRpg::Precache()
 }
 
 
+// orig 0xb9610. RC2: carry and clip from rc2.ini, no flags, weight 12.
 bool CRpg::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "rockets";
-	p->iMaxAmmo1 = ROCKET_MAX_CARRY;
+	p->iMaxAmmo1 = RC2_RPG_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
-	p->iMaxClip = RPG_MAX_CLIP;
+	p->iMaxClip = RC2_RPG_CLIP_SIZE;
 	p->iSlot = 3;
 	p->iPosition = 0;
 	p->iId = m_iId = WEAPON_RPG;
-	p->iFlags = ITEM_FLAG_NOAUTOSWITCHTO;
-	p->iWeight = RPG_WEIGHT;
+	p->iFlags = 0;
+	p->iWeight = 12;
 
 	return true;
 }
+
+// orig 0xb9680: CRpg::AddToPlayer is SDK 2.3's (CBasePlayerWeapon::AddToPlayer, then the
+// WeapPickup message); HLU sends that message from CBasePlayer::AddPlayerItem for every weapon,
+// so there is nothing to write here.
 
 bool CRpg::Deploy()
 {
@@ -427,17 +426,13 @@ bool CRpg::Deploy()
 }
 
 
+// orig 0xb9720. RC2: always.
 bool CRpg::CanHolster()
 {
-	if (m_fSpotActive && 0 != m_cActiveRockets)
-	{
-		// can't put away while guiding a missile.
-		return false;
-	}
-
 	return true;
 }
 
+// orig 0xb9730. RC2: no laser spot to kill.
 void CRpg::Holster()
 {
 	m_fInReload = false; // cancel any reload in progress.
@@ -445,14 +440,6 @@ void CRpg::Holster()
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 
 	SendWeaponAnim(RPG_HOLSTER1);
-
-#ifndef CLIENT_DLL
-	if (m_pSpot)
-	{
-		m_pSpot->Killed(NULL, GIB_NEVER);
-		m_pSpot = NULL;
-	}
-#endif
 }
 
 
