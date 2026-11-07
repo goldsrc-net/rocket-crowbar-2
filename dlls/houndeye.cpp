@@ -1202,11 +1202,8 @@ Schedule_t* CHoundeye::GetScheduleOfType(int Type)
 		{
 			return &slHoundSleep[0];
 		}
-		// Marphy Fact Files Fix - Restore squad leader leaderlook animation
-		if (InSquad() && IsLeader() && !m_fAsleep && RANDOM_LONG(0, 14) < 1)
-		{
-			return &slHoundGuardPack[0];
-		}
+		// SDK 2.3's (stock in RC2); halflife-updated gave an idle squad leader slHoundGuardPack
+		// one time in 15 (Marphy's leaderlook fix).
 		else
 		{
 			return CSquadMonster::GetScheduleOfType(Type);

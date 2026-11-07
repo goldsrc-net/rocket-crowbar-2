@@ -5520,15 +5520,8 @@ int CBasePlayer::GiveAmmo(int iCount, const char* szName, int iMax, int* piGiven
 		return i;
 	}
 
-	// If this is an exhaustible weapon make sure the player has it.
-	if (const auto& ammoType = CBasePlayerItem::AmmoInfoArray[i]; ammoType.WeaponName != nullptr)
-	{
-		if (!HasNamedPlayerItem(ammoType.WeaponName))
-		{
-			GiveNamedItem(ammoType.WeaponName, 0);
-		}
-	}
-
+	// The original (as SDK 2.3) doesn't give an exhaustible weapon with its ammo, as
+	// halflife-updated did here.
 	m_rgAmmo[i] += iAdd;
 
 
