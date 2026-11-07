@@ -153,9 +153,9 @@ CImploderShotTent::CImploderShotTent() // orig client 0x79eb0
 		}
 
 		if (m_iTarget == 0)
-			m_vecVelocity[i] = RC2_SpreadVector(vecDir, vecRight, vecUp, 0.5) * m_flSpeed;
+			m_vecVelocity[i] = UTIL_RandomSpreadDir(vecDir, vecRight, vecUp, 0.5) * m_flSpeed;
 		else
-			m_vecVelocity[i] = RC2_SpreadVector(vecDir, vecRight, vecUp, 0.9) * m_flSpeed;
+			m_vecVelocity[i] = UTIL_RandomSpreadDir(vecDir, vecRight, vecUp, 0.9) * m_flSpeed;
 
 		m_vecOrigin[i] = vecSrc;
 

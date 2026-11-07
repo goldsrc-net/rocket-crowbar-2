@@ -40,7 +40,7 @@ scripts/build.sh i386 client                               ok
 scripts/build.sh i386                                      ok
 scripts/build.sh amd64                                     ok
 check_coverage.py --lib client                             786 of 1466 (786 at 0047e14)
-stub_addrs.py . cl_dll pm_shared                           only c1's stubs left (section 5)
+stub_addrs.py . cl_dll pm_shared dlls                      no TEMP STUBs left (section 5, after the c1 merge)
 grep '^class CClientTent|^class CTentTrail|^class CRC2Trail'  one each (clte.h; CRC2Trail gone)
 ```
 
@@ -261,25 +261,41 @@ predicted origin reaches the effects' origin cache; the view's locks and tints f
 antifriction, transforming and houndeye-asleep state; PM_GetEnergy returns the HUD's energy instead
 of 100.
 
-## 5. Remaining stubs
+## 5. After c1 merged: the last stubs
 
-All are package c1's (client.dll below 0x4ec50, being reconstructed elsewhere), each a TEMP STUB with
-its address in the comment:
+c1 merged into main while this pass ran, so its stand-ins for c2-c5 code and the c2-c5 stubs for
+c1's code were reconciled at the merge, the same way (main ca6fd79 + this branch). No TEMP STUB is
+left anywhere in the tree, and no `__attribute__((weak))` either.
 
 ```
-client    stub (file)                                           what it is
-0x3b630   RC2_SpreadVector (rc2/c3_stubs.cpp)                   spread a direction in a disc
-0xdd80    RC2_WaterLevel (rc2/c3_stubs.cpp)                     water surface height (nuke, gravity grenade)
-0xdd40    EV_RideTarget (rc2/clte_effects3.cpp)                 the player iEnt rides, else iEnt
-0x3b400   UTIL_PackNormal (rc2/clte_effects3.cpp)               client copy of the server's
-0x3b560   UTIL_ReflectVector (rc2/clte_effects3.cpp)            client copy of the server's
-0x4a900   Ammo_RestoreCrosshair (rc2/input_stubs_V.cpp)         CHudAmmo's
-0xee70    EV_TraceVisible (rc2/input_stubs_V.cpp)               ev_hldm's
-0x49110   CVoiceStatus::IsPlayerVoiceEnabled (vgui_ScorePanel.cpp)  voice_status
-0x3b900   __MsgFunc_WeaponSync (rc2/c4_stubs.cpp, weak)         the weapons' message
+client           kept (file)                               replaced
+0x3b630          UTIL_RandomSpreadDir (hl/hl_weapons.cpp)  RC2_SpreadVector (c3)
+0xdd80           EV_WaterLevel (rc2/ev_helpers.cpp)        RC2_WaterLevel (c3)
+0xdd40           EV_PlayerForEntity (rc2/ev_helpers.cpp)   EV_RideTarget (c2)
+0x3b400, 0x3b560 UTIL_PackNormal, UTIL_ReflectVector       c2's copies (dropped at the c1 merge)
+                 (hl/hl_weapons.cpp)
+0x4a900          CHudAmmo::RestoreCrosshair (ammo.cpp)     Ammo_RestoreCrosshair (c4)
+0xee70           EV_PenetrateThickness (ev_hldm.cpp)       EV_TraceVisible (c4; its target is the
+                                                           cl_entity_t*, whose first member, index, is
+                                                           what 0xee70 compares, so &pEnt->index)
+0x49110          CVoiceStatus::IsPlayerAudible             c5's IsPlayerVoiceEnabled, which read
+                 (voice_status.cpp)                        m_VoiceEnabledPlayers; 0x49110 reads this+0x28,
+                                                           m_AudiblePlayers in SDK 2.3's layout
+0x3b900          __MsgFunc_WeaponSync (hl/hl_weapons.cpp)  c4's weak stub
+0x4f4c0          PM_GetAbilityFlags (rc2/attributes.cpp)   RC2_GetPlayerAbilities (c1)
+0xaf980          PM_GetRideInfo (rc2/pm_client.cpp)        RC2_GetPlayerRiding (c1)
+0xec590          V_StartScreenTint (view.cpp)              c1's V_ScreenTint, now an inline front end in
+                                                           ev_hldm.cpp (Vectors for the six colour floats)
+.data 0x1a8004   gHUD.m_Energy.GetEnergy()                 g_flRC2LocalEnergy (c1); 0x4f698 in PM_GetEnergy
+                                                           reads the same address
+.bss 0x101f69f8  g_iLocalPlayerFrozen                      g_iRC2LocalFrozen (c1)
+.data 0x101a9598 g_iClientDetail                           g_iDetailLevel (c1's events)
+-                the CLTE_* functions, cl_gibcount,        c1's weak stubs; CLTE_ShieldPoint's took bool*,
+                 CL_SpawnGib, g_flTransformFOV             so c1's callers bound to it: their flags are int
 ```
 
-No address outside c1's range is left without a real definition.
+On the server, dlls/rc2prefs.cpp's IsTempAdmin stub was dead (its caller already uses
+Admin_IsTempAdmin, maintainent.cpp) and is gone.
 
 ## 6. VERIFY list
 

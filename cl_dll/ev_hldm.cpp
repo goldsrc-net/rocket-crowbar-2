@@ -353,11 +353,10 @@ void EV_HLDM_CheckTracer(int idx, float* vecSrc, float* end, float* forward, flo
 // names ours unless SDK 2.3 has them). The ones not reconstructed in this worktree have weak TEMP
 // STUBs at the bottom of this file.
 
-// cdll_int.cpp (c2): (int)cl_detail->value, refreshed every HUD_Frame (orig .data 0x101a9598).
-// The main checkout's c4 calls it g_iDetailLevel, c2's worktree g_iClientDetail.
-extern int g_iDetailLevel;
+// cdll_int.cpp (c2): (int)cl_detail->value, refreshed every HUD_Frame (orig .data 0x101a9598)
+extern int g_iClientDetail;
 // entity.cpp's HUD_AddEntity: one past the highest player or normal entity index seen (orig .bss
-// 0x10206918). The main checkout's c4 calls it g_iHighestEntIndex, c2's worktree g_iMaxPlayerEnt.
+// 0x10206918)
 extern int g_iHighestEntIndex;
 // hud.cpp: the FOV while transformed, 0 when not zoomed (orig .bss 0x1020bb44)
 extern float g_flTransformFOV;
@@ -389,11 +388,17 @@ void CLTE_LoopbackSend();				 // orig client 0x59970
 void CLTE_LoopbackByte(int iValue);		 // orig client 0x599a0
 void CLTE_LoopbackShort(int iValue);	 // orig client 0x599d0
 void CLTE_LoopbackCoord(float flValue);	 // orig client 0x59a30
-Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecNormal, bool* pbHit); // orig client 0x59ee0
+Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecNormal, int* pbHit); // orig client 0x59ee0 (writes the flag as a dword)
 
 // view.cpp (c4): a full screen color fade from colorStart/alphaStart to colorEnd/alphaEnd over
 // flDuration; a new one replaces the running one only at the same or a higher priority. name ours
-void V_ScreenTint(Vector vecColorStart, Vector vecColorEnd, float flAlphaStart, float flAlphaEnd, float flDuration, int iPriority); // orig client 0xec590
+// orig client 0xec590 is view.cpp's V_StartScreenTint; the events pass its two colours as three
+// floats each, which this spells as Vectors (the same ten arguments)
+void V_StartScreenTint(float r1, float g1, float b1, float r2, float g2, float b2, float a1, float a2, float flTime, int iPriority);
+static inline void V_ScreenTint(Vector vecColorStart, Vector vecColorEnd, float flAlphaStart, float flAlphaEnd, float flDuration, int iPriority)
+{
+	V_StartScreenTint(vecColorStart.x, vecColorStart.y, vecColorStart.z, vecColorEnd.x, vecColorEnd.y, vecColorEnd.z, flAlphaStart, flAlphaEnd, flDuration, iPriority);
+}
 
 
 
@@ -628,7 +633,7 @@ void EV_GlockFireGib(event_args_t* args) // orig client 0xf1b0
 
 		V_PunchAxis(0, -2.0);
 
-		if (g_iDetailLevel >= 0)
+		if (g_iClientDetail >= 0)
 		{
 			int iBlood, iBloodSpray;
 			if (gEngfuncs.CL_LoadModel("sprites/blood.spr", &iBlood) && gEngfuncs.CL_LoadModel("sprites/bloodspray.spr", &iBloodSpray))
@@ -726,7 +731,7 @@ void EV_GlockTPGibFire(event_args_t* args) // orig client 0xfaa0 (Ghidra-missed)
 
 		V_PunchAxis(0, -12.0);
 
-		if (g_iDetailLevel >= 0)
+		if (g_iClientDetail >= 0)
 		{
 			Vector vecDisk;
 			EV_GetGunPosition(args, vecDisk, origin);
@@ -1220,7 +1225,7 @@ void EV_ShotgunCrateHit(event_args_t* args) // orig client 0x12ee0 (Ghidra-misse
 	gEngfuncs.pfnPlaybackEvent(args->flags, nullptr, s_usExpSmoke, 0.3, origin, args->angles,
 		RC2Pref(RC2P_Shotgun_CrateMaxRadius).f * 0.4 * args->fparam1, 0, 0, 0, 0, 0);
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	if (!gEngfuncs.CL_LoadModel("models/woodgibs.mdl", &iModel))
@@ -1574,7 +1579,7 @@ void EV_MP5BlasterHit(event_args_t* args) // orig client 0x14b40 (Ghidra-missed)
 		tr.plane.normal[2] = 1;
 	}
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	Vector angles, forward, right, up;
@@ -1670,14 +1675,14 @@ void EV_MP5PulseHit(event_args_t* args) // orig client 0x150b0 (Ghidra-missed)
 			tr.plane.normal[2] = 1;
 		}
 
-		if (g_iDetailLevel < 0)
+		if (g_iClientDetail < 0)
 			return;
 
 		VectorAngles(tr.plane.normal, angles);
 	}
 	else
 	{
-		if (g_iDetailLevel < 0)
+		if (g_iClientDetail < 0)
 			return;
 
 		VectorAngles(vecDir, angles);
@@ -1721,7 +1726,7 @@ void EV_MP5BouncyHit(event_args_t* args) // orig client 0x15bd0 (Ghidra-missed)
 	gEngfuncs.pEventAPI->EV_PlayerTrace(vecStart, vecEnd, PM_STUDIO_IGNORE, args->entindex, &tr);
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 
-	if (g_iDetailLevel >= 0)
+	if (g_iClientDetail >= 0)
 		gEngfuncs.pEventAPI->EV_PlaySound(-1, tr.endpos, CHAN_AUTO, "debris/beamstart11.wav", 0.3, 1.0, 0, gEngfuncs.pfnRandomLong(130, 140));
 
 	if (tr.fraction < 1.0)
@@ -1759,7 +1764,7 @@ void EV_MP5BouncyHit(event_args_t* args) // orig client 0x15bd0 (Ghidra-missed)
 		tr.plane.normal[2] = 1;
 	}
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	Vector angles, forward, right, up;
@@ -1863,7 +1868,7 @@ bool EV_DrawLightning(Vector vecStart, Vector vecEnd, float flWidth, int bNoFlas
 // player's ellipsoid. name ours
 void EV_ChainLightning(int iDepth, Vector vecFrom, int iIgnore, unsigned char* pMask, cl_entity_t* pSource, int* pFlashed) // orig client 0x17690
 {
-	bool bHitPlayer = false;
+	int bHitPlayer = false;
 
 	if (iDepth <= 0)
 		return;
@@ -1999,7 +2004,7 @@ void EV_PythonLightning(event_args_t* args) // orig client 0x168f0 (Ghidra-misse
 			vecEnd = vecEnd + vecDir * 8;
 			vecEnd.z = EV_WaterLevel(vecEnd, vecEnd.z, vecEnd.z + 16.0) + 2.0;
 
-			if (g_iDetailLevel >= 0)
+			if (g_iClientDetail >= 0)
 			{
 				for (int j = 6; j > 0; j--)
 				{
@@ -2029,7 +2034,7 @@ void EV_PythonLightning(event_args_t* args) // orig client 0x168f0 (Ghidra-misse
 					gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr), 0, tr.endpos, 0);
 			}
 
-			if (g_iDetailLevel >= 0)
+			if (g_iClientDetail >= 0)
 			{
 				Vector vecAngles, vecForward, vecRight, vecUp;
 				VectorAngles(tr.plane.normal, vecAngles);
@@ -2063,7 +2068,7 @@ void EV_PythonChain(event_args_t* args) // orig client 0x17c80 (Ghidra-missed)
 	Vector vecSrc, vecEnd;
 	Vector up, right, forward;
 	pmtrace_t tr;
-	bool bHitPlayer = false;
+	int bHitPlayer = false;
 	int bFlashed;
 
 	idx = args->entindex;
@@ -2151,7 +2156,7 @@ void EV_PythonChain(event_args_t* args) // orig client 0x17c80 (Ghidra-missed)
 			vecEnd = vecEnd + vecDir * 8;
 			vecEnd.z = EV_WaterLevel(vecEnd, vecEnd.z, vecEnd.z + 16.0) + 2.0;
 
-			if (g_iDetailLevel >= 0)
+			if (g_iClientDetail >= 0)
 			{
 				for (int j = 6; j > 0; j--)
 				{
@@ -2181,7 +2186,7 @@ void EV_PythonChain(event_args_t* args) // orig client 0x17c80 (Ghidra-missed)
 					gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr), 0, tr.endpos, 0);
 			}
 
-			if (g_iDetailLevel >= 0)
+			if (g_iClientDetail >= 0)
 			{
 				Vector vecAngles, vecForward, vecRight, vecUp;
 				VectorAngles(tr.plane.normal, vecAngles);
@@ -2265,7 +2270,7 @@ void EV_PythonFireball(event_args_t* args) // orig client 0x18d50
 		gEngfuncs.pEventAPI->EV_WeaponAnimation(PYTHON_FIRE1, gEngfuncs.GetMaxClients() != 1 ? 1 : 0);
 		V_PunchAxis(0, -10.0);
 
-		if (g_iDetailLevel >= 0)
+		if (g_iClientDetail >= 0)
 		{
 			VectorMA(vecSrc, 26, forward, vecSrc);
 			VectorMA(vecSrc, 6, right, vecSrc);
@@ -2411,7 +2416,7 @@ void EV_PythBallImpact(event_args_t* args) // orig client 0x19280
 	if (tr.fraction >= 1.0)
 		return;
 
-	if (g_iDetailLevel >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		Vector vecAngles, vecForward, vecRight, vecUp;
 		VectorAngles(tr.plane.normal, vecAngles);
@@ -2435,7 +2440,7 @@ void EV_PythBallImpact(event_args_t* args) // orig client 0x19280
 
 	Vector vecLight = Vector(tr.plane.normal) * 2 + Vector(tr.endpos);
 
-	if (g_iDetailLevel >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		if (dl)
@@ -2653,7 +2658,7 @@ void EV_GaussThird(event_args_t* args) // orig client 0x1a6d0
 		Vector(0.8, 0.8, 1), Vector(0.8, 0.8, 1), 0.9, 0.1,
 		0.4, "sprites/shockwave.spr", 0, 0, 0);
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	CLTE_AddDiskRing(Vector(tr.endpos) + Vector(tr.plane.normal) * 2, vecUp, vecRight, vecForward, 3,
@@ -2765,14 +2770,14 @@ void EV_TeleportFlash(event_args_t* args) // orig client 0x1b070 (Ghidra-missed)
 		}
 	}
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	if (!gEngfuncs.CL_LoadModel("sprites/redflare1.spr", &iModel))
 		return;
 
 	int cSparks = gEngfuncs.pfnRandomLong(8, 12);
-	if (g_iDetailLevel >= 1)
+	if (g_iClientDetail >= 1)
 		cSparks = gEngfuncs.pfnRandomLong(12, 15);
 
 	Vector vecCenter = args->origin;
@@ -3002,7 +3007,7 @@ void EV_XbowZoom1(event_args_t* args) // orig client 0x1bca0
 	if (tr.fraction < 1.0)
 	{
 		physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
-		bool bShield = false;
+		int bShield = false;
 		if (pe)
 		{
 			Vector vecHit = CLTE_ShieldPoint(pe->info, tr.endpos, forward, nullptr, &bShield);
@@ -3167,7 +3172,7 @@ void EV_XbowExploZoomed(event_args_t* args) // orig client 0x1c570 (Ghidra-misse
 	if (tr.fraction < 1.0)
 	{
 		physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
-		bool bShield = false;
+		int bShield = false;
 		if (pe)
 		{
 			Vector vecHit = CLTE_ShieldPoint(pe->info, tr.endpos, forward, nullptr, &bShield);
@@ -3380,7 +3385,7 @@ void EV_RpgSphereMineImpact(event_args_t* args) // orig client 0x1cdf0 (Ghidra-m
 		VectorCopy(vecDir, tr.plane.normal);
 	}
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	// original: the ring's axes come from the direction, its position from the trace
@@ -3761,7 +3766,7 @@ void EV_EgonShrinkerImpact(event_args_t* args) // orig client 0x1e260
 			VectorCopy(vecHit, tr.endpos);
 		}
 
-		if (g_iDetailLevel < 0)
+		if (g_iClientDetail < 0)
 			return;
 
 		Vector vecAngles, vecForward, vecRight, vecUp;
@@ -3782,7 +3787,7 @@ void EV_EgonShrinkerImpact(event_args_t* args) // orig client 0x1e260
 			0.2, "sprites/shockwave.spr", 0, 0, 0);
 	}
 
-	if (g_iDetailLevel >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 		Vector vecLight = Vector(tr.plane.normal) * 16 + Vector(tr.endpos);
@@ -4073,7 +4078,7 @@ void EV_HornetGunFire(event_args_t* args) // orig client 0x205d0 (Ghidra-missed)
 	if (tr.fraction < 1.0)
 		pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
 
-	bool bShield = false;
+	int bShield = false;
 	if (pe)
 	{
 		Vector vecHit = CLTE_ShieldPoint(pe->info, tr.endpos, forward, tr.plane.normal, &bShield);
@@ -4413,7 +4418,7 @@ void EV_SnarkProjectHit(event_args_t* args) // orig client 0x21b10 (Ghidra-misse
 		VectorCopy(vecDir, tr.plane.normal);
 	}
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	// original: the ring's axes come from the direction, its position from the trace
@@ -4455,7 +4460,7 @@ void EV_MiniGruntBlast(event_args_t* args) // orig client 0x21ff0 (Ghidra-missed
 
 	Vector vecNormal = vecDir.Normalize();
 
-	if (g_iDetailLevel >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		for (int i = 4; i > 0; i--)
 		{
@@ -4634,10 +4639,10 @@ void EV_GravGrenadeDet(event_args_t* args) // orig client 0x22a20 (Ghidra-missed
 		if (gEngfuncs.CL_LoadModel("sprites/xflare1.spr", &iModel))
 			gEngfuncs.pEfxAPI->R_Explosion(origin, iModel, 2.0, 15, TE_EXPLFLAG_NOPARTICLES);
 
-		if (g_iDetailLevel >= 0 && gEngfuncs.CL_LoadModel("sprites/blueflare1.spr", &iModel))
+		if (g_iClientDetail >= 0 && gEngfuncs.CL_LoadModel("sprites/blueflare1.spr", &iModel))
 		{
 			int cSparks = gEngfuncs.pfnRandomLong(6, 8);
-			if (g_iDetailLevel >= 1)
+			if (g_iClientDetail >= 1)
 				cSparks = gEngfuncs.pfnRandomLong(10, 12);
 
 			Vector vecCenter = args->origin;
@@ -4823,9 +4828,9 @@ void EV_UltimaGrenadeDet(event_args_t* args) // orig client 0x238f0 (Ghidra-miss
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 
 	int cScorches;
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		cScorches = gEngfuncs.pfnRandomLong(8, 10);
-	else if (g_iDetailLevel == 0)
+	else if (g_iClientDetail == 0)
 		cScorches = gEngfuncs.pfnRandomLong(12, 16);
 	else
 		cScorches = gEngfuncs.pfnRandomLong(18, 24);
@@ -5259,7 +5264,7 @@ void EV_HoundBeamImpact(Vector vecPos, Vector vecNormal, int iSide, pmtrace_t* t
 		Vector(0.2, 1, 2), Vector(0, 1, 0), 0.9, 0.05,
 		0.5, "sprites/shockwave.spr", 0, 0, 0);
 
-	if (g_iDetailLevel >= 0 && s_cHoundQuads < HOUND_MAX_QUADS)
+	if (g_iClientDetail >= 0 && s_cHoundQuads < HOUND_MAX_QUADS)
 	{
 		Vector vecCenter = vecNormal + vecPos;
 		Vector vecA32 = vecA * 32;
@@ -5603,7 +5608,7 @@ void EV_TControllerBallHit(event_args_t* args) // orig client 0x274a0
 			gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr), 0, tr.endpos, 0);
 	}
 
-	if (g_iDetailLevel >= 0)
+	if (g_iClientDetail >= 0)
 	{
 		// original: the ring's axes come from the direction, its position from the trace
 		Vector vecAngles, vecForward, vecRight, vecUp;
@@ -5642,7 +5647,7 @@ void EV_TControllerBallHit(event_args_t* args) // orig client 0x274a0
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 
-	if (g_iDetailLevel < 0)
+	if (g_iClientDetail < 0)
 		return;
 
 	dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
@@ -5843,34 +5848,3 @@ bool EV_TFC_IsAllyTeam(int iTeam1, int iTeam2)
 }
 
 
-// TEMP STUB (c1 events): real ones belong in cl_dll/rc2/clte*.cpp and cdll_int.cpp (c2),
-// view.cpp (0xec590), hud.cpp (g_flTransformFOV) and entity.cpp's HUD_AddEntity
-// (g_iHighestEntIndex); the last two are in the main checkout already. Weak, so the real
-// definitions replace them. None carries an orig tag.
-#define C1EV_WEAK __attribute__((weak))
-C1EV_WEAK int g_iDetailLevel = 0;
-C1EV_WEAK int g_iHighestEntIndex = 0;
-C1EV_WEAK float g_flTransformFOV = 0;
-C1EV_WEAK void CLTE_KillByEntity(int iEnt, int iType) {}
-C1EV_WEAK void CLTE_AddDiskRing(Vector vecOrigin, Vector vecX, Vector vecY, Vector vecZ, int iRing,
-	float flHeight1, float flHeight1End, float flHeight2, float flHeight2End,
-	float flRadius1, float flRadius1End, float flRadius2, float flRadius2End,
-	Vector vecColor1, Vector vecColor1End, float flAlpha1, float flAlpha1End,
-	Vector vecColor2, Vector vecColor2End, float flAlpha2, float flAlpha2End,
-	float flLife, const char* pszModel, float flFrame, float flNumFrames, float flFramerate) {}
-C1EV_WEAK void CLTE_AddFadeQuads(int iCount, Vector* pV0, Vector* pV1, Vector* pV2, Vector* pV3, Vector* pColors,
-	float* pAlphas, float* pFades, model_s* pModel) {}
-C1EV_WEAK void CLTE_SetPlayerOverride(int iPlayer, float x, float y, float z, float flValue) {}
-C1EV_WEAK void CLTE_ClearPlayerOverride(int iPlayer) {}
-C1EV_WEAK void CLTE_LoopbackBegin() {}
-C1EV_WEAK void CLTE_LoopbackSend() {}
-C1EV_WEAK void CLTE_LoopbackByte(int iValue) {}
-C1EV_WEAK void CLTE_LoopbackShort(int iValue) {}
-C1EV_WEAK void CLTE_LoopbackCoord(float flValue) {}
-C1EV_WEAK Vector CLTE_ShieldPoint(int iPlayer, Vector vecPoint, Vector vecDir, float* vecNormal, bool* pbHit)
-{
-	if (pbHit)
-		*pbHit = false;
-	return vecPoint;
-}
-C1EV_WEAK void V_ScreenTint(Vector vecColorStart, Vector vecColorEnd, float flAlphaStart, float flAlphaEnd, float flDuration, int iPriority) {}

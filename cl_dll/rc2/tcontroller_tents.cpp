@@ -447,7 +447,7 @@ CControllerSparksTent::CControllerSparksTent()
 
 	for (int i = iCount; i > 0; i--)
 	{
-		const Vector vecSpread = RC2_SpreadVector(m_vecDir, m_vecRight, m_vecUp, 0.9);
+		const Vector vecSpread = UTIL_RandomSpreadDir(m_vecDir, m_vecRight, m_vecUp, 0.9);
 		const Vector vecUpOffset = m_vecUp * gEngfuncs.pfnRandomFloat(-16, 16);
 		const Vector vecRightOffset = m_vecRight * gEngfuncs.pfnRandomFloat(-16, 16);
 		const Vector vecSparkOrigin = m_vecOrigin + vecRightOffset + vecUpOffset;

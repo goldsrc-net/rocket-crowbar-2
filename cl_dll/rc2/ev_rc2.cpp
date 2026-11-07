@@ -24,7 +24,7 @@
 #include <cstdlib>
 
 // --- c1 events needs (client.dll addresses; names ours unless the SDK has them)
-extern int g_iDetailLevel;				  // cdll_int.cpp (c2): cl_detail as an int (orig .data 0x101a9598)
+extern int g_iClientDetail;				  // cdll_int.cpp (c2): cl_detail as an int (orig .data 0x101a9598)
 extern struct cvar_s* cl_gibcount;		  // hud.cpp: "cl_gibcount" (orig .bss 0x1020b71c)
 Vector UTIL_UnpackNormal(int iPacked);	  // orig client 0xde90 (c1)
 float EV_WaterLevel(float* position, float minz, float maxz); // orig client 0xdd80 (c1)
@@ -274,8 +274,3 @@ void EV_ExpSmoke(event_args_t* args) // orig client 0x28df0
 	gEngfuncs.pEfxAPI->R_Sprite_Smoke(pTemp, flScale * 0.1);
 }
 
-// TEMP STUB (c1 events): real ones belong in cdll_int.cpp (c2), hud.cpp and entity.cpp (merged in
-// the main checkout; not in this worktree). Weak, so the real definitions replace them.
-#define C1EV_WEAK __attribute__((weak))
-C1EV_WEAK struct cvar_s* cl_gibcount = nullptr;
-C1EV_WEAK struct tempent_s* CL_SpawnGib(Vector vecOrigin, Vector vecVelocity, int bHuman, int bSkull) { return nullptr; }

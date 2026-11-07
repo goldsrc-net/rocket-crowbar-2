@@ -22,10 +22,10 @@
 
 void VectorAngles(const float* forward, float* angles);
 
-// From other client files (another package's; TEMP STUBs at the bottom)
+// From other client files (another package's)
 int UTIL_PackNormal(Vector vecDir);							// client 0x3b400, as the server's (dlls/util.cpp)
 Vector UTIL_ReflectVector(Vector vecDir, Vector vecNormal); // client 0x3b560, as the server's
-int EV_RideTarget(int iEnt);								// client 0xdd40: the player iEnt rides, else iEnt. name ours
+int EV_PlayerForEntity(int idx); // orig client 0xdd40 (rc2/ev_helpers.cpp): the player iEnt rides, else iEnt
 
 #define CLTE_SND_CHANGE_VOL 0x40   // SND_CHANGE_VOL
 #define CLTE_SND_CHANGE_PITCH 0x80 // SND_CHANGE_PITCH
@@ -628,7 +628,7 @@ static void Bolt_Trace(int iShooter, float* vecStart, float* vecEnd, pmtrace_t* 
 {
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
 	gEngfuncs.pEventAPI->EV_PushPMStates();
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(EV_RideTarget(iShooter) - 1);
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(EV_PlayerForEntity(iShooter) - 1);
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 	gEngfuncs.pEventAPI->EV_PlayerTrace(vecStart, vecEnd, PM_NORMAL, iShooter, ptr);
 	gEngfuncs.pEventAPI->EV_PopPMStates();
@@ -1283,7 +1283,7 @@ void CTentMP5Bouncy::Trace(Vector vecStart, Vector vecEnd, int iDepth)
 		return;
 
 	if (m_iIgnore > 0)
-		gEngfuncs.pEventAPI->EV_SetSolidPlayers(EV_RideTarget(m_iIgnore) - 1);
+		gEngfuncs.pEventAPI->EV_SetSolidPlayers(EV_PlayerForEntity(m_iIgnore) - 1);
 	else
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);
 
@@ -1716,8 +1716,3 @@ bool CTentHEVFlame::KillEntity(int iEnt)
 	return true;
 }
 
-// TEMP STUB (c2): real one belongs in the client's event files (client 0xdd40, c1's)
-int EV_RideTarget(int iEnt)
-{
-	return iEnt;
-}

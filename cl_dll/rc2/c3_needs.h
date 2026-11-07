@@ -31,10 +31,9 @@
 // pm_math.cpp (stock)
 void VectorAngles(const float* forward, float* angles);
 
-// orig 0x3b630 ("new: hl_hl_weapons .. common_interface"): vecDir spread by up to flSpread
-// along vecRight and vecUp (a random point in the unit disc, each coordinate the sum of two
-// RandomFloat(-0.5, 0.5)), normalized ((0,0,1) when it comes out zero). name ours
-Vector RC2_SpreadVector(Vector vecDir, Vector vecRight, Vector vecUp, float flSpread);
+// orig client 0x3b630 (cl_dll/hl/hl_weapons.cpp): vecDir spread by up to flSpread along vecRight
+// and vecUp, normalized
+Vector UTIL_RandomSpreadDir(Vector vecDir, Vector vecRight, Vector vecUp, float flSpread);
 
 //
 // Compiler-generated copy constructors the original emits out of line at the end of this run

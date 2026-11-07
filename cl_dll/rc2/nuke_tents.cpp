@@ -20,7 +20,7 @@
 // between flMinZ and flMaxZ, by bisecting PM_PointContents down to a unit (flMinZ when vecPos
 // isn't in water at flMinZ, flMaxZ when it is still water there). Only x and y of vecPos are
 // used. name ours
-float RC2_WaterLevel(const float* vecPos, float flMinZ, float flMaxZ);
+float EV_WaterLevel(float* position, float minz, float maxz); // orig client 0xdd80 (rc2/ev_helpers.cpp)
 
 class CNukeTent : public CClientTent // name ours
 {
@@ -265,7 +265,7 @@ bool CNukeTent::Update(float flFrametime) // orig client 0x75d70
 					VectorMA(pEntity->origin, 16, vecOne, vecMaxs);
 					Vector vecPos = pEntity->origin;
 					// VERIFY: the height is read as the water level less the box's bottom (the stack slot is mins.z by its offset)
-					const float flHeight = RC2_WaterLevel(vecPos, pEntity->origin.z, pEntity->origin.z + 1024) - vecMins.z;
+					const float flHeight = EV_WaterLevel((float*)vecPos, pEntity->origin.z, pEntity->origin.z + 1024) - vecMins.z;
 					gEngfuncs.pEfxAPI->R_Bubbles(vecMins, vecMaxs, flHeight, m_iBubbleModel, iBubbles, 8.0);
 				}
 			}

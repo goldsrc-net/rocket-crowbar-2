@@ -34,11 +34,10 @@
 extern int g_iUser1;
 
 // Rocket Crowbar 2: the HUD's copies of what the server tells the client about players (names
-// ours; c2's, see the TEMP STUBs at the bottom)
-extern float g_flRC2LocalEnergy;					// orig client .data 0x1a8004: the local player's energy
-extern int g_iRC2LocalFrozen;						// orig client .data 0x1f69f8: the local player is frozen
-int RC2_GetPlayerAbilities(int iPlayer);			// orig client 0x4f4c0: player iPlayer's ability bits, 0 out of 1..32
-unsigned char* RC2_GetPlayerRiding(int iPlayer);	// orig client 0xaf980: player iPlayer's riding byte
+// ours; the real ones are c2's)
+extern int g_iLocalPlayerFrozen; // rc2/clte.cpp, orig client .bss 0x101f69f8: the local player is frozen
+int PM_GetAbilityFlags(int iEnt);			// rc2/attributes.cpp, orig client 0x4f4c0: player iEnt's ability bits, 0 out of 1..32
+unsigned char* PM_GetRideInfo(int iEnt);	// rc2/pm_client.cpp, orig client 0xaf980: player iEnt's riding byte
 static void RC2_ApplyWeaponSync(CBasePlayerWeapon* pWeapon);
 bool CanAttack(float attack_time, float curtime, bool isPredicted); // weapons_shared.cpp
 
@@ -647,8 +646,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	}
 	else
 	{
-		player.m_flEnergy = g_flRC2LocalEnergy;
-		player.m_iAbilities = RC2_GetPlayerAbilities(from->playerstate.number);
+		player.m_flEnergy = gHUD.m_Energy.GetEnergy(); // orig client .data 0x1a8004, the energy HUD's value
+		player.m_iAbilities = PM_GetAbilityFlags(from->playerstate.number);
 	}
 
 	for (i = 0; i < MAX_WEAPONS; i++)
@@ -728,7 +727,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	// Rocket Crowbar 2: the player this one rides (the HUD's per-player byte, its top bit dropped).
 	// VERIFY: the byte table's meaning (orig client .data 0x20d5b8, written by a c2/c3 message handler)
-	player.m_iRidingIndex = *RC2_GetPlayerRiding(from->playerstate.number) & 0x7f;
+	player.m_iRidingIndex = *PM_GetRideInfo(from->playerstate.number) & 0x7f;
 
 	// Point to current weapon object
 	if (WEAPON_NONE != from->client.m_iId)
@@ -993,7 +992,7 @@ checked with halflife-updated's CanAttack (RC2's compares them with 0 directly).
 */
 void CBasePlayerWeapon::ItemPostFrame()
 {
-	if (0 != g_iRC2LocalFrozen)
+	if (0 != g_iLocalPlayerFrozen)
 	{
 		m_pPlayer->pev->button &= ~(IN_ATTACK | IN_ATTACK2 | IN_CANCEL | IN_ALT1);
 		WeaponFrame();
@@ -1200,13 +1199,3 @@ bool PlayerHasAttrFlag200(CBaseEntity* pPlayer)
 //   orig client 0x3be00 CTripmine::UseDecrement (true)
 //   orig client 0x3be60 CBasePlayer::BodyTarget
 
-// TEMP STUB (c1): real ones belong to the client's HUD and message handlers (c2's): the
-// addresses above. Zero until those are reconstructed.
-float g_flRC2LocalEnergy = 0;
-int g_iRC2LocalFrozen = 0;
-int RC2_GetPlayerAbilities(int iPlayer) { return 0; }
-unsigned char* RC2_GetPlayerRiding(int iPlayer)
-{
-	static unsigned char ucNone = 0;
-	return &ucNone;
-}

@@ -25,7 +25,7 @@
 // c3 needs:
 // orig 0xdd80 ("new: start .. ev_hldm"): the height of the water surface above vecPosition
 // between flMinZ and flMaxZ, by bisection on PM_PointContents (as UTIL_WaterLevel). name ours
-float RC2_WaterLevel(const float* vecPosition, float flMinZ, float flMaxZ);
+float EV_WaterLevel(float* position, float minz, float maxz); // orig client 0xdd80 (rc2/ev_helpers.cpp)
 
 #define GRAVGREN_SOUND "weapons/gravgren.wav"
 
@@ -470,7 +470,7 @@ bool CGravGrenadeTent::Update(float flFrametime) // orig client 0x7e2e0
 				const Vector vecOne(1, 1, 1);
 				VectorMA(m_vecOrigin, -32, vecOne, vecMins);
 				VectorMA(m_vecOrigin, 32, vecOne, vecMaxs);
-				const float flHeight = RC2_WaterLevel(m_vecOrigin, m_vecOrigin.z, m_vecOrigin.z + 1024) - vecMins.z;
+				const float flHeight = EV_WaterLevel(m_vecOrigin, m_vecOrigin.z, m_vecOrigin.z + 1024) - vecMins.z;
 				gEngfuncs.pEfxAPI->R_Bubbles(vecMins, vecMaxs, flHeight, m_iBubbleModel, gEngfuncs.pfnRandomLong(2, 5), 8);
 			}
 		}

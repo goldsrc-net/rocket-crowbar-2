@@ -28,12 +28,11 @@ int PM_GetPlayerTimer(int iEnt, int iSlot);														  // pm_rc2.h
 extern Vector v_angles; // view.cpp
 
 // From elsewhere (Ammo_RestoreCrosshair and EV_TraceVisible are c1's; input_stubs_V.cpp stands in for them):
-extern void Ammo_RestoreCrosshair();					// client.dll 0x4a900: CHudAmmo's, sets the current weapon's crosshair again (package c1)
 extern void CLTE_KillByEntity(int iEnt, int iType); // client.dll 0x52280 (rc2/clte.cpp): frees the client tents of a type on an entity
 extern Vector CLTE_GetOrigin(int iEnt);				// client.dll 0x59be0 (rc2/clte.cpp): an entity's origin as drawn
 // client.dll 0xee70 (ev_hldm.cpp, package c1): what is left of flRange after tracing from vecStart
 // along vecDir towards pTarget; 0 when it doesn't get there.
-extern float EV_TraceVisible(Vector vecStart, Vector vecEnd, Vector vecDir, float flRange, cl_entity_t* pTarget, pmtrace_t* ptr, int iDepth);
+float EV_PenetrateThickness(Vector vecStart, Vector vecEnd, Vector vecDir, float flThickness, int* pTarget, pmtrace_t* tr, int iDepth); // orig client 0xee70 (ev_hldm.cpp)
 
 int g_bHoundeyeAsleep = 0; // .bss 0x10220c40
 int g_iBatPerch = 0;	   // .bss 0x10220c4c
@@ -193,7 +192,7 @@ void RC2_TempEntThink(float flFrameTime)
 
 		if (0 != s_iOldViewMode && 0 == g_iViewMode)
 		{
-			Ammo_RestoreCrosshair();
+			gHUD.m_Ammo.RestoreCrosshair(); // orig client 0x4a900
 			s_iOldViewMode = g_iViewMode;
 			return;
 		}
@@ -348,7 +347,7 @@ void RC2_HudRedraw(float flTime, float flTimeDelta)
 					continue;
 
 				pmtrace_t tr;
-				const float flLeft = EV_TraceVisible(vecEye, vecTarget, vecDir, flRange, pEnt, &tr, 16);
+				const float flLeft = EV_PenetrateThickness(vecEye, vecTarget, vecDir, flRange, &pEnt->index, &tr, 16) /* the original passes pEnt: index is its first member */;
 				if (flLeft <= 0)
 					continue;
 

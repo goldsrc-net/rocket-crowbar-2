@@ -9,12 +9,12 @@
 #include "const.h"
 #include "pm_defs.h"
 
-unsigned char* RC2_GetPlayerRiding(int iPlayer); // orig client 0xaf980 (c2's): player iPlayer's riding byte
+unsigned char* PM_GetRideInfo(int iEnt); // rc2/pm_client.cpp, orig client 0xaf980: player iEnt's riding byte
 
 // orig client 0xdd40: the entity a player's events come from: the one it rides, if any
 int EV_PlayerForEntity(int idx)
 {
-	unsigned char* pRiding = RC2_GetPlayerRiding(idx);
+	unsigned char* pRiding = PM_GetRideInfo(idx);
 	if (*pRiding != 0)
 		return *pRiding & 0x7f;
 	return idx;

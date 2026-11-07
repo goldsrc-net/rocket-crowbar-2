@@ -127,8 +127,6 @@ public:
 
 	// returns false if the player can't hear the other client due to game rules (eg. the other team)
 	bool    IsPlayerAudible(int iPlayerIndex);
-	// c5 needs: client 0x49110 (RC2's, package c1): whether iPlayerIndex's voice is enabled
-	bool IsPlayerVoiceEnabled(int iPlayerIndex); // name ours
 
 	// blocks the target client from being heard
 	void	SetPlayerBlockedState(int iPlayerIndex, bool blocked);

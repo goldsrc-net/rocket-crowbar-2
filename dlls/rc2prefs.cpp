@@ -1077,9 +1077,3 @@ bool RC2Prefs_UnpackValues(const unsigned char* pBuf, int iSize) // orig 0xb1520
 
 // gmsgRCCFG: UserMessages.h (p5)
 
-// TEMP STUB (p6): real one belongs in the run before aflock (orig 0x1160): whether the
-// player's WON id is listed in the sv_tempadmins cvar
-bool IsTempAdmin(edict_t* pEntity)
-{
-	return false;
-}

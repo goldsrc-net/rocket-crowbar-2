@@ -1021,7 +1021,7 @@ void ScorePanel::MouseOverCell(int row, int col)
 		return;
 
 	// setup the new highlight
-	if (GetClientVoiceMgr()->IsPlayerVoiceEnabled(m_iSortedRows[row]))
+	if (GetClientVoiceMgr()->IsPlayerAudible(m_iSortedRows[row]))
 	{
 		m_pCurrentHighlightLabel = label;
 		m_iHighlightRow = row;
@@ -1172,9 +1172,4 @@ void CLabelHeader::calcAlignment(int iwide, int itall, int& x, int& y)
 }
 
 
-// TEMP STUB (c5): real one belongs in voice_status.cpp (RC2's, at client 0x49110, package c1)
-bool CVoiceStatus::IsPlayerVoiceEnabled(int iPlayer)
-{
-	return !!m_VoiceEnabledPlayers[iPlayer - 1];
-}
 
