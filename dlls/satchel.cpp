@@ -30,6 +30,12 @@
 #include "UserMessages.h"
 #include <algorithm>
 
+#ifdef CLIENT_DLL
+// The client's prediction (client.dll, reference/dossiers/c1.md) compiles CSatchel without the
+// charges themselves, loading the view model itself and counting nothing (WeaponSync tells it).
+void LoadVModel(const char* szViewModel, CBasePlayer* m_pPlayer); // hl_weapons.cpp
+#endif
+
 #ifndef CLIENT_DLL
 
 // CLTE effect types this file sends (gmsgCLTE: byte type, short entindex, ...); 254 removes
@@ -570,15 +576,19 @@ void CConcCharge::Detonate() // orig 0xbcb40
 #endif // !CLIENT_DLL
 
 
+// orig client 0x42150 (and its GetClassPtr<CSatchel>, orig client 0x42e80); the iItemSlot and
+// UseDecrement below are orig client 0x3bcb0 and orig client 0x3bcd0
 LINK_ENTITY_TO_CLASS(weapon_satchel, CSatchel); // orig 0xbd410
 
+// rc2.dll 0xbd480 (left to the server packages); orig client 0x42180 (the client's is SDK 2.3's: CBasePlayerItem::AddToPlayer, the
+// weapon bit, then AddWeapon; nothing calls it there)
 void CSatchel::AddToPlayer(CBasePlayer* pPlayer)
 {
 	m_chargeReady = 0; // this satchel charge weapon now forgets that any satchels are deployed by it.
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-void CSatchel::Spawn() // orig 0xbd4d0
+void CSatchel::Spawn() // orig 0xbd4d0, orig client 0x421f0
 {
 	Precache();
 	m_iId = WEAPON_SATCHEL;
@@ -591,7 +601,7 @@ void CSatchel::Spawn() // orig 0xbd4d0
 	FallInit(); // get ready to fall down.
 }
 
-void CSatchel::Precache() // orig 0xbd530
+void CSatchel::Precache() // orig 0xbd530, orig client 0x42270
 {
 	PRECACHE_MODEL("models/v_satchel.mdl");
 	PRECACHE_MODEL("models/v_satchel_radio.mdl");
@@ -605,7 +615,7 @@ void CSatchel::Precache() // orig 0xbd530
 	UTIL_PrecacheOther("control_forklift");
 }
 
-bool CSatchel::GetItemInfo(ItemInfo* p) // orig 0xbd5a0
+bool CSatchel::GetItemInfo(ItemInfo* p) // orig 0xbd5a0, orig client 0x42300
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "Satchel Charge";
@@ -622,7 +632,7 @@ bool CSatchel::GetItemInfo(ItemInfo* p) // orig 0xbd5a0
 	return true;
 }
 
-bool CSatchel::IsUseable() // orig 0xbd610
+bool CSatchel::IsUseable() // orig 0xbd610, orig client 0x42390
 {
 	if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0)
 		return true; // player is carrying some satchels
@@ -634,7 +644,7 @@ bool CSatchel::IsUseable() // orig 0xbd610
 	return 0 != m_chargeReady;
 }
 
-bool CSatchel::CanDeploy() // orig 0xbd670
+bool CSatchel::CanDeploy() // orig 0xbd670, orig client 0x42410
 {
 	if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0)
 		return true;
@@ -646,7 +656,7 @@ bool CSatchel::CanDeploy() // orig 0xbd670
 	return 0 != m_chargeReady;
 }
 
-bool CSatchel::Deploy() // orig 0xbd6d0
+bool CSatchel::Deploy() // orig 0xbd6d0, orig client 0x42490
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
@@ -661,7 +671,7 @@ bool CSatchel::Deploy() // orig 0xbd6d0
 		return DefaultDeploy("models/v_satchel.mdl", "models/p_satchel.mdl", SATCHEL_DRAW, "trip");
 }
 
-void CSatchel::Holster() // orig 0xbd790
+void CSatchel::Holster() // orig 0xbd790, orig client 0x42580
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 
@@ -681,7 +691,7 @@ void CSatchel::Holster() // orig 0xbd790
 }
 
 // Throws a roach charge; with roaches out, arms every one this player threw.
-void CSatchel::PrimaryAttack() // orig 0xbd860
+void CSatchel::PrimaryAttack() // orig 0xbd860, orig client 0x42730
 {
 	switch (m_chargeReady)
 	{
@@ -720,7 +730,7 @@ void CSatchel::PrimaryAttack() // orig 0xbd860
 	}
 }
 
-void CSatchel::SecondaryAttack() // orig 0xbd990
+void CSatchel::SecondaryAttack() // orig 0xbd990, orig client 0x42840
 {
 	if (m_chargeReady != 2)
 		Throw();
@@ -757,7 +767,7 @@ static void SatchelLaunchOwner(CBasePlayer* pPlayer, CBaseEntity* pLaunched) // 
 }
 
 // The conc charge.
-void CSatchel::TertiaryAttack() // orig 0xbd9a0
+void CSatchel::TertiaryAttack() // orig 0xbd9a0, orig client 0x42860
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= RC2Pref(RC2P_Satchel_ConcAmmoCost).s)
 	{
@@ -779,7 +789,7 @@ void CSatchel::TertiaryAttack() // orig 0xbd9a0
 }
 
 // The control forklift (shotgun_forklift's sibling, reconstructed with the forklift).
-void CSatchel::QuaternaryAttack() // orig 0xbdc80
+void CSatchel::QuaternaryAttack() // orig 0xbdc80, orig client 0x42990
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= RC2Pref(RC2P_Satchel_ForkliftAmmoCost).s)
 	{
@@ -798,7 +808,7 @@ void CSatchel::QuaternaryAttack() // orig 0xbdc80
 }
 
 // Throws a roach charge, up to [Satchel] RoachMaxDeployed of them out.
-void CSatchel::Throw() // orig 0xbdf50
+void CSatchel::Throw() // orig 0xbdf50, orig client 0x42ac0
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= RC2Pref(RC2P_Satchel_RoachAmmoCost).s && m_iRoachCount < RC2Pref(RC2P_Satchel_RoachMaxDeployed).s)
 	{
@@ -814,8 +824,12 @@ void CSatchel::Throw() // orig 0xbdf50
 		SatchelLaunchOwner(m_pPlayer, pRoach);
 #endif
 
+#ifdef CLIENT_DLL
+		LoadVModel("models/v_satchel_radio.mdl", m_pPlayer);
+#else
 		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_satchel_radio.mdl");
 		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_satchel_radio.mdl");
+#endif
 		m_flNextRoachCount = gpGlobals->time - 1.0; // recount now
 
 		SendWeaponAnim(SATCHEL_RADIO_DRAW);
@@ -830,7 +844,7 @@ void CSatchel::Throw() // orig 0xbdf50
 	}
 }
 
-void CSatchel::WeaponIdle() // orig 0xbe290
+void CSatchel::WeaponIdle() // orig 0xbe290, orig client 0x42c40
 {
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
@@ -855,8 +869,12 @@ void CSatchel::WeaponIdle() // orig 0xbe290
 			return;
 		}
 
+#ifdef CLIENT_DLL
+		LoadVModel("models/v_satchel.mdl", m_pPlayer);
+#else
 		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_satchel.mdl");
 		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_satchel.mdl");
+#endif
 		SendWeaponAnim(SATCHEL_DRAW);
 
 		// use tripmine animations
@@ -871,10 +889,10 @@ void CSatchel::WeaponIdle() // orig 0xbe290
 }
 
 // Every frame: counts this player's roaches; twice a second sends the count to the HUD.
-void CSatchel::WeaponFrame() // orig 0xbe440
+void CSatchel::WeaponFrame() // orig 0xbe440, orig client 0x42e20
 {
-	m_iRoachCount = 0;
 #ifndef CLIENT_DLL
+	m_iRoachCount = 0;
 	for (CBaseEntity* pRoach = UTIL_FindEntityByClassname(NULL, "roach_charge"); pRoach != NULL; pRoach = UTIL_FindEntityByClassname(pRoach, "roach_charge"))
 	{
 		if (pRoach->pev->dmg_inflictor == m_pPlayer->pev->pContainingEntity)
@@ -892,9 +910,10 @@ void CSatchel::WeaponFrame() // orig 0xbe440
 #endif
 }
 
-void CSatchel::ReadWeaponState(void* pData, int iSize) // orig 0xbe530
+void CSatchel::ReadWeaponState(void* pData, int iSize) // orig 0xbe530, orig client 0x42e40
 {
-	m_iRoachCount = 0; // VERIFY: as CRpg's: the original assigns 0xfb780's constant false
+	// the server's reader (0xfb780) answers 0; the client's (orig client 0x3b940) reads the count
+	m_iRoachCount = RC2ReadStateByte(&pData, &iSize);
 }
 
 int CSatchel::iItemSlot() { return 5; } // orig 0xbe560

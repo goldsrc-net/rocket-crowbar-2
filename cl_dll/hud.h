@@ -136,8 +136,9 @@ private:
 	int m_HUD_selection;
 
 public:
-	// c4 needs: RC2's energy meter reads m_pWeapon (CHud +0x98, CHudAmmo +0x1c); accessor ours
+	// RC2's energy meter reads m_pWeapon (CHud +0x98, CHudAmmo +0x1c); accessor ours
 	WEAPON* GetActiveWeapon() const { return m_pWeapon; }
+	void RestoreCrosshair(); // client 0x4a900, in ammo.cpp; name ours
 };
 
 //

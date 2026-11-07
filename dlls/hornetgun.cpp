@@ -28,36 +28,39 @@
 #include "hornet.h"
 #include "gamerules.h"
 #include "UserMessages.h"
-#ifndef CLIENT_DLL
 #include "rc2prefs.h"
+#ifndef CLIENT_DLL
 #include "freezegrenade.h"
+#else
+// The client's prediction (client.dll, reference/dossiers/c1.md) compiles the same code without
+// the freeze shots' damage and the grenade. The original's one event flag is g_fRC2PlayWeaponEvents there.
 #endif
 
 
+// orig client 0x3c050 (and its GetClassPtr<CHgun>, orig client 0x3d330); the inline iItemSlot and
+// UseDecrement are orig client 0x3bc70 and orig client 0x3bc90
 LINK_ENTITY_TO_CLASS(weapon_hornetgun, CHgun); // orig 0x64fb0
 
-// orig 0x65020
+// orig 0x65020, orig client 0x3c080
 bool CHgun::IsUseable()
 {
 	return true;
 }
 
-// orig 0x65030
+// orig 0x65030, orig client 0x3c0a0
 void CHgun::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_HORNETGUN;
 	SET_MODEL(ENT(pev), "models/w_hgun.mdl");
 
-#ifndef CLIENT_DLL
 	m_iDefaultAmmo = RC2Pref(RC2P_Ammo_HornetGunPickupGive).s;
-#endif
 
 	FallInit(); // get ready to fall down.
 }
 
 
-// orig 0x65070
+// orig 0x65070, orig client 0x3c110
 void CHgun::Precache()
 {
 	PRECACHE_MODEL("models/v_hgun.mdl");
@@ -77,7 +80,7 @@ void CHgun::Precache()
 	UTIL_PrecacheOther("freeze_timer");
 }
 
-// orig 0x65110
+// orig 0x65110, orig client 0x3c1e0
 void CHgun::AddToPlayer(CBasePlayer* pPlayer)
 {
 #ifndef CLIENT_DLL
@@ -91,16 +94,12 @@ void CHgun::AddToPlayer(CBasePlayer* pPlayer)
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-// orig 0x65190
+// orig 0x65190, orig client 0x3c260
 bool CHgun::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "Hornets";
-#ifndef CLIENT_DLL
 	p->iMaxAmmo1 = RC2Pref(RC2P_Ammo_MaxCarryHornets).s;
-#else
-	p->iMaxAmmo1 = HORNET_MAX_CARRY;
-#endif
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -114,7 +113,7 @@ bool CHgun::GetItemInfo(ItemInfo* p)
 }
 
 
-// orig 0x65200
+// orig 0x65200, orig client 0x3c2f0
 bool CHgun::Deploy()
 {
 	m_fInAttack = 0;
@@ -129,7 +128,7 @@ bool CHgun::Deploy()
 	return DefaultDeploy("models/v_hgun.mdl", "models/p_hgun.mdl", HGUN_UP, "hive");
 }
 
-// orig 0x652a0
+// orig 0x652a0, orig client 0x3c3d0
 void CHgun::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
@@ -152,10 +151,9 @@ void CHgun::Holster()
 }
 
 
-// orig 0x65380
+// orig 0x65380, orig client 0x3c510
 void CHgun::PrimaryAttack()
 {
-#ifndef CLIENT_DLL
 	// the hitscan freeze shot
 	if (m_fCharging || 0 != m_fInAttack)
 		return;
@@ -177,6 +175,7 @@ void CHgun::PrimaryAttack()
 
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= (unsigned short)RC2Pref(RC2P_HornetGun_PrimaryAmmoCost).s;
 
+#ifndef CLIENT_DLL
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
@@ -195,10 +194,9 @@ void CHgun::PrimaryAttack()
 #endif
 }
 
-// orig 0x656b0
+// orig 0x656b0, orig client 0x3c710
 void CHgun::SecondaryAttack()
 {
-#ifndef CLIENT_DLL
 	// start charging; WeaponFrame draws more ammo into it and lets it go
 	if (m_fCharging || 0 != m_fInAttack)
 		return;
@@ -216,13 +214,11 @@ void CHgun::SecondaryAttack()
 
 	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0.01, 0, ENTINDEX(m_pPlayer->edict()), 0, 0, 1);
-#endif
 }
 
-// orig 0x657d0
+// orig 0x657d0, orig client 0x3c8a0
 void CHgun::TertiaryAttack()
 {
-#ifndef CLIENT_DLL
 	// the freeze grenade
 	if (m_fCharging || 0 != m_fInAttack)
 		return;
@@ -243,6 +239,7 @@ void CHgun::TertiaryAttack()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 	UTIL_ExtendTime(&m_flRechargeTime, gpGlobals->time, RC2Pref(RC2P_HornetGun_GrenadeRechargeDelay).f);
 
+#ifndef CLIENT_DLL
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 	UTIL_MakeVectors(vecAngles);
@@ -262,10 +259,9 @@ void CHgun::TertiaryAttack()
 #endif
 }
 
-// orig 0x65aa0
+// orig 0x65aa0, orig client 0x3caa0
 void CHgun::QuaternaryAttack()
 {
-#ifndef CLIENT_DLL
 	// zoom toggle
 	if (m_fCharging || 0 != m_fInAttack)
 		return;
@@ -286,13 +282,11 @@ void CHgun::QuaternaryAttack()
 	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_QuaternaryRefireTertiary).f);
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_HornetGun_QuaternaryRefireQuaternary).f);
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-#endif
 }
 
-// orig 0x65bd0
+// orig 0x65bd0, orig client 0x3cc20
 void CHgun::ReleaseCharge(bool bBackfire)
 {
-#ifndef CLIENT_DLL
 	// the charged shot, or with bBackfire the overcharge going off on the player
 	if (0 != g_fRC2PlayWeaponEvents)
 	{
@@ -323,6 +317,7 @@ void CHgun::ReleaseCharge(bool bBackfire)
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 	UTIL_ExtendTime(&m_flRechargeTime, gpGlobals->time, RC2Pref(RC2P_HornetGun_SecondaryRechargeDelay).f);
 
+#ifndef CLIENT_DLL
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 
 	float flDamage = RC2Pref(RC2P_HornetGun_SecondaryAddDamage).f * flCharge + RC2Pref(RC2P_HornetGun_SecondaryBaseDamage).f;
@@ -351,10 +346,9 @@ void CHgun::ReleaseCharge(bool bBackfire)
 #endif
 }
 
-// orig 0x66080
+// orig 0x66080, orig client 0x3cf40
 void CHgun::Recharge()
 {
-#ifndef CLIENT_DLL
 	// what Reload did in the SDK: an ammo point per [HornetGun] SharedRechargeGiveDelay
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= RC2Pref(RC2P_Ammo_MaxCarryHornets).s)
 		return;
@@ -365,12 +359,13 @@ void CHgun::Recharge()
 		m_flRechargeTime = RC2Pref(RC2P_HornetGun_SharedRechargeGiveDelay).f + m_flRechargeTime;
 	}
 
+#ifndef CLIENT_DLL
 	m_pPlayer->TabulateAmmo();
 #endif
 }
 
 
-// orig 0x66100
+// orig 0x66100, orig client 0x3cfe0
 void CHgun::WeaponIdle()
 {
 	// Rocket Crowbar 2: no Reload() here; WeaponFrame recharges
@@ -397,10 +392,9 @@ void CHgun::WeaponIdle()
 	SendWeaponAnim(iAnim);
 }
 
-// orig 0x661a0
+// orig 0x661a0, orig client 0x3d0b0
 void CHgun::WeaponFrame()
 {
-#ifndef CLIENT_DLL
 	if (!m_pPlayer->m_bFrozen && !m_fCharging && 0 == m_fInAttack)
 		Recharge();
 
@@ -443,5 +437,4 @@ void CHgun::WeaponFrame()
 
 	if (0 != g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usHgunSetCharge, 0, (float*)&g_vecZero, (float*)&g_vecZero, (float)flCharge, 0, ENTINDEX(m_pPlayer->edict()), 0, 0, 0);
-#endif
 }

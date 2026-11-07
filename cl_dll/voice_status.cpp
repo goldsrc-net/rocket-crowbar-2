@@ -44,8 +44,11 @@ extern BitmapTGA* LoadTGA(const char* pImageName);
 // ---------------------------------------------------------------------- //
 // The voice manager for the client.
 // ---------------------------------------------------------------------- //
+// orig client 0x471c0 orig client 0x471e0 orig client 0x47200 orig client 0x47220 (its dynamic
+// initializer and atexit destructor; Ghidra's list has only the middle two)
 CVoiceStatus g_VoiceStatus;
 
+// orig client 0x47240
 CVoiceStatus* GetClientVoiceMgr()
 {
 	return &g_VoiceStatus;
@@ -59,6 +62,7 @@ CVoiceStatus* GetClientVoiceMgr()
 
 static CVoiceStatus* g_pInternalVoiceStatus = NULL;
 
+// orig client 0x47260 (not in Ghidra's function list)
 int __MsgFunc_VoiceMask(const char* pszName, int iSize, void* pbuf)
 {
 	if (g_pInternalVoiceStatus)
@@ -67,6 +71,7 @@ int __MsgFunc_VoiceMask(const char* pszName, int iSize, void* pbuf)
 	return 1;
 }
 
+// orig client 0x47290 (not in Ghidra's function list)
 int __MsgFunc_ReqState(const char* pszName, int iSize, void* pbuf)
 {
 	if (g_pInternalVoiceStatus)
@@ -107,6 +112,9 @@ void ShowBannedCallback()
 // CVoiceStatus.
 // ---------------------------------------------------------------------- //
 
+// orig client 0x47400
+// RC2's (an SDK older than 2.3's) has no m_pchGameDir; halflife-updated's cache of the game
+// directory is kept (see ~CVoiceStatus).
 CVoiceStatus::CVoiceStatus()
 {
 	m_bBanMgrInitialized = false;
@@ -135,6 +143,11 @@ CVoiceStatus::CVoiceStatus()
 }
 
 
+// orig client 0x475b0
+// RC2 asks the engine for the game directory again here, at DLL unload:
+//   if (gEngfuncs.pfnGetGameDirectory() && m_bBanMgrInitialized)
+//       m_BanMgr.SaveState(gEngfuncs.pfnGetGameDirectory());
+// halflife-updated's cached copy (SDK 2.3's fix) is kept: same file, same directory.
 CVoiceStatus::~CVoiceStatus()
 {
 	g_pInternalVoiceStatus = NULL;
@@ -168,6 +181,7 @@ CVoiceStatus::~CVoiceStatus()
 }
 
 
+// orig client 0x476d0 (not in Ghidra's function list)
 int CVoiceStatus::Init(
 	IVoiceStatusHelper* pHelper,
 	Panel** pParentPanel)
@@ -198,9 +212,10 @@ int CVoiceStatus::Init(
 
 		pLabel->m_pBackground = new Label("");
 
+		// RC2: the label and icon are not made visible here; RepositionLabels and Frame show and
+		// hide the label itself (SDK 2.3 toggles only the background)
 		if (pLabel->m_pLabel = new Label(""))
 		{
-			pLabel->m_pLabel->setVisible(true);
 			pLabel->m_pLabel->setFont(Scheme::sf_primary2);
 			pLabel->m_pLabel->setTextAlignment(Label::a_east);
 			pLabel->m_pLabel->setContentAlignment(Label::a_east);
@@ -209,7 +224,6 @@ int CVoiceStatus::Init(
 
 		if (pLabel->m_pIcon = new ImagePanel(NULL))
 		{
-			pLabel->m_pIcon->setVisible(true);
 			pLabel->m_pIcon->setParent(pLabel->m_pBackground);
 		}
 
@@ -236,19 +250,21 @@ int CVoiceStatus::Init(
 }
 
 
+// orig client 0x47990
 bool CVoiceStatus::VidInit()
 {
 	FreeBitmaps();
 
 
+	// RC2: alpha 1 on both (SDK 2.3: 135)
 	if (m_pLocalBitmap = vgui_LoadTGA("gfx/vgui/icntlk_pl.tga"))
 	{
-		m_pLocalBitmap->setColor(Color(255, 255, 255, 135));
+		m_pLocalBitmap->setColor(Color(255, 255, 255, 1));
 	}
 
 	if (m_pAckBitmap = vgui_LoadTGA("gfx/vgui/icntlk_sv.tga"))
 	{
-		m_pAckBitmap->setColor(Color(255, 255, 255, 135)); // Give just a tiny bit of translucency so software draws correctly.
+		m_pAckBitmap->setColor(Color(255, 255, 255, 1)); // Give just a tiny bit of translucency so software draws correctly.
 	}
 
 	m_pLocalLabel->setImage(m_pLocalBitmap);
@@ -296,6 +312,7 @@ bool CVoiceStatus::VidInit()
 }
 
 
+// orig client 0x47e20
 void CVoiceStatus::Frame(double frametime)
 {
 	// check server banned players once per second
@@ -306,16 +323,16 @@ void CVoiceStatus::Frame(double frametime)
 
 	m_BlinkTimer += frametime;
 
-	// Update speaker labels.
+	// Update speaker labels. RC2 toggles the text label, not the background (SDK 2.3).
 	if (m_pHelper->CanShowSpeakerLabels())
 	{
 		for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
-			m_Labels[i].m_pBackground->setVisible(m_Labels[i].m_clientindex != -1);
+			m_Labels[i].m_pLabel->setVisible(m_Labels[i].m_clientindex != -1);
 	}
 	else
 	{
 		for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
-			m_Labels[i].m_pBackground->setVisible(false);
+			m_Labels[i].m_pLabel->setVisible(false);
 	}
 
 	for (int i = 0; i < MAX_PLAYERS; i++)
@@ -323,6 +340,7 @@ void CVoiceStatus::Frame(double frametime)
 }
 
 
+// stock (names-client.tsv)
 void CVoiceStatus::CreateEntities()
 {
 	if (0 == m_VoiceHeadModel)
@@ -376,10 +394,13 @@ void CVoiceStatus::CreateEntities()
 }
 
 
+// orig client 0x480e0
+// RC2's is SDK 2.3's (no halflife-updated local player label and voice_loopback), with three
+// changes: entindex must be below MAX_PLAYERS, the background's alpha is 100, and a speaker who
+// stops hides the text label rather than the background.
 void CVoiceStatus::UpdateSpeakerStatus(int entindex, bool bTalking)
 {
-	cvar_t* pVoiceLoopback = NULL;
-
+	// halflife-updated's null check of m_pParentPanel is kept; RC2 reads *m_pParentPanel only
 	if (!m_pParentPanel || !*m_pParentPanel)
 	{
 		return;
@@ -392,8 +413,6 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, bool bTalking)
 		gEngfuncs.pfnConsolePrint(msg);
 	}
 
-	int iLocalPlayerIndex = gEngfuncs.GetLocalPlayer()->index;
-
 	// Is it the local player talking?
 	if (entindex == -1)
 	{
@@ -403,25 +422,16 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, bool bTalking)
 			// Enable voice for them automatically if they try to talk.
 			gEngfuncs.pfnClientCmd("voice_modenable 1");
 		}
-
-		// now set the player index to the correct index for the local player
-		// this will allow us to have the local player's icon flash in the scoreboard
-		entindex = iLocalPlayerIndex;
-
-		pVoiceLoopback = gEngfuncs.pfnGetCvarPointer("voice_loopback");
 	}
 	else if (entindex == -2)
 	{
 		m_bServerAcked = bTalking;
 	}
-
-	if (entindex >= 0 && entindex <= MAX_PLAYERS)
+	else if (entindex >= 0 && entindex < MAX_PLAYERS) // RC2: < (SDK 2.3: <=)
 	{
 		int iClient = entindex - 1;
 		if (iClient < 0)
-		{
 			return;
-		}
 
 		CVoiceLabel* pLabel = FindVoiceLabel(iClient);
 		if (bTalking)
@@ -432,38 +442,34 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, bool bTalking)
 			// If we don't have a label for this guy yet, then create one.
 			if (!pLabel)
 			{
-				// if this isn't the local player (unless they have voice_loopback on)
-				if ((entindex != iLocalPlayerIndex) || (pVoiceLoopback && 0 != pVoiceLoopback->value))
+				if (pLabel = GetFreeVoiceLabel())
 				{
-					if (pLabel = GetFreeVoiceLabel())
+					// Get the name from the engine.
+					hud_player_info_t info;
+					memset(&info, 0, sizeof(info));
+					gEngfuncs.pfnGetPlayerInfo(entindex, &info);
+
+					char paddedName[512];
+					snprintf(paddedName, sizeof(paddedName), "%s   ", info.name);
+
+					int color[3];
+					m_pHelper->GetPlayerTextColor(entindex, color);
+
+					if (pLabel->m_pBackground)
 					{
-						// Get the name from the engine.
-						hud_player_info_t info;
-						memset(&info, 0, sizeof(info));
-						gEngfuncs.pfnGetPlayerInfo(entindex, &info);
-
-						char paddedName[512];
-						snprintf(paddedName, sizeof(paddedName), "%s   ", info.name);
-
-						int color[3];
-						m_pHelper->GetPlayerTextColor(entindex, color);
-
-						if (pLabel->m_pBackground)
-						{
-							pLabel->m_pBackground->setBgColor(color[0], color[1], color[2], 135);
-							pLabel->m_pBackground->setParent(*m_pParentPanel);
-							pLabel->m_pBackground->setVisible(m_pHelper->CanShowSpeakerLabels());
-						}
-
-						if (pLabel->m_pLabel)
-						{
-							pLabel->m_pLabel->setFgColor(255, 255, 255, 0);
-							pLabel->m_pLabel->setBgColor(0, 0, 0, 255);
-							pLabel->m_pLabel->setText("%s", paddedName);
-						}
-
-						pLabel->m_clientindex = iClient;
+						pLabel->m_pBackground->setBgColor(color[0], color[1], color[2], 100); // RC2: 100 (SDK 2.3: 135)
+						pLabel->m_pBackground->setParent(*m_pParentPanel);
+						pLabel->m_pBackground->setVisible(m_pHelper->CanShowSpeakerLabels());
 					}
+
+					if (pLabel->m_pLabel)
+					{
+						pLabel->m_pLabel->setFgColor(255, 255, 255, 0);
+						pLabel->m_pLabel->setBgColor(0, 0, 0, 255);
+						pLabel->m_pLabel->setText("%s", paddedName);
+					}
+
+					pLabel->m_clientindex = iClient;
 				}
 			}
 		}
@@ -474,7 +480,7 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, bool bTalking)
 			// If we have a label for this guy, kill it.
 			if (pLabel)
 			{
-				pLabel->m_pBackground->setVisible(false);
+				pLabel->m_pLabel->setVisible(false); // RC2: the text label (SDK 2.3: m_pBackground)
 				pLabel->m_clientindex = -1;
 			}
 		}
@@ -484,6 +490,7 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, bool bTalking)
 }
 
 
+// stock (names-client.tsv)
 void CVoiceStatus::UpdateServerState(bool bForce)
 {
 	// Can't do anything when we're not in a level.
@@ -571,12 +578,16 @@ void CVoiceStatus::UpdateServerState(bool bForce)
 	m_LastUpdateServerState = gEngfuncs.GetClientTime();
 }
 
+// stock (names-client.tsv)
 void CVoiceStatus::UpdateSpeakerImage(Label* pLabel, int iPlayer)
 {
 	m_pBanButtons[iPlayer - 1] = pLabel;
 	UpdateBanButton(iPlayer - 1);
 }
 
+// orig client 0x48840
+// RC2 asks the engine directly (SDK 2.3 goes through the scoreboard's HACK_GetPlayerUniqueID,
+// which does the same) and shows no icon for a player the game rules make inaudible.
 void CVoiceStatus::UpdateBanButton(int iClient)
 {
 	Label* pPanel = m_pBanButtons[iClient];
@@ -585,18 +596,22 @@ void CVoiceStatus::UpdateBanButton(int iClient)
 		return;
 
 	char playerID[16];
-	extern bool HACK_GetPlayerUniqueID(int iPlayer, char playerID[16]);
-	if (!HACK_GetPlayerUniqueID(iClient + 1, playerID))
+	if (0 == gEngfuncs.GetPlayerUniqueID(iClient + 1, playerID))
 		return;
 
 	// Figure out if it's blinking or not.
 	bool bBlink = fmod(m_BlinkTimer, SCOREBOARD_BLINK_FREQUENCY * 2) < SCOREBOARD_BLINK_FREQUENCY;
 	bool bTalking = !!m_VoicePlayers[iClient];
+	bool bInaudible = !IsPlayerAudible(iClient + 1); // name ours
 	bool bBanned = m_BanMgr.GetPlayerBan(playerID);
 	bool bNeverSpoken = !m_VoiceEnabledPlayers[iClient];
 
 	// Get the appropriate image to display on the panel.
-	if (bBanned)
+	if (bInaudible)
+	{
+		pPanel->setImage(NULL);
+	}
+	else if (bBanned)
 	{
 		pPanel->setImage(m_pScoreboardBanned);
 	}
@@ -675,6 +690,7 @@ void CVoiceStatus::StopSquelchMode()
 	m_pHelper->UpdateCursorState();
 }
 
+// orig client 0x48bd0
 bool CVoiceStatus::IsInSquelchMode()
 {
 	return m_bInSquelchMode;
@@ -692,12 +708,14 @@ CVoiceLabel* CVoiceStatus::FindVoiceLabel(int clientindex)
 }
 
 
+// orig client 0x48c30
 CVoiceLabel* CVoiceStatus::GetFreeVoiceLabel()
 {
 	return FindVoiceLabel(-1);
 }
 
 
+// orig client 0x48c50
 void CVoiceStatus::RepositionLabels()
 {
 	// find starting position to draw from, along right-hand side of screen
@@ -716,8 +734,15 @@ void CVoiceStatus::RepositionLabels()
 
 		if (pLabel->m_clientindex == -1 || !pLabel->m_pLabel)
 		{
+			// RC2 hides all three (SDK 2.3: the background only)
+			if (pLabel->m_pIcon)
+				pLabel->m_pIcon->setVisible(false);
+
 			if (pLabel->m_pBackground)
 				pLabel->m_pBackground->setVisible(false);
+
+			if (pLabel->m_pLabel)
+				pLabel->m_pLabel->setVisible(false);
 
 			continue;
 		}
@@ -744,7 +769,14 @@ void CVoiceStatus::RepositionLabels()
 		if (pLabel->m_pIcon)
 		{
 			pLabel->m_pIcon->setImage(m_pSpeakerLabelIcon);
+			pLabel->m_pIcon->setVisible(true);
 			pLabel->m_pIcon->setBounds(iconLeft, iconTop, iconWide, iconTall);
+		}
+		else
+		{
+			// RC2's own: hides the icon it has just found to be NULL (a null call; Init always
+			// makes the icons, so it is not reached)
+			pLabel->m_pIcon->setVisible(false);
 		}
 
 		y += bgTall + 2;
@@ -823,6 +855,7 @@ void CVoiceStatus::FreeBitmaps()
 // Input  : playerID -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
+// stock (names-client.tsv)
 bool CVoiceStatus::IsPlayerBlocked(int iPlayer)
 {
 	char playerID[16];
@@ -837,6 +870,7 @@ bool CVoiceStatus::IsPlayerBlocked(int iPlayer)
 // Input  : playerID -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
+// orig client 0x49110
 bool CVoiceStatus::IsPlayerAudible(int iPlayer)
 {
 	return !!m_AudiblePlayers[iPlayer - 1];
@@ -847,6 +881,9 @@ bool CVoiceStatus::IsPlayerAudible(int iPlayer)
 // Input  : playerID -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
+// orig client 0x49150
+// RC2's (an SDK older than 2.3's) ignores blocked: it toggles the ban, and only for a player the
+// game rules let us hear.
 void CVoiceStatus::SetPlayerBlockedState(int iPlayer, bool blocked)
 {
 	if (0 != gEngfuncs.pfnGetCvarFloat("voice_clientdebug"))
@@ -864,13 +901,16 @@ void CVoiceStatus::SetPlayerBlockedState(int iPlayer, bool blocked)
 	}
 
 	// Squelch or (try to) unsquelch this player.
-	if (0 != gEngfuncs.pfnGetCvarFloat("voice_clientdebug"))
+	if (IsPlayerAudible(iPlayer))
 	{
-		char str[256];
-		sprintf(str, "CVoiceStatus::SetPlayerBlockedState: setting player %d ban to %d\n", iPlayer, static_cast<int>(!m_BanMgr.GetPlayerBan(playerID)));
-		gEngfuncs.pfnConsolePrint(str);
-	}
+		if (0 != gEngfuncs.pfnGetCvarFloat("voice_clientdebug"))
+		{
+			char str[256];
+			sprintf(str, "CVoiceStatus::SetPlayerBlockedState: setting player %d ban to %d\n", iPlayer, static_cast<int>(!m_BanMgr.GetPlayerBan(playerID)));
+			gEngfuncs.pfnConsolePrint(str);
+		}
 
-	m_BanMgr.SetPlayerBan(playerID, blocked);
-	UpdateServerState(false);
+		m_BanMgr.SetPlayerBan(playerID, !m_BanMgr.GetPlayerBan(playerID));
+		UpdateServerState(false);
+	}
 }

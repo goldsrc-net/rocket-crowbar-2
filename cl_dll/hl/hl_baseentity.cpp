@@ -29,24 +29,30 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "nodes.h"
 #include "soundent.h"
 #include "skill.h"
+#include "rc2prefs.h"
 
-void EMIT_SOUND_DYN(edict_t* entity, int channel, const char* sample, float volume, float attenuation, int flags, int pitch) {}
+// Rocket Crowbar 2's client.dll has this file's stubs in SDK 2.3's order (each its own function,
+// the client was linked incrementally), with RC2's own after CBasePlayer::AddPointsToTeam and at
+// the end. The ones tagged orig client were matched to SDK 2.3's list by position, argument bytes
+// and return value (reference/dossiers/c1.md); their bodies are the stock stubs.
+
+void EMIT_SOUND_DYN(edict_t* entity, int channel, const char* sample, float volume, float attenuation, int flags, int pitch) {} // orig client 0x36310
 
 // CBaseEntity Stubs
-bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; }
-bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) { return true; }
-CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; }
+bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType) { return true; } // orig client 0x36330
+bool CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) { return true; } // orig client 0x36350
+CBaseEntity* CBaseEntity::GetNextTarget() { return NULL; } // orig client 0x36370
 bool CBaseEntity::Save(CSave& save) { return true; }
 bool CBaseEntity::Restore(CRestore& restore) { return true; }
 void CBaseEntity::SetObjectCollisionBox() {}
 bool CBaseEntity::Intersects(CBaseEntity* pOther) { return false; }
 void CBaseEntity::MakeDormant() {}
 bool CBaseEntity::IsDormant() { return false; }
-bool CBaseEntity::IsInWorld() { return true; }
+bool CBaseEntity::IsInWorld() { return true; } // orig client 0x36450
 bool CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState) { return false; }
-int CBaseEntity::DamageDecal(int bitsDamageType) { return -1; }
+int CBaseEntity::DamageDecal(int bitsDamageType) { return -1; } // orig client 0x36490
 CBaseEntity* CBaseEntity::Create(const char* szName, const Vector& vecOrigin, const Vector& vecAngles, edict_t* pentOwner) { return NULL; }
-void CBaseEntity::SUB_Remove() {}
+void CBaseEntity::SUB_Remove() {} // orig client 0x364d0
 
 // CBaseDelay Stubs
 bool CBaseDelay::KeyValue(struct KeyValueData_s*) { return false; }
@@ -58,17 +64,17 @@ bool CBaseAnimating::Restore(class CRestore&) { return true; }
 bool CBaseAnimating::Save(class CSave&) { return true; }
 
 // DEBUG Stubs
-edict_t* DBG_EntOfVars(const entvars_t* pev) { return NULL; }
+edict_t* DBG_EntOfVars(const entvars_t* pev) { return NULL; } // orig client 0x365b0
 void DBG_AssertFunction(bool fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage) {}
 
 // UTIL_* Stubs
-void UTIL_PrecacheOther(const char* szClassname) {}
+void UTIL_PrecacheOther(const char* szClassname) {} // orig client 0x365f0
 void UTIL_BloodDrips(const Vector& origin, const Vector& direction, int color, int amount) {}
 void UTIL_DecalTrace(TraceResult* pTrace, int decalNumber) {}
 void UTIL_GunshotDecalTrace(TraceResult* pTrace, int decalNumber) {}
-void UTIL_MakeVectors(const Vector& vecAngles) {}
-bool UTIL_IsValidEntity(edict_t* pent) { return true; }
-void UTIL_SetOrigin(entvars_t*, const Vector& org) {}
+void UTIL_MakeVectors(const Vector& vecAngles) {} // orig client 0x36670
+bool UTIL_IsValidEntity(edict_t* pent) { return true; } // orig client 0x36690
+void UTIL_SetOrigin(entvars_t*, const Vector& org) {} // orig client 0x366b0
 void UTIL_LogPrintf(char*, ...) {}
 void UTIL_ClientPrintAll(int, char const*, char const*, char const*, char const*, char const*) {}
 void ClientPrint(entvars_t* client, int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) {}
@@ -90,10 +96,10 @@ void CGrenade::Killed(entvars_t*, int) {}
 void CGrenade::Spawn() {}
 CGrenade* CGrenade::ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time) { return 0; }
 CGrenade* CGrenade::ShootContact(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity) { return 0; }
-void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {}
+void CGrenade::DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {} // orig client 0x36890
 
 void UTIL_Remove(CBaseEntity* pEntity) {}
-void UTIL_SetSize(entvars_t* pev, const Vector& vecMin, const Vector& vecMax) {}
+void UTIL_SetSize(entvars_t* pev, const Vector& vecMin, const Vector& vecMax) {} // orig client 0x368d0
 CBaseEntity* UTIL_FindEntityInSphere(CBaseEntity* pStartEntity, const Vector& vecCenter, float flRadius) { return 0; }
 
 Vector UTIL_VecToAngles(const Vector& vec) { return 0; }
@@ -117,7 +123,7 @@ CSound* CBaseMonster::PBestSound() { return NULL; }
 CSound* CBaseMonster::PBestScent() { return NULL; }
 float CBaseAnimating::StudioFrameAdvance(float flInterval) { return 0.0; }
 void CBaseMonster::MonsterThink() {}
-void CBaseMonster::MonsterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {}
+void CBaseMonster::MonsterUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value) {} // orig client 0x36b80
 int CBaseMonster::IgnoreConditions() { return 0; }
 void CBaseMonster::RouteClear() {}
 void CBaseMonster::RouteNew() {}
@@ -153,7 +159,7 @@ void CBaseMonster::Move(float flInterval) {}
 bool CBaseMonster::ShouldAdvanceRoute(float flWaypointDist) { return false; }
 void CBaseMonster::MoveExecute(CBaseEntity* pTargetEnt, const Vector& vecDir, float flInterval) {}
 void CBaseMonster::MonsterInit() {}
-void CBaseMonster::MonsterInitThink() {}
+void CBaseMonster::MonsterInitThink() {} // orig client 0x36fe0
 void CBaseMonster::StartMonster() {}
 void CBaseMonster::MovementComplete() {}
 bool CBaseMonster::TaskIsRunning() { return false; }
@@ -165,17 +171,24 @@ bool CBaseMonster::FInViewCone(CBaseEntity* pEntity) { return false; }
 bool CBaseMonster::FInViewCone(Vector* pOrigin) { return false; }
 bool CBaseEntity::FVisible(CBaseEntity* pEntity) { return false; }
 bool CBaseEntity::FVisible(const Vector& vecOrigin) { return false; }
-// Rocket Crowbar 2's added CBaseEntity virtuals (dlls/cbase.cpp on the server)
-float CBaseEntity::TransphasicImpactDamage() { return 0; }
-float CBaseEntity::GlobalBeamDamage() { return 0; }
-float CBaseEntity::FartDamageInflict() { return 0; }
-float CBaseEntity::ZoomedPrimaryDamage() { return 0; }
-float CBaseEntity::ZoomedSecondaryDamage() { return 0; }
-float CBaseEntity::BeamCoreDamage() { return 0; }
-float CBaseEntity::BeamRadialMaxDamage() { return 0; }
-float CBaseEntity::BeamViewDamage() { return 0; }
-void CBaseEntity::GravGrenAnnihilate(CBaseEntity* pInflictor, CBaseEntity* pAttacker) {}
-bool CBaseEntity::ApplyExternalForce(float flInterval) { return false; }
+// Rocket Crowbar 2's added CBaseEntity virtuals (dlls/cbase.cpp on the server). The client's are
+// the same bodies, inline in the original's cbase.h (emitted into crossbow.cpp's object): they read
+// the client's copy of rc2.ini.
+float CBaseEntity::TransphasicImpactDamage() { return RC2Pref(RC2P_Glock_TransphasicImpactDamage).f; }		  // orig client 0xa410
+float CBaseEntity::GlobalBeamDamage() { return RC2Pref(RC2P_Tripmine_GlobalBeamDamage).f; }				  // orig client 0xa430
+float CBaseEntity::FartDamageInflict() { return RC2Pref(RC2P_MP5_FartDamageInflict).f; }				  // orig client 0xa450
+float CBaseEntity::ZoomedPrimaryDamage() { return RC2Pref(RC2P_Crossbow_ZoomedPrimaryDamage).f; }		  // orig client 0xa470
+float CBaseEntity::ZoomedSecondaryDamage() { return RC2Pref(RC2P_Crossbow_ZoomedSecondaryDamage).f; }	  // orig client 0xa490
+float CBaseEntity::BeamCoreDamage() { return RC2Pref(RC2P_TransformHoundeye_BeamCoreDamage).f; }		  // orig client 0xa4b0
+float CBaseEntity::BeamRadialMaxDamage() { return RC2Pref(RC2P_TransformHoundeye_BeamRadialMaxDamage).f; } // orig client 0xa4d0
+float CBaseEntity::BeamViewDamage() { return RC2Pref(RC2P_TransformHoundeye_BeamViewDamage).f; }		  // orig client 0xa4f0
+// orig client 0xa570
+void CBaseEntity::GravGrenAnnihilate(CBaseEntity* pInflictor, CBaseEntity* pAttacker)
+{
+	if (pev->takedamage != DAMAGE_NO)
+		TakeDamage(pInflictor->pev, pAttacker->pev, RC2Pref(RC2P_Grenade_GravGrenAnnihilateDamage).f, DMG_ALWAYSGIB | DMG_ENERGYBEAM | DMG_BLAST);
+}
+bool CBaseEntity::ApplyExternalForce(float flInterval) { return false; } // orig client 0x38880
 bool CBaseEntity::IsViewOfPlayer(CBaseEntity* pPlayer) { return false; }
 void CBaseMonster::MakeIdealYaw(Vector vecTarget) {}
 float CBaseMonster::FlYawDiff() { return 0.0; }
@@ -199,9 +212,9 @@ void CBaseAnimating::GetAutomovement(Vector& origin, Vector& angles, float flInt
 void CBaseAnimating::SetBodygroup(int iGroup, int iValue) {}
 int CBaseAnimating::GetBodygroup(int iGroup) { return 0; }
 Vector CBaseMonster::GetGunPosition() { return g_vecZero; }
-void CBaseEntity::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
+void CBaseEntity::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {} // orig client 0x37440
 void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker) {}
-void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {}
+void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) {} // orig client 0x37480
 void CBaseMonster::MakeDamageBloodDecal(int cCount, float flNoise, TraceResult* ptr, const Vector& vecDir) {}
 bool CBaseMonster::FGetNodeRoute(Vector vecDest) { return true; }
 int CBaseMonster::FindHintNode() { return NO_NODE; }
@@ -213,7 +226,7 @@ bool CBaseMonster::FindLateralCover(const Vector& vecThreat, const Vector& vecVi
 Vector CBaseMonster::ShootAtEnemy(const Vector& shootOrigin) { return g_vecZero; }
 bool CBaseMonster::FacingIdeal() { return false; }
 bool CBaseMonster::FCanActiveIdle() { return false; }
-void CBaseMonster::CorpseFallThink() {}
+void CBaseMonster::CorpseFallThink() {} // orig client 0x37680
 void CBaseMonster::MonsterInitDead() {}
 bool CBaseMonster::BBoxFlat() { return true; }
 bool CBaseMonster::GetEnemy() { return false; }
@@ -248,10 +261,10 @@ void CBasePlayer::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vec
 bool CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) { return false; }
 void CBasePlayer::PackDeadPlayerItems() {}
 void CBasePlayer::RemoveAllItems(bool removeSuit) {}
-void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {}
+void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim) {} // orig client 0x37ac0
 void CBasePlayer::WaterMove() {}
 bool CBasePlayer::IsOnLadder() { return false; }
-void CBasePlayer::PlayerDeathThink() {}
+void CBasePlayer::PlayerDeathThink() {} // orig client 0x37b20
 void CBasePlayer::StartDeathCam() {}
 void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle) {}
 void CBasePlayer::PlayerUse() {}
@@ -262,7 +275,7 @@ void CBasePlayer::PreThink() {}
 void CBasePlayer::CheckTimeBasedDamage() {}
 void CBasePlayer::UpdateGeigerCounter() {}
 void CBasePlayer::CheckSuitUpdate() {}
-void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {}
+void CBasePlayer::SetSuitUpdate(const char* name, bool fgroup, int iNoRepeatTime) {} // orig client 0x37c80
 void CBasePlayer::UpdatePlayerSound() {}
 void CBasePlayer::PostThink() {}
 void CBasePlayer::Precache() {}
@@ -291,7 +304,7 @@ void CBasePlayer::BarnacleVictimBitten(entvars_t* pevBarnacle) {}
 void CBasePlayer::BarnacleVictimReleased() {}
 int CBasePlayer::Illumination() { return 0; }
 void CBasePlayer::EnableControl(bool fControl) {}
-Vector CBasePlayer::GetAutoaimVector(float flDelta) { return g_vecZero; }
+Vector CBasePlayer::GetAutoaimVector(float flDelta) { return g_vecZero; } // orig client 0x38040
 Vector CBasePlayer::AutoaimDeflection(Vector& vecSrc, float flDist, float flDelta) { return g_vecZero; }
 void CBasePlayer::ResetAutoaim() {}
 void CBasePlayer::SetCustomDecalFrames(int nFrames) {}
@@ -314,50 +327,51 @@ void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker) {}
 void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamage, int bitsDamageType) {}
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage) {}
 int DamageDecal(CBaseEntity* pEntity, int bitsDamageType) { return 0; }
-void DecalGunshot(TraceResult* pTrace, int iBulletType) {}
+void DecalGunshot(TraceResult* pTrace, int iBulletType) {} // orig client 0x38400
 void EjectBrass(const Vector& vecOrigin, const Vector& vecVelocity, float rotation, int model, int soundtype) {}
 bool CBasePlayerItem::Restore(class CRestore&) { return true; }
 bool CBasePlayerItem::Save(class CSave&) { return true; }
-bool CBasePlayerWeapon::Restore(class CRestore&) { return true; }
-bool CBasePlayerWeapon::Save(class CSave&) { return true; }
+bool CBasePlayerWeapon::Restore(class CRestore&) { return true; } // orig client 0x384a0
+bool CBasePlayerWeapon::Save(class CSave&) { return true; } // orig client 0x384c0
 float CBasePlayerWeapon::GetNextAttackDelay(float flTime) { return flTime; }
 void CBasePlayerItem::SetObjectCollisionBox() {}
-void CBasePlayerItem::FallInit() {}
-void CBasePlayerItem::FallThink() {}
-void CBasePlayerItem::Materialize() {}
-void CBasePlayerItem::AttemptToMaterialize() {}
+void CBasePlayerItem::FallInit() {} // orig client 0x38500
+void CBasePlayerItem::FallThink() {} // orig client 0x38520
+void CBasePlayerItem::Materialize() {} // orig client 0x38540
+void CBasePlayerItem::AttemptToMaterialize() {} // orig client 0x38560
 void CBasePlayerItem::CheckRespawn() {}
 CBaseEntity* CBasePlayerItem::Respawn() { return NULL; }
-void CBasePlayerItem::DefaultTouch(CBaseEntity* pOther) {}
-void CBasePlayerItem::DestroyItem() {}
-void CBasePlayerItem::AddToPlayer(CBasePlayer* pPlayer) {}
+void CBasePlayerItem::DefaultTouch(CBaseEntity* pOther) {} // orig client 0x385c0
+void CBasePlayerItem::DestroyItem() {} // orig client 0x385e0
+void CBasePlayerItem::AddToPlayer(CBasePlayer* pPlayer) {} // orig client 0x38600
 void CBasePlayerItem::Drop() {}
 void CBasePlayerItem::Kill() {}
 void CBasePlayerItem::Holster() {}
 void CBasePlayerItem::AttachToPlayer(CBasePlayer* pPlayer) {}
 bool CBasePlayerWeapon::AddDuplicate(CBasePlayerItem* pOriginal) { return false; }
-void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {}
+void CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer) {} // orig client 0x386c0
 bool CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer) { return false; }
 bool CBasePlayerWeapon::IsUseable() { return true; }
 int CBasePlayerWeapon::PrimaryAmmoIndex() { return m_iPrimaryAmmoType; }
 int CBasePlayerWeapon::SecondaryAmmoIndex() { return m_iSecondaryAmmoType; }
-void CBasePlayerAmmo::Spawn() {}
-CBaseEntity* CBasePlayerAmmo::Respawn() { return this; }
-void CBasePlayerAmmo::Materialize() {}
-void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther) {}
+void CBasePlayerAmmo::Spawn() {} // orig client 0x387a0
+CBaseEntity* CBasePlayerAmmo::Respawn() { return this; } // orig client 0x387c0
+void CBasePlayerAmmo::Materialize() {} // orig client 0x387e0
+void CBasePlayerAmmo::DefaultTouch(CBaseEntity* pOther) {} // orig client 0x38800
 bool CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon) { return false; }
 bool CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon* pWeapon) { return false; }
 void CBasePlayerWeapon::RetireWeapon() {}
 void CBasePlayerWeapon::DoRetireWeapon() {}
 
 // Rocket Crowbar 2 (p3, weapons): client stubs for what weapons.cpp adds (server only there)
-bool CBasePlayerItem::KeyValue(KeyValueData* pkvd) { return false; }
+bool CBasePlayerItem::KeyValue(KeyValueData* pkvd) { return false; } // orig client 0x388c0
 void RC2RandomizeItem(CBaseEntity* pItem) {}
 bool g_fRC2Randomize = true;
 unsigned short g_usExplodeEvent;
-unsigned char RC2ReadStateByte(void** ppData, int* piSize) { return false; }
-short RC2ReadStateShort(void** ppData, int* piSize) { return 0; }
-int RC2ReadStateInt(void** ppData, int* piSize) { return 0; }
-float RC2ReadStateFloat(void** ppData, int* piSize) { return 0.0f; }
+// RC2ReadState*: the client's real ones are in hl_weapons.cpp (c1)
 void CSoundEnt::InsertSound(int iType, const Vector& vecOrigin, int iVolume, float flDuration) {}
 void RadiusDamage(Vector vecSrc, entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType) {}
+
+// Rocket Crowbar 2 (c1): the client's LINK_ENTITY_TO_CLASS calls this too, after GetClassPtr
+// (the client keeps no precache list). util.h's client macro leaves the call out: an empty call.
+void AddToPrecachedList(const char* pszClassname) {} // orig client 0x38900

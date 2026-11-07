@@ -22,267 +22,6 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 
-#ifdef CLIENT_DLL
-
-// halflife-updated's python, kept for the client's weapon prediction until RC2's client.dll
-// is reconstructed. The server's python is Rocket Crowbar 2's, below.
-
-LINK_ENTITY_TO_CLASS(weapon_python, CPython);
-LINK_ENTITY_TO_CLASS(weapon_357, CPython);
-
-bool CPython::GetItemInfo(ItemInfo* p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "357";
-	p->iMaxAmmo1 = _357_MAX_CARRY;
-	p->pszAmmo2 = NULL;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = PYTHON_MAX_CLIP;
-	p->iFlags = 0;
-	p->iSlot = 1;
-	p->iPosition = 1;
-	p->iId = m_iId = WEAPON_PYTHON;
-	p->iWeight = PYTHON_WEIGHT;
-
-	return true;
-}
-
-void CPython::Spawn()
-{
-	pev->classname = MAKE_STRING("weapon_357"); // hack to allow for old names
-	Precache();
-	m_iId = WEAPON_PYTHON;
-	SET_MODEL(ENT(pev), "models/w_357.mdl");
-
-	m_iDefaultAmmo = PYTHON_DEFAULT_GIVE;
-
-	FallInit(); // get ready to fall down.
-}
-
-
-void CPython::Precache()
-{
-	PRECACHE_MODEL("models/v_357.mdl");
-	PRECACHE_MODEL("models/w_357.mdl");
-	PRECACHE_MODEL("models/p_357.mdl");
-
-	PRECACHE_MODEL("models/w_357ammobox.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-
-	PRECACHE_SOUND("weapons/357_reload1.wav");
-	PRECACHE_SOUND("weapons/357_cock1.wav");
-	PRECACHE_SOUND("weapons/357_shot1.wav");
-	PRECACHE_SOUND("weapons/357_shot2.wav");
-
-	m_usFirePython = PRECACHE_EVENT(1, "events/python.sc");
-}
-
-bool CPython::Deploy()
-{
-#ifdef CLIENT_DLL
-	if (bIsMultiplayer())
-#else
-	if (g_pGameRules->IsMultiplayer())
-#endif
-	{
-		// enable laser sight geometry.
-		pev->body = 1;
-	}
-	else
-	{
-		pev->body = 0;
-	}
-
-	return DefaultDeploy("models/v_357.mdl", "models/p_357.mdl", PYTHON_DRAW, "python", pev->body);
-}
-
-
-void CPython::Holster()
-{
-	m_fInReload = false; // cancel any reload in progress.
-
-	if (m_pPlayer->m_iFOV != 0)
-	{
-		SecondaryAttack();
-	}
-
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;
-	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-	SendWeaponAnim(PYTHON_HOLSTER);
-}
-
-void CPython::SecondaryAttack()
-{
-#ifdef CLIENT_DLL
-	if (!bIsMultiplayer())
-#else
-	if (!g_pGameRules->IsMultiplayer())
-#endif
-	{
-		return;
-	}
-
-	if (m_pPlayer->m_iFOV != 0)
-	{
-		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
-	}
-	else if (m_pPlayer->m_iFOV != 40)
-	{
-		m_pPlayer->m_iFOV = 40;
-	}
-
-	m_flNextSecondaryAttack = 0.5;
-}
-
-void CPython::PrimaryAttack()
-{
-	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		PlayEmptySound();
-		m_flNextPrimaryAttack = 0.15;
-		return;
-	}
-
-	if (m_iClip <= 0)
-	{
-		if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_flNextPrimaryAttack = 0.15;
-		}
-
-		return;
-	}
-
-	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-
-	m_iClip--;
-
-	m_pPlayer->pev->effects = (int)(m_pPlayer->pev->effects) | EF_MUZZLEFLASH;
-
-	// player "shoot" animation
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
-
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
-	Vector vecDir;
-	vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_1DEGREES, 8192, BULLET_PLAYER_357, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed);
-
-	int flags;
-#if defined(CLIENT_WEAPONS)
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
-#endif
-
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usFirePython, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0);
-
-	if (0 == m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-		// HEV suit - indicate out of ammo condition
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", false, 0);
-
-	m_flNextPrimaryAttack = 0.75;
-	m_flTimeWeaponIdle = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
-}
-
-
-void CPython::Reload()
-{
-	if (m_pPlayer->ammo_357 <= 0)
-		return;
-
-	if (m_pPlayer->m_iFOV != 0)
-	{
-		m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
-	}
-
-	bool bUseScope = false;
-#ifdef CLIENT_DLL
-	bUseScope = bIsMultiplayer();
-#else
-	bUseScope = g_pGameRules->IsMultiplayer();
-#endif
-
-	DefaultReload(6, PYTHON_RELOAD, 2.0, bUseScope ? 1 : 0);
-}
-
-
-void CPython::WeaponIdle()
-{
-	ResetEmptySound();
-
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
-		return;
-
-	int iAnim;
-	float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
-	if (flRand <= 0.5)
-	{
-		iAnim = PYTHON_IDLE1;
-		m_flTimeWeaponIdle = (70.0 / 30.0);
-	}
-	else if (flRand <= 0.7)
-	{
-		iAnim = PYTHON_IDLE2;
-		m_flTimeWeaponIdle = (60.0 / 30.0);
-	}
-	else if (flRand <= 0.9)
-	{
-		iAnim = PYTHON_IDLE3;
-		m_flTimeWeaponIdle = (88.0 / 30.0);
-	}
-	else
-	{
-		iAnim = PYTHON_FIDGET;
-		m_flTimeWeaponIdle = (170.0 / 30.0);
-	}
-
-	bool bUseScope = false;
-#ifdef CLIENT_DLL
-	bUseScope = bIsMultiplayer();
-#else
-	bUseScope = g_pGameRules->IsMultiplayer();
-#endif
-
-	SendWeaponAnim(iAnim, bUseScope ? 1 : 0);
-}
-
-
-class CPythonAmmo : public CBasePlayerAmmo
-{
-	void Spawn() override
-	{
-		Precache();
-		SET_MODEL(ENT(pev), "models/w_357ammobox.mdl");
-		CBasePlayerAmmo::Spawn();
-	}
-	void Precache() override
-	{
-		PRECACHE_MODEL("models/w_357ammobox.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
-	}
-	bool AddAmmo(CBaseEntity* pOther) override
-	{
-		if (pOther->GiveAmmo(AMMO_357BOX_GIVE, "357", _357_MAX_CARRY) != -1)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
-			return true;
-		}
-		return false;
-	}
-};
-LINK_ENTITY_TO_CLASS(ammo_357, CPythonAmmo);
-
-
-#else // !CLIENT_DLL
 
 //=========================================================
 // Rocket Crowbar 2's python. Primary is a lightning bolt: a hitscan hurt one think later
@@ -296,11 +35,24 @@ LINK_ENTITY_TO_CLASS(ammo_357, CPythonAmmo);
 #include <cstdlib>
 
 #include "rc2prefs.h"
+#ifndef CLIENT_DLL
 #include "rc2/shield.h"
 #include "rc2/balllightning.h"
+#define PYTHON_MULTIPLAYER() (g_pGameRules->IsMultiplayer())
+#else
+// The client's prediction (client.dll, reference/dossiers/c1.md) compiles the same code without
+// the hurts, the chain, the ball, the water discharges and the client effect messages; it asks
+// bIsMultiplayer() where the server asks the game rules.
+bool bIsMultiplayer();	// hl_weapons.cpp
+#define PYTHON_MULTIPLAYER() (bIsMultiplayer())
+#endif
 
+#ifndef CLIENT_DLL
+extern int gmsgCLTE; // RC2's "CLTE" user message (orig .bss 0x18f4b8), UserMessages.cpp
 
 #define CLTE_KILL 0xfe // ours: kills a client effect of the type in the next byte
+
+#endif
 
 // orig 0xac2e0 is util.h's inline VARS(edict_t*), emitted out of line in this file; the SDK's is used
 
@@ -308,10 +60,13 @@ LINK_ENTITY_TO_CLASS(ammo_357, CPythonAmmo);
 // true: the inline ones in weapons.h (CLIENT_WEAPONS is always defined in this tree).
 
 // VERIFY: the original's factories also call RC 1.9's AddToPrecachedList("weapon_python", "weapon_357") (0xf5a20); the shared macro doesn't yet
+// orig client 0x3f2f0 and orig client 0x3f320 (and their GetClassPtr<CPython>, orig client 0x40ac0); the
+// inline iItemSlot, UseDecrement and CanHolster are orig client 0x3bb30, orig client 0x3bb50 and
+// orig client 0x3bb70
 LINK_ENTITY_TO_CLASS(weapon_python, CPython); // orig 0xab930
 LINK_ENTITY_TO_CLASS(weapon_357, CPython);	  // orig 0xab9a0
 
-bool CPython::GetItemInfo(ItemInfo* p) // orig 0xaba10
+bool CPython::GetItemInfo(ItemInfo* p) // orig 0xaba10, orig client 0x3f350
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "357";
@@ -328,7 +83,7 @@ bool CPython::GetItemInfo(ItemInfo* p) // orig 0xaba10
 	return true;
 }
 
-// orig 0xaba80. RC2 sends gmsgWeapPickup here once the base has added the weapon;
+// orig 0xaba80, orig client 0x3f3e0. RC2 sends gmsgWeapPickup here once the base has added the weapon;
 // halflife-updated sends that same message from CBasePlayer::AddPlayerItem, so it isn't
 // repeated here (one message either way).
 void CPython::AddToPlayer(CBasePlayer* pPlayer)
@@ -336,7 +91,7 @@ void CPython::AddToPlayer(CBasePlayer* pPlayer)
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-void CPython::Spawn() // orig 0xabae0
+void CPython::Spawn() // orig 0xabae0, orig client 0x3f460
 {
 	pev->classname = MAKE_STRING("weapon_357"); // hack to allow for old names
 	Precache();
@@ -348,7 +103,7 @@ void CPython::Spawn() // orig 0xabae0
 	FallInit(); // get ready to fall down.
 }
 
-void CPython::Precache() // orig 0xabb40
+void CPython::Precache() // orig 0xabb40, orig client 0x3f4e0
 {
 	PRECACHE_MODEL("models/v_357.mdl");
 	PRECACHE_MODEL("models/w_357.mdl");
@@ -372,12 +127,12 @@ void CPython::Precache() // orig 0xabb40
 	m_usPythonPrefire = PRECACHE_EVENT(1, "events/pythonprefire.sc");
 }
 
-bool CPython::Deploy() // orig 0xabc20
+bool CPython::Deploy() // orig 0xabc20, orig client 0x3f600
 {
 	m_iChargeState = 0;
 	m_fInAttack = 0;
 
-	if (g_pGameRules->IsMultiplayer())
+	if (PYTHON_MULTIPLAYER())
 	{
 		// enable laser sight geometry.
 		pev->body = 1;
@@ -390,7 +145,7 @@ bool CPython::Deploy() // orig 0xabc20
 	return DefaultDeploy("models/v_357.mdl", "models/p_357.mdl", PYTHON_DRAW, "python", pev->body);
 }
 
-void CPython::Holster() // orig 0xabc90
+void CPython::Holster() // orig 0xabc90, orig client 0x3f690
 {
 	m_fInReload = false; // cancel any reload in progress.
 	m_iChargeState = 0;
@@ -407,7 +162,7 @@ void CPython::Holster() // orig 0xabc90
 }
 
 // The zoom toggle
-void CPython::QuaternaryAttack() // orig 0xabd10
+void CPython::QuaternaryAttack() // orig 0xabd10, orig client 0x3f750
 {
 	if (m_pPlayer->pev->fov != 0)
 	{
@@ -429,7 +184,7 @@ void CPython::QuaternaryAttack() // orig 0xabd10
 }
 
 // The lightning bolt: traced now, hurt on the next think (DelayedHurt)
-void CPython::PrimaryAttack() // orig 0xabe10
+void CPython::PrimaryAttack() // orig 0xabe10, orig client 0x3f890
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
@@ -485,6 +240,7 @@ void CPython::PrimaryAttack() // orig 0xabe10
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonLightning, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, m_pPlayer->pev->waterlevel == 3 ? 1 : 0, 0);
 
+#ifndef CLIENT_DLL
 	TraceResult tr;
 	UTIL_TraceLine(vecSrc, vecSrc + gpGlobals->v_forward * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
 
@@ -507,10 +263,11 @@ void CPython::PrimaryAttack() // orig 0xabe10
 	m_vecHurtDir = gpGlobals->v_forward;
 	SetThink(&CPython::DelayedHurt);
 	pev->nextthink = gpGlobals->time + 0.001;
+#endif
 }
 
 // Starts charging the chain lightning: it fires from WeaponFrame when the charge is done
-void CPython::SecondaryAttack() // orig 0xac2f0
+void CPython::SecondaryAttack() // orig 0xac2f0, orig client 0x3fc50
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
@@ -562,12 +319,12 @@ void CPython::SecondaryAttack() // orig 0xac2f0
 	m_fInAttack = 3;
 	m_flChargeDone = gpGlobals->time + RC2Pref(RC2P_Python_SharedChargeTime).f;
 
-	SendWeaponAnim(PYTHON_IDLE1, g_pGameRules->IsMultiplayer() ? 1 : 0);
+	SendWeaponAnim(PYTHON_IDLE1, PYTHON_MULTIPLAYER() ? 1 : 0);
 }
 
 // Starts charging the ball lightning: one round now, the rest of [Python] BallAmmoCost over
 // the charge (WeaponFrame), and it fires from WeaponFrame when the charge is done
-void CPython::TertiaryAttack() // orig 0xac5b0
+void CPython::TertiaryAttack() // orig 0xac5b0, orig client 0x3ff90
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
@@ -616,19 +373,20 @@ void CPython::TertiaryAttack() // orig 0xac5b0
 	m_fInAttack = 2;
 	m_flChargeDone = gpGlobals->time + RC2Pref(RC2P_Python_SharedChargeTime).f;
 
-	SendWeaponAnim(PYTHON_IDLE1, g_pGameRules->IsMultiplayer() ? 1 : 0);
+	SendWeaponAnim(PYTHON_IDLE1, PYTHON_MULTIPLAYER() ? 1 : 0);
 }
 
 // The lightning bolt's hurt, one think after PrimaryAttack traced it
-void CPython::DelayedHurt() // orig 0xac860
+void CPython::DelayedHurt() // orig 0xac860, orig client 0x402b0 (empty on the client)
 {
+#ifndef CLIENT_DLL
 	if (!m_hTarget)
 		return;
 
 	if (m_hTarget->pev->takedamage == DAMAGE_NO)
 		return;
 
-	// VERIFY: the last argument, 6, as ShieldDeflect reads it (the chain passes 8)
+	// VERIFY: the last argument, 6, as RC2ShieldAbsorb reads it (the chain passes 8)
 	const float flDamage = ShieldDeflect(m_hTarget, RC2Pref(RC2P_Python_PrimaryDamage).f, RC2Pref(RC2P_Python_PrimaryShieldFraction).f,
 		m_trHurt.vecEndPos, m_vecHurtDir, NULL, NULL, 6);
 
@@ -641,7 +399,10 @@ void CPython::DelayedHurt() // orig 0xac860
 
 	m_hTarget = NULL;
 	SetThink(NULL);
+#endif
 }
+
+#ifndef CLIENT_DLL
 
 // One jump of the chain lightning: from vecFrom (pentFrom, which the traces skip) to every
 // player within [Python] ChainMaxChainDistance it can see that pHitBits (one bit per entity
@@ -716,8 +477,10 @@ void CPython::ChainTo(int iDepth, Vector vecFrom, edict_t* pentFrom, unsigned ch
 	}
 }
 
+#endif
+
 // The chain lightning, when its charge is done (WeaponFrame)
-void CPython::FireChain() // orig 0xacea0
+void CPython::FireChain() // orig 0xacea0, orig client 0x402f0
 {
 	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
@@ -748,14 +511,17 @@ void CPython::FireChain() // orig 0xacea0
 		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonChain, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 1, 0);
 
+#ifndef CLIENT_DLL
 		UTIL_RC2WaterDischarge(m_pPlayer->Center(), RC2Pref(RC2P_Python_ChainSelfDischargeDamage).f,
 			UTIL_RC2DamageInflictor("357_discharge"), m_pPlayer->pev);
+#endif
 		return;
 	}
 
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonChain, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
+#ifndef CLIENT_DLL
 	// VERIFY: which client effect type 0x0e is (the charge's, presumably)
 	MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 	WRITE_BYTE(CLTE_KILL);
@@ -805,10 +571,11 @@ void CPython::FireChain() // orig 0xacea0
 	ChainTo(8, pEntity->Center(), pEntity->edict(), pHitBits, false);
 
 	free(pHitBits);
+#endif
 }
 
 // The ball lightning, when its charge is done (WeaponFrame)
-void CPython::FireBall() // orig 0xad3c0
+void CPython::FireBall() // orig 0xad3c0, orig client 0x404f0
 {
 	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
@@ -839,14 +606,17 @@ void CPython::FireBall() // orig 0xad3c0
 		if (g_fRC2PlayWeaponEvents)
 			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonFireball, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 1, 0);
 
+#ifndef CLIENT_DLL
 		UTIL_RC2WaterDischarge(m_pPlayer->Center(), RC2Pref(RC2P_Python_BallSelfDischargeDamage).f,
 			UTIL_RC2DamageInflictor("357_discharge"), m_pPlayer->pev);
+#endif
 		return;
 	}
 
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usPythonFireball, 0.0, g_vecZero, g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
+#ifndef CLIENT_DLL
 	// VERIFY: which client effect type 0x0e is (the charge's, presumably)
 	MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
 	WRITE_BYTE(CLTE_KILL);
@@ -867,9 +637,10 @@ void CPython::FireBall() // orig 0xad3c0
 		if (UTIL_IsValidEntity(pentRidden))
 			pBall->pev->owner = pentRidden;
 	}
+#endif
 }
 
-void CPython::Reload() // orig 0xad6b0
+void CPython::Reload() // orig 0xad6b0, orig client 0x406f0
 {
 	if (m_pPlayer->ammo_357 <= 0 || 0 != m_fInAttack)
 		return;
@@ -881,11 +652,11 @@ void CPython::Reload() // orig 0xad6b0
 		m_pPlayer->pev->fov = 0;
 	}
 
-	if (DefaultReload(RC2Pref(RC2P_Ammo_PythonClipSize).s, PYTHON_RELOAD, RC2Pref(RC2P_Python_ReloadTime).f, g_pGameRules->IsMultiplayer() ? 1 : 0))
+	if (DefaultReload(RC2Pref(RC2P_Ammo_PythonClipSize).s, PYTHON_RELOAD, RC2Pref(RC2P_Python_ReloadTime).f, PYTHON_MULTIPLAYER() ? 1 : 0))
 		m_flReloadSoundTime = 1.5;
 }
 
-void CPython::WeaponIdle() // orig 0xad730
+void CPython::WeaponIdle() // orig 0xad730, orig client 0x40790
 {
 	if (0 != m_fInAttack)
 		return;
@@ -927,12 +698,12 @@ void CPython::WeaponIdle() // orig 0xad730
 		m_flTimeWeaponIdle = (170.0 / 30.0);
 	}
 
-	SendWeaponAnim(iAnim, g_pGameRules->IsMultiplayer() ? 1 : 0);
+	SendWeaponAnim(iAnim, PYTHON_MULTIPLAYER() ? 1 : 0);
 }
 
 // First thing in every ItemPostFrame: takes the ball's rounds over its charge, and fires
 // the charge when it is done
-void CPython::WeaponFrame() // orig 0xad880
+void CPython::WeaponFrame() // orig 0xad880, orig client 0x40950
 {
 	if (0 == m_iChargeState)
 		return;
@@ -970,19 +741,19 @@ bool CPython::CanHolster() // orig 0xadac0
 
 class CPythonAmmo : public CBasePlayerAmmo
 {
-	void Spawn() override // orig 0xad9f0
+	void Spawn() override // orig 0xad9f0, orig client 0x40bc0
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_357ammobox.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
-	void Precache() override // orig 0xada20
+	void Precache() override // orig 0xada20, orig client 0x40c00
 	{
 		PRECACHE_MODEL("models/w_357ammobox.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	// VERIFY: RC2's GiveAmmo takes a fourth argument (0 here); halflife-updated's has three
-	bool AddAmmo(CBaseEntity* pOther) override // orig 0xada40
+	bool AddAmmo(CBaseEntity* pOther) override // orig 0xada40, orig client 0x40c30
 	{
 		if (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_PythonSpareClipGive).s, "357", RC2Pref(RC2P_Ammo_MaxCarry357).s) != -1)
 		{
@@ -993,7 +764,8 @@ class CPythonAmmo : public CBasePlayerAmmo
 	}
 };
 // VERIFY: the original's factory also calls RC 1.9's AddToPrecachedList("ammo_357") (0xf5a20); the shared macro doesn't yet
+// orig client 0x40a90 (and its GetClassPtr<CPythonAmmo>, orig client 0x40b40)
 LINK_ENTITY_TO_CLASS(ammo_357, CPythonAmmo); // orig 0xad980
 
 
-#endif // CLIENT_DLL
+

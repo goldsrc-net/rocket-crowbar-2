@@ -481,7 +481,12 @@ public:
 // uses it too), and the flags around it. Names ours.
 void RC2RandomizeItem(CBaseEntity* pItem);
 extern bool g_fRC2Randomize;
-extern bool g_fRC2PlayWeaponEvents;
+#ifdef CLIENT_DLL
+extern bool g_runfuncs;							  // cl_dll/com_weapons.cpp
+#define g_fRC2PlayWeaponEvents g_runfuncs // the original's one event flag is g_runfuncs on the client
+#else
+extern bool g_fRC2PlayWeaponEvents; // weapons.cpp
+#endif
 extern unsigned short g_usExplodeEvent;
 
 // Rocket Crowbar 2: the readers ReadWeaponState's overrides call, as the server has them: each
@@ -666,7 +671,6 @@ enum crowbar_e
 class CCrowbar : public CBasePlayerWeapon
 {
 public:
-#ifndef CLIENT_DLL
 	// Rocket Crowbar 2's crowbar (p2, dlls/crowbar.cpp): a charged swing that shoves, a rocket,
 	// the crowbarang throw, and the charge itself (fourth attack, held).
 	void Spawn() override;
@@ -702,34 +706,6 @@ public:
 	unsigned short m_usCrowbar;	   // orig +0x130, events/crowbar.sc
 	unsigned short m_usCrowbarSwing; // orig +0x132, events/crowbarswing.sc
 	unsigned short m_usCbarCharge; // orig +0x134, events/cbarcharge.sc
-#else
-	// halflife-updated's client prediction, until RC2's client.dll is reconstructed
-	void Spawn() override;
-	void Precache() override;
-	int iItemSlot() override { return 1; }
-	void EXPORT SwingAgain();
-	void EXPORT Smack();
-	bool GetItemInfo(ItemInfo* p) override;
-
-	void PrimaryAttack() override;
-	bool Swing(bool fFirst);
-	bool Deploy() override;
-	void Holster() override;
-	int m_iSwing;
-	TraceResult m_trHit;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
-private:
-	unsigned short m_usCrowbar;
-#endif
 };
 
 enum python_e
@@ -770,10 +746,8 @@ public:
 private:
 	unsigned short m_usFirePython;
 
-	// p6 needs: Rocket Crowbar 2's python (dlls/python.cpp, server only; the client keeps
-	// halflife-updated's above). Size 0x140 in the original. No save table, so every member
-	// name is ours.
-#ifndef CLIENT_DLL
+	// p6 needs: Rocket Crowbar 2's python (dlls/python.cpp; the client's prediction is the same
+	// class, c1). Size 0x140 in the original. No save table, so every member name is ours.
 public:
 	void AddToPlayer(CBasePlayer* pPlayer) override;
 	bool CanHolster() override;
@@ -798,7 +772,6 @@ public:
 	unsigned short m_usPythonFireball; // orig +0x13a: events/pythonfireball.sc
 	unsigned short m_usPythonChain;	   // orig +0x13c: events/pythonchain.sc
 	unsigned short m_usPythonPrefire;  // orig +0x13e: events/pythonprefire.sc
-#endif
 };
 
 enum mp5_e
@@ -891,8 +864,7 @@ enum crossbow_e
 class CCrossbow : public CBasePlayerWeapon
 {
 public:
-#ifndef CLIENT_DLL
-	// Rocket Crowbar 2's crossbow (p2, dlls/crossbow.cpp): four attacks, zoomed or not, firing
+	// Rocket Crowbar 2's crossbow (p2, dlls/crossbow.cpp; the client's prediction is the same class, c1): four attacks, zoomed or not, firing
 	// impailers, tethers and exploding bolts, or delayed hitscan hurts when zoomed.
 	void Spawn() override;
 	void Precache() override;
@@ -938,35 +910,6 @@ public:
 	unsigned short m_usSuperZoomed;	 // orig +0x146, events/xbowsuperzoomed.sc
 	unsigned short m_usExploZoomed;	 // orig +0x148, events/xbowexplozoomed.sc
 	unsigned short m_usExplodeBolt;	 // orig +0x14a, events/xbowimpailer.sc again
-#else
-	// halflife-updated's client prediction, until RC2's client.dll is reconstructed
-	void Spawn() override;
-	void Precache() override;
-	int iItemSlot() override { return 3; }
-	bool GetItemInfo(ItemInfo* p) override;
-
-	void FireBolt();
-	void FireSniperBolt();
-	void PrimaryAttack() override;
-	void SecondaryAttack() override;
-	bool Deploy() override;
-	void Holster() override;
-	void Reload() override;
-	void WeaponIdle() override;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
-private:
-	unsigned short m_usCrossbow;
-	unsigned short m_usCrossbow2;
-#endif
 };
 
 enum shotgun_e
@@ -1175,9 +1118,12 @@ public:
 
 	bool UseDecrement() override { return true; } // orig 0x4fc90 (RC2 returns 1 without the CLIENT_WEAPONS test)
 
-#ifndef CLIENT_DLL
 	CGaussBecon* FindBecon();
+#ifndef CLIENT_DLL
 	bool HasBecon() { return FindBecon() != NULL; } // orig 0x4d4b0
+#else
+	bool HasBecon() { return m_blHasBecon; } // orig client 0x31a50: the client knows only what WeaponSync said
+#endif
 	bool CanPlaceAt(CBaseEntity* pEnt, Vector vecSpot);
 	bool TeleFragEnt(CBaseEntity* pMover, CBaseEntity* pInBox, CBaseEntity* pSkip);
 	bool TeleFragBox(CBaseEntity* pMover, Vector vecSpot, CBaseEntity* pSkip);
@@ -1188,7 +1134,6 @@ public:
 	void TertiaryFireNoBecon();
 	void TertiaryFireBecon();
 	void RaiseAttackTimes(float flDelay);
-#endif
 
 	bool m_blHasBecon;			  // orig +0xdc: the player's beacon is out (sent to the client with WeaponSync)
 	float m_flNextBeconSync;	  // orig +0xe0: when WeaponFrame next sends m_blHasBecon
@@ -1239,7 +1184,6 @@ enum EGON_FIREMODE
 class CEgon : public CBasePlayerWeapon
 {
 public:
-#ifndef CLIENT_DLL
 	// Rocket Crowbar 2's egon (p2, dlls/egon.cpp): a tractor beam (primary; secondary and
 	// tertiary push and pull what it holds, quaternary throws it), the shrinker (secondary),
 	// the imploder (tertiary, charged; secondary while charging shrinks yourself) and the nuke
@@ -1283,68 +1227,6 @@ public:
 	unsigned short m_usFireNuke;	  // orig +0x106, events/egonfirenuke.sc
 	unsigned short m_usTractor;		  // orig +0x108, events/egontractor.sc
 	unsigned short m_usShrinkerImpact; // orig +0x10a, events/egonshrinkerimpact.sc
-#else
-	// halflife-updated's client prediction, until RC2's client.dll is reconstructed
-#ifndef CLIENT_DLL
-	bool Save(CSave& save) override;
-	bool Restore(CRestore& restore) override;
-	static TYPEDESCRIPTION m_SaveData[];
-#endif
-
-	void Spawn() override;
-	void Precache() override;
-	int iItemSlot() override { return 4; }
-	bool GetItemInfo(ItemInfo* p) override;
-
-	bool Deploy() override;
-	void Holster() override;
-
-	void UpdateEffect(const Vector& startPoint, const Vector& endPoint, float timeBlend);
-
-	void CreateEffect();
-	void DestroyEffect();
-
-	void EndAttack();
-	void Attack();
-	void PrimaryAttack() override;
-	bool ShouldWeaponIdle() override { return true; }
-	void WeaponIdle() override;
-
-	float m_flAmmoUseTime; // since we use < 1 point of ammo per update, we subtract ammo on a timer.
-
-	float GetPulseInterval();
-	float GetDischargeInterval();
-
-	void Fire(const Vector& vecOrigSrc, const Vector& vecDir);
-
-	bool HasAmmo();
-	bool CanHolster();
-
-	void UseAmmo(int count);
-
-	CBeam* m_pBeam;
-	CBeam* m_pNoise;
-	CSprite* m_pSprite;
-
-	bool UseDecrement() override
-	{
-#if defined(CLIENT_WEAPONS)
-		return true;
-#else
-		return false;
-#endif
-	}
-
-	unsigned short m_usEgonStop;
-
-private:
-	float m_shootTime;
-	EGON_FIREMODE m_fireMode;
-	float m_shakeTime;
-	bool m_deployed;
-
-	unsigned short m_usEgonFire;
-#endif
 };
 
 enum hgun_e
@@ -1549,10 +1431,9 @@ public:
 #endif
 	}
 
-	// Rocket Crowbar 2 (dlls/rc2/tripmine_weapon.cpp): four mines, one per attack: monster_tripmine
+	// Rocket Crowbar 2 (tripmine.cpp): four mines, one per attack: monster_tripmine
 	// (PrimaryAttack), bouncy_tripmine, punch_tripmine and target_tripmine, each with its [Tripmine]
-	// ammo cost, limit and refire keys. Server only: the client's tripmine keeps the stock attack.
-#ifndef CLIENT_DLL
+	// ammo cost, limit and refire keys. The client's prediction is the same class (c1).
 	void SecondaryAttack() override;
 	void TertiaryAttack() override;
 	void QuaternaryAttack() override;
@@ -1561,7 +1442,6 @@ public:
 
 	int CountMines(const char* szClassname); // name ours
 	void MineAttack(int iMine);				 // name ours: the body of all four attacks
-#endif
 
 	int m_iMinesOut[4];			// name ours. orig +0xdc..+0xe8: this player's mines of each kind in the world
 	float m_flNextMinesOutSend; // name ours. orig +0xec: when WeaponFrame next sends m_iMinesOut
@@ -1608,14 +1488,12 @@ private:
 	unsigned short m_usSnarkFire; // orig +0xec, "events/snarkfire.sc"
 
 public:
-	// CSqueak's RC2 members and overrides: p8's attacks (dlls/rc2/squeak.cpp), p7's functions.
-	// Names ours.
-#ifndef CLIENT_DLL
+	// CSqueak's RC2 members and overrides: p8's attacks (now in squeakgrenade.cpp, c1: the client
+	// compiles them too), p7's functions. Names ours.
 	void TertiaryAttack() override;
 	void QuaternaryAttack() override;
 	void WeaponFrame() override;
 	void ReadWeaponState(void* pData, int iSize) override;
-#endif
 	int m_iSnarksDeployed;			  // orig +0xe0: live monster_snarks this player owns
 	int m_iCamsDeployed;			  // orig +0xe4: snark_cams this player owns
 	float m_flNextWeaponSync;		  // orig +0xe8: gpGlobals->time at Spawn and Deploy (p7), then when WeaponFrame next sends WeaponSync (p8)

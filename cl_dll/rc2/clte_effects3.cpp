@@ -1716,28 +1716,7 @@ bool CTentHEVFlame::KillEntity(int iEnt)
 	return true;
 }
 
-// TEMP STUB (c2): real ones belong in the client's weapon and event files (client 0x3b400,
-// 0x3b560, 0xdd40, other packages')
-int UTIL_PackNormal(Vector vecDir)
-{
-	const Vector n = vecDir.Normalize();
-	int x = (int)(fabs(n.x) * 511.0);
-	if (n.x < 0)
-		x |= 0x200;
-	int y = (int)(fabs(n.y) * 511.0);
-	if (n.y < 0)
-		y |= 0x200;
-	int z = (int)(fabs(n.z) * 511.0);
-	if (n.z < 0)
-		z |= 0x200;
-	return z << 20 | x | y << 10;
-}
-
-Vector UTIL_ReflectVector(Vector vecDir, Vector vecNormal)
-{
-	return vecDir + vecNormal * 2 * -DotProduct(vecDir, vecNormal);
-}
-
+// TEMP STUB (c2): real one belongs in the client's event files (client 0xdd40, c1's)
 int EV_RideTarget(int iEnt)
 {
 	return iEnt;

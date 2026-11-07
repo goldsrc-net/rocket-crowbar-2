@@ -30,8 +30,8 @@
 #include "weapons.h"
 #include "player.h"
 
-#ifndef CLIENT_DLL
 #include "rc2prefs.h"
+#ifndef CLIENT_DLL
 #include "UserMessages.h"
 
 extern bool g_fRC2PlayWeaponEvents; // weapons.cpp
@@ -39,14 +39,18 @@ extern bool g_fRC2PlayWeaponEvents; // weapons.cpp
 // RC2's CLTE user message: the byte that tells the client which temp entity follows
 #define CLTE_STOPEFFECT 0xfe // ours: then the player's index and the effect (13: the charge glow)
 #define CLTE_CHARGEGLOW 13	 // ours
+#else
+// The client's prediction (client.dll, reference/dossiers/c1.md) compiles the same code without
+// the gibs, the fart's push, the charge glow messages and the shot itself. The original's one
+// event flag is g_runfuncs on the client (weapons.h).
 #endif
 
+// orig client 0x33a60 and orig client 0x33a90 (their GetClassPtr<CGlock> is at the ammo, below); the inline
+// iItemSlot, UseDecrement and CanHolster are orig client 0x35130, orig client 0x35150 and orig client 0x35170
 LINK_ENTITY_TO_CLASS(weapon_glock, CGlock);		 // orig 0x54c00
 LINK_ENTITY_TO_CLASS(weapon_9mmhandgun, CGlock); // orig 0x54cb0
 
-#ifndef CLIENT_DLL
-
-// orig 0x54d20
+// orig 0x54d20, orig client 0x33ac0
 void CGlock::Spawn()
 {
 	pev->classname = MAKE_STRING("weapon_9mmhandgun"); // hack to allow for old names
@@ -61,7 +65,7 @@ void CGlock::Spawn()
 }
 
 
-// orig 0x54d90
+// orig 0x54d90, orig client 0x33b50
 void CGlock::Precache()
 {
 	PRECACHE_MODEL("models/v_9mmhandgun.mdl");
@@ -92,7 +96,7 @@ void CGlock::Precache()
 	m_usFart = PRECACHE_EVENT(1, "events/glockfart.sc");
 }
 
-// orig 0x54eb0
+// orig 0x54eb0, orig client 0x33cc0
 bool CGlock::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
@@ -110,7 +114,7 @@ bool CGlock::GetItemInfo(ItemInfo* p)
 	return true;
 }
 
-// orig 0x54f20
+// orig 0x54f20, orig client 0x33d50
 bool CGlock::Deploy()
 {
 	m_fInAttack = 0;
@@ -120,6 +124,7 @@ bool CGlock::Deploy()
 
 // Stop the charge glow the client draws on the player (CLTE 0xfe, effect 13). Inline in the
 // original's Holster and FireTransphasic.
+#ifndef CLIENT_DLL
 static void GlockStopChargeGlow(CBasePlayer* pPlayer) // name ours
 {
 	MESSAGE_BEGIN(MSG_ALL, gmsgCLTE);
@@ -128,12 +133,15 @@ static void GlockStopChargeGlow(CBasePlayer* pPlayer) // name ours
 	WRITE_BYTE(CLTE_CHARGEGLOW);
 	MESSAGE_END();
 }
+#endif
 
-// orig 0x54f50
+// orig 0x54f50, orig client 0x33d90
 void CGlock::Holster()
 {
+#ifndef CLIENT_DLL
 	if (m_fInAttack != 0)
 		GlockStopChargeGlow(m_pPlayer);
+#endif
 
 	m_fInAttack = 0;
 	m_fCharging = false;
@@ -160,6 +168,7 @@ static void GlockRaiseAll(CGlock* pGlock, float flPrimary, float flSecondary, fl
 
 // A thrown gib is owned by the player in the player's m_iRidingIndex (orig +0x69c) when there
 // is one, else by the player (Create's owner). Inline in each attack in the original.
+#ifndef CLIENT_DLL
 static void GlockGibOwner(CBasePlayer* pPlayer, CBaseEntity* pGib) // name ours
 {
 	if (pPlayer->m_iRidingIndex != 0)
@@ -169,8 +178,9 @@ static void GlockGibOwner(CBasePlayer* pPlayer, CBaseEntity* pGib) // name ours
 			pGib->pev->owner = pent;
 	}
 }
+#endif
 
-// orig 0x54fd0
+// orig 0x54fd0, orig client 0x33dc0
 // Primary: the bouncing gib.
 void CGlock::PrimaryAttack()
 {
@@ -202,14 +212,16 @@ void CGlock::PrimaryAttack()
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 
+#ifndef CLIENT_DLL
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 	CBaseEntity* pGib = CBaseEntity::Create("glock_gib", vecSrc, g_vecZero, m_pPlayer->edict());
 	pGib->pev->velocity = gpGlobals->v_forward * RC2Pref(RC2P_Glock_GibLaunchVel).f;
 	pGib->pev->velocity.z += RC2Pref(RC2P_Glock_GibLaunchZBoost).f;
 	GlockGibOwner(m_pPlayer, pGib);
+#endif
 }
 
-// orig 0x552e0
+// orig 0x552e0, orig client 0x34090 (the client's doesn't push)
 // Secondary: the fart, a push along the view (not under water) and an event. The server deals
 // no damage here.
 void CGlock::SecondaryAttack()
@@ -250,14 +262,16 @@ void CGlock::SecondaryAttack()
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 
+#ifndef CLIENT_DLL
 	if (m_pPlayer->pev->waterlevel < 2)
 	{
 		UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 		m_pPlayer->pev->velocity = gpGlobals->v_forward * RC2Pref(RC2P_Glock_FartVelAdd).f + m_pPlayer->pev->velocity;
 	}
+#endif
 }
 
-// orig 0x55620
+// orig 0x55620, orig client 0x343f0
 // Tertiary: the sticky gas gib.
 void CGlock::TertiaryAttack()
 {
@@ -289,14 +303,16 @@ void CGlock::TertiaryAttack()
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
 
+#ifndef CLIENT_DLL
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 	CBaseEntity* pGib = CBaseEntity::Create("glock_stickygib", vecSrc, g_vecZero, m_pPlayer->edict());
 	pGib->pev->velocity = gpGlobals->v_forward * RC2Pref(RC2P_Glock_StickyLaunchVel).f;
 	pGib->pev->velocity.z += RC2Pref(RC2P_Glock_StickyLaunchZBoost).f;
 	GlockGibOwner(m_pPlayer, pGib);
+#endif
 }
 
-// orig 0x55940
+// orig 0x55940, orig client 0x346c0
 // Quaternary: start the transphasic charge. It costs energy up front; WeaponFrame burns clip
 // rounds while it runs and fires when it is done.
 void CGlock::QuaternaryAttack()
@@ -340,7 +356,7 @@ void CGlock::QuaternaryAttack()
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usTPCharge, 0.0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 }
 
-// orig 0x55b80
+// orig 0x55b80, orig client 0x34990 (the client's stops after the aim)
 // The charge's shot: the transphasic gib along the view, with the shooter's ping as head start
 // (TGibThink adds it to its first step), and a recoil that lifts the player off the ground.
 void CGlock::FireTransphasic()
@@ -374,6 +390,7 @@ void CGlock::FireTransphasic()
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 
+#ifndef CLIENT_DLL
 	GlockStopChargeGlow(m_pPlayer);
 
 	CBaseEntity* pGib = CBaseEntity::Create("transphasic_gib", vecSrc, g_vecZero, m_pPlayer->edict());
@@ -396,9 +413,10 @@ void CGlock::FireTransphasic()
 	WRITE_SHORT(0);
 	WRITE_LONG(1);
 	MESSAGE_END();
+#endif
 }
 
-// orig 0x56050
+// orig 0x56050, orig client 0x34d50
 // While charging: a clip round every ChargeTime / AmmoCost seconds, then the shot.
 void CGlock::WeaponFrame()
 {
@@ -418,6 +436,10 @@ void CGlock::WeaponFrame()
 		return;
 	}
 
+#ifdef CLIENT_DLL
+	// the client's alone: the idle animation every frame of the charge
+	SendWeaponAnim(GLOCK_IDLE2);
+#endif
 	m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flNextTertiaryAttack = UTIL_WeaponTimeBase() + 1.5;
 	m_flNextQuaternaryAttack = UTIL_WeaponTimeBase() + 4.0;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
@@ -425,7 +447,7 @@ void CGlock::WeaponFrame()
 }
 
 
-// orig 0x55ee0
+// orig 0x55ee0, orig client 0x34b70
 void CGlock::Reload()
 {
 	if (m_pPlayer->ammo_9mm <= 0)
@@ -446,7 +468,7 @@ void CGlock::Reload()
 }
 
 
-// orig 0x55f70
+// orig 0x55f70, orig client 0x34c30
 void CGlock::WeaponIdle()
 {
 	ResetEmptySound();
@@ -484,47 +506,24 @@ void CGlock::WeaponIdle()
 	}
 }
 
-#else // CLIENT_DLL: RC2's client weapons are its own library's
-
-void CGlock::Spawn()
-{
-	Precache();
-	m_iId = WEAPON_GLOCK;
-	FallInit();
-}
-void CGlock::Precache() {}
-bool CGlock::GetItemInfo(ItemInfo* p) { return false; }
-bool CGlock::Deploy() { return DefaultDeploy("models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded", 0); }
-void CGlock::Holster() { SendWeaponAnim(GLOCK_HOLSTER); }
-void CGlock::PrimaryAttack() {}
-void CGlock::SecondaryAttack() {}
-void CGlock::TertiaryAttack() {}
-void CGlock::QuaternaryAttack() {}
-void CGlock::FireTransphasic() {}
-void CGlock::WeaponFrame() {}
-void CGlock::Reload() {}
-void CGlock::WeaponIdle() {}
-
-#endif // CLIENT_DLL
 
 
-#ifndef CLIENT_DLL
 class CGlockAmmo : public CBasePlayerAmmo
 {
-	// orig 0x561d0
+	// orig 0x561d0, orig client 0x35020
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
-	// orig 0x56200
+	// orig 0x56200, orig client 0x35060
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_9mmclip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
-	// orig 0x56220
+	// orig 0x56220, orig client 0x35090
 	bool AddAmmo(CBaseEntity* pOther) override
 	{
 		if (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_GlockSpareClipGive).s, "9mm", RC2Pref(RC2P_Ammo_MaxCarry9mmBullets).s) != -1)
@@ -535,6 +534,7 @@ class CGlockAmmo : public CBasePlayerAmmo
 		return false;
 	}
 };
+// orig client 0x34ec0 and orig client 0x34ef0 (and the GetClassPtrs, orig client 0x34f20 for CGlock and
+// orig client 0x34fa0 for CGlockAmmo)
 LINK_ENTITY_TO_CLASS(ammo_glockclip, CGlockAmmo); // orig 0x56160
 LINK_ENTITY_TO_CLASS(ammo_9mmclip, CGlockAmmo);	  // orig 0x56280
-#endif

@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -26,56 +26,6 @@
 #include "entity_types.h"
 #include "r_efx.h"
 
-extern BEAM* pBeam;
-extern BEAM* pBeam2;
-void HUD_GetLastOrg(float* org);
-
-void UpdateBeams()
-{
-	Vector forward, vecSrc, vecEnd, origin, angles, right, up;
-	Vector view_ofs;
-	pmtrace_t tr;
-	cl_entity_t* pthisplayer = gEngfuncs.GetLocalPlayer();
-	int idx = pthisplayer->index;
-
-	// Get our exact viewangles from engine
-	gEngfuncs.GetViewAngles((float*)angles);
-
-	// Determine our last predicted origin
-	HUD_GetLastOrg((float*)&origin);
-
-	AngleVectors(angles, forward, right, up);
-
-	VectorCopy(origin, vecSrc);
-
-	VectorMA(vecSrc, 2048, forward, vecEnd);
-
-	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
-
-	// Store off the old count
-	gEngfuncs.pEventAPI->EV_PushPMStates();
-
-	// Now add in all of the players.
-	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
-
-	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
-
-	gEngfuncs.pEventAPI->EV_PopPMStates();
-
-	if (pBeam)
-	{
-		pBeam->target = tr.endpos;
-		pBeam->die = gEngfuncs.GetClientTime() + 0.1; // We keep it alive just a little bit forward in the future, just in case.
-	}
-
-	if (pBeam2)
-	{
-		pBeam2->target = tr.endpos;
-		pBeam2->die = gEngfuncs.GetClientTime() + 0.1; // We keep it alive just a little bit forward in the future, just in case.
-	}
-}
-
 /*
 =====================
 Game_AddObjects
@@ -83,8 +33,7 @@ Game_AddObjects
 Add game specific, client-side objects here
 =====================
 */
+// orig client 0x38f50. RC2: empty; its egon has no client beams, so SDK 2.3's UpdateBeams is gone
 void Game_AddObjects()
 {
-	if (pBeam || pBeam2)
-		UpdateBeams();
 }

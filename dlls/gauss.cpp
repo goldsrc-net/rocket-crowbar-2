@@ -37,9 +37,13 @@
 #include "gamerules.h"
 #include "UserMessages.h"
 
-#ifndef CLIENT_DLL
 #include "rc2prefs.h"
+#ifndef CLIENT_DLL
 #include "gaussbecon.h"
+#else
+// The client's prediction (client.dll, reference/dossiers/c1.md) compiles the same code: it spends
+// the ammo and sets the timers, but finds, teleports and telefrags nothing, and knows whether the
+// beacon is out only from WeaponSync. The original's one event flag is g_runfuncs on the client (weapons.h).
 #endif
 
 #define RC2_WEAPON_GAUSS 9 // RC2's weapon id for the gauss (SDK 2.3: 7)
@@ -50,12 +54,13 @@
 
 #define GAUSS_TELEFRAG_DAMAGE 50000
 
+// orig client 0x31590 (and its GetClassPtr<CGauss>, orig client 0x33830)
 LINK_ENTITY_TO_CLASS(weapon_gauss, CGauss); // orig 0x4ca70
-
-#ifndef CLIENT_DLL
 
 static int GaussPref(rc2pref_e i) { return RC2Pref(i).s; } // the costs are shorts in rc2.ini
 static float GaussPrefF(rc2pref_e i) { return RC2Pref(i).f; }
+
+#ifndef CLIENT_DLL
 
 // GetRCCaps/GetRCCaps2 as the gauss asks them: the original passes (m_pPlayer, this).
 static int GaussCaps(CBaseEntity* pEnt, CGauss* pGauss)
@@ -67,20 +72,18 @@ static int GaussCaps2(CBaseEntity* pEnt, CGauss* pGauss)
 	return pEnt->GetRCCaps2(pGauss->m_pPlayer, pGauss);
 }
 
-#define GAUSS_AMMO (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
-
 #endif
 
-// orig 0x4cae0
+#define GAUSS_AMMO (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+
+// orig 0x4cae0, orig client 0x315c0
 void CGauss::Spawn()
 {
 	Precache();
 	m_iId = RC2_WEAPON_GAUSS;
 	SET_MODEL(ENT(pev), "models/w_gauss.mdl");
-#ifndef CLIENT_DLL
 	m_iDefaultAmmo = RC2Pref(RC2P_Ammo_GaussPickupGive).s;
 	m_flNextBeconSync = gpGlobals->time;
-#endif
 	m_iTertiaryState = 0;
 	m_fInAttack = 0;
 	m_blHasBecon = false;
@@ -88,7 +91,7 @@ void CGauss::Spawn()
 	FallInit(); // get ready to fall down.
 }
 
-// orig 0x4cb40
+// orig 0x4cb40, orig client 0x31650
 void CGauss::Precache()
 {
 	PRECACHE_MODEL("models/w_gauss.mdl");
@@ -118,23 +121,19 @@ void CGauss::Precache()
 	m_usGaussThird = PRECACHE_EVENT(1, "events/gaussthird.sc");
 }
 
-// orig 0x4d310. RC2 (SDK 2.3) sends WeapPickup here after the base; halflife-updated sends it
+// orig 0x4d310, orig client 0x31840. RC2 (SDK 2.3) sends WeapPickup here after the base; halflife-updated sends it
 // from CBasePlayer::AddPlayerItem, so this only calls the base (as mod-rockcrowbar does).
 void CGauss::AddToPlayer(CBasePlayer* pPlayer)
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-// orig 0x4d370
+// orig 0x4d370, orig client 0x318c0
 bool CGauss::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "uranium";
-#ifndef CLIENT_DLL
 	p->iMaxAmmo1 = RC2Pref(RC2P_Ammo_MaxCarryCells).s;
-#else
-	p->iMaxAmmo1 = URANIUM_MAX_CARRY;
-#endif
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
@@ -147,7 +146,7 @@ bool CGauss::GetItemInfo(ItemInfo* p)
 	return true;
 }
 
-// orig 0x4d3e0
+// orig 0x4d3e0, orig client 0x31950
 bool CGauss::Deploy()
 {
 	m_iTertiaryState = 0;
@@ -156,13 +155,13 @@ bool CGauss::Deploy()
 	return DefaultDeploy("models/v_gauss.mdl", "models/p_gauss.mdl", GAUSS_DRAW, "gauss");
 }
 
-// orig 0x4d450: not while charging the tertiary attack
+// orig 0x4d450, orig client 0x31a10: not while charging the tertiary attack
 bool CGauss::CanHolster()
 {
 	return m_fInAttack == 0;
 }
 
-// orig 0x4d410
+// orig 0x4d410, orig client 0x319a0
 void CGauss::Holster()
 {
 	m_iTertiaryState = 0;
@@ -171,7 +170,7 @@ void CGauss::Holster()
 	SendWeaponAnim(GAUSS_HOLSTER);
 }
 
-// orig 0x50260. No idle animations in RC2: only the next idle time.
+// orig 0x50260, orig client 0x334b0. No idle animations in RC2: only the next idle time.
 void CGauss::WeaponIdle()
 {
 	ResetEmptySound();
@@ -188,24 +187,13 @@ void CGauss::WeaponIdle()
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3;
 }
 
-#ifdef CLIENT_DLL
-
-// RC2's client predicts nothing of this weapon here (its client.dll is reconstructed apart).
-void CGauss::PrimaryAttack() {}
-void CGauss::SecondaryAttack() {}
-void CGauss::TertiaryAttack() {}
-void CGauss::QuaternaryAttack() {}
-void CGauss::WeaponFrame() {}
-void CGauss::ReadWeaponState(void* pData, int iSize) {}
-
-#else
-
-// orig 0x50330
+// orig 0x50330, orig client 0x335c0
 void CGauss::ReadWeaponState(void* pData, int iSize)
 {
 	m_blHasBecon = RC2ReadStateByte(&pData, &iSize);
 }
 
+#ifndef CLIENT_DLL
 // orig 0x4d460: the beacon this player threw (pev->dmg_inflictor names the thrower), or NULL
 CGaussBecon* CGauss::FindBecon()
 {
@@ -217,6 +205,7 @@ CGaussBecon* CGauss::FindBecon()
 	}
 	return NULL;
 }
+#endif
 
 // Every attack's refusal: all four timers at least flDelay from now. (Inline in the original.)
 void CGauss::RaiseAttackTimes(float flDelay)
@@ -227,6 +216,7 @@ void CGauss::RaiseAttackTimes(float flDelay)
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), flDelay);
 }
 
+#ifndef CLIENT_DLL
 // orig 0x4cc80: room for pEnt at vecSpot (RC 1.9's TeleIsValidSpot, here with the gamerules'
 // and the target's say)
 bool CGauss::CanPlaceAt(CBaseEntity* pEnt, Vector vecSpot)
@@ -323,7 +313,9 @@ bool CGauss::TeleFragBox(CBaseEntity* pMover, Vector vecSpot, CBaseEntity* pSkip
 	return true;
 }
 
-// orig 0x4d4c0: puts pEnt's center at vecDest, facing vecAngles, moving at vecVelocity, and makes
+#endif
+
+// orig 0x4d4c0, orig client 0x31a70 (compiled on the client too, though nothing there calls it): puts pEnt's center at vecDest, facing vecAngles, moving at vecVelocity, and makes
 // everything that holds it let go
 void CGauss::TeleportEnt(CBaseEntity* pEnt, Vector vecDest, Vector vecAngles, Vector vecVelocity)
 {
@@ -351,6 +343,7 @@ void CGauss::TeleportEnt(CBaseEntity* pEnt, Vector vecDest, Vector vecAngles, Ve
 	}
 }
 
+#ifndef CLIENT_DLL
 // orig 0x4d620: moves pEnt out from the beacon along its surface's normal (or onto it while it
 // flies), telefragging what's there. False when there's no room.
 bool CGauss::BeconTeleport(CGaussBecon* pBecon, CBaseEntity* pEnt, bool bFlashArrival)
@@ -374,21 +367,22 @@ bool CGauss::BeconTeleport(CGaussBecon* pBecon, CBaseEntity* pEnt, bool bFlashAr
 	TeleportEnt(pEnt, vecDest, Vector(0, pBecon->pev->angles.y, 0), g_vecZero);
 	return true;
 }
+#endif
 
-// orig 0x4d7e0
+// orig 0x4d7e0, orig client 0x31c50
 void CGauss::PrimaryDenyEvent()
 {
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usGaussPrimaryDeny, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 }
 
-// orig 0x4d830: the teleport effect at vecOrigin, for pEnt (its index in iparam2)
+// orig 0x4d830, orig client 0x31cc0: the teleport effect at vecOrigin, for pEnt (its index in iparam2)
 void CGauss::TeleportFlash(CBaseEntity* pEnt, Vector vecOrigin, bool bArrival)
 {
 	PLAYBACK_EVENT_FULL(0, NULL, m_usTeleportFlash, 0, vecOrigin, g_vecZero, 0, 0, 0, ENTINDEX(pEnt->edict()), bArrival ? 1 : 0, 0);
 }
 
-// orig 0x4d890
+// orig 0x4d890, orig client 0x31d40
 void CGauss::PrimaryAttack()
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
@@ -425,9 +419,13 @@ void CGauss::PrimaryAttack()
 		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_PrimaryRefireQuaternary));
 		m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+		// bparam1 1 with the beacon out, 0 without (rc2.dll 0x4e2ee and 0x4db90, client.dll agree)
 		if (g_fRC2PlayWeaponEvents)
-			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussPrimary, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
+			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussPrimary, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 1, 0);
 
+#ifdef CLIENT_DLL
+		return;
+#else
 		CGaussBecon* pBecon = FindBecon();
 		if (!pBecon)
 			return;
@@ -454,6 +452,7 @@ void CGauss::PrimaryAttack()
 			UTIL_Remove(pBecon);
 			return;
 		}
+#endif
 	}
 	else
 	{
@@ -468,8 +467,11 @@ void CGauss::PrimaryAttack()
 		m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		if (g_fRC2PlayWeaponEvents)
-			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussPrimary, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 1, 0);
+			PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussPrimary, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
+#ifdef CLIENT_DLL
+		return;
+#else
 		Vector vecSrc = m_pPlayer->GetGunPosition();
 		UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 		UTIL_TraceLine(vecSrc, vecSrc + gpGlobals->v_forward * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
@@ -543,12 +545,15 @@ void CGauss::PrimaryAttack()
 				m_pPlayer->pev->owner = pentPlayerOwner;
 			}
 		}
+#endif
 	}
 
+#ifndef CLIENT_DLL
 	PrimaryDenyEvent();
+#endif
 }
 
-// orig 0x4e540
+// orig 0x4e540, orig client 0x32280 (the client's takes the cost up front and moves nobody)
 void CGauss::SecondaryAttack()
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
@@ -576,12 +581,18 @@ void CGauss::SecondaryAttack()
 
 		// to the beacon
 		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
+#ifdef CLIENT_DLL
+		GAUSS_AMMO -= GaussPref(RC2P_Gauss_SecondaryCost);
+#endif
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
 		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefirePrimary));
 		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireSecondary));
 		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireTertiary));
 		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_SecondaryRefireQuaternary));
 
+#ifdef CLIENT_DLL
+		return;
+#else
 		CGaussBecon* pBecon = FindBecon();
 		if (!pBecon)
 			return;
@@ -599,6 +610,7 @@ void CGauss::SecondaryAttack()
 		UTIL_Remove(pBecon);
 		m_flNextBeconSync = gpGlobals->time;
 		return;
+#endif
 	}
 
 	if (GAUSS_AMMO < GaussPref(RC2P_Gauss_SecondaryNoBeaconCost))
@@ -617,6 +629,7 @@ void CGauss::SecondaryAttack()
 	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireTertiary));
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_NoBeaconSecondaryRefireQuaternary));
 
+#ifndef CLIENT_DLL
 	TeleportFlash(m_pPlayer, m_pPlayer->pev->origin, false);
 
 	CBaseEntity* pSpot = UTIL_RandomEntityByClassname("info_player_deathmatch");
@@ -632,9 +645,10 @@ void CGauss::SecondaryAttack()
 
 	TeleportFlash(m_pPlayer, pSpot->pev->origin, false);
 	TeleportEnt(m_pPlayer, pSpot->pev->origin, pSpot->pev->angles, g_vecZero);
+#endif
 }
 
-// orig 0x4ea50: starts the charge; WeaponFrame burns ammo while it lasts and then fires it
+// orig 0x4ea50, orig client 0x32700: starts the charge; WeaponFrame burns ammo while it lasts and then fires it
 void CGauss::TertiaryAttack()
 {
 	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
@@ -695,9 +709,36 @@ void CGauss::TertiaryAttack()
 	m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase();
 }
 
-// orig 0x4ee80: throws the beacon, or brings it back (free when the player stands by it)
+// orig 0x4ee80, orig client 0x32c40 (the client's: no free pick-up, no flash, no beacon): throws the beacon, or brings it back (free when the player stands by it)
 void CGauss::QuaternaryAttack()
 {
+#ifdef CLIENT_DLL
+	if (HasBecon())
+	{
+		if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
+		{
+			PlayEmptySound();
+			RaiseAttackTimes(0.15);
+			return;
+		}
+
+		if (GAUSS_AMMO < GaussPref(RC2P_Gauss_BeaconRetriveCost))
+		{
+			PlayEmptySound();
+			RaiseAttackTimes(0.5);
+			return;
+		}
+
+		m_pPlayer->m_iWeaponVolume = 200;
+		GAUSS_AMMO -= GaussPref(RC2P_Gauss_BeaconRetriveCost);
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
+		UTIL_ExtendTime(&m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefirePrimary));
+		UTIL_ExtendTime(&m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireSecondary));
+		UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireTertiary));
+		UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), GaussPrefF(RC2P_Gauss_QuaternaryRefireQuaternary));
+		return;
+	}
+#else
 	if (HasBecon())
 	{
 		CGaussBecon* pBecon = FindBecon();
@@ -745,6 +786,7 @@ void CGauss::QuaternaryAttack()
 			return;
 		}
 	}
+#endif
 
 	if (m_pPlayer->pev->waterlevel == 3 && !PlayerHasAttrFlag200(m_pPlayer))
 	{
@@ -764,15 +806,17 @@ void CGauss::QuaternaryAttack()
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussBecon, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 
+#ifndef CLIENT_DLL
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 	CBaseEntity* pBecon = CBaseEntity::Create("gauss_becon", vecSrc, UTIL_VecToAngles(gpGlobals->v_forward), m_pPlayer->edict());
 	pBecon->pev->velocity = gpGlobals->v_forward * GaussPrefF(RC2P_Gauss_BeaconLaunchVel);
 	pBecon->pev->velocity.z += GaussPrefF(RC2P_Gauss_BeaconLaunchZBoost);
 	pBecon->pev->dmg_inflictor = m_pPlayer->edict();
+#endif
 }
 
-// orig 0x4f4e0: the tertiary charge without a beacon goes off: the player blinks to where the
+// orig 0x4f4e0, orig client 0x32ff0 (the client's stops after the event): the tertiary charge without a beacon goes off: the player blinks to where the
 // beam lands (onto a teleportable thing it hits when there's room above it). A beam into the sky
 // or nothing kills the player ("in_space").
 void CGauss::TertiaryFireNoBecon()
@@ -808,6 +852,7 @@ void CGauss::TertiaryFireNoBecon()
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usGaussThird, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
+#ifndef CLIENT_DLL
 	TraceResult tr;
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -853,9 +898,10 @@ void CGauss::TertiaryFireNoBecon()
 	vecAngles.x = -vecAngles.x;
 	TeleportEnt(m_pPlayer, vecDest, vecAngles, g_vecZero);
 	GAUSS_AMMO -= GaussPref(RC2P_Gauss_TertiaryNoBeaconBurnAmmount);
+#endif
 }
 
-// orig 0x4fca0: the tertiary charge with a beacon goes off: everything teleportable near where
+// orig 0x4fca0, orig client 0x33240 (the client's stops after the cost): the tertiary charge with a beacon goes off: everything teleportable near where
 // the beam lands goes to the beacon, the first with a flash; when more than one went, the last
 // one is telefragged (they land on each other).
 void CGauss::TertiaryFireBecon()
@@ -893,6 +939,7 @@ void CGauss::TertiaryFireBecon()
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	GAUSS_AMMO -= GaussPref(RC2P_Gauss_TertiaryNoBeaconBurnAmmount);
 
+#ifndef CLIENT_DLL
 	CGaussBecon* pBecon = FindBecon();
 	if (!pBecon)
 	{
@@ -951,12 +998,14 @@ void CGauss::TertiaryFireBecon()
 
 	if (iCount > 1 && hLast)
 		hLast->TakeDamage(UTIL_RC2DamageInflictor("gauss_telefrag"), m_pPlayer->pev, GAUSS_TELEFRAG_DAMAGE, DMG_ALWAYSGIB);
+#endif
 }
 
-// orig 0x50360: tells the client whether the beacon is out, burns ammo while the tertiary charges
+// orig 0x50360, orig client 0x33600 (the client's without the sync): tells the client whether the beacon is out, burns ammo while the tertiary charges
 // and fires it when the charge is done
 void CGauss::WeaponFrame()
 {
+#ifndef CLIENT_DLL
 	if (m_flNextBeconSync < gpGlobals->time)
 	{
 		m_flNextBeconSync = gpGlobals->time + 0.25;
@@ -966,6 +1015,7 @@ void CGauss::WeaponFrame()
 		WRITE_BYTE(m_blHasBecon ? 1 : 0);
 		MESSAGE_END();
 	}
+#endif
 
 	if (m_iTertiaryState == 0)
 		return;
@@ -1006,32 +1056,26 @@ void CGauss::WeaponFrame()
 	}
 }
 
-#endif // CLIENT_DLL
-
 
 class CGaussAmmo : public CBasePlayerAmmo
 {
-	// orig 0x505e0
+	// orig 0x505e0, orig client 0x33930
 	void Spawn() override
 	{
 		Precache();
 		SET_MODEL(ENT(pev), "models/w_gaussammo.mdl");
 		CBasePlayerAmmo::Spawn();
 	}
-	// orig 0x50610
+	// orig 0x50610, orig client 0x33970
 	void Precache() override
 	{
 		PRECACHE_MODEL("models/w_gaussammo.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
-	// orig 0x50630. VERIFY: RC2's GiveAmmo takes a fourth argument (0 here); cbase.h has three.
+	// orig 0x50630, orig client 0x339a0. VERIFY: RC2's GiveAmmo takes a fourth argument (0 here); cbase.h has three.
 	bool AddAmmo(CBaseEntity* pOther) override
 	{
-#ifndef CLIENT_DLL
 		if (pOther->GiveAmmo(RC2Pref(RC2P_Ammo_CellBoxGive).s, "uranium", RC2Pref(RC2P_Ammo_MaxCarryCells).s) != -1)
-#else
-		if (pOther->GiveAmmo(AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY) != -1)
-#endif
 		{
 			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			return true;
@@ -1039,4 +1083,6 @@ class CGaussAmmo : public CBasePlayerAmmo
 		return false;
 	}
 };
+// orig client 0x33800 (and its GetClassPtr<CGaussAmmo>, orig client 0x338b0); the inline iItemSlot and
+// UseDecrement are orig client 0x33a20 and orig client 0x33a40
 LINK_ENTITY_TO_CLASS(ammo_gaussclip, CGaussAmmo); // orig 0x50570

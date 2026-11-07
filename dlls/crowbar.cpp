@@ -30,337 +30,52 @@
 #include "UserMessages.h"
 
 #define RC2_CAP_SHOVE 0x1 // GetRCCaps: may be knocked about (name ours)
+#else
 #endif
 
 #define CROWBAR_BODYHIT_VOLUME 128
 #define CROWBAR_WALLHIT_VOLUME 512
 
-#ifdef CLIENT_DLL
-
-// halflife-updated's crowbar, kept for the client's weapon prediction until RC2's client.dll is
-// reconstructed. The server's crowbar is Rocket Crowbar 2's, below.
-
-
-LINK_ENTITY_TO_CLASS(weapon_crowbar, CCrowbar);
-
-void CCrowbar::Spawn()
-{
-	Precache();
-	m_iId = WEAPON_CROWBAR;
-	SET_MODEL(ENT(pev), "models/w_crowbar.mdl");
-	m_iClip = -1;
-
-	FallInit(); // get ready to fall down.
-}
-
-
-void CCrowbar::Precache()
-{
-	PRECACHE_MODEL("models/v_crowbar.mdl");
-	PRECACHE_MODEL("models/w_crowbar.mdl");
-	PRECACHE_MODEL("models/p_crowbar.mdl");
-	PRECACHE_SOUND("weapons/cbar_hit1.wav");
-	PRECACHE_SOUND("weapons/cbar_hit2.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod1.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod2.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod3.wav");
-	PRECACHE_SOUND("weapons/cbar_miss1.wav");
-
-	m_usCrowbar = PRECACHE_EVENT(1, "events/crowbar.sc");
-}
-
-bool CCrowbar::GetItemInfo(ItemInfo* p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = NULL;
-	p->iMaxAmmo1 = -1;
-	p->pszAmmo2 = NULL;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 0;
-	p->iPosition = 0;
-	p->iId = WEAPON_CROWBAR;
-	p->iWeight = CROWBAR_WEIGHT;
-	return true;
-}
-
-
-
-bool CCrowbar::Deploy()
-{
-	return DefaultDeploy("models/v_crowbar.mdl", "models/p_crowbar.mdl", CROWBAR_DRAW, "crowbar");
-}
-
-void CCrowbar::Holster()
-{
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-	SendWeaponAnim(CROWBAR_HOLSTER);
-}
-
-
-void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& mins, const Vector& maxs, edict_t* pEntity)
-{
-	int i, j, k;
-	float distance;
-	const Vector* minmaxs[2] = {&mins, &maxs};
-	TraceResult tmpTrace;
-	Vector vecHullEnd = tr.vecEndPos;
-	Vector vecEnd;
-
-	distance = 1e6f;
-
-	vecHullEnd = vecSrc + ((vecHullEnd - vecSrc) * 2);
-	UTIL_TraceLine(vecSrc, vecHullEnd, dont_ignore_monsters, pEntity, &tmpTrace);
-	if (tmpTrace.flFraction < 1.0)
-	{
-		tr = tmpTrace;
-		return;
-	}
-
-	for (i = 0; i < 2; i++)
-	{
-		for (j = 0; j < 2; j++)
-		{
-			for (k = 0; k < 2; k++)
-			{
-				vecEnd.x = vecHullEnd.x + minmaxs[i]->x;
-				vecEnd.y = vecHullEnd.y + minmaxs[j]->y;
-				vecEnd.z = vecHullEnd.z + minmaxs[k]->z;
-
-				UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, pEntity, &tmpTrace);
-				if (tmpTrace.flFraction < 1.0)
-				{
-					float thisDistance = (tmpTrace.vecEndPos - vecSrc).Length();
-					if (thisDistance < distance)
-					{
-						tr = tmpTrace;
-						distance = thisDistance;
-					}
-				}
-			}
-		}
-	}
-}
-
-
-void CCrowbar::PrimaryAttack()
-{
-	if (!Swing(true))
-	{
-		SetThink(&CCrowbar::SwingAgain);
-		pev->nextthink = gpGlobals->time + 0.1;
-	}
-}
-
-
-void CCrowbar::Smack()
-{
-	DecalGunshot(&m_trHit, BULLET_PLAYER_CROWBAR);
-}
-
-
-void CCrowbar::SwingAgain()
-{
-	Swing(false);
-}
-
-
-bool CCrowbar::Swing(bool fFirst)
-{
-	bool fDidHit = false;
-
-	TraceResult tr;
-
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecEnd = vecSrc + gpGlobals->v_forward * 32;
-
-	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
-
-#ifndef CLIENT_DLL
-	if (tr.flFraction >= 1.0)
-	{
-		UTIL_TraceHull(vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT(m_pPlayer->pev), &tr);
-		if (tr.flFraction < 1.0)
-		{
-			// Calculate the point of intersection of the line (or hull) and the object we hit
-			// This is and approximation of the "best" intersection
-			CBaseEntity* pHit = CBaseEntity::Instance(tr.pHit);
-			if (!pHit || pHit->IsBSPModel())
-				FindHullIntersection(vecSrc, tr, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX, m_pPlayer->edict());
-			vecEnd = tr.vecEndPos; // This is the point on the actual surface (the hull could have hit space)
-		}
-	}
-#endif
-
-	if (fFirst)
-	{
-		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrowbar,
-			0.0, g_vecZero, g_vecZero, 0, 0, 0,
-			0.0, 0, 0.0);
-	}
-
-
-	if (tr.flFraction >= 1.0)
-	{
-		if (fFirst)
-		{
-			// miss
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-
-			// player "shoot" animation
-			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-		}
-	}
-	else
-	{
-		switch (((m_iSwing++) % 2) + 1)
-		{
-		case 0:
-			SendWeaponAnim(CROWBAR_ATTACK1HIT);
-			break;
-		case 1:
-			SendWeaponAnim(CROWBAR_ATTACK2HIT);
-			break;
-		case 2:
-			SendWeaponAnim(CROWBAR_ATTACK3HIT);
-			break;
-		}
-
-		// player "shoot" animation
-		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
-#ifndef CLIENT_DLL
-
-		// hit
-		fDidHit = true;
-		CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
-
-		ClearMultiDamage();
-
-		// JoshA: Changed from < -> <= to fix the full swing logic since client weapon prediction.
-		// -1.0f + 1.0f = 0.0f. UTIL_WeaponTimeBase is always 0 with client weapon prediction (0 time base vs curtime base)
-		if ((m_flNextPrimaryAttack + 1.0f <= UTIL_WeaponTimeBase()) || g_pGameRules->IsMultiplayer())
-		{
-			// first swing does full damage
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB);
-		}
-		else
-		{
-			// subsequent swings do half
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar / 2, gpGlobals->v_forward, &tr, DMG_CLUB);
-		}
-		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-
-#endif
-
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
-
-#ifndef CLIENT_DLL
-		// play thwack, smack, or dong sound
-		float flVol = 1.0;
-		bool fHitWorld = true;
-
-		if (pEntity)
-		{
-			if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
-			{
-				// play thwack or smack sound
-				switch (RANDOM_LONG(0, 2))
-				{
-				case 0:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod1.wav", 1, ATTN_NORM);
-					break;
-				case 1:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod2.wav", 1, ATTN_NORM);
-					break;
-				case 2:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hitbod3.wav", 1, ATTN_NORM);
-					break;
-				}
-				m_pPlayer->m_iWeaponVolume = CROWBAR_BODYHIT_VOLUME;
-				if (!pEntity->IsAlive())
-					return true;
-				else
-					flVol = 0.1;
-
-				fHitWorld = false;
-			}
-		}
-
-		// play texture hit sound
-		// UNDONE: Calculate the correct point of intersection when we hit with the hull instead of the line
-
-		if (fHitWorld)
-		{
-			float fvolbar = TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd - vecSrc) * 2, BULLET_PLAYER_CROWBAR);
-
-			if (g_pGameRules->IsMultiplayer())
-			{
-				// override the volume here, cause we don't play texture sounds in multiplayer,
-				// and fvolbar is going to be 0 from the above call.
-
-				fvolbar = 1;
-			}
-
-			// also play crowbar strike
-			switch (RANDOM_LONG(0, 1))
-			{
-			case 0:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
-				break;
-			case 1:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0, 3));
-				break;
-			}
-
-			// delay the decal a bit
-			m_trHit = tr;
-		}
-
-		m_pPlayer->m_iWeaponVolume = flVol * CROWBAR_WALLHIT_VOLUME;
-#endif
-		SetThink(&CCrowbar::Smack);
-		pev->nextthink = gpGlobals->time + 0.2;
-	}
-	return fDidHit;
-}
-
-#else // !CLIENT_DLL
 
 //=========================================================
 // Rocket Crowbar 2's crowbar. Holding the fourth attack charges it (spending the player's RC2
 // energy); the charge powers the next swing (more damage and a shove, of the victim or of the
 // player off what can't move), the rocket (secondary) or the crowbarang (tertiary, which gives
 // the crowbar away until it comes back). A charge drains away a while after it is released.
-// Every number is rc2.ini [Crowbar]. Reconstructed from rc2.dll (reference/dossiers/p2.md).
+// Every number is rc2.ini [Crowbar]. Reconstructed from rc2.dll (reference/dossiers/p2.md); the
+// client's prediction compiles the same code (client.dll, reference/dossiers/c1.md) without what
+// only the server does. The client has the same inline defaults (orig client 0xbb50 CanHolster,
+// 0xbb70 WeaponIdle, 0xbb90 iItemSlot, 0xbbb0 UseDecrement).
 //
 // Inline defaults the original emitted here, from weapons.h: CBasePlayerItem::CanHolster
 // (orig 0x30450, true), CBasePlayerWeapon::Reload and WeaponIdle (orig 0x30460, orig 0x30470,
 // empty).
 //=========================================================
 
+// orig client 0xa780 (and its GetClassPtr<CCrowbar>, orig client 0xbab0)
 LINK_ENTITY_TO_CLASS(weapon_crowbar, CCrowbar); // orig 0x303e0
 
 // orig 0x304a0. RC2's AddToPlayer refuses the crowbar (returns 0) while a crowbarang this
 // player threw is still out; halflife-updated asks that before AddToPlayer, so it is here.
 bool CCrowbar::CanAddToPlayer(CBasePlayer* pPlayer)
 {
+#ifndef CLIENT_DLL
 	for (CBaseEntity* pBang = UTIL_FindEntityByClassname(NULL, "crowbarang"); pBang; pBang = UTIL_FindEntityByClassname(pBang, "crowbarang"))
 	{
 		if (UTIL_IsValidEntity(pBang->pev->dmg_inflictor) && pBang->pev->dmg_inflictor == pPlayer->edict())
 			return false;
 	}
+#endif
 	return true;
 }
 
-// orig 0x304a0 (the rest of it): the base's
+// orig 0x304a0 (the rest of it), orig client 0xa7b0: the base's
 void CCrowbar::AddToPlayer(CBasePlayer* pPlayer)
 {
 	CBasePlayerWeapon::AddToPlayer(pPlayer);
 }
 
-// orig 0x30520: end a charge; the client hears it end unless bSilent or there was none
+// orig 0x30520, orig client 0xa7d0: end a charge; the client hears it end unless bSilent or there was none
 void CCrowbar::ChargeStop(bool bSilent)
 {
 	edict_t* pPlayer = m_pPlayer->edict();
@@ -371,7 +86,7 @@ void CCrowbar::ChargeStop(bool bSilent)
 	m_flNextSync = gpGlobals->time;
 }
 
-// orig 0x305d0
+// orig 0x305d0, orig client 0xa8e0
 void CCrowbar::Spawn()
 {
 	Precache();
@@ -389,7 +104,7 @@ void CCrowbar::Spawn()
 	FallInit(); // get ready to fall down.
 }
 
-// orig 0x30660
+// orig 0x30660, orig client 0xa9a0
 void CCrowbar::Precache()
 {
 	PRECACHE_MODEL("models/v_crowbar.mdl");
@@ -412,7 +127,7 @@ void CCrowbar::Precache()
 	m_usCbarCharge = PRECACHE_EVENT(1, "events/cbarcharge.sc");
 }
 
-// orig 0x30740. Unlike SDK 2.3's, the weight is 1 and iFlags is left as the caller had it.
+// orig 0x30740, orig client 0xaac0. Unlike SDK 2.3's, the weight is 1 and iFlags is left as the caller had it.
 bool CCrowbar::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = STRING(pev->classname);
@@ -428,7 +143,7 @@ bool CCrowbar::GetItemInfo(ItemInfo* p)
 	return true;
 }
 
-// orig 0x30780
+// orig 0x30780, orig client 0xab10
 bool CCrowbar::Deploy()
 {
 	ChargeStop(false);
@@ -436,7 +151,7 @@ bool CCrowbar::Deploy()
 	return DefaultDeploy("models/v_crowbar.mdl", "models/p_crowbar.mdl", CROWBAR_DRAW, "crowbar");
 }
 
-// orig 0x307c0
+// orig 0x307c0, orig client 0xab60
 void CCrowbar::Holster()
 {
 	ChargeStop(false);
@@ -445,7 +160,7 @@ void CCrowbar::Holster()
 	SendWeaponAnim(CROWBAR_HOLSTER);
 }
 
-// stock (SDK 2.3's, matched; orig 0x30810), kept for the server
+// stock (SDK 2.3's, matched; orig 0x30810); the client's is orig client 0xabd0
 void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& mins, const Vector& maxs, edict_t* pEntity)
 {
 	int i, j, k;
@@ -492,7 +207,7 @@ void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, const Vector& m
 
 
 
-// orig 0x30a50
+// orig 0x30a50, orig client 0xaea0
 void CCrowbar::PrimaryAttack()
 {
 	if (!Swing(true))
@@ -502,7 +217,7 @@ void CCrowbar::PrimaryAttack()
 	}
 }
 
-// orig 0x30a80: the rocket, powered by the charge, for RocketEnergyCost of the player's energy
+// orig 0x30a80, orig client 0xaf80: the rocket, powered by the charge, for RocketEnergyCost of the player's energy
 void CCrowbar::SecondaryAttack()
 {
 	float flCharge = m_flCharge;
@@ -530,6 +245,7 @@ void CCrowbar::SecondaryAttack()
 	UTIL_ExtendTime(&m_flNextTertiaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_SecondaryRefireTertiary).f);
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_SecondaryRefireQuaternary).f);
 
+#ifndef CLIENT_DLL
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 	Vector vecAngles(-m_pPlayer->pev->v_angle.x, m_pPlayer->pev->v_angle.y, 0);
 	Vector vecSrc = m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs;
@@ -545,9 +261,10 @@ void CCrowbar::SecondaryAttack()
 		if (UTIL_IsValidEntity(pControlled))
 			pRocket->pev->owner = pControlled;
 	}
+#endif
 }
 
-// orig 0x30d60: throw the crowbar (it leaves the player's inventory)
+// orig 0x30d60, orig client 0xb150: throw the crowbar (it leaves the player's inventory)
 void CCrowbar::TertiaryAttack()
 {
 	float flCharge = m_flCharge;
@@ -559,6 +276,7 @@ void CCrowbar::TertiaryAttack()
 	UTIL_ExtendTime(&m_flNextQuaternaryAttack, UTIL_WeaponTimeBase(), RC2Pref(RC2P_Crowbar_SecondaryRefireQuaternary).f);
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+#ifndef CLIENT_DLL
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 
 	Vector vecSrc = m_pPlayer->pev->view_ofs + m_pPlayer->pev->origin;
@@ -586,17 +304,21 @@ void CCrowbar::TertiaryAttack()
 		if (UTIL_IsValidEntity(pControlled))
 			pBang->pev->owner = pControlled;
 	}
+#endif
 
 	ChargeStop(true);
 
+#ifndef CLIENT_DLL
 	m_pPlayer->RemovePlayerItem(this);
 	m_pPlayer->pev->weapons &= ~(1 << m_iId);
 	Drop();
+#endif
 }
 
-// orig 0x31030: start charging
+// orig 0x31030: start charging (orig client 0xb220: the client's is empty, the server starts it)
 void CCrowbar::QuaternaryAttack()
 {
+#ifndef CLIENT_DLL
 	if (m_flCharge > 0 || m_bCharging)
 		return;
 
@@ -613,21 +335,22 @@ void CCrowbar::QuaternaryAttack()
 	PLAYBACK_EVENT_FULL(0, pPlayer, m_usCbarCharge, 0, g_vecZero, g_vecZero, m_flCharge, 0, ENTINDEX(pPlayer), 0, 0, 1);
 
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, m_pPlayer->Center(), 400, 0.9);
+#endif
 }
 
-// orig 0x31170
+// orig 0x31170, orig client 0xb240
 void CCrowbar::Smack()
 {
 	DecalGunshot(&m_trHit, BULLET_PLAYER_CROWBAR);
 }
 
-// orig 0x31190
+// orig 0x31190, orig client 0xb270
 void CCrowbar::SwingAgain()
 {
 	Swing(false);
 }
 
-// orig 0x311a0. SDK 2.3's swing with the charge: what it hits gets ChargeDamageFraction more
+// orig 0x311a0, orig client 0xb290 (the client's: the line trace only, no hit, damage or sound). SDK 2.3's swing with the charge: what it hits gets ChargeDamageFraction more
 // damage per unit of charge (and is gibbed above half a unit), and the charge's push, of what it
 // hit when that can be shoved, otherwise of the player back off it.
 bool CCrowbar::Swing(bool fFirst)
@@ -642,6 +365,7 @@ bool CCrowbar::Swing(bool fFirst)
 
 	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
 
+#ifndef CLIENT_DLL
 	if (tr.flFraction >= 1.0)
 	{
 		UTIL_TraceHull(vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT(m_pPlayer->pev), &tr);
@@ -655,6 +379,7 @@ bool CCrowbar::Swing(bool fFirst)
 			vecEnd = tr.vecEndPos; // This is the point on the actual surface (the hull could have hit space)
 		}
 	}
+#endif
 
 	if (g_fRC2PlayWeaponEvents)
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usCrowbar, 0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
@@ -695,8 +420,11 @@ bool CCrowbar::Swing(bool fFirst)
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
+#ifndef CLIENT_DLL
 	float flCharge = m_flCharge;
+#endif
 	ChargeStop(true);
+#ifndef CLIENT_DLL
 	fDidHit = true;
 
 	// Original bug, kept: no check that the hit entity has an instance (dossier)
@@ -796,6 +524,7 @@ bool CCrowbar::Swing(bool fFirst)
 	}
 
 	m_pPlayer->m_iWeaponVolume = flVol * CROWBAR_WALLHIT_VOLUME;
+#endif
 
 	SetThink(&CCrowbar::Smack);
 	// Original oddity, kept: the weapon time base (0 with client weapons), not gpGlobals->time,
@@ -805,13 +534,13 @@ bool CCrowbar::Swing(bool fFirst)
 	return fDidHit;
 }
 
-// orig 0x31b60: the client's half of WeaponSync (on the server the reader returns 0)
+// orig 0x31b60, orig client 0xb630: the client's half of WeaponSync (on the server the reader returns 0)
 void CCrowbar::ReadWeaponState(void* pData, int iSize)
 {
 	m_flCharge = RC2ReadStateFloat(&pData, &iSize);
 }
 
-// orig 0x31b80: the charge, every frame
+// orig 0x31b80, orig client 0xb660 (the client's without the WeaponSync message): the charge, every frame
 void CCrowbar::WeaponFrame()
 {
 	float flInterval = gpGlobals->time - m_flLastFrame;
@@ -822,6 +551,7 @@ void CCrowbar::WeaponFrame()
 	else if (m_flCharge > RC2Pref(RC2P_Crowbar_MaxCharge).f)
 		m_flCharge = RC2Pref(RC2P_Crowbar_MaxCharge).f;
 
+#ifndef CLIENT_DLL
 	if (m_flNextSync < gpGlobals->time)
 	{
 		// the charge, as the float's bits
@@ -831,6 +561,7 @@ void CCrowbar::WeaponFrame()
 		MESSAGE_END();
 		m_flNextSync = gpGlobals->time + 0.1;
 	}
+#endif
 
 	if (g_fRC2PlayWeaponEvents && m_flNextChargeEvent < gpGlobals->time)
 	{
@@ -902,4 +633,3 @@ void CCrowbar::WeaponFrame()
 	UTIL_ExtendTime(&m_pPlayer->m_flEnergyRegenTime, gpGlobals->time, RC2Pref(RC2P_Crowbar_ChargeEnergyRechargeDelay).f);
 }
 
-#endif // CLIENT_DLL
