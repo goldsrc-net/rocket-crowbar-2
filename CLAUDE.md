@@ -41,20 +41,18 @@ Original content: Steven's install at `/media/Data3/Projects/mods/rc2/` (beta 1.
 
 ## Status (2026-11-07)
 
-- **Server (rc2.dll):** waves 1 and 2 are merged: all 2,468 functions to reconstruct have a
-  counterpart, counting the code Ghidra's function list misses (`scripts/gaps.py`). Masking from
-  `.reloc` (`scripts/vc6/match.py`) found 285 more stock functions; `scripts/stock_drift.py` shows
-  the 14 of them that differ from halflife-updated, all deliberate returns to SDK 2.3. No TEMP STUBs
-  are left. Builds on i386 and amd64; on the rig it boots and loads rc_sandcrab with a clean
-  console. Booted only, not played.
-- **Client (client.dll):** 1,466 functions to reconstruct (incremental-link and import thunks
-  skipped). All five packages are merged: 1,158 have a counterpart (78%); most of the rest is
-  template and compiler-generated code c1 lists in its dossier. The weapon files in dlls/ are one
-  source for both libraries. The packages named each other's code differently, so many stubs
-  still stand in for real code under another name (c2's effect dispatcher reaches none of c3's
-  effects, nothing in CLTE draws). w3-reconcile is unifying them by original address
-  (`scripts/merge/stub_addrs.py`).
-- Not yet: playing ours against the original, ORIGINAL_BUGS.md from the dossiers, the server
-  docs (as mod-rockcrowbar's docs/), the amd64 client (no 64-bit VGUI).
-- Merging packages: the shared headers collect each package's names for the same members;
-  one set of names wins, the rest are renamed, and stubs shadowed by real code are dropped.
+- **Server (rc2.dll):** all 2,468 functions to reconstruct have a counterpart, counting the code
+  Ghidra's function list misses (`scripts/gaps.py`). Builds on i386 and amd64.
+  `tools/rig/smoke.py` boots ours and the original side by side, changes map through three RC2 maps
+  and reads RC2's cvars: the only console difference is a halflife-updated skill cvar warning
+  (`reference/DEVIATIONS.md`). Not played yet.
+- **Client (client.dll):** 1,158 of 1,466 functions (78%); the rest is template and
+  compiler-generated code (c1's dossier lists it). Builds on i386 (amd64 has no 64-bit VGUI). The
+  packages' cross-references are reconciled by original address (`reference/dossiers/w3-reconcile.md`).
+  Never run in an engine.
+- No TEMP STUBs left in the tree. The weapon files in dlls/ are one source for both libraries.
+- Stock functions (byte-identical to SDK 2.3 in RC2) still carry halflife-updated's own changes:
+  `scripts/stock_drift.py --sdk build-vc6/singleplayer --loose` lists 400. Not yet audited.
+- In progress: ORIGINAL_BUGS.md with the original's crashes guarded (RC 1.9's policy), and the
+  server docs (docs/SERVER.md, GAMEPLAY.md, RC_INI.md).
+- Not yet: playing ours against the original with our client.
