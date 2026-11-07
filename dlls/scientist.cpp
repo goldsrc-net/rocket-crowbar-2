@@ -431,13 +431,13 @@ void CScientist::DeclineFollowing()
 
 void CScientist::Scream()
 {
-	// Marphy Fact Files Fix - This speech check always fails during combat, so removing
-	//if ( FOkToSpeak() )
-	//{
-	Talk(10);
-	m_hTalkTarget = m_hEnemy;
-	PlaySentence("SC_SCREAM", RANDOM_FLOAT(3, 6), VOL_NORM, ATTN_NORM);
-	//}
+	// SDK 2.3's (stock in RC2); halflife-updated dropped the FOkToSpeak check
+	if (FOkToSpeak())
+	{
+		Talk(10);
+		m_hTalkTarget = m_hEnemy;
+		PlaySentence("SC_SCREAM", RANDOM_FLOAT(3, 6), VOL_NORM, ATTN_NORM);
+	}
 }
 
 
@@ -523,17 +523,16 @@ void CScientist::RunTask(Task_t* pTask)
 		if (MovementIsComplete())
 			TaskComplete();
 
-		// Marphy Fact Files Fix - Reducing scream (which didn't work before) chance significantly
-		//if ( RANDOM_LONG(0,31) < 8 )
-		if (RANDOM_LONG(0, 63) < 1)
+		// SDK 2.3's (stock in RC2); halflife-updated cut the chance to 1 in 64
+		if (RANDOM_LONG(0, 31) < 8)
 			Scream();
 		break;
 
 	case TASK_MOVE_TO_TARGET_RANGE_SCARED:
 	{
-		// Marphy Fact Files Fix - Removing redundant scream
-		//if ( RANDOM_LONG(0,63)< 8 )
-		//Scream();
+		// SDK 2.3's (stock in RC2); halflife-updated removed this scream
+		if (RANDOM_LONG(0, 63) < 8)
+			Scream();
 
 		if (m_hEnemy == NULL)
 		{

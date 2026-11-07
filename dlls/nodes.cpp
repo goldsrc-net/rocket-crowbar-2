@@ -1525,7 +1525,8 @@ void CTestHull::Spawn(entvars_t* pevMasterNode)
 //=========================================================
 void CTestHull::DropDelay()
 {
-	//	UTIL_CenterPrintAll( "Node Graph out of Date. Rebuilding..." );
+	// SDK 2.3's (stock in RC2); halflife-updated commented out this message
+	UTIL_CenterPrintAll("Node Graph out of Date. Rebuilding...");
 
 	UTIL_SetOrigin(pev, WorldGraph.m_pNodes[0].m_vecOrigin);
 
