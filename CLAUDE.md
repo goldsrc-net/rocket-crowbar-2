@@ -23,8 +23,8 @@ byte, and by vtable position; RC2's own code has no recoverable names, so those 
 A fork of `goldsrc-net/halflife-updated` branch `64bit-demo`, like mod-ts.
 
 - `upstream` = `git@github.com:goldsrc-net/halflife-updated.git`, tracked by `main`.
-- `origin` = `git@github.com:goldsrc-net/rocket-crowbar-2.git`, private (`../REPOS.md`:
-  reconstructions are private until Steven releases them).
+- `origin` = `git@github.com:goldsrc-net/rocket-crowbar-2.git`, public since the v0.1.2 release
+  (2026-11-12). The original libraries are not in it (`reference/README.md`).
 
 | Path | What |
 |---|---|
