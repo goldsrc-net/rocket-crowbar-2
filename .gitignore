@@ -22,3 +22,8 @@ __pycache__/
 
 # scripts/package.sh output
 dist/
+
+# The original mod's own libraries (reference/README.md): not ours to publish
+/reference/rc2.dll
+/reference/client.dll
+/reference/beta1/

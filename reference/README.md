@@ -3,6 +3,10 @@
 Source-of-truth binaries from the original mod, kept for reconstructing the server
 and client libraries as C++ on this SDK. Reference only, not linked into any build.
 
+The original libraries themselves are not in this repository: they are their authors' work. Put
+them here, under the names below (the checksums say which files), before running the scripts and
+the test rig that read them; they are in the beta 1.1 and beta 1 installers (Provenance). `.gitignore` keeps them out of commits.
+
 RC2 never had a Linux build, so unlike RC 1.9 and The Specialists there is no
 unstripped .so: these Windows libraries are all there is.
 

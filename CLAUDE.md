@@ -29,7 +29,7 @@ A fork of `goldsrc-net/halflife-updated` branch `64bit-demo`, like mod-ts.
 | Path | What |
 |---|---|
 | `game/rc2/` | the mod's gamedir manifest (`liblist.gam`) |
-| `reference/` | the originals, provenance, and every table read from them: names, vtables, save fields, cvars, `prefs-rc2.tsv` (rc2.ini), files and gaps by link order, the work lists (`RECONSTRUCTION-<lib>.md`) |
+| `reference/` | the originals (gitignored: fetch them, `reference/README.md`), provenance, and every table read from them: names, vtables, save fields, cvars, `prefs-rc2.tsv` (rc2.ini), files and gaps by link order, the work lists (`RECONSTRUCTION-<lib>.md`) |
 | `reference/BASE_VIRTUALS.md`, `DEVIATIONS.md` | what RC2 added to the SDK bases; what we do differently |
 | `reference/dossiers/` | the briefs (`AGENT_BRIEF.md`, `AGENT_BRIEF_CLIENT.md`), the package splits (`PACKAGES*.md`), one dossier per package |
 | `third_party/` | openvgui and goldsrc-net/vgui_support (submodules, both public; vgui_support's `64bit` branch) and the vendored Xash headers, for the 64-bit clients |
