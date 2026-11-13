@@ -1,66 +1,119 @@
 name: CI/CD
 
-on: [push, pull_request]
+on:
+  # Branch pushes only: a vX.Y.Z tag runs release.yml, which calls this workflow.
+  push:
+    branches: ['**']
+    paths-ignore:
+      - '**.md'
+      - 'reference/**'
+      - 'LICENSE'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'reference/**'
+      - 'LICENSE'
+  # Run by hand (Actions -> CI/CD -> Run workflow) to also build and package the Debug profile.
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Also build the Debug profile (i386 + Win32) and package reRC2-<commit>-debug"
+        type: boolean
+        default: false
+  # release.yml builds a tagged commit through this workflow.
+  workflow_call:
+    inputs:
+      debug:
+        type: boolean
+        default: false
+
+# A newer push to the same branch cancels the run still building the older one. Tag builds (release.yml)
+# never cancel.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type == 'branch' }}
+
+# The version every build stamps (cmake/Version.cmake): the pushed tag on a tag build, else empty and
+# CMake uses git describe or the commit.
+env:
+  MOD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+
+# Every arch builds through CMake. Rocket Crowbar 2 is a server and a client: the client builds for i386
+# and Win32, which link Valve's 32-bit VGUI; there is no 64-bit VGUI in the tree, so the 64-bit jobs
+# build the server alone.
 
 jobs:
-  # Linux i386 — legacy Makefile path. Kept for the master-branch
-  # workflow; reproduces the original CI's matrix behaviour. Output
-  # paths: linux/release/{hl.so,client.so}.
+  # Linux i386 — CMake + the in-tree i386 toolchain.
   linux-i386:
     name: Linux-i386
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        compiler: [g++, clang++]
+    runs-on: ubuntu-latest
+    # Build inside the goldsrc-net build image (debian10 / glibc-2.28 floor, gcc-multilib +
+    # aarch64 cross + cmake 3.29) so the .so runs on any glibc >= 2.28 — Ubuntu runners link
+    # 2.34+. Published by goldsrc-net/build-containers (its 64bit branch); pull-only.
+    container: ghcr.io/goldsrc-net/build-containers/debian10:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
-      - name: Install G++ Multilib, Clang++ & OpenGL library
-        run: |
-          sudo apt update
-          sudo apt install -y g++-multilib clang libgl1-mesa-dev
+      - name: Let git read the checkout (the container runs as another user)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Build (Makefile, i386)
+      - name: Configure (i386)
         run: |
-          cd linux
-          make COMPILER=${{ matrix.compiler }} CFG=release -j2
+          cmake -B build-i386 -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/LinuxToolchain.cmake
+
+      - name: Build
+        run: cmake --build build-i386 --target hl --target client -j"$(nproc)"
+
+      - name: Stage per-arch
+        run: |
+          mkdir -p staged-i386/dlls staged-i386/cl_dlls
+          cp build-i386/dlls/hl.so staged-i386/dlls/hl.so
+          cp build-i386/cl_dll/client.so staged-i386/cl_dlls/client.so
+
+      - name: Build the Debug profile (workflow_dispatch with debug only)
+        if: ${{ inputs.debug }}
+        run: |
+          cmake -B build-i386-debug -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/LinuxToolchain.cmake
+          cmake --build build-i386-debug --target hl --target client -j"$(nproc)"
+          mkdir -p staged-i386-debug/dlls staged-i386-debug/cl_dlls
+          cp build-i386-debug/dlls/hl.so staged-i386-debug/dlls/hl.so
+          cp build-i386-debug/cl_dll/client.so staged-i386-debug/cl_dlls/client.so
+
+      - name: Upload the Debug profile
+        if: ${{ inputs.debug }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: Linux-i386-debug
+          path: staged-i386-debug/**
+          retention-days: 7
 
       - name: Deploy
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: Linux-i386-${{ matrix.compiler }}
-          path: |
-            linux/release/client.so
-            linux/release/client.so.dbg
-            linux/release/hl.so
-            linux/release/hl.so.dbg
+          name: Linux-i386
+          path: staged-i386/**
+          retention-days: 7
 
-  # Linux amd64 — CMake (top-level) build. The 64bit-branch CMakeLists
-  # gates -m32 / -mfpmath=387 to "x86-32 target", so a default cmake
-  # invocation on amd64 produces real 64-bit binaries.
+  # Linux amd64 — CMake, the server only.
   linux-amd64:
     name: Linux-amd64
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container: ghcr.io/goldsrc-net/build-containers/debian10:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential cmake libgl1-mesa-dev
+      - name: Let git read the checkout (the container runs as another user)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Configure (amd64)
-        run: |
-          cmake -B build-amd64 -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build-amd64 -DCMAKE_BUILD_TYPE=Release
 
-      - name: Build (hl gamedll only)
-        # cl_dll/client.so links against the prebuilt x86-32 vgui.so
-        # and there's no native 64-bit GoldSrc client engine to load
-        # the result anyway — only build the server-side hl gamedll
-        # on non-i386, matching the buildchain Makefile pattern.
-        run: cmake --build build-amd64 --target hl -j$(nproc)
+      - name: Build (server)
+        run: cmake --build build-amd64 --target hl -j"$(nproc)"
 
       - name: Stage per-arch
         run: |
@@ -68,44 +121,37 @@ jobs:
           cp build-amd64/dlls/hl.so staged-amd64/dlls/hl.so
 
       - name: Deploy
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Linux-amd64
           path: staged-amd64/**
+          retention-days: 7
 
-  # Linux aarch64 — cross-compiled via the in-tree toolchain file.
-  # cmake/LinuxToolchain-aarch64.cmake probes for an unversioned
-  # aarch64-linux-gnu-gcc first, then falls back to -13.
+  # Linux aarch64 — CMake cross-compiled via the in-tree toolchain file, the server only.
   linux-aarch64:
     name: Linux-aarch64
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container: ghcr.io/goldsrc-net/build-containers/debian10:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
-      - name: Install aarch64 cross-toolchain
-        # Ubuntu 22.04 ships gcc-11 as the newest aarch64 cross-toolchain.
-        # The toolchain file probes for the unversioned binary first, so
-        # symlinking gcc-11 → unversioned lets cmake find it.
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            build-essential cmake \
-            gcc-11-aarch64-linux-gnu g++-11-aarch64-linux-gnu
-          sudo ln -sf /usr/bin/aarch64-linux-gnu-gcc-11 /usr/bin/aarch64-linux-gnu-gcc
-          sudo ln -sf /usr/bin/aarch64-linux-gnu-g++-11 /usr/bin/aarch64-linux-gnu-g++
+      - name: Let git read the checkout (the container runs as another user)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Configure (aarch64 cross)
+        # The image ships a gcc-8.3 aarch64 cross-toolchain; point CC/CXX at it (matches
+        # scripts/build.sh) so the toolchain file picks it over the image's default clang.
+        env:
+          CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
         run: |
           cmake -B build-aarch64 \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE=cmake/LinuxToolchain-aarch64.cmake
 
-      - name: Build (hl gamedll only)
-        # Same rationale as Linux-amd64: no native 64-bit GoldSrc
-        # client engine, and the prebuilt linux/release/vgui.so is
-        # x86 only. Server-side hl.so is all that's needed.
-        run: cmake --build build-aarch64 --target hl -j$(nproc)
+      - name: Build (server)
+        run: cmake --build build-aarch64 --target hl -j"$(nproc)"
 
       - name: Stage per-arch
         run: |
@@ -113,67 +159,163 @@ jobs:
           cp build-aarch64/dlls/hl.so staged-aarch64/dlls/hl.so
 
       - name: Deploy
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Linux-aarch64
           path: staged-aarch64/**
+          retention-days: 7
 
+  # Win32 — CMake/MSVC. The client links Valve's win32 vgui.lib (utils/vgui/lib/win32_vc16).
   win32:
     name: Win32
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
-        with:
-          msbuild-architecture: x86
+      - name: Configure (Win32)
+        run: cmake -B build-win32 -A Win32
 
       - name: Build
-        run: msbuild projects/vs2019/projects.sln -t:rebuild -property:Configuration=Release -maxcpucount:2
+        run: cmake --build build-win32 --config Release --target hl --target client --parallel 2
+
+      - name: Stage per-arch
+        shell: bash
+        run: |
+          mkdir -p staged-win32/dlls staged-win32/cl_dlls
+          cp build-win32/dlls/Release/hl.dll        staged-win32/dlls/hl.dll
+          cp build-win32/cl_dll/Release/client.dll  staged-win32/cl_dlls/client.dll
 
       - name: Deploy
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Win32
-          path: |
-            projects/vs2019/Release/hl_cdll/client.dll
-            projects/vs2019/Release/hl_cdll/client.pdb
-            projects/vs2019/Release/hldll/hl.dll
-            projects/vs2019/Release/hldll/hl.pdb
+          path: staged-win32/**
+          retention-days: 7
 
-  # Win64 — CMake-driven, gamedll only. The projects/vs2019 .sln is
-  # Win32-locked (links the prebuilt x86 vgui.lib for cl_dll), so the
-  # x64 path uses the top-level CMakeLists.txt with cmake -A x64 and
-  # builds just the hl target — same scope as Linux-amd64/aarch64,
-  # since there's no native 64-bit GoldSrc client engine to load
-  # client.dll on Win64 anyway.
+      - name: Build the Debug profile (workflow_dispatch with debug only)
+        if: ${{ inputs.debug }}
+        shell: bash
+        run: |
+          cmake --build build-win32 --config Debug --target hl --target client --parallel 2
+          mkdir -p staged-win32-debug/dlls staged-win32-debug/cl_dlls
+          cp build-win32/dlls/Debug/hl.dll build-win32/dlls/Debug/hl.pdb staged-win32-debug/dlls/
+          cp build-win32/cl_dll/Debug/client.dll build-win32/cl_dll/Debug/client.pdb staged-win32-debug/cl_dlls/
+
+      - name: Upload the Debug profile
+        if: ${{ inputs.debug }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: Win32-debug
+          path: staged-win32-debug/**
+          retention-days: 7
+
+  # Win64 — CMake/MSVC, the server only. Compile+link check for 64-bit engines (no native 64-bit
+  # GoldSrc engine loads it).
   win64:
     name: Win64
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Configure (Win64)
         run: cmake -B build-win64 -A x64
 
-      - name: Build (hl gamedll only)
-        run: cmake --build build-win64 --config Release --target hl -j 2
+      - name: Build (server)
+        run: cmake --build build-win64 --config Release --target hl --parallel 2
 
       - name: Stage per-arch
         shell: bash
         run: |
           mkdir -p staged-win64/dlls
           cp build-win64/dlls/Release/hl.dll staged-win64/dlls/hl.dll
-          # PDB is optional but useful for debugging.
-          if [ -f build-win64/dlls/Release/hl.pdb ]; then
-            cp build-win64/dlls/Release/hl.pdb staged-win64/dlls/hl.pdb
-          fi
 
       - name: Deploy
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Win64
           path: staged-win64/**
+          retention-days: 7
+
+  # Package — fan in every build job. Two artifacts, both under the original's own file names
+  # (liblist.gam names dlls\rc2.dll; the patch adds gamedll_linux dlls/rc2_i386.so):
+  #  - reRC2-<commit>: the patch for a stock Rocket Crowbar 2 install (scripts/assemble-dropin.sh, the layout
+  #    scripts/package.sh builds locally), every arch in one folder; README.txt in it says which name
+  #    each engine loads.
+  #  - rc2-gamelibs-all: the bare libraries, the 64-bit ones under the names Xash builds from liblist
+  #    (rc2_amd64.so, rc2_arm64.so, rc2_amd64.dll).
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    needs: [linux-i386, linux-amd64, linux-aarch64, win32, win64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: llvm-strip for the aarch64 libraries (GNU strip on x86 cannot read them)
+        run: |
+          ls /usr/bin/llvm-strip* >/dev/null 2>&1 || { sudo apt-get update -q && sudo apt-get install -y -q llvm; }
+          ls /usr/bin/llvm-strip*
+
+      - name: Assemble
+        shell: bash
+        run: |
+          set -euo pipefail
+          # pick <artifact-dir> <filename> -> first matching file (robust to nesting)
+          pick() {
+            local f
+            f=$(find "artifacts/$1" -type f -name "$2" | head -1)
+            if [ -z "$f" ]; then echo "MISSING: $2 in artifact $1" >&2; exit 1; fi
+            echo "$f"
+          }
+          # On a tag (release.yml) the version is the tag as pushed; otherwise the short commit.
+          if [ "${{ github.ref_type }}" = tag ]; then REV="${{ github.ref_name }}"; else REV=$(git rev-parse --short HEAD); fi
+          scripts/assemble-dropin.sh \
+            --amd64 "$(pick Linux-amd64 hl.so)" \
+            --arm64 "$(pick Linux-aarch64 hl.so)" \
+            --win64 "$(pick Win64 hl.dll)" \
+            "$REV" \
+            "$(pick Linux-i386 hl.so)" "$(pick Linux-i386 client.so)" \
+            "$(pick Win32 hl.dll)" "$(pick Win32 client.dll)" dropin
+          echo "REV=$REV" >> "$GITHUB_ENV"
+          mkdir -p dist
+          cp -r "dropin/reRC2-$REV/rc2/." dist/
+          find dropin dist -type f | sort
+
+      - name: Upload the patch
+        uses: actions/upload-artifact@v7
+        with:
+          name: reRC2-${{ env.REV }}
+          path: dropin/reRC2-${{ env.REV }}/**
+          retention-days: 30
+
+      - name: Assemble the Debug package
+        if: ${{ inputs.debug }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pick() { find "artifacts/$1" -type f -name "$2" | head -1; }
+          scripts/assemble-dropin.sh --debug "$REV" \
+            "$(pick Linux-i386-debug hl.so)" "$(pick Linux-i386-debug client.so)" \
+            "$(pick Win32-debug hl.dll)" "$(pick Win32-debug client.dll)" dropin
+
+      - name: Upload the Debug package
+        if: ${{ inputs.debug }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: reRC2-${{ env.REV }}-debug
+          path: dropin/reRC2-${{ env.REV }}-debug/**
+          retention-days: 30
+
+      - name: Upload the bare libraries
+        uses: actions/upload-artifact@v7
+        with:
+          name: rc2-gamelibs-all
+          path: dist/**
+          retention-days: 7

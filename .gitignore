@@ -19,3 +19,6 @@ scratchpad/
 # python bytecode
 __pycache__/
 *.pyc
+
+# scripts/package.sh output
+dist/

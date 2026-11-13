@@ -54,6 +54,16 @@ diff <(tools/rig/smoke.py --clean /tmp/o.log | sort -u) <(tools/rig/smoke.py --c
 
 `forkliftfun` (one of the extra maps) loads on neither: its `alex2.wad` isn't in the content.
 
+## Booting a package
+
+`tools/rig/boot-package.sh win|linux <package>/rc2 <RC2's rc2 folder> <map>` boots a `reRC2-<rev>`
+package's server (BUILDING.md, Packaging) under its shipped name, with the package's liblist.gam, and
+passes when it answers a server query on port 27045. `win` runs `rc2.dll` in the Windows HLDS under
+Wine (`HLDS_WIN`, default `/media/Data3/Projects/goldsrc.net/hlds-win`, the one mod-ts fetches with
+steamcmd; its shared `wineprefix`, not setup.sh's `wineprefix-rc2`), `linux` the i386 server on the
+32-bit rig (`RIG`, default `~/Containers/hlds/hlds-linux32-test`). It makes an `rc2-boot` gamedir there
+and removes it after. The clients aren't loaded: a dedicated server has none.
+
 ## Undo
 
 Stop both servers, then move these four away (nothing else is touched):

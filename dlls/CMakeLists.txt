@@ -1,4 +1,11 @@
-add_library(hl SHARED $<$<PLATFORM_ID:Windows>:hl.def>)
+# lld-link (the clang-cl cross build, cmake/WindowsClangClToolchain.cmake) rejects a .def SECTIONS
+# block; hl.def's only one sets .data READ WRITE, which is the default, so that build drops it.
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(HL_DEF_FILE hl-lld.def)
+else()
+	set(HL_DEF_FILE hl.def)
+endif()
+add_library(hl SHARED $<$<PLATFORM_ID:Windows>:${HL_DEF_FILE}>)
 
 # Rocket Crowbar 2's own source files (the classes SDK 2.3 doesn't have). The originals'
 # file names are lost, so these are named after their classes, and they're globbed so a work

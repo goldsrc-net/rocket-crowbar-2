@@ -14,9 +14,10 @@ its name, maps, models, sounds and configs are theirs; this replaces only the co
 
 ## Installing
 
-The rebuild is a server library and a client library for a stock RC2 beta 1.1 install: `hl.so` goes in
-`rc2/dlls/`, `client.so` in `rc2/cl_dlls/`, and this repository's `game/rc2/liblist.gam` replaces the
-original's. Both are Linux builds; there is no Windows build yet. [INSTALL.md](INSTALL.md) covers
+The rebuild is a server library and a client library for a stock RC2 beta 1.1 install, packaged as
+`reRC2-<rev>`: its `rc2/` folder goes over the install's, with the server under RC2's own name
+(`rc2.dll`, and `rc2_i386.so` with its aliases for Linux), the Windows and Linux clients, the 64-bit
+servers, and RC2's `liblist.gam` with the line a Linux server needs. [INSTALL.md](INSTALL.md) covers
 servers, players, the test setup that runs the original and the rebuild side by side, and going back.
 
 ## Servers
@@ -33,8 +34,10 @@ found in the original, and which ones it keeps, are in
 ## Building
 
 The Linux libraries build in the [goldsrc-net/buildchain](https://github.com/goldsrc-net/buildchain)
-Docker image (`scripts/build.sh i386 all` for the server and client, `scripts/build.sh amd64` for a
-64-bit server). [BUILDING.md](BUILDING.md) has the steps.
+Docker image (`scripts/build.sh i386 all` for the server and client, `amd64` or `aarch64` for a 64-bit
+server), the Win32 ones with clang-cl on Linux (`scripts/build-win.sh`) or MSVC, and
+`scripts/package.sh` packages them. CI builds every arch and the package on each push.
+[BUILDING.md](BUILDING.md) has the steps.
 
 ## How it was made
 
