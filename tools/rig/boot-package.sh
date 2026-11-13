@@ -32,7 +32,9 @@ rm -rf "${G:?}"
 mkdir -p "$G/dlls"; touch "$G/.boot-package"
 for e in "$CONTENT"/*; do
   b="$(basename "$e")"
-  case "$b" in dlls|cl_dlls|logs|SAVE|liblist.gam) continue ;; esac
+  # custom.hpk too: the engine rewrites it (and deletes a bad one), which a link would pass on to
+  # the original content.
+  case "$b" in dlls|cl_dlls|logs|SAVE|liblist.gam|custom.hpk) continue ;; esac
   ln -s "$e" "$G/$b"
 done
 cp -r "$PKGG"/dlls/. "$G/dlls/"

@@ -13,7 +13,9 @@ install's, on servers and players alike.
    for Windows and `rc2.so`, `rc2_i386.so` and `rc2_i686.so` for Linux (Steam's current engine loads
    `rc2.so`, older ones `rc2_i386.so`, Metamod-R `rc2_i686.so`), the 64-bit servers, the clients, and
    RC2's `liblist.gam` with `gamedll_linux "dlls/rc2_i386.so"` added (RC2's names only
-   `gamedll "dlls\rc2.dll"`).
+   `gamedll "dlls\rc2.dll"`). A 64-bit ReHLDS loads `gamedll_linux` as written, so on one, point
+   it at `dlls/rc2_amd64.so` (x86-64) or `dlls/rc2_arm64.so` (ARM); Xash3D finds the 64-bit name
+   from the line by itself.
 3. Start the server with `-game rc2`, e.g. `./hlds_linux -game rc2 +deathmatch 1 +map rc_sandcrab`.
 
 Admin levels in `adminprim.cfg` and `sv_tempadmins` take Steam IDs (`STEAM_0:1:2`) where RC2's took WON

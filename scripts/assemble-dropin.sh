@@ -174,9 +174,10 @@ para() { printf '%s\n' "$*" | fmt -w 100; }
   para "$NAMES_NOTE"
   if [ -n "$X64_SO$A64_SO$W64_DLL" ]; then
     echo
-    para "The *_amd64 and *_arm64 files are the 64-bit servers, for engines that run 64-bit game" \
-      "libraries (Xash3D on 64-bit systems, 64-bit ReHLDS). They are named the way those engines" \
-      "build the name from liblist.gam. Steam's Half-Life is 32-bit and never loads them.$X64_EXTRA"
+    para "The *_amd64 and *_arm64 files are the 64-bit servers. Xash3D on a 64-bit system builds" \
+      "these names from liblist.gam by itself. A 64-bit ReHLDS (x86-64 or ARM) loads" \
+      "liblist.gam's gamedll_linux exactly as written, so on one, set it to dlls/$SERVER_AMD64" \
+      "or dlls/$SERVER_ARM64. Steam's Half-Life is 32-bit and never loads them.$X64_EXTRA"
   fi
   echo
   para "MANIFEST.tsv lists every file with its sha256."

@@ -48,7 +48,8 @@ Original content: an RC2 beta 1.1 install (the `rc2` folder of `rc2beta1.1.exe`,
   Ghidra's function list misses (`scripts/gaps.py`). Builds for Linux i386, amd64, aarch64 and
   Win32 here (Win64 only in CI, with MSVC), packaged with the client as `reRC2-<rev>` under RC2's
   file names; the packaged i386 and Win32 servers boot a map on ReHLDS and on the Windows HLDS
-  under Wine (`tools/rig/boot-package.sh`). CI is off on this repo until Steven turns it on.
+  under Wine (`tools/rig/boot-package.sh`). CI is on (2026-11-12); its first run passed
+  every job, its Linux libraries are byte-identical to local builds, and its MSVC Win32 server boots the same way.
   `tools/rig/smoke.py` boots ours and the original side by side, changes map through three RC2 maps
   and reads RC2's cvars: the only console difference is a halflife-updated skill cvar warning
   (`reference/DEVIATIONS.md`). Played on the rig with our client; the HEV suit, weapon selection,
