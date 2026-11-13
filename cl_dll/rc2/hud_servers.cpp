@@ -18,6 +18,7 @@
 #include "net_api.h"
 #include <string.h>
 #ifdef _WIN32
+#include "PlatformHeaders.h" // Windows.h without its HSPRITE, which clashes with the SDK's
 #include <winsock.h>
 #else
 #include <arpa/inet.h> // htons
@@ -766,7 +767,7 @@ int CHudServers::LoadMasterAddresses( int maxservers, int *count, netadr_t *padr
 	char		szMaster[ 256 ];
 	char		szMasterFile[256];
 	char		*pbuffer = NULL;
-	char		*pstart = NULL ;
+	const char	*pstart = NULL ;
 	netadr_t	adr;
 	char		szAdr[64];
 	int			nPort;

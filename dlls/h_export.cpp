@@ -25,6 +25,10 @@
 
 #include "cbase.h"
 
+#ifdef _WIN32
+#include "PlatformHeaders.h"
+#endif
+
 #undef DLLEXPORT
 #ifdef WIN32
 #define DLLEXPORT __stdcall
