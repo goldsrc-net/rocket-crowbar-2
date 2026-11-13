@@ -166,6 +166,14 @@ Kept as SDK 2.3, decided by Steven 2026-11-07 (FIXES.md): `LinearMoveDone`'s sna
   the `new[]` array's pointer (block + 4). MSVC6's release heap rejects that silently and the
   trails leak; glibc would abort. We leave the delete out and keep the leak
   (`cl_dll/rc2/tcontroller_tents.cpp`, `reference/dossiers/c3.md`).
+- **The 64-bit clients (amd64, arm64, Win64) are an addition, for Xash3D.** RC2 shipped only a
+  32-bit Windows client. Xash has no Valve VGUI or SDL2 to lend a 64-bit client, so these link
+  openvgui statically with the vgui_support shim (`third_party/`, as mod-ts does) and take mouse and
+  gamepad input from the engine (`IN_ClientLookEvent`, `IN_ClientMoveEvent`; `RC2_ENGINE_INPUT` in
+  `cl_dll/inputw32.cpp`). The look deltas go back to raw counts first, so RC2's view locks and the
+  bat's inverted view apply as with the mouse. Pushed gamepad movement is added to the move like
+  keys are, so it isn't held to `IN_JoyMove`'s houndeye-only gate (an original bug). The 32-bit
+  clients are built as before: i386 is byte-identical, and Win32's code and data are unchanged.
 
 ## Crashes in the original
 

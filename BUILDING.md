@@ -1,6 +1,9 @@
 # Building
 
-CMake builds both libraries. The Linux builds run in the
+CMake builds both libraries. Clone with the submodules (`git clone --recursive`, or
+`git submodule update --init --recursive` in a checkout): `third_party/` holds openvgui and the
+vgui_support shim the 64-bit clients link, and vgui_support (`goldsrc-net/vgui_support`) is private.
+The Linux builds run in the
 [goldsrc-net/buildchain](https://github.com/goldsrc-net/buildchain) Docker image (Debian 10, glibc 2.28),
 so the result runs on any Linux with glibc 2.28 or newer. Build the image once from a buildchain checkout:
 
@@ -12,8 +15,8 @@ Then, from this repository:
 
 ```sh
 scripts/build.sh i386 all    # -> build-i386/dlls/hl.so and build-i386/cl_dll/client.so
-scripts/build.sh amd64       # -> build-amd64/dlls/hl.so, for a 64-bit HLDS (the server only)
-scripts/build.sh aarch64     # -> build-aarch64/dlls/hl.so, for a 64-bit ARM server
+scripts/build.sh amd64 all   # -> build-amd64/dlls/hl.so and cl_dll/client.so (64-bit: ReHLDS, Xash3D)
+scripts/build.sh aarch64 all # -> build-aarch64/..., the same for 64-bit ARM
 scripts/build.sh i386 client # the client alone; the second argument is hl (the default), client or all
 BUILDTYPE=Debug scripts/build.sh i386 all   # -O0 with debug info
 ```
@@ -23,9 +26,12 @@ build system (`dlls/CMakeLists.txt`, `cl_dll/CMakeLists.txt`); RC2's own files i
 `cl_dll/rc2/` are globbed, so a new file there needs no CMake change. The weapon files in `dlls/` are
 compiled into both libraries, as in the SDK.
 
-The server builds for every arch. The client builds for i386 and Win32 only: it links Valve's 32-bit
-VGUI (`linux/release/vgui.so`, `utils/vgui/lib/win32_vc16/vgui.lib`), and there is no 64-bit VGUI in the
-tree, so a 64-bit client isn't done yet.
+Both libraries build for every arch. The 32-bit clients (i386, Win32), which Half-Life's own engine
+loads, link Valve's VGUI (`linux/release/vgui.so`, `utils/vgui/lib/win32_vc16/vgui.lib`) and SDL2,
+which the engine provides. The 64-bit clients are for Xash3D, which has neither to lend them: as in
+mod-ts, they link openvgui statically with the vgui_support shim, so they export
+`InitVGUISupportAPI` and Xash hosts VGUI inside the client, and they take mouse and gamepad input
+from the engine (`RC2_ENGINE_INPUT`, `cl_dll/inputw32.cpp`; `reference/DEVIATIONS.md`, Client).
 
 ## Windows
 
@@ -40,9 +46,9 @@ scripts/build-win.sh       # -> build-win32-clangcl/dlls/hl.dll and build-win32-
 ```
 
 On Windows, MSVC builds the same from the same CMake files: `cmake -B build -A Win32`, then
-`cmake --build build --config Release --target hl --target client` (`-A x64` and `--target hl` for
-Win64). CI does that. The Win32 server boots a map in the Windows HLDS
-(`tools/rig/boot-package.sh`); the Win32 client has not been run in a game yet.
+`cmake --build build --config Release --target hl --target client` (`-A x64` for Win64). CI does
+that. The Win32 server boots a map in the Windows HLDS (`tools/rig/boot-package.sh`); the Win32
+client has not been run in a game yet. Win64 is built only by CI (xwin's splat here is x86 only).
 
 `scripts/vc6/` builds Half-Life SDK 2.3 with RC2's own compiler (Visual C++ 6, under Wine). Those builds
 are for naming the stock functions in the originals; nothing built there ships.
@@ -61,17 +67,20 @@ dynamic exports. `scripts/package.sh --debug` builds the Debug profile instead, 
 the dlls' PDBs, as `reRC2-<rev>-debug`.
 
 `scripts/assemble-dropin.sh` is the layout step alone, from libraries already built; CI gives it the
-64-bit servers as well (`rc2_amd64.so`, `rc2_arm64.so`, `rc2_amd64.dll`, the names Xash builds from
-the liblist).
+64-bit libraries as well, under the names Xash builds from the liblist: the servers `rc2_amd64.so`,
+`rc2_arm64.so`, `rc2_amd64.dll`, and the clients `cl_dlls/client_amd64.so`, `client_arm64.so`,
+`client_amd64.dll`.
 
 `tools/rig/boot-package.sh win|linux <package>/rc2 <RC2's rc2 folder> <map>` boots a package's server
 in the Windows HLDS under Wine or on the 32-bit Linux rig, and passes when it answers a server query.
 
 ## CI
 
-`.github/workflows/ci-cd.yml` builds Linux i386 (server and client), amd64 and aarch64 (server) in the
-goldsrc-net build image (`ghcr.io/goldsrc-net/build-containers/debian10`, the buildchain's), and Win32
-(server and client) and Win64 (server) with MSVC, on every push that touches more than docs. The
+`.github/workflows/ci-cd.yml` builds the server and client for Linux i386, amd64 and aarch64 in the
+goldsrc-net build image (`ghcr.io/goldsrc-net/build-containers/debian10`, the buildchain's), and for
+Win32 and Win64 with MSVC, on every push that touches more than docs. Its checkouts fetch the
+submodules with the `SUBMODULES_TOKEN` secret (read access to the private vgui_support, as in
+mod-ts), which the repository needs set. The
 package job then runs `scripts/assemble-dropin.sh` on them and uploads `reRC2-<commit>` (the patch,
 every arch) and `rc2-gamelibs-all` (the bare libraries). Run it by hand (Actions, CI/CD, Run workflow)
 with debug ticked to get the Debug package too.

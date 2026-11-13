@@ -29,9 +29,18 @@
 #include "PlatformHeaders.h"
 #include "rc2/transform_hud.h"
 
+// RC2_ENGINE_INPUT (the 64-bit clients, cl_dll/CMakeLists.txt): only Xash3D runs a 64-bit client,
+// and it owns the mouse and the gamepad and pushes their input to the client through
+// IN_ClientLookEvent and IN_ClientMoveEvent (below), as mod-ts's client takes it. Those builds
+// have no SDL2 to link, so SDL is compiled out of them. The 32-bit clients, which Half-Life's own
+// engine loads, keep halflife-updated's SDL input unchanged.
+#if !defined(RC2_ENGINE_INPUT)
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>
+#else
+#include <cmath>
+#endif
 
 void IN_ResetMouse();
 
@@ -73,6 +82,7 @@ static bool IN_UseRawInput()
 	return m_rawinput ? m_rawinput->value != 0 : true;
 }
 
+#if !defined(RC2_ENGINE_INPUT)
 static SDL_bool mouseRelative = SDL_TRUE;
 
 static void IN_SetMouseRelative(bool enable)
@@ -82,6 +92,32 @@ static void IN_SetMouseRelative(bool enable)
 	SDL_SetRelativeMouseMode(value);
 	mouseRelative = value;
 }
+#else
+// Xash grabs and releases the mouse itself.
+static void IN_SetMouseRelative(bool enable)
+{
+}
+
+// Input Xash pushes between frames: the look deltas arrive already scaled by its m_yaw and m_pitch
+// (raw counts times the cvar), the movement from a gamepad or touch it owns. Xash calls
+// IN_ClientMoveEvent whenever IN_ClientLookEvent exists, so both are exported.
+static float s_relYaw = 0.0f;
+static float s_relPitch = 0.0f;
+static float s_acForward = 0.0f;
+static float s_acSide = 0.0f;
+
+extern "C" void DLLEXPORT IN_ClientLookEvent(float relyaw, float relpitch)
+{
+	s_relYaw += relyaw;
+	s_relPitch += relpitch;
+}
+
+extern "C" void DLLEXPORT IN_ClientMoveEvent(float forwardmove, float sidemove)
+{
+	s_acForward += forwardmove;
+	s_acSide += sidemove;
+}
+#endif
 
 static bool m_bMouseThread = false;
 
@@ -146,7 +182,9 @@ std::uint32_t joy_oldbuttonstate, joy_oldpovstate;
 int joy_id;
 std::uint32_t joy_numbuttons;
 
+#if !defined(RC2_ENGINE_INPUT)
 SDL_GameController* s_pJoystick = NULL;
+#endif
 
 // none of these cvars are saved over a session
 // this means that advanced controller configuration needs to be executed
@@ -434,12 +472,17 @@ IN_ResetRelativeMouseState
 */
 void IN_ResetRelativeMouseState(void)
 {
+#if !defined(RC2_ENGINE_INPUT)
 	if (IN_UseRawInput())
 	{
 		SDL_PumpEvents();
 		int deltaX, deltaY;
 		SDL_GetRelativeMouseState(&deltaX, &deltaY);
 	}
+#else
+	s_relYaw = 0.0f;
+	s_relPitch = 0.0f;
+#endif
 }
 
 /*
@@ -552,6 +595,17 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
 	if (!iMouseInUse && !gHUD.m_iIntermission && !g_iVisibleMouse)
 	{
+#if defined(RC2_ENGINE_INPUT)
+		// Back to raw counts (Xash scaled them by m_yaw and m_pitch), so the scaling below applies
+		// as it does to SDL's deltas.
+		const int deltaX = (m_yaw->value != 0.0f) ? (int)lroundf(-s_relYaw / m_yaw->value) : 0;
+		const int deltaY = (m_pitch->value != 0.0f) ? (int)lroundf(s_relPitch / m_pitch->value) : 0;
+		s_relYaw = 0.0f;
+		s_relPitch = 0.0f;
+
+		pos.x = deltaX + mx_accum;
+		pos.y = deltaY + my_accum;
+#else
 		int deltaX, deltaY;
 #ifdef WIN32
 		if (!IN_UseRawInput())
@@ -592,6 +646,7 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 			pos.x = deltaX + mx_accum;
 			pos.y = deltaY + my_accum;
 		}
+#endif
 
 		mx_accum = 0;
 		my_accum = 0;
@@ -653,6 +708,7 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 
 	gEngfuncs.SetViewAngles((float*)viewangles);
 
+#if !defined(RC2_ENGINE_INPUT)
 	if ((!IN_UseRawInput() && SDL_FALSE != mouseRelative) || g_iVisibleMouse)
 	{
 		IN_SetMouseRelative(false);
@@ -661,6 +717,7 @@ void IN_MouseMove(float frametime, usercmd_t* cmd)
 	{
 		IN_SetMouseRelative(true);
 	}
+#endif
 
 	/*
 //#define TRACE_TEST
@@ -687,6 +744,7 @@ void DLLEXPORT IN_Accumulate()
 	{
 		if (mouseactive)
 		{
+#if !defined(RC2_ENGINE_INPUT) // Xash accumulates its pushes itself; IN_MouseMove drains them
 #ifdef WIN32
 			if (!IN_UseRawInput())
 			{
@@ -709,6 +767,7 @@ void DLLEXPORT IN_Accumulate()
 			}
 			// force the mouse to the center, so there's room to move
 			IN_ResetMouse();
+#endif
 		}
 	}
 }
@@ -747,6 +806,10 @@ void IN_StartupJoystick()
 
 	flLastCheck = gEngfuncs.GetAbsoluteTime();
 
+#if defined(RC2_ENGINE_INPUT)
+	// Xash owns the gamepad: its movement comes in through IN_ClientMoveEvent, its buttons as keys.
+	joy_avail = false;
+#else
 	int nJoysticks = SDL_NumJoysticks();
 	if (nJoysticks > 0)
 	{
@@ -789,11 +852,15 @@ void IN_StartupJoystick()
 			gEngfuncs.Con_DPrintf("joystick not found -- driver not present\n\n");
 		}
 	}
+#endif
 }
 
 
 int RawValuePointer(int axis)
 {
+#if defined(RC2_ENGINE_INPUT)
+	return 0; // no client-side gamepad (IN_StartupJoystick)
+#else
 	switch (axis)
 	{
 	default:
@@ -806,6 +873,7 @@ int RawValuePointer(int axis)
 	case JOY_AXIS_R:
 		return SDL_GameControllerGetAxis(s_pJoystick, SDL_CONTROLLER_AXIS_RIGHTY);
 	}
+#endif
 }
 
 /*
@@ -889,6 +957,7 @@ void IN_Commands()
 	// loop through the joystick buttons
 	// key a joystick event or auxillary event for higher number buttons for each state change
 	buttonstate = 0;
+#if !defined(RC2_ENGINE_INPUT) // joy_avail is never set there, so this isn't reached
 	for (i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
 	{
 		if (0 != SDL_GameControllerGetButton(s_pJoystick, (SDL_GameControllerButton)i))
@@ -896,6 +965,7 @@ void IN_Commands()
 			buttonstate |= 1 << i;
 		}
 	}
+#endif
 
 	for (i = 0; i < JOY_MAX_AXES; i++)
 	{
@@ -951,7 +1021,9 @@ IN_ReadJoystick
 */
 bool IN_ReadJoystick()
 {
+#if !defined(RC2_ENGINE_INPUT)
 	SDL_JoystickUpdate();
+#endif
 	return true;
 }
 
@@ -1166,6 +1238,14 @@ void IN_Move(float frametime, usercmd_t* cmd)
 	}
 
 	IN_JoyMove(frametime, cmd);
+
+#if defined(RC2_ENGINE_INPUT)
+	// The movement Xash pushed from its gamepad or touch controls, the way keys add to cmd.
+	cmd->forwardmove += s_acForward;
+	cmd->sidemove += s_acSide;
+	s_acForward = 0.0f;
+	s_acSide = 0.0f;
+#endif
 }
 
 /*

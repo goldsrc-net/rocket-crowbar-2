@@ -7,23 +7,56 @@
 # The actual .so files are next to hl_linux so that's where the paths must point to.
 # This is how it was done in the original Linux makefiles as well
 # DO NOT DO THIS FOR ANY OTHER LIBRARIES YOU USE! If you must ship a dynamic library you should use the same approach used for OpenAL.
+#
+# That holds for the 32-bit clients (i386, Win32), which Half-Life's own engine loads. The 64-bit
+# clients are for Xash3D, which has no Valve vgui or SDL2 to lend them: they link openvgui
+# statically with the vgui_support shim (as mod-ts does, third_party/), so the client exports
+# InitVGUISupportAPI and Xash hosts VGUI inside it, and they take mouse and gamepad input from the
+# engine (IN_ClientLookEvent / IN_ClientMoveEvent, RC2_ENGINE_INPUT in inputw32.cpp).
+set(HALFLIFE_VGUI_STATIC OFF)
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+	set(HALFLIFE_VGUI_STATIC ON)
+endif()
 
-add_library(vgui SHARED IMPORTED)
-add_library(SDL2 SHARED IMPORTED)
+if (NOT HALFLIFE_VGUI_STATIC)
+	add_library(vgui SHARED IMPORTED)
+	add_library(SDL2 SHARED IMPORTED)
 
-target_include_directories(vgui INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../utils/vgui/include)
-target_include_directories(SDL2 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../external)
+	target_include_directories(vgui INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../utils/vgui/include)
+	target_include_directories(SDL2 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../external)
 
-if (WIN32)
-	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/../utils/vgui/lib/win32_vc16/vgui.lib")
-	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/../lib/public/SDL2.lib")
+	if (WIN32)
+		set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/../utils/vgui/lib/win32_vc16/vgui.lib")
+		set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/../lib/public/SDL2.lib")
+	else()
+		# Copy libraries provided by the game to the build directory so we can point the compiler and linker to the files.
+		configure_file(../linux/release/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_CURRENT_BINARY_DIR}/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} COPYONLY)
+		configure_file(../linux/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0 ${CMAKE_CURRENT_BINARY_DIR}/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0 COPYONLY)
+
+		set_target_properties(vgui PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/vgui${CMAKE_SHARED_LIBRARY_SUFFIX}")
+		set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0")
+	endif()
 else()
-	# Copy libraries provided by the game to the build directory so we can point the compiler and linker to the files.
-	configure_file(../linux/release/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_CURRENT_BINARY_DIR}/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} COPYONLY)
-	configure_file(../linux/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0 ${CMAKE_CURRENT_BINARY_DIR}/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0 COPYONLY)
+	# openvgui builds as a static libvgui; it goes into a shared object, so it needs PIC.
+	set(VGUI_STATIC ON CACHE BOOL "" FORCE)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/openvgui ${CMAKE_BINARY_DIR}/openvgui EXCLUDE_FROM_ALL)
+	set_target_properties(vgui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-	set_target_properties(vgui PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/vgui${CMAKE_SHARED_LIBRARY_SUFFIX}")
-	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0")
+	# The shim is compiled with its own include dirs (vendored Xash headers, the VGUI headers) so it
+	# never picks up the SDK's headers of the same names.
+	add_library(vgui_support STATIC
+		${CMAKE_SOURCE_DIR}/third_party/vgui_support/vgui_int.cpp
+		${CMAKE_SOURCE_DIR}/third_party/vgui_support/vgui_surf.cpp
+		${CMAKE_SOURCE_DIR}/third_party/vgui_support/vgui_input.cpp
+		${CMAKE_SOURCE_DIR}/third_party/vgui_support/vgui_clip.cpp)
+	target_compile_definitions(vgui_support PRIVATE INTERNAL_VGUI_SUPPORT $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:stricmp=strcasecmp _vsnprintf=vsnprintf>)
+	target_include_directories(vgui_support PRIVATE
+		${CMAKE_SOURCE_DIR}/third_party/vgui_support
+		${CMAKE_SOURCE_DIR}/third_party/xash_headers
+		${CMAKE_SOURCE_DIR}/third_party/openvgui/include
+		${CMAKE_SOURCE_DIR}/utils/vgui/include)
+	set_target_properties(vgui_support PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_VISIBILITY_PRESET default)
+	target_link_libraries(vgui_support PUBLIC vgui)
 endif()
 
 # End special case stuff for dynamic libraries included with the game
@@ -53,17 +86,31 @@ target_include_directories(client PRIVATE
 
 target_compile_definitions(client PRIVATE
 	CLIENT_DLL
-	HL_DLL)
+	HL_DLL
+	$<$<BOOL:${HALFLIFE_VGUI_STATIC}>:RC2_ENGINE_INPUT>)
 
-target_link_libraries(client PRIVATE
-	vgui
-	$<$<PLATFORM_ID:Windows>:delayimp>
-	$<$<PLATFORM_ID:Windows>:wsock32>
-	SDL2)
+if (NOT HALFLIFE_VGUI_STATIC)
+	target_link_libraries(client PRIVATE
+		vgui
+		$<$<PLATFORM_ID:Windows>:delayimp>
+		$<$<PLATFORM_ID:Windows>:wsock32>
+		SDL2)
 
-if (UNIX)
-	# Tell the linker to search for vgui.so and SDL2-2.0.so.0 in here
-	target_link_directories(client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+	if (UNIX)
+		# Tell the linker to search for vgui.so and SDL2-2.0.so.0 in here
+		target_link_directories(client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+	endif()
+else()
+	# Nothing in the client calls InitVGUISupportAPI, so the linker would drop it from the static
+	# shim; keep it, since that export is how Xash finds the client-hosted VGUI.
+	target_link_libraries(client PRIVATE
+		$<$<PLATFORM_ID:Windows>:delayimp>
+		$<$<PLATFORM_ID:Windows>:wsock32>
+		vgui_support
+		vgui)
+	target_link_options(client PRIVATE
+		$<$<PLATFORM_ID:Linux>:-Wl,-u,InitVGUISupportAPI>
+		$<$<PLATFORM_ID:Windows>:/INCLUDE:InitVGUISupportAPI>)
 endif()
 
 target_link_options(client PRIVATE

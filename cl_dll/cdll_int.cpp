@@ -18,7 +18,9 @@
 // this implementation handles the linking of the engine to the DLL
 //
 
+#if !defined(RC2_ENGINE_INPUT) // the 64-bit clients have no SDL (inputw32.cpp)
 #include <SDL2/SDL_messagebox.h>
+#endif
 
 #include "hud.h"
 #include "cl_util.h"
@@ -174,9 +176,14 @@ static bool CL_InitClient()
 
 	if (UTIL_IsValveGameDirectory())
 	{
+#if !defined(RC2_ENGINE_INPUT)
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error",
 			"This mod has detected that it is being run from a Valve game directory which is not supported\n"
 			"Run this mod from its intended location\n\nThe game will now shut down", nullptr);
+#else
+		gEngfuncs.Con_Printf("Fatal Error: this mod is being run from a Valve game directory, which is not supported.\n"
+			"Run this mod from its intended location. The game will now shut down.\n");
+#endif
 		return false;
 	}
 

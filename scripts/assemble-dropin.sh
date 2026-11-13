@@ -4,8 +4,8 @@
 # libraries, under the original's own file names, and its liblist.gam gets the line a Linux server
 # needs. Used by scripts/package.sh (local builds) and by CI's package job (its artifacts).
 #
-# Usage: scripts/assemble-dropin.sh [--debug] [--amd64 <server.so>] [--arm64 <server.so>]
-#            [--win64 <server.dll>] <rev> <i386-server.so> <i386-client.so> <win32-server.dll> <win32-client.dll> <outdir>
+# Usage: scripts/assemble-dropin.sh [--debug] [--amd64 <server.so> <client.so>]
+#            [--arm64 <server.so> <client.so>] [--win64 <server.dll> <client.dll>] <rev> <i386-server.so> <i386-client.so> <win32-server.dll> <win32-client.dll> <outdir>
 # Output: <outdir>/reRC2-<rev>/{rc2/..., README.txt, MANIFEST.tsv} and <outdir>/reRC2-<rev>.zip
 #
 #   Release (the default): give it Release builds. The Linux libraries are stripped to their dynamic
@@ -20,10 +20,12 @@
 #   rc2/dlls/rc2.dll                                the server, Win32 (liblist's gamedll)
 #   rc2/cl_dlls/client.so, client.dll               the client; every engine loads it by this name
 #   rc2/dlls/rc2_amd64.so rc2_arm64.so rc2_amd64.dll  64-bit servers (--amd64/--arm64/--win64)
+#   rc2/cl_dlls/client_amd64.so client_arm64.so       64-bit clients, for Xash3D, which loads
+#     client_amd64.dll                                  client_<arch> on a 64-bit system
 #   rc2/liblist.gam                                 the original's, plus a gamedll_linux line
 set -euo pipefail
 
-usage() { sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 # What this mod's install looks like.
 PKG_NAME=reRC2
@@ -51,18 +53,19 @@ current Linux engine loads rc2.so (it cuts the name at the first "_"), older eng
 rc2_i386.so, and Metamod-R prefers rc2_i686.so. Windows loads rc2.dll. The client is always
 cl_dlls/client.dll or client.so; no engine lets a mod rename it, and players need it too.'
 RESTART_CLIENT=' (and the game, for players)'
-X64_EXTRA=' There is no 64-bit client yet (no 64-bit VGUI in the tree), so a 64-bit engine runs
-the server only.'
-NEW_FILES='dlls/rc2.so, dlls/rc2_i386.so, dlls/rc2_i686.so, cl_dlls/client.so and the 64-bit servers'   # what the original install never had
+X64_EXTRA=' The cl_dlls/client_amd64 and client_arm64 files are the 64-bit clients, for Xash3D,
+which loads the client under that name on a 64-bit system; they link VGUI statically (openvgui),
+so Xash hosts it inside the client.'
+NEW_FILES='dlls/rc2.so, dlls/rc2_i386.so, dlls/rc2_i686.so, cl_dlls/client.so and the 64-bit files'   # what the original install never had
 
 DEBUG=0
-X64_SO=""; A64_SO=""; W64_DLL=""
+X64_SO=""; X64_CL=""; A64_SO=""; A64_CL=""; W64_DLL=""; W64_CL=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --debug) DEBUG=1; shift ;;
-    --amd64) X64_SO="$2"; shift 2 ;;
-    --arm64) A64_SO="$2"; shift 2 ;;
-    --win64) W64_DLL="$2"; shift 2 ;;
+    --amd64) X64_SO="$2"; X64_CL="$3"; shift 3 ;;
+    --arm64) A64_SO="$2"; A64_CL="$3"; shift 3 ;;
+    --win64) W64_DLL="$2"; W64_CL="$3"; shift 3 ;;
     --*) usage ;;
     *) break ;;
   esac
@@ -75,7 +78,7 @@ else
   REV="$1"; SO="$2"; CLSO=""; DLL="$3"; CLDLL=""; OUT="$4"
 fi
 
-for f in "$SO" "$DLL" $CLSO $CLDLL $X64_SO $A64_SO $W64_DLL; do
+for f in "$SO" "$DLL" $CLSO $CLDLL $X64_SO $X64_CL $A64_SO $A64_CL $W64_DLL $W64_CL; do
   [ -f "$f" ] || { echo "ERROR: missing $f" >&2; exit 1; }
 done
 
@@ -127,6 +130,9 @@ fi
 if [ -n "$X64_SO" ]; then put_so "$X64_SO" "$G/dlls/$SERVER_AMD64"; add "dlls/$SERVER_AMD64" "$X64_SO"; fi
 if [ -n "$A64_SO" ]; then put_so "$A64_SO" "$G/dlls/$SERVER_ARM64"; add "dlls/$SERVER_ARM64" "$A64_SO"; fi
 if [ -n "$W64_DLL" ]; then cp "$W64_DLL" "$G/dlls/$SERVER_WIN64"; add "dlls/$SERVER_WIN64" "$W64_DLL"; fi
+if [ -n "$X64_CL" ]; then put_so "$X64_CL" "$G/cl_dlls/client_amd64.so"; add cl_dlls/client_amd64.so "$X64_CL"; fi
+if [ -n "$A64_CL" ]; then put_so "$A64_CL" "$G/cl_dlls/client_arm64.so"; add cl_dlls/client_arm64.so "$A64_CL"; fi
+if [ -n "$W64_CL" ]; then cp "$W64_CL" "$G/cl_dlls/client_amd64.dll"; add cl_dlls/client_amd64.dll "$W64_CL"; fi
 if [ -n "$LIBLIST" ]; then
   printf '%s' "$LIBLIST" > "$G/liblist.gam"
   FILES+=(liblist.gam); SRC+=("liblist.gam	scripts/assemble-dropin.sh @$REV")
@@ -135,7 +141,7 @@ fi
 if [ $DEBUG = 1 ]; then
   # Each PDB beside the dll it belongs to, under the file name that dll records; the 64-bit dll's PDB
   # has the same name as the 32-bit one's, so it gets its own folder.
-  for spec in "$DLL:dlls" ${CLDLL:+"$CLDLL:cl_dlls"} ${W64_DLL:+"$W64_DLL:dlls/amd64-pdb"}; do
+  for spec in "$DLL:dlls" ${CLDLL:+"$CLDLL:cl_dlls"} ${W64_DLL:+"$W64_DLL:dlls/amd64-pdb"} ${W64_CL:+"$W64_CL:cl_dlls/amd64-pdb"}; do
     dll="${spec%%:*}"; dir="${spec##*:}"; pdb="${dll%.dll}.pdb"
     [ -f "$pdb" ] || { echo "ERROR: --debug needs $pdb beside $dll" >&2; exit 1; }
     mkdir -p "$G/$dir"
@@ -174,7 +180,7 @@ para() { printf '%s\n' "$*" | fmt -w 100; }
   para "$NAMES_NOTE"
   if [ -n "$X64_SO$A64_SO$W64_DLL" ]; then
     echo
-    para "The *_amd64 and *_arm64 files are the 64-bit servers. Xash3D on a 64-bit system builds" \
+    para "The dlls/*_amd64 and *_arm64 files are the 64-bit servers. Xash3D on a 64-bit system builds" \
       "these names from liblist.gam by itself. A 64-bit ReHLDS (x86-64 or ARM) loads" \
       "liblist.gam's gamedll_linux exactly as written, so on one, set it to dlls/$SERVER_AMD64" \
       "or dlls/$SERVER_ARM64. Steam's Half-Life is 32-bit and never loads them.$X64_EXTRA"

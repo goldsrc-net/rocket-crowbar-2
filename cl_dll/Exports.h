@@ -54,6 +54,11 @@ extern "C"
 	void DLLEXPORT IN_MouseEvent (int mstate);
 	void DLLEXPORT IN_Accumulate (void);
 	void DLLEXPORT IN_ClearStates (void);
+#if defined(RC2_ENGINE_INPUT)
+	// Xash3D pushes mouse and gamepad input through these (inputw32.cpp)
+	void DLLEXPORT IN_ClientMoveEvent (float forwardmove, float sidemove);
+	void DLLEXPORT IN_ClientLookEvent (float relyaw, float relpitch);
+#endif
 
 	// From tri
 	void DLLEXPORT HUD_DrawNormalTriangles( void );

@@ -38,9 +38,9 @@ concurrency:
 env:
   MOD_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
 
-# Every arch builds through CMake. Rocket Crowbar 2 is a server and a client: the client builds for i386
-# and Win32, which link Valve's 32-bit VGUI; there is no 64-bit VGUI in the tree, so the 64-bit jobs
-# build the server alone.
+# Every arch builds through CMake, the server and the client. The 32-bit clients (i386, Win32) link
+# Valve's VGUI and SDL2, which Half-Life's engine provides; the 64-bit ones, for Xash3D, link openvgui
+# statically with the vgui_support shim (third_party/, as mod-ts does) and take input from the engine.
 
 jobs:
   # Linux i386 — CMake + the in-tree i386 toolchain.
@@ -54,6 +54,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          # A token with Contents:Read on the private goldsrc-net/vgui_support submodule (the
+          # 64-bit clients' VGUI shim); the default GITHUB_TOKEN reaches this repo only. The same
+          # secret mod-ts uses.
+          token: ${{ secrets.SUBMODULES_TOKEN }}
 
       - name: Let git read the checkout (the container runs as another user)
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -97,7 +103,7 @@ jobs:
           path: staged-i386/**
           retention-days: 7
 
-  # Linux amd64 — CMake, the server only.
+  # Linux amd64 — CMake.
   linux-amd64:
     name: Linux-amd64
     runs-on: ubuntu-latest
@@ -105,6 +111,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          # A token with Contents:Read on the private goldsrc-net/vgui_support submodule (the
+          # 64-bit clients' VGUI shim); the default GITHUB_TOKEN reaches this repo only. The same
+          # secret mod-ts uses.
+          token: ${{ secrets.SUBMODULES_TOKEN }}
 
       - name: Let git read the checkout (the container runs as another user)
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -112,13 +124,14 @@ jobs:
       - name: Configure (amd64)
         run: cmake -B build-amd64 -DCMAKE_BUILD_TYPE=Release
 
-      - name: Build (server)
-        run: cmake --build build-amd64 --target hl -j"$(nproc)"
+      - name: Build
+        run: cmake --build build-amd64 --target hl --target client -j"$(nproc)"
 
       - name: Stage per-arch
         run: |
-          mkdir -p staged-amd64/dlls
+          mkdir -p staged-amd64/dlls staged-amd64/cl_dlls
           cp build-amd64/dlls/hl.so staged-amd64/dlls/hl.so
+          cp build-amd64/cl_dll/client.so staged-amd64/cl_dlls/client.so
 
       - name: Deploy
         uses: actions/upload-artifact@v7
@@ -127,7 +140,7 @@ jobs:
           path: staged-amd64/**
           retention-days: 7
 
-  # Linux aarch64 — CMake cross-compiled via the in-tree toolchain file, the server only.
+  # Linux aarch64 — CMake cross-compiled via the in-tree toolchain file.
   linux-aarch64:
     name: Linux-aarch64
     runs-on: ubuntu-latest
@@ -135,6 +148,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          # A token with Contents:Read on the private goldsrc-net/vgui_support submodule (the
+          # 64-bit clients' VGUI shim); the default GITHUB_TOKEN reaches this repo only. The same
+          # secret mod-ts uses.
+          token: ${{ secrets.SUBMODULES_TOKEN }}
 
       - name: Let git read the checkout (the container runs as another user)
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -150,13 +169,14 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE=cmake/LinuxToolchain-aarch64.cmake
 
-      - name: Build (server)
-        run: cmake --build build-aarch64 --target hl -j"$(nproc)"
+      - name: Build
+        run: cmake --build build-aarch64 --target hl --target client -j"$(nproc)"
 
       - name: Stage per-arch
         run: |
-          mkdir -p staged-aarch64/dlls
+          mkdir -p staged-aarch64/dlls staged-aarch64/cl_dlls
           cp build-aarch64/dlls/hl.so staged-aarch64/dlls/hl.so
+          cp build-aarch64/cl_dll/client.so staged-aarch64/cl_dlls/client.so
 
       - name: Deploy
         uses: actions/upload-artifact@v7
@@ -172,6 +192,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          # A token with Contents:Read on the private goldsrc-net/vgui_support submodule (the
+          # 64-bit clients' VGUI shim); the default GITHUB_TOKEN reaches this repo only. The same
+          # secret mod-ts uses.
+          token: ${{ secrets.SUBMODULES_TOKEN }}
 
       - name: Configure (Win32)
         run: cmake -B build-win32 -A Win32
@@ -210,26 +236,32 @@ jobs:
           path: staged-win32-debug/**
           retention-days: 7
 
-  # Win64 — CMake/MSVC, the server only. Compile+link check for 64-bit engines (no native 64-bit
-  # GoldSrc engine loads it).
+  # Win64 — CMake/MSVC, for 64-bit engines (no native 64-bit GoldSrc engine loads it).
   win64:
     name: Win64
     runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          # A token with Contents:Read on the private goldsrc-net/vgui_support submodule (the
+          # 64-bit clients' VGUI shim); the default GITHUB_TOKEN reaches this repo only. The same
+          # secret mod-ts uses.
+          token: ${{ secrets.SUBMODULES_TOKEN }}
 
       - name: Configure (Win64)
         run: cmake -B build-win64 -A x64
 
-      - name: Build (server)
-        run: cmake --build build-win64 --config Release --target hl --parallel 2
+      - name: Build
+        run: cmake --build build-win64 --config Release --target hl --target client --parallel 2
 
       - name: Stage per-arch
         shell: bash
         run: |
-          mkdir -p staged-win64/dlls
+          mkdir -p staged-win64/dlls staged-win64/cl_dlls
           cp build-win64/dlls/Release/hl.dll staged-win64/dlls/hl.dll
+          cp build-win64/cl_dll/Release/client.dll staged-win64/cl_dlls/client.dll
 
       - name: Deploy
         uses: actions/upload-artifact@v7
@@ -244,7 +276,8 @@ jobs:
   #    scripts/package.sh builds locally), every arch in one folder; README.txt in it says which name
   #    each engine loads.
   #  - rc2-gamelibs-all: the bare libraries, the 64-bit ones under the names Xash builds from liblist
-  #    (rc2_amd64.so, rc2_arm64.so, rc2_amd64.dll).
+  #    (rc2_amd64.so, rc2_arm64.so, rc2_amd64.dll; cl_dlls/client_amd64.so, client_arm64.so,
+  #    client_amd64.dll).
   package:
     name: Package
     runs-on: ubuntu-latest
@@ -277,9 +310,9 @@ jobs:
           # On a tag (release.yml) the version is the tag as pushed; otherwise the short commit.
           if [ "${{ github.ref_type }}" = tag ]; then REV="${{ github.ref_name }}"; else REV=$(git rev-parse --short HEAD); fi
           scripts/assemble-dropin.sh \
-            --amd64 "$(pick Linux-amd64 hl.so)" \
-            --arm64 "$(pick Linux-aarch64 hl.so)" \
-            --win64 "$(pick Win64 hl.dll)" \
+            --amd64 "$(pick Linux-amd64 hl.so)" "$(pick Linux-amd64 client.so)" \
+            --arm64 "$(pick Linux-aarch64 hl.so)" "$(pick Linux-aarch64 client.so)" \
+            --win64 "$(pick Win64 hl.dll)" "$(pick Win64 client.dll)" \
             "$REV" \
             "$(pick Linux-i386 hl.so)" "$(pick Linux-i386 client.so)" \
             "$(pick Win32 hl.dll)" "$(pick Win32 client.dll)" dropin

@@ -23,7 +23,7 @@ ids ([reference/DEVIATIONS.md](reference/DEVIATIONS.md)), so a server whose admi
 with `sv_lan 0`; `-nomaster` keeps it off Valve's server list.
 
 Going back: put RC2's own `rc2.dll`, `client.dll` and `liblist.gam` back, and delete `rc2.so`,
-`rc2_i386.so`, `rc2_i686.so`, `client.so` and the 64-bit servers, which RC2 never had. The original
+`rc2_i386.so`, `rc2_i686.so`, `client.so` and the 64-bit files, which RC2 never had. The original
 only runs on a Windows server.
 
 ## A player
@@ -32,12 +32,15 @@ RC2 has its own client library, so players install the mod too:
 
 1. Install RC2 beta 1.1 as `rc2/` in the Half-Life folder.
 2. Copy the package's `rc2/` folder over it: `cl_dlls/client.so` is the Linux client,
-   `cl_dlls/client.dll` the Windows one.
+   `cl_dlls/client.dll` the Windows one, and `client_amd64.so`, `client_arm64.so` and
+   `client_amd64.dll` the 64-bit ones for Xash3D.
 3. Join with `steam -applaunch 70 -game rc2 +connect <server>`.
 
-The client is 32-bit, as Half-Life's is. The Linux client can't load RC2's Windows `client.dll`, so on
-Linux the rebuilt client is the only one; the side-by-side setup below uses it against both the
-original and the rebuilt server. The rebuilt Windows client has been built but not yet played.
+Half-Life's own client is 32-bit and loads `client.so` or `client.dll`. The Linux client can't load
+RC2's Windows `client.dll`, so on Linux the rebuilt client is the only one; the side-by-side setup
+below uses it against both the original and the rebuilt server. Xash3D on a 64-bit system loads
+`client_amd64` or `client_arm64` instead, with VGUI inside it. The rebuilt Windows and 64-bit clients
+have been built but not yet played.
 
 ## Running the original and the rebuild side by side
 

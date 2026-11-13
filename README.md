@@ -17,8 +17,9 @@ its name, maps, models, sounds and configs are theirs; this replaces only the co
 The rebuild is a server library and a client library for a stock RC2 beta 1.1 install, packaged as
 `reRC2-<rev>`: its `rc2/` folder goes over the install's, with the server under RC2's own name
 (`rc2.dll`, and `rc2_i386.so` with its aliases for Linux), the Windows and Linux clients, the 64-bit
-servers, and RC2's `liblist.gam` with the line a Linux server needs. [INSTALL.md](INSTALL.md) covers
-servers, players, the test setup that runs the original and the rebuild side by side, and going back.
+servers and clients (the clients for Xash3D), and RC2's `liblist.gam` with the line a Linux server
+needs. [INSTALL.md](INSTALL.md) covers servers, players, the test setup that runs the original and the
+rebuild side by side, and going back.
 
 ## Servers
 

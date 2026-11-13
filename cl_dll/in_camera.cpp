@@ -16,7 +16,9 @@
 #include "in_defs.h"
 #include "Exports.h"
 
+#if !defined(RC2_ENGINE_INPUT) // the 64-bit clients have no SDL (inputw32.cpp); nothing here needs it
 #include "SDL2/SDL_mouse.h"
+#endif
 
 float CL_KeyState(kbutton_t* key);
 
