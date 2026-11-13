@@ -80,5 +80,6 @@ The 64-bit clients (for Xash3D) link two libraries in `third_party/`, as mod-ts'
   Valve Software; Copyright (c) 2019, Flying With Gauss", BSD 3-clause,
   `third_party/openvgui/miniutl/LICENSE`).
 - **vgui_support**, Xash3D's VGUI bridge ("Copyright (C) 2011 Uncle Mike", GPL version 3 or later,
-  with an exception for linking Valve's VGUI library), in goldsrc-net's fork
-  (`goldsrc-net/vgui_support`, branch `emscripten`).
+  with an exception for linking Valve's VGUI library), in goldsrc-net's public fork
+  ([goldsrc-net/vgui_support](https://github.com/goldsrc-net/vgui_support), branch `64bit`), which
+  is the source the 64-bit clients are built from.

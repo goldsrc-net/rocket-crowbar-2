@@ -2,7 +2,7 @@
 
 CMake builds both libraries. Clone with the submodules (`git clone --recursive`, or
 `git submodule update --init --recursive` in a checkout): `third_party/` holds openvgui and the
-vgui_support shim the 64-bit clients link, and vgui_support (`goldsrc-net/vgui_support`) is private.
+vgui_support shim the 64-bit clients link (`FWGS/openvgui`, `goldsrc-net/vgui_support` branch `64bit`).
 The Linux builds run in the
 [goldsrc-net/buildchain](https://github.com/goldsrc-net/buildchain) Docker image (Debian 10, glibc 2.28),
 so the result runs on any Linux with glibc 2.28 or newer. Build the image once from a buildchain checkout:
@@ -78,9 +78,7 @@ in the Windows HLDS under Wine or on the 32-bit Linux rig, and passes when it an
 
 `.github/workflows/ci-cd.yml` builds the server and client for Linux i386, amd64 and aarch64 in the
 goldsrc-net build image (`ghcr.io/goldsrc-net/build-containers/debian10`, the buildchain's), and for
-Win32 and Win64 with MSVC, on every push that touches more than docs. Its checkouts fetch the
-submodules with the `SUBMODULES_TOKEN` secret (read access to the private vgui_support, as in
-mod-ts), which the repository needs set. The
+Win32 and Win64 with MSVC, on every push that touches more than docs, with the submodules. The
 package job then runs `scripts/assemble-dropin.sh` on them and uploads `reRC2-<commit>` (the patch,
 every arch) and `rc2-gamelibs-all` (the bare libraries). Run it by hand (Actions, CI/CD, Run workflow)
 with debug ticked to get the Debug package too.
