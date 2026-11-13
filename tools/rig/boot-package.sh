@@ -3,8 +3,8 @@
 # package's server on a real engine and wait for it to answer A2S_INFO, the way a server list asks.
 # Answers "does the packaged library load and run a map under its shipped name".
 #
-#   win    the Windows HLDS under Wine (HLDS_WIN, default /media/Data3/Projects/goldsrc.net/hlds-win,
-#          the one mod-ts's scripts/test-win-server.sh fetches with steamcmd), loading the Win32 dll
+#   win    the Windows HLDS under Wine (HLDS_WIN: a Windows HLDS install, e.g. steamcmd
+#          +@sSteamCmdForcePlatformType windows +app_update 90), loading the Win32 dll
 #   linux  the 32-bit Linux rig (RIG, default ~/Containers/hlds/hlds-linux32-test), loading the i386 .so
 #
 #   <package gamedir>  e.g. dist/reRC2-<rev>/rc2
@@ -20,7 +20,7 @@ ENGINE="${1:?usage: boot-package.sh win|linux <package gamedir> <content dir> <m
 PKGG="$(realpath "${2:?}")"; CONTENT="$(realpath "${3:?}")"; MAP="${4:?}"
 PORT=27045; SECS="${SECS:-90}"
 case "$ENGINE" in
-  win)   H="${HLDS_WIN:-/media/Data3/Projects/goldsrc.net/hlds-win}" ;;
+  win)   H="${HLDS_WIN:?set HLDS_WIN to a Windows HLDS install (steamcmd app 90, platform windows)}" ;;
   linux) H="${RIG:-$HOME/Containers/hlds/hlds-linux32-test}" ;;
   *) echo "engine: win or linux" >&2; exit 2 ;;
 esac
